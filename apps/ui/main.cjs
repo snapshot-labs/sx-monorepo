@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { app, BrowserWindow, shell } = require('electron');
 
 function createWindow() {

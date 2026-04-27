@@ -76,10 +76,14 @@ type ApiOptions = {
 
 const DELEGATES_SUBGRAPH_URL =
   'https://subgrapher.snapshot.org/subgraph/arbitrum/7iEHSsBprpnwCHKULfaQaCA6gU6RcEgnXfD3XtHx4yyc';
+const DELEGATES_ARB_SUBGRAPH_URL =
+  'https://subgrapher.snapshot.org/subgraph/arbitrum/BFeDAWHi9sNCMK8Rtmu4hxQ4PF8DhdPwN4enQsHUDmN2';
 
 const GOVERNOR_DELEGATIONS: Record<string, string> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,
-  '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3': DELEGATES_SUBGRAPH_URL
+  '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3': DELEGATES_SUBGRAPH_URL,
+  '0x789fC99093B09aD01C34DC7251D0C89ce743e5a4': DELEGATES_ARB_SUBGRAPH_URL,
+  '0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9': DELEGATES_ARB_SUBGRAPH_URL
 };
 
 function getAddressType(author: ApiProposal['author']) {
@@ -129,12 +133,12 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
-  if ((proposal.max_end_block_number ?? proposal.max_end) <= current) {
+  if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
 
-  if ((proposal.start_block_number ?? proposal.start) > current) {
+  if (Number(proposal.start_block_number ?? proposal.start) > current) {
     return 'pending';
   }
 
@@ -313,6 +317,9 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    voting_delay: Number(space.voting_delay),
+    min_voting_period: Number(space.min_voting_period),
+    max_voting_period: Number(space.max_voting_period),
     turbo_expiration: 0,
     network: space._indexer as NetworkID,
     name: space.metadata.name,
@@ -378,6 +385,12 @@ function formatProposal(
 
   return {
     ...proposal,
+    start: Number(proposal.start),
+    min_end: Number(proposal.min_end),
+    max_end: Number(proposal.max_end),
+    snapshot: Number(proposal.snapshot),
+    execution_time: Number(proposal.execution_time),
+    executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
     isInvalid:
       proposal.metadata === null ||
       (proposal.metadata.execution === null &&
@@ -417,8 +430,8 @@ function formatProposal(
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
       proposal.execution_strategy_type
     )
-      ? (proposal.max_end_block_number ?? proposal.max_end) <= current
-      : (proposal.min_end_block_number ?? proposal.min_end) <= current,
+      ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
+      : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
     state,
     network: networkId,

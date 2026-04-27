@@ -74,6 +74,11 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
       component: SpaceDelegates
     },
     {
+      path: 'treasury/:index?/:tab?',
+      name: `${prefix}-treasury-root`,
+      component: SpaceTreasury
+    },
+    {
       path: ':space/treasury/:index?/:tab?',
       name: `${prefix}-treasury`,
       component: SpaceTreasury

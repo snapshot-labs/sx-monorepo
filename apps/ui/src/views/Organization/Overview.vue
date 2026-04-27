@@ -74,7 +74,7 @@ const proposals = computed(() =>
 );
 
 watchEffect(() => {
-  if (space.value) setTitle(space.value.name);
+  if (organization.value) setTitle(organization.value.name);
 });
 </script>
 
@@ -111,7 +111,7 @@ watchEffect(() => {
           class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
         />
         <div class="flex items-center gap-1">
-          <h1 data-testid="space-name" v-text="space.name" />
+          <h1 data-testid="space-name" v-text="organization?.name" />
           <UiBadgeSpace
             v-if="!isWhiteLabel"
             class="top-0.5"

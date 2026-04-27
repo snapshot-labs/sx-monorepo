@@ -1,5 +1,5 @@
-import { Config } from 'tailwindcss';
 import tunePreset from '@snapshot-labs/tune/tailwind-preset';
+import { Config } from 'tailwindcss';
 
 const ELECTRON_TITLEBAR_HEIGHT = !!process.env.ELECTRON ? 32 : 0;
 const APP_TOPNAV_HEIGHT = 72;

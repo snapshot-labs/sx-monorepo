@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate -o ./src/api/overrides.json -s ./src/api/schema.gql",
-    "lint": "eslint src/ test/",
+    "lint": "eslint .",
     "lint:fix": "bun run lint --fix",
     "test": "vitest",
     "build": "tsc",
@@ -20,7 +20,7 @@
     "@ethersproject/hash": "^5.8.0",
     "@ethersproject/providers": "^5.8.0",
     "@ethersproject/wallet": "^5.8.0",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.58",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.70",
     "@snapshot-labs/sx": "^0.1.7",
     "async-lock": "^1.4.0",
     "change-case": "^4.1.2",

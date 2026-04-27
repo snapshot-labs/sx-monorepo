@@ -19,9 +19,10 @@ export default function createOzVotesStrategy(): Strategy {
     ): Promise<bigint> {
       const votesContract = new Contract(params, IVotes, provider);
 
-      const votingPower = await votesContract.getVotes(voterAddress, {
-        blockTag: block ?? 'latest'
-      });
+      const votingPower =
+        block !== null
+          ? await votesContract.getPastVotes(voterAddress, block)
+          : await votesContract.getVotes(voterAddress);
 
       return BigInt(votingPower.toString());
     }

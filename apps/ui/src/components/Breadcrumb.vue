@@ -79,7 +79,7 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
       <div class="shrink-0">
         <SpaceAvatar :space="space" :size="36" class="!rounded-[4px]" />
       </div>
-      <span class="truncate" v-text="space.name" />
+      <span class="truncate" v-text="organization?.name ?? space.name" />
     </template>
   </AppLink>
 </template>

@@ -27,6 +27,7 @@ const arb1Config = createConfig('arb1', protocols);
 const baseConfig = createConfig('base', protocols);
 const mntConfig = createConfig('mnt', protocols);
 const bnbConfig = createConfig('bnb', protocols);
+const bnbtConfig = createConfig('bnbt', protocols);
 const apeConfig = createConfig('ape', protocols);
 const curtisConfig = createConfig('curtis', protocols);
 
@@ -75,6 +76,7 @@ const arb1Indexer = process.env.HYPERSYNC_API_TOKEN
 const baseIndexer = new evm.EvmIndexer(createWriters(baseConfig));
 const mntIndexer = new evm.EvmIndexer(createWriters(mntConfig));
 const bnbIndexer = new evm.EvmIndexer(createWriters(bnbConfig));
+const bnbtIndexer = new evm.EvmIndexer(createWriters(bnbtConfig));
 const apeIndexer = new evm.EvmIndexer(createWriters(apeConfig));
 const curtisIndexer = new evm.EvmIndexer(createWriters(curtisConfig));
 
@@ -92,6 +94,7 @@ export function addEvmIndexers(checkpoint: Checkpoint) {
   registerIndexer(checkpoint, baseConfig.indexerName, baseConfig, baseIndexer);
   registerIndexer(checkpoint, mntConfig.indexerName, mntConfig, mntIndexer);
   registerIndexer(checkpoint, bnbConfig.indexerName, bnbConfig, bnbIndexer);
+  registerIndexer(checkpoint, bnbtConfig.indexerName, bnbtConfig, bnbtIndexer);
   registerIndexer(checkpoint, apeConfig.indexerName, apeConfig, apeIndexer);
   registerIndexer(
     checkpoint,
