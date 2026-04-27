@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HELPDESK_URL } from '@/helpers/constants';
+import { DOCS_URL } from '@/helpers/constants';
 import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
@@ -53,7 +53,7 @@ const SOCIALS = [
           <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink :to="HELPDESK_URL">
+              <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
             </div>
@@ -75,7 +75,7 @@ const SOCIALS = [
           <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink to="https://docs.snapshot.box">
+              <AppLink :to="`${DOCS_URL}/developers`">
                 Docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
@@ -103,7 +103,9 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <AppLink :to="HELPDESK_URL">Contact us</AppLink>
+            <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`"
+              >Contact us</AppLink
+            >
           </div>
         </div>
       </div>
