@@ -314,12 +314,6 @@ export function useActions() {
       return null;
     }
 
-    if (auth.value.connector.type === 'guest') {
-      throw new Error(
-        `${auth.value.connector.type} is not supported for this action`
-      );
-    }
-
     const network = getNetwork(proposal.network);
     const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
