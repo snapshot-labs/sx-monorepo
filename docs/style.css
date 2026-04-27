@@ -59,7 +59,6 @@ nav:not(#navbar):not(.nav-tabs) {
   border-color: #2b2a2f !important;
 }
 
-/* Mintlify search modal */
 [id^="headlessui-dialog-panel-"],
 [id^="headlessui-dialog-panel-"] > div,
 [id^="headlessui-dialog-panel-"] [role="listbox"] {
