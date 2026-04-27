@@ -37,7 +37,7 @@ export const Danger: Story = {
 export const InfoWithLearnMore: Story = {
   args: {
     type: 'info',
-    learnMoreLink: 'https://docs.snapshot.org',
+    learnMoreLink: 'https://docs.snapshot.box',
     default: 'This is an informational message with additional resources.'
   }
 };
@@ -45,7 +45,7 @@ export const InfoWithLearnMore: Story = {
 export const DangerWithLearnMore: Story = {
   args: {
     type: 'danger',
-    learnMoreLink: 'https://help.snapshot.org',
+    learnMoreLink: 'https://docs.snapshot.box',
     default: 'This is a danger message with helpful documentation.'
   }
 };
@@ -53,7 +53,7 @@ export const DangerWithLearnMore: Story = {
 export const LongContent: Story = {
   args: {
     type: 'info',
-    learnMoreLink: 'https://docs.snapshot.org/guides',
+    learnMoreLink: 'https://docs.snapshot.box/guides',
     default:
       'This is a longer informational message that demonstrates how the component handles extended content. It includes multiple sentences to show text wrapping and layout behavior within the message container.'
   }

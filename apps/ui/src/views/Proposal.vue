@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getBoostsCount } from '@/helpers/boost';
-import { FLAGS, HELPDESK_URL } from '@/helpers/constants';
+import { DOCS_URL, FLAGS } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
@@ -339,7 +339,7 @@ watchEffect(() => {
                       v-if="
                         votingPower?.votingPowers?.every(v => v.value === 0n)
                       "
-                      :to="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
+                      :to="`${DOCS_URL}/faq#why-is-my-voting-power-equal-to-0`"
                     >
                       <IH-question-mark-circle />
                     </AppLink>
