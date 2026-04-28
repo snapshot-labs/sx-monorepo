@@ -149,7 +149,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         position: 3
       },
       signals: {
-        name: 'Signals',
+        name: 'Offchain voting',
         icon: IHWifi,
         link: {
           name: 'space-proposals',
