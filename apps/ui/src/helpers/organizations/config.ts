@@ -126,7 +126,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     ],
     navItems: {
       proposals: {
-        name: 'Onchain treasury',
+        name: 'Treasury governor',
         icon: IHNewspaper,
         link: {
           name: 'space-proposals',
@@ -167,6 +167,9 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           name: 'space-discussions',
           params: { space: 's:arbitrumfoundation.eth' }
         }
+      },
+      treasury: {
+        name: 'Onchain treasury'
       },
       docs: {
         name: 'Docs',
