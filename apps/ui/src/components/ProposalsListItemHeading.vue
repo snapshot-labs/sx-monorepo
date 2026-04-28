@@ -34,6 +34,12 @@ const currentQuorum = computed(() =>
 
 const currentQuorumDisplay = computed(() => _vp(currentQuorum.value));
 
+const quorumAmountTooltip = computed(() => {
+  const required = _vp(props.proposal.quorum);
+
+  return `Required: ${required}`;
+});
+
 const hasVoted = computed(
   () =>
     props.showVotedIndicator &&
@@ -135,8 +141,10 @@ const hasVoted = computed(
         </AppLink>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
-        · {{ quorumLabel(proposal.quorum_type) }}:
-        {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}
+        ·
+        <UiTooltip :title="quorumAmountTooltip">
+          <span>{{ quorumLabel(proposal.quorum_type) }}: {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}</span>
+        </UiTooltip>
       </span>
       ·
       <button
