@@ -44,7 +44,7 @@ export function useLock(details: Record<ConnectorType, ConnectorDetail>): {
               options: d.options,
               provider: d.provider,
               autoConnectOnly: d.autoConnectOnly ?? false
-            }) as unknown as Connector
+            })
         )
     )
   );
