@@ -38,8 +38,8 @@ const quorumAmountTooltip = computed(() => {
   const required = _vp(props.proposal.quorum);
 
   return symbol
-    ? `Current: ${current} ${symbol}\nRequired: ${required} ${symbol}`
-    : `Current: ${current}\nRequired: ${required}`;
+    ? `${current} ${symbol} / ${required} ${symbol}`
+    : `${current} / ${required}`;
 });
 
 const hasVoted = computed(
