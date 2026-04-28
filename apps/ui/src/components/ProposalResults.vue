@@ -40,14 +40,14 @@ const currentQuorum = computed(() =>
   getProposalCurrentQuorum(props.proposal.network, props.proposal)
 );
 
+const currentQuorumDisplay = computed(() =>
+  _vp(currentQuorum.value / 10 ** props.decimals)
+);
+
 const quorumAmountTooltip = computed(() => {
-  const symbol = props.proposal.space.voting_power_symbol;
-  const current = _vp(currentQuorum.value / 10 ** props.decimals);
   const required = _vp(props.proposal.quorum / 10 ** props.decimals);
 
-  return symbol
-    ? `${current} ${symbol} / ${required} ${symbol}`
-    : `${current} / ${required}`;
+  return `Required: ${required}`;
 });
 
 const placeholderResults = computed(() =>
@@ -162,9 +162,13 @@ onMounted(() => {
       is over, making the results visible.
     </div>
     <div v-if="proposal.quorum">
-      {{ quorumLabel(proposal.quorum_type) }}:
       <UiTooltip :title="quorumAmountTooltip">
-        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+        <span>
+          {{ quorumLabel(proposal.quorum_type) }}:
+          <span class="text-skin-link">
+            {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}
+          </span>
+        </span>
       </UiTooltip>
     </div>
   </div>
@@ -246,9 +250,13 @@ onMounted(() => {
         </div>
       </button>
       <div v-if="proposal.quorum">
-        {{ quorumLabel(proposal.quorum_type) }}:
         <UiTooltip :title="quorumAmountTooltip">
-          <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+          <span>
+            {{ quorumLabel(proposal.quorum_type) }}:
+            <span class="text-skin-link">
+              {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}
+            </span>
+          </span>
         </UiTooltip>
       </div>
     </div>

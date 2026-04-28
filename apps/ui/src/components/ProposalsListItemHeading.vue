@@ -32,14 +32,12 @@ const currentQuorum = computed(() =>
   getProposalCurrentQuorum(props.proposal.network, props.proposal)
 );
 
+const currentQuorumDisplay = computed(() => _vp(currentQuorum.value));
+
 const quorumAmountTooltip = computed(() => {
-  const symbol = props.proposal.space.voting_power_symbol;
-  const current = _vp(currentQuorum.value);
   const required = _vp(props.proposal.quorum);
 
-  return symbol
-    ? `${current} ${symbol} / ${required} ${symbol}`
-    : `${current} / ${required}`;
+  return `Required: ${required}`;
 });
 
 const hasVoted = computed(
@@ -145,9 +143,8 @@ const hasVoted = computed(
       <span v-if="proposal.quorum" class="lowercase">
         ·
         <UiTooltip :title="quorumAmountTooltip">
-          <span>{{ formatQuorum(totalProgress) }}</span>
+          <span>{{ quorumLabel(proposal.quorum_type) }}: {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}</span>
         </UiTooltip>
-        {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
       <button
