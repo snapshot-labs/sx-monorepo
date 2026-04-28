@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import {
   formatQuorum,
+  getProposalCurrentQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
@@ -34,6 +35,20 @@ const queryClient = useQueryClient();
 const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const currentQuorum = computed(() =>
+  getProposalCurrentQuorum(props.proposal.network, props.proposal)
+);
+
+const currentQuorumDisplay = computed(() =>
+  _vp(currentQuorum.value / 10 ** props.decimals)
+);
+
+const quorumAmountTooltip = computed(() => {
+  const required = _vp(props.proposal.quorum / 10 ** props.decimals);
+
+  return `Required: ${required}`;
+});
 
 const placeholderResults = computed(() =>
   props.proposal.choices.map((_, i) => ({
@@ -147,8 +162,14 @@ onMounted(() => {
       is over, making the results visible.
     </div>
     <div v-if="proposal.quorum">
-      {{ quorumLabel(proposal.quorum_type) }}:
-      <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+      <UiTooltip :title="quorumAmountTooltip">
+        <span>
+          {{ quorumLabel(proposal.quorum_type) }}:
+          <span class="text-skin-link">
+            {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}
+          </span>
+        </span>
+      </UiTooltip>
     </div>
   </div>
   <template v-else>
@@ -229,8 +250,14 @@ onMounted(() => {
         </div>
       </button>
       <div v-if="proposal.quorum">
-        {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+        <UiTooltip :title="quorumAmountTooltip">
+          <span>
+            {{ quorumLabel(proposal.quorum_type) }}:
+            <span class="text-skin-link">
+              {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}
+            </span>
+          </span>
+        </UiTooltip>
       </div>
     </div>
     <div
