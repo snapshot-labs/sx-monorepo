@@ -2,7 +2,6 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import {
   formatQuorum,
-  getProposalCurrentQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
@@ -36,13 +35,9 @@ const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
-const currentQuorum = computed(() =>
-  getProposalCurrentQuorum(props.proposal.network, props.proposal)
-);
-
 const quorumAmountTooltip = computed(() => {
   const symbol = props.proposal.space.voting_power_symbol;
-  const amount = _vp(currentQuorum.value / 10 ** props.decimals);
+  const amount = _vp(props.proposal.quorum / 10 ** props.decimals);
 
   return symbol ? `${amount} ${symbol}` : amount;
 });
