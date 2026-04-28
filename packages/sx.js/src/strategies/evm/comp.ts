@@ -19,9 +19,10 @@ export default function createCompStrategy(): Strategy {
     ): Promise<bigint> {
       const compContract = new Contract(params, ICompAbi, provider);
 
-      const votingPower = await compContract.getCurrentVotes(voterAddress, {
-        blockTag: block ?? 'latest'
-      });
+      const votingPower =
+        block !== null
+          ? await compContract.getPriorVotes(voterAddress, block)
+          : await compContract.getCurrentVotes(voterAddress);
 
       return BigInt(votingPower.toString());
     }

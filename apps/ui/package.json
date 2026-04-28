@@ -15,7 +15,7 @@
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit",
     "codegen": "graphql-codegen",
-    "lint": "eslint src/",
+    "lint": "eslint .",
     "lint:fix": "bun run lint --fix",
     "test": "vitest run",
     "test:watch": "vitest",

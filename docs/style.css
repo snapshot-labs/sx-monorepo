@@ -59,6 +59,12 @@ nav:not(#navbar):not(.nav-tabs) {
   border-color: #2b2a2f !important;
 }
 
+[id^="headlessui-dialog-panel-"],
+[id^="headlessui-dialog-panel-"] > div,
+[id^="headlessui-dialog-panel-"] [role="listbox"] {
+  background: #141318 !important;
+}
+
 #sidebar,
 #sidebar *,
 #sidebar-content,
