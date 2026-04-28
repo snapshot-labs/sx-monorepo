@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
+import {
+  formatQuorum,
+  getProposalCurrentQuorum,
+  quorumLabel,
+  quorumProgress
+} from '@/helpers/quorum';
 import { _n, _vp, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
@@ -23,11 +28,18 @@ const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
+const currentQuorum = computed(() =>
+  getProposalCurrentQuorum(props.proposal.network, props.proposal)
+);
+
 const quorumAmountTooltip = computed(() => {
   const symbol = props.proposal.space.voting_power_symbol;
-  const amount = _vp(props.proposal.quorum);
+  const current = _vp(currentQuorum.value);
+  const required = _vp(props.proposal.quorum);
 
-  return symbol ? `${amount} ${symbol}` : amount;
+  return symbol
+    ? `Current: ${current} ${symbol}\nRequired: ${required} ${symbol}`
+    : `Current: ${current}\nRequired: ${required}`;
 });
 
 const hasVoted = computed(
