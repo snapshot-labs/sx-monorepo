@@ -23,14 +23,11 @@
       "import": "./dist/vue/index.js"
     }
   },
-  "peerDependencies": {
-    "vue": ">=3.5.0"
-  },
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ./src",
+    "lint": "eslint .",
     "lint:fix": "bun run lint --fix",
     "prepare": "bun run build",
     "prepublishOnly": "bun run lint"
@@ -46,6 +43,9 @@
     "starknet": "7.6.4",
     "starknetkit": "^1.1.9",
     "thirdweb": "^5.88.6"
+  },
+  "peerDependencies": {
+    "vue": ">=3.5.0"
   },
   "devDependencies": {
     "@types/node": "^22.6.0",
