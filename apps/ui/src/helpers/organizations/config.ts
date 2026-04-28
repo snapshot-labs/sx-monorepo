@@ -126,7 +126,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     ],
     navItems: {
       proposals: {
-        name: 'Treasury governor',
+        name: 'Onchain treasury',
         icon: IHNewspaper,
         link: {
           name: 'space-proposals',
