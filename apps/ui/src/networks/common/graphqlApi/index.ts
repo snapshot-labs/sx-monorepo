@@ -386,8 +386,17 @@ function formatProposal(
   return {
     ...proposal,
     start: Number(proposal.start),
+    start_block_number: proposal.start_block_number
+      ? Number(proposal.start_block_number)
+      : null,
     min_end: Number(proposal.min_end),
+    min_end_block_number: proposal.min_end_block_number
+      ? Number(proposal.min_end_block_number)
+      : null,
     max_end: Number(proposal.max_end),
+    max_end_block_number: proposal.max_end_block_number
+      ? Number(proposal.max_end_block_number)
+      : null,
     snapshot: Number(proposal.snapshot),
     execution_time: Number(proposal.execution_time),
     executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
