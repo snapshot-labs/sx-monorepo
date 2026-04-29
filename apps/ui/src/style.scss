@@ -83,6 +83,14 @@
   color: white !important;
 }
 
+.sticky-header {
+  @apply sticky z-10 top-header-height-with-offset lg:top-header-height;
+}
+
+.sticky-header-with-section {
+  @apply sticky z-10 top-header-with-section-height-with-offset lg:top-header-with-section-height;
+}
+
 .x-block {
   @apply block border-y border-x-0 sm:border-x sm:rounded-lg;
 }
