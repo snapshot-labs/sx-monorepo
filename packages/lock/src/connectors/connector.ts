@@ -1,7 +1,4 @@
-import {
-  Connector as ConnectorInstance,
-  ConnectorType
-} from '@/networks/types';
+import { Connector as ConnectorInstance, ConnectorType } from '../types';
 
 export default class Connector {
   public id: string;
