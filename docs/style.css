@@ -1,62 +1,91 @@
-:root {
-  --background-dark: #141318;
-  --border-dark: #2b2a2f;
-  --text-dark: #d0d0d1;
-}
-
-body {
-  background-color: #141318;
+html.dark,
+html.dark body {
+  background-color: #0E0F10;
   color: #d0d0d1;
 }
 
-#navbar {
-  background-color: #141318;
-  border-bottom-color: #2b2a2f;
+html.dark #navbar {
+  background-color: #0E0F10;
+  border-bottom-color: #282A2D;
 }
 
-#sidebar {
-  background-color: #141318;
-  border-right: 1px solid #2b2a2f;
+html.dark #sidebar {
+  background-color: #0E0F10;
+  border-right: 1px solid #282A2D;
 }
 
-#content-area {
-  background-color: #141318;
+html.dark #content-area {
+  background-color: #0E0F10;
   color: #d0d0d1;
 }
 
-#content-area p,
-#content-area li,
-#content-area td,
-#content-area th,
-#content-area span,
-#content-area div {
+html.dark #content-area p,
+html.dark #content-area li,
+html.dark #content-area td,
+html.dark #content-area th,
+html.dark #content-area span,
+html.dark #content-area div {
   color: #d0d0d1;
 }
 
-h1, h2, h3, h4, h5, h6,
-h1 *, h2 *, h3 *, h4 *, h5 *, h6 * {
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
+html.dark h1 *, html.dark h2 *, html.dark h3 *, html.dark h4 *, html.dark h5 *, html.dark h6 * {
   color: #ffffff !important;
 }
 
-#content-area a {
+html.dark #content-area a {
   color: #ffffff;
 }
 
-header, footer, main, div, a, hr, [class*="border"] {
-  border-color: #2b2a2f !important;
+html.dark header,
+html.dark footer,
+html.dark main,
+html.dark div,
+html.dark a,
+html.dark hr,
+html.dark [class*="border"] {
+  border-color: #282A2D !important;
 }
 
-nav:not(#navbar):not(.nav-tabs) {
-  border-color: #2b2a2f !important;
+html.dark nav:not(#navbar):not(.nav-tabs) {
+  border-color: #282A2D !important;
+}
+
+html:not(.dark) #navbar {
+  border-bottom-color: #E5E5E6;
+}
+
+html:not(.dark) #sidebar {
+  border-right: 1px solid #E5E5E6;
+}
+
+html:not(.dark) header,
+html:not(.dark) footer,
+html:not(.dark) main,
+html:not(.dark) div,
+html:not(.dark) a,
+html:not(.dark) hr,
+html:not(.dark) [class*="border"] {
+  border-color: #E5E5E6 !important;
+}
+
+html:not(.dark) nav:not(#navbar):not(.nav-tabs) {
+  border-color: #E5E5E6 !important;
 }
 
 /* Dropdown / popover backgrounds */
-[data-radix-popper-content-wrapper] > div,
-[data-radix-popper-content-wrapper] > div > div {
+html.dark [data-radix-popper-content-wrapper] > div,
+html.dark [data-radix-popper-content-wrapper] > div > div {
   background: #1c1b22 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border-color: #2b2a2f !important;
+  border-color: #282A2D !important;
+}
+
+html.dark [id^="headlessui-dialog-panel-"],
+html.dark [id^="headlessui-dialog-panel-"] > div,
+html.dark [id^="headlessui-dialog-panel-"] [role="listbox"] {
+  background: #0E0F10 !important;
 }
 
 #sidebar,
@@ -71,5 +100,9 @@ nav:not(#navbar):not(.nav-tabs) {
 #sidebar *::-webkit-scrollbar,
 #sidebar-content::-webkit-scrollbar,
 #sidebar-content *::-webkit-scrollbar {
+  display: none !important;
+}
+
+a[href*="mintlify.com"] {
   display: none !important;
 }

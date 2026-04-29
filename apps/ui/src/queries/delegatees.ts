@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
+import { formatAddress } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -39,7 +40,7 @@ async function fetchGovernorSubgraphDelegatees(
 
     return [
       {
-        id: delegateeData.address,
+        id: formatAddress(delegateeData.address),
         balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
         delegatedVotePercentage: 1,
         name: names[delegateeData.address],
@@ -69,7 +70,7 @@ async function fetchGovernorSubgraphDelegatees(
 
   return [
     {
-      id: delegateeData.address,
+      id: formatAddress(delegateeData.address),
       balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
       delegatedVotePercentage:
         apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
@@ -114,7 +115,7 @@ async function fetchApeChainDelegatees(
 
   return [
     {
-      id: accountDelegation.delegate,
+      id: formatAddress(accountDelegation.delegate),
       balance: Number(balance.toBigInt()) / 1e18,
       delegatedVotePercentage:
         apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
@@ -172,7 +173,7 @@ async function fetchDelegateRegistryDelegatees(
 
   return [
     {
-      id: accountDelegation.delegate,
+      id: formatAddress(accountDelegation.delegate),
       balance,
       delegatedVotePercentage: apiDelegate
         ? balance / Number(apiDelegate.delegatedVotes)
@@ -269,7 +270,7 @@ async function fetchSplitDelegationDelegatees(
       : 0;
 
     return {
-      id: delegate,
+      id: formatAddress(delegate),
       balance: delegatedPower,
       delegatedVotePercentage: delegatedVpPercentage,
       name: names[delegate],
