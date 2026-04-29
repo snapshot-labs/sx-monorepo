@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import {
-  formatQuorum,
-  getProposalCurrentQuorum,
-  quorumLabel,
-  quorumProgress
-} from '@/helpers/quorum';
-import { _n, _vp, getProposalId, shortenAddress } from '@/helpers/utils';
+import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -27,18 +22,6 @@ const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
-
-const currentQuorum = computed(() =>
-  getProposalCurrentQuorum(props.proposal.network, props.proposal)
-);
-
-const currentQuorumDisplay = computed(() => _vp(currentQuorum.value));
-
-const quorumAmountTooltip = computed(() => {
-  const required = _vp(props.proposal.quorum);
-
-  return `Required: ${required}`;
-});
 
 const hasVoted = computed(
   () =>
@@ -141,10 +124,8 @@ const hasVoted = computed(
         </AppLink>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
-        ·
-        <UiTooltip :title="quorumAmountTooltip">
-          <span>{{ quorumLabel(proposal.quorum_type) }}: {{ currentQuorumDisplay }} {{ formatQuorum(totalProgress) }}</span>
-        </UiTooltip>
+        · {{ formatQuorum(totalProgress) }}
+        {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
       <button
