@@ -122,8 +122,8 @@ function createEvmConfig(
   };
 }
 
-const ethMainnetBlockTime = 12.09;
-const ethSepoliaBlockTime = 13.2816;
+const ethMainnetBlockTime = 12;
+const ethSepoliaBlockTime = 12;
 
 export const evmNetworks = {
   eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
@@ -135,7 +135,7 @@ export const evmNetworks = {
     //   Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
     // }
   }),
-  matic: createStandardConfig(137, { blockTime: 2.15812 }),
+  matic: createStandardConfig(137, { blockTime: 2 }),
   arb1: createStandardConfig(42161, {
     blockTime: ethMainnetBlockTime,
     hasNonNativeBlockNumbers: true
