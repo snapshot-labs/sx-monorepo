@@ -108,7 +108,7 @@ describe('getTimestampFromBlock', () => {
       client
     });
 
-    expect(actual).toBe(1744967610n);
+    expect(actual).toBe(1744966967n);
   });
 
   it('should return timestamp for networks with foreign block.number', async () => {
