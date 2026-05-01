@@ -374,9 +374,14 @@ export function createWriters(
         client
       });
 
-    proposal.start = await getTimestampFromBlock(event.args.voteStart);
+    const [start, end] = await Promise.all([
+      getTimestampFromBlock(event.args.voteStart),
+      getTimestampFromBlock(event.args.voteEnd)
+    ]);
+
+    proposal.start = start;
     proposal.start_block_number = event.args.voteStart;
-    proposal.min_end = await getTimestampFromBlock(event.args.voteEnd);
+    proposal.min_end = end;
     proposal.min_end_block_number = event.args.voteEnd;
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.min_end_block_number;

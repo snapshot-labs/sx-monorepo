@@ -654,19 +654,19 @@ export function createWriters(
         client
       });
 
-    proposal.start = await getTimestampFromBlock(
-      event.args.proposal.startBlockNumber
-    );
+    const [start, minEnd, maxEnd] = await Promise.all([
+      getTimestampFromBlock(event.args.proposal.startBlockNumber),
+      getTimestampFromBlock(event.args.proposal.minEndBlockNumber),
+      getTimestampFromBlock(event.args.proposal.maxEndBlockNumber)
+    ]);
+
+    proposal.start = start;
     proposal.start_block_number = BigInt(event.args.proposal.startBlockNumber);
-    proposal.min_end = await getTimestampFromBlock(
-      event.args.proposal.minEndBlockNumber
-    );
+    proposal.min_end = minEnd;
     proposal.min_end_block_number = BigInt(
       event.args.proposal.minEndBlockNumber
     );
-    proposal.max_end = await getTimestampFromBlock(
-      event.args.proposal.maxEndBlockNumber
-    );
+    proposal.max_end = maxEnd;
     proposal.max_end_block_number = BigInt(
       event.args.proposal.maxEndBlockNumber
     );
