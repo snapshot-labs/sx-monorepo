@@ -1,13 +1,9 @@
 import Connector from './connector';
-const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
-const getInjected = () =>
-  import(/* webpackChunkName: "argentx" */ 'starknetkit/injected');
-const getWebwallet = () =>
-  import(/* webpackChunkName: "argentx" */ 'starknetkit/webwallet');
 
 export default class Argentx extends Connector {
   async connect() {
-    const { currentTheme } = useTheme();
+    const { getTheme, ...options } = this.options;
+    const modalTheme = getTheme?.() ?? 'light';
 
     try {
       const injected = (window as any).starknet_argentX;
@@ -18,10 +14,14 @@ export default class Argentx extends Connector {
         return;
       }
 
-      const [argentx, { InjectedConnector }, { WebWalletConnector }] =
-        await Promise.all([get(), getInjected(), getWebwallet()]);
-      const starknet = await argentx.connect({
-        ...this.options,
+      const [starknetkit, { InjectedConnector }, { WebWalletConnector }] =
+        await Promise.all([
+          import('starknetkit'),
+          import('starknetkit/injected'),
+          import('starknetkit/webwallet')
+        ]);
+      const starknet = await starknetkit.connect({
+        ...options,
         connectors: [
           new InjectedConnector({ options: { id: 'argentX' } }),
           new InjectedConnector({ options: { id: 'braavos' } }),
@@ -30,7 +30,7 @@ export default class Argentx extends Connector {
         modalMode: localStorage.getItem('starknetLastConnectedWallet')
           ? 'neverAsk'
           : 'alwaysAsk',
-        modalTheme: currentTheme.value
+        modalTheme
       });
 
       if (!starknet.wallet) {
@@ -50,10 +50,10 @@ export default class Argentx extends Connector {
   }
 
   async disconnect() {
-    const argentx = await get();
+    const starknetkit = await import('starknetkit');
 
     try {
-      await argentx.disconnect({
+      await starknetkit.disconnect({
         clearLastWallet: true
       });
     } catch (err) {

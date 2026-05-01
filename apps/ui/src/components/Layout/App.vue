@@ -31,6 +31,9 @@ const { setFavicon } = useFavicon();
 const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
+
+useGuestLoginFromUrl();
+
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(event: TouchEvent) {
     const noSideBarSwipe = (event.target as Element)?.closest(
