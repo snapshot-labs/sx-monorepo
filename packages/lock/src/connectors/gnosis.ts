@@ -7,18 +7,16 @@ export default class Gnosis extends Connector {
         return;
       }
 
-      let SafeAppsSDK = await import('@safe-global/safe-apps-sdk'!);
-      if (SafeAppsSDK?.default) SafeAppsSDK = SafeAppsSDK.default;
-      if (SafeAppsSDK?.default) SafeAppsSDK = SafeAppsSDK.default;
+      const { default: SafeAppsSDK } = await import(
+        '@safe-global/safe-apps-sdk'
+      );
 
       const sdk = new SafeAppsSDK();
       const safe = await sdk.safe.getInfo();
 
-      let SafeAppProvider = await import('@safe-global/safe-apps-provider'!);
-      if (SafeAppProvider?.default) SafeAppProvider = SafeAppProvider.default;
-      if (SafeAppProvider?.default) SafeAppProvider = SafeAppProvider.default;
-      if (SafeAppProvider?.SafeAppProvider)
-        SafeAppProvider = SafeAppProvider.SafeAppProvider;
+      const { SafeAppProvider } = await import(
+        '@safe-global/safe-apps-provider'
+      );
 
       this.provider = new SafeAppProvider(safe, sdk);
     } catch (err) {
