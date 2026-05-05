@@ -8,7 +8,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "TURBO_TELEMETRY_DISABLED=1 turbo run dev --filter=!mana --filter=!api --filter=!highlight",
+    "dev": "TURBO_TELEMETRY_DISABLED=1 turbo run dev --filter=!mana --filter=!api --filter=!highlight --filter=!auction",
     "dev:interactive": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/dev-interactive.ts",
     "dev:electron": "TURBO_TELEMETRY_DISABLED=1 turbo run dev:electron",
     "build": "TURBO_TELEMETRY_DISABLED=1 turbo run build",

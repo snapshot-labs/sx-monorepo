@@ -117,13 +117,12 @@ Source of truth: `tailwind.config.ts`
 
 ## GraphQL Codegen
 
-`bun run codegen` generates typed clients from 3 schemas:
+`bun run codegen` generates typed clients:
 
 | Output dir                            | Schema source                   |
 | ------------------------------------- | ------------------------------- |
 | `src/networks/common/graphqlApi/gql/` | `../api/.checkpoint/schema.gql` |
-| `src/helpers/auction/gql/`            | Subgraph endpoint               |
-| `src/helpers/auction/referral/gql/`   | Brokester API                   |
+| `src/helpers/townhall/gql/`           | `../highlight/.checkpoint/schema.gql` |
 
 Generated `gql/` directories are gitignored. **Never edit generated files.**
 
