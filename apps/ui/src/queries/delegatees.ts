@@ -1,6 +1,6 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
-import { MaybeRefOrGetter } from 'vue';
+import { computed, MaybeRefOrGetter, toValue } from 'vue';
 import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
 import { formatAddress } from '@/helpers/utils';
@@ -23,6 +23,22 @@ const FETCH_DELEGATEES_FN = {
   'delegate-registry': fetchDelegateRegistryDelegatees,
   'split-delegation': fetchSplitDelegationDelegatees
 } as const;
+
+export function getDelegateesQueryKey(
+  account: string | undefined,
+  space: Space,
+  delegation: SpaceMetadataDelegation | null
+) {
+  return [
+    'delegatees',
+    delegation?.apiType,
+    delegation?.contractAddress,
+    delegation?.chainId,
+    space.network,
+    space.id,
+    account
+  ];
+}
 
 async function fetchGovernorSubgraphDelegatees(
   account: string,
@@ -285,7 +301,13 @@ export function useDelegateesQuery(
   delegation: MaybeRefOrGetter<SpaceMetadataDelegation | null>
 ) {
   return useQuery({
-    queryKey: ['delegatees', delegation, account],
+    queryKey: computed(() =>
+      getDelegateesQueryKey(
+        toValue(account),
+        toValue(space),
+        toValue(delegation)
+      )
+    ),
     queryFn: () =>
       FETCH_DELEGATEES_FN[
         toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN
