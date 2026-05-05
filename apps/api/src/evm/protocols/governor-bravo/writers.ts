@@ -334,9 +334,14 @@ export function createWriters(
         client
       });
 
-    proposal.start = await getTimestampFromBlock(event.args.startBlock);
+    const [start, end] = await Promise.all([
+      getTimestampFromBlock(event.args.startBlock),
+      getTimestampFromBlock(event.args.endBlock)
+    ]);
+
+    proposal.start = start;
     proposal.start_block_number = event.args.startBlock;
-    proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
+    proposal.min_end = end;
     proposal.min_end_block_number = event.args.endBlock;
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.min_end_block_number;

@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import {
   formatQuorum,
+  getProposalCurrentQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
@@ -34,6 +35,15 @@ const queryClient = useQueryClient();
 const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const quorumAmount = computed(() => {
+  const current = getProposalCurrentQuorum(
+    props.proposal.network,
+    props.proposal
+  );
+  const format = (n: number) => _vp(n / 10 ** props.decimals);
+  return `${format(current)} / ${format(props.proposal.quorum)}`;
+});
 
 const placeholderResults = computed(() =>
   props.proposal.choices.map((_, i) => ({
@@ -146,9 +156,14 @@ onMounted(() => {
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
-    <div v-if="proposal.quorum">
-      {{ quorumLabel(proposal.quorum_type) }}:
-      <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+    <div v-if="proposal.quorum" class="flex items-center justify-between">
+      <span class="text-skin-link">
+        {{ quorumLabel(proposal.quorum_type) }}
+      </span>
+      <div class="flex items-center gap-2">
+        <span>{{ quorumAmount }}</span>
+        <span class="text-skin-heading">{{ formatQuorum(totalProgress) }}</span>
+      </div>
     </div>
   </div>
   <template v-else>
@@ -228,9 +243,16 @@ onMounted(() => {
           See all <IH-arrow-down class="size-[16px]" />
         </div>
       </button>
-      <div v-if="proposal.quorum">
-        {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
+      <div v-if="proposal.quorum" class="flex items-center justify-between">
+        <span class="text-skin-link">
+          {{ quorumLabel(proposal.quorum_type) }}
+        </span>
+        <div class="flex items-center gap-2">
+          <span>{{ quorumAmount }}</span>
+          <span class="text-skin-heading">
+            {{ formatQuorum(totalProgress) }}
+          </span>
+        </div>
       </div>
     </div>
     <div

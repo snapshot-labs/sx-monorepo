@@ -5,7 +5,7 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
-import { compareAddresses } from '@/helpers/utils';
+import { compareAddresses, formatAddress } from '@/helpers/utils';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
 import {
   RequiredProperty,
@@ -219,6 +219,7 @@ export function useDelegates(
         return {
           name: names[delegate.user] || null,
           ...delegate,
+          user: formatAddress(delegate.user),
           delegatorsPercentage,
           votesPercentage,
           statement: indexedStatements[delegate.user.toLowerCase()]
