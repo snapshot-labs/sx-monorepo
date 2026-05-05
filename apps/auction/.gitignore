@@ -8,6 +8,7 @@ auto-imports.d.ts
 .eslintrc-auto-import.json
 
 # local env files
+!/.env
 .env.local
 .env.*.local
 
@@ -24,5 +25,3 @@ auto-imports.d.ts
 *.sw?
 
 gql
-
-storybook-static
