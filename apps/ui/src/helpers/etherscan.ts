@@ -1,8 +1,12 @@
 import { call } from './call';
 import { getProvider } from './provider';
 
-export async function getABI(chainId: number, address: string) {
-  const apiHost = `https://api.etherscan.io/v2/api`;
+const API_HOST = `https://api.etherscan.io/v2/api`;
+const abiCache = new Map<string, any[]>();
+
+export async function getABI(chainId: number, address: string): Promise<any[]> {
+  const cacheKey = `${chainId}:${address.toLowerCase()}`;
+  if (abiCache.has(cacheKey)) return abiCache.get(cacheKey)!;
 
   const params = new URLSearchParams({
     chainid: chainId.toString(),
@@ -12,7 +16,7 @@ export async function getABI(chainId: number, address: string) {
     apikey: import.meta.env.VITE_ETHERSCAN_API_KEY || ''
   });
 
-  const res = await fetch(`${apiHost}?${params}`);
+  const res = await fetch(`${API_HOST}?${params}`);
   const { result } = await res.json();
   const abi = JSON.parse(result);
 
@@ -24,9 +28,12 @@ export async function getABI(chainId: number, address: string) {
     ]);
 
     if (implementationAddress) {
-      return await getABI(chainId, implementationAddress);
+      const implAbi = await getABI(chainId, implementationAddress);
+      abiCache.set(cacheKey, implAbi);
+      return implAbi;
     }
   }
 
+  abiCache.set(cacheKey, abi);
   return abi;
 }
