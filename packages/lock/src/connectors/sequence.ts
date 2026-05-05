@@ -3,22 +3,23 @@ import Connector from './connector';
 const projectAccessKey = 'AQAAAAAAAJbd_5JOcE50AqglZCtvu51YlGI';
 
 export default class Sequence extends Connector {
-  async getWallet() {
+  async getWallet(): Promise<any> {
     const sequence = await import('0xsequence');
     return sequence.initWallet(projectAccessKey);
   }
 
   async connect() {
-    const { currentTheme } = useTheme();
+    const { getTheme, ...options } = this.options;
+    const theme = getTheme?.() ?? 'light';
 
     try {
       const wallet = await this.getWallet();
 
       const connectDetails = await wallet.connect({
-        ...this.options,
+        ...options,
         authorize: true,
         settings: {
-          theme: currentTheme.value
+          theme
         }
       });
 

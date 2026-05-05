@@ -149,7 +149,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         position: 3
       },
       signals: {
-        name: 'Signals',
+        name: 'Offchain voting',
         icon: IHWifi,
         link: {
           name: 'space-proposals',
@@ -167,6 +167,9 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           name: 'space-discussions',
           params: { space: 's:arbitrumfoundation.eth' }
         }
+      },
+      treasury: {
+        name: 'Onchain treasury'
       },
       docs: {
         name: 'Docs',
