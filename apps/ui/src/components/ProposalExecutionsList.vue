@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Interface, JsonFragment } from '@ethersproject/abi';
+import { getABI } from '@/helpers/etherscan';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
@@ -15,11 +17,59 @@ const props = defineProps<{
 
 const network = computed(() => getNetwork(props.networkId));
 
-function downloadExecution(execution: ProposalExecution) {
-  if (!execution.chainId) return;
+async function tryDecodeRawTransactions(
+  execution: ProposalExecution
+): Promise<ProposalExecution> {
+  const rawTxs = execution.transactions.filter(
+    tx => tx._type === 'raw' && tx.data && tx.data !== '0x'
+  );
+  if (!rawTxs.length) return execution;
 
+  const uniqueAddresses = [...new Set(rawTxs.map(tx => tx.to))];
+
+  const abiMap: Record<string, JsonFragment[] | null> = Object.fromEntries(
+    await Promise.all(
+      uniqueAddresses.map(async address => [
+        address,
+        await getABI(Number(execution.chainId), address).catch(() => null)
+      ])
+    )
+  );
+
+  const transactions = execution.transactions.map(tx => {
+    const abi = tx._type === 'raw' ? abiMap[tx.to] : null;
+    if (!abi) return tx;
+
+    try {
+      const iface = new Interface(abi);
+      const parsed = iface.parseTransaction({ data: tx.data });
+      const args: Record<string, string> = {};
+
+      iface.getFunction(parsed.name).inputs.forEach((input, i) => {
+        args[input.name || `param${i}`] = String(parsed.args[i]);
+      });
+
+      return {
+        ...tx,
+        _type: 'contractCall' as const,
+        _form: { recipient: tx.to, method: parsed.signature, args, abi }
+      };
+    } catch {
+      return tx;
+    }
+  });
+
+  return { ...execution, transactions };
+}
+
+const decodedExecutions = computedAsync(
+  () => Promise.all(props.executions.map(tryDecodeRawTransactions)),
+  props.executions
+);
+
+function downloadExecution(execution: ProposalExecution) {
   const batchFile = buildBatchFile(
-    execution.chainId as number,
+    Number(execution.chainId),
     execution.transactions
   );
 
@@ -37,7 +87,7 @@ function downloadExecution(execution: ProposalExecution) {
 
 <template>
   <div
-    v-for="execution in executions"
+    v-for="execution in decodedExecutions"
     :key="`${execution.chainId}:${execution.safeAddress}`"
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
