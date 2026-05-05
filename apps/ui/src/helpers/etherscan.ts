@@ -1,3 +1,5 @@
+import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
 import { call } from './call';
 import { getProvider } from './provider';
 
@@ -36,4 +38,29 @@ export async function getABI(chainId: number, address: string): Promise<any[]> {
 
   abiCache.set(cacheKey, abi);
   return abi;
+}
+
+export async function decodeCalldata(
+  chainId: number,
+  to: string,
+  data: string
+): Promise<{ abi: any[]; method: string; args: Record<string, any> }> {
+  const abi = await getABI(chainId, to);
+  const iface = new Interface(abi);
+  const parsed = iface.parseTransaction({ data });
+  const abiFunction = iface.getFunction(parsed.signature);
+
+  const args = Object.fromEntries(
+    abiFunction.inputs.map(input => {
+      let value = parsed.args[input.name];
+      if (BigNumber.isBigNumber(value)) {
+        value = value.toString();
+      } else if (Array.isArray(value)) {
+        value = value.join(', ');
+      }
+      return [input.name, value];
+    })
+  );
+
+  return { abi, method: parsed.signature, args };
 }
