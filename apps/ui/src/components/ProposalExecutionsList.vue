@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Interface, JsonFragment } from '@ethersproject/abi';
-import { getABI } from '@/helpers/etherscan';
+import { decodeCalldata } from '@/helpers/etherscan';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
@@ -25,39 +24,31 @@ async function tryDecodeRawTransactions(
   );
   if (!rawTxs.length) return execution;
 
-  const uniqueAddresses = [...new Set(rawTxs.map(tx => tx.to))];
+  const transactions = await Promise.all(
+    execution.transactions.map(async tx => {
+      if (tx._type !== 'raw' || !tx.data || tx.data === '0x') return tx;
 
-  const abiMap: Record<string, JsonFragment[] | null> = Object.fromEntries(
-    await Promise.all(
-      uniqueAddresses.map(async address => [
-        address,
-        await getABI(Number(execution.chainId), address).catch(() => null)
-      ])
-    )
+      try {
+        const decoded = await decodeCalldata(
+          Number(execution.chainId),
+          tx.to,
+          tx.data
+        );
+        return {
+          ...tx,
+          _type: 'contractCall' as const,
+          _form: {
+            recipient: tx.to,
+            method: decoded.method,
+            args: decoded.args,
+            abi: decoded.abi
+          }
+        };
+      } catch {
+        return tx;
+      }
+    })
   );
-
-  const transactions = execution.transactions.map(tx => {
-    const abi = tx._type === 'raw' ? abiMap[tx.to] : null;
-    if (!abi) return tx;
-
-    try {
-      const iface = new Interface(abi);
-      const parsed = iface.parseTransaction({ data: tx.data });
-      const args: Record<string, string> = {};
-
-      iface.getFunction(parsed.name).inputs.forEach((input, i) => {
-        args[input.name || `param${i}`] = String(parsed.args[i]);
-      });
-
-      return {
-        ...tx,
-        _type: 'contractCall' as const,
-        _form: { recipient: tx.to, method: parsed.signature, args, abi }
-      };
-    } catch {
-      return tx;
-    }
-  });
 
   return { ...execution, transactions };
 }
