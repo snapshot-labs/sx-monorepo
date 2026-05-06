@@ -14,14 +14,9 @@ export async function getAddresses(
   chainId: ChainId
 ): Promise<Record<string, string>> {
   try {
-    const inputMapping: Record<string, string> = {};
-    for (const name of names) {
-      try {
-        inputMapping[name] = ensNormalize(name);
-      } catch {
-        // ignore unnormalizable input
-      }
-    }
+    const inputMapping = Object.fromEntries(
+      names.map(name => [name, ensNormalize(name)])
+    );
     const resolvedNamesKeys = Array.from(resolvedNames.keys());
     const unresolvedNames = Object.values(inputMapping).filter(
       name => !resolvedNamesKeys.includes(name)
