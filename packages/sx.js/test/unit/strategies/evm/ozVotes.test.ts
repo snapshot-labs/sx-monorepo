@@ -11,28 +11,26 @@ describe('ozVotes', () => {
   beforeAll(() => {
     vi.mock('@ethersproject/contracts', () => ({
       Contract: class {
-        async getVotes(
-          voterAddress: string,
-          { blockTag }: { blockTag: number | string }
-        ) {
+        async getPastVotes(voterAddress: string, block: number) {
           if (
             voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
-            blockTag === 8388733
+            block === 8388733
           ) {
             return '1000000000000000000';
           }
 
           if (
             voterAddress === '0x000000000000000000000000000000000000dead' &&
-            blockTag === 8388733
+            block === 8388733
           ) {
             return '0';
           }
 
-          if (
-            voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
-            blockTag === 'latest'
-          ) {
+          return '0';
+        }
+
+        async getVotes(voterAddress: string) {
+          if (voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe') {
             return '3000000000000000000';
           }
 

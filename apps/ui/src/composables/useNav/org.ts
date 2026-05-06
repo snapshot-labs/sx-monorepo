@@ -17,8 +17,8 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
   const hasDelegates = primarySpace.delegations?.length;
   const hasDiscussions = SPACES_DISCUSSIONS[spaceId];
-  const hasTreasury =
-    context.organization?.treasuries?.length || primarySpace.treasuries?.length;
+  const hasOrgTreasuries = context.organization?.treasuries?.length;
+  const hasTreasury = hasOrgTreasuries || primarySpace.treasuries?.length;
 
   // Canonical order matching space.ts
   const allItems: [string, NavItem | null][] = [
@@ -68,7 +68,9 @@ function getOrgConfig(context: NavContext): NavConfig | null {
         ? {
             name: 'Treasury',
             icon: IHCash,
-            link: { name: 'space-treasury', params: { space: spaceId } }
+            link: hasOrgTreasuries
+              ? { name: 'space-treasury-root' }
+              : { name: 'space-treasury', params: { space: spaceId } }
           }
         : null
     ]

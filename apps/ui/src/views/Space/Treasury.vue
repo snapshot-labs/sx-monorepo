@@ -41,7 +41,7 @@ watchEffect(() => {
   const isValidTab = ['tokens', 'nfts'].includes(tab as string);
   if (!index || !tab || !isValidTab) {
     router.replace({
-      name: 'space-treasury',
+      name: route.name as string,
       params: {
         index: index || 1,
         tab: 'tokens'
@@ -65,7 +65,7 @@ watchEffect(() => {
           v-for="(treasury, i) in treasuries"
           :key="i"
           :to="{
-            name: 'space-treasury',
+            name: route.name as string,
             params: {
               index: i + 1,
               tab: 'tokens'

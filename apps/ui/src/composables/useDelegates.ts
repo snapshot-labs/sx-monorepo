@@ -5,6 +5,7 @@ import {
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
+import { compareAddresses, formatAddress } from '@/helpers/utils';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
 import {
   RequiredProperty,
@@ -63,6 +64,15 @@ const DELEGATION_SUBGRAPHS = {
   '11155111': 'https://subgrapher.snapshot.org/delegation/11155111'
 };
 
+const EXCLUDED_DELEGATES: Record<string, string[]> = {
+  '0x789fC99093B09aD01C34DC7251D0C89ce743e5a4': [
+    '0x00000000000000000000000000000000000a4b86'
+  ],
+  '0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9': [
+    '0x00000000000000000000000000000000000a4b86'
+  ]
+};
+
 const DELEGATES_QUERY = gql`
   query (
     $first: Int!
@@ -71,6 +81,7 @@ const DELEGATES_QUERY = gql`
     $orderDirection: OrderDirection!
     $where: Delegate_filter
     $governance: String!
+    $excludedUsers: [String!] = []
   ) {
     delegates(
       first: $first
@@ -88,6 +99,13 @@ const DELEGATES_QUERY = gql`
     governance(id: $governance) {
       delegatedVotes
       totalDelegates
+    }
+    excluded: delegates(
+      where: { governance: $governance, user_in: $excludedUsers }
+    ) {
+      user
+      delegatedVotes
+      tokenHoldersRepresentedAmount
     }
   }
 `;
@@ -153,9 +171,23 @@ export function useDelegates(
   async function formatDelegates(data: {
     governance: Governance;
     delegates: ApiDelegate[];
+    excluded?: ApiDelegate[];
   }): Promise<Delegate[]> {
-    const governanceData = data.governance;
-    const delegatesData = data.delegates;
+    const excluded = data.excluded ?? [];
+    const excludedVotes = excluded.reduce(
+      (sum, d) => sum + Number(d.delegatedVotes),
+      0
+    );
+    const excludedHolders = excluded.reduce(
+      (sum, d) => sum + Number(d.tokenHoldersRepresentedAmount),
+      0
+    );
+    const totalVotes = Number(data.governance.delegatedVotes) - excludedVotes;
+    const totalDelegates =
+      Number(data.governance.totalDelegates) - excludedHolders;
+    const delegatesData = data.delegates.filter(
+      d => !excluded.some(e => compareAddresses(d.user, e.user))
+    );
     const addresses = delegatesData.map(delegate => delegate.user);
 
     const [names, statements] = await Promise.all([
@@ -177,19 +209,17 @@ export function useDelegates(
           votesPercentage?: number;
         }
       ) => {
+        const delegateVotes = Number(delegate.delegatedVotes);
+        const delegateHolders = Number(delegate.tokenHoldersRepresentedAmount);
         const delegatorsPercentage =
-          delegate.delegatorsPercentage ??
-          Number(delegate.tokenHoldersRepresentedAmount) /
-            Number(governanceData.totalDelegates);
+          delegate.delegatorsPercentage ?? delegateHolders / totalDelegates;
         const votesPercentage =
-          delegate.votesPercentage ??
-          (Number(delegate.delegatedVotes) /
-            Number(governanceData.delegatedVotes) ||
-            0);
+          delegate.votesPercentage ?? (delegateVotes / totalVotes || 0);
 
         return {
           name: names[delegate.user] || null,
           ...delegate,
+          user: formatAddress(delegate.user),
           delegatorsPercentage,
           votesPercentage,
           statement: indexedStatements[delegate.user.toLowerCase()]
@@ -252,7 +282,12 @@ export function useDelegates(
 
     const { data } = await apollo.query({
       query: DELEGATES_QUERY,
-      variables: { ...filter, governance: where.governance, where }
+      variables: {
+        ...filter,
+        governance: where.governance,
+        where,
+        excludedUsers: EXCLUDED_DELEGATES[space.id] ?? []
+      }
     });
 
     return formatDelegates(data);

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { DOCS_URL } from '@/helpers/constants';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
@@ -148,7 +149,7 @@ function handleSelect(value: string) {
                   Domain name was used by a previously deleted space and can not
                   be reused to create a new space.
                   <AppLink
-                    to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
+                    :to="`${DOCS_URL}/faq#why-cant-i-create-a-new-space-with-my-previously-deleted-spaces-ens-name`"
                     class="text-skin-link"
                   >
                     Learn more

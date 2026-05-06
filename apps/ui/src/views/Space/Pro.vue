@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
+import { DOCS_URL } from '@/helpers/constants';
 import { _n } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
@@ -388,9 +389,7 @@ onMounted(() => {
     </div>
 
     <div class="px-4">
-      <AppLink
-        to="https://help.snapshot.box/en/collections/12372196-snapshot-pro"
-      >
+      <AppLink :to="`${DOCS_URL}/user-guides/spaces/pro`">
         <h2
           class="mb-6 text-center flex items-center justify-center text-[32px]"
         >

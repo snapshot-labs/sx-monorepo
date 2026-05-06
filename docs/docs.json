@@ -3,8 +3,7 @@
   "name": "Snapshot",
   "theme": "mint",
   "appearance": {
-    "default": "dark",
-    "strict": true
+    "default": "dark"
   },
   "favicon": {
     "dark": "/logo/favicon.svg",
@@ -12,12 +11,12 @@
   },
   "logo": {
     "dark": "/logo/snapshot.svg",
-    "light": "/logo/snapshot.svg"
+    "light": "/logo/snapshot-dark.svg"
   },
   "colors": {
-    "primary": "#fafe69",
-    "dark": "#fafe69",
-    "light": "#fafe69"
+    "primary": "#000000",
+    "light": "#FFFFFF",
+    "dark": "#000000"
   },
   "navigation": {
     "tabs": [
@@ -191,10 +190,6 @@
     }
   },
   "externalLinks": [
-    {
-      "label": "Help Center",
-      "url": "https://help.snapshot.box"
-    },
     {
       "label": "Discord",
       "url": "https://discord.snapshot.org"
