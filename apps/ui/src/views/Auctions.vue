@@ -96,13 +96,25 @@ function handleEndReached() {
     </div>
 
     <UiSectionHeader label="Auctions" sticky />
-    <UiColumnHeader class="hidden md:flex text-center">
-      <div class="grow" />
-      <div class="w-[100px]" v-text="'Selling'" />
-      <div class="w-[100px]" v-text="'Buying'" />
-      <div class="w-[100px]" v-text="'Status'" />
-      <div class="w-[100px]" v-text="'Volume'" />
-      <div class="w-[170px]" v-text="'End date'" />
+    <UiColumnHeader
+      class="hidden md:flex gap-3 px-4 sticky-header-with-section"
+    >
+      <UiColumnHeaderItem class="grow" />
+      <UiColumnHeaderItem class="w-[100px] justify-center">
+        Selling
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[100px] justify-center">
+        Buying
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[100px] justify-center">
+        Status
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[100px] justify-center">
+        Volume
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[170px] justify-center">
+        End date
+      </UiColumnHeaderItem>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="block m-4" />
     <div v-else-if="data">
@@ -118,35 +130,43 @@ function handleEndReached() {
             name: 'auction-overview',
             params: { id: `${network}:${auction.id}` }
           }"
-          class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
+          class="text-skin-text mx-4 flex border-b items-center py-[18px] gap-3"
         >
           <div class="flex items-center gap-2 truncate grow">
             <IS-lock-closed v-if="auction.isPrivateAuction" class="shrink-0" />
             <h3 class="truncate" v-text="`Auction #${auction.id}`" />
           </div>
-          <div class="hidden md:flex font-bold text-center text-skin-link">
-            <div class="w-[100px] truncate px-2">
-              {{ auction.symbolAuctioningToken }}
-            </div>
-            <div class="w-[100px] truncate px-2">
-              {{ auction.symbolBiddingToken }}
-            </div>
-            <div class="w-[100px]">
-              {{ getAuctionState(auction, currentTimestamp) }}
-            </div>
-            <div class="w-[100px] truncate px-2">
-              {{
-                _n(
-                  Number(auction.currentBiddingAmount) /
-                    10 ** Number(auction.decimalsBiddingToken),
-                  'compact'
-                )
-              }}
-              {{ auction.symbolBiddingToken }}
-            </div>
-            <div class="w-[170px]">
-              {{ _t(auction.endTimeTimestamp) }}
-            </div>
+          <div
+            class="hidden md:flex w-[100px] shrink-0 truncate justify-center font-bold text-skin-link"
+          >
+            {{ auction.symbolAuctioningToken }}
+          </div>
+          <div
+            class="hidden md:flex w-[100px] shrink-0 truncate justify-center font-bold text-skin-link"
+          >
+            {{ auction.symbolBiddingToken }}
+          </div>
+          <div
+            class="hidden md:flex w-[100px] shrink-0 justify-center font-bold text-skin-link"
+          >
+            {{ getAuctionState(auction, currentTimestamp) }}
+          </div>
+          <div
+            class="hidden md:flex w-[100px] shrink-0 truncate justify-center font-bold text-skin-link"
+          >
+            {{
+              _n(
+                Number(auction.currentBiddingAmount) /
+                  10 ** Number(auction.decimalsBiddingToken),
+                'compact'
+              )
+            }}
+            {{ auction.symbolBiddingToken }}
+          </div>
+          <div
+            class="hidden md:flex w-[170px] shrink-0 justify-center font-bold text-skin-link"
+          >
+            {{ _t(auction.endTimeTimestamp) }}
           </div>
         </AppLink>
       </UiContainerInfiniteScroll>

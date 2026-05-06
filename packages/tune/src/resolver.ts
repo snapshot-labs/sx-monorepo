@@ -7,6 +7,7 @@ const components = [
   'Carousel',
   'Checkbox',
   'ColumnHeader',
+  'ColumnHeaderItem',
   'ContainerInfiniteScroll',
   'Countdown',
   'Dropdown',

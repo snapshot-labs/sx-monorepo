@@ -464,21 +464,30 @@ watch(volume, () => {
             :ref="
               ref =>
                 (bidsHeader =
-                  (ref as InstanceType<typeof UiColumnHeader> | null)
-                    ?.container ?? null)
+                  (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ??
+                  null)
             "
-            class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
-            :sticky="false"
+            class="py-2 text-sm tracking-wider overflow-hidden"
           >
-            <div
-              class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[735px] w-full"
-            >
-              <div class="flex-1 min-w-[110px] truncate">Created</div>
-              <div class="w-[200px] max-w-[200px] truncate">Amount</div>
-              <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
-              <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-              <div class="w-[200px] max-w-[200px] truncate">Status</div>
-              <div class="min-w-[44px] lg:w-[60px]" />
+            <div class="flex px-4 gap-3 min-w-[735px] w-full">
+              <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
+                Created
+              </UiColumnHeaderItem>
+              <UiColumnHeaderItem class="w-[200px] uppercase">
+                Amount
+              </UiColumnHeaderItem>
+              <UiColumnHeaderItem class="w-[200px] uppercase">
+                Max. price
+              </UiColumnHeaderItem>
+              <UiColumnHeaderItem class="w-[200px] uppercase">
+                Max. FDV
+              </UiColumnHeaderItem>
+              <UiColumnHeaderItem class="w-[200px] uppercase">
+                Status
+              </UiColumnHeaderItem>
+              <UiColumnHeaderItem
+                class="min-w-[20px] lg:w-[40px] justify-end"
+              />
             </div>
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">

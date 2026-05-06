@@ -91,17 +91,16 @@ function handleScrollEvent(target: HTMLElement) {
     :ref="
       ref =>
         (votesHeader =
-          (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
-          null)
+          (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
     "
-    class="!px-0 overflow-hidden"
+    class="overflow-hidden sticky-header-with-section"
   >
-    <div class="flex space-x-3 min-w-[735px] w-full">
-      <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
-      <div class="grow w-[40%]">
-        <template v-if="offchainNetworks.includes(proposal.network)"
-          >Choice</template
-        >
+    <div class="flex px-4 gap-3 min-w-[735px] w-full">
+      <UiColumnHeaderItem class="w-[218px]"> Voter </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="grow w-[40%]">
+        <template v-if="offchainNetworks.includes(proposal.network)">
+          Choice
+        </template>
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
@@ -130,26 +129,24 @@ function handleScrollEvent(target: HTMLElement) {
             </button>
           </template>
         </UiSelectDropdown>
-      </div>
-      <button
-        type="button"
-        class="flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('created')"
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px]"
+        :is-ordered="sortBy.startsWith('created')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('created')"
       >
-        <span>Date</span>
-        <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
-        <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
-      </button>
-      <button
-        type="button"
-        class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('vp')"
+        Date
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px] justify-end"
+        :is-ordered="sortBy.startsWith('vp')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('vp')"
       >
-        <span class="truncate">Voting power</span>
-        <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
-        <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
-      </button>
-      <div class="min-w-[44px] lg:w-[60px]" />
+        Voting power
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
     </div>
   </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
@@ -172,7 +169,7 @@ function handleScrollEvent(target: HTMLElement) {
         <div
           v-for="(vote, i) in data.pages.flat()"
           :key="i"
-          class="border-b flex space-x-3"
+          class="border-b flex gap-3 px-4"
         >
           <div
             class="right-0 h-[8px] absolute"
@@ -193,7 +190,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
+            class="leading-[22px] py-3 w-[218px] flex items-center gap-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
@@ -216,7 +213,7 @@ function handleScrollEvent(target: HTMLElement) {
             <ProposalVoteChoice :proposal="proposal" :vote="vote" />
           </button>
           <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
+            class="leading-[22px] w-[144px] flex flex-col justify-center truncate"
           >
             <TimeRelative v-slot="{ relativeTime }" :time="vote.created">
               <h4>{{ relativeTime }}</h4>
@@ -226,7 +223,7 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </div>
           <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center text-right truncate"
+            class="leading-[22px] w-[144px] flex flex-col justify-center text-right truncate"
           >
             <h4 class="text-skin-link truncate">
               {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
@@ -236,9 +233,7 @@ function handleScrollEvent(target: HTMLElement) {
               {{ _n((vote.vp / proposal.scores_total) * 100) }}%
             </div>
           </div>
-          <div
-            class="min-w-[44px] lg:w-[60px] flex items-center justify-center"
-          >
+          <div class="min-w-[20px] lg:w-[40px] flex items-center justify-end">
             <UiDropdown>
               <template #button>
                 <button type="button">

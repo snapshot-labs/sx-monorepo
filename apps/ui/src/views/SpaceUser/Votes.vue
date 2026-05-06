@@ -99,9 +99,11 @@ watchEffect(() =>
 </script>
 
 <template>
-  <UiColumnHeader>
-    <div class="grow truncate">Proposal</div>
-    <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
+  <UiColumnHeader class="gap-3 px-4 sticky-header-with-section">
+    <UiColumnHeaderItem class="grow"> Proposal </UiColumnHeaderItem>
+    <UiColumnHeaderItem class="shrink-0 w-[35%] md:w-[220px]">
+      Choice
+    </UiColumnHeaderItem>
   </UiColumnHeader>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <UiStateWarning v-else-if="!proposals.length || failed" class="px-4 py-3">

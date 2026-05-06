@@ -20,7 +20,7 @@ const props = defineProps<{
   totalSupply: bigint;
 }>();
 
-const columnHeaderRef = ref<InstanceType<typeof UiColumnHeader> | null>(null);
+const columnHeaderEl = ref<HTMLElement | null>(null);
 const page = ref(1);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
@@ -44,9 +44,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     tokenAddress: () => props.auction.addressBiddingToken
   });
 
-const { x: columnHeaderX } = useScroll(
-  () => columnHeaderRef.value?.container ?? null
-);
+const { x: columnHeaderX } = useScroll(columnHeaderEl);
 
 const totalPageCount = computed(() => {
   const pages = Math.ceil(props.auction.orderCount / LIMIT);
@@ -72,41 +70,48 @@ function handleSortChange(field: Order_OrderBy) {
   <div class="divide-y divide-skin-border">
     <div class="overflow-hidden">
       <UiColumnHeader
-        ref="columnHeaderRef"
-        class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
-        :sticky="false"
+        :ref="
+          ref =>
+            (columnHeaderEl =
+              (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
+        "
+        class="py-2 text-sm tracking-wider overflow-hidden"
       >
-        <div
-          class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
-        >
-          <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+        <div class="flex px-4 gap-3 min-w-[880px] w-full">
+          <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
+            Bidder
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'timestamp'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('timestamp')"
           >
             Created
-          </UiColumnHeaderItemSortable>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'sellAmount'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('sellAmount')"
           >
             Amount
-          </UiColumnHeaderItemSortable>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'price'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('price')"
           >
             Max. price
-          </UiColumnHeaderItemSortable>
-          <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-          <div class="w-[200px] max-w-[200px] truncate">Status</div>
-          <div class="min-w-[44px] lg:w-[60px]" />
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] uppercase">
+            Max. FDV
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] uppercase">
+            Status
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
         </div>
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">

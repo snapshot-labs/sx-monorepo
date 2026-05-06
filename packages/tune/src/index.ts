@@ -15,6 +15,7 @@ export { default as UiCalendar } from './components/Ui/Calendar.vue';
 export { default as UiCarousel } from './components/Ui/Carousel.vue';
 export { default as UiCheckbox } from './components/Ui/Checkbox.vue';
 export { default as UiColumnHeader } from './components/Ui/ColumnHeader.vue';
+export { default as UiColumnHeaderItem } from './components/Ui/ColumnHeaderItem.vue';
 export { default as UiContainerInfiniteScroll } from './components/Ui/ContainerInfiniteScroll.vue';
 export { default as UiCountdown } from './components/Ui/Countdown.vue';
 export { default as UiDropdown } from './components/Ui/Dropdown.vue';
