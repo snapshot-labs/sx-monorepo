@@ -1,4 +1,5 @@
 import { Provider } from '@ethersproject/providers';
+import { parseBytes32String } from '@ethersproject/strings';
 import { abis } from './abis';
 import { EIP7702_DELEGATION_INDICATOR } from './constants';
 import Multicaller from './multicaller';
@@ -26,6 +27,30 @@ export async function getTokensMetadata(chainId: string, tokens: string[]) {
   const result = await multi.execute({
     allowFailure: true
   });
+
+  // Some legacy tokens (e.g., MKR, AVT) return bytes32 for name/symbol
+  // instead of string. Retry the missing fields with a bytes32 ABI.
+  const bytes32Multi = new Multicaller(chainId, provider, [
+    'function name() view returns (bytes32)',
+    'function symbol() view returns (bytes32)'
+  ]);
+  tokens.forEach(token => {
+    if (!result[token].name) bytes32Multi.call(`${token}.name`, token, 'name');
+    if (!result[token].symbol)
+      bytes32Multi.call(`${token}.symbol`, token, 'symbol');
+  });
+
+  if (bytes32Multi.calls.length) {
+    const fallback = await bytes32Multi.execute({ allowFailure: true });
+    tokens.forEach(token => {
+      result[token].name =
+        result[token].name ||
+        (fallback[token]?.name && parseBytes32String(fallback[token].name));
+      result[token].symbol =
+        result[token].symbol ||
+        (fallback[token]?.symbol && parseBytes32String(fallback[token].symbol));
+    });
+  }
 
   return tokens.map(token => ({
     address: token,
