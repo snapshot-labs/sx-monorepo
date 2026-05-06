@@ -23,14 +23,7 @@ const props = defineProps<{
 const queryClient = useQueryClient();
 const router = useRouter();
 const uiStore = useUiStore();
-const { getCurrent, getBlockTimestamp, fetchBlockTimestamp } = useMetaStore();
-
-// Fetch real timestamps for past blocks (fire-and-forget, updates reactively)
-fetchBlockTimestamp(props.proposal.network, props.proposal.start_block_number);
-fetchBlockTimestamp(
-  props.proposal.network,
-  props.proposal.max_end_block_number
-);
+const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -142,21 +135,8 @@ const proposalTransactionId = computed(() => {
   return null;
 });
 
-const endTime = useRelativeTime(
-  () =>
-    getBlockTimestamp(
-      props.proposal.network,
-      props.proposal.max_end_block_number
-    ) ?? props.proposal.max_end
-);
-const startTime = useRelativeTime(
-  () =>
-    getBlockTimestamp(
-      props.proposal.network,
-      props.proposal.start_block_number
-    ) ?? props.proposal.start,
-  true
-);
+const endTime = useRelativeTime(() => props.proposal.max_end);
+const startTime = useRelativeTime(() => props.proposal.start, true);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
@@ -170,12 +150,7 @@ const votingTime = computed(() => {
       : `Starting in ${startTime.value}`;
   }
 
-  const estimatedEnd =
-    getBlockTimestamp(
-      props.proposal.network,
-      props.proposal.max_end_block_number
-    ) ?? props.proposal.max_end;
-  const hasEnded = estimatedEnd <= Math.floor(Date.now() / 1000);
+  const hasEnded = props.proposal.max_end <= current;
 
   return hasEnded ? `Ended ${endTime.value}` : endTime.value;
 });
