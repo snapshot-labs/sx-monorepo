@@ -100,8 +100,11 @@ watch(
             <IC-github class="shrink-0" />
             <span class="leading-[18px] truncate">{{ strategy.author }}</span>
           </div>
-          <div v-if="strategy.spaceCount !== undefined" class="text-left">
-            In {{ _n(strategy.spaceCount) }} space(s)
+          <div
+            v-if="strategy.verifiedSpaceCount !== undefined"
+            class="text-left"
+          >
+            In {{ _n(strategy.verifiedSpaceCount) }} verified space(s)
           </div>
         </button>
       </div>

@@ -29,6 +29,13 @@ const proposalQueries = useQueries({
 
 const space = computed(() => organization.value?.spaces[0]);
 const spaces = computed(() => organization.value?.spaces ?? []);
+const description = computed(() => {
+  if (organization.value?.id === 'arbitrum') {
+    return 'Powering the programmable economy';
+  }
+
+  return space.value?.about;
+});
 
 const totalProposalCount = computed(() =>
   spaces.value.reduce((sum, s) => sum + s.proposal_count, 0)
@@ -141,9 +148,9 @@ watchEffect(() => {
           </template>
         </div>
         <div
-          v-if="space.about"
+          v-if="description"
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
-          v-html="autoLinkText(space.about)"
+          v-html="autoLinkText(description)"
         />
         <div v-if="socials.length > 0" class="gap-x-2 flex">
           <AppLink

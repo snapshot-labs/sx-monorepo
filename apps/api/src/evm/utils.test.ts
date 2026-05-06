@@ -95,7 +95,7 @@ describe('applyConfig', () => {
 });
 
 describe('getTimestampFromBlock', () => {
-  it('should return timestamp for networks with own block.number', async () => {
+  it('should return real onchain timestamp for past blocks on native-block chains', async () => {
     const client = createPublicClient({
       transport: http('https://rpc.snapshot.org/1')
     });
@@ -108,10 +108,10 @@ describe('getTimestampFromBlock', () => {
       client
     });
 
-    expect(actual).toBe(1744967610n);
+    expect(actual).toBe(1744967303n);
   });
 
-  it('should return timestamp for networks with foreign block.number', async () => {
+  it('should return real onchain timestamp for past blocks on non-native-block chains', async () => {
     const client = createPublicClient({
       transport: http('https://rpc.snapshot.org/42161')
     });
@@ -124,6 +124,6 @@ describe('getTimestampFromBlock', () => {
       client
     });
 
-    expect(actual).toBe(1753466114n);
+    expect(actual).toBe(1753466099n);
   });
 });

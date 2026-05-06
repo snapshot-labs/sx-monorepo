@@ -4,7 +4,7 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
+import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
@@ -585,7 +585,7 @@ watchEffect(() => {
             non-premium networks (<span v-html="nonPremiumNetworksList" />).
             Change to a
             <AppLink
-              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
               class="font-semibold text-rose-500"
             >
               premium network
@@ -616,7 +616,7 @@ watchEffect(() => {
             }}
             no longer available.
             <AppLink
-              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
               class="inline-flex items-center font-semibold text-rose-500"
             >
               See migration guide
@@ -660,7 +660,7 @@ watchEffect(() => {
             >
             to create a proposal.
             <AppLink
-              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              :to="`${DOCS_URL}/user-guides/premium-voting-strategies`"
               class="inline-flex items-center font-semibold text-rose-500"
             >
               Learn more
