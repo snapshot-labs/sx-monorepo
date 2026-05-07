@@ -55,7 +55,12 @@ watch(isGuestFormVisible, () => {
   guestAddress.value = '';
 });
 
-watchEffect(async () => {
+watchEffect(async onCleanup => {
+  let cancelled = false;
+  onCleanup(() => {
+    cancelled = true;
+  });
+
   isFormValid.value = false;
   formErrors.value = {};
 
@@ -69,10 +74,13 @@ watchEffect(async () => {
     }
   });
 
-  formErrors.value = await validator.validateAsync({
+  const errors = await validator.validateAsync({
     account: guestAddress.value
   });
 
+  if (cancelled) return;
+
+  formErrors.value = errors;
   isFormValid.value = Object.keys(formErrors.value).length === 0;
 });
 </script>
