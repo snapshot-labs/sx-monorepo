@@ -55,11 +55,15 @@ async function getPropositionPower(space: Space, block: number | null) {
     )
   };
 
-  // Vanilla / "anyone can propose" validation: no voting-power strategies are
-  // attached, so there's nothing to compute and no threshold to clear.
-  // Without this short-circuit, the call below to getVotingPower would error
-  // (no strategies → no result) and leave the Publish button disabled.
-  if (!space.voting_power_validation_strategy_strategies.length) {
+  // Confidential (Inco) spaces use Vanilla proposal validation (anyone can
+  // propose) with no off-chain-introspectable strategies. Short-circuit the
+  // VP preview to avoid disabling the Publish button. Scoped to confidential
+  // so legacy SX spaces with no validation strategies (likely misconfigured)
+  // keep their previous behavior.
+  if (
+    space.confidential &&
+    !space.voting_power_validation_strategy_strategies.length
+  ) {
     vpItem.canPropose = true;
     return vpItem;
   }
@@ -86,12 +90,13 @@ async function getPropositionPower(space: Space, block: number | null) {
     const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
     vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
   } catch (err) {
-    // Voting-power preview failed (commonly: confidential / Vanilla-validation
-    // spaces where the strategies aren't introspectable off-chain, or the
-    // chain RPC blipped). Defer to the on-chain validation strategy: let the
-    // user try to propose and fail at submit time if validation rejects.
+    // Confidential (Inco) spaces use Vanilla validation strategies that
+    // aren't introspectable off-chain. Defer to the on-chain validation at
+    // submit time. For every other network, rethrow — masking errors on
+    // mainnet would let users hit a broken submit flow without warning.
+    if (!space.confidential) throw err;
     console.warn(
-      'Proposition power preview failed; allowing propose anyway:',
+      'Proposition power preview failed for confidential space; allowing propose:',
       err
     );
     vpItem.canPropose = true;
