@@ -47,6 +47,86 @@ const quorumAmount = computed(() => {
   return `${format(current)} / ${format(proposal.value.quorum)}`;
 });
 
+// True when per-choice tallies are encrypted and not displayable as numbers.
+// Shutter (offchain) sets `privacy = 'shutter'` until reveal; Inco (onchain)
+// sets `space.confidential = true` and the per-choice tallies stay encrypted
+// forever in v1. Both should render the lock-icon UI instead of 0/0%.
+const isEncryptedTally = computed(() => {
+  if (props.proposal.privacy !== 'none') return true;
+  return !!props.proposal.space?.confidential;
+});
+
+// On-chain decision flags fetched directly from the Space contract. Falls
+// back to the indexer-stored values when present. Direct on-chain read is
+// needed because the contract's `tryExecute` only emits `ProposalExecuted`
+// when execution actually runs — for "rejected" paths (quorum or support
+// failed) no event is emitted and the indexer can't observe the reveal.
+const onchainQuorumReached = ref<boolean | null>(null);
+const onchainSupportAchieved = ref<boolean | null>(null);
+
+const revealedQuorumReached = computed(() => {
+  if (
+    props.proposal.is_quorum_reached !== null &&
+    props.proposal.is_quorum_reached !== undefined
+  ) {
+    return props.proposal.is_quorum_reached;
+  }
+  return onchainQuorumReached.value;
+});
+const revealedSupportAchieved = computed(() => {
+  if (
+    props.proposal.is_support_achieved !== null &&
+    props.proposal.is_support_achieved !== undefined
+  ) {
+    return props.proposal.is_support_achieved;
+  }
+  return onchainSupportAchieved.value;
+});
+
+async function fetchConfidentialFlags() {
+  if (!props.proposal.space?.confidential) return;
+  try {
+    const network = getNetwork(props.proposal.network);
+    const provider = (network.helpers as any).getTransaction
+      ? (await import('@/helpers/provider')).getProvider(
+          network.chainId as number
+        )
+      : null;
+    if (!provider) return;
+    const { Contract } = await import('@ethersproject/contracts');
+    const abi = [
+      'function isQuorumReached(uint256) view returns (bool)',
+      'function isSupportAchieved(uint256) view returns (bool)'
+    ];
+    const space = new Contract(props.proposal.space.id, abi, provider);
+    const [q, s] = await Promise.all([
+      space.isQuorumReached(props.proposal.proposal_id),
+      space.isSupportAchieved(props.proposal.proposal_id)
+    ]);
+    onchainQuorumReached.value = q;
+    onchainSupportAchieved.value = s;
+  } catch (err) {
+    console.warn('Failed to read confidential flags from chain:', err);
+  }
+}
+
+// Without a contract event for `tryExecute`, the on-chain flag storage
+// `isQuorumReached(id)`/`isSupportAchieved(id)` defaults to (false, false)
+// — indistinguishable from "revealed and rejected". So we only display the
+// verdict once the proposal is past the active phase: either `executed`
+// (indexer saw ProposalExecuted = approved path) or its lifecycle has
+// concluded (passed/rejected/closed = voting window over). During active
+// voting, the verdict card stays hidden even though we could read the
+// (default-false) flags.
+const showVerdict = computed(() => {
+  if (!props.proposal.space?.confidential) return false;
+  if (revealedQuorumReached.value === null) return false;
+  if (revealedSupportAchieved.value === null) return false;
+  return ['executed', 'passed', 'rejected', 'closed', 'queued'].includes(
+    props.proposal.state
+  );
+});
+
 const placeholderResults = computed(() =>
   props.proposal.choices.map((_, i) => ({
     choice: i + 1,
@@ -135,6 +215,16 @@ async function refreshScores() {
 
 onMounted(() => {
   if (isFinalizing.value) refreshScores();
+  // Only fetch on-chain flags for proposals whose verdict is meaningful —
+  // see `showVerdict` for the criteria.
+  if (
+    props.proposal.space?.confidential &&
+    ['executed', 'passed', 'rejected', 'closed', 'queued'].includes(
+      props.proposal.state
+    )
+  ) {
+    fetchConfidentialFlags();
+  }
 });
 </script>
 
@@ -148,15 +238,51 @@ onMounted(() => {
   </div>
   <div
     v-else-if="
-      props.proposal.privacy !== 'none' &&
-      props.proposal.state === 'active' &&
+      isEncryptedTally &&
+      (props.proposal.state === 'active' ||
+        !!props.proposal.space?.confidential) &&
       withDetails
     "
     class="space-y-1"
   >
-    <div>
+    <div v-if="props.proposal.space?.confidential">
+      Per-choice tallies stay encrypted on-chain. Only the quorum and support
+      pass/fail flags are revealed when the proposal is executed.
+    </div>
+    <div v-else>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
+    </div>
+    <!-- Confidential reveal verdict — read from chain (or indexer when available). -->
+    <div v-if="showVerdict" class="border rounded-lg p-3 mt-2 space-y-1">
+      <div class="flex items-center gap-2 text-skin-link font-medium">
+        <IH-eye />
+        <span>Revealed verdict</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <IH-check v-if="revealedQuorumReached" class="text-emerald-500" />
+        <IH-x v-else class="text-rose-500" />
+        <span>
+          Quorum {{ revealedQuorumReached ? 'reached' : 'NOT reached' }}
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <IH-check v-if="revealedSupportAchieved" class="text-emerald-500" />
+        <IH-x v-else class="text-rose-500" />
+        <span>
+          Support
+          {{ revealedSupportAchieved ? '(For > Against)' : '(For ≤ Against)' }}
+        </span>
+      </div>
+      <div class="pt-1 font-semibold">
+        Outcome:
+        <span
+          v-if="revealedQuorumReached && revealedSupportAchieved"
+          class="text-emerald-500"
+          >Approved</span
+        >
+        <span v-else class="text-rose-500">Rejected</span>
+      </div>
     </div>
     <div v-if="proposal.quorum" class="flex items-center justify-between">
       <span class="text-skin-link">
@@ -211,7 +337,10 @@ onMounted(() => {
           class="grow"
         />
         <IH-lock-closed
-          v-if="proposal.privacy !== 'none' && !proposal.completed"
+          v-if="
+            (proposal.privacy !== 'none' && !proposal.completed) ||
+            !!proposal.space?.confidential
+          "
           class="size-[16px] shrink-0"
         />
         <template v-else>
