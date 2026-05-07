@@ -1,3 +1,13 @@
+// Polyfill Node `Buffer` global for the browser. `@inco/js`'s ECIES
+// encryption path uses Buffer internally and Vite externalizes `buffer` in
+// dev mode (production builds already inject via vite.config rolldown).
+import { Buffer } from 'buffer';
+
+if (typeof globalThis.Buffer === 'undefined') {
+  // @ts-expect-error - assigning Node typing onto window-like globalThis.
+  globalThis.Buffer = Buffer;
+}
+
 import { createTune } from '@snapshot-labs/tune';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
