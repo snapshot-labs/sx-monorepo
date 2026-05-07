@@ -65,6 +65,14 @@
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
+  "peerDependencies": {
+    "@inco/js": "^0.7.10"
+  },
+  "peerDependenciesMeta": {
+    "@inco/js": {
+      "optional": true
+    }
+  },
   "files": [
     "dist/**/*",
     "dist.cjs/**/*",
