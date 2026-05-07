@@ -59,6 +59,7 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
   - **Offchain spaces** — Snapshot spaces fetched from [snapshot-hub](https://github.com/snapshot-labs/snapshot-hub). Writes go through [snapshot-sequencer](https://github.com/snapshot-labs/snapshot-sequencer).
 - **Strategies** — voting power calculation (token balance, whitelist, cross-chain proofs)
 - **Executors** — onchain execution patterns (Safe, Timelock)
+- **Confidential voting (Inco)** — per-space `confidential` flag enables encrypted vote choices and attested-decryption execution via [`@inco/js`](https://www.npmjs.com/package/@inco/js). Active on Base Sepolia (chainId 84532). When touching `vote`/`execute` paths or the `Space` ABI, branch on `space.confidential` and read [`docs/CONFIDENTIAL_VOTING.md`](docs/CONFIDENTIAL_VOTING.md) first.
 
 ## Tooling
 
