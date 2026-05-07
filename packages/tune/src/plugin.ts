@@ -2,7 +2,11 @@ import type { InjectionKey, Plugin } from 'vue';
 import VueTippy from 'vue-tippy';
 
 export interface TuneOptions {
-  iframelyApiKey?: string;
+  /**
+   * URL of an endpoint that returns `{ title?, description?, icon? }` for a `?url=` query parameter.
+   * Used by `<UiLinkPreview>`. When unset, the component renders only the default fallback.
+   */
+  linkPreviewUrl?: string;
 }
 
 export const TUNE_OPTIONS_KEY: InjectionKey<TuneOptions> = Symbol('tune');
