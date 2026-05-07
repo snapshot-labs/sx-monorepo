@@ -155,6 +155,23 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
+  // Inco confidential reveal — populated by `DecisionFlagsRevealed` from
+  // `Space.tryExecute` (always, both approved + rejected paths). Once both
+  // flags are non-null the proposal is in a terminal state regardless of
+  // whether `executed` was set: approved means the contract ran the action
+  // and emitted ProposalExecuted (executed=true above), so this branch only
+  // catches the rejected case where neither path made `executed=true`.
+  if (
+    proposal.is_quorum_reached !== null &&
+    proposal.is_quorum_reached !== undefined &&
+    proposal.is_support_achieved !== null &&
+    proposal.is_support_achieved !== undefined
+  ) {
+    return proposal.is_quorum_reached && proposal.is_support_achieved
+      ? 'executed'
+      : 'rejected';
+  }
+
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
