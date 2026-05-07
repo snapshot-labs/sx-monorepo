@@ -55,6 +55,15 @@ async function getPropositionPower(space: Space, block: number | null) {
     )
   };
 
+  // Vanilla / "anyone can propose" validation: no voting-power strategies are
+  // attached, so there's nothing to compute and no threshold to clear.
+  // Without this short-circuit, the call below to getVotingPower would error
+  // (no strategies → no result) and leave the Publish button disabled.
+  if (!space.voting_power_validation_strategy_strategies.length) {
+    vpItem.canPropose = true;
+    return vpItem;
+  }
+
   if (vpItem.canPropose) {
     return vpItem;
   }
@@ -64,18 +73,29 @@ async function getPropositionPower(space: Space, block: number | null) {
     chainId: space.snapshot_chain_id
   };
 
-  const powers = await network.actions.getVotingPower(
-    space.id,
-    space.voting_power_validation_strategy_strategies,
-    space.voting_power_validation_strategy_strategies_params,
-    space.voting_power_validation_strategies_parsed_metadata,
-    account,
-    opts
-  );
+  try {
+    const powers = await network.actions.getVotingPower(
+      space.id,
+      space.voting_power_validation_strategy_strategies,
+      space.voting_power_validation_strategy_strategies_params,
+      space.voting_power_validation_strategies_parsed_metadata,
+      account,
+      opts
+    );
 
-  const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
-
-  vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
+    const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
+    vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
+  } catch (err) {
+    // Voting-power preview failed (commonly: confidential / Vanilla-validation
+    // spaces where the strategies aren't introspectable off-chain, or the
+    // chain RPC blipped). Defer to the on-chain validation strategy: let the
+    // user try to propose and fail at submit time if validation rejects.
+    console.warn(
+      'Proposition power preview failed; allowing propose anyway:',
+      err
+    );
+    vpItem.canPropose = true;
+  }
 
   return vpItem;
 }
