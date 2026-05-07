@@ -1,12 +1,10 @@
-import { Interface } from '@ethersproject/abi';
-import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
 import { WalletKit } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { APP_NAME } from '@/helpers/constants';
-import { getABI } from '@/helpers/etherscan';
+import { decodeCalldata } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { NetworkID, SelectedStrategy } from '@/types';
 
@@ -42,33 +40,15 @@ const connections: Ref<Record<string, ConnectionData | undefined>> = ref({});
 async function parseCall(chainId: number, call) {
   const params = call.params[0];
 
-  const abi = await getABI(chainId, params.to);
-  const iface = new Interface(abi);
-  const tx = iface.parseTransaction(params);
-
-  const abiFunction = iface.getFunction(tx.signature);
-
-  const args = Object.fromEntries(
-    abiFunction.inputs.map(input => {
-      const rawValue = tx.args[input.name];
-      let value = rawValue;
-      if (BigNumber.isBigNumber(rawValue)) {
-        value = rawValue.toString();
-      } else if (Array.isArray(rawValue)) {
-        value = rawValue.join(', ');
-      }
-
-      return [input.name, value];
-    })
-  );
+  const decoded = await decodeCalldata(chainId, params.to, params.data);
 
   return createContractCallTransaction({
     form: {
       to: params.to,
-      abi,
-      method: tx.signature,
+      abi: decoded.abi,
+      method: decoded.method,
       amount: formatUnits(params.value || 0),
-      args
+      args: decoded.args
     }
   });
 }
