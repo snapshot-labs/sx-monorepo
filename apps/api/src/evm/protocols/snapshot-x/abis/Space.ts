@@ -1420,5 +1420,19 @@ export default [
       { name: 'supportHandle', type: 'bytes32' }
     ],
     stateMutability: 'view'
+  },
+  // Always emitted by `tryExecute` after the encrypted decision flags are
+  // decrypted and stored — covers both approved and rejected paths.
+  // Non-Inco Spaces never emit this; topic-0 is unique to this signature so
+  // there's no listener collision on legacy networks.
+  {
+    type: 'event',
+    name: 'DecisionFlagsRevealed',
+    inputs: [
+      { name: 'proposalId', type: 'uint256', indexed: true },
+      { name: 'quorumReached', type: 'bool', indexed: false },
+      { name: 'supportAchieved', type: 'bool', indexed: false }
+    ],
+    anonymous: false
   }
 ] as const;
