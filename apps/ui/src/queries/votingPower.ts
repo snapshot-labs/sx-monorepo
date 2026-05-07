@@ -84,7 +84,15 @@ export async function getVotingPower(
     ) {
       throw new Error('NOT_READY_YET');
     }
-    throw err;
+    // Graceful degradation for confidential / Vanilla-strategy spaces where
+    // off-chain VP computation isn't possible. Assume canVote=true; the
+    // on-chain voting strategy is the source of truth at submit time.
+    console.warn('Voting power preview failed; allowing vote anyway:', err);
+    return {
+      symbol: space.voting_power_symbol,
+      votingPowers: [],
+      canVote: true
+    };
   }
 }
 
