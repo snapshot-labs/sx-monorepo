@@ -98,11 +98,12 @@ function createIncoConfig(
     Strategies: {
       Vanilla: additionalProperties.strategies.Vanilla,
       // Snapshot-X-canonical strategies aren't deployed on Inco yet. Use
-      // distinct sentinel addresses so `createEvmConfig`'s type registry
-      // doesn't collapse them onto the Vanilla address (which would otherwise
-      // mis-register Vanilla as `type: 'whitelist'` due to last-write-wins on
-      // the shared key).
-      Comp: '0x0000000000000000000000000000000000000C01',
+      // distinct (lowercase, never-checksummed) sentinel addresses so
+      // `createEvmConfig`'s type registry doesn't collapse them onto the
+      // Vanilla address — last-write-wins on a shared key would otherwise
+      // mis-register Vanilla as `type: 'whitelist'`. They are dead keys and
+      // are never used as actual contract addresses.
+      Comp: '0x0000000000000000000000000000000000000c01',
       OZVotes: '0x0000000000000000000000000000000000000c02',
       Whitelist: '0x0000000000000000000000000000000000000c03',
       ApeGas: undefined as string | undefined
