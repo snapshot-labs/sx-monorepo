@@ -41,15 +41,20 @@ export async function getTokensMetadata(chainId: string, tokens: string[]) {
   });
 
   if (bytes32Multi.calls.length) {
-    const fallback = await bytes32Multi.execute({ allowFailure: true });
-    tokens.forEach(token => {
-      result[token].name =
-        result[token].name ||
-        (fallback[token]?.name && parseBytes32String(fallback[token].name));
-      result[token].symbol =
-        result[token].symbol ||
-        (fallback[token]?.symbol && parseBytes32String(fallback[token].symbol));
-    });
+    try {
+      const fallback = await bytes32Multi.execute({ allowFailure: true });
+      tokens.forEach(token => {
+        result[token].name =
+          result[token].name ||
+          (fallback[token]?.name && parseBytes32String(fallback[token].name));
+        result[token].symbol =
+          result[token].symbol ||
+          (fallback[token]?.symbol &&
+            parseBytes32String(fallback[token].symbol));
+      });
+    } catch {
+      // bytes32 fallback is best-effort; ignore decode/RPC errors.
+    }
   }
 
   return tokens.map(token => ({
