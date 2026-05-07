@@ -651,12 +651,22 @@ export function createActions(
       // sx.js when `Vote.ciphertext` is set. The ciphertext must be bound to
       // the *voter* (not msg.sender), since EthSigAuthenticator forwards into
       // Space.vote() and msg.sender there is the authenticator.
+      //
+      // CRITICAL: derive the voter from `signer.getAddress()` rather than the
+      // web3 store `account` so the encryption binding matches the address
+      // sx.js encodes into the on-chain vote() call. Any drift (case, stale
+      // store) makes the contract's `ciphertext.newEuint256(voter)` produce a
+      // junk handle — userChoice ends up != 1, the For accumulator never
+      // increments, and tryExecute decrypts (false, false) → looks identical
+      // to a rejected proposal. See snapshotx/inco-base-sepolia-runner
+      // negative-cases.ts `wrongCiphertextOwnerCase`.
       let ciphertext: string | undefined;
       if (isConfidentialSpace(proposal.space, chainId)) {
         const { encryptChoice } = await import('@/helpers/inco');
+        const voterAddress = await signer.getAddress();
         ciphertext = await encryptChoice({
           space: proposal.space.id,
-          voter: account,
+          voter: voterAddress,
           choice: sdkChoice
         });
       }
