@@ -1368,5 +1368,57 @@ export default [
     type: 'error',
     name: 'ZeroAddress',
     inputs: []
+  },
+  // ─── Inco confidential-voting variants ────────────────────────────────────
+  // Different topic-0 from the legacy `VoteCast` (no `choice` arg). Both
+  // signatures coexist in the ABI so a single Space template can subscribe to
+  // either depending on whether the proxy implements the Inco-master Space.
+  // Inco confidential variants share the legacy `VoteCast` event name but
+  // drop the `choice` arg → different topic-0 hash from the legacy variants.
+  // viem decodes by topic-0 so overloaded names are fine.
+  {
+    type: 'event',
+    name: 'VoteCast',
+    inputs: [
+      { name: 'proposalId', type: 'uint256', indexed: false },
+      { name: 'voter', type: 'address', indexed: false },
+      { name: 'votingPower', type: 'uint256', indexed: false }
+    ],
+    anonymous: false
+  },
+  {
+    type: 'event',
+    name: 'VoteCastWithMetadata',
+    inputs: [
+      { name: 'proposalId', type: 'uint256', indexed: false },
+      { name: 'voter', type: 'address', indexed: false },
+      { name: 'votingPower', type: 'uint256', indexed: false },
+      { name: 'metadataUri', type: 'string', indexed: false }
+    ],
+    anonymous: false
+  },
+  {
+    type: 'function',
+    name: 'isQuorumReached',
+    inputs: [{ name: 'proposalId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'view'
+  },
+  {
+    type: 'function',
+    name: 'isSupportAchieved',
+    inputs: [{ name: 'proposalId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'view'
+  },
+  {
+    type: 'function',
+    name: 'getQuorumAndSupportHandles',
+    inputs: [{ name: 'proposalId', type: 'uint256' }],
+    outputs: [
+      { name: 'quorumHandle', type: 'bytes32' },
+      { name: 'supportHandle', type: 'bytes32' }
+    ],
+    stateMutability: 'view'
   }
 ] as const;
