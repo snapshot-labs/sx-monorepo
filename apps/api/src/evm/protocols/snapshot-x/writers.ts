@@ -243,6 +243,11 @@ export function createWriters(
 
     const space = new Space(id, config.indexerName);
     space.protocol = 'snapshot-x';
+    // basesep only hosts Inco confidential Spaces — flag at SpaceCreated time
+    // so the UI lock-icon path triggers immediately, before any vote arrives.
+    // The lazy flip in handleConfidentialVoteCast still acts as a backstop for
+    // legacy spaces that predate this assignment.
+    space.confidential = config.indexerName === 'basesep';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -991,57 +996,42 @@ export function createWriters(
       }
     }
 
-    // Confidential-voting reveal: tryExecute on the Inco Space sets
-    // isQuorumReached/isSupportAchieved before emitting ProposalExecuted, so
-    // those flags are readable now. Other Spaces don't expose these views;
-    // the call will revert and we leave the fields null.
-    //
-    // Skip the entity load on chains we know have no Inco deployment — saves
-    // one DB round-trip per execution event for every legacy SX chain.
-    const space =
-      config.indexerName === 'basesep'
-        ? await Space.loadEntity(spaceId, config.indexerName)
-        : null;
-    if (space?.confidential) {
-      try {
-        // Two direct readContract calls instead of multicall — the publicClient
-        // doesn't have a `chain` configured so viem can't auto-resolve a
-        // Multicall3 address for Base Sepolia.
-        const [quorumReached, supportAchieved] = (await Promise.all([
-          client.readContract({
-            address: spaceId as `0x${string}`,
-            abi: SpaceAbi,
-            functionName: 'isQuorumReached',
-            args: [event.args.proposalId]
-          }),
-          client.readContract({
-            address: spaceId as `0x${string}`,
-            abi: SpaceAbi,
-            functionName: 'isSupportAchieved',
-            args: [event.args.proposalId]
-          })
-        ])) as [boolean, boolean];
+    // Confidential-voting Space.tryExecute fires `DecisionFlagsRevealed`
+    // before `ProposalExecuted` on the approved path, so the flags +
+    // settlement fields are already on the entity. Nothing extra to do here.
 
-        proposal.is_quorum_reached = quorumReached;
-        proposal.is_support_achieved = supportAchieved;
-      } catch (err) {
-        logger.warn(
-          { err, proposalId },
-          'Failed to read decrypted decision flags from confidential Space'
-        );
-      }
+    await proposal.save();
+  };
 
-      // Inco confidential proposals don't use timelock/queue settlement —
-      // tryExecute is atomic. Mark the proposal as settled here so the UI's
-      // state machine doesn't report 'queued' (which would otherwise happen
-      // because no ExecutionStrategy entity exists for the Vanilla singleton
-      // we use as the default executor).
-      proposal.execution_settled = true;
-      proposal.completed = true;
-      proposal.execution_tx = txId;
-      proposal.executed_at = BigInt(now);
-      proposal.executed_at_block_number = BigInt(blockNumber);
-    }
+  // Inco confidential reveal. Always emitted by `Space.tryExecute` (approved
+  // OR rejected path) so the indexer can persist the verdict without polling
+  // on-chain views. Non-Inco Spaces never emit this event — the topic-0 is
+  // unique to this signature, so legacy chains see no traffic and incur no
+  // cost from the subscription.
+  const handleDecisionFlagsRevealed: evm.Writer<
+    typeof SpaceAbi,
+    'DecisionFlagsRevealed'
+  > = async ({ block, blockNumber, txId, rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    const now = Number(block?.timestamp ?? getCurrentTimestamp());
+
+    proposal.is_quorum_reached = event.args.quorumReached;
+    proposal.is_support_achieved = event.args.supportAchieved;
+    // Mark settlement here so the UI doesn't park rejected proposals in the
+    // 'queued' state (no ExecutionStrategy entity exists for the Vanilla
+    // singleton confidential spaces use as their default executor — without
+    // this the lifecycle state stays Pending until max_end).
+    proposal.execution_settled = true;
+    proposal.completed = true;
+    proposal.execution_tx = txId;
+    proposal.executed_at = BigInt(now);
+    proposal.executed_at_block_number = BigInt(blockNumber);
 
     await proposal.save();
   };
@@ -1432,6 +1422,7 @@ export function createWriters(
     handleProposalCancelled,
     handleProposalUpdated,
     handleProposalExecuted,
+    handleDecisionFlagsRevealed,
     handleVoteCast,
     handleConfidentialVoteCast,
     // SimpleQuorumTimelockExecutionStrategy

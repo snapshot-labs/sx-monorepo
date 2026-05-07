@@ -35,16 +35,6 @@ const START_BLOCKS: Record<NetworkID, number> = {
     : BASESEP_DEFAULT_START
 };
 
-/**
- * Pre-factory Spaces. The Phase-0 demo Space on Base Sepolia
- * (0xCb8eB47d52286c0FC1b5a0F4e0720f2e7Db077AC) was deployed directly before
- * the ProxyFactory existed, so the indexer can't see it via `ProxyDeployed`.
- * Listed here so its events flow through the same Space template subscription.
- *
- * Going forward, new Inco Spaces should be deployed via the factory at
- * 0x06A0C3b26C13B444FEDb3B2988892E359DCb8b06 — those will be picked up
- * automatically and don't need to be added here.
- */
 const STATIC_INCO_SPACES: Partial<Record<NetworkID, string[]>> = {
   basesep: ['0xcb8eB47d52286c0fc1B5A0F4e0720f2E7db077Ac']
 };
@@ -102,6 +92,14 @@ const SPACE_TEMPLATE_EVENTS = [
     fn: 'handleProposalUpdated'
   },
   { name: 'ProposalExecuted(uint256)', fn: 'handleProposalExecuted' },
+  // Inco confidential reveal — fires from `tryExecute` regardless of
+  // outcome (approved or rejected). Carries the decrypted flags so the
+  // indexer can persist the verdict without polling on-chain reads.
+  // Non-Inco Spaces never emit this; safe no-op on legacy networks.
+  {
+    name: 'DecisionFlagsRevealed(uint256,bool,bool)',
+    fn: 'handleDecisionFlagsRevealed'
+  },
   // Legacy plaintext-choice VoteCasts.
   { name: 'VoteCast(uint256,address,uint8,uint256)', fn: 'handleVoteCast' },
   {
