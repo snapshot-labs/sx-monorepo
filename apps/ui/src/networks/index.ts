@@ -38,7 +38,10 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'ape',
       'curtis',
       'sep',
-      'basesep',
+      // basesep (Inco confidential demo) is intentionally opt-in. There's
+      // no hosted indexer yet, so production builds would render a network
+      // entry pointing at a localhost URL. Add via VITE_ENABLED_NETWORKS
+      // when running the Inco demo locally.
       'sn',
       'sn-sep'
     ];
