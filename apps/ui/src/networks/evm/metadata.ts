@@ -84,5 +84,15 @@ export const METADATA: Record<string, Metadata> = {
     chainId: 11155111,
     apiUrl: API_TESTNET_URL,
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
+  },
+  basesep: {
+    name: 'Base Sepolia (Inco)',
+    chainId: 84532,
+    // Inco demo runs against a local indexer by default. Override with
+    // VITE_BASESEP_API_URL once a hosted indexer is published.
+    apiUrl:
+      import.meta.env.VITE_BASESEP_API_URL ||
+      'http://localhost:3000',
+    avatar: 'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri'
   }
 };

@@ -412,6 +412,7 @@ function formatProposal(
         proposal.space.strategies_parsed_metadata,
         proposal.strategies_indices
       ),
+      confidential: proposal.space.confidential ?? undefined,
       terms: ''
     },
     author: {
@@ -435,6 +436,8 @@ function formatProposal(
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
       : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    is_quorum_reached: proposal.is_quorum_reached ?? null,
+    is_support_achieved: proposal.is_support_achieved ?? null,
     state,
     network: networkId,
     privacy: 'none',
