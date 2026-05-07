@@ -15,12 +15,13 @@ type CallsStatusResponse = {
   receipts: { transactionHash: string }[];
 };
 
-const STATUS_CONFIRMED = 200;
-
 type CapabilitiesResponse = Record<
   string,
   { atomic?: { status?: AtomicStatus } }
 >;
+
+const STATUS_CONFIRMED_MIN = 200;
+const STATUS_FAILURE_MIN = 400;
 
 export async function hasAtomicBatchSupport(
   provider: Pick<Web3Provider, 'send'>,
@@ -74,14 +75,14 @@ export async function waitForCallsBundle(
       bundleId
     ])) as CallsStatusResponse;
 
-    if (result.status >= STATUS_CONFIRMED && result.status < 300) {
+    if (result.status >= STATUS_CONFIRMED_MIN && result.status < 300) {
       const hash = result.receipts[0]?.transactionHash;
       if (!hash) throw new Error('Bundle confirmed but no receipts returned');
 
       return hash;
     }
 
-    if (result.status >= 400) {
+    if (result.status >= STATUS_FAILURE_MIN) {
       throw new Error(`Bundle execution failed (status ${result.status})`);
     }
 
