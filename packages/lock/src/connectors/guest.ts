@@ -27,12 +27,7 @@ class GuestProvider extends EventEmitter {
       case 'eth_accounts':
         return [this.selectedAddress];
       case 'wallet_switchEthereumChain': {
-        // Allow the chain switch to succeed for guest sessions: nothing
-        // safety-critical reads the guest's chainId, and rejecting here would
-        // surface a misleading "wallet not supported" error from the network
-        // verification path. The actual "guest can't do this" rejection
-        // happens at sign time when eth_signTypedData_v4 / eth_sendTransaction
-        // hit the default branch.
+        // EIP-3326: update chainId, emit chainChanged, return null.
         const newChainId = Number(args.params?.[0]?.chainId);
         if (Number.isFinite(newChainId) && newChainId !== this.chainId) {
           this.chainId = newChainId;
