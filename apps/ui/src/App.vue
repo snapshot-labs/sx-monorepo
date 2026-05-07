@@ -10,7 +10,7 @@ import whiteLabelRoutes from '@/routes/whiteLabel';
 
 const route = useRoute();
 const router = useRouter();
-const { app, isAuctionApp } = useApp();
+const { app } = useApp();
 const {
   init: initWhiteLabel,
   isWhiteLabel,
@@ -53,7 +53,7 @@ watchEffect(() => setTitle(app.value.app_name));
 watch(
   whiteLabelResolved,
   resolved => {
-    if (!resolved || isAuctionApp.value) return;
+    if (!resolved) return;
 
     if (isCustomDomain.value && !whiteLabelFailed.value) {
       mountCustomDomainRoutes();
@@ -68,9 +68,9 @@ onMounted(() => initWhiteLabel());
 <template>
   <div class="max-w-maximum mx-auto">
     <ElectronTitlebar />
-    <LayoutSplash v-if="!whiteLabelResolved && !isAuctionApp" />
+    <LayoutSplash v-if="!whiteLabelResolved" />
     <LayoutSite v-else-if="routeName === 'site'" />
     <LayoutApp v-else />
-    <AppFooter v-if="!isAuctionApp" />
+    <AppFooter />
   </div>
 </template>

@@ -1,5 +1,4 @@
 import { FunctionalComponent } from 'vue';
-import { SellOrder } from '@/helpers/auction';
 import { getChoiceText } from '@/helpers/utils';
 import { Choice, Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
@@ -10,8 +9,8 @@ type SocialNetwork = 'x' | 'lens' | 'farcaster';
 type SpaceUser = { user: User; space: Space };
 export type Vote = { proposal: Proposal; choice: Choice };
 
-export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote' | 'bid';
-export type Payload = Proposal | User | SpaceUser | Vote | SellOrder;
+export type PayloadType = 'proposal' | 'user' | 'space-user' | 'vote';
+export type Payload = Proposal | User | SpaceUser | Vote;
 
 const SOCIAL_NETWORKS: {
   id: SocialNetwork;
@@ -70,8 +69,6 @@ export function useSharing() {
         return getProposalMessage(payload as Proposal);
       case 'vote':
         return getVoteMessage(payload as Vote);
-      case 'bid':
-        return getBidMessage(payload as SellOrder);
       default:
         throw new Error('Invalid shareable object');
     }
@@ -87,10 +84,6 @@ export function useSharing() {
 
   function getSpaceUserMessage(spaceUser: SpaceUser): string {
     return getSpaceUserUrl(spaceUser);
-  }
-
-  function getBidMessage(sellOrder: SellOrder): string {
-    return `Just joined the $${sellOrder.auction.symbolAuctioningToken} auction with a bid!`;
   }
 
   function getVoteMessage(payload: Vote) {
@@ -116,7 +109,7 @@ export function useSharing() {
 
     if (type === 'vote' && socialNetwork === 'x') {
       message += `%20%23${app.value.app_name}`;
-    } else if (socialNetwork === 'lens' && type !== 'bid') {
+    } else if (socialNetwork === 'lens') {
       message += `&hashtags=${app.value.app_name}`;
     }
 

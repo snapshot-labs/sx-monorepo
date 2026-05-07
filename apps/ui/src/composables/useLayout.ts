@@ -1,30 +1,13 @@
-const AUCTION_ROUTES = [
-  'auctions',
-  'auction',
-  'auction-verify-standalone',
-  'auction-verify',
-  'auction-invite'
-];
-
 export function useLayout() {
   const route = useRoute();
   const { isWhiteLabel } = useWhiteLabel();
-  const { isAuctionApp } = useApp();
 
   const isStandaloneLayout = computed(() => {
-    if (isWhiteLabel.value || isAuctionApp.value) return true;
+    if (isWhiteLabel.value) return true;
 
-    const routeName = route.matched[0]?.name?.toString();
     const currentRouteName = route.name?.toString();
 
-    if (routeName) {
-      return (
-        AUCTION_ROUTES.includes(routeName) ||
-        currentRouteName === 'settings-alias-authorize'
-      );
-    }
-
-    return false;
+    return currentRouteName === 'settings-alias-authorize';
   });
 
   return { isStandaloneLayout };
