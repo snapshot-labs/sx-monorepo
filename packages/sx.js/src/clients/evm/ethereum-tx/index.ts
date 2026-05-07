@@ -7,6 +7,7 @@ import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy.json';
 import IsokratiaExecutionStrategyAbi from './abis/IsokratiaExecutionStrategy.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
+import SpaceIncoAbi from './abis/Space.inco.json';
 import SpaceAbi from './abis/Space.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import { getAuthenticator } from '../../../authenticators/evm';
@@ -553,11 +554,14 @@ export class EthereumTx {
       this.config
     );
 
-    const spaceInterface = new Interface(SpaceAbi);
+    const isConfidential = !!envelope.data.ciphertext;
+    const spaceInterface = new Interface(
+      isConfidential ? SpaceIncoAbi : SpaceAbi
+    );
     const functionData = spaceInterface.encodeFunctionData('vote', [
       voterAddress,
       envelope.data.proposal,
-      envelope.data.choice,
+      isConfidential ? envelope.data.ciphertext : envelope.data.choice,
       userVotingStrategies,
       envelope.data.metadataUri
     ]);
@@ -609,6 +613,84 @@ export class EthereumTx {
       executionParams,
       this.defaultTransactionOverrides
     );
+
+    return opts.noWait ? null : promise;
+  }
+
+  /**
+   * Confidential-mode execute. Submits attested decryptions for the proposal's
+   * encrypted quorum + support flags so the on-chain Space can verify and (if both
+   * decrypted to true) finalize the proposal. Use only against Inco-flavored Spaces;
+   * non-confidential spaces don't have this method and will revert.
+   *
+   * Pass `{handle, value}` attestations and covalidator signatures from
+   * `inco.decryptHandles(...)`.
+   */
+  async tryExecute(
+    {
+      signer,
+      space,
+      proposal,
+      executionParams,
+      quorumAttestation,
+      quorumSignatures,
+      supportAttestation,
+      supportSignatures
+    }: {
+      signer: Signer;
+      space: string;
+      proposal: number;
+      executionParams: string;
+      quorumAttestation: { handle: string; value: string };
+      quorumSignatures: string[];
+      supportAttestation: { handle: string; value: string };
+      supportSignatures: string[];
+    },
+    opts: CallOptions = {}
+  ) {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.tryExecute(
+      proposal,
+      executionParams,
+      quorumAttestation,
+      quorumSignatures,
+      supportAttestation,
+      supportSignatures,
+      this.defaultTransactionOverrides
+    );
+
+    return opts.noWait ? null : promise;
+  }
+
+  /** Read both encrypted decision-flag handles for a proposal. */
+  async getQuorumAndSupportHandles({
+    signer,
+    space,
+    proposal
+  }: {
+    signer: Signer;
+    space: string;
+    proposal: number;
+  }): Promise<[string, string]> {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const [q, s] = await spaceContract.getQuorumAndSupportHandles(proposal);
+    return [q, s];
+  }
+
+  /** Top up a confidential Space with ETH so it can pay Inco compute fees. */
+  async fundSpace(
+    {
+      signer,
+      space,
+      amount
+    }: { signer: Signer; space: string; amount: string },
+    opts: CallOptions = {}
+  ) {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.fund({
+      ...this.defaultTransactionOverrides,
+      value: amount
+    });
 
     return opts.noWait ? null : promise;
   }
