@@ -84,15 +84,24 @@ export async function getVotingPower(
     ) {
       throw new Error('NOT_READY_YET');
     }
-    // Graceful degradation for confidential / Vanilla-strategy spaces where
-    // off-chain VP computation isn't possible. Assume canVote=true; the
-    // on-chain voting strategy is the source of truth at submit time.
-    console.warn('Voting power preview failed; allowing vote anyway:', err);
-    return {
-      symbol: space.voting_power_symbol,
-      votingPowers: [],
-      canVote: true
-    };
+    // Confidential (Inco) Spaces use Vanilla voting strategies that aren't
+    // introspectable off-chain — preview always fails. Fall back to
+    // canVote=true so the user can submit; the on-chain validation strategy
+    // gates the actual vote tx. For every other network, surface the error
+    // as before — silently masking RPC blips on mainnet would let users
+    // burn gas on a vote that the contract will reject.
+    if (space.network === 'basesep') {
+      console.warn(
+        'Voting power preview failed for confidential space; allowing vote:',
+        err
+      );
+      return {
+        symbol: space.voting_power_symbol,
+        votingPowers: [],
+        canVote: true
+      };
+    }
+    throw err;
   }
 }
 
