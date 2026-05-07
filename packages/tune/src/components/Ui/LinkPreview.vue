@@ -18,13 +18,9 @@ const props = withDefaults(
 );
 
 type Preview = {
-  meta: {
-    title?: string;
-    description?: string;
-  };
-  links: {
-    icon: { href: string }[];
-  };
+  title?: string;
+  description?: string;
+  icon?: string;
 };
 
 const options = inject(TUNE_OPTIONS_KEY, {});
@@ -45,22 +41,20 @@ async function isImageUrlValid(url: string): Promise<boolean> {
 }
 
 async function update(val: string) {
-  if (!options.iframelyApiKey) return;
+  if (!options.linkPreviewUrl) return;
 
   try {
     preview.value = null;
     previewLoading.value = true;
     new URL(val);
-    const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
-      val
-    )}&api_key=${options.iframelyApiKey}`;
-    const result = await fetch(url);
+    const result = await fetch(
+      `${options.linkPreviewUrl}?url=${encodeURIComponent(val)}`
+    );
+    if (!result.ok) return;
     preview.value = await result.json();
 
-    if (preview.value?.links?.icon[0]?.href) {
-      previewIconResolved.value = await isImageUrlValid(
-        preview.value.links.icon[0].href
-      );
+    if (preview.value?.icon) {
+      previewIconResolved.value = await isImageUrlValid(preview.value.icon);
     }
   } catch {
   } finally {
@@ -77,31 +71,31 @@ debouncedWatch(
 
 <template>
   <div
-    v-if="preview?.meta?.title || (showDefault && !previewLoading)"
+    v-if="preview?.title || (showDefault && !previewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
     :class="{
       'gap-2': showDefault,
-      '!gap-4': preview?.meta?.title || previewIconResolved
+      '!gap-4': preview?.title || previewIconResolved
     }"
   >
-    <template v-if="preview && (preview?.meta?.title || previewIconResolved)">
+    <template v-if="preview && (preview.title || previewIconResolved)">
       <img
-        v-if="previewIconResolved"
-        :src="preview.links.icon[0]?.href"
+        v-if="previewIconResolved && preview.icon"
+        :src="preview.icon"
         width="32"
         height="32"
         class="bg-white rounded shrink-0"
-        :alt="preview.meta.title"
+        :alt="preview.title"
       />
       <div class="flex flex-col truncate">
         <div
           class="text-skin-link truncate"
-          v-text="preview.meta.title || props.url"
+          v-text="preview.title || props.url"
         />
         <div
-          v-if="preview.meta.description"
+          v-if="preview.description"
           class="text-[17px] text-skin-text truncate"
-          v-text="preview.meta.description"
+          v-text="preview.description"
         />
       </div>
     </template>

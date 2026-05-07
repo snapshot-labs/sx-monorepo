@@ -21,7 +21,7 @@ setup(app => {
     })
   );
 
-  app.use(createTune({ iframelyApiKey: 'd155718c86be7d5305ccb6' }));
+  app.use(createTune({ linkPreviewUrl: 'https://sh5.co/api/og' }));
 });
 
 export const decorators: Decorator[] = [
