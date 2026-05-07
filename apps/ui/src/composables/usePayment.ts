@@ -1,6 +1,14 @@
+import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { MaybeRefOrGetter } from 'vue';
+import { abis } from '@/helpers/abis';
+import {
+  Eip5792Call,
+  hasAtomicBatchSupport,
+  sendBatchedCalls,
+  waitForCallsBundle
+} from '@/helpers/eip5792';
 import { approve as approveToken, getTokenAllowance } from '@/helpers/token';
 import { verifyNetwork } from '@/helpers/walletNetworks';
 import { ChainId } from '@/types';
@@ -117,9 +125,66 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
     );
   }
 
+  async function getHasBatchSupport(): Promise<boolean> {
+    if (!auth.value) return false;
+
+    return hasAtomicBatchSupport(
+      auth.value.provider,
+      auth.value.account,
+      Number(toValue(network))
+    );
+  }
+
+  async function batchedApproveAndPay(
+    token: Token,
+    amount: number,
+    barcode: string
+  ): Promise<{ hash: string }> {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      throw new Error('wallet not connected');
+    }
+
+    await verifyNetwork(auth.value.provider, Number(toValue(network)));
+
+    const spender = PAYMENT_CONTRACT_ADDRESSES[toValue(network)];
+    const weiAmount = getWeiAmount(token, amount);
+
+    const erc20 = new Interface(abis.erc20);
+    const payment = new Interface(PAYMENT_CONTRACT_ABI);
+
+    const calls: Eip5792Call[] = [
+      {
+        to: token.contractAddress,
+        data: erc20.encodeFunctionData('approve', [spender, weiAmount])
+      },
+      {
+        to: spender,
+        data: payment.encodeFunctionData('payWithERC20Token', [
+          token.contractAddress,
+          weiAmount,
+          barcode
+        ])
+      }
+    ];
+
+    const bundleId = await sendBatchedCalls(
+      auth.value.provider,
+      auth.value.account,
+      Number(toValue(network)),
+      calls
+    );
+
+    const hash = await waitForCallsBundle(auth.value.provider, bundleId);
+
+    return { hash };
+  }
+
   return {
     getIsApproved,
+    getHasBatchSupport,
     approve,
-    pay
+    pay,
+    batchedApproveAndPay
   };
 }
