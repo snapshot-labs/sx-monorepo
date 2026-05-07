@@ -25,4 +25,14 @@ describe('getTokensMetadata', () => {
       }
     ]);
   });
+
+  it('should resolve symbol for legacy bytes32 tokens (e.g. AVT)', async () => {
+    const [avt] = await getTokensMetadata('1', [
+      '0x0d88ed6e74bbfd96b831231638b66c05571e824f'
+    ]);
+
+    expect(avt.address).toBe('0x0d88ed6e74bbfd96b831231638b66c05571e824f');
+    expect(avt.symbol).toBe('AVT');
+    expect(avt.decimals).toBe(18);
+  });
 });
