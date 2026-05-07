@@ -228,7 +228,8 @@ export const evmNetworks = {
     // shared SX factory exists for Inco yet). Tx hash recorded in
     // INTEGRATION_PROGRESS.md §7.
     proxyFactory: '0x06a0c3B26C13B444fEdb3B2988892E359dCb8B06',
-    masterSpace: '0xcb8eB47d52286c0fc1B5A0F4e0720f2E7db077Ac',
+    // Master Space implementation.
+    masterSpace: '0xA501B7D9B1e353C573a7497e3ECF5d15f4c25caA',
     authenticators: {
       EthSig: '0x009ABB61d7E868aEf944F133Ca104e24FC3D5162',
       EthTx: '0x67a7d86F6c8B3E7FF3063D26A28D58e989850e4D'
