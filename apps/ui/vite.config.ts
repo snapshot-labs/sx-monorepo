@@ -83,7 +83,10 @@ export default defineConfig({
       stream: require.resolve('stream-browserify'),
       events: require.resolve('events'),
       util: require.resolve('util'),
-      buffer: require.resolve('buffer')
+      buffer: require.resolve('buffer'),
+      // `@inco/js`'s ECIES path imports `crypto` (Node) — alias to a browser
+      // shim. Same goes for the rolldown inject in the build target.
+      crypto: require.resolve('crypto-browserify')
     },
     dedupe: ['@popperjs/core']
   }
