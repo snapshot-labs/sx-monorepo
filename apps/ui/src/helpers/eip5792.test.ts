@@ -1,5 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { hasAtomicBatchSupport } from './eip5792';
+import {
+  Eip5792Call,
+  hasAtomicBatchSupport,
+  sendBatchedCalls,
+  waitForCallsBundle
+} from './eip5792';
 
 function makeProvider(response: unknown, error?: Error) {
   return {
@@ -58,5 +63,75 @@ describe('hasAtomicBatchSupport', () => {
     expect(await hasAtomicBatchSupport(provider as any, '0xabc', 1)).toBe(
       false
     );
+  });
+});
+
+describe('sendBatchedCalls', () => {
+  it('sends wallet_sendCalls with hex chain id and returns the bundle id', async () => {
+    const provider = makeProvider({ id: '0xBUNDLE' });
+
+    const calls: Eip5792Call[] = [
+      { to: '0xToken', data: '0xapprove' },
+      { to: '0xPay', data: '0xpay' }
+    ];
+
+    const bundleId = await sendBatchedCalls(
+      provider as any,
+      '0xACCOUNT',
+      1,
+      calls
+    );
+
+    expect(bundleId).toBe('0xBUNDLE');
+    expect(provider.send).toHaveBeenCalledWith('wallet_sendCalls', [
+      {
+        version: '2.0.0',
+        chainId: '0x1',
+        from: '0xACCOUNT',
+        atomicRequired: true,
+        calls
+      }
+    ]);
+  });
+
+  it('accepts a string bundle id (legacy wallet shape)', async () => {
+    const provider = makeProvider('0xLEGACY');
+
+    const bundleId = await sendBatchedCalls(
+      provider as any,
+      '0xACCOUNT',
+      1,
+      []
+    );
+
+    expect(bundleId).toBe('0xLEGACY');
+  });
+});
+
+describe('waitForCallsBundle', () => {
+  it('polls until status is CONFIRMED and returns the first tx hash', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValueOnce({ status: 100, receipts: [] })
+      .mockResolvedValueOnce({
+        status: 200,
+        receipts: [{ transactionHash: '0xTX1' }, { transactionHash: '0xTX2' }]
+      });
+
+    const hash = await waitForCallsBundle({ send } as any, '0xBUNDLE', {
+      pollIntervalMs: 0
+    });
+
+    expect(hash).toBe('0xTX1');
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledWith('wallet_getCallsStatus', ['0xBUNDLE']);
+  });
+
+  it('throws when status indicates failure', async () => {
+    const send = vi.fn().mockResolvedValue({ status: 500, receipts: [] });
+
+    await expect(
+      waitForCallsBundle({ send } as any, '0xBUNDLE', { pollIntervalMs: 0 })
+    ).rejects.toThrow(/failed/i);
   });
 });
