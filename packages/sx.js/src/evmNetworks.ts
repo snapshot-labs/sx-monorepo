@@ -182,6 +182,30 @@ export const evmNetworks = {
     strategies: {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
+  }),
+  // Base Sepolia Inco confidential reference deployment.
+  basesep: createStandardConfig(84532, {
+    blockTime: 2,
+    proxyFactory: '0x06a0c3B26C13B444fEdb3B2988892E359dCb8B06',
+    masterSpace: '0xcb8eB47d52286c0fc1B5A0F4e0720f2E7db077Ac',
+    authenticators: {
+      EthSig: null,
+      EthSigV2: null,
+      EthTx: '0x67a7d86F6c8B3E7FF3063D26A28D58e989850e4D'
+    },
+    strategies: {
+      Vanilla: '0x5513d0e1b3E273d9373f3D4Cfbb8f1940556EDd2',
+      Comp: null,
+      OZVotes: null,
+      Whitelist: null
+    },
+    proposalValidations: {
+      VotingPower: '0x18aE195EaA8E8D9Cc387CC13Db5727357BF9f4d7'
+    },
+    executionStrategies: {
+      SimpleQuorumAvatar: '0x7Ddcb1F2Ca1b1079Ad4BeeA2aDD0A7D792e16143',
+      SimpleQuorumTimelock: null
+    }
   })
 } as const;
 
@@ -196,3 +220,4 @@ export const evmBnb = createEvmConfig(evmNetworks.bnb);
 export const evmBnbt = createEvmConfig(evmNetworks.bnbt);
 export const evmApe = createEvmConfig(evmNetworks.ape);
 export const evmCurtis = createEvmConfig(evmNetworks.curtis);
+export const evmBaseSepolia = createEvmConfig(evmNetworks.basesep);
