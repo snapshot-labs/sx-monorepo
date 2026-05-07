@@ -61,6 +61,8 @@ type Space {
   "Parsed metadata for voting power validation strategies"
   voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  "Inco confidential-voting Space (votes are stored as encrypted ciphertexts; only quorum/support pass-fail flags are revealed). False/null for legacy spaces."
+  confidential: Boolean
   "Total number of proposals created in this space"
   proposal_count: Int!
   "Total number of votes cast in this space"
@@ -302,6 +304,10 @@ type Proposal {
   vote_count: Int!
   "Whether proposal has been executed"
   executed: Boolean!
+  "Confidential-voting decryption: did the encrypted For+Abstain tally reach quorum? Populated from `Space.isQuorumReached(proposalId)` after `tryExecute`. Null for non-confidential spaces or pre-execution proposals."
+  is_quorum_reached: Boolean
+  "Confidential-voting decryption: did encrypted For exceed encrypted Against? Populated from `Space.isSupportAchieved(proposalId)` after `tryExecute`. Null for non-confidential spaces or pre-execution proposals."
+  is_support_achieved: Boolean
   "Whether proposal has been vetoed"
   vetoed: Boolean!
   "Whether proposal execution has been settled"
