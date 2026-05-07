@@ -995,7 +995,13 @@ export function createWriters(
     // isQuorumReached/isSupportAchieved before emitting ProposalExecuted, so
     // those flags are readable now. Other Spaces don't expose these views;
     // the call will revert and we leave the fields null.
-    const space = await Space.loadEntity(spaceId, config.indexerName);
+    //
+    // Skip the entity load on chains we know have no Inco deployment — saves
+    // one DB round-trip per execution event for every legacy SX chain.
+    const space =
+      config.indexerName === 'basesep'
+        ? await Space.loadEntity(spaceId, config.indexerName)
+        : null;
     if (space?.confidential) {
       try {
         // Two direct readContract calls instead of multicall — the publicClient
