@@ -25,6 +25,7 @@ gql(`
     protocol
     verified
     turbo
+    confidential
     metadata {
       name
       avatar
@@ -158,6 +159,8 @@ gql(`
     vetoed
     execution_settled
     cancelled
+    is_quorum_reached
+    is_support_achieved
   }
 `);
 
