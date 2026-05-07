@@ -43,68 +43,23 @@ const isEncryptedTally = computed(() => {
   return !!props.proposal.space?.confidential;
 });
 
-// On-chain decision flags fetched directly from the Space contract. Falls
-// back to the indexer-stored values when present. Direct on-chain read is
-// needed because the contract's `tryExecute` only emits `ProposalExecuted`
-// when execution actually runs — for "rejected" paths (quorum or support
-// failed) no event is emitted and the indexer can't observe the reveal.
-const onchainQuorumReached = ref<boolean | null>(null);
-const onchainSupportAchieved = ref<boolean | null>(null);
+// Confidential decision flags. The indexer writes these from the
+// `DecisionFlagsRevealed` event emitted by `Space.tryExecute` (always — both
+// the approved and rejected paths). They stay null until the proposal is
+// actually revealed, which is exactly the signal we want for showing the
+// verdict — no lifecycle gate needed, no on-chain fallback needed.
+const revealedQuorumReached = computed(
+  () => props.proposal.is_quorum_reached ?? null
+);
+const revealedSupportAchieved = computed(
+  () => props.proposal.is_support_achieved ?? null
+);
 
-const revealedQuorumReached = computed(() => {
-  if (props.proposal.is_quorum_reached !== null && props.proposal.is_quorum_reached !== undefined) {
-    return props.proposal.is_quorum_reached;
-  }
-  return onchainQuorumReached.value;
-});
-const revealedSupportAchieved = computed(() => {
-  if (props.proposal.is_support_achieved !== null && props.proposal.is_support_achieved !== undefined) {
-    return props.proposal.is_support_achieved;
-  }
-  return onchainSupportAchieved.value;
-});
-
-async function fetchConfidentialFlags() {
-  if (!props.proposal.space?.confidential) return;
-  try {
-    const network = getNetwork(props.proposal.network);
-    const provider = (network.helpers as any).getTransaction
-      ? (await import('@/helpers/provider')).getProvider(
-          network.chainId as number
-        )
-      : null;
-    if (!provider) return;
-    const { Contract } = await import('@ethersproject/contracts');
-    const abi = [
-      'function isQuorumReached(uint256) view returns (bool)',
-      'function isSupportAchieved(uint256) view returns (bool)'
-    ];
-    const space = new Contract(props.proposal.space.id, abi, provider);
-    const [q, s] = await Promise.all([
-      space.isQuorumReached(props.proposal.proposal_id),
-      space.isSupportAchieved(props.proposal.proposal_id)
-    ]);
-    onchainQuorumReached.value = q;
-    onchainSupportAchieved.value = s;
-  } catch (err) {
-    console.warn('Failed to read confidential flags from chain:', err);
-  }
-}
-
-// Without a contract event for `tryExecute`, the on-chain flag storage
-// `isQuorumReached(id)`/`isSupportAchieved(id)` defaults to (false, false)
-// — indistinguishable from "revealed and rejected". So we only display the
-// verdict once the proposal is past the active phase: either `executed`
-// (indexer saw ProposalExecuted = approved path) or its lifecycle has
-// concluded (passed/rejected/closed = voting window over). During active
-// voting, the verdict card stays hidden even though we could read the
-// (default-false) flags.
 const showVerdict = computed(() => {
   if (!props.proposal.space?.confidential) return false;
-  if (revealedQuorumReached.value === null) return false;
-  if (revealedSupportAchieved.value === null) return false;
-  return ['executed', 'passed', 'rejected', 'closed', 'queued'].includes(
-    props.proposal.state
+  return (
+    revealedQuorumReached.value !== null &&
+    revealedSupportAchieved.value !== null
   );
 });
 
@@ -207,16 +162,6 @@ async function refreshScores() {
 
 onMounted(() => {
   if (isFinalizing.value) refreshScores();
-  // Only fetch on-chain flags for proposals whose verdict is meaningful —
-  // see `showVerdict` for the criteria.
-  if (
-    props.proposal.space?.confidential &&
-    ['executed', 'passed', 'rejected', 'closed', 'queued'].includes(
-      props.proposal.state
-    )
-  ) {
-    fetchConfidentialFlags();
-  }
 });
 </script>
 
