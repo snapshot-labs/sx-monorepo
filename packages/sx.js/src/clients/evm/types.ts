@@ -58,6 +58,14 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
+  /**
+   * Confidential mode (Inco). When set, the SDK sends the encrypted bytes to the
+   * Space's `vote(...,bytes ciphertext,...)` ABI variant and signs over the
+   * Inco-flavored EIP-712 type. Produce this with `inco.encryptChoice(...)`.
+   * `choice` must still be supplied so non-confidential code paths and analytics
+   * stay consistent — the on-chain contract only sees `ciphertext`.
+   */
+  ciphertext?: string;
 };
 
 export type Call = {
