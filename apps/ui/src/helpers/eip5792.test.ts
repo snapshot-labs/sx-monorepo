@@ -132,6 +132,14 @@ describe('waitForCallsBundle', () => {
 
     await expect(
       waitForCallsBundle({ send } as any, '0xBUNDLE', { pollIntervalMs: 0 })
-    ).rejects.toThrow(/failed/i);
+    ).rejects.toThrow(/failed.*500/i);
+  });
+
+  it('throws when status is 3xx (partial revert)', async () => {
+    const send = vi.fn().mockResolvedValue({ status: 300, receipts: [] });
+
+    await expect(
+      waitForCallsBundle({ send } as any, '0xBUNDLE', { pollIntervalMs: 0 })
+    ).rejects.toThrow(/failed.*300/i);
   });
 });
