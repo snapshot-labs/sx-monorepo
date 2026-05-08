@@ -2,13 +2,16 @@ import { execSync, fork } from 'child_process';
 import path from 'path';
 import { checkbox } from '@inquirer/prompts';
 
-type ServiceType = 'ui' | 'api' | 'mana' | 'highlight';
+type ServiceType = 'ui' | 'auction' | 'api' | 'mana' | 'highlight';
 type Service = {
   env: Record<string, string>;
 };
 
 const SERVICES: Record<ServiceType, Service> = {
   ui: {
+    env: {}
+  },
+  auction: {
     env: {}
   },
   api: {
@@ -75,6 +78,7 @@ async function run() {
       message: 'Select services to run locally',
       choices: [
         { name: 'UI', value: 'ui' as const },
+        { name: 'Auction', value: 'auction' as const },
         { name: 'API (only sep and sn-sep)', value: 'api' as const },
         { name: 'Mana', value: 'mana' as const },
         { name: 'Highlight', value: 'highlight' as const }
