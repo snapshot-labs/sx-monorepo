@@ -114,9 +114,7 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
 
   const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
-  const isLastStep = computed<boolean>(
-    () => currentStep.value.nextStep() === false
-  );
+  const isLastStep = computed<boolean>(() => !currentStep.value.nextStep());
 
   function goToNextStep() {
     const nextStep = currentStep.value.nextStep();
