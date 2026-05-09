@@ -53,7 +53,8 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
     batchedApproveAndPay
   } = usePayment(network);
   const currentStepId = ref<StepId>(FIRST_STEP);
-  const stepExecuteResults = ref<Map<string, boolean>>(new Map());
+  const isApproved = ref(false);
+  const isBatchSupported = ref(false);
 
   const STEPS = ref<Record<StepId, Step>>({
     prepare: {
@@ -63,25 +64,22 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
         failTitle: 'Unable to prepare payment'
       },
       nextStep: () => {
-        if (stepExecuteResults.value.get('batched_pay_supported')) {
-          return 'batched_pay';
-        }
+        if (isBatchSupported.value) return 'batched_pay';
 
-        return stepExecuteResults.value.get('check_approval')
-          ? 'pay'
-          : 'approve';
+        return isApproved.value ? 'pay' : 'approve';
       },
       execute: async (token, amount) => {
-        const isApproved = await getIsApproved(token, amount);
+        const [approved, batchSupported] = await Promise.all([
+          getIsApproved(token, amount),
+          getHasBatchSupport()
+        ]);
 
-        if (isApproved === undefined) {
+        if (approved === undefined) {
           throw new Error('wallet not found');
         }
 
-        stepExecuteResults.value.set('check_approval', isApproved);
-
-        const isBatchSupported = await getHasBatchSupport();
-        stepExecuteResults.value.set('batched_pay_supported', isBatchSupported);
+        isApproved.value = approved;
+        isBatchSupported.value = batchSupported;
 
         return null;
       }
@@ -159,7 +157,8 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
 
   function start() {
     currentStepId.value = FIRST_STEP;
-    stepExecuteResults.value.clear();
+    isApproved.value = false;
+    isBatchSupported.value = false;
   }
 
   return { start, goToNextStep, isLastStep, currentStep };
