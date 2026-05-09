@@ -63,11 +63,8 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
         approveSubtitle: 'Please wait...',
         failTitle: 'Unable to prepare payment'
       },
-      nextStep: () => {
-        if (isBatchSupported.value || isApproved.value) return 'pay';
-
-        return 'approve';
-      },
+      nextStep: () =>
+        isBatchSupported.value || isApproved.value ? 'pay' : 'approve',
       execute: async (token, amount) => {
         const [approved, batchSupported] = await Promise.all([
           getIsApproved(token, amount),
