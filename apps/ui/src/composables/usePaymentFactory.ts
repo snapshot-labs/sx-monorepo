@@ -9,7 +9,7 @@ export type BarcodePayload = {
   params: Record<string, any>;
 };
 
-type StepId = 'prepare' | 'approve' | 'pay' | 'batched_pay';
+type StepId = 'prepare' | 'approve' | 'pay';
 
 type Step = {
   messages: {
@@ -64,9 +64,9 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
         failTitle: 'Unable to prepare payment'
       },
       nextStep: () => {
-        if (isBatchSupported.value) return 'batched_pay';
+        if (isBatchSupported.value || isApproved.value) return 'pay';
 
-        return isApproved.value ? 'pay' : 'approve';
+        return 'approve';
       },
       execute: async (token, amount) => {
         const [approved, batchSupported] = await Promise.all([
@@ -105,28 +105,12 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
           throw new Error('barcode payload is missing');
         }
 
-        return wrapPromise(
-          pay(token, amount, await getBarcode(payload)),
-          toValue(network)
-        );
-      }
-    },
-    batched_pay: {
-      messages: {
-        approveTitle: 'Confirm payment',
-        confirmingTitle: 'Confirming payment',
-        successTitle: 'Payment successful'
-      },
-      nextStep: () => false,
-      execute: async (token, amount, payload) => {
-        if (!payload) {
-          throw new Error('barcode payload is missing');
-        }
+        const barcode = await getBarcode(payload);
+        const promise = isBatchSupported.value
+          ? batchedApproveAndPay(token, amount, barcode)
+          : pay(token, amount, barcode);
 
-        return wrapPromise(
-          batchedApproveAndPay(token, amount, await getBarcode(payload)),
-          toValue(network)
-        );
+        return wrapPromise(promise, toValue(network));
       }
     }
   });
