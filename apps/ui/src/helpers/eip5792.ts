@@ -98,7 +98,10 @@ export async function waitForCallsBundle(
       bundleId
     ])) as CallsStatusResponse;
 
-    if (result.status >= STATUS_CONFIRMED_MIN && result.status < 300) {
+    if (
+      result.status >= STATUS_CONFIRMED_MIN &&
+      result.status < STATUS_FAILURE_MIN
+    ) {
       const hash = result.receipts?.[0]?.transactionHash;
       if (!hash) throw new Error('Bundle confirmed but no receipts returned');
 
