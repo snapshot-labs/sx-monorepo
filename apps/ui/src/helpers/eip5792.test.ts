@@ -49,6 +49,42 @@ describe('hasAtomicBatchSupport', () => {
     );
   });
 
+  it('returns true when atomic is a JSON-encoded string (Safe Wallet format)', async () => {
+    const provider = makeProvider({
+      '0x1': { atomic: '{"status":"supported"}' }
+    });
+
+    expect(await hasAtomicBatchSupport(provider as any, '0xabc', 1)).toBe(true);
+  });
+
+  it('returns true when capability uses legacy atomicBatch.supported (Safe iframe)', async () => {
+    const provider = makeProvider({
+      '0x1': { atomicBatch: { supported: true } }
+    });
+
+    expect(await hasAtomicBatchSupport(provider as any, '0xabc', 1)).toBe(true);
+  });
+
+  it('returns false when legacy atomicBatch.supported is false', async () => {
+    const provider = makeProvider({
+      '0x1': { atomicBatch: { supported: false } }
+    });
+
+    expect(await hasAtomicBatchSupport(provider as any, '0xabc', 1)).toBe(
+      false
+    );
+  });
+
+  it('returns false when atomic is an unparseable string', async () => {
+    const provider = makeProvider({
+      '0x1': { atomic: 'not json' }
+    });
+
+    expect(await hasAtomicBatchSupport(provider as any, '0xabc', 1)).toBe(
+      false
+    );
+  });
+
   it('returns false when capability key is missing', async () => {
     const provider = makeProvider({ '0x1': {} });
 

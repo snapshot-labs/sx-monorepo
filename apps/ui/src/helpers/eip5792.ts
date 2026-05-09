@@ -15,13 +15,32 @@ type CallsStatusResponse = {
   receipts?: { transactionHash: string }[];
 };
 
+type AtomicCapability = { status?: AtomicStatus };
+
+type LegacyAtomicCapability = { supported?: boolean };
+
 type CapabilitiesResponse = Record<
   string,
-  { atomic?: { status?: AtomicStatus } }
+  {
+    atomic?: AtomicCapability | string;
+    atomicBatch?: LegacyAtomicCapability;
+  }
 >;
 
 const STATUS_CONFIRMED_MIN = 200;
 const STATUS_FAILURE_MIN = 300;
+
+function parseAtomicCapability(
+  raw: AtomicCapability | string | undefined
+): AtomicCapability | undefined {
+  if (typeof raw !== 'string') return raw;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
 
 export async function hasAtomicBatchSupport(
   provider: Pick<Web3Provider, 'send'>,
@@ -36,9 +55,13 @@ export async function hasAtomicBatchSupport(
       [chainHex]
     ])) as CapabilitiesResponse | undefined;
 
-    const status = result?.[chainHex]?.atomic?.status;
+    const capability = result?.[chainHex];
+    const atomic = parseAtomicCapability(capability?.atomic);
+    const status = atomic?.status;
 
-    return status === 'supported' || status === 'ready';
+    if (status === 'supported' || status === 'ready') return true;
+
+    return capability?.atomicBatch?.supported === true;
   } catch {
     return false;
   }
