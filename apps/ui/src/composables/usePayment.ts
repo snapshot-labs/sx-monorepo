@@ -139,10 +139,10 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
     token: Token,
     amount: number,
     barcode: string
-  ): Promise<{ hash: string }> {
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
-      throw new Error('wallet not connected');
+      return;
     }
 
     await verifyNetwork(auth.value.provider, Number(toValue(network)));
