@@ -2,7 +2,7 @@ import { execSync, fork } from 'child_process';
 import path from 'path';
 import { checkbox } from '@inquirer/prompts';
 
-type ServiceType = 'ui' | 'api' | 'mana' | 'highlight' | 'hub';
+type ServiceType = 'ui' | 'api' | 'mana' | 'highlight' | 'hub' | 'sequencer';
 type Service = {
   env: Record<string, string>;
 };
@@ -33,6 +33,11 @@ const SERVICES: Record<ServiceType, Service> = {
   hub: {
     env: {
       PORT: '3003'
+    }
+  },
+  sequencer: {
+    env: {
+      PORT: '3004'
     }
   }
 };
@@ -83,7 +88,8 @@ async function run() {
         { name: 'API (only sep and sn-sep)', value: 'api' as const },
         { name: 'Mana', value: 'mana' as const },
         { name: 'Highlight', value: 'highlight' as const },
-        { name: 'Hub', value: 'hub' as const }
+        { name: 'Hub', value: 'hub' as const },
+        { name: 'Sequencer', value: 'sequencer' as const }
       ]
     });
 
@@ -91,7 +97,8 @@ async function run() {
       answer.includes('api') ||
       answer.includes('mana') ||
       answer.includes('highlight') ||
-      answer.includes('hub')
+      answer.includes('hub') ||
+      answer.includes('sequencer')
     ) {
       console.log('Starting Docker for backend services...');
       execSync(DOCKER_CMD);

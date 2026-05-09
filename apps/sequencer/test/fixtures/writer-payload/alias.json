@@ -1,0 +1,6 @@
+{
+  "address": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+  "from": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+  "msg": "{\"version\":\"0.1.4\",\"timestamp\":1688788535,\"type\":\"alias\",\"from\":\"0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3\",\"payload\":{\"alias\":\"0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3\"}}",
+  "sig": "0x943e4bd0a450d604fa74c2c64937c5bd810fbd35a3514b91fb83d68c935576893db38dc28240cfca5ce5f1b8a87df703b3b456a0c52cad408a68b94b6d6567ae1c"
+}
