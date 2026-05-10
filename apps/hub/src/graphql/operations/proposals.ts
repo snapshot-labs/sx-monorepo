@@ -1,0 +1,119 @@
+import { capture } from '@snapshot-labs/snapshot-sentry';
+import log from '../../helpers/log';
+import db from '../../helpers/mysql';
+import { buildWhereQuery, checkLimits, formatProposal } from '../helpers';
+
+export default async function (parent, args) {
+  const { first, skip, where = {} } = args;
+
+  checkLimits(args, 'proposals');
+
+  const fields = {
+    id: 'string',
+    ipfs: 'string',
+    space: 'string',
+    author: ['evmAddress', 'starknetAddress'],
+    network: 'string',
+    created: 'number',
+    updated: 'number',
+    app: 'string',
+    start: 'number',
+    end: 'number',
+    type: 'string',
+    scores_state: 'string',
+    votes: 'number',
+    scores_total_value: 'number'
+  };
+  const whereQuery = buildWhereQuery(fields, 'p', where);
+  let queryStr = whereQuery.query;
+  const params: any[] = whereQuery.params;
+
+  const ts = parseInt((Date.now() / 1e3).toFixed());
+  const state = where.state || null;
+  if (state === 'pending') {
+    queryStr += 'AND p.start > ? ';
+    params.push(ts);
+  } else if (state === 'active') {
+    queryStr += 'AND p.start < ? AND p.end > ? ';
+    params.push(ts, ts);
+  } else if (state === 'closed') {
+    queryStr += 'AND p.end < ? ';
+    params.push(ts);
+  }
+
+  let searchSql = '';
+  if (where.title_contains) {
+    searchSql = 'AND LOWER(p.title) LIKE ?';
+    params.push(`%${where.title_contains.toLowerCase()}%`);
+  }
+
+  if (where.strategies_contains) {
+    searchSql += ' AND p.strategies LIKE ?';
+    params.push(`%${where.strategies_contains}%`);
+  }
+
+  if (where.plugins_contains) {
+    searchSql += ' AND p.plugins LIKE ?';
+    params.push(`%${where.plugins_contains}%`);
+  }
+
+  if (where.validation) {
+    searchSql += ' AND p.validation LIKE ?';
+    params.push(`%"name": "${where.validation}"%`);
+  }
+
+  if (where.space_verified) {
+    searchSql += ' AND spaces.verified = 1';
+  }
+
+  if (where.flagged === true) {
+    searchSql += ' AND p.flagged > 0';
+  }
+
+  if (where.flagged === false) {
+    searchSql += ' AND p.flagged = 0';
+  }
+
+  if (where?.labels_in?.length) {
+    searchSql += ' AND JSON_CONTAINS(p.labels, ?)';
+    params.push(JSON.stringify(where.labels_in));
+  }
+
+  const orderByFields = Object.entries(fields)
+    .filter(field => field[1] === 'number')
+    .map(field => field[0]);
+
+  let orderBy = args.orderBy || 'created';
+  let orderDirection = args.orderDirection || 'desc';
+  if (!orderByFields.includes(orderBy)) orderBy = 'created';
+  orderBy = `p.${orderBy}`;
+  orderDirection = orderDirection.toUpperCase();
+  if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
+
+  const query = `
+    SELECT
+      p.*,
+      skins.*,
+      p.id AS id,
+      spaces.settings,
+      spaces.domain as spaceDomain,
+      spaces.flagged as spaceFlagged,
+      spaces.verified as spaceVerified,
+      spaces.turbo_expiration as spaceTurboExpiration,
+      spaces.hibernated as spaceHibernated
+    FROM proposals p
+    INNER JOIN spaces ON spaces.id = p.space
+    LEFT JOIN skins ON spaces.id = skins.id
+    WHERE 1=1 ${queryStr} ${searchSql}
+    ORDER BY ${orderBy} ${orderDirection}, p.id ASC LIMIT ?, ?
+  `;
+  params.push(skip, first);
+  try {
+    const proposals = await db.queryAsync(query, params);
+    return proposals.map(proposal => formatProposal(proposal));
+  } catch (err: any) {
+    log.error(`[graphql] proposals, ${JSON.stringify(err)}`);
+    capture(err, { args });
+    return Promise.reject(new Error('request failed'));
+  }
+}
