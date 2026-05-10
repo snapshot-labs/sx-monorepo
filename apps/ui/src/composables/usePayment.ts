@@ -67,6 +67,8 @@ function getWeiAmount(token: Token, amount: number): bigint {
 export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
+  const abortController = new AbortController();
+  onScopeDispose(() => abortController.abort());
 
   async function getIsApproved(
     token: Token,
@@ -175,7 +177,9 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
       calls
     );
 
-    const hash = await waitForCallsBundle(auth.value.provider, bundleId);
+    const hash = await waitForCallsBundle(auth.value.provider, bundleId, {
+      signal: abortController.signal
+    });
 
     return { hash };
   }

@@ -89,11 +89,14 @@ export async function sendBatchedCalls(
 export async function waitForCallsBundle(
   provider: Pick<Web3Provider, 'send'>,
   bundleId: string,
-  options: { pollIntervalMs?: number } = {}
+  options: { pollIntervalMs?: number; signal?: AbortSignal } = {}
 ): Promise<string> {
   const interval = options.pollIntervalMs ?? 2000;
+  const { signal } = options;
 
   while (true) {
+    if (signal?.aborted) throw new Error('Bundle polling aborted');
+
     const result = (await provider.send('wallet_getCallsStatus', [
       bundleId
     ])) as CallsStatusResponse;

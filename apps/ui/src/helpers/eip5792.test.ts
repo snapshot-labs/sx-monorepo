@@ -178,4 +178,17 @@ describe('waitForCallsBundle', () => {
       waitForCallsBundle({ send } as any, '0xBUNDLE', { pollIntervalMs: 0 })
     ).rejects.toThrow(/failed.*300/i);
   });
+
+  it('throws when signal is aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const send = vi.fn().mockResolvedValue({ status: 100, receipts: [] });
+
+    await expect(
+      waitForCallsBundle({ send } as any, '0xBUNDLE', {
+        pollIntervalMs: 0,
+        signal: controller.signal
+      })
+    ).rejects.toThrow(/aborted/i);
+  });
 });
