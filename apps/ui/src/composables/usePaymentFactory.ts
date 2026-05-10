@@ -104,7 +104,7 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
 
         const barcode = await getBarcode(payload);
         const promise = isBatchSupported.value
-          ? batchedApproveAndPay(token, amount, barcode)
+          ? batchedApproveAndPay(token, amount, barcode, !isApproved.value)
           : pay(token, amount, barcode);
 
         return wrapPromise(promise, toValue(network));

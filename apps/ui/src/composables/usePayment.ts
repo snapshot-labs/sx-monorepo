@@ -140,7 +140,8 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
   async function batchedApproveAndPay(
     token: Token,
     amount: number,
-    barcode: string
+    barcode: string,
+    includeApprove: boolean
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -155,20 +156,23 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
     const erc20 = new Interface(abis.erc20);
     const payment = new Interface(PAYMENT_CONTRACT_ABI);
 
-    const calls: Eip5792Call[] = [
-      {
+    const calls: Eip5792Call[] = [];
+
+    if (includeApprove) {
+      calls.push({
         to: token.contractAddress,
         data: erc20.encodeFunctionData('approve', [spender, weiAmount])
-      },
-      {
-        to: spender,
-        data: payment.encodeFunctionData('payWithERC20Token', [
-          token.contractAddress,
-          weiAmount,
-          barcode
-        ])
-      }
-    ];
+      });
+    }
+
+    calls.push({
+      to: spender,
+      data: payment.encodeFunctionData('payWithERC20Token', [
+        token.contractAddress,
+        weiAmount,
+        barcode
+      ])
+    });
 
     const bundleId = await sendBatchedCalls(
       auth.value.provider,
