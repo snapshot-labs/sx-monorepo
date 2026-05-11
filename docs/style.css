@@ -73,13 +73,73 @@ html:not(.dark) nav:not(#navbar):not(.nav-tabs) {
   border-color: #E5E5E6 !important;
 }
 
-/* Dropdown / popover backgrounds */
+/* Dropdown / popover backgrounds.
+   Match the Snapshot UI's `bg-skin-border` token (rgb(40,42,45) dark,
+   rgb(229,229,230) light) so dropdowns feel native to the brand. */
 html.dark [data-radix-popper-content-wrapper] > div,
 html.dark [data-radix-popper-content-wrapper] > div > div {
-  background: #1c1b22 !important;
+  background: #282A2D !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-color: #282A2D !important;
+}
+
+html:not(.dark) [data-radix-popper-content-wrapper] > div,
+html:not(.dark) [data-radix-popper-content-wrapper] > div > div {
+  background: #E5E5E6 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: #E5E5E6 !important;
+}
+
+/* Restore Mintlify callout borders. The wildcards above (`html.dark div`,
+   `[class*="border"]`) force every div border to the muted divider color,
+   wiping out the intended note/tip/warning/info/error palette. Reapply the
+   UI's Alert palette (Tailwind amber/rose/emerald/blue) so callouts look like
+   the in-app flash messages. */
+html.dark .callout[data-callout-type="warning"],
+html.dark .callout[data-callout-type="caution"] {
+  border-color: #f59e0b !important; /* amber-500, matches UI warning alert */
+}
+html:not(.dark) .callout[data-callout-type="warning"],
+html:not(.dark) .callout[data-callout-type="caution"] {
+  border-color: #fcd34d !important; /* amber-300 */
+}
+
+html.dark .callout[data-callout-type="error"],
+html.dark .callout[data-callout-type="danger"] {
+  border-color: #f43f5e !important; /* rose-500, matches UI error alert */
+}
+html:not(.dark) .callout[data-callout-type="error"],
+html:not(.dark) .callout[data-callout-type="danger"] {
+  border-color: #fda4af !important; /* rose-300 */
+}
+
+html.dark .callout[data-callout-type="check"],
+html.dark .callout[data-callout-type="success"],
+html.dark .callout[data-callout-type="tip"] {
+  border-color: #10b981 !important; /* emerald-500, matches UI success alert */
+}
+html:not(.dark) .callout[data-callout-type="check"],
+html:not(.dark) .callout[data-callout-type="success"],
+html:not(.dark) .callout[data-callout-type="tip"] {
+  border-color: #6ee7b7 !important; /* emerald-300 */
+}
+
+html.dark .callout[data-callout-type="note"] {
+  border-color: #3b82f6 !important; /* blue-500 */
+}
+html:not(.dark) .callout[data-callout-type="note"] {
+  border-color: #93c5fd !important; /* blue-300 */
+}
+
+/* Mintlify defaults `info` to a neutral palette (border-neutral-700 dark,
+   border-neutral-200 light). Restore that instead of overriding to blue. */
+html.dark .callout[data-callout-type="info"] {
+  border-color: #404040 !important; /* neutral-700 */
+}
+html:not(.dark) .callout[data-callout-type="info"] {
+  border-color: #e5e5e5 !important; /* neutral-200 */
 }
 
 html.dark [id^="headlessui-dialog-panel-"],
@@ -105,4 +165,26 @@ html.dark [id^="headlessui-dialog-panel-"] [role="listbox"] {
 
 a[href*="mintlify.com"] {
   display: none !important;
+}
+
+/* Treat the first sidebar group as a top-level page rather than a category.
+   Mintlify's schema requires every page to live in a group within a tab,
+   but for "Getting started" (one page each in Help center and Developers)
+   the category header is just noise. */
+#navigation-items > div:first-child .sidebar-group-header {
+  display: none !important;
+}
+
+/* Restore the Tabs active indicator. Mintlify renders the visual marker on a
+   nested <div data-component-part="tab-button" data-active="true">, which has
+   border-current + text-primary. The wildcard [class*="border"] rule above
+   forces that border to the muted divider color, hiding the underline. */
+html.dark [data-component-part="tab-button"][data-active="true"] {
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) [data-component-part="tab-button"][data-active="true"] {
+  border-color: #000000 !important;
+  color: #000000 !important;
 }
