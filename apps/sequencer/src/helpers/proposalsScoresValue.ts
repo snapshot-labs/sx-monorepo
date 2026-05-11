@@ -90,7 +90,7 @@ async function getVotesVpValueSum(proposalId: string): Promise<number> {
     [proposalId]
   );
 
-  return total;
+  return Number(total);
 }
 
 // Both this job and votesVpValue trigger on cb = PENDING_COMPUTE, creating a race condition
