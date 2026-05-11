@@ -2,7 +2,14 @@ import { execSync, fork } from 'child_process';
 import path from 'path';
 import { checkbox } from '@inquirer/prompts';
 
-type ServiceType = 'ui' | 'api' | 'mana' | 'highlight' | 'hub' | 'sequencer';
+type ServiceType =
+  | 'ui'
+  | 'api'
+  | 'mana'
+  | 'highlight'
+  | 'hub'
+  | 'sequencer'
+  | 'mcp';
 type Service = {
   env: Record<string, string>;
 };
@@ -38,6 +45,11 @@ const SERVICES: Record<ServiceType, Service> = {
   sequencer: {
     env: {
       PORT: '3004'
+    }
+  },
+  mcp: {
+    env: {
+      PORT: '3005'
     }
   }
 };
@@ -89,7 +101,8 @@ async function run() {
         { name: 'Mana', value: 'mana' as const },
         { name: 'Highlight', value: 'highlight' as const },
         { name: 'Hub', value: 'hub' as const },
-        { name: 'Sequencer', value: 'sequencer' as const }
+        { name: 'Sequencer', value: 'sequencer' as const },
+        { name: 'MCP', value: 'mcp' as const }
       ]
     });
 
