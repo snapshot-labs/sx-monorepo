@@ -103,7 +103,7 @@ async function allVotesFinalized(proposalId: string): Promise<boolean> {
     [proposalId, [CB.FINAL, CB.INELIGIBLE]]
   );
 
-  return pending === 0;
+  return Number(pending) === 0;
 }
 
 async function refreshProposalsScoresTotalValue(proposals: Proposal[]) {
