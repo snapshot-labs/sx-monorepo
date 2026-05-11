@@ -285,6 +285,127 @@ exports[`EthereumSig > should create propose envelope with shutter 1`] = `
 }
 `;
 
+exports[`EthereumSig > should create propose envelope with vocdoni 1`] = `
+{
+  "data": {
+    "app": "snapshot-v2",
+    "body": "Dummy body",
+    "choices": [
+      "For",
+      "Against",
+      "Abstain",
+    ],
+    "discussion": "https://snapshot.org",
+    "end": 1705798800,
+    "labels": [
+      "1234e",
+    ],
+    "plugins": "{}",
+    "privacy": "vocdoni",
+    "snapshot": 19283932,
+    "space": "wan-test.eth",
+    "start": 1705795200,
+    "title": "Creation test",
+    "type": "basic",
+  },
+  "signatureData": {
+    "address": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+    "domain": {
+      "name": "snapshot",
+      "version": "0.1.4",
+    },
+    "message": {
+      "app": "snapshot-v2",
+      "body": "Dummy body",
+      "choices": [
+        "For",
+        "Against",
+        "Abstain",
+      ],
+      "discussion": "https://snapshot.org",
+      "end": 1705798800,
+      "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+      "labels": [
+        "1234e",
+      ],
+      "plugins": "{}",
+      "privacy": "vocdoni",
+      "snapshot": 19283932,
+      "space": "wan-test.eth",
+      "start": 1705795200,
+      "timestamp": 1705795200,
+      "title": "Creation test",
+      "type": "basic",
+    },
+    "signature": "0x78e889d63a9ac510dd5b50ecd3319068a39461fa8aee956fefaa8d1f2953ec5d0b91c84a48a7a68799faa7f6974da2546a322cc8c0f77b8629e56a5bb18dc8401c",
+    "types": {
+      "Proposal": [
+        {
+          "name": "from",
+          "type": "string",
+        },
+        {
+          "name": "space",
+          "type": "string",
+        },
+        {
+          "name": "timestamp",
+          "type": "uint64",
+        },
+        {
+          "name": "type",
+          "type": "string",
+        },
+        {
+          "name": "title",
+          "type": "string",
+        },
+        {
+          "name": "body",
+          "type": "string",
+        },
+        {
+          "name": "discussion",
+          "type": "string",
+        },
+        {
+          "name": "choices",
+          "type": "string[]",
+        },
+        {
+          "name": "labels",
+          "type": "string[]",
+        },
+        {
+          "name": "start",
+          "type": "uint64",
+        },
+        {
+          "name": "end",
+          "type": "uint64",
+        },
+        {
+          "name": "snapshot",
+          "type": "uint64",
+        },
+        {
+          "name": "plugins",
+          "type": "string",
+        },
+        {
+          "name": "privacy",
+          "type": "string",
+        },
+        {
+          "name": "app",
+          "type": "string",
+        },
+      ],
+    },
+  },
+}
+`;
+
 exports[`EthereumSig > should create vote envelope 1`] = `
 {
   "data": {

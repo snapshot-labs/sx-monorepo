@@ -158,6 +158,9 @@ export function useEditor() {
         id,
         space.privacy === 'any' ? ['none', 'shutter'] : [space.privacy]
       );
+      // NOTE: 'vocdoni' is intentionally excluded from 'any' — vocdoni is a
+      // space-level commitment ("private forever") that the author cannot
+      // opt out of on a per-proposal basis.
       spaceDelays.set(id, space.voting_delay);
       spaceMinPeriods.set(id, space.min_voting_period);
       spaceMaxPeriods.set(id, space.max_voting_period);

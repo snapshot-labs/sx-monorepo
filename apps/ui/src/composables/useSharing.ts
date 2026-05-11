@@ -98,7 +98,7 @@ export function useSharing() {
     const choiceText = getChoiceText(proposal.choices, choice);
     const isSingleChoice =
       proposal.type === 'single-choice' || proposal.type === 'basic';
-    const hasPrivacy = proposal.privacy === 'shutter';
+    const hasPrivacy = proposal.privacy !== 'none';
     const votedText =
       isSingleChoice && !hasPrivacy
         ? `I just voted "${choiceText}"`

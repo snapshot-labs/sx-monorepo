@@ -185,6 +185,11 @@ export const PRIVACY_TYPES_INFO: Record<
     description:
       'Choices are encrypted and only visible once the voting period is over.'
   },
+  vocdoni: {
+    label: 'Private voting',
+    description:
+      'Choices are encrypted and never revealed. Only the list of voters and their voting power are public.'
+  },
   any: {
     label: 'Any',
     description: 'Author can choose between no privacy and shielded voting.'
