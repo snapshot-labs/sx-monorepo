@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "codegen", "api#codegen", "highlight#codegen"],
-      "outputs": ["dist/**", "dist.cjs/**"],
+      "outputs": ["dist/**", "dist.cjs/**", "build/**"],
       "env": ["ELECTRON"]
     },
     "build:electron": {

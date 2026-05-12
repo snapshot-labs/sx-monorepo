@@ -27,8 +27,19 @@ services:
       - redis:/data
     restart: always
     entrypoint: redis-server --appendonly yes
+  mysql:
+    image: mysql:8
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: snapshot_hub
+    volumes:
+      - mysql:/var/lib/mysql
 volumes:
   pg:
     driver: local
   redis:
+    driver: local
+  mysql:
     driver: local

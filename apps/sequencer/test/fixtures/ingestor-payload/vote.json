@@ -1,0 +1,29 @@
+{
+  "address": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+  "sig": "0x9899652e4ebf35eb5abd22bbb85baead3696891cb67a115166390b64035251e9205a20b9860f6d4575c373f8243edfc77d4245053216b264e6cb0f3e1556b0041b",
+  "data": {
+    "domain": { "name": "snapshot", "version": "0.1.4" },
+    "types": {
+      "Vote": [
+        { "name": "from", "type": "address" },
+        { "name": "space", "type": "string" },
+        { "name": "timestamp", "type": "uint64" },
+        { "name": "proposal", "type": "bytes32" },
+        { "name": "choice", "type": "uint32" },
+        { "name": "reason", "type": "string" },
+        { "name": "app", "type": "string" },
+        { "name": "metadata", "type": "string" }
+      ]
+    },
+    "message": {
+      "space": "fabien.eth",
+      "proposal": "0x0d68ee21b493aec521a67dbec244d131e00cfa5eb6f97c9a0133d3e3f08cd7d4",
+      "choice": 1,
+      "app": "snapshot",
+      "reason": "",
+      "metadata": "{}",
+      "from": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+      "timestamp": 1688865913
+    }
+  }
+}
