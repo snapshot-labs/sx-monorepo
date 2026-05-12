@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { RouteLocationRaw } from 'vue-router';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getOrganizationConfigBySpace } from '@/helpers/organizations';
 import { getUrl } from '@/helpers/utils';
@@ -113,16 +112,6 @@ function handleEndReached() {
 function getSpaceOrg(space: Space | RelatedSpace) {
   if (protocol.value !== 'snapshot') return null;
   return getOrganizationConfigBySpace(`${space.network}:${space.id}`);
-}
-
-function getSpaceLink(space: Space | RelatedSpace): RouteLocationRaw {
-  const org = getSpaceOrg(space);
-  if (org) return { name: 'org', params: { org: org.id } };
-
-  return {
-    name: 'space-overview',
-    params: { space: `${space.network}:${space.id}` }
-  };
 }
 
 watch([protocol, category, network], ([p, c, n]) => {
@@ -239,7 +228,6 @@ watchEffect(() => setTitle('Explore'));
             v-for="space in data.pages.flat()"
             :key="space.id"
             :space="space"
-            :to="getSpaceLink(space)"
             :org="getSpaceOrg(space)"
           />
         </UiContainerInfiniteScroll>

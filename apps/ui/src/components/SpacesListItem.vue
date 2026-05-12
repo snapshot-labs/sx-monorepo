@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { RouteLocationRaw } from 'vue-router';
 import { OrganizationConfig } from '@/helpers/organizations';
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
@@ -7,26 +6,21 @@ import { RelatedSpace, Space } from '@/types';
 
 const props = defineProps<{
   space: Space | RelatedSpace;
-  to?: RouteLocationRaw;
   org?: OrganizationConfig | null;
 }>();
-const compositeSpaceId = `${props.space.network}:${props.space.id}`;
-const linkTo = computed<RouteLocationRaw>(
-  () =>
-    props.to ?? { name: 'space-overview', params: { space: compositeSpaceId } }
+const linkTo = computed(() =>
+  props.org
+    ? { name: 'org', params: { org: props.org.id } }
+    : {
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      }
 );
-const displayName = computed(() => props.org?.name ?? props.space.name);
-const orgSpaceCount = computed(() => props.org?.spaceIds.length ?? 0);
-const avatarSpace = computed(() => {
-  if (!props.org) return props.space;
-  const primary = props.org.spaceIds[0];
-  return {
-    id: primary.id,
-    network: primary.network,
-    avatar: '',
-    active_proposals: 0
-  };
-});
+const avatarSpace = computed(() =>
+  props.org
+    ? { ...props.org.spaceIds[0], avatar: '', active_proposals: 0 }
+    : props.space
+);
 </script>
 
 <template>
@@ -42,7 +36,7 @@ const avatarSpace = computed(() => {
       >
         <SpaceAvatar :space="avatarSpace" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
-      <h3 class="truncate" v-text="displayName" />
+      <h3 class="truncate" v-text="org?.name ?? space.name" />
       <UiBadgeSpace
         class="ml-1"
         :verified="space.verified"
@@ -52,11 +46,9 @@ const avatarSpace = computed(() => {
           false
         "
       />
-      <span v-if="org" class="ml-2 shrink-0">
-        {{ _n(orgSpaceCount) }}
-        <span class="text-skin-text">
-          {{ orgSpaceCount === 1 ? 'space' : 'spaces' }}
-        </span>
+      <span v-if="org" class="ml-2 shrink-0 text-skin-text">
+        {{ org.spaceIds.length }}
+        {{ org.spaceIds.length === 1 ? 'space' : 'spaces' }}
       </span>
     </div>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />

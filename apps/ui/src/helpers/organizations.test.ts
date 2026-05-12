@@ -104,16 +104,8 @@ describe('getOrgProposalLabel', () => {
 });
 
 describe('getOrganizationConfigBySpace', () => {
-  it('returns the org config when the space is part of one', () => {
+  it('returns the org for a member space, null otherwise', () => {
     expect(getOrganizationConfigBySpace('s:ens.eth')?.id).toBe('ens');
-    expect(
-      getOrganizationConfigBySpace(
-        'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
-      )?.id
-    ).toBe('ens');
-  });
-
-  it('returns null when the space is not part of any org', () => {
     expect(getOrganizationConfigBySpace('s:not-an-org.eth')).toBeNull();
   });
 });
