@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { SPACE_CATEGORIES } from '@/helpers/constants';
+import { getOrganizationConfigBySpace } from '@/helpers/organizations';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { useExploreSpacesQuery } from '@/queries/spaces';
-import { SelectItem } from '@/types';
+import { RelatedSpace, SelectItem, Space } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -106,6 +107,11 @@ function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
+}
+
+function getSpaceOrg(space: Space | RelatedSpace) {
+  if (protocol.value !== 'snapshot') return null;
+  return getOrganizationConfigBySpace(`${space.network}:${space.id}`);
 }
 
 watch([protocol, category, network], ([p, c, n]) => {
@@ -222,6 +228,7 @@ watchEffect(() => setTitle('Explore'));
             v-for="space in data.pages.flat()"
             :key="space.id"
             :space="space"
+            :org="getSpaceOrg(space)"
           />
         </UiContainerInfiniteScroll>
         <UiStateWarning v-else class="px-4 py-3">
