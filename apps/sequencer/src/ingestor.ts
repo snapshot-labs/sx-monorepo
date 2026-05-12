@@ -102,7 +102,15 @@ export default async function ingestor(req) {
       return Promise.reject('Invalid space id');
     }
 
-    if (!['settings', 'alias', 'profile', 'delete-space'].includes(type)) {
+    if (
+      ![
+        'settings',
+        'alias',
+        'revoke-alias',
+        'profile',
+        'delete-space'
+      ].includes(type)
+    ) {
       if (!message.space) return Promise.reject('unknown space');
 
       try {
@@ -160,6 +168,7 @@ export default async function ingestor(req) {
         app: message.app || ''
       };
     if (type === 'alias') payload = { alias: message.alias };
+    if (type === 'revoke-alias') payload = { alias: message.alias };
     if (type === 'statement')
       payload = {
         about: message.about,
