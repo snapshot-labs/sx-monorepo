@@ -1,9 +1,36 @@
+import { Interface } from '@ethersproject/abi';
+import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
 import { parseBytes32String } from '@ethersproject/strings';
 import { abis } from './abis';
+import { MULTICALL_ABI } from './call';
 import { EIP7702_DELEGATION_INDICATOR } from './constants';
-import Multicaller from './multicaller';
 import { getProvider } from './provider';
+
+const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
+
+const stringIface = new Interface(abis.erc20);
+const bytes32Iface = new Interface([
+  'function name() view returns (bytes32)',
+  'function symbol() view returns (bytes32)'
+]);
+
+function decodeField(
+  field: 'name' | 'symbol' | 'decimals',
+  returnData: string
+): string | number | null {
+  try {
+    return stringIface.decodeFunctionResult(field, returnData)[0];
+  } catch {
+    try {
+      return parseBytes32String(
+        bytes32Iface.decodeFunctionResult(field, returnData)[0]
+      );
+    } catch {
+      return null;
+    }
+  }
+}
 
 export async function getIsContract(provider: Provider, address: string) {
   const code = await provider.getCode(address);
@@ -16,46 +43,30 @@ export async function getIsContract(provider: Provider, address: string) {
 
 export async function getTokensMetadata(chainId: string, tokens: string[]) {
   const provider = getProvider(Number(chainId));
+  const multi3 = new Contract(MULTICALL3_ADDRESS, MULTICALL_ABI, provider);
 
-  const multi = new Multicaller(chainId, provider, abis.erc20);
+  const fields = ['name', 'symbol', 'decimals'] as const;
+  const callItems = tokens.flatMap(token =>
+    fields.map(field => ({ token, field }))
+  );
+
+  const rawResults: [boolean, string][] = await multi3.aggregate3(
+    callItems.map(({ token, field }) => [
+      token.toLowerCase(),
+      true,
+      stringIface.encodeFunctionData(field)
+    ])
+  );
+
+  const result: Record<string, Record<string, any>> = {};
   tokens.forEach(token => {
-    multi.call(`${token}.name`, token, 'name');
-    multi.call(`${token}.symbol`, token, 'symbol');
-    multi.call(`${token}.decimals`, token, 'decimals');
+    result[token] = { name: null, symbol: null, decimals: null };
   });
 
-  const result = await multi.execute({
-    allowFailure: true
+  rawResults.forEach(([success, returnData], i) => {
+    const { token, field } = callItems[i];
+    result[token][field] = success ? decodeField(field, returnData) : null;
   });
-
-  // Some legacy tokens (e.g., MKR, AVT) return bytes32 for name/symbol
-  // instead of string. Retry the missing fields with a bytes32 ABI.
-  const bytes32Multi = new Multicaller(chainId, provider, [
-    'function name() view returns (bytes32)',
-    'function symbol() view returns (bytes32)'
-  ]);
-  tokens.forEach(token => {
-    if (!result[token].name) bytes32Multi.call(`${token}.name`, token, 'name');
-    if (!result[token].symbol)
-      bytes32Multi.call(`${token}.symbol`, token, 'symbol');
-  });
-
-  if (bytes32Multi.calls.length) {
-    try {
-      const fallback = await bytes32Multi.execute({ allowFailure: true });
-      tokens.forEach(token => {
-        result[token].name =
-          result[token].name ||
-          (fallback[token]?.name && parseBytes32String(fallback[token].name));
-        result[token].symbol =
-          result[token].symbol ||
-          (fallback[token]?.symbol &&
-            parseBytes32String(fallback[token].symbol));
-      });
-    } catch {
-      // bytes32 fallback is best-effort; ignore decode/RPC errors.
-    }
-  }
 
   return tokens.map(token => ({
     address: token,
