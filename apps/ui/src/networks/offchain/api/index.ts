@@ -633,7 +633,7 @@ export function createApi(
           }
         });
 
-        const page = data.votes;
+        const page = (data.votes ?? []) as { choice: number; vp: number; created: number }[];
         votes.push(...page);
 
         if (page.length < SCORES_TICKS_LIMIT) break;
@@ -682,7 +682,10 @@ export function createApi(
         filters.choice = 3;
       }
 
-      const [orderBy, orderDirection] = sortBy.split('-');
+      const [orderBy, orderDirection] = sortBy.split('-') as [
+        string,
+        'asc' | 'desc'
+      ];
 
       const { data } = await apollo.query({
         query: VOTES_QUERY,
@@ -699,10 +702,10 @@ export function createApi(
         }
       });
 
-      const addresses = data.votes.map(vote => vote.voter);
-      const names = await getNames(addresses);
+      const votes = (data.votes ?? []) as ApiVote[];
+      const names = await getNames(votes.map(vote => vote.voter));
 
-      return data.votes.map(vote => {
+      return votes.map(vote => {
         const formattedVote = formatVote(vote);
         formattedVote.voter.name = names[vote.voter] || undefined;
 
@@ -724,8 +727,10 @@ export function createApi(
         }
       });
 
+      const votes = (data.votes ?? []) as ApiVote[];
+
       return Object.fromEntries(
-        data.votes.map(vote => [
+        votes.map(vote => [
           `${networkId}:${vote.proposal.id}`,
           formatVote(vote)
         ])
@@ -779,9 +784,8 @@ export function createApi(
         }
       });
 
-      return data.proposals.map(proposal =>
-        formatProposal(proposal, networkId)
-      );
+      const proposals = (data.proposals ?? []) as ApiProposal[];
+      return proposals.map(proposal => formatProposal(proposal, networkId));
     },
     loadProposal: async (
       spaceId: string,
@@ -789,18 +793,14 @@ export function createApi(
     ): Promise<Proposal | null> => {
       const { data } = await apollo.query({
         query: PROPOSAL_QUERY,
-        variables: { id: proposalId }
+        variables: { id: String(proposalId) }
       });
 
-      if (
-        !data.proposal ||
-        data.proposal.metadata === null ||
-        data.proposal.space?.id !== spaceId
-      ) {
+      if (!data.proposal || data.proposal.space?.id !== spaceId) {
         return null;
       }
 
-      return formatProposal(data.proposal, networkId);
+      return formatProposal(data.proposal as ApiProposal, networkId);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,
@@ -829,9 +829,8 @@ export function createApi(
             where
           }
         });
-        return data.ranking.items.map(space =>
-          formatSpace(space, networkId, constants)
-        );
+        const items = (data.ranking?.items ?? []) as ApiSpace[];
+        return items.map(space => formatSpace(space, networkId, constants));
       }
 
       const { data } = await apollo.query({
@@ -845,7 +844,8 @@ export function createApi(
         }
       });
 
-      return data.spaces.map(space => formatSpace(space, networkId, constants));
+      const spaces = (data.spaces ?? []) as ApiSpace[];
+      return spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const { data } = await apollo.query({
@@ -854,33 +854,30 @@ export function createApi(
       });
 
       if (!data.space) return null;
-      if (data.space.metadata === null) return null;
-
-      return formatSpace(data.space, networkId, constants);
+      return formatSpace(data.space as ApiSpace, networkId, constants);
     },
     loadUser: async (id: string): Promise<User> => {
-      let {
+      const {
         data: { user }
       } = await apollo.query({
         query: USER_QUERY,
         variables: { id }
       });
 
-      if (!user) {
-        user = { id };
-      }
+      const resolvedId = user?.id ?? id;
 
       return {
-        ...user,
-        created: user.created || null,
-        name: user.name || (await getNames([user.id]))?.[user.id] || '',
-        about: user.about || '',
-        avatar: user.avatar || '',
-        cover: user.cover || '',
-        twitter: user.twitter || '',
-        github: user.github || '',
-        lens: user.lens || '',
-        farcaster: user.farcaster || ''
+        id: resolvedId,
+        created: user?.created ?? null,
+        name: user?.name || (await getNames([resolvedId]))?.[resolvedId] || '',
+        about: user?.about || '',
+        avatar: user?.avatar || '',
+        cover: user?.cover || '',
+        twitter: user?.twitter || '',
+        github: user?.github || '',
+        lens: user?.lens || '',
+        farcaster: user?.farcaster || '',
+        votesCount: user?.votesCount ?? undefined
       };
     },
     loadUserActivities(userId: string): Promise<UserActivity[]> {
@@ -898,10 +895,11 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
-            spaceId: `${networkId}:${leaderboard.space}`,
-            vote_count: leaderboard.votesCount,
-            proposal_count: leaderboard.proposalsCount
+          (data.leaderboards ?? []).filter(Boolean).map(leaderboard => ({
+            id: leaderboard!.user ?? '',
+            spaceId: `${networkId}:${leaderboard!.space}`,
+            vote_count: leaderboard!.votesCount ?? 0,
+            proposal_count: leaderboard!.proposalsCount ?? 0
           }))
         );
     },
@@ -935,110 +933,81 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
-            id: leaderboard.user,
-            spaceId: leaderboard.space,
-            vote_count: leaderboard.votesCount,
-            proposal_count: leaderboard.proposalsCount
+          (data.leaderboards ?? []).filter(Boolean).map(leaderboard => ({
+            id: leaderboard!.user ?? '',
+            spaceId: leaderboard!.space ?? '',
+            vote_count: leaderboard!.votesCount ?? 0,
+            proposal_count: leaderboard!.proposalsCount ?? 0
           }))
         );
     },
-    loadFollows: async (
-      userId?: string,
-      spaceId?: string
-    ): Promise<Follow[]> => {
-      const {
-        data: { follows }
-      }: { data: { follows: Follow[] } } = await apollo.query({
+    loadFollows: async (userId?: string): Promise<Follow[]> => {
+      if (!userId) return [];
+
+      const { data } = await apollo.query({
         query: USER_FOLLOWS_QUERY,
-        variables: {
-          first: 25,
-          follower: userId,
-          space: spaceId
-        }
+        variables: { first: 25, follower: userId }
       });
 
-      return follows.map(follow => ({
-        ...follow,
-        space: { ...follow.space, network: follow.network }
-      }));
+      return (data.follows ?? []).filter(Boolean).map(follow => ({
+        ...follow!,
+        space: { ...follow!.space, network: follow!.network }
+      })) as unknown as Follow[];
     },
     loadAlias: async (
       address: string,
       aliasAddress: string,
       created_gt: number
     ): Promise<Alias | null> => {
-      const {
-        data: { aliases }
-      }: { data: { aliases: Alias[] } } = await apollo.query({
+      const { data } = await apollo.query({
         query: ALIASES_QUERY,
-        variables: {
-          address,
-          alias: aliasAddress,
-          created_gt
-        }
+        variables: { address, alias: aliasAddress, created_gt }
       });
 
-      return aliases?.[0] ?? null;
+      const alias = data.aliases?.[0];
+      return alias ? (alias as Alias) : null;
     },
     loadAliases: async (address: string): Promise<Alias[]> => {
-      const {
-        data: { aliases }
-      }: { data: { aliases: Alias[] } } = await apollo.query({
+      const { data } = await apollo.query({
         query: ALIASES_BY_ADDRESS_QUERY,
         variables: { address }
       });
 
-      return aliases ?? [];
+      return (data.aliases ?? []) as Alias[];
     },
     loadStatement: async (
       networkId: NetworkID,
       spaceId: string,
       userId: string
     ): Promise<Statement | null> => {
-      const {
-        data: { statements }
-      }: { data: { statements: Statement[] } } = await apollo.query({
+      const { data } = await apollo.query({
         query: STATEMENTS_QUERY,
         variables: {
-          where: {
-            delegate: userId,
-            network: networkId,
-            space: spaceId
-          }
+          where: { delegate: userId, network: networkId, space: spaceId }
         }
       });
 
-      return statements?.[0] ?? null;
+      const statement = data.statements?.[0];
+      return statement ? (statement as Statement) : null;
     },
     loadStatements: async (
       networkId: NetworkID,
       spaceId: string,
       userIds: string[]
     ): Promise<Statement[]> => {
-      const {
-        data: { statements }
-      }: { data: { statements: Statement[] } } = await apollo.query({
+      const { data } = await apollo.query({
         query: STATEMENTS_QUERY,
         variables: {
-          where: {
-            delegate_in: userIds,
-            network: networkId,
-            space: spaceId
-          }
+          where: { delegate_in: userIds, network: networkId, space: spaceId }
         }
       });
 
-      return statements;
+      return (data.statements ?? []).filter(Boolean) as Statement[];
     },
     loadStrategies: async () => {
-      const { data } = await apollo.query({
-        query: STRATEGIES_QUERY
-      });
+      const { data } = await apollo.query({ query: STRATEGIES_QUERY });
 
-      return data.strategies.map((strategy: ApiStrategy) =>
-        formatStrategy(strategy)
-      );
+      return ((data.strategies ?? []) as ApiStrategy[]).map(formatStrategy);
     },
     loadStrategy: async (id: string) => {
       const { data } = await apollo.query({
@@ -1046,33 +1015,25 @@ export function createApi(
         variables: { id }
       });
 
-      if (!data.strategy) return null;
-
-      return formatStrategy(data.strategy as ApiStrategy);
+      return data.strategy ? formatStrategy(data.strategy as ApiStrategy) : null;
     },
     getNetworks: async () => {
-      const { data } = await apollo.query({
-        query: NETWORKS_QUERY
-      });
+      const { data } = await apollo.query({ query: NETWORKS_QUERY });
 
       return Object.fromEntries(
-        data.networks.map((network: any) => [
-          network.id,
+        (data.networks ?? []).filter(Boolean).map(network => [
+          network!.id,
           {
-            spaces_count: network.spacesCount,
-            premium: network.premium
+            spaces_count: network!.spacesCount ?? 0,
+            premium: network!.premium ?? false
           }
         ])
       );
     },
     loadSettings: async (): Promise<Setting[]> => {
-      const {
-        data: { options }
-      }: { data: { options: Setting[] } } = await apollo.query({
-        query: SETTINGS_QUERY
-      });
+      const { data } = await apollo.query({ query: SETTINGS_QUERY });
 
-      return options;
+      return ((data.options ?? []).filter(Boolean) as Setting[]);
     },
     loadLastIndexedBlock: async () => null
   };
