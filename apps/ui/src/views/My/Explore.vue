@@ -110,12 +110,19 @@ function handleEndReached() {
   fetchNextPage();
 }
 
+function getSpaceOrg(space: Space | RelatedSpace) {
+  if (protocol.value !== 'snapshot') return null;
+  return getOrganizationConfigBySpace(`${space.network}:${space.id}`);
+}
+
 function getSpaceLink(space: Space | RelatedSpace): RouteLocationRaw {
-  const compositeId = `${space.network}:${space.id}`;
-  const org = getOrganizationConfigBySpace(compositeId);
+  const org = getSpaceOrg(space);
   if (org) return { name: 'org', params: { org: org.id } };
 
-  return { name: 'space-overview', params: { space: compositeId } };
+  return {
+    name: 'space-overview',
+    params: { space: `${space.network}:${space.id}` }
+  };
 }
 
 watch([protocol, category, network], ([p, c, n]) => {
@@ -233,6 +240,7 @@ watchEffect(() => setTitle('Explore'));
             :key="space.id"
             :space="space"
             :to="getSpaceLink(space)"
+            :org="getSpaceOrg(space)"
           />
         </UiContainerInfiniteScroll>
         <UiStateWarning v-else class="px-4 py-3">
