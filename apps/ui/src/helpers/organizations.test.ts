@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { getOrgProposalLabel } from './organizations';
+import {
+  getOrganizationConfigBySpace,
+  getOrgProposalLabel
+} from './organizations';
 
 function org(navItems: any) {
   return { navItems } as any;
@@ -97,5 +100,12 @@ describe('getOrgProposalLabel', () => {
     };
 
     expect(getOrgProposalLabel(org(navItems), 'eth:0xABC')).toBeUndefined();
+  });
+});
+
+describe('getOrganizationConfigBySpace', () => {
+  it('returns the org for a member space, null otherwise', () => {
+    expect(getOrganizationConfigBySpace('s:ens.eth')?.id).toBe('ens');
+    expect(getOrganizationConfigBySpace('s:not-an-org.eth')).toBeNull();
   });
 });
