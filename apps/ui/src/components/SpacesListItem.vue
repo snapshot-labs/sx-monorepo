@@ -1,15 +1,23 @@
 <script lang="ts" setup>
+import { RouteLocationRaw } from 'vue-router';
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { RelatedSpace, Space } from '@/types';
 
-const props = defineProps<{ space: Space | RelatedSpace }>();
+const props = defineProps<{
+  space: Space | RelatedSpace;
+  to?: RouteLocationRaw;
+}>();
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
+const linkTo = computed<RouteLocationRaw>(
+  () =>
+    props.to ?? { name: 'space-overview', params: { space: compositeSpaceId } }
+);
 </script>
 
 <template>
   <AppLink
-    :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
+    :to="linkTo"
     class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
     <div class="grow flex items-center">

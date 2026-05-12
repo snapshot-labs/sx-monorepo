@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { RouteLocationRaw } from 'vue-router';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
+import { getOrganizationConfigBySpace } from '@/helpers/organizations';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { useExploreSpacesQuery } from '@/queries/spaces';
-import { SelectItem } from '@/types';
+import { RelatedSpace, SelectItem, Space } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -106,6 +108,14 @@ function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
+}
+
+function getSpaceLink(space: Space | RelatedSpace): RouteLocationRaw {
+  const compositeId = `${space.network}:${space.id}`;
+  const org = getOrganizationConfigBySpace(compositeId);
+  if (org) return { name: 'org', params: { org: org.id } };
+
+  return { name: 'space-overview', params: { space: compositeId } };
 }
 
 watch([protocol, category, network], ([p, c, n]) => {
@@ -222,6 +232,7 @@ watchEffect(() => setTitle('Explore'));
             v-for="space in data.pages.flat()"
             :key="space.id"
             :space="space"
+            :to="getSpaceLink(space)"
           />
         </UiContainerInfiniteScroll>
         <UiStateWarning v-else class="px-4 py-3">
