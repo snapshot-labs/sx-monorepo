@@ -633,7 +633,11 @@ export function createApi(
           }
         });
 
-        const page = (data.votes ?? []) as { choice: number; vp: number; created: number }[];
+        const page = (data.votes ?? []) as {
+          choice: number;
+          vp: number;
+          created: number;
+        }[];
         votes.push(...page);
 
         if (page.length < SCORES_TICKS_LIMIT) break;
@@ -1015,7 +1019,9 @@ export function createApi(
         variables: { id }
       });
 
-      return data.strategy ? formatStrategy(data.strategy as ApiStrategy) : null;
+      return data.strategy
+        ? formatStrategy(data.strategy as ApiStrategy)
+        : null;
     },
     getNetworks: async () => {
       const { data } = await apollo.query({ query: NETWORKS_QUERY });
@@ -1033,7 +1039,7 @@ export function createApi(
     loadSettings: async (): Promise<Setting[]> => {
       const { data } = await apollo.query({ query: SETTINGS_QUERY });
 
-      return ((data.options ?? []).filter(Boolean) as Setting[]);
+      return (data.options ?? []).filter(Boolean) as Setting[];
     },
     loadLastIndexedBlock: async () => null
   };
