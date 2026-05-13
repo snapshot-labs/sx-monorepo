@@ -3,11 +3,9 @@ import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
 import { parseBytes32String } from '@ethersproject/strings';
 import { abis } from './abis';
-import { MULTICALL_ABI } from './call';
+import { MULTICALL3_ADDRESSES, MULTICALL_ABI } from './call';
 import { EIP7702_DELEGATION_INDICATOR } from './constants';
 import { getProvider } from './provider';
-
-const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
 
 const stringIface = new Interface(abis.erc20);
 const bytes32Iface = new Interface([
@@ -43,7 +41,7 @@ export async function getIsContract(provider: Provider, address: string) {
 
 export async function getTokensMetadata(chainId: string, tokens: string[]) {
   const provider = getProvider(Number(chainId));
-  const multi3 = new Contract(MULTICALL3_ADDRESS, MULTICALL_ABI, provider);
+  const multi3 = new Contract(MULTICALL3_ADDRESSES, MULTICALL_ABI, provider);
 
   const fields = ['name', 'symbol', 'decimals'] as const;
   const callItems = tokens.flatMap(token =>

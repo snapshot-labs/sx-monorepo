@@ -2,7 +2,7 @@ import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 
-const MULTICALL3_ADDRESSES = '0xcA11bde05977b3631167028862bE2a173976CA11';
+export const MULTICALL3_ADDRESSES = '0xcA11bde05977b3631167028862bE2a173976CA11';
 
 export const MULTICALL_ABI = [
   'function aggregate(tuple(address target, bytes callData)[] calls) view returns (uint256 blockNumber, bytes[] returnData)',
