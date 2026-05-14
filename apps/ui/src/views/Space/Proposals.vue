@@ -48,9 +48,18 @@ const orgOnchainSpaces = computed(() => {
   );
 });
 
-/** Multi-select: which spaces to aggregate proposals from. Defaults to the current
- *  space; persisted in ?spaces=<csv>. Always a subset of orgOnchainSpaces. */
-const selectedSpaceIds = ref<string[]>([props.space.id]);
+/** Default selection: when the chip is shown (Arbitrum org today), all onchain spaces
+ *  are pre-selected so "Onchain voting" surfaces everything at once. Falls back to the
+ *  current space for any future org that opts in with a single-space sidebar. */
+const defaultSelectedSpaceIds = computed(() =>
+  orgOnchainSpaces.value.length
+    ? orgOnchainSpaces.value.map(s => s.id)
+    : [props.space.id]
+);
+
+/** Multi-select: which spaces to aggregate proposals from. Persisted in ?spaces=<csv>;
+ *  initialized from the default and overridden by URL state in the watcher below. */
+const selectedSpaceIds = ref<string[]>([...defaultSelectedSpaceIds.value]);
 
 const showSpacesFilter = computed(() => orgOnchainSpaces.value.length > 1);
 
@@ -132,7 +141,7 @@ watchThrottled(
     () => props.space.id,
     () => orgOnchainSpaces.value
   ],
-  ([toState, toLabels, toSpaces, currentSpaceId, onchainSpaces]) => {
+  ([toState, toLabels, toSpaces, , onchainSpaces]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
@@ -144,7 +153,9 @@ watchThrottled(
 
     const validIds = new Set(onchainSpaces.map(s => s.id));
     const fromQuery = (toSpaces ?? '').split(',').filter(id => validIds.has(id));
-    selectedSpaceIds.value = fromQuery.length ? fromQuery : [currentSpaceId];
+    selectedSpaceIds.value = fromQuery.length
+      ? fromQuery
+      : [...defaultSelectedSpaceIds.value];
   },
   { throttle: 1000, immediate: true }
 );
@@ -175,9 +186,12 @@ watch(
         delete query.labels;
       }
 
-      /** Drop the param when the selection is the current-space default. */
+      /** Drop the param when the selection matches the default (so URLs stay clean
+       *  on fresh visits and only show ?spaces= when the user has narrowed). */
+      const def = defaultSelectedSpaceIds.value;
       const isDefault =
-        toSpaces.length === 1 && toSpaces[0] === toSpaceId;
+        toSpaces.length === def.length &&
+        toSpaces.every(id => def.includes(id));
       if (toSpaces.length && !isDefault) {
         query.spaces = toSpaces.join(',');
       } else {
