@@ -5,6 +5,14 @@ import Connector from './connector';
 const KEY = 'SANDBOX_PRIVATE_KEY';
 const PRIVATE_KEY_REGEX = /^0x[0-9a-fA-F]{64}$/;
 
+function privateKeyFromLogin(login: string | null): string {
+  if (!login || login === 'random') return Wallet.createRandom().privateKey;
+  if (PRIVATE_KEY_REGEX.test(login)) return login;
+  throw new Error(
+    'Invalid ?login value: expected "random" or 0x-prefixed 32-byte hex'
+  );
+}
+
 function createProvider(privateKey: string) {
   const wallet = new Wallet(privateKey);
 
@@ -15,21 +23,14 @@ function createProvider(privateKey: string) {
 
   const signTypedData = (raw: any) => {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    const types = { ...data.types };
-    delete types.EIP712Domain;
+    const { EIP712Domain: _, ...types } = data.types;
     return wallet._signTypedData(data.domain, types, data.message);
   };
 
   return {
     selectedAddress: wallet.address,
     chainId: '0x1',
-    request: async ({
-      method,
-      params = []
-    }: {
-      method: string;
-      params?: any[];
-    }) => {
+    request: async ({ method, params = [] }: { method: string; params?: any[] }) => {
       switch (method) {
         case 'eth_chainId':
           return '0x1';
@@ -54,20 +55,8 @@ function createProvider(privateKey: string) {
 
 export default class Sandbox extends Connector {
   async connect() {
-    const params = new URLSearchParams(
-      window.location.hash.split('?')[1] ?? ''
-    );
-    const login = params.get('login');
-    let pk: string;
-    if (!login || login === 'random') {
-      pk = Wallet.createRandom().privateKey;
-    } else if (PRIVATE_KEY_REGEX.test(login)) {
-      pk = login;
-    } else {
-      throw new Error(
-        'Invalid ?login value: expected "random" or 0x-prefixed 32-byte hex'
-      );
-    }
+    const params = new URLSearchParams(window.location.hash.split('?')[1] ?? '');
+    const pk = privateKeyFromLogin(params.get('login'));
     localStorage.setItem(KEY, pk);
     this.provider = createProvider(pk);
   }
