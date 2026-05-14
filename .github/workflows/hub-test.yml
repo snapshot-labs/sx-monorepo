@@ -1,0 +1,20 @@
+name: Hub Test
+
+on:
+  push:
+    paths:
+      - 'apps/hub/**'
+      - '.github/workflows/hub-test.yml'
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        target: ['22.6']
+    uses: snapshot-labs/actions/.github/workflows/test.yml@main
+    secrets: inherit
+    with:
+      working_directory: apps/hub
+      mysql_database_name: hub_test
+      target: ${{ matrix.target }}
+      package_manager: bun
