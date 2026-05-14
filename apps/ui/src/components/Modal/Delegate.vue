@@ -319,7 +319,8 @@ watch(
       share: delegatee.share ?? 100
     }));
     form.expirationDate = DEFAULT_FORM_STATE.expirationDate;
-    form.chainId = props.delegation?.chainId || DEFAULT_FORM_STATE.chainId;
+    form.chainId =
+      selectedDelegation.value?.chainId || DEFAULT_FORM_STATE.chainId;
 
     prefillExistingDelegatees();
   }
