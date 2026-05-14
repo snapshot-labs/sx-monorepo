@@ -38,6 +38,19 @@ export const PROPOSALS_KEYS = {
       spacesIds,
       { ...filters, query }
     ] as const,
+  multiSpaceList: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    spacesIds: MaybeRefOrGetter<string[]>,
+    filters: Filters,
+    query?: MaybeRefOrGetter<string>
+  ) =>
+    [
+      ...PROPOSALS_KEYS.all,
+      'multiSpaceList',
+      networkId,
+      spacesIds,
+      { ...filters, query }
+    ] as const,
   spaceSummary: (
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>
@@ -191,6 +204,23 @@ export function useProposalsQuery(
     PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
     networkId,
     toRef(() => [toValue(spaceId)]),
+    filters,
+    query
+  );
+}
+
+/** Multi-space variant — used by the Spaces filter in Space/Proposals.vue to merge
+ *  proposals across several spaces in the same org / network. */
+export function useMultiSpaceProposalsQuery(
+  networkId: MaybeRefOrGetter<NetworkID>,
+  spacesIds: MaybeRefOrGetter<string[]>,
+  filters: Filters,
+  query?: MaybeRefOrGetter<string>
+) {
+  return getProposalsQuery(
+    PROPOSALS_KEYS.multiSpaceList(networkId, spacesIds, filters, query),
+    networkId,
+    spacesIds,
     filters,
     query
   );
