@@ -1,31 +1,7 @@
 <script setup lang="ts">
-import { getOrganizationConfigBySpace } from '@/helpers/organizations';
-import type { Space } from '@/types';
-import type { RouteLocationRaw } from 'vue-router';
 import draggable from 'vuedraggable';
 
 const followedSpacesStore = useFollowedSpacesStore();
-
-function getSpaceItem(space: Space) {
-  const org = getOrganizationConfigBySpace(`${space.network}:${space.id}`);
-
-  if (org) {
-    return {
-      link: { name: 'org', params: { org: org.id } } as RouteLocationRaw,
-      title: org.name,
-      avatarSpace: { ...org.spaceIds[0], avatar: '', active_proposals: 0 }
-    };
-  }
-
-  return {
-    link: {
-      name: 'space-overview',
-      params: { space: `${space.network}:${space.id}` }
-    } as RouteLocationRaw,
-    title: space.name,
-    avatarSpace: space
-  };
-}
 </script>
 
 <template>
@@ -48,16 +24,7 @@ function getSpaceItem(space: Space) {
       class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">
-        <AppLink :to="getSpaceItem(element).link" class="block">
-          <UiTooltip :title="getSpaceItem(element).title" placement="right">
-            <SpaceAvatar
-              show-active-proposals
-              :space="getSpaceItem(element).avatarSpace"
-              :size="32"
-              class="!rounded-[4px]"
-            />
-          </UiTooltip>
-        </AppLink>
+        <AppSidebarItem :space="element" />
       </template>
     </draggable>
   </div>
