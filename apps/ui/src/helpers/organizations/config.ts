@@ -1,5 +1,6 @@
 import { RouteLocationRaw } from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
+import { offchainNetworks } from '@/networks';
 import { NetworkID, RelatedSpace, Space, SpaceMetadataTreasury } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
@@ -324,6 +325,18 @@ export function getCustomRoute(
   spaceId: string
 ): SpaceRoute | undefined {
   return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
+}
+
+/** Onchain spaces in this org on a given network. Drives the Spaces filter on
+ *  proposals; currently only Arbitrum opts in (Core + Treasury governors). */
+export function getOrgOnchainSpaces(
+  organization: Organization | null,
+  network: NetworkID
+): Space[] {
+  if (organization?.id !== 'arbitrum') return [];
+  return (organization.spaces ?? []).filter(
+    s => !offchainNetworks.includes(s.network) && s.network === network
+  );
 }
 
 export function getOrgProposalLabel(
