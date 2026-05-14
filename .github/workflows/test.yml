@@ -1,6 +1,12 @@
 name: CI
 
-on: [push]
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
 
 env:
   STARKNET_DEVNET_VERSION: 0.4.2
