@@ -2,7 +2,14 @@ import { execSync, fork } from 'child_process';
 import path from 'path';
 import { checkbox } from '@inquirer/prompts';
 
-type ServiceType = 'ui' | 'api' | 'mana' | 'highlight';
+type ServiceType =
+  | 'ui'
+  | 'api'
+  | 'mana'
+  | 'highlight'
+  | 'hub'
+  | 'sequencer'
+  | 'mcp';
 type Service = {
   env: Record<string, string>;
 };
@@ -28,6 +35,21 @@ const SERVICES: Record<ServiceType, Service> = {
   highlight: {
     env: {
       VITE_HIGHLIGHT_URL: 'http://localhost:3002'
+    }
+  },
+  hub: {
+    env: {
+      PORT: '3003'
+    }
+  },
+  sequencer: {
+    env: {
+      PORT: '3004'
+    }
+  },
+  mcp: {
+    env: {
+      PORT: '3005'
     }
   }
 };
@@ -77,14 +99,19 @@ async function run() {
         { name: 'UI', value: 'ui' as const },
         { name: 'API (only sep and sn-sep)', value: 'api' as const },
         { name: 'Mana', value: 'mana' as const },
-        { name: 'Highlight', value: 'highlight' as const }
+        { name: 'Highlight', value: 'highlight' as const },
+        { name: 'Hub', value: 'hub' as const },
+        { name: 'Sequencer', value: 'sequencer' as const },
+        { name: 'MCP', value: 'mcp' as const }
       ]
     });
 
     if (
       answer.includes('api') ||
       answer.includes('mana') ||
-      answer.includes('highlight')
+      answer.includes('highlight') ||
+      answer.includes('hub') ||
+      answer.includes('sequencer')
     ) {
       console.log('Starting Docker for backend services...');
       execSync(DOCKER_CMD);

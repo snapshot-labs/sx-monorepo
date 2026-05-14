@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/Envelope",
+  "definitions": {
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "address"
+            },
+            {
+              "type": "string",
+              "format": "starknetAddress"
+            }
+          ]
+        },
+        "data": {
+          "type": "object",
+          "properties": {
+            "domain": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "version"
+              ]
+            },
+            "message": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "address"
+                    },
+                    {
+                      "type": "string",
+                      "format": "starknetAddress"
+                    }
+                  ]
+                },
+                "timestamp": {
+                  "type": "number"
+                },
+                "space": {
+                  "type": "string",
+                  "pattern": "^[^ ]+$"
+                }
+              },
+              "required": [
+                "from",
+                "timestamp"
+              ]
+            },
+            "types": {
+              "type": "object"
+            },
+            "primaryType": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "domain",
+            "message",
+            "types"
+          ],
+          "additionalProperties": false
+        },
+        "sig": {
+          "type": ["string", "array"]
+        }
+      },
+      "required": [
+        "address",
+        "data",
+        "sig"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
