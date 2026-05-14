@@ -8,8 +8,7 @@ import {
 import { Float } from '@headlessui-float/vue';
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { getOrgProposalLabel } from '@/helpers/organizations';
-import { offchainNetworks } from '@/networks';
+import { getOrgOnchainSpaces, getOrgProposalLabel } from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useMultiSpaceProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
@@ -35,44 +34,23 @@ const {
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
 
-/** Onchain spaces in this org, on the same network as the current space.
- *  Drives the Spaces filter. Gated to Arbitrum for now — the only org with multiple
- *  onchain governors today; revisit when another org needs the same pattern. */
-const orgOnchainSpaces = computed(() => {
-  if (organization.value?.id !== 'arbitrum') return [];
-  const all = organization.value?.spaces ?? [];
-  return all.filter(
-    s =>
-      !offchainNetworks.includes(s.network) &&
-      s.network === props.space.network
-  );
-});
+const orgOnchainSpaces = computed(() =>
+  getOrgOnchainSpaces(organization.value, props.space.network)
+);
 
-/** Default selection: when the chip is shown (Arbitrum org today), all onchain spaces
- *  are pre-selected so "Onchain voting" surfaces everything at once. Falls back to the
- *  current space for any future org that opts in with a single-space sidebar. */
 const defaultSelectedSpaceIds = computed(() =>
   orgOnchainSpaces.value.length
     ? orgOnchainSpaces.value.map(s => s.id)
     : [props.space.id]
 );
 
-/** Multi-select: which spaces to aggregate proposals from. Persisted in ?spaces=<csv>;
- *  initialized from the default and overridden by URL state in the watcher below. */
 const selectedSpaceIds = ref<string[]>([...defaultSelectedSpaceIds.value]);
 
-const showSpacesFilter = computed(() => orgOnchainSpaces.value.length > 1);
-
-const spacesById = computed(() =>
-  Object.fromEntries(orgOnchainSpaces.value.map(s => [s.id, s]))
-);
-
-/** Chip label: "Any" when nothing selected, the name when one, "Name +N" when many. */
 const spacesButtonLabel = computed(() => {
   const ids = selectedSpaceIds.value;
   if (!ids.length) return 'Any';
-  const first = spacesById.value[ids[0]];
-  const firstName = first?.name ?? first?.id ?? ids[0];
+  const first = orgOnchainSpaces.value.find(s => s.id === ids[0]);
+  const firstName = first?.name ?? ids[0];
   return ids.length === 1 ? firstName : `${firstName} +${ids.length - 1}`;
 });
 
@@ -81,16 +59,13 @@ const selectIconBaseProps = {
 };
 
 const proposalsLabel = computed(() => {
-  /** Single space selected (or no org context): keep the existing per-space label. */
-  if (selectedSpaceIds.value.length <= 1) {
-    return (
-      getOrgProposalLabel(
-        organization.value,
-        `${props.space.network}:${props.space.id}`
-      ) ?? 'Proposals'
-    );
-  }
-  return 'Proposals';
+  if (selectedSpaceIds.value.length > 1) return 'Proposals';
+  return (
+    getOrgProposalLabel(
+      organization.value,
+      `${props.space.network}:${props.space.id}`
+    ) ?? 'Proposals'
+  );
 });
 
 const spaceLabels = computed(() => {
@@ -98,12 +73,6 @@ const spaceLabels = computed(() => {
 
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
-
-/** Effective spaces to query — falls back to the current space when the multi-select
- *  is empty (avoids an empty-IN query that would return nothing). */
-const effectiveSpaceIds = computed(() =>
-  selectedSpaceIds.value.length ? selectedSpaceIds.value : [props.space.id]
-);
 
 const {
   data,
@@ -114,7 +83,7 @@ const {
   isFetchingNextPage
 } = useMultiSpaceProposalsQuery(
   toRef(() => props.space.network),
-  effectiveSpaceIds,
+  selectedSpaceIds,
   {
     state,
     labels
@@ -131,6 +100,10 @@ async function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
+}
+
+function sameIds(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((id, i) => id === b[i]);
 }
 
 watchThrottled(
@@ -153,9 +126,8 @@ watchThrottled(
 
     const validIds = new Set(onchainSpaces.map(s => s.id));
     const fromQuery = (toSpaces ?? '').split(',').filter(id => validIds.has(id));
-    selectedSpaceIds.value = fromQuery.length
-      ? fromQuery
-      : [...defaultSelectedSpaceIds.value];
+    const next = fromQuery.length ? fromQuery : defaultSelectedSpaceIds.value;
+    if (!sameIds(next, selectedSpaceIds.value)) selectedSpaceIds.value = [...next];
   },
   { throttle: 1000, immediate: true }
 );
@@ -186,12 +158,7 @@ watch(
         delete query.labels;
       }
 
-      /** Drop the param when the selection matches the default (so URLs stay clean
-       *  on fresh visits and only show ?spaces= when the user has narrowed). */
-      const def = defaultSelectedSpaceIds.value;
-      const isDefault =
-        toSpaces.length === def.length &&
-        toSpaces.every(id => def.includes(id));
+      const isDefault = sameIds(toSpaces, defaultSelectedSpaceIds.value);
       if (toSpaces.length && !isDefault) {
         query.spaces = toSpaces.join(',');
       } else {
@@ -247,48 +214,51 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
             }
           ]"
         />
-        <div v-if="showSpacesFilter" class="sm:relative">
-          <Listbox v-model="selectedSpaceIds" multiple as="div">
-            <Float adaptive-width strategy="fixed" placement="bottom-start">
-              <ListboxButton
-                class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-3 min-w-[110px] h-[42px] top-1 text-skin-link bg-skin-bg"
+        <Listbox
+          v-if="orgOnchainSpaces.length > 1"
+          v-model="selectedSpaceIds"
+          multiple
+          as="div"
+        >
+          <Float adaptive-width strategy="fixed" placement="bottom-start">
+            <ListboxButton
+              class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-3 min-w-[110px] h-[42px] top-1 text-skin-link bg-skin-bg"
+            >
+              <div
+                class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
               >
-                <div
-                  class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
-                >
-                  Spaces
-                </div>
-                <span class="truncate max-w-[180px]">
-                  {{ spacesButtonLabel }}
-                </span>
-              </ListboxButton>
-              <ListboxOptions
-                class="mt-2 bg-skin-bg rounded-md shadow-bottom overflow-hidden focus:outline-none min-w-[200px] border"
+                Spaces
+              </div>
+              <span class="truncate max-w-[180px]">
+                {{ spacesButtonLabel }}
+              </span>
+            </ListboxButton>
+            <ListboxOptions
+              class="mt-2 bg-skin-bg rounded-md shadow-bottom overflow-hidden focus:outline-none min-w-[200px] border"
+            >
+              <ListboxOption
+                v-for="s in orgOnchainSpaces"
+                :key="s.id"
+                v-slot="{ selected, active }"
+                :value="s.id"
               >
-                <ListboxOption
-                  v-for="s in orgOnchainSpaces"
-                  :key="s.id"
-                  v-slot="{ selected, active }"
-                  :value="s.id"
+                <li
+                  class="px-3 py-2 cursor-pointer flex items-center gap-2 whitespace-nowrap"
+                  :class="active ? 'bg-skin-border' : ''"
                 >
-                  <li
-                    class="px-3 py-2 cursor-pointer flex items-center gap-2 whitespace-nowrap"
-                    :class="active ? 'bg-skin-border' : ''"
-                  >
-                    <IH-check
-                      v-if="selected"
-                      class="text-skin-success size-[16px]"
-                    />
-                    <span v-else class="inline-block size-[16px]" />
-                    <span class="text-skin-link">
-                      {{ s.name ?? s.id }}
-                    </span>
-                  </li>
-                </ListboxOption>
-              </ListboxOptions>
-            </Float>
-          </Listbox>
-        </div>
+                  <IH-check
+                    v-if="selected"
+                    class="text-skin-success size-[16px]"
+                  />
+                  <span v-else class="inline-block size-[16px]" />
+                  <span class="text-skin-link">
+                    {{ s.name ?? s.id }}
+                  </span>
+                </li>
+              </ListboxOption>
+            </ListboxOptions>
+          </Float>
+        </Listbox>
         <div v-if="space.labels?.length" class="sm:relative">
           <PickerLabel
             v-model="labels"
