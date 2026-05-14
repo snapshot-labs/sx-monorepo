@@ -127,27 +127,17 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     ],
     navItems: {
       proposals: {
-        name: 'Treasury governor',
+        name: 'Onchain voting',
         icon: IHNewspaper,
-        link: {
-          name: 'space-proposals',
-          params: { space: 'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4' }
-        },
-        activeRoute: {
-          prefix: 'space-treasury-gov'
-        }
-      },
-      core: {
-        name: 'Core governor',
-        icon: IHNewspaper,
+        /** Lands on the Core governor route by convention; the Spaces filter on the
+         *  proposals page picks both Core and Treasury by default for Arbitrum. */
         link: {
           name: 'space-proposals',
           params: { space: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9' }
         },
         activeRoute: {
-          prefix: 'space-core-gov'
-        },
-        position: 3
+          prefix: ['space-core-gov', 'space-treasury-gov']
+        }
       },
       signals: {
         name: 'Offchain voting',
