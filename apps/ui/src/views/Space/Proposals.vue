@@ -368,6 +368,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :loading="isPending"
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"
+      :show-space="selectedSpaceIds.length > 1"
       @end-reached="handleEndReached"
     />
   </div>
