@@ -43,7 +43,12 @@ onMounted(() => load());
                 <div v-text="app.category" />
               </div>
             </div>
-            <UiButton v-if="app.link" :to="app.link" primary class="w-full">
+            <UiButton
+              v-if="app.link"
+              :to="app.link"
+              primary
+              class="w-full md:w-auto"
+            >
               Use integration
             </UiButton>
           </div>

@@ -6,8 +6,8 @@ defineProps<{ app: any }>();
 
 <template>
   <AppLink
-    :to="app.link || app.website"
-    class="border rounded-lg p-3 leading-6 relative group"
+    :to="{ name: 'site-app', params: { app: app.id } }"
+    class="border rounded-lg p-3 leading-6 relative group block text-left w-full"
   >
     <img :src="getUrl(app.avatar) || ''" class="size-[32px] rounded-lg mb-2" />
     <IH-arrow-sm-right
