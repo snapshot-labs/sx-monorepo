@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { fallbackLogger, initLogger } from '@snapshot-labs/snapshot-sentry';
+import './instrument';
+import { fallbackLogger } from '@snapshot-labs/snapshot-sentry';
 import cors from 'cors';
 import express from 'express';
 import api from './api';
@@ -22,7 +23,6 @@ import refreshVotesVpValue from './helpers/votesVpValue';
 const app = express();
 
 async function startServer() {
-  initLogger(app);
   refreshModeration();
   refreshProposalsVpValue();
   refreshProposalsScoresValue();

@@ -1,5 +1,6 @@
 import 'dotenv/config';
-import { fallbackLogger, initLogger } from '@snapshot-labs/snapshot-sentry';
+import './instrument';
+import { fallbackLogger } from '@snapshot-labs/snapshot-sentry';
 import cors from 'cors';
 import express from 'express';
 import api from './api';
@@ -16,7 +17,6 @@ import './helpers/strategies';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-initLogger(app);
 initMetrics(app);
 refreshSpacesCache();
 
