@@ -368,8 +368,14 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :loading="isPending"
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"
-      :show-space="selectedSpaceIds.length > 1"
       @end-reached="handleEndReached"
-    />
+    >
+      <template
+        v-if="selectedSpaceIds.length > 1"
+        #item-meta="{ proposal }"
+      >
+        {{ proposal.space.name }}
+      </template>
+    </ProposalsList>
   </div>
 </template>
