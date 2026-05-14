@@ -244,7 +244,7 @@
         "@headlessui/vue": "^1.7.23",
         "@reown/walletkit": "^1.2.11",
         "@snapshot-labs/highlight": "^0.1.0-beta.2",
-        "@snapshot-labs/lock": "0.3.1",
+        "@snapshot-labs/lock": "0.3.2",
         "@snapshot-labs/pineapple": "^1.2.1",
         "@snapshot-labs/snapshot.js": "^0.14.20",
         "@snapshot-labs/sx": "^0.1.11",
@@ -367,7 +367,7 @@
     },
     "packages/lock": {
       "name": "@snapshot-labs/lock",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "dependencies": {
         "0xsequence": "^2.2.10",
         "@coinbase/wallet-sdk": "^4.3.0",
