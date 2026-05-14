@@ -3,6 +3,9 @@ export function useLoginFromUrl() {
   const { login } = useWeb3();
   const { connectors } = useConnectors();
 
+  /** immediate: true so first-paint deep links (?login=… / ?as=…) — the whole
+   *  point of this composable — actually fire on initial load, not just on a
+   *  subsequent navigation. */
   watch(
     () => {
       const q = router.currentRoute.value.query;
@@ -21,6 +24,7 @@ export function useLoginFromUrl() {
       delete query.login;
       delete query.chainId;
       router.push({ query });
-    }
+    },
+    { immediate: true }
   );
 }

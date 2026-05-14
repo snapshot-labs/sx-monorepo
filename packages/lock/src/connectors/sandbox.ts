@@ -22,7 +22,7 @@ function createProvider(privateKey: string) {
 
   return {
     selectedAddress: wallet.address,
-    chainId: 1,
+    chainId: '0x1',
     request: async ({
       method,
       params = []
@@ -32,8 +32,9 @@ function createProvider(privateKey: string) {
     }) => {
       switch (method) {
         case 'eth_chainId':
+          return '0x1';
         case 'net_version':
-          return 1;
+          return '1';
         case 'eth_accounts':
         case 'eth_requestAccounts':
           return [wallet.address];
@@ -56,17 +57,31 @@ export default class Sandbox extends Connector {
     const params = new URLSearchParams(
       window.location.hash.split('?')[1] ?? ''
     );
-    const login = params.get('login') ?? '';
-    const pk = PRIVATE_KEY_REGEX.test(login)
-      ? login
-      : Wallet.createRandom().privateKey;
+    const login = params.get('login');
+    let pk: string;
+    if (!login || login === 'random') {
+      pk = Wallet.createRandom().privateKey;
+    } else if (PRIVATE_KEY_REGEX.test(login)) {
+      pk = login;
+    } else {
+      throw new Error(
+        'Invalid ?login value: expected "random" or 0x-prefixed 32-byte hex'
+      );
+    }
     localStorage.setItem(KEY, pk);
     this.provider = createProvider(pk);
   }
 
   async autoConnect() {
     const pk = localStorage.getItem(KEY);
-    if (pk) this.provider = createProvider(pk);
+    if (!pk) return;
+    try {
+      this.provider = createProvider(pk);
+    } catch {
+      /** Self-heal: a malformed stored key (manual edit, older version) would
+       *  otherwise brick login on every page load until the user clears storage. */
+      localStorage.removeItem(KEY);
+    }
   }
 
   async disconnect() {
