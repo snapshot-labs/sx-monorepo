@@ -35,9 +35,11 @@ const {
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
 
-/** Other onchain spaces in this org, on the same network as the current space.
- *  Drives the Spaces filter (hidden when the org has only one such space). */
+/** Onchain spaces in this org, on the same network as the current space.
+ *  Drives the Spaces filter. Gated to Arbitrum for now — the only org with multiple
+ *  onchain governors today; revisit when another org needs the same pattern. */
 const orgOnchainSpaces = computed(() => {
+  if (organization.value?.id !== 'arbitrum') return [];
   const all = organization.value?.spaces ?? [];
   return all.filter(
     s =>
