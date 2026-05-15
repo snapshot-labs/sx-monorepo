@@ -8,7 +8,7 @@ import Process from '../highlight/process';
 
 const CHAIN_ID = '11155111';
 
-const provider = new StaticJsonRpcProvider('https://rpc.snapshot.org/11155111');
+const provider = new StaticJsonRpcProvider('https://rpc.brovider.xyz/11155111');
 const adapter = new MemoryAdapter();
 const wallet = getWallet();
 

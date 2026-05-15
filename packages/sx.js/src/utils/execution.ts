@@ -8,6 +8,9 @@ import {
   Transaction
 } from '../types';
 
+const BROVIDER_URL = 'https://rpc.brovider.xyz';
+const getRpcUrl = (chainId: number) => `${BROVIDER_URL}/${chainId}?client=sx.js`;
+
 type Abi = (Fragment | JsonFragment | string)[];
 
 type CallInfo = {
@@ -61,7 +64,7 @@ export async function getAbi(
       CUSTOM_PROXY_RESOLVERS[address as keyof typeof CUSTOM_PROXY_RESOLVERS];
 
     const provider = new StaticJsonRpcProvider(
-      `https://rpc.snapshot.org/${chainId}`,
+      getRpcUrl(chainId),
       chainId
     );
 
@@ -128,7 +131,7 @@ export async function decodeExecution(
 
     if (isErc20Transfer) {
       const provider = new StaticJsonRpcProvider(
-        `https://rpc.snapshot.org/${chainId}`,
+        getRpcUrl(chainId),
         chainId
       );
 
