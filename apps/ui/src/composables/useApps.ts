@@ -5,7 +5,8 @@ const APPS_SHEET_GID = '0';
 
 async function getSpreadsheet(id: string, gid: string = '0'): Promise<any[]> {
   const res = await fetch(
-    `https://docs.google.com/spreadsheets/d/e/${id}/pub?output=csv&gid=${gid}&cb=${Math.random()}}`
+    `https://docs.google.com/spreadsheets/d/e/${id}/pub?output=csv&gid=${gid}&cb=${Date.now()}`,
+    { cache: 'no-store' }
   );
   const text = await res.text();
 
@@ -64,7 +65,7 @@ const loaded: Ref<boolean> = ref(false);
 
 export function useApps() {
   async function load() {
-    if (loading.value || loaded.value) return;
+    if (loading.value) return;
 
     loading.value = true;
 
