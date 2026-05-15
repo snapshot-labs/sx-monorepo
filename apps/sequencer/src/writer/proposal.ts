@@ -9,8 +9,8 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
-import { validateSpaceSettings } from '../helpers/spaceValidation';
 import { getProvider } from '../helpers/provider';
+import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
   captureError,
   getQuorum,
