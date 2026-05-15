@@ -23,14 +23,21 @@ function createProvider(privateKey: string) {
 
   const signTypedData = (raw: any) => {
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw;
-    const { EIP712Domain: _, ...types } = data.types;
+    const types = { ...data.types };
+    delete types.EIP712Domain;
     return wallet._signTypedData(data.domain, types, data.message);
   };
 
   return {
     selectedAddress: wallet.address,
     chainId: '0x1',
-    request: async ({ method, params = [] }: { method: string; params?: any[] }) => {
+    request: async ({
+      method,
+      params = []
+    }: {
+      method: string;
+      params?: any[];
+    }) => {
       switch (method) {
         case 'eth_chainId':
           return '0x1';
@@ -55,7 +62,9 @@ function createProvider(privateKey: string) {
 
 export default class Sandbox extends Connector {
   async connect() {
-    const params = new URLSearchParams(window.location.hash.split('?')[1] ?? '');
+    const params = new URLSearchParams(
+      window.location.hash.split('?')[1] ?? ''
+    );
     const pk = privateKeyFromLogin(params.get('login'));
     localStorage.setItem(KEY, pk);
     this.provider = createProvider(pk);
