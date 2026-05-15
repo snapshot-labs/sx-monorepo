@@ -36,6 +36,8 @@
     "0xsequence": "^2.2.10",
     "@coinbase/wallet-sdk": "^4.3.0",
     "@ethersproject/address": "^5.8.0",
+    "@ethersproject/bytes": "^5.8.0",
+    "@ethersproject/wallet": "^5.8.0",
     "@reown/appkit": "^1.8.8",
     "@safe-global/safe-apps-provider": "^0.18.6",
     "@safe-global/safe-apps-sdk": "^9.1.0",
