@@ -222,6 +222,12 @@ describe('utils', () => {
       );
     });
 
+    it('re-checksums an evm address with a malformed checksum', () => {
+      expect(formatAddress('0x0579A616689f7ed748dC07692A3f150d44b0CA09')).toBe(
+        '0x0579A616689f7ed748dC07692A3F150D44b0CA09'
+      );
+    });
+
     it('returns a padded starknet address', () => {
       expect(formatAddress('0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781')).toBe(
         '0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781'
