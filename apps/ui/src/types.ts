@@ -375,6 +375,7 @@ export type UserActivity = {
   spaceId: string;
   proposal_count: number;
   vote_count: number;
+  vp_value: number;
 };
 
 export type Statement = {

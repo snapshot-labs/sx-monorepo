@@ -81,29 +81,26 @@ function handleSortChange(field: Order_OrderBy) {
         >
           <div class="flex-1 min-w-[168px] truncate">Bidder</div>
           <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+            class="w-[200px] max-w-[200px] !justify-start uppercase"
             :is-ordered="orderBy === 'timestamp'"
             :order-direction="orderDirection"
+            label="Created"
             @sort-change="handleSortChange('timestamp')"
-          >
-            Created
-          </UiColumnHeaderItemSortable>
+          />
           <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+            class="w-[200px] max-w-[200px] !justify-start uppercase"
             :is-ordered="orderBy === 'sellAmount'"
             :order-direction="orderDirection"
+            label="Amount"
             @sort-change="handleSortChange('sellAmount')"
-          >
-            Amount
-          </UiColumnHeaderItemSortable>
+          />
           <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+            class="w-[200px] max-w-[200px] !justify-start uppercase"
             :is-ordered="orderBy === 'price'"
             :order-direction="orderDirection"
+            label="Max. price"
             @sort-change="handleSortChange('price')"
-          >
-            Max. price
-          </UiColumnHeaderItemSortable>
+          />
           <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
           <div class="w-[200px] max-w-[200px] truncate">Status</div>
           <div class="min-w-[44px] lg:w-[60px]" />
