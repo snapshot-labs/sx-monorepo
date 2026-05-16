@@ -204,13 +204,13 @@ router.afterEach(() => {
 <template>
   <div
     ref="el"
-    class="min-h-screen"
+    class="min-h-screen min-h-dvh"
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
     <div
       v-else
-      class="flex min-h-screen maximum:border-r"
+      class="flex min-h-screen min-h-dvh maximum:border-r"
       :class="{ 'maximum:border-l': isStandaloneLayout }"
     >
       <AppBottomNav
@@ -261,7 +261,7 @@ router.afterEach(() => {
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
-          <router-view class="h-full pb-10" />
+          <router-view class="h-full" />
         </div>
         <div
           v-if="hasPlaceHolderSidebar"
