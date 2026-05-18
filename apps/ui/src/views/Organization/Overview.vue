@@ -123,7 +123,7 @@ watchEffect(() => {
             v-if="!isWhiteLabel"
             class="top-0.5"
             :verified="space.verified"
-            :turbo="space.turbo"
+            :turbo="spaces.some(s => s.turbo)"
             :flagged="space.additionalRawData?.flagged || false"
           />
         </div>

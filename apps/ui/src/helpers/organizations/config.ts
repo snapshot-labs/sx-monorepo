@@ -270,6 +270,14 @@ export function getOrganizationConfigById(
   return ORGANIZATIONS[id] ?? null;
 }
 
+export function getOrganizationConfigBySpace(
+  spaceId: string
+): OrganizationConfig | null {
+  return (
+    Object.values(ORGANIZATIONS).find(org => isOrgSpace(org, spaceId)) ?? null
+  );
+}
+
 export function isOrgSpace(
   org: OrganizationConfig,
   spaceParam?: string | string[]
