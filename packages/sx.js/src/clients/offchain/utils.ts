@@ -13,7 +13,10 @@ export async function encryptChoices(
   proposalId: string,
   choice: string
 ): Promise<string> {
-  if (privacy === 'shutter') {
+  // Vocdoni reuses the shutter encryption primitive on the wire; the
+  // never-decrypt semantic is enforced by the hub/sequencer, which never
+  // request a decryption key for vocdoni proposals.
+  if (privacy === 'shutter' || privacy === 'vocdoni') {
     return encryptShutterChoice(choice, proposalId);
   }
 

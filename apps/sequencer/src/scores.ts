@@ -186,17 +186,36 @@ export async function updateProposalAndVotes(
     }
 
     // Get results
-    const voting = new snapshot.utils.voting[proposal.type](
-      proposal,
-      votes,
-      proposal.strategies
-    );
-    const results = {
-      scores_state: proposal.state === 'closed' ? 'final' : 'pending',
-      scores: voting.getScores(),
-      scores_by_strategy: voting.getScoresByStrategy(),
-      scores_total: voting.getScoresTotal()
-    };
+    let results;
+    if (proposal.privacy === 'vocdoni') {
+      // For vocdoni, choices are never decrypted. Expose aggregate
+      // participation (total VP) so quorum can still be evaluated, but keep
+      // per-choice scores at zero — they are private forever.
+      const scoresTotal = votes.reduce(
+        (sum: number, v: any) => sum + (v.balance || 0),
+        0
+      );
+      results = {
+        scores_state: proposal.state === 'closed' ? 'final' : 'pending',
+        scores: proposal.choices.map(() => 0),
+        scores_by_strategy: proposal.choices.map(() =>
+          proposal.strategies.map(() => 0)
+        ),
+        scores_total: scoresTotal
+      };
+    } else {
+      const voting = new snapshot.utils.voting[proposal.type](
+        proposal,
+        votes,
+        proposal.strategies
+      );
+      results = {
+        scores_state: proposal.state === 'closed' ? 'final' : 'pending',
+        scores: voting.getScores(),
+        scores_by_strategy: voting.getScoresByStrategy(),
+        scores_total: voting.getScoresTotal()
+      };
+    }
 
     // Check if voting power is final
     const withOverride = hasStrategyOverride(proposal.strategies);

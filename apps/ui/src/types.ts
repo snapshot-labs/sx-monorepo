@@ -54,7 +54,7 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | 'none';
+export type Privacy = 'shutter' | 'vocdoni' | 'none';
 export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
