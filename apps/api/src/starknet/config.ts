@@ -1,14 +1,13 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { starknetNetworks } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet';
-import { MANA_URL } from '../config';
+import { getRpcUrl, MANA_URL } from '../config';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
 
-const snNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN || 'https://rpc.snapshot.org/sn';
+const snNetworkNodeUrl = process.env.NETWORK_NODE_URL_SN || getRpcUrl('sn');
 const snSepNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN_SEP || 'https://rpc.snapshot.org/sn-sep';
+  process.env.NETWORK_NODE_URL_SN_SEP || getRpcUrl('sn-sep');
 
 export type FullConfig = {
   indexerName: 'sn' | 'sn-sep';
@@ -19,7 +18,7 @@ const CONFIG = {
   sn: {
     indexerName: 'sn',
     networkNodeUrl: snNetworkNodeUrl,
-    l1NetworkNodeUrl: 'https://rpc.brovider.xyz/1',
+    l1NetworkNodeUrl: getRpcUrl(1),
     contract: starknetNetworks['sn'].Meta.spaceFactory,
     start: 445498,
     verifiedSpaces: [
@@ -32,7 +31,7 @@ const CONFIG = {
   'sn-sep': {
     indexerName: 'sn-sep',
     networkNodeUrl: snSepNetworkNodeUrl,
-    l1NetworkNodeUrl: 'https://rpc.brovider.xyz/11155111',
+    l1NetworkNodeUrl: getRpcUrl(11155111),
     contract: starknetNetworks['sn-sep'].Meta.spaceFactory,
     start: 17960,
     verifiedSpaces: [

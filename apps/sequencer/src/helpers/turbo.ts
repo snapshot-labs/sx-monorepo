@@ -1,6 +1,7 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import db from './mysql';
+import { getProvider } from './provider';
 import { fetchWithKeepAlive } from './utils';
 
 type Space = {
@@ -12,12 +13,7 @@ const SCHNAPS_API_URL = process.env.SCHNAPS_API_URL;
 const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
 const RUN_INTERVAL = 10 * 1e3; // 10 seconds
 
-const provider = snapshot.utils.getProvider(
-  process.env.DEFAULT_NETWORK ?? '1',
-  {
-    broviderUrl: process.env.BROVIDER_URL || 'https://rpc.snapshot.org'
-  }
-);
+const provider = getProvider(process.env.DEFAULT_NETWORK ?? '1');
 
 // Periodically sync the turbo status of spaces with the schnaps-api
 export async function trackTurboStatuses() {
