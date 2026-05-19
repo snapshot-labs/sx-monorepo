@@ -7,7 +7,7 @@ import {
   useEmailNotificationQuery
 } from '@/queries/emailNotification';
 
-useTitle('Email notifications');
+useTitle('Notifications');
 
 const SUBSCRIBE_FORM_STATE = {
   email: ''
@@ -26,7 +26,7 @@ const SUBSCRIBE_DEFINITION = {
       title: 'Email',
       errorMessage: 'Invalid email address',
       maxLength: 256,
-      examples: ['e.g. me@snapshot.box']
+      examples: ['e.g. satoshin@gmx.com']
     }
   }
 };
@@ -190,7 +190,7 @@ watchEffect(async () => {
     </div>
     <UiContainerSettings
       v-else-if="status === 'NOT_SUBSCRIBED'"
-      title="Receive email notifications"
+      title="Receive notifications"
       description="Stay updated with the latest and important updates directly on your inbox."
     >
       <div class="s-box">
@@ -205,7 +205,7 @@ watchEffect(async () => {
         :loading="isPending"
         @click="handleCreateSubscriptionClick"
       >
-        Subscribe now
+        Subscribe
       </UiButton>
     </UiContainerSettings>
     <UiContainerSettings
@@ -221,7 +221,7 @@ watchEffect(async () => {
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="status === 'VERIFIED'"
-      title="Email notifications"
+      title="Notifications"
       description="Choose the notifications you'd like to receive - and those you don't."
     >
       <div class="space-y-3 mb-4">

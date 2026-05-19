@@ -21,8 +21,8 @@ export default {
           name: 'Contacts',
           icon: IHUsers
         },
-        'email-notifications': {
-          name: 'Email notifications',
+        notifications: {
+          name: 'Notifications',
           icon: IHAtSymbol,
           hidden: metadataNetwork !== 's' || isWhiteLabel
         }
