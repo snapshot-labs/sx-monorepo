@@ -38,7 +38,11 @@ export const PROPOSALS_KEYS = {
       spacesIds,
       { ...filters, query }
     ] as const,
-  multiSpaceList: (
+  spaceSummary: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    spaceId: MaybeRefOrGetter<string>
+  ) => [...PROPOSALS_KEYS.space(networkId, spaceId), 'summary'] as const,
+  spaceList: (
     networkId: MaybeRefOrGetter<NetworkID>,
     spacesIds: MaybeRefOrGetter<string[]>,
     filters: Filters,
@@ -46,24 +50,9 @@ export const PROPOSALS_KEYS = {
   ) =>
     [
       ...PROPOSALS_KEYS.all,
-      'multiSpaceList',
+      'spaceList',
       networkId,
       spacesIds,
-      { ...filters, query }
-    ] as const,
-  spaceSummary: (
-    networkId: MaybeRefOrGetter<NetworkID>,
-    spaceId: MaybeRefOrGetter<string>
-  ) => [...PROPOSALS_KEYS.space(networkId, spaceId), 'summary'] as const,
-  spaceList: (
-    networkId: MaybeRefOrGetter<NetworkID>,
-    spaceId: MaybeRefOrGetter<string>,
-    filters: Filters,
-    query?: MaybeRefOrGetter<string>
-  ) =>
-    [
-      ...PROPOSALS_KEYS.space(networkId, spaceId),
-      'list',
       { ...filters, query }
     ] as const,
   details: (
@@ -196,29 +185,12 @@ export function useHomeProposalsQuery(
 
 export function useProposalsQuery(
   networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>,
-  filters: Filters,
-  query?: MaybeRefOrGetter<string>
-) {
-  return getProposalsQuery(
-    PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
-    networkId,
-    toRef(() => [toValue(spaceId)]),
-    filters,
-    query
-  );
-}
-
-/** Multi-space variant — used by the Spaces filter in Space/Proposals.vue to merge
- *  proposals across several spaces in the same org / network. */
-export function useMultiSpaceProposalsQuery(
-  networkId: MaybeRefOrGetter<NetworkID>,
   spacesIds: MaybeRefOrGetter<string[]>,
   filters: Filters,
   query?: MaybeRefOrGetter<string>
 ) {
   return getProposalsQuery(
-    PROPOSALS_KEYS.multiSpaceList(networkId, spacesIds, filters, query),
+    PROPOSALS_KEYS.spaceList(networkId, spacesIds, filters, query),
     networkId,
     spacesIds,
     filters,

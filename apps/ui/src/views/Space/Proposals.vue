@@ -6,7 +6,7 @@ import {
   getOrgProposalLabel
 } from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
-import { useMultiSpaceProposalsQuery } from '@/queries/proposals';
+import { useProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
 import { Space } from '@/types';
 
@@ -86,7 +86,7 @@ const {
   isPending,
   isError,
   isFetchingNextPage
-} = useMultiSpaceProposalsQuery(
+} = useProposalsQuery(
   toRef(() => props.space.network),
   queriedSpaceIds,
   {
@@ -158,7 +158,7 @@ watch(
         delete query.labels;
       }
 
-      if (hasMultiSpaceFilter.value && toSpace !== ANY_SPACE) {
+      if (toSpace !== ANY_SPACE) {
         query.space = toSpace;
       } else {
         delete query.space;

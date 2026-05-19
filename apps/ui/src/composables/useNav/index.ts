@@ -23,10 +23,7 @@ function getActiveItemKey(
 
   for (const [key, item] of Object.entries(config.items)) {
     const { prefix, params } = item.activeRoute ?? { prefix: `space-${key}` };
-    /** Multiple prefixes let one nav entry highlight under several routes (e.g. a unified
-     *  "Onchain voting" item that's active on both core-gov and treasury-gov routes). */
-    const prefixes = Array.isArray(prefix) ? prefix : [prefix];
-    const isMatchingRoute = prefixes.some(p => {
+    const isMatchingRoute = [prefix].flat().some(p => {
       const fullPrefix = p.replace(/^space-/, `${namespace}-`);
       return routeName === fullPrefix || routeName.startsWith(`${fullPrefix}-`);
     });
