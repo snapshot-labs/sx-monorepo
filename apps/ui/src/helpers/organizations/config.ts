@@ -129,8 +129,6 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       proposals: {
         name: 'Onchain voting',
         icon: IHNewspaper,
-        /** Lands on the Core governor route by convention; the Spaces filter on the
-         *  proposals page picks both Core and Treasury by default for Arbitrum. */
         link: {
           name: 'space-proposals',
           params: { space: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9' }
@@ -288,15 +286,13 @@ export function getCustomRoute(
   return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
 }
 
-/** Onchain spaces in this org on a given network. Drives the Spaces filter on
- *  proposals; currently only Arbitrum opts in (Core + Treasury governors). */
 export function getOrgOnchainSpaces(
   organization: Organization | null,
   network: NetworkID
 ): Space[] {
   if (organization?.id !== 'arbitrum') return [];
-  return (organization.spaces ?? []).filter(
-    s => !offchainNetworks.includes(s.network) && s.network === network
+  return organization.spaces.filter(
+    s => s.network === network && !offchainNetworks.includes(s.network)
   );
 }
 
