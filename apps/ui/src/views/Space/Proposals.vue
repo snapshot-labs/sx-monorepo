@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions
-} from '@headlessui/vue';
-import { Float } from '@headlessui-float/vue';
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { getOrgOnchainSpaces, getOrgProposalLabel } from '@/helpers/organizations';
+import {
+  getOrgOnchainSpaces,
+  getOrgProposalLabel
+} from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useMultiSpaceProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
 import { Space } from '@/types';
+
+const ANY_SPACE = 'any';
 
 const props = defineProps<{ space: Space }>();
 
@@ -38,28 +36,35 @@ const orgOnchainSpaces = computed(() =>
   getOrgOnchainSpaces(organization.value, props.space.network)
 );
 
-const defaultSelectedSpaceIds = computed(() =>
-  orgOnchainSpaces.value.length
+const hasMultiSpaceFilter = computed(() => orgOnchainSpaces.value.length > 1);
+
+const selectedSpaceId = ref<string>(ANY_SPACE);
+
+const spacesItems = computed(() => [
+  { key: ANY_SPACE, label: 'Any' },
+  ...orgOnchainSpaces.value.map(s => ({
+    key: s.id,
+    label: s.name ?? s.id
+  }))
+]);
+
+const queriedSpaceIds = computed(() => {
+  if (!hasMultiSpaceFilter.value) return [props.space.id];
+  return selectedSpaceId.value === ANY_SPACE
     ? orgOnchainSpaces.value.map(s => s.id)
-    : [props.space.id]
-);
-
-const selectedSpaceIds = ref<string[]>([...defaultSelectedSpaceIds.value]);
-
-const spacesButtonLabel = computed(() => {
-  const ids = selectedSpaceIds.value;
-  if (!ids.length) return 'Any';
-  const first = orgOnchainSpaces.value.find(s => s.id === ids[0]);
-  const firstName = first?.name ?? ids[0];
-  return ids.length === 1 ? firstName : `${firstName} +${ids.length - 1}`;
+    : [selectedSpaceId.value];
 });
+
+const isMergedList = computed(
+  () => hasMultiSpaceFilter.value && selectedSpaceId.value === ANY_SPACE
+);
 
 const selectIconBaseProps = {
   size: 16
 };
 
 const proposalsLabel = computed(() => {
-  if (selectedSpaceIds.value.length > 1) return 'Proposals';
+  if (isMergedList.value) return 'Proposals';
   return (
     getOrgProposalLabel(
       organization.value,
@@ -83,7 +88,7 @@ const {
   isFetchingNextPage
 } = useMultiSpaceProposalsQuery(
   toRef(() => props.space.network),
-  selectedSpaceIds,
+  queriedSpaceIds,
   {
     state,
     labels
@@ -102,19 +107,15 @@ async function handleEndReached() {
   fetchNextPage();
 }
 
-function sameIds(a: string[], b: string[]): boolean {
-  return a.length === b.length && a.every((id, i) => id === b[i]);
-}
-
 watchThrottled(
   [
     () => route.query.state as string,
     () => route.query.labels as string[] | string,
-    () => route.query.spaces as string | undefined,
+    () => route.query.space as string | undefined,
     () => props.space.id,
     () => orgOnchainSpaces.value
   ],
-  ([toState, toLabels, toSpaces, , onchainSpaces]) => {
+  ([toState, toLabels, toSpace, , onchainSpaces]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
@@ -125,24 +126,23 @@ watchThrottled(
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
 
     const validIds = new Set(onchainSpaces.map(s => s.id));
-    const fromQuery = (toSpaces ?? '').split(',').filter(id => validIds.has(id));
-    const next = fromQuery.length ? fromQuery : defaultSelectedSpaceIds.value;
-    if (!sameIds(next, selectedSpaceIds.value)) selectedSpaceIds.value = [...next];
+    const next = toSpace && validIds.has(toSpace) ? toSpace : ANY_SPACE;
+    if (next !== selectedSpaceId.value) selectedSpaceId.value = next;
   },
   { throttle: 1000, immediate: true }
 );
 
 watch(
-  [() => props.space.id, state, labels, selectedSpaceIds],
+  [() => props.space.id, state, labels, selectedSpaceId],
   (
-    [toSpaceId, toState, toLabels, toSpaces],
-    [fromSpaceId, fromState, fromLabels, fromSpaces]
+    [toSpaceId, toState, toLabels, toSpace],
+    [fromSpaceId, fromState, fromLabels, fromSpace]
   ) => {
     if (
       toSpaceId !== fromSpaceId ||
       toState !== fromState ||
       toLabels !== fromLabels ||
-      toSpaces !== fromSpaces
+      toSpace !== fromSpace
     ) {
       const query: LocationQueryRaw = { ...route.query };
 
@@ -158,11 +158,10 @@ watch(
         delete query.labels;
       }
 
-      const isDefault = sameIds(toSpaces, defaultSelectedSpaceIds.value);
-      if (toSpaces.length && !isDefault) {
-        query.spaces = toSpaces.join(',');
+      if (hasMultiSpaceFilter.value && toSpace !== ANY_SPACE) {
+        query.space = toSpace;
       } else {
-        delete query.spaces;
+        delete query.space;
       }
 
       if (JSON.stringify(query) !== JSON.stringify(route.query)) {
@@ -184,6 +183,14 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :class="{ 'flex-col-reverse sm:flex-row': space.labels?.length }"
     >
       <div class="flex gap-2">
+        <UiSelectDropdown
+          v-if="hasMultiSpaceFilter"
+          v-model="selectedSpaceId"
+          title="Spaces"
+          gap="12"
+          placement="start"
+          :items="spacesItems"
+        />
         <UiSelectDropdown
           v-model="state"
           title="Status"
@@ -214,51 +221,6 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
             }
           ]"
         />
-        <Listbox
-          v-if="orgOnchainSpaces.length > 1"
-          v-model="selectedSpaceIds"
-          multiple
-          as="div"
-        >
-          <Float adaptive-width strategy="fixed" placement="bottom-start">
-            <ListboxButton
-              class="flex items-center gap-2 relative rounded-full leading-[100%] border button px-3 min-w-[110px] h-[42px] top-1 text-skin-link bg-skin-bg"
-            >
-              <div
-                class="absolute top-[-10px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text"
-              >
-                Spaces
-              </div>
-              <span class="truncate max-w-[180px]">
-                {{ spacesButtonLabel }}
-              </span>
-            </ListboxButton>
-            <ListboxOptions
-              class="mt-2 bg-skin-bg rounded-md shadow-bottom overflow-hidden focus:outline-none min-w-[200px] border"
-            >
-              <ListboxOption
-                v-for="s in orgOnchainSpaces"
-                :key="s.id"
-                v-slot="{ selected, active }"
-                :value="s.id"
-              >
-                <li
-                  class="px-3 py-2 cursor-pointer flex items-center gap-2 whitespace-nowrap"
-                  :class="active ? 'bg-skin-border' : ''"
-                >
-                  <IH-check
-                    v-if="selected"
-                    class="text-skin-success size-[16px]"
-                  />
-                  <span v-else class="inline-block size-[16px]" />
-                  <span class="text-skin-link">
-                    {{ s.name ?? s.id }}
-                  </span>
-                </li>
-              </ListboxOption>
-            </ListboxOptions>
-          </Float>
-        </Listbox>
         <div v-if="space.labels?.length" class="sm:relative">
           <PickerLabel
             v-model="labels"
@@ -318,7 +280,28 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           :is-error="isVotingPowerError"
           @fetch="fetchVotingPower"
         />
-        <UiTooltip title="New proposal">
+        <UiDropdown v-if="hasMultiSpaceFilter" gap="12" placement="end">
+          <template #button>
+            <UiTooltip title="New proposal">
+              <UiButton type="button" uniform>
+                <IH-pencil-alt />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <template #items>
+            <UiDropdownItem
+              v-for="s in orgOnchainSpaces"
+              :key="s.id"
+              :to="{
+                name: 'space-editor',
+                params: { space: `${space.network}:${s.id}` }
+              }"
+            >
+              {{ s.name ?? s.id }}
+            </UiDropdownItem>
+          </template>
+        </UiDropdown>
+        <UiTooltip v-else title="New proposal">
           <UiButton
             :to="{
               name: 'space-editor',
@@ -340,10 +323,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :proposals="data?.pages.flat() ?? []"
       @end-reached="handleEndReached"
     >
-      <template
-        v-if="selectedSpaceIds.length > 1"
-        #item-meta="{ proposal }"
-      >
+      <template v-if="isMergedList" #item-meta="{ proposal }">
         {{ proposal.space.name }}
       </template>
     </ProposalsList>
