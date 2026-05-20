@@ -43,6 +43,7 @@ import {
   Vote
 } from '@/types';
 import {
+  ALIASES_BY_ADDRESS_QUERY,
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
   NETWORKS_QUERY,
@@ -975,6 +976,17 @@ export function createApi(
       });
 
       return aliases?.[0] ?? null;
+    },
+    loadAliases: async (address: string): Promise<Alias[]> => {
+      const {
+        data: { aliases }
+      }: { data: { aliases: Alias[] } } = await apollo.query({
+        query: ALIASES_BY_ADDRESS_QUERY,
+        variables: { address },
+        fetchPolicy: 'no-cache'
+      });
+
+      return aliases ?? [];
     },
     loadStatement: async (
       networkId: NetworkID,

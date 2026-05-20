@@ -871,6 +871,9 @@ export function createApi(
     loadAlias: async () => {
       return null;
     },
+    loadAliases: async () => {
+      return [];
+    },
     loadStatement: async () => {
       return null;
     },

@@ -140,6 +140,14 @@ export const aliasTypes = {
   ]
 };
 
+export const revokeAliasTypes = {
+  RevokeAlias: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};
+
 export const updateUserTypes = {
   Profile: [
     { name: 'from', type: 'string' },

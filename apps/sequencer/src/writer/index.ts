@@ -5,6 +5,7 @@ import * as flagProposal from './flag-proposal';
 import * as follow from './follow';
 import * as profile from './profile';
 import * as proposal from './proposal';
+import * as revokeAlias from './revoke-alias';
 import * as settings from './settings';
 import * as statement from './statement';
 import * as subscribe from './subscribe';
@@ -26,6 +27,7 @@ export default {
   subscribe,
   unsubscribe,
   alias,
+  'revoke-alias': revokeAlias,
   profile,
   statement
 };
