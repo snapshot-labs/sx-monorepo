@@ -26,8 +26,8 @@ export default {
           name: 'Aliases',
           icon: IHKey
         },
-        'email-notifications': {
-          name: 'Email notifications',
+        notifications: {
+          name: 'Notifications',
           icon: IHAtSymbol,
           hidden: metadataNetwork !== 's' || isWhiteLabel
         }

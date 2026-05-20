@@ -12,7 +12,7 @@ import Policy from '@/views/Policy.vue';
 import Aliases from '@/views/Settings/Aliases.vue';
 import Authorize from '@/views/Settings/Authorize.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
-import EmailNotifications from '@/views/Settings/EmailNotifications.vue';
+import SettingsNotifications from '@/views/Settings/Notifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
@@ -67,9 +67,9 @@ export default [
       { path: 'contacts', name: 'settings-contacts', component: Contacts },
       { path: 'aliases', name: 'settings-aliases', component: Aliases },
       {
-        path: 'email-notifications',
-        name: 'settings-email-notifications',
-        component: EmailNotifications
+        path: 'notifications',
+        name: 'settings-notifications',
+        component: SettingsNotifications
       },
       {
         path: 'alias/authorize/:address',
