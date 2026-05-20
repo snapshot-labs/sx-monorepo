@@ -2,15 +2,15 @@
 
 ## CB States
 
-| Value | Constant | Proposals | Votes |
-|------:|----------|-----------|-------|
-| 0 | `PENDING_SYNC` | Default. Waiting for strategy values from Overlord | N/A |
-| -1 | `PENDING_COMPUTE` | Strategy values synced. Waiting for `scores_total_value` computation | Default. Waiting for `vp_value` computation |
-| -2 | `PENDING_FINAL` | Score value computed, but proposal still active | Value computed, but `vp_state` not final |
-| 1 | `FINAL` | Fully computed | Fully computed |
-| -3 | `PENDING_DELETE` | N/A | Proposal deleted, vote awaiting async cleanup |
-| -10 | `INELIGIBLE` | Invalid payload format, cannot compute (permanent) | Invalid data, cannot compute (permanent) |
-| -11 | `ERROR_SYNC` | Overlord sync failed, will be retried | N/A |
+| Value | Constant          | Proposals                                                            | Votes                                         |
+| ----: | ----------------- | -------------------------------------------------------------------- | --------------------------------------------- |
+|     0 | `PENDING_SYNC`    | Default. Waiting for strategy values from Overlord                   | N/A                                           |
+|    -1 | `PENDING_COMPUTE` | Strategy values synced. Waiting for `scores_total_value` computation | Default. Waiting for `vp_value` computation   |
+|    -2 | `PENDING_FINAL`   | Score value computed, but waiting for scores or votes to finalize    | Value computed, but `vp_state` not final      |
+|     1 | `FINAL`           | Fully computed                                                       | Fully computed                                |
+|    -3 | `PENDING_DELETE`  | N/A                                                                  | Proposal deleted, vote awaiting async cleanup |
+|   -10 | `INELIGIBLE`      | Invalid payload format, cannot compute (permanent)                   | Invalid data, cannot compute (permanent)      |
+|   -11 | `ERROR_SYNC`      | Overlord sync failed, will be retried                                | N/A                                           |
 
 > 🟦 Blue = user action &nbsp;&nbsp; 🟧 Orange = async background script
 
@@ -27,20 +27,23 @@ flowchart TD
     D -->|proposalsScoresValue.ts<br>computes scores_total_value| F{Valid payload?}
     F -->|No| G["cb = -10<br>INELIGIBLE"]
     F -->|Yes| H{scores_state<br>final?}
-    H -->|Yes| I["cb = 1<br>FINAL"]
+    H -->|Yes| K{All votes<br>finalized?}
+    K -->|Yes| I["cb = 1<br>FINAL"]
+    K -->|No| J
     H -->|No| J["cb = -2<br>PENDING_FINAL"]
     J -->|New vote arrives<br>scores.ts| D
+    J -->|"scores_state = final<br>proposalsScoresValue.ts<br>retries finalization"| F
 
     classDef user fill:#4a90d9,color:#fff
     classDef async fill:#e8833a,color:#fff
 
     class A user
-    class C,F,H async
+    class C,F,H,K async
     class B,D,E,G,I,J default
 
     linkStyle 0 stroke:#4a90d9
-    linkStyle 1,2,3,4,5,6,7,8,9,10 stroke:#e8833a
-    linkStyle 11 stroke:#4a90d9
+    linkStyle 1,2,3,4,5,6,7,8,9,10,11,12 stroke:#e8833a
+    linkStyle 13 stroke:#4a90d9
 ```
 
 ## Votes State Diagram
