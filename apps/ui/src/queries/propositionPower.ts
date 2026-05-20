@@ -55,6 +55,19 @@ async function getPropositionPower(space: Space, block: number | null) {
     )
   };
 
+  // Confidential (Inco) spaces use Vanilla proposal validation (anyone can
+  // propose) with no off-chain-introspectable strategies. Short-circuit the
+  // VP preview to avoid disabling the Publish button. Scoped to confidential
+  // so legacy SX spaces with no validation strategies (likely misconfigured)
+  // keep their previous behavior.
+  if (
+    space.confidential &&
+    !space.voting_power_validation_strategy_strategies.length
+  ) {
+    vpItem.canPropose = true;
+    return vpItem;
+  }
+
   if (vpItem.canPropose) {
     return vpItem;
   }
@@ -64,18 +77,30 @@ async function getPropositionPower(space: Space, block: number | null) {
     chainId: space.snapshot_chain_id
   };
 
-  const powers = await network.actions.getVotingPower(
-    space.id,
-    space.voting_power_validation_strategy_strategies,
-    space.voting_power_validation_strategy_strategies_params,
-    space.voting_power_validation_strategies_parsed_metadata,
-    account,
-    opts
-  );
+  try {
+    const powers = await network.actions.getVotingPower(
+      space.id,
+      space.voting_power_validation_strategy_strategies,
+      space.voting_power_validation_strategy_strategies_params,
+      space.voting_power_validation_strategies_parsed_metadata,
+      account,
+      opts
+    );
 
-  const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
-
-  vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
+    const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
+    vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
+  } catch (err) {
+    // Confidential (Inco) spaces use Vanilla validation strategies that
+    // aren't introspectable off-chain. Defer to the on-chain validation at
+    // submit time. For every other network, rethrow — masking errors on
+    // mainnet would let users hit a broken submit flow without warning.
+    if (!space.confidential) throw err;
+    console.warn(
+      'Proposition power preview failed for confidential space; allowing propose:',
+      err
+    );
+    vpItem.canPropose = true;
+  }
 
   return vpItem;
 }

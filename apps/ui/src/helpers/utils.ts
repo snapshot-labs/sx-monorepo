@@ -633,6 +633,11 @@ export function getChoiceText(availableChoices: string[], choice: Choice) {
   }
 
   if (typeof choice === 'number') {
+    // Confidential-voting sentinel — the indexer writes `choice = 0` for
+    // encrypted votes (the on-chain enum [0=Against,1=For,2=Abstain] is never
+    // exposed). Legacy plaintext votes always have choice ∈ {1,2,3}, so 0 is
+    // unambiguous.
+    if (choice === 0) return 'Encrypted';
     return availableChoices[choice - 1] ?? 'Invalid choice';
   }
 

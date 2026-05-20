@@ -8,6 +8,7 @@ import {
   evmApe,
   evmArbitrum,
   evmBase,
+  evmBaseSepolia,
   evmBnb,
   evmBnbt,
   evmCurtis,
@@ -74,8 +75,24 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   1: evmMainnet,
   33139: evmApe,
   33111: evmCurtis,
-  11155111: evmSepolia
+  11155111: evmSepolia,
+  // Inco confidential-voting reference chain (Base Sepolia).
+  84532: evmBaseSepolia
 };
+
+/**
+ * Cheap detector for confidential-voting Spaces. Prefers the API-reported flag
+ * (`space.confidential` from the indexer) but falls back to "deployed on the
+ * Inco chain" so brand-new spaces also flow correctly before the indexer has
+ * marked them.
+ */
+function isConfidentialSpace(
+  space: { confidential?: boolean | null },
+  chainId: number
+): boolean {
+  if (space.confidential) return true;
+  return chainId === 84532;
+}
 
 export function createActions(
   provider: Provider,
@@ -331,6 +348,16 @@ export function createActions(
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
         };
+      } else if (isConfidentialSpace(space, chainId)) {
+        // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
+        // accumulating each encrypted vote, so a zero-address strategy reverts
+        // the vote. Fall back to the network's default Vanilla execution
+        // strategy for confidential spaces with no actions.
+        selectedExecutionStrategy = {
+          addr: networkConfig.executionStrategiesImplementations
+            .SimpleQuorumAvatar,
+          params: '0x'
+        };
       } else {
         selectedExecutionStrategy = {
           addr: '0x0000000000000000000000000000000000000000',
@@ -441,6 +468,16 @@ export function createActions(
             executionInfo.destinationAddress,
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
+        };
+      } else if (isConfidentialSpace(space, chainId)) {
+        // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
+        // accumulating each encrypted vote, so a zero-address strategy reverts
+        // the vote. Fall back to the network's default Vanilla execution
+        // strategy for confidential spaces with no actions.
+        selectedExecutionStrategy = {
+          addr: networkConfig.executionStrategiesImplementations
+            .SimpleQuorumAvatar,
+          params: '0x'
         };
       } else {
         selectedExecutionStrategy = {
@@ -607,12 +644,40 @@ export function createActions(
       let pinned: { cid: string; provider: string } | null = null;
       if (reason) pinned = await helpers.pin({ reason });
 
+      const sdkChoice = getSdkChoice(choice);
+
+      // Inco confidential mode: encrypt the choice before sending. The on-chain
+      // Space's `vote(...,bytes ciphertext,...)` ABI variant is selected by
+      // sx.js when `Vote.ciphertext` is set. The ciphertext must be bound to
+      // the *voter* (not msg.sender), since EthSigAuthenticator forwards into
+      // Space.vote() and msg.sender there is the authenticator.
+      //
+      // CRITICAL: derive the voter from `signer.getAddress()` rather than the
+      // web3 store `account` so the encryption binding matches the address
+      // sx.js encodes into the on-chain vote() call. Any drift (case, stale
+      // store) makes the contract's `ciphertext.newEuint256(voter)` produce a
+      // junk handle — userChoice ends up != 1, the For accumulator never
+      // increments, and tryExecute decrypts (false, false) → looks identical
+      // to a rejected proposal. See snapshotx/inco-base-sepolia-runner
+      // negative-cases.ts `wrongCiphertextOwnerCase`.
+      let ciphertext: string | undefined;
+      if (isConfidentialSpace(proposal.space, chainId)) {
+        const { encryptChoice } = await import('@/helpers/inco');
+        const voterAddress = await signer.getAddress();
+        ciphertext = await encryptChoice({
+          space: proposal.space.id,
+          voter: voterAddress,
+          choice: sdkChoice
+        });
+      }
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: Number(proposal.proposal_id),
-        choice: getSdkChoice(choice),
+        choice: sdkChoice,
+        ...(ciphertext ? { ciphertext } : {}),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
@@ -665,6 +730,48 @@ export function createActions(
           transactions: convertToMetaTransactions(
             proposal.executions[0].transactions
           )
+        });
+      }
+
+      // Confidential-voting execution: read encrypted decision-flag handles
+      // from the Space, request attested decryption from Inco's TEE
+      // covalidator, then call `tryExecute` with the attestations. Mana relay
+      // is bypassed because the relayer wallet doesn't have decrypt ACL on the
+      // current Inco contract — only the proposal author does (see
+      // INTEGRATION_PROGRESS.md Open Decision O3).
+      if (isConfidentialSpace(proposal.space, chainId)) {
+        const signer = getSigner(web3);
+        const author = await signer.getAddress();
+        const { decryptDecisionFlags } = await import('@/helpers/inco');
+        const { quorum, support } = await decryptDecisionFlags({
+          space: proposal.space.id,
+          proposal: Number(proposal.proposal_id),
+          account: author
+        });
+
+        // Inco confidential proposals can be created with no on-chain
+        // actions (Vanilla execution). For those, executionParams must match
+        // what was passed at propose time (`'0x'`). For proposals with
+        // actions, encode the same way as the legacy path below.
+        const executionParams =
+          proposal.executions && proposal.executions.length > 0
+            ? getExecutionData(
+                proposal.space,
+                proposal.execution_strategy,
+                proposal.execution_destination,
+                convertToMetaTransactions(proposal.executions[0].transactions)
+              ).executionParams[0]
+            : '0x';
+
+        return client.tryExecute({
+          signer,
+          space: proposal.space.id,
+          proposal: Number(proposal.proposal_id),
+          executionParams,
+          quorumAttestation: quorum.attestation,
+          quorumSignatures: quorum.signatures,
+          supportAttestation: support.attestation,
+          supportSignatures: support.signatures
         });
       }
 

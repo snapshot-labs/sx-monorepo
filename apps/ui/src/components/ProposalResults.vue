@@ -34,6 +34,35 @@ const queryClient = useQueryClient();
 
 const displayAllChoices = ref(false);
 
+// True when per-choice tallies are encrypted and not displayable as numbers.
+// Shutter (offchain) sets `privacy = 'shutter'` until reveal; Inco (onchain)
+// sets `space.confidential = true` and the per-choice tallies stay encrypted
+// forever in v1. Both should render the lock-icon UI instead of 0/0%.
+const isEncryptedTally = computed(() => {
+  if (props.proposal.privacy !== 'none') return true;
+  return !!props.proposal.space?.confidential;
+});
+
+// Confidential decision flags. The indexer writes these from the
+// `DecisionFlagsRevealed` event emitted by `Space.tryExecute` (always — both
+// the approved and rejected paths). They stay null until the proposal is
+// actually revealed, which is exactly the signal we want for showing the
+// verdict — no lifecycle gate needed, no on-chain fallback needed.
+const revealedQuorumReached = computed(
+  () => props.proposal.is_quorum_reached ?? null
+);
+const revealedSupportAchieved = computed(
+  () => props.proposal.is_support_achieved ?? null
+);
+
+const showVerdict = computed(() => {
+  if (!props.proposal.space?.confidential) return false;
+  return (
+    revealedQuorumReached.value !== null &&
+    revealedSupportAchieved.value !== null
+  );
+});
+
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const quorumAmount = computed(() => {
@@ -146,15 +175,51 @@ onMounted(() => {
   </div>
   <div
     v-else-if="
-      props.proposal.privacy !== 'none' &&
-      props.proposal.state === 'active' &&
+      isEncryptedTally &&
+      (props.proposal.state === 'active' ||
+        !!props.proposal.space?.confidential) &&
       withDetails
     "
     class="space-y-1"
   >
-    <div>
+    <div v-if="props.proposal.space?.confidential">
+      Per-choice tallies stay encrypted on-chain. Only the quorum and support
+      pass/fail flags are revealed when the proposal is executed.
+    </div>
+    <div v-else>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
+    </div>
+    <!-- Confidential reveal verdict — read from chain (or indexer when available). -->
+    <div v-if="showVerdict" class="border rounded-lg p-3 mt-2 space-y-1">
+      <div class="flex items-center gap-2 text-skin-link font-medium">
+        <IH-eye />
+        <span>Revealed verdict</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <IH-check v-if="revealedQuorumReached" class="text-emerald-500" />
+        <IH-x v-else class="text-rose-500" />
+        <span>
+          Quorum {{ revealedQuorumReached ? 'reached' : 'NOT reached' }}
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <IH-check v-if="revealedSupportAchieved" class="text-emerald-500" />
+        <IH-x v-else class="text-rose-500" />
+        <span>
+          Support
+          {{ revealedSupportAchieved ? '(For > Against)' : '(For ≤ Against)' }}
+        </span>
+      </div>
+      <div class="pt-1 font-semibold">
+        Outcome:
+        <span
+          v-if="revealedQuorumReached && revealedSupportAchieved"
+          class="text-emerald-500"
+          >Approved</span
+        >
+        <span v-else class="text-rose-500">Rejected</span>
+      </div>
     </div>
     <div v-if="proposal.quorum" class="flex items-center justify-between">
       <span class="text-skin-link">
@@ -209,7 +274,10 @@ onMounted(() => {
           class="grow"
         />
         <IH-lock-closed
-          v-if="proposal.privacy !== 'none' && !proposal.completed"
+          v-if="
+            (proposal.privacy !== 'none' && !proposal.completed) ||
+            !!proposal.space?.confidential
+          "
           class="size-[16px] shrink-0"
         />
         <template v-else>
