@@ -133,14 +133,8 @@ export function useWeb3() {
 
       if (acc) {
         handleChainChanged(network.chainId);
-        const usersStore = useUsersStore();
-        try {
-          await usersStore.fetchUser(formatAddress(acc));
-        } catch (err) {
-          console.warn('failed to fetch user', err);
-        }
         state.account = formatAddress(acc);
-        state.name = usersStore.getUser(acc)?.name || '';
+        state.name = '';
       }
     } catch (err) {
       reset();

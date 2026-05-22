@@ -75,6 +75,13 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
       resolveName: async (name: string, chainId: number) =>
         (await getAddresses([name], chainId))[name] ?? null
     }
+  },
+  sandbox: {
+    info: {
+      name: 'Sandbox',
+      ignoreRecent: true
+    },
+    autoConnectOnly: true
   }
 } as const;
 

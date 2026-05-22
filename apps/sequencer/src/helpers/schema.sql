@@ -1,0 +1,21 @@
+CREATE TABLE messages (
+  mci INT NOT NULL AUTO_INCREMENT,
+  id VARCHAR(66) NOT NULL,
+  ipfs VARCHAR(64) NOT NULL,
+  address VARCHAR(100) NOT NULL,
+  version VARCHAR(6) NOT NULL,
+  timestamp BIGINT NOT NULL,
+  space VARCHAR(100),
+  type VARCHAR(24) NOT NULL,
+  sig VARCHAR(3000) NOT NULL,
+  receipt VARCHAR(256) NOT NULL,
+  PRIMARY KEY (id),
+  INDEX mci (mci),
+  INDEX ipfs (ipfs),
+  INDEX address (address),
+  INDEX version (version),
+  INDEX timestamp (timestamp),
+  INDEX space (space),
+  INDEX type (type),
+  INDEX receipt (receipt)
+);

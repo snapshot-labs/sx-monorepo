@@ -35,7 +35,7 @@ const { toggleTheme, currentTheme } = useTheme();
         </AppLink>
       </li>
       <li>
-        <AppLink to="https://snapshot.mirror.xyz">
+        <AppLink to="https://blog.snapshot.box">
           Blog
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </AppLink>

@@ -6,19 +6,15 @@ defineProps<{
 }>();
 
 const route = useRoute();
-const usersStore = useUsersStore();
 const { modalAccountOpen, resetAccountModal } = useModal();
 const { logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 
-const user = computed(
-  () =>
-    usersStore.getUser(web3.value.account) || {
-      id: web3.value.account,
-      name: web3.value.name,
-      avatar: undefined
-    }
-);
+const user = computed(() => ({
+  id: web3.value.account,
+  name: web3.value.name,
+  avatar: undefined as string | undefined
+}));
 const cb = computed(() => getCacheHash(user.value.avatar));
 
 onUnmounted(() => {

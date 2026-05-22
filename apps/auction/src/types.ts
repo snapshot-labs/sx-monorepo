@@ -389,14 +389,6 @@ export type Statement = {
   source: string | null;
 };
 
-export type Follow = {
-  id: string;
-  follower: string;
-  space: Space;
-  created: number;
-  network: NetworkID;
-};
-
 export type Alias = {
   address: string;
   alias: string;

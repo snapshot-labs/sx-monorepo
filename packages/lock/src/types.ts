@@ -6,7 +6,8 @@ export type ConnectorType =
   | 'gnosis'
   | 'sequence'
   | 'unicorn'
-  | 'guest';
+  | 'guest'
+  | 'sandbox';
 
 export type Connector = {
   id: string;
