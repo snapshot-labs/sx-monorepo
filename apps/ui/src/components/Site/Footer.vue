@@ -58,7 +58,7 @@ const SOCIALS = [
               </AppLink>
             </div>
             <div>
-              <AppLink to="https://snapshot.mirror.xyz">
+              <AppLink to="https://blog.snapshot.box">
                 Blog
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
