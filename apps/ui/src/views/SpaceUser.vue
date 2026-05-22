@@ -3,6 +3,7 @@ import { isValidDelegation } from '@/helpers/delegation';
 import {
   _vp,
   autoLinkText,
+  formatAddress,
   getCacheHash,
   getSocialNetworksLink,
   shortenAddress
@@ -37,7 +38,8 @@ const delegateModalState = ref<{
 
 const network = computed(() => getNetwork(props.space.network));
 
-const userId = computed(() => route.params.user as string);
+const userId = computed(() => formatAddress(route.params.user as string));
+const rawUserId = computed(() => route.params.user as string);
 
 const user = computed(() => usersStore.getUser(userId.value));
 
@@ -268,7 +270,7 @@ watch(
           v-for="(item, i) in navigation"
           :key="i"
           v-slot="{ isExactActive }"
-          :to="{ name: item.route, params: { user: userId } }"
+          :to="{ name: item.route, params: { user: rawUserId } }"
         >
           <UiLabel
             :is-active="isExactActive"
