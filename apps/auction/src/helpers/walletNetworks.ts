@@ -1,5 +1,4 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { constants as starknetConstants } from 'starknet';
 import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm/metadata';
 
 const ADDABLE_NETWORKS = {
@@ -65,36 +64,6 @@ export async function verifyNetwork(
       );
       (error as any).code = 4001;
       throw error;
-    }
-  }
-}
-
-// Not implemented by Braavos and Argent Mobile
-// Signing and verifying messages on different network should work fine
-// for single signer message
-export async function verifyStarknetNetwork(
-  web3: any,
-  chainId: starknetConstants.StarknetChainId
-) {
-  if (!web3.provider.request) return;
-  // Skip network switch for Argent Mobile (and Ready in-app browser injected
-  // provider) — only SN_MAIN is supported and `wallet_switchStarknetChain`
-  // returns "Unknown request" inside the in-app browser.
-  if (web3.provider.name === 'Argent Mobile') return;
-  if (web3.provider.isInAppBrowser) return;
-  try {
-    await web3.provider.request({
-      type: 'wallet_switchStarknetChain',
-      params: {
-        chainId
-      }
-    });
-  } catch (err) {
-    if (
-      err instanceof Error &&
-      !err.message.toLowerCase().includes('not implemented')
-    ) {
-      throw new Error(err.message);
     }
   }
 }
