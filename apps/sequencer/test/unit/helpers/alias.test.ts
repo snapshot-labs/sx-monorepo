@@ -25,6 +25,20 @@ describe('verifyAlias()', () => {
     );
   });
 
+  it('rejects alias creation signed by an alias (owner-only)', async () => {
+    const body = { address: '0xaaa', data: { message: { from: '0xbbb' } } };
+    await expect(verifyAlias('alias', body)).rejects.toMatch(
+      'alias not allowed'
+    );
+  });
+
+  it('rejects alias revocation signed by an alias (owner-only)', async () => {
+    const body = { address: '0xaaa', data: { message: { from: '0xbbb' } } };
+    await expect(verifyAlias('revoke-alias', body)).rejects.toMatch(
+      'alias not allowed'
+    );
+  });
+
   it('rejects delete-proposal when the author is an EVM address', async () => {
     const body = {
       address: '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3',

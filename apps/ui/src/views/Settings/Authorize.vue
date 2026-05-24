@@ -7,13 +7,15 @@ const aliasAddress = computed(() => (route.params.address as string) || '');
 const {
   isAuthorizing,
   isJustAuthorized,
+  isRevoking,
   error,
   isAlreadyAuthorized,
   isCheckingAlias,
   isValidAddress,
   isSelfAlias,
   checksumAddress,
-  authorize
+  authorize,
+  revoke
 } = useAliasAuthorize(aliasAddress);
 
 const isLoading = computed(
@@ -84,26 +86,20 @@ watch(isJustAuthorized, val => {
         <template v-else>
           <div class="p-4 space-y-4">
             <div class="text-[20px] text-skin-link text-center">
-              <template v-if="isJustAuthorized">
-                <UiAddress
-                  :address="checksumAddress"
-                  copy-button="always"
-                  class="inline-flex font-bold"
-                />
-                has been successfully authorized to perform actions on your
-                behalf.
-                <div v-if="redirectUri" class="mt-2 text-skin-text text-[16px]">
-                  Redirecting in {{ countdown }}s...
-                </div>
-              </template>
-              <template v-else-if="isAlreadyAuthorized">
+              <template v-if="isJustAuthorized || isAlreadyAuthorized">
                 The alias
                 <UiAddress
                   :address="checksumAddress"
                   copy-button="always"
                   class="inline-flex font-bold"
                 />
-                is already authorized to perform actions on your behalf.
+                is authorized to perform actions on your behalf.
+                <div
+                  v-if="isJustAuthorized && redirectUri"
+                  class="mt-2 text-skin-text text-[16px]"
+                >
+                  Redirecting in {{ countdown }}s...
+                </div>
               </template>
               <template v-else>
                 Do you want to authorize
@@ -120,15 +116,18 @@ watch(isJustAuthorized, val => {
               v-if="!isAlreadyAuthorized"
               class="border rounded-lg overflow-hidden"
             >
-              <div class="flex items-center gap-2 px-4 py-2.5 text-skin-link">
-                <IH-check class="text-skin-success shrink-0 size-[16px]" />
-                <span>Cast a vote</span>
-              </div>
               <div
-                class="flex items-center gap-2 px-4 py-2.5 text-skin-link border-t"
+                v-for="(label, i) in [
+                  'Cast a vote',
+                  'Publish a proposal',
+                  'Follow a space'
+                ]"
+                :key="label"
+                class="flex items-center gap-2 px-4 py-2.5 text-skin-link"
+                :class="{ 'border-t': i > 0 }"
               >
                 <IH-check class="text-skin-success shrink-0 size-[16px]" />
-                <span>Publish a proposal</span>
+                <span>{{ label }}</span>
               </div>
             </div>
 
@@ -144,8 +143,9 @@ watch(isJustAuthorized, val => {
       <div v-if="!isLoading" class="border-t p-4 mt-auto md:mt-0">
         <UiButton
           v-if="isAlreadyAuthorized"
-          disabled
           class="w-full hover:border-skin-danger"
+          :loading="isRevoking"
+          @click="revoke()"
         >
           <span class="text-skin-danger">Revoke alias</span>
         </UiButton>
