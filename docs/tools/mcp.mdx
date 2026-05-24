@@ -1,11 +1,11 @@
 ---
-title: "MCP server"
+title: "Snapshot MCP"
 description: "Connect Claude, ChatGPT, Cursor and other AI assistants to Snapshot through the Model Context Protocol."
 ---
 
-The **Snapshot MCP server** lets any [Model Context Protocol](https://modelcontextprotocol.io)-aware AI assistant read governance data and **act on the user's behalf** (cast votes, create proposals, follow spaces), all signed by a per-user wallet the user authorizes once.
+The **Snapshot MCP server** lets any [MCP](https://modelcontextprotocol.io)-compatible AI assistant read governance data and **act on your behalf**: cast votes, create proposals, follow spaces. All writes are signed by a per-user alias wallet that you authorize once and can revoke at any time.
 
-The hosted server is live at **`https://mcp.snapshot.box`**. No install, no API key required for read access.
+The hosted server is available at **`https://mcp.snapshot.box`**. No install or API key required for read access.
 
 ```text
 You: "Vote 'For' on the active ENS proposal about treasury rebalancing."
@@ -14,41 +14,37 @@ AI:  → snapshot-query    (find the proposal)
      ✓ Voted.
 ```
 
-<Note>
-Source code lives at [`apps/mcp`](https://github.com/snapshot-labs/sx-monorepo/tree/master/apps/mcp). Self-hosting instructions are in the [Self-hosting](#self-hosting) section.
-</Note>
-
 ## Quick start
 
 | Client | What to do |
 |---|---|
-| **Claude.ai** | Settings → Connectors → Add custom connector → `https://mcp.snapshot.box` |
-| **Claude Desktop** | Edit `claude_desktop_config.json` ([details](#claude-desktop)) → restart |
+| **Claude.ai** | Settings > Integrations > Add integration > `https://mcp.snapshot.box` |
+| **Claude Desktop** | Edit `claude_desktop_config.json` ([details](#claude-desktop)) > restart |
 | **Claude Code** | `claude mcp add snapshot --transport http https://mcp.snapshot.box` |
-| **ChatGPT** | Settings → Connectors → Connect to MCP → `https://mcp.snapshot.box` |
+| **ChatGPT** | Settings > Connectors > Connect to MCP > `https://mcp.snapshot.box` |
 | **Codex CLI** | Add `[mcp_servers.snapshot]` to `~/.codex/config.toml` ([details](#codex)) |
-| **Cursor** | Settings → MCP → Add → URL `https://mcp.snapshot.box` |
+| **Cursor** | Settings > MCP > Add > URL `https://mcp.snapshot.box` |
 
-The first time the AI calls a write tool, an OAuth window opens so you can authorize a Snapshot alias against your main wallet (one-time, revocable).
+The first time the AI calls a write tool, an OAuth window opens so you can authorize a Snapshot alias against your main wallet. This is a one-time step, and you can revoke the alias at any time.
 
 Once connected, try: *"What proposals are active in `ens.eth` right now?"*
 
-## Add to your AI client
+## Connect your AI client
 
 <Tabs>
 <Tab title="Claude.ai">
 
-1. Open **Settings → Connectors → Add custom connector**.
-2. **Name:** `Snapshot`  •  **URL:** `https://mcp.snapshot.box`
-3. Click the connector in any chat → **Connect** → authorize the alias on Snapshot.
+1. Open **Settings > Integrations > Add integration**.
+2. Paste the URL: `https://mcp.snapshot.box`
+3. In any chat, click the integration and select **Connect** to start the OAuth flow.
 
-Tools appear under the 🧰 menu. Available on Pro, Team, and Enterprise plans.
+Available on Pro, Team, and Enterprise plans.
 
 </Tab>
 
 <Tab title="Claude Desktop">
 
-Edit your `claude_desktop_config.json`:
+Add the server to your config file:
 
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -64,7 +60,7 @@ Edit your `claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. The first write opens your browser for OAuth.
+Restart Claude Desktop. The first time you use a write tool, your browser will open for the OAuth authorization.
 
 </Tab>
 
@@ -74,24 +70,23 @@ Restart Claude Desktop. The first write opens your browser for OAuth.
 claude mcp add snapshot --transport http https://mcp.snapshot.box
 ```
 
-Verify with `claude mcp list` (`snapshot ✓ connected`). Inside any session, run `/mcp` to inspect available tools.
+Verify with `claude mcp list`. Inside any session, run `/mcp` to inspect available tools.
 
 </Tab>
 
 <Tab title="ChatGPT">
 
-ChatGPT Plus, Pro, Business, and Enterprise support remote MCP via **Settings → Connectors → Connect to MCP server**.
+1. Open **Settings > Connectors > Connect to MCP server**.
+2. Paste the URL: `https://mcp.snapshot.box`
+3. Complete the OAuth flow.
 
-- **URL:** `https://mcp.snapshot.box`
-- Complete the OAuth flow
-
-Snapshot tools become available in chats and projects. For developer mode (custom GPTs), use the same URL in the Actions configuration with the OAuth scheme.
+Available on Plus, Pro, Business, and Enterprise plans.
 
 </Tab>
 
 <Tab title="Codex CLI">
 
-OpenAI's Codex CLI reads MCP servers from `~/.codex/config.toml`:
+Add the server to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.snapshot]
@@ -105,7 +100,7 @@ Run `codex` and the first write triggers an OAuth prompt.
 
 <Tab title="Cursor">
 
-Open **Settings → MCP → Add new MCP server**, choose **HTTP**, paste `https://mcp.snapshot.box`. Cursor handles the OAuth flow automatically.
+Open **Settings > MCP > Add new MCP server**, choose **HTTP**, paste `https://mcp.snapshot.box`.
 
 </Tab>
 
@@ -133,29 +128,54 @@ For local development or scripting where you want to sign directly without OAuth
 </Tab>
 </Tabs>
 
+## Authorize and revoke an alias
+
+When you first use a write tool (vote, propose, follow), the MCP server redirects you to Snapshot to authorize an alias wallet. The alias is a separate wallet managed by the MCP server that can only sign Snapshot governance messages on your behalf. Your main wallet key never leaves your wallet.
+
+Once authorized, the alias can:
+- Cast a vote
+- Publish a proposal
+- Follow a space
+
+You can revoke an alias at any time. Either open the authorize link (`snapshot.box/#/settings/alias/authorize/<alias-address>`) while connected with your main wallet and click **Revoke alias**, or go to **Settings > Aliases** to see and revoke all your active aliases.
+
+<video
+  autoPlay
+  muted
+  controls
+  playsInline
+  className="w-full rounded-xl"
+  src="/videos/mcp-authorize-alias.mp4"
+></video>
+
+<Tip>
+Disconnecting the MCP connector in your AI client stops the AI from making requests but does not revoke the alias itself. To fully revoke access, use the revoke flow described above.
+</Tip>
+
 ## Try it
 
-A few prompts to validate the connection end-to-end:
+A few prompts to validate the connection:
 
+- *"What proposals are active in `ens.eth` right now?"*
 - *"What's the current voting power of `vitalik.eth` in `ens.eth`?"*
 - *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."*
 - *"Follow `gitcoindao.eth` for me."*
-- *"Create a draft proposal in `myspace.eth` titled 'Q3 budget' with body 'Allocate $50k…'."*
-- *"Vote 'For' on proposal `0xabc…` in `ens.eth` because [reason]."*
+- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."*
+- *"Create a proposal in `myspace.eth` titled 'Q3 budget' with body 'Allocate $50k...'."*
 
-The AI chains tools automatically: `snapshot-query` to discover, then `snapshot-vote` or `snapshot-propose` to act. Writes always show the payload before signing.
+The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act.
 
 ## Tools
 
-The server exposes **5 tools**. The AI selects them based on intent.
+The server exposes 5 tools. The AI selects them based on your intent.
 
-| Tool | Purpose | Auth |
+| Tool | Purpose | Auth required |
 |---|---|---|
-| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds the user's address as `$user`. | none (anonymous reads OK) |
-| `snapshot-schema` | Returns the GraphQL schema. Used only when a query fails on an unknown field. | none |
-| `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected from the proposal. Re-calling **replaces** the previous vote. | wallet |
-| `snapshot-propose` | Create a proposal. Most fields default from the space, so typically only `space`, `title`, `body` are required. | wallet |
-| `snapshot-follow` | Follow a space. Idempotent. | wallet |
+| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
+| `snapshot-schema` | Return the GraphQL schema. The AI uses this when a query fails on an unknown field. | No |
+| `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected from the proposal. Calling again on the same proposal replaces the previous vote. | Yes |
+| `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. Voting type, choices, period, and privacy default from the space settings. | Yes |
+| `snapshot-follow` | Follow a space. Calling again on a space you already follow is a no-op. | Yes |
 
 <Tip>
 The full input schema for each tool is exposed via standard MCP discovery, so your AI client introspects them automatically.
@@ -163,40 +183,32 @@ The full input schema for each tool is exposed via standard MCP discovery, so yo
 
 ## How it works
 
-```text
-                                            (per-user, custodial)
-   ┌───────────┐   HTTP + JWT     ┌──────────────────┐    GraphQL    ┌──────────┐
-   │ AI client │ ──────────────▶  │ mcp.snapshot.box │ ─────────────▶│ Snapshot │
-   │ (Claude,  │ ◀──────────────  │   (this server)  │ ◀─────────────│   Hub    │
-   │  ChatGPT) │                  └────────┬─────────┘               └──────────┘
-   └─────┬─────┘                           │
-         │                                 │ sign EIP-712
-         │ OAuth 2.0 (PKCE)                ▼
-         │                          ┌───────────────┐
-         └─────────────────────────▶│ Coinbase CDP  │
-                                    │ alias wallet  │
-                                    └───────────────┘
-```
+<iframe
+  width="100%"
+  height="400"
+  src="https://embed.figma.com/board/dQaTvHwQG7CBSXTKd3RCH8/Snapshot-MCP-Architecture?node-id=&embed-host=share"
+  allowFullScreen
+  style={{ border: "none", borderRadius: "8px" }}
+></iframe>
 
-1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tool list.
-2. **Connect (one-time).** OAuth 2.0 with PKCE. The server mints a fresh CDP-managed alias wallet, redirects the user to Snapshot to authorize that alias against their main wallet, then issues a JWT (HS256) tied to `{ address, alias }`.
-3. **Read.** `snapshot-query` and `snapshot-schema` proxy to `https://hub.snapshot.org/graphql`. No wallet needed.
-4. **Write.** The write tools build the EIP-712 envelope, ask CDP to sign with **the user's** alias, and submit to Snapshot's sequencer.
+1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tools.
+2. **Connect (one-time).** OAuth 2.0 with PKCE. The server creates a fresh CDP-managed alias wallet, redirects you to Snapshot to authorize that alias against your main wallet, then issues a JWT tied to your address and alias.
+3. **Read.** `snapshot-query` and `snapshot-schema` proxy to Snapshot Hub. No wallet needed.
+4. **Write.** Write tools build the EIP-712 envelope, ask CDP to sign with your alias, and submit to the Snapshot sequencer.
 
-The server is **stateless**: it stores zero per-user data. The JWT carries everything (address, CDP account ID, alias). Restart-safe.
+The server is **stateless**. It stores no per-user data. The JWT carries everything (address, CDP account ID, alias).
 
 ## Security
 
 | Property | How it's enforced |
 |---|---|
-| **Your main key never leaves your wallet** | Writes are signed by an *alias* (a separate wallet you authorize once via Snapshot's standard alias flow). The alias is scope-limited to Snapshot messages and cannot sign anything else. |
+| **Your main key never leaves your wallet** | Writes are signed by an *alias*, a separate wallet you authorize once via Snapshot's alias flow. The alias can only sign Snapshot governance messages. |
 | **One alias per user, isolated** | Each OAuth connection provisions its own [Coinbase CDP](https://docs.cdp.coinbase.com)-managed alias. The server never sees the private key. CDP signs on demand using the per-user account ID embedded in the JWT. |
-| **Tokens are scoped to your alias** | Access tokens are stateless JWTs (HS256). A stolen token can vote *as that alias* but cannot touch your main wallet, change account info, or impersonate other users. Rotating `JWT_SECRET` invalidates every token. |
+| **Tokens are scoped** | Access tokens are stateless JWTs (HS256). A stolen token can act *as that alias* but cannot touch your main wallet or impersonate other users. Rotating `JWT_SECRET` invalidates all tokens. |
 | **OAuth with PKCE** | Standards-compliant Authorization Code + PKCE flow. No client secret required for native and desktop clients. |
-| **Anonymous reads** | The OAuth flow only triggers when the AI calls a write tool. Read-only queries never need auth. |
-| **No data persistence** | The server keeps zero session state. Every request is processed in isolation from the JWT alone. |
-
-The threat model: an AI assistant with a vote-only proxy key. Equivalent to handing it a hardware key that can only sign Snapshot messages on your behalf, revocable from your main wallet.
+| **Anonymous reads** | The OAuth flow only triggers when you use a write tool. Read-only queries never need auth. |
+| **No data stored** | The server keeps zero session state. Every request is processed from the JWT alone. |
+| **Revocable** | You can [revoke the alias](#revoke-an-alias) at any time from the Snapshot UI. |
 
 ## Auth flow
 
@@ -204,19 +216,19 @@ The threat model: an AI assistant with a vote-only proxy key. Equivalent to hand
 <Tab title="HTTP (OAuth 2.0 + PKCE)">
 
 1. Client calls `/authorize`.
-2. Server mints a fresh CDP alias wallet for the session.
+2. Server creates a fresh CDP alias wallet.
 3. Server redirects to `snapshot.box/#/settings/alias/authorize/<alias>` with a callback URL.
-4. User signs the alias authorization with their main wallet.
+4. You sign the alias authorization with your main wallet.
 5. Snapshot redirects back to `/auth/callback`.
-6. Server resolves the authorizing user from the on-chain alias mapping, mints a JWT, redirects back to client.
-7. Client exchanges code for JWT at `/token`.
+6. Server resolves the authorizing user from the alias mapping, mints a JWT, and redirects back to the client.
+7. Client exchanges the authorization code for a JWT at `/token`.
 8. All subsequent requests carry the JWT. The server reads `{ address, aliasAccountId, alias }` from claims and asks CDP to sign.
 
 </Tab>
 <Tab title="Stdio (local key)">
 
-1. Call any write tool. If `ALIAS_PRIVATE_KEY`'s alias isn't yet authorized, the tool returns the URL `snapshot.box/#/settings/alias/authorize/<alias>`.
-2. User authorizes the alias once.
+1. Call any write tool. If the alias key isn't yet authorized, the tool returns a URL to `snapshot.box/#/settings/alias/authorize/<alias>`.
+2. Authorize the alias once in your browser.
 3. Subsequent calls succeed.
 
 </Tab>
@@ -235,19 +247,19 @@ cp apps/mcp/.env.example apps/mcp/.env   # fill in JWT + CDP creds
 cd apps/mcp && bun start                 # HTTP on :8080
 ```
 
-Requirements: [Bun](https://bun.sh) ≥ 1.0, a [Coinbase CDP](https://portal.cdp.coinbase.com) project (free tier works), and a 32-byte `JWT_SECRET` (`openssl rand -hex 32`).
+Requirements: [Bun](https://bun.sh) 1.0 or later, a [Coinbase CDP](https://portal.cdp.coinbase.com) project (free tier works), and a 32-byte `JWT_SECRET` (`openssl rand -hex 32`).
 
 ### Configuration
 
 | Variable | Required for | Description |
 |---|---|---|
-| `JWT_SECRET` | HTTP | HS256 secret, ≥32 chars. Rotate to invalidate all tokens. |
-| `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET` / `CDP_WALLET_SECRET` | HTTP | Coinbase CDP credentials for per-user alias wallets |
-| `BASE_URL` | HTTP | Public URL for OAuth metadata (e.g. `https://mcp.snapshot.box`) |
-| `PORT` | any | HTTP port (default `8080`) |
+| `JWT_SECRET` | HTTP | HS256 secret, 32+ chars. Rotate to invalidate all tokens. |
+| `CDP_API_KEY_ID` / `CDP_API_KEY_SECRET` / `CDP_WALLET_SECRET` | HTTP | Coinbase CDP credentials for per-user alias wallets. |
+| `BASE_URL` | HTTP | Public URL for OAuth metadata (e.g. `https://mcp.snapshot.box`). |
+| `PORT` | any | HTTP port (default `8080`). |
 | `ALIAS_PRIVATE_KEY` | stdio | A single Snapshot alias key. Ignored by HTTP. |
-| `SNAPSHOT_API_KEY` | any | [API key](/tools/api/api-keys) for higher rate limits |
-| `SNAPSHOT_API_URL` | any | GraphQL endpoint (default mainnet hub) |
+| `SNAPSHOT_API_KEY` | any | [API key](/tools/api/api-keys) for higher rate limits. |
+| `SNAPSHOT_API_URL` | any | GraphQL endpoint (defaults to mainnet hub). |
 
 ### Stdio for local development
 
@@ -260,17 +272,24 @@ Useful for scripting, CI, or testing changes locally before deploying.
 
 ## FAQ
 
-**Do I need to give the AI my private key?**
-No. You authorize a Snapshot *alias* (a separate signer). Your main wallet stays in your wallet.
+<AccordionGroup>
+<Accordion title="Do I need to give the AI my private key?">
+No. You authorize a Snapshot *alias*, a separate signer managed by the MCP server. Your main wallet key stays in your wallet.
+</Accordion>
 
-**Can the AI drain my funds?**
-No. The alias can only sign Snapshot messages (votes, proposals, follows). It cannot move tokens, sign other contracts, or change your main wallet's settings.
+<Accordion title="Can the AI drain my funds?">
+No. The alias can only sign Snapshot governance messages (votes, proposals, follows). It cannot move tokens, call other contracts, or change your wallet settings.
+</Accordion>
 
-**How do I stop the AI from acting on my behalf?**
-Disconnect the Snapshot connector in your AI client (for example in Claude.ai: Settings → Connectors → Snapshot → Disconnect). Snapshot does not currently expose a per-alias revocation flow, so the alias itself stays registered. The alias is scope-limited to Snapshot messages, so it cannot do anything else.
+<Accordion title="How do I revoke access?">
+Open the alias authorization page on Snapshot (`snapshot.box/#/settings/alias/authorize/<alias-address>`) while connected with your main wallet, and click **Revoke alias**. This removes the alias authorization. You can also disconnect the MCP connector in your AI client to stop it from making requests, though that does not revoke the alias itself.
+</Accordion>
 
-**Is the read API rate-limited?**
-Yes. The standard Snapshot rate limit applies. Self-host with your own `SNAPSHOT_API_KEY` for higher throughput.
+<Accordion title="Is the read API rate-limited?">
+Yes, the standard Snapshot rate limit applies. Self-host with your own `SNAPSHOT_API_KEY` for higher throughput.
+</Accordion>
 
-**What does the server store?**
-Nothing. It is stateless. Tokens are self-verifiable JWTs.
+<Accordion title="What does the server store?">
+Nothing. The server is stateless. Tokens are self-verifiable JWTs.
+</Accordion>
+</AccordionGroup>
