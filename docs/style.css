@@ -1,93 +1,26 @@
+/* Snapshot brand colors */
 html.dark,
 html.dark body {
   background-color: #0E0F10;
-  color: #d0d0d1;
 }
 
 html.dark #navbar {
   background-color: #0E0F10;
-  border-bottom-color: #282A2D;
+}
+
+html:not(.dark) #navbar {
+  background-color: #ffffff;
 }
 
 html.dark #sidebar {
   background-color: #0E0F10;
-  border-right: 1px solid #282A2D;
 }
 
 html.dark #content-area {
   background-color: #0E0F10;
-  color: #d0d0d1;
 }
 
-html.dark #content-area p,
-html.dark #content-area li,
-html.dark #content-area td,
-html.dark #content-area th,
-html.dark #content-area span,
-html.dark #content-area div {
-  color: #d0d0d1;
-}
-
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6,
-html.dark h1 *, html.dark h2 *, html.dark h3 *, html.dark h4 *, html.dark h5 *, html.dark h6 * {
-  color: #ffffff !important;
-}
-
-html.dark #content-area a {
-  color: #ffffff;
-}
-
-html.dark header,
-html.dark footer,
-html.dark main,
-html.dark div,
-html.dark a,
-html.dark hr,
-html.dark [class*="border"] {
-  border-color: #282A2D !important;
-}
-
-html.dark nav:not(#navbar):not(.nav-tabs) {
-  border-color: #282A2D !important;
-}
-
-html:not(.dark) #navbar {
-  border-bottom-color: #E5E5E6;
-}
-
-html:not(.dark) #sidebar {
-  border-right: 1px solid #E5E5E6;
-}
-
-html:not(.dark) header,
-html:not(.dark) footer,
-html:not(.dark) main,
-html:not(.dark) div,
-html:not(.dark) a,
-html:not(.dark) hr,
-html:not(.dark) [class*="border"] {
-  border-color: #E5E5E6 !important;
-}
-
-html:not(.dark) nav:not(#navbar):not(.nav-tabs) {
-  border-color: #E5E5E6 !important;
-}
-
-/* Dropdown / popover backgrounds */
-html.dark [data-radix-popper-content-wrapper] > div,
-html.dark [data-radix-popper-content-wrapper] > div > div {
-  background: #1c1b22 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-color: #282A2D !important;
-}
-
-html.dark [id^="headlessui-dialog-panel-"],
-html.dark [id^="headlessui-dialog-panel-"] > div,
-html.dark [id^="headlessui-dialog-panel-"] [role="listbox"] {
-  background: #0E0F10 !important;
-}
-
+/* Hide sidebar scrollbar */
 #sidebar,
 #sidebar *,
 #sidebar-content,
@@ -103,6 +36,53 @@ html.dark [id^="headlessui-dialog-panel-"] [role="listbox"] {
   display: none !important;
 }
 
+/* Hide Mintlify branding */
 a[href*="mintlify.com"] {
   display: none !important;
 }
+
+/* Custom nav anchor icons */
+a.nav-anchor[href*="blog"] svg {
+  -webkit-mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/newspaper.svg) !important;
+  mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/newspaper.svg) !important;
+}
+
+a.nav-anchor[href*="intercom"] svg {
+  -webkit-mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/headset.svg) !important;
+  mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/headset.svg) !important;
+}
+
+a.nav-anchor[href*="status"] svg {
+  -webkit-mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/signal.svg) !important;
+  mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/signal.svg) !important;
+}
+
+/* Hide only the first sidebar group header per tab
+   ("Getting started" / "Build with Snapshot" are homepages, not categories). */
+#navigation-items .mt-6.lg\:mt-8 > .sidebar-group-header {
+  display: none !important;
+}
+
+/* Match the Snapshot UI eyebrow style for sidebar group headers */
+.sidebar-group-header {
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  color: #d0d0d1 !important;
+}
+
+html:not(.dark) .sidebar-group-header {
+  color: #606060 !important;
+}
+
+/* Content horizontal padding */
+#content-container {
+  padding-left: 40px !important;
+  padding-right: 40px !important;
+}
+
+/* Remove dividers between sidebar sections */
+.sidebar-nav-group-divider {
+  display: none !important;
+}
+
+
