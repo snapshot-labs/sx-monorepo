@@ -10,6 +10,7 @@ import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
 import Aliases from '@/views/Settings/Aliases.vue';
+import ApiKeys from '@/views/Settings/ApiKeys.vue';
 import Authorize from '@/views/Settings/Authorize.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsNotifications from '@/views/Settings/Notifications.vue';
@@ -66,6 +67,7 @@ export default [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
       { path: 'contacts', name: 'settings-contacts', component: Contacts },
       { path: 'aliases', name: 'settings-aliases', component: Aliases },
+      { path: 'api-keys', name: 'settings-api-keys', component: ApiKeys },
       {
         path: 'notifications',
         name: 'settings-notifications',
