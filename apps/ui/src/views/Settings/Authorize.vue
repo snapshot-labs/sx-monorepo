@@ -86,26 +86,20 @@ watch(isJustAuthorized, val => {
         <template v-else>
           <div class="p-4 space-y-4">
             <div class="text-[20px] text-skin-link text-center">
-              <template v-if="isJustAuthorized">
-                <UiAddress
-                  :address="checksumAddress"
-                  copy-button="always"
-                  class="inline-flex font-bold"
-                />
-                has been successfully authorized to perform actions on your
-                behalf.
-                <div v-if="redirectUri" class="mt-2 text-skin-text text-[16px]">
-                  Redirecting in {{ countdown }}s...
-                </div>
-              </template>
-              <template v-else-if="isAlreadyAuthorized">
+              <template v-if="isJustAuthorized || isAlreadyAuthorized">
                 The alias
                 <UiAddress
                   :address="checksumAddress"
                   copy-button="always"
                   class="inline-flex font-bold"
                 />
-                is already authorized to perform actions on your behalf.
+                is authorized to perform actions on your behalf.
+                <div
+                  v-if="isJustAuthorized && redirectUri"
+                  class="mt-2 text-skin-text text-[16px]"
+                >
+                  Redirecting in {{ countdown }}s...
+                </div>
               </template>
               <template v-else>
                 Do you want to authorize
