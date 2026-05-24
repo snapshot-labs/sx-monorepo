@@ -82,7 +82,7 @@ function shortenKey(key: string) {
       You have no API keys.
     </UiStateWarning>
     <teleport to="#modal">
-      <ModalCreateApiKey
+      <ModalCreateKey
         :open="modalOpen"
         @close="modalOpen = false"
         @created="handleCreated"
