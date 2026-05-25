@@ -14,6 +14,7 @@ import {
   registerProposeTool,
   registerQueryTool,
   registerSchemaTool,
+  registerUnfollowTool,
   registerVoteTool
 } from './tools.js';
 
@@ -39,6 +40,7 @@ function createMcpServer(mode: 'http' | 'stdio'): McpServer {
   registerVoteTool(server, resolveContext);
   registerProposeTool(server, resolveContext);
   registerFollowTool(server, resolveContext);
+  registerUnfollowTool(server, resolveContext);
   return server;
 }
 

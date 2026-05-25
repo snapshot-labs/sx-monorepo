@@ -330,3 +330,30 @@ export function registerFollowTool(
       })
   );
 }
+
+export function registerUnfollowTool(
+  server: McpServer,
+  resolveContext: ResolveContext
+): void {
+  server.registerTool(
+    'snapshot-unfollow',
+    {
+      description:
+        'Remove a Snapshot space from the user\'s followed list. Calling this on a space the user does not follow is a no-op on Snapshot\'s side.',
+      inputSchema: {
+        space: z.string().describe('Space ID slug (e.g. "ens.eth")')
+      }
+    },
+    (data, extra) =>
+      handle('snapshot-unfollow', extra, async () => {
+        const { user: from, signer } = await resolveContext(extra);
+        const space = await requireSpace<{ id: string }>(data.space, 'id');
+        const envelope = await sx.unfollowSpace({
+          signer: signer as Wallet,
+          data: { from, space: space.id, network: 's' }
+        });
+        const result = (await sx.send(envelope)) as unknown;
+        return { result, links: { space: `https://snapshot.box/#/s:${space.id}` } };
+      })
+  );
+}
