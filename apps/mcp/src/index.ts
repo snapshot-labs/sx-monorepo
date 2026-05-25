@@ -14,7 +14,8 @@ import {
   registerProposeTool,
   registerQueryTool,
   registerSchemaTool,
-  registerVoteTool
+  registerVoteTool,
+  registerWhoamiTool
 } from './tools.js';
 
 const ICONS = [
@@ -36,6 +37,7 @@ function createMcpServer(mode: 'http' | 'stdio'): McpServer {
   const resolveContext = createResolveContext(mode);
   registerSchemaTool(server);
   registerQueryTool(server, resolveContext);
+  registerWhoamiTool(server, resolveContext);
   registerVoteTool(server, resolveContext);
   registerProposeTool(server, resolveContext);
   registerFollowTool(server, resolveContext);

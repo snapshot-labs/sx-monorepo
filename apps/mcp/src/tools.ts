@@ -13,6 +13,7 @@ import {
   resolveUserFromAlias,
   schemaCache
 } from './hub.js';
+import { lookupAddress } from './stamp.js';
 
 const sx = new clients.OffchainEthereumSig({ networkConfig: offchainMainnet });
 
@@ -107,6 +108,32 @@ async function handle(
       isError: true
     };
   }
+}
+
+export function registerWhoamiTool(
+  server: McpServer,
+  resolveContext: ResolveContext
+): void {
+  server.registerTool(
+    'snapshot-whoami',
+    {
+      description:
+        'Returns the connected user: address, Snapshot profile (name, bio, avatar, social handles), and primary ENS name if any. Use this to confirm who you are acting as before writing on chain.',
+      inputSchema: {}
+    },
+    (_args, extra) =>
+      handle('snapshot-whoami', extra, async () => {
+        const { user } = await resolveContext(extra);
+        const [{ user: profile }, ens] = await Promise.all([
+          gql(
+            'query ($id: String!) { user(id: $id) { name about avatar github twitter lens farcaster } }',
+            { id: user }
+          ) as Promise<{ user: Record<string, string | null> | null }>,
+          lookupAddress(user)
+        ]);
+        return { address: user, ens, profile };
+      })
+  );
 }
 
 export function registerSchemaTool(server: McpServer): void {

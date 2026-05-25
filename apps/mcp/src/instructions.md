@@ -2,6 +2,8 @@ Snapshot governance MCP. Reads via snapshot-query, writes via snapshot-vote, sch
 
 The user's address is auto-bound as `$user` on every snapshot-query: declare it (`query Foo($user: String!)`) and reference it; do NOT pass `user` in `variables`.
 
+Call snapshot-whoami once at the start of a session (or before any write) to confirm the connected address, primary ENS, and Snapshot profile.
+
 Common patterns:
 - Find a space by name: `spaces(where: { search: "<name>" })`. Space `id` is a slug ("ens.eth"), never the display name.
 - Search proposals: `proposals(where: { title_contains: "<text>", space_in: [...] })`.
