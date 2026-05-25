@@ -20,6 +20,8 @@ export const DOCS_URL = 'https://docs.snapshot.box';
 
 export const VERIFIED_URL = `${DOCS_URL}/user-guides/spaces/get-verified`;
 
+export const ALIAS_EXPIRY_DAYS = 90;
+
 export const EVM_EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const STARKNET_EMPTY_ADDRESS =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
