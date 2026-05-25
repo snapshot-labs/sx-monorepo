@@ -19,6 +19,7 @@ const ethereumNetwork = createEvmNetwork('eth');
 const apeNetwork = createEvmNetwork('ape');
 const curtisNetwork = createEvmNetwork('curtis');
 const sepoliaNetwork = createEvmNetwork('sep');
+const baseSepoliaNetwork = createEvmNetwork('basesep');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
   .VITE_ENABLED_NETWORKS
@@ -37,6 +38,10 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'ape',
       'curtis',
       'sep',
+      // basesep (Inco confidential demo) is intentionally opt-in. There's
+      // no hosted indexer yet, so production builds would render a network
+      // entry pointing at a localhost URL. Add via VITE_ENABLED_NETWORKS
+      // when running the Inco demo locally.
       'sn',
       'sn-sep'
     ];
@@ -52,7 +57,8 @@ export const evmNetworks: NetworkID[] = [
   'bnbt',
   'ape',
   'curtis',
-  'sep'
+  'sep',
+  'basesep'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
@@ -84,6 +90,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'ape') return apeNetwork;
   if (id === 'curtis') return curtisNetwork;
   if (id === 'sep') return sepoliaNetwork;
+  if (id === 'basesep') return baseSepoliaNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-sep') return starknetSepoliaNetwork;
 

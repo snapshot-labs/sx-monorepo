@@ -243,6 +243,11 @@ export function createWriters(
 
     const space = new Space(id, config.indexerName);
     space.protocol = 'snapshot-x';
+    // basesep only hosts Inco confidential Spaces — flag at SpaceCreated time
+    // so the UI lock-icon path triggers immediately, before any vote arrives.
+    // The lazy flip in handleConfidentialVoteCast still acts as a backstop for
+    // legacy spaces that predate this assignment.
+    space.confidential = config.indexerName === 'basesep';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -991,6 +996,43 @@ export function createWriters(
       }
     }
 
+    // Confidential-voting Space.tryExecute fires `DecisionFlagsRevealed`
+    // before `ProposalExecuted` on the approved path, so the flags +
+    // settlement fields are already on the entity. Nothing extra to do here.
+
+    await proposal.save();
+  };
+
+  // Inco confidential reveal. Always emitted by `Space.tryExecute` (approved
+  // OR rejected path) so the indexer can persist the verdict without polling
+  // on-chain views. Non-Inco Spaces never emit this event — the topic-0 is
+  // unique to this signature, so legacy chains see no traffic and incur no
+  // cost from the subscription.
+  const handleDecisionFlagsRevealed: evm.Writer<
+    typeof SpaceAbi,
+    'DecisionFlagsRevealed'
+  > = async ({ block, blockNumber, txId, rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    const now = Number(block?.timestamp ?? getCurrentTimestamp());
+
+    proposal.is_quorum_reached = event.args.quorumReached;
+    proposal.is_support_achieved = event.args.supportAchieved;
+    // Mark settlement here so the UI doesn't park rejected proposals in the
+    // 'queued' state (no ExecutionStrategy entity exists for the Vanilla
+    // singleton confidential spaces use as their default executor — without
+    // this the lifecycle state stays Pending until max_end).
+    proposal.execution_settled = true;
+    proposal.completed = true;
+    proposal.execution_tx = txId;
+    proposal.executed_at = BigInt(now);
+    proposal.executed_at_block_number = BigInt(blockNumber);
+
     await proposal.save();
   };
 
@@ -999,6 +1041,9 @@ export function createWriters(
     'VoteCast' | 'VoteCastWithMetadata'
   > = async ({ block, txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
+    // Confidential variant of `VoteCast` overloads the same event name with
+    // no `choice` arg. Skip — it's handled by `handleConfidentialVoteCast`.
+    if (!('choice' in event.args)) return;
 
     logger.info('Handle vote cast');
 
@@ -1104,6 +1149,114 @@ export function createWriters(
     );
 
     await updateScoresTick(proposal, created, config.indexerName);
+    await proposal.save();
+  };
+
+  // Confidential-voting variant. Inco Spaces emit `VoteCast(uint256,address,uint256)`
+  // (no plaintext `choice`), so per-choice score tallies are unknowable until the
+  // proposal is `tryExecute`d (and even then, only the pass/fail flags decrypt).
+  // We only touch the totals-side state; `vote.choice = 0` is a sentinel meaning
+  // "encrypted — see `space.confidential`".
+  const handleConfidentialVoteCast: evm.Writer<
+    typeof SpaceAbi,
+    'VoteCast' | 'VoteCastWithMetadata'
+  > = async ({ block, txId, rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+    // Legacy `VoteCast` (with `choice`) is dispatched here too because the
+    // names overload. Skip — handled by `handleVoteCast` above.
+    if ('choice' in event.args) return;
+
+    logger.info('Handle confidential vote cast');
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = event.args.proposalId;
+    const vp = event.args.votingPower;
+
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    const created = Number(block?.timestamp ?? getCurrentTimestamp());
+    const voter = getAddress(event.args.voter);
+
+    const vote = new Vote(
+      `${spaceId}/${proposalId}/${voter}`,
+      config.indexerName
+    );
+    vote.space = spaceId;
+    vote.proposal = proposalId.toString();
+    vote.voter = voter;
+    // 0 is a sentinel; UI must check `space.confidential` before showing a choice.
+    vote.choice = 0;
+    vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
+    vote.created = created;
+    vote.tx = txId;
+
+    if ('metadataUri' in event.args) {
+      try {
+        const metadataUri = event.args.metadataUri;
+        await handleVoteMetadata(metadataUri, config);
+        vote.metadata = dropIpfs(metadataUri);
+      } catch (err) {
+        logger.info({ err }, 'Failed to handle confidential vote metadata');
+      }
+    }
+
+    await vote.save();
+
+    const existingUser = await User.loadEntity(voter, config.indexerName);
+    if (existingUser) {
+      existingUser.vote_count += 1;
+      await existingUser.save();
+    } else {
+      const user = new User(voter, config.indexerName);
+      user.address_type = 1;
+      user.created = created;
+      await user.save();
+    }
+
+    let leaderboardItem = await Leaderboard.loadEntity(
+      `${spaceId}/${voter}`,
+      config.indexerName
+    );
+    if (!leaderboardItem) {
+      leaderboardItem = new Leaderboard(
+        `${spaceId}/${voter}`,
+        config.indexerName
+      );
+      leaderboardItem.space = spaceId;
+      leaderboardItem.user = voter;
+      leaderboardItem.vote_count = 0;
+      leaderboardItem.proposal_count = 0;
+    }
+    leaderboardItem.vote_count += 1;
+    await leaderboardItem.save();
+
+    await updateCounter(config.indexerName, 'vote_count', 1);
+
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (space) {
+      space.vote_count += 1;
+      // Lazy-detect: any space that emits a confidential VoteCast IS confidential.
+      // Saves an extra implementation-address lookup at SpaceCreated time.
+      if (!space.confidential) space.confidential = true;
+      if (leaderboardItem.vote_count === 1) space.voter_count += 1;
+      await space.save();
+    }
+
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
+    );
+    // Per-choice score buckets are intentionally NOT updated — they remain encrypted.
+
     await proposal.save();
   };
 
@@ -1269,7 +1422,9 @@ export function createWriters(
     handleProposalCancelled,
     handleProposalUpdated,
     handleProposalExecuted,
+    handleDecisionFlagsRevealed,
     handleVoteCast,
+    handleConfidentialVoteCast,
     // SimpleQuorumTimelockExecutionStrategy
     handleTimelockProposalExecuted,
     handleTimelockProposalVetoed,

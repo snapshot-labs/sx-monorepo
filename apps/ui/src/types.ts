@@ -41,6 +41,7 @@ export type NetworkID =
   | 'ape'
   | 'curtis'
   | 'sep'
+  | 'basesep'
   | 'sn'
   | 'sn-sep';
 
@@ -213,6 +214,8 @@ export type Space = {
   privacy: SpacePrivacy;
   voting_power_symbol: string;
   active_proposals: number | null;
+  /** Inco confidential-voting Space — votes are encrypted on-chain. */
+  confidential?: boolean;
   controller: string;
   voting_delay: number;
   voting_types: VoteType[];
@@ -291,6 +294,8 @@ export type Proposal = {
     executors: string[];
     executors_types: string[];
     strategies_parsed_metadata: StrategyParsedMetadata[];
+    /** Inco confidential-voting Space — votes are encrypted on-chain. */
+    confidential?: boolean;
   };
   author: {
     id: string;
@@ -344,6 +349,9 @@ export type Proposal = {
    */
   completed: boolean;
   cancelled: boolean;
+  /** Inco confidential reveal — set after `tryExecute`. Null/undefined for non-confidential or pre-reveal proposals. */
+  is_quorum_reached?: boolean | null;
+  is_support_achieved?: boolean | null;
   state: ProposalState;
   privacy: Privacy;
   plugins: Record<string, unknown>;

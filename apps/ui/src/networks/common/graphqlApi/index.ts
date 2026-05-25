@@ -133,6 +133,23 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
+  // Inco confidential reveal — populated by `DecisionFlagsRevealed` from
+  // `Space.tryExecute` (always, both approved + rejected paths). Once both
+  // flags are non-null the proposal is in a terminal state regardless of
+  // whether `executed` was set: approved means the contract ran the action
+  // and emitted ProposalExecuted (executed=true above), so this branch only
+  // catches the rejected case where neither path made `executed=true`.
+  if (
+    proposal.is_quorum_reached !== null &&
+    proposal.is_quorum_reached !== undefined &&
+    proposal.is_support_achieved !== null &&
+    proposal.is_support_achieved !== undefined
+  ) {
+    return proposal.is_quorum_reached && proposal.is_support_achieved
+      ? 'executed'
+      : 'rejected';
+  }
+
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -393,8 +410,14 @@ function formatProposal(
     executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
     isInvalid:
       proposal.metadata === null ||
+      // Confidential (Inco) proposals always carry a non-zero execution
+      // strategy because `Space.vote()` calls `executionStrategy.getQuorum()`
+      // during accumulation. Pure-discussion proposals therefore have an
+      // execution strategy but no `metadata.execution`, which would otherwise
+      // trip this anti-spam heuristic.
       (proposal.metadata.execution === null &&
-        proposal.execution_strategy !== emptyAddress),
+        proposal.execution_strategy !== emptyAddress &&
+        !proposal.space.confidential),
     space: {
       id: proposal.space.id,
       protocol: proposal.space.protocol,
@@ -410,6 +433,7 @@ function formatProposal(
         proposal.space.strategies_parsed_metadata,
         proposal.strategies_indices
       ),
+      confidential: proposal.space.confidential ?? undefined,
       terms: ''
     },
     author: {
@@ -433,6 +457,8 @@ function formatProposal(
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
       : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    is_quorum_reached: proposal.is_quorum_reached ?? null,
+    is_support_achieved: proposal.is_support_achieved ?? null,
     state,
     network: networkId,
     privacy: 'none',

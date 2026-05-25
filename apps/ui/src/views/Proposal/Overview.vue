@@ -25,7 +25,12 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { flagProposal, cancelProposal } = useActions();
+const { flagProposal, cancelProposal, executeTransactions } = useActions();
+
+// DEMO ONLY — confidential reveal & execute wrapper. See template comment.
+async function handleConfidentialExecute() {
+  await executeTransactions(props.proposal);
+}
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -572,6 +577,41 @@ onBeforeUnmount(() => destroyAudio());
             :executions="proposal.executions"
           />
         </div>
+      </div>
+      <!--
+        DEMO ONLY — confidential (Inco) `tryExecute` test button. The legacy
+        SX execute button is gated by `proposal.scores[0] > scores[1]` etc.,
+        which can't be evaluated for confidential proposals because per-choice
+        scores stay encrypted. Until the canonical UI gating is updated, this
+        button always shows for confidential spaces in non-terminal states so
+        the proposal author can trigger attested decryption + tryExecute.
+        Remove (or move into ProposalExecutionsList properly) before the PR.
+      -->
+      <div
+        v-if="
+          proposal.space.confidential &&
+          !proposal.executed &&
+          !proposal.cancelled
+        "
+        class="my-3 p-3 border rounded-lg"
+      >
+        <UiEyebrow class="mb-2 flex items-center gap-2">
+          <IH-lock-closed />
+          <span>Confidential reveal</span>
+        </UiEyebrow>
+        <div class="mb-3 text-sm text-skin-text">
+          Encrypted vote tallies stay private. Click below to request attested
+          decryption of the quorum / support flags from Inco's covalidator and
+          submit them with the proposal's <code>tryExecute</code>. Two wallet
+          prompts: typed-data for the decrypt request, then the on-chain tx.
+        </div>
+        <UiButton
+          primary
+          class="w-full"
+          @click="handleConfidentialExecute"
+        >
+          <IH-play /> Reveal &amp; execute
+        </UiButton>
       </div>
       <div>
         <AppLink
