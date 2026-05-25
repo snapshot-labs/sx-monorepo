@@ -13,6 +13,7 @@ import {
   resolveUserFromAlias,
   schemaCache
 } from './hub.js';
+import { lookupAddress, resolveName } from './stamp.js';
 
 const sx = new clients.OffchainEthereumSig({ networkConfig: offchainMainnet });
 
@@ -107,6 +108,32 @@ async function handle(
       isError: true
     };
   }
+}
+
+const HEX_ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+
+export function registerResolveTool(server: McpServer): void {
+  server.registerTool(
+    'snapshot-resolve',
+    {
+      description:
+        'Resolve a name (ENS, Lens, etc.) to a 0x address, or an address to its primary name. Returns both fields whenever resolution succeeds; the missing direction is set to null.',
+      inputSchema: {
+        input: z
+          .string()
+          .describe('A name (e.g. "fabien.eth") or a 0x-prefixed address')
+      }
+    },
+    ({ input }, extra) =>
+      handle('snapshot-resolve', extra, async () => {
+        const trimmed = input.trim();
+        if (HEX_ADDRESS.test(trimmed)) {
+          return { address: trimmed.toLowerCase(), name: await lookupAddress(trimmed) };
+        }
+        const address = await resolveName(trimmed);
+        return { name: trimmed, address: address?.toLowerCase() ?? null };
+      })
+  );
 }
 
 export function registerSchemaTool(server: McpServer): void {

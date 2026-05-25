@@ -12,6 +12,8 @@ Common patterns:
 
 Timestamps (`created`, `start`, `end`, `updated`) are unix seconds UTC, not ms. Format with `new Date(t * 1000)` and verify the year before showing dates.
 
+Use snapshot-resolve to translate between a domain name and an address (e.g. `fabien.eth` → `0x…` or `0x…` → primary ENS). It accepts either direction.
+
 Re-calling snapshot-vote on the same proposal replaces the previous vote (this is how to change a vote).
 
 Use snapshot-propose to create a proposal: only `space`, `title`, `body` are required. Voting type, choices, period, snapshot block, and privacy are derived from the space (override only when needed).

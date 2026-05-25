@@ -13,6 +13,7 @@ import {
   registerFollowTool,
   registerProposeTool,
   registerQueryTool,
+  registerResolveTool,
   registerSchemaTool,
   registerVoteTool
 } from './tools.js';
@@ -35,6 +36,7 @@ function createMcpServer(mode: 'http' | 'stdio'): McpServer {
   );
   const resolveContext = createResolveContext(mode);
   registerSchemaTool(server);
+  registerResolveTool(server);
   registerQueryTool(server, resolveContext);
   registerVoteTool(server, resolveContext);
   registerProposeTool(server, resolveContext);
