@@ -50,3 +50,9 @@ weighted/quadratic (`'{"1":1,"2":2}'`).
 - `ALIAS_PRIVATE_KEY` — alias signing key (hex). Required for writes.
 - `SNAPSHOT_API_URL` — override the hub URL.
 - `SNAPSHOT_API_KEY` — sent as `x-api-key`.
+
+## Claude Code skill
+
+A Claude Code [skill](https://docs.claude.com/claude-code/skills) that teaches
+Claude when and how to invoke this CLI lives at [`skill/SKILL.md`](./skill/SKILL.md).
+Symlink it into `~/.claude/skills/snapshot/SKILL.md` to enable it.
