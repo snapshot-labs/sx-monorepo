@@ -112,8 +112,12 @@ export function shorten(
 
 export function formatAddress(address: string) {
   try {
+    // Lowercase EVM addresses before checksumming so a mixed-case input with a
+    // malformed EIP-55 checksum still resolves (getAddress re-derives the
+    // canonical checksum) instead of throwing and falling through to the
+    // Starknet path, which would zero-pad it to 64 chars.
     return address.length === 42
-      ? getAddress(address)
+      ? getAddress(address.toLowerCase())
       : validateAndParseAddress(address);
   } catch {
     return address;

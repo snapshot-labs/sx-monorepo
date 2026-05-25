@@ -326,6 +326,21 @@ export const ALIASES_QUERY = gql`
   }
 `;
 
+export const ALIASES_BY_ADDRESS_QUERY = gql`
+  query AliasesByAddress($address: String!) {
+    aliases(
+      first: 1000
+      where: { address: $address }
+      orderBy: "created"
+      orderDirection: desc
+    ) {
+      address
+      alias
+      created
+    }
+  }
+`;
+
 export const STATEMENTS_QUERY = gql`
   query ($where: StatementsWhere) {
     statements(where: $where) {

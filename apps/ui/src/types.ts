@@ -407,6 +407,7 @@ export type Follow = {
 export type Alias = {
   address: string;
   alias: string;
+  created?: number;
 };
 
 export type Contact = {

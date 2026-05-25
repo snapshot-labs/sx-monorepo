@@ -216,6 +216,7 @@ export type ReadOnlyNetworkActions = {
     from?: string
   );
   setAlias(web3: Web3Provider, alias: string);
+  revokeAlias(web3: Web3Provider | Wallet, alias: string);
   updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
   updateStatement(
     web3: Web3Provider | Wallet,
@@ -348,6 +349,7 @@ export type NetworkApi = {
     alias: string,
     created_gt: number
   ): Promise<Alias | null>;
+  loadAliases(address: string): Promise<Alias[]>;
   loadStatement(
     networkId: NetworkID,
     spaceId: string,

@@ -2,11 +2,11 @@ import { ensNormalize } from '@ethersproject/hash';
 import { pin } from '@snapshot-labs/pineapple';
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
-import hashTypes from '@snapshot-labs/snapshot.js/src/sign/hashedTypes.json';
 import castArray from 'lodash/castArray';
 import { getProposal, getSpace } from './helpers/actions';
 import { verifyAlias } from './helpers/alias';
 import envelope from './helpers/envelope.json';
+import hashTypes from './helpers/hashedTypes.json';
 import { doesMessageExist, storeMsg } from './helpers/highlight';
 import log from './helpers/log';
 import { timeIngestorProcess } from './helpers/metrics';
@@ -102,7 +102,15 @@ export default async function ingestor(req) {
       return Promise.reject('Invalid space id');
     }
 
-    if (!['settings', 'alias', 'profile', 'delete-space'].includes(type)) {
+    if (
+      ![
+        'settings',
+        'alias',
+        'revoke-alias',
+        'profile',
+        'delete-space'
+      ].includes(type)
+    ) {
       if (!message.space) return Promise.reject('unknown space');
 
       try {
@@ -160,6 +168,7 @@ export default async function ingestor(req) {
         app: message.app || ''
       };
     if (type === 'alias') payload = { alias: message.alias };
+    if (type === 'revoke-alias') payload = { alias: message.alias };
     if (type === 'statement')
       payload = {
         about: message.about,

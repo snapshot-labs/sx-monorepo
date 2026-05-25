@@ -44,7 +44,7 @@
     "@inco/js": "^0.7.10",
     "@reown/walletkit": "^1.2.11",
     "@snapshot-labs/highlight": "^0.1.0-beta.2",
-    "@snapshot-labs/lock": "0.3.1",
+    "@snapshot-labs/lock": "0.3.2",
     "@snapshot-labs/tune": "0.1.0",
     "@snapshot-labs/pineapple": "^1.2.1",
     "@snapshot-labs/snapshot.js": "^0.14.20",

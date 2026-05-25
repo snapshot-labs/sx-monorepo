@@ -1182,6 +1182,7 @@ export function createActions(
     unfollowSpace: () => {},
     updateUser: () => {},
     updateStatement: () => {},
-    setAlias: () => {}
+    setAlias: () => {},
+    revokeAlias: () => {}
   };
 }
