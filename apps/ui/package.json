@@ -122,7 +122,6 @@
     "electron": "^38.2.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
-    "husky": "^8.0.3",
     "postcss": "^8.4.30",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.68.0",
