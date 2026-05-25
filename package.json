@@ -21,7 +21,7 @@
     "lint:fix": "TURBO_TELEMETRY_DISABLED=1 turbo run lint:fix && bun run lint:scripts --fix",
     "lint:scripts": "eslint scripts/",
     "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck",
-    "check:deps": "knip --dependencies",
+    "knip": "knip --dependencies",
     "release": "bun run build && changeset publish"
   },
   "prettier": "@snapshot-labs/prettier-config",
