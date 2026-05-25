@@ -17,7 +17,7 @@
     "test:integration": "TURBO_TELEMETRY_DISABLED=1 turbo run test:integration --filter=!hub --filter=!sequencer",
     "test:e2e": "playwright test --config=playwright.config.ts",
     "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
-    "lint": "TURBO_TELEMETRY_DISABLED=1 turbo run lint lint:scripts --filter=!auction",
+    "lint": "TURBO_TELEMETRY_DISABLED=1 turbo run lint lint:scripts --filter=!auction && bun run knip",
     "lint:fix": "TURBO_TELEMETRY_DISABLED=1 turbo run lint:fix && bun run lint:scripts --fix",
     "lint:scripts": "eslint scripts/",
     "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck --filter=!auction",
