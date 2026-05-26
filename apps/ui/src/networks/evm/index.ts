@@ -83,15 +83,16 @@ export function createEvmNetwork(networkId: NetworkID): Network {
           }
         }, interval);
       }),
-    getExplorerUrl: (id, type) => {
-      let dataType: 'tx' | 'address' | 'token' = 'tx';
+    getExplorerUrl: (id, type, chainIdOverride) => {
+      let dataType: 'tx' | 'address' | 'token' | 'block' = 'tx';
       if (type === 'token') dataType = 'token';
+      else if (type === 'block') dataType = 'block';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
 
       if (dataType === 'address') id = formatAddress(id);
 
-      return `${networks[chainId].explorer.url}/${dataType}/${id}`;
+      return `${networks[chainIdOverride ?? chainId].explorer.url}/${dataType}/${id}`;
     }
   };
 
