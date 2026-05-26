@@ -8,8 +8,6 @@ import defaultRoutes from '@/routes/default';
 import { orgRootRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
-const METRO_SUPPORT_CONV_ID = import.meta.env.VITE_METRO_SUPPORT_CONV_ID || '';
-
 const route = useRoute();
 const router = useRouter();
 const { app, isAuctionApp } = useApp();
@@ -64,18 +62,7 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  initWhiteLabel();
-
-  if (!METRO_SUPPORT_CONV_ID) return;
-
-  const script = document.createElement('script');
-  script.src = 'https://metro.box/embed.js';
-  script.defer = true;
-  script.dataset.convId = METRO_SUPPORT_CONV_ID;
-  script.dataset.title = 'Chat with us';
-  document.body.appendChild(script);
-});
+onMounted(() => initWhiteLabel());
 </script>
 
 <template>
@@ -85,5 +72,6 @@ onMounted(() => {
     <LayoutSite v-else-if="routeName === 'site'" />
     <LayoutApp v-else />
     <AppFooter v-if="!isAuctionApp" />
+    <AppSupportWidget v-if="!isAuctionApp" />
   </div>
 </template>
