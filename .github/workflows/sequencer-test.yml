@@ -1,0 +1,30 @@
+name: Sequencer Test
+
+on:
+  push:
+    paths:
+      - 'apps/sequencer/**'
+      - '.github/workflows/sequencer-test.yml'
+  pull_request:
+    paths:
+      - 'apps/sequencer/**'
+      - '.github/workflows/sequencer-test.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        target: ['22.6']
+    uses: snapshot-labs/actions/.github/workflows/test.yml@main
+    secrets: inherit
+    with:
+      working_directory: apps/sequencer
+      mysql_database_name: snapshot_sequencer_test
+      mysql_schema_path: 'test/schema.sql'
+      redis: true
+      target: ${{ matrix.target }}
+      package_manager: bun

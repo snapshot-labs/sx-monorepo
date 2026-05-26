@@ -7,7 +7,8 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'gnosis',
   'sequence',
   'unicorn',
-  'guest'
+  'guest',
+  'sandbox'
 ];
 
 export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx', 'guest'];

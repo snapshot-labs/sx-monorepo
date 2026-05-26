@@ -1,0 +1,39 @@
+{
+  "address": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+  "sig": "0x943e4bd0a450d604fa74c2c64937c5bd810fbd35a3514b91fb83d68c935576893db38dc28240cfca5ce5f1b8a87df703b3b456a0c52cad408a68b94b6d6567ae1c",
+  "data": {
+    "domain": { "name": "snapshot", "version": "0.1.4" },
+    "types": {
+      "Proposal": [
+        { "name": "from", "type": "address" },
+        { "name": "space", "type": "string" },
+        { "name": "timestamp", "type": "uint64" },
+        { "name": "type", "type": "string" },
+        { "name": "title", "type": "string" },
+        { "name": "body", "type": "string" },
+        { "name": "discussion", "type": "string" },
+        { "name": "choices", "type": "string[]" },
+        { "name": "start", "type": "uint64" },
+        { "name": "end", "type": "uint64" },
+        { "name": "snapshot", "type": "uint64" },
+        { "name": "plugins", "type": "string" },
+        { "name": "app", "type": "string" }
+      ]
+    },
+    "message": {
+      "space": "fabien.eth",
+      "type": "single-choice",
+      "title": "My first proposal",
+      "body": "Hello world",
+      "discussion": "",
+      "choices": ["1"],
+      "start": 1688788535,
+      "end": 1689047735,
+      "snapshot": 9310476,
+      "plugins": "{}",
+      "app": "snapshot",
+      "from": "0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3",
+      "timestamp": 1688788535
+    }
+  }
+}

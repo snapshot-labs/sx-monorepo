@@ -32,7 +32,7 @@ const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
 
-useGuestLoginFromUrl();
+useLoginFromUrl();
 
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(event: TouchEvent) {
