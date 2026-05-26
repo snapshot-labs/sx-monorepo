@@ -65,7 +65,13 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     },
     getExplorerUrl: (
       id: string,
-      type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+      type:
+        | 'transaction'
+        | 'address'
+        | 'contract'
+        | 'strategy'
+        | 'token'
+        | 'block',
       chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
@@ -87,6 +93,8 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
           return network
             ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
             : '';
+        case 'block':
+          return network ? `${network.explorer.url}/block/${id}` : '';
         default:
           throw new Error('Not implemented');
       }
