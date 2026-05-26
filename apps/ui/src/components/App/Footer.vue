@@ -54,11 +54,16 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
 </script>
 
 <template>
-  <!-- Full-height right sidebar; border-left only, no radius. -->
+  <!-- Click-outside backdrop (covers the page incl. the launcher buttons). -->
+  <div v-if="helpOpen" class="hidden xl:block fixed inset-0 z-40" @click="toggleHelp" />
+  <!-- Floating bottom-right widget (Intercom-style): docked at right-3/bottom-3,
+       capped at 600px tall and never closer than 2rem (top-8) to the top.
+       Border on all four sides + large radius; sits above the launcher buttons. -->
   <div
     v-show="helpOpen"
-    class="hidden xl:block fixed top-0 right-0 bottom-0 w-[380px] max-w-[90vw] z-50
-      border-l border-skin-border bg-skin-bg"
+    class="hidden xl:flex flex-col fixed right-3 bottom-3 z-50
+      w-[380px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-2.75rem)]
+      rounded-2xl overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
   >
     <iframe
       v-if="helpLoaded"
@@ -71,7 +76,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
     />
   </div>
   <div
-    class="hidden xl:flex fixed bottom-3 pr-4 inset-x-0 max-w-maximum !mx-auto justify-end z-[51] pointer-events-none"
+    class="hidden xl:flex fixed bottom-3 pr-4 inset-x-0 max-w-maximum !mx-auto justify-end z-30 pointer-events-none"
   >
     <div class="flex space-x-2 pointer-events-auto">
       <UiTooltip
