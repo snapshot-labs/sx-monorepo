@@ -92,7 +92,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <UiButton primary uniform class="relative" @click="toggleHelp">
+        <UiButton :primary="helpOpen" uniform class="relative" @click="toggleHelp">
           <IH-chevron-down v-if="helpOpen" />
           <IH-chat v-else />
           <span
