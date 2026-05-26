@@ -31,7 +31,7 @@ function toggleHelp() {
     <div class="flex flex-col items-end space-y-2 pointer-events-auto">
       <div
         v-show="helpOpen"
-        class="support-panel border rounded-lg bg-skin-bg overflow-hidden shadow-xl"
+        class="support-panel border rounded-lg bg-skin-bg overflow-hidden shadow-sm"
       >
         <iframe
           v-if="helpLoaded"
