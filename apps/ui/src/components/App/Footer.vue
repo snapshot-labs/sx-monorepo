@@ -13,6 +13,8 @@ const isSiteRoute = computed(() => {
 // TODO: replace with the real XMTP conversation id of the Snapshot support group.
 const SUPPORT_CONV_ID = 'snapshot-support';
 const METRO_ORIGIN = 'https://metro.box';
+const { currentTheme } = useTheme();
+const helpFrame = ref<HTMLIFrameElement | null>(null);
 const helpOpen = ref(false);
 const helpLoaded = ref(false);
 const unread = ref(0);
@@ -28,13 +30,25 @@ function toggleHelp() {
   }
 }
 
-/** The embedded metro.box messenger posts an unread ping per inbound
- *  message; count them while the panel is closed to badge the button. */
+function pushTheme() {
+  helpFrame.value?.contentWindow?.postMessage(
+    { type: 'metro:theme', theme: currentTheme.value },
+    METRO_ORIGIN
+  );
+}
+
 function onMessage(e: MessageEvent) {
   if (e.origin !== METRO_ORIGIN) return;
-  if ((e.data as { type?: string })?.type !== 'metro:inbound') return;
-  if (!helpOpen.value) unread.value += (e.data as { count?: number }).count ?? 1;
+  const type = (e.data as { type?: string })?.type;
+  // Embed unread pings → badge the button while the panel is closed.
+  if (type === 'metro:inbound' && !helpOpen.value) {
+    unread.value += (e.data as { count?: number }).count ?? 1;
+  }
+  // Embed booted → send it the current theme so it matches instantly.
+  if (type === 'metro:ready') pushTheme();
 }
+// Keep the widget's theme in sync whenever the site theme changes.
+watch(currentTheme, pushTheme);
 onMounted(() => window.addEventListener('message', onMessage));
 onUnmounted(() => window.removeEventListener('message', onMessage));
 </script>
@@ -50,10 +64,12 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
       >
         <iframe
           v-if="helpLoaded"
+          ref="helpFrame"
           :src="helpSrc"
           title="Get help"
           class="size-full border-0"
           allow="clipboard-write; microphone; camera"
+          @load="pushTheme"
         />
       </div>
       <div class="flex space-x-2">
