@@ -335,7 +335,7 @@ function formatSpace(
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
-    active_proposals: null,
+    active_proposals: space.active_proposal_count,
     voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury =>
       formatMetadataTreasury(treasury)
@@ -759,9 +759,15 @@ export function createApi(
         });
       }
 
-      return data.spaces
+      const spaces = data.spaces
         .filter(space => isSpaceWithMetadata(space))
         .map(space => formatSpace(space, constants));
+
+      spaces.sort(
+        (a, b) => (b.active_proposals ?? 0) - (a.active_proposals ?? 0)
+      );
+
+      return spaces;
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
