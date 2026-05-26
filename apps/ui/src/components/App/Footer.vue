@@ -64,7 +64,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
     v-show="helpOpen"
     class="hidden xl:flex flex-col fixed right-3 bottom-[74px] z-50
       w-[420px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-106px)]
-      rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
+      rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-md"
   >
     <!-- Single topnav: the close button lives inside the messenger's own
          conversation header (it posts metro:close), so there's no second
