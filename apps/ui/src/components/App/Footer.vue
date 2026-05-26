@@ -86,7 +86,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
     />
   </div>
   <div
-    class="hidden xl:flex fixed bottom-3 pr-4 inset-x-0 max-w-maximum !mx-auto justify-end z-30 pointer-events-none"
+    class="hidden xl:flex fixed bottom-3 pr-4 inset-x-0 max-w-maximum !mx-auto justify-end z-50 pointer-events-none"
   >
     <div class="flex space-x-2 pointer-events-auto">
       <UiTooltip
