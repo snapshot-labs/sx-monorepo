@@ -63,7 +63,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
     v-show="helpOpen"
     class="hidden xl:flex flex-col fixed right-3 bottom-3 z-50
       w-[380px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-2.75rem)]
-      rounded-2xl overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
+      rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
   >
     <iframe
       v-if="helpLoaded"
