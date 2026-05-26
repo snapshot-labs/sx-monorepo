@@ -61,18 +61,16 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
   <div
     v-show="helpOpen"
     class="hidden xl:flex flex-col fixed right-3 bottom-[74px] z-50
-      w-[440px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-106px)]
+      w-[420px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-106px)]
       rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
   >
     <button
       type="button"
-      class="absolute top-2 right-2 z-10 flex items-center justify-center size-7
-        rounded-full border border-skin-border bg-skin-bg/80 backdrop-blur
-        text-skin-link hover:bg-skin-border"
+      class="absolute top-3 right-3 z-10 text-skin-link opacity-60 hover:opacity-100"
       title="Close"
       @click="toggleHelp"
     >
-      <IH-x-mark class="size-[16px]" />
+      <IH-x-mark class="size-5" />
     </button>
     <iframe
       v-if="helpLoaded"
