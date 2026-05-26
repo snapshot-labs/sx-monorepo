@@ -54,17 +54,26 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
 </script>
 
 <template>
-  <!-- Click-outside backdrop (covers the page incl. the launcher buttons). -->
-  <div v-if="helpOpen" class="hidden xl:block fixed inset-0 z-40" @click="toggleHelp" />
-  <!-- Floating bottom-right widget (Intercom-style): docked at right-3/bottom-3,
-       capped at 600px tall and never closer than 2rem (top-8) to the top.
-       Border on all four sides + large radius; sits above the launcher buttons. -->
+  <!-- Floating widget (Intercom-style): docked at the right, sitting 4 (1rem)
+       above the launcher buttons (46px tall at bottom-3 → top at 58px). Capped
+       at 600px tall and never closer than 2rem to the top. No click-out close.
+       Border on all sides + large radius. -->
   <div
     v-show="helpOpen"
-    class="hidden xl:flex flex-col fixed right-3 bottom-3 z-50
-      w-[380px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-2.75rem)]
+    class="hidden xl:flex flex-col fixed right-3 bottom-[74px] z-50
+      w-[440px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-106px)]
       rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
   >
+    <button
+      type="button"
+      class="absolute top-2 right-2 z-10 flex items-center justify-center size-7
+        rounded-full border border-skin-border bg-skin-bg/80 backdrop-blur
+        text-skin-link hover:bg-skin-border"
+      title="Close"
+      @click="toggleHelp"
+    >
+      <IH-x-mark class="size-[16px]" />
+    </button>
     <iframe
       v-if="helpLoaded"
       ref="helpFrame"
@@ -89,7 +98,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
       </UiTooltip>
       <UiTooltip title="Get help">
         <UiButton uniform class="relative" @click="toggleHelp">
-          <IH-x-mark v-if="helpOpen" />
+          <IH-chevron-down v-if="helpOpen" />
           <IH-chat v-else />
           <span
             v-if="!helpOpen && unread > 0"
