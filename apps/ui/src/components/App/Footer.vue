@@ -10,16 +10,16 @@ const isSiteRoute = computed(() => {
   return false;
 });
 
-// TODO: replace with the real XMTP conversation id of the Snapshot support group.
-const SUPPORT_CONV_ID = 'snapshot-support';
 const METRO_ORIGIN = 'https://metro.box';
 const { currentTheme } = useTheme();
 const helpFrame = ref<HTMLIFrameElement | null>(null);
 const helpOpen = ref(false);
 const helpLoaded = ref(false);
 const unread = ref(0);
+/** Open the messenger homepage (channels list); the iframe hides the metro
+ *  chrome itself when embedded. */
 const helpSrc = computed(
-  () => `${METRO_ORIGIN}/#/embed/${encodeURIComponent(SUPPORT_CONV_ID)}`
+  () => `${METRO_ORIGIN}/#/channels`
 );
 
 function toggleHelp() {
