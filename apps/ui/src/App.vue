@@ -72,6 +72,5 @@ onMounted(() => initWhiteLabel());
     <LayoutSite v-else-if="routeName === 'site'" />
     <LayoutApp v-else />
     <AppFooter v-if="!isAuctionApp" />
-    <AppSupportWidget v-if="!isAuctionApp" />
   </div>
 </template>
