@@ -12,16 +12,31 @@ const isSiteRoute = computed(() => {
 
 // TODO: replace with the real XMTP conversation id of the Snapshot support group.
 const SUPPORT_CONV_ID = 'snapshot-support';
+const METRO_ORIGIN = 'https://metro.box';
 const helpOpen = ref(false);
 const helpLoaded = ref(false);
+const unread = ref(0);
 const helpSrc = computed(
-  () => `https://metro.box/#/embed/${encodeURIComponent(SUPPORT_CONV_ID)}`
+  () => `${METRO_ORIGIN}/#/embed/${encodeURIComponent(SUPPORT_CONV_ID)}`
 );
 
 function toggleHelp() {
   helpOpen.value = !helpOpen.value;
-  if (helpOpen.value) helpLoaded.value = true;
+  if (helpOpen.value) {
+    helpLoaded.value = true;
+    unread.value = 0;
+  }
 }
+
+/** The embedded metro.box messenger posts an unread ping per inbound
+ *  message; count them while the panel is closed to badge the button. */
+function onMessage(e: MessageEvent) {
+  if (e.origin !== METRO_ORIGIN) return;
+  if ((e.data as { type?: string })?.type !== 'metro:inbound') return;
+  if (!helpOpen.value) unread.value += (e.data as { count?: number }).count ?? 1;
+}
+onMounted(() => window.addEventListener('message', onMessage));
+onUnmounted(() => window.removeEventListener('message', onMessage));
 </script>
 
 <template>
@@ -51,9 +66,13 @@ function toggleHelp() {
           </UiButton>
         </UiTooltip>
         <UiTooltip title="Get help">
-          <UiButton uniform @click="toggleHelp">
+          <UiButton uniform class="relative" @click="toggleHelp">
             <IH-x-mark v-if="helpOpen" />
             <IH-chat v-else />
+            <span
+              v-if="!helpOpen && unread > 0"
+              class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-skin-danger text-white text-[11px] leading-[18px] text-center"
+            >{{ unread > 99 ? '99+' : unread }}</span>
           </UiButton>
         </UiTooltip>
       </div>
