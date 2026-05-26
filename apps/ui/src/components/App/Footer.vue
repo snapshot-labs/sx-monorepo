@@ -64,20 +64,23 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
       w-[420px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[calc(100vh-106px)]
       rounded-lg overflow-hidden border border-skin-border bg-skin-bg shadow-sm"
   >
-    <button
-      type="button"
-      class="absolute top-3 right-3 z-10 text-skin-link opacity-60 hover:opacity-100"
-      title="Close"
-      @click="toggleHelp"
-    >
-      <IH-x-mark class="size-5" />
-    </button>
+    <!-- Widget topnav: bottom border, close button last (right-aligned). -->
+    <div class="flex items-center justify-end shrink-0 h-[48px] px-3 border-b border-skin-border">
+      <button
+        type="button"
+        class="text-skin-link opacity-60 hover:opacity-100"
+        title="Close"
+        @click="toggleHelp"
+      >
+        <IH-x-mark class="size-5" />
+      </button>
+    </div>
     <iframe
       v-if="helpLoaded"
       ref="helpFrame"
       :src="helpSrc"
       title="Get help"
-      class="size-full border-0"
+      class="flex-1 w-full border-0"
       allow="clipboard-write; microphone; camera"
       @load="pushTheme"
     />
@@ -95,7 +98,7 @@ onUnmounted(() => window.removeEventListener('message', onMessage));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <UiButton uniform class="relative" @click="toggleHelp">
+        <UiButton primary uniform class="relative" @click="toggleHelp">
           <IH-chevron-down v-if="helpOpen" />
           <IH-chat v-else />
           <span
