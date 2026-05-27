@@ -1,13 +1,45 @@
 ---
 title: "Snapshot MCP"
+sidebarTitle: "MCP"
 description: "Connect Claude, ChatGPT, Cursor and other AI assistants to Snapshot through the Model Context Protocol."
 ---
 
-A hosted [MCP](https://modelcontextprotocol.io) server that lets AI assistants read governance data and act on your behalf: cast votes, create proposals, follow spaces. All writes are signed by a per-user alias wallet that you authorize once and can revoke at any time.
+Give any AI assistant full access to Snapshot governance: query data, cast votes, create proposals, and follow spaces.
 
 ```
 https://mcp.snapshot.box
 ```
+
+## What you can do
+
+- **Query** proposals, spaces, voting power, and any governance data via GraphQL
+- **Vote** on active proposals across any space
+- **Propose** new proposals with automatic defaults from the space settings
+- **Follow** spaces to stay updated
+
+All write operations are signed by a per-user [alias](/user-guides/aliases) wallet that you authorize once and can revoke at any time.
+
+## Available tools
+
+The server exposes 5 tools. The AI selects them automatically based on your prompt.
+
+| Tool | Description | Auth |
+|---|---|---|
+| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
+| `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
+| `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
+| `snapshot-follow` | Follow a space. Idempotent. | Yes |
+
+## Example prompts
+
+- *"What proposals are active in `ens.eth` right now?"*
+- *"What's the current voting power of `vitalik.eth` in `ens.eth`?"*
+- *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."*
+- *"Follow `gitcoindao.eth` for me."*
+- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."*
+
+The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act.
 
 ## Connect
 
@@ -109,57 +141,29 @@ You can revoke an alias at any time from **Settings > Aliases**.
   src="/videos/mcp-revoke-alias.mp4"
 ></video>
 
-## Available tools
-
-The server exposes 5 tools. The AI selects them automatically based on your prompt.
-
-| Tool | Description | Auth |
-|---|---|---|
-| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
-| `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
-| `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
-| `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
-| `snapshot-follow` | Follow a space. Idempotent. | Yes |
-
-## Example prompts
-
-Once connected, try these prompts to validate the connection:
-
-- *"What proposals are active in `ens.eth` right now?"*
-- *"What's the current voting power of `vitalik.eth` in `ens.eth`?"*
-- *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."*
-- *"Follow `gitcoindao.eth` for me."*
-- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."*
-
-The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act.
-
 ## How it works
 
-<iframe
-  width="100%"
-  height="400"
-  src="https://embed.figma.com/board/dQaTvHwQG7CBSXTKd3RCH8/Snapshot-MCP-Architecture?node-id=&embed-host=share"
-  allowFullScreen
-  style={{ border: "none", borderRadius: "8px" }}
-></iframe>
+### Reading data
 
-1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tools.
-2. **Connect.** OAuth 2.0 with PKCE. The server creates a CDP-managed alias wallet, redirects you to Snapshot to authorize it, then issues a JWT.
-3. **Read.** `snapshot-query` and `snapshot-schema` proxy to Snapshot Hub. No wallet needed.
-4. **Write.** Write tools build the EIP-712 envelope, ask CDP to sign with your alias, and submit to the Snapshot sequencer.
+Read tools (`snapshot-query`, `snapshot-schema`) require no authentication. The MCP server proxies your GraphQL query directly to Snapshot Hub and returns the result. Your address is automatically bound as `$user` so the AI can query your votes, follows, and voting power without any setup.
 
-The server is stateless. The JWT carries everything (address, CDP account ID, alias).
+### Writing data
 
-## Security
+Write tools (`snapshot-vote`, `snapshot-propose`, `snapshot-follow`) use a dedicated signing flow that keeps your main wallet safe:
 
-| Property | Detail |
-|---|---|
-| **Your main key never leaves your wallet** | Writes are signed by an alias that can only sign Snapshot governance messages. |
-| **Isolated aliases** | Each connection provisions its own [Coinbase CDP](https://docs.cdp.coinbase.com)-managed alias. The server never sees the private key. |
-| **Scoped tokens** | Stateless JWTs (HS256). A stolen token can act as that alias but cannot touch your main wallet. Rotating `JWT_SECRET` invalidates all tokens. |
-| **OAuth with PKCE** | Standards-compliant Authorization Code + PKCE. No client secret required. |
-| **Stateless** | Zero session state. Every request is processed from the JWT alone. |
-| **Revocable** | [Revoke the alias](/user-guides/aliases#revoke-an-alias) at any time from the Snapshot UI. |
+1. **Authorization.** On first use, an OAuth 2.0 + PKCE flow opens in your browser. This creates a new [alias](/user-guides/aliases) wallet managed by [Coinbase CDP](https://docs.cdp.coinbase.com) and links it to your Snapshot account. You approve the alias once.
+2. **Token issuance.** After approval, the server issues a stateless JWT containing your address, CDP account ID, and alias reference. No session is stored server-side.
+3. **Signing.** When the AI calls a write tool, the server builds an EIP-712 typed message (the same format used by the Snapshot UI), sends it to CDP for signing with your alias key, and submits the signed message to the Snapshot sequencer.
+4. **Execution.** The Snapshot sequencer validates the signature and the alias authorization, then processes the action exactly as if you had performed it through the UI.
+
+### Security guarantees
+
+- **Your private key is never exposed.** The MCP server never sees, stores, or transmits your main wallet key. All writes are signed by an alias, a separate key managed by Coinbase CDP that only you authorize.
+- **Aliases are scoped to governance.** An alias can only sign Snapshot messages (votes, proposals, follows). It cannot move tokens, call contracts, or interact with anything outside Snapshot.
+- **Each connection is isolated.** Every OAuth flow provisions its own CDP-managed alias. Compromising one connection does not affect your main wallet or other connections.
+- **Tokens are stateless and scoped.** The server issues JWTs (HS256) that carry only the information needed to sign. A leaked token can act as that alias but cannot escalate to your main wallet. Rotating `JWT_SECRET` on the server invalidates all tokens instantly.
+- **OAuth with PKCE.** Standards-compliant Authorization Code + PKCE flow. No client secret is required or stored.
+- **Fully revocable.** You can [revoke any alias](/user-guides/aliases#revoke-an-alias) at any time from the Snapshot UI. Once revoked, the alias can no longer sign, regardless of any outstanding tokens.
 
 ## Local mode (stdio)
 

@@ -76,6 +76,11 @@ export default defineConfig({
       }
     }
   },
+  server: {
+    fs: {
+      allow: ['../..']
+    }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

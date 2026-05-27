@@ -25,6 +25,11 @@ import { orgRoute } from './organization';
 
 export default [
   {
+    path: '/docs/:path(.*)*',
+    name: 'docs',
+    component: () => import('@/views/Docs.vue')
+  },
+  {
     path: '/about',
     name: 'site',
     component: Site,

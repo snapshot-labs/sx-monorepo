@@ -41,10 +41,7 @@
         }
       ]
     },
-    "tabs": [
-      {
-        "tab": "Help center",
-        "groups": [
+    "groups": [
           {
             "group": "Getting started",
             "pages": [
@@ -65,13 +62,23 @@
               },
               "user-guides/spaces/settings",
               "user-guides/spaces/sub-spaces",
-              "user-guides/spaces/get-verified",
-              "user-guides/spaces/add-custom-domain",
-              "user-guides/spaces/space-roles",
-              "user-guides/spaces/migrate-or-delete",
-              "user-guides/spaces/badges-and-warnings",
-              "user-guides/spaces/cover-image-size",
-              "user-guides/spaces/pro"
+              {
+                "group": "Management",
+                "pages": [
+                  "user-guides/spaces/get-verified",
+                  "user-guides/spaces/space-roles",
+                  "user-guides/spaces/badges-and-warnings",
+                  "user-guides/spaces/migrate-or-delete"
+                ]
+              },
+              {
+                "group": "Customization",
+                "pages": [
+                  "user-guides/spaces/add-custom-domain",
+                  "user-guides/spaces/cover-image-size",
+                  "user-guides/spaces/pro"
+                ]
+              }
             ]
           },
           {
@@ -98,72 +105,65 @@
               "user-guides/delegation",
               "user-guides/using-safe-multi-sig",
               "v1-interface/plugins/safesnap-reality",
-              "tools/mobile-notifications",
+              "user-guides/aliases"
+            ]
+          },
+          {
+            "group": "Integrations",
+            "pages": [
+              "tools/snapshot-mcp",
+              "tools/webhooks",
               "tools/bots",
-              "user-guides/aliases",
-              "tools/snapshot-mcp"
+              "tools/mobile-notifications"
+            ]
+          },
+          {
+            "group": "Developers",
+            "pages": [
+              "developers/index",
+              {
+                "group": "Guides",
+                "pages": [
+                  "developer-guides/voting-strategy",
+                  "developer-guides/validation-strategy",
+                  "developer-guides/identify-integrator-activity",
+                  "developer-guides/networks"
+                ]
+              },
+              {
+                "group": "Tools",
+                "pages": [
+                  "tools/tools-overview",
+                  "tools/snapshot-js",
+                  {
+                    "group": "API",
+                    "pages": [
+                      "tools/api",
+                      "tools/api/api-keys"
+                    ]
+                  },
+                  "tools/subgraphs"
+                ]
+              }
             ]
           },
           {
             "group": "Snapshot X",
             "pages": [
               "snapshot-x/overview",
-              "snapshot-x/user-guides/create-a-space",
-              "snapshot-x/user-guides/proposals",
-              "snapshot-x/user-guides/voting",
-              "snapshot-x/user-guides/safe-execution-setup",
-              "snapshot-x/user-guides/gasless-voting",
-              "snapshot-x/user-guides/voting-power",
-              "snapshot-x/user-guides/storage-proofs",
-              "snapshot-x/user-guides/voting-strategies-sx"
-            ]
-          },
-          {
-            "group": "FAQ",
-            "pages": [
-              "faq"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Developers",
-        "groups": [
-          {
-            "group": "Getting started",
-            "pages": [
-              "developers/index"
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              "developer-guides/voting-strategy",
-              "developer-guides/validation-strategy",
-              "developer-guides/identify-integrator-activity",
-              "developer-guides/networks"
-            ]
-          },
-          {
-            "group": "Tools",
-            "pages": [
-              "tools/tools-overview",
-              "tools/snapshot-js",
               {
-                "group": "API",
+                "group": "User guides",
                 "pages": [
-                  "tools/api",
-                  "tools/api/api-keys"
+                  "snapshot-x/user-guides/create-a-space",
+                  "snapshot-x/user-guides/proposals",
+                  "snapshot-x/user-guides/voting",
+                  "snapshot-x/user-guides/safe-execution-setup",
+                  "snapshot-x/user-guides/gasless-voting",
+                  "snapshot-x/user-guides/voting-power",
+                  "snapshot-x/user-guides/storage-proofs",
+                  "snapshot-x/user-guides/voting-strategies-sx"
                 ]
               },
-              "tools/webhooks",
-              "tools/subgraphs"
-            ]
-          },
-          {
-            "group": "Snapshot X",
-            "pages": [
-              "snapshot-x/services/architecture",
               {
                 "group": "Protocol",
                 "pages": [
@@ -178,15 +178,25 @@
                   "snapshot-x/protocol/audits"
                 ]
               },
-              "snapshot-x/services/api",
-              "snapshot-x/services/sx-js",
-              "snapshot-x/services/ui",
-              "snapshot-x/services/mana"
+              {
+                "group": "Services",
+                "pages": [
+                  "snapshot-x/services/architecture",
+                  "snapshot-x/services/api",
+                  "snapshot-x/services/sx-js",
+                  "snapshot-x/services/ui",
+                  "snapshot-x/services/mana"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "FAQ",
+            "pages": [
+              "faq"
             ]
           }
         ]
-      }
-    ]
   },
   "redirects": [
     {
