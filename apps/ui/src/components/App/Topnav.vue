@@ -153,6 +153,8 @@ onUnmounted(() => {
       </label>
     </form>
 
+    <div v-if="!searchConfig" id="topnav-search-slot" class="flex flex-1 py-3 h-full" />
+
     <div v-if="isAuctionApp" class="flex-grow">
       <IC-snapshot class="size-[28px] text-skin-link" />
     </div>

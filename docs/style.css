@@ -74,6 +74,51 @@ html:not(.dark) .sidebar-group-header {
   color: #606060 !important;
 }
 
+/* Match article category breadcrumb to sidebar eyebrow style */
+#content-area .breadcrumb-group-label,
+#content-area nav[aria-label="breadcrumb"] a:first-child,
+#content-container > div > a:first-child,
+article > a:first-of-type,
+.eyebrow,
+#content-area [class*="group-label"] {
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  font-size: 0.75rem !important;
+  color: #606060 !important;
+}
+
+html.dark #content-area .breadcrumb-group-label,
+html.dark #content-area nav[aria-label="breadcrumb"] a:first-child,
+html.dark #content-container > div > a:first-child,
+html.dark article > a:first-of-type,
+html.dark .eyebrow,
+html.dark #content-area [class*="group-label"] {
+  color: #d0d0d1 !important;
+}
+
+/* Override full black backgrounds with our bg color */
+html.dark .code-block,
+html.dark .code-block *,
+html.dark pre,
+html.dark code,
+html.dark [class*="CodeBlock"],
+html.dark [class*="codeblock"],
+html.dark .shiki,
+html.dark [data-rehype-pretty-code-fragment] {
+  background-color: #0E0F10 !important;
+}
+
+html:not(.dark) .code-block,
+html:not(.dark) .code-block *,
+html:not(.dark) pre,
+html:not(.dark) code,
+html:not(.dark) [class*="CodeBlock"],
+html:not(.dark) [class*="codeblock"],
+html:not(.dark) .shiki,
+html:not(.dark) [data-rehype-pretty-code-fragment] {
+  background-color: #ffffff !important;
+}
+
 /* Content horizontal padding */
 #content-container {
   padding-left: 40px !important;
@@ -82,6 +127,23 @@ html:not(.dark) .sidebar-group-header {
 
 /* Remove dividers between sidebar sections */
 .sidebar-nav-group-divider {
+  display: none !important;
+}
+
+/* Add space between "On this page" heading and the list */
+#table-of-contents h2 {
+  margin-bottom: 16px !important;
+}
+
+/* Hide "On this page" right sidebar scrollbar */
+#table-of-contents,
+#table-of-contents * {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+#table-of-contents::-webkit-scrollbar,
+#table-of-contents *::-webkit-scrollbar {
   display: none !important;
 }
 
