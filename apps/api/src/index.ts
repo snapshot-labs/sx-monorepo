@@ -50,21 +50,6 @@ async function run() {
     resolvers: {
       Space: {
         active_proposal_count: {
-          resolve: async (parent, _args, context) => {
-            const now = Math.floor(Date.now() / 1000);
-            const result = await context.knex('proposals')
-              .where('_indexer', parent._indexer)
-              .where('space', parent.id)
-              .where('start', '<=', now)
-              .where('max_end', '>', now)
-              .where('cancelled', false)
-              .where('executed', false)
-              .where('vetoed', false)
-              .whereRaw('upper_inf(block_range)')
-              .count('* as count')
-              .first();
-            return Number(result?.count ?? 0);
-          },
           sql: (knex) =>
             knex('proposals')
               .count('*')
