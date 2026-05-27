@@ -759,15 +759,9 @@ export function createApi(
         });
       }
 
-      const spaces = data.spaces
+      return data.spaces
         .filter(space => isSpaceWithMetadata(space))
         .map(space => formatSpace(space, constants));
-
-      spaces.sort(
-        (a, b) => (b.active_proposals ?? 0) - (a.active_proposals ?? 0)
-      );
-
-      return spaces;
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
