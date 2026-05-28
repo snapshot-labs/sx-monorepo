@@ -360,10 +360,7 @@ export default async function run() {
       log.info('[spaces] End spaces refresh');
     } catch (err: any) {
       capture(err);
-      // JSON.stringify on an Error gives `{}` (non-enumerable props) — surface message + stack instead.
-      log.error(
-        `[spaces] failed to load spaces: ${err?.message ?? String(err)}\n${err?.stack ?? ''}`
-      );
+      log.error('[spaces] failed to load spaces', err);
     }
     await snapshot.utils.sleep(RUN_INTERVAL);
   }
