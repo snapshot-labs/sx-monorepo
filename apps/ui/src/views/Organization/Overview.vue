@@ -7,7 +7,8 @@ import {
   getSocialNetworksLink,
   SOCIAL_NETWORKS
 } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { Space } from '@/types';
 import {
   PROPOSALS_KEYS,
   PROPOSALS_SUMMARY_LIMIT,
@@ -83,6 +84,21 @@ const proposals = computed(() =>
 watchEffect(() => {
   if (organization.value) setTitle(organization.value.name);
 });
+
+function getSpaceLabel(s: Space) {
+  const navItems = organization.value?.navItems;
+  if (navItems) {
+    const spaceId = `${s.network}:${s.id}`;
+    const match = Object.values(navItems).find(item => {
+      const link = item.link as
+        | { name?: string; params?: { space?: string } }
+        | undefined;
+      return link?.name === 'space-proposals' && link.params?.space === spaceId;
+    });
+    if (match?.name) return match.name;
+  }
+  return getNetwork(s.network).name;
+}
 </script>
 
 <template>
@@ -97,28 +113,27 @@ watchEffect(() => {
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
-        <UiDropdown>
-          <template #button>
-            <UiTooltip title="New proposal">
+        <UiTooltip title="New proposal">
+          <UiDropdown>
+            <template #button>
               <UiButton uniform>
                 <IH-pencil-alt />
               </UiButton>
-            </UiTooltip>
-          </template>
-          <template #items>
-            <UiDropdownItem
-              v-for="s in spaces"
-              :key="`${s.network}:${s.id}`"
-              :to="{
-                name: 'space-editor',
-                params: { space: `${s.network}:${s.id}` }
-              }"
-            >
-              <SpaceAvatar :space="s" :size="20" />
-              {{ getOrgProposalLabel(organization, `${s.network}:${s.id}`) || s.name }}
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
+            </template>
+            <template #items>
+              <UiDropdownItem
+                v-for="s in spaces"
+                :key="`${s.network}:${s.id}`"
+                :to="{
+                  name: 'space-editor',
+                  params: { space: `${s.network}:${s.id}` }
+                }"
+              >
+                {{ getSpaceLabel(s) }}
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </UiTooltip>
       </div>
     </div>
     <div class="px-4">
