@@ -360,13 +360,8 @@ export default async function run() {
       log.info('[spaces] End spaces refresh');
     } catch (err: any) {
       capture(err);
-      /** Error instances aren't enumerable so `JSON.stringify(err)` produces
-       *  `{}` and the log line carries no signal — the 2026-05-28 stall
-       *  showed empty `[spaces] failed to load spaces,` lines because of
-       *  this. Surface `message` + `stack` explicitly instead. */
-      log.error(
-        `[spaces] failed to load spaces: ${err?.message ?? String(err)}\n${err?.stack ?? ''}`
-      );
+      // JSON.stringify on an Error gives `{}` (non-enumerable props) — surface message + stack instead.
+      log.error(`[spaces] failed to load spaces: ${err?.message ?? String(err)}\n${err?.stack ?? ''}`);
     }
     await snapshot.utils.sleep(RUN_INTERVAL);
   }
