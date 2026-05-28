@@ -239,7 +239,7 @@ watchEffect(() => setTitle('Explore'));
                 type="button"
                 class="ml-2 shrink-0 text-skin-text hover:text-skin-link"
                 @click.stop.prevent="openDeus"
-                v-text="'$DEUS is out!'"
+                v-text="'$DEUS Now Trading'"
               />
             </template>
           </SpacesListItem>
