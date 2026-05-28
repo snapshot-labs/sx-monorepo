@@ -7,7 +7,7 @@ import {
   getSocialNetworksLink,
   SOCIAL_NETWORKS
 } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 import {
   PROPOSALS_KEYS,
@@ -97,7 +97,13 @@ function getSpaceLabel(s: Space) {
     });
     if (match?.name) return match.name;
   }
-  return getNetwork(s.network).name;
+
+  for (const protocol of Object.values(explorePageProtocols)) {
+    if (protocol.protocols?.includes(s.protocol)) return protocol.label;
+  }
+  return offchainNetworks.includes(s.network)
+    ? explorePageProtocols.snapshot.label
+    : explorePageProtocols['snapshot-x'].label;
 }
 </script>
 
