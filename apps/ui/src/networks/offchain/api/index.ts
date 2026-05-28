@@ -982,8 +982,7 @@ export function createApi(
         data: { aliases }
       }: { data: { aliases: Alias[] } } = await apollo.query({
         query: ALIASES_BY_ADDRESS_QUERY,
-        variables: { address },
-        fetchPolicy: 'no-cache'
+        variables: { address }
       });
 
       return aliases ?? [];
