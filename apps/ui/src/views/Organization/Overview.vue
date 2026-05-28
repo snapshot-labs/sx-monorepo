@@ -8,12 +8,12 @@ import {
   SOCIAL_NETWORKS
 } from '@/helpers/utils';
 import { explorePageProtocols, offchainNetworks } from '@/networks';
-import { Space } from '@/types';
 import {
   PROPOSALS_KEYS,
   PROPOSALS_SUMMARY_LIMIT,
   proposalsSummaryQueryFn
 } from '@/queries/proposals';
+import { Space } from '@/types';
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
@@ -86,24 +86,15 @@ watchEffect(() => {
 });
 
 function getSpaceLabel(s: Space) {
-  const navItems = organization.value?.navItems;
-  if (navItems) {
-    const spaceId = `${s.network}:${s.id}`;
-    const match = Object.values(navItems).find(item => {
-      const link = item.link as
-        | { name?: string; params?: { space?: string } }
-        | undefined;
-      return link?.name === 'space-proposals' && link.params?.space === spaceId;
-    });
-    if (match?.name) return match.name;
-  }
-
-  for (const protocol of Object.values(explorePageProtocols)) {
-    if (protocol.protocols?.includes(s.protocol)) return protocol.label;
-  }
-  return offchainNetworks.includes(s.network)
-    ? explorePageProtocols.snapshot.label
-    : explorePageProtocols['snapshot-x'].label;
+  const spaceId = `${s.network}:${s.id}`;
+  const navItem = Object.values(organization.value?.navItems ?? {}).find(i => {
+    const link = i.link as { name?: string; params?: { space?: string } };
+    return link?.name === 'space-proposals' && link.params?.space === spaceId;
+  });
+  if (navItem?.name) return navItem.name;
+  const { governor, snapshot, 'snapshot-x': sx } = explorePageProtocols;
+  if (governor.protocols?.includes(s.protocol)) return governor.label;
+  return offchainNetworks.includes(s.network) ? snapshot.label : sx.label;
 }
 </script>
 
