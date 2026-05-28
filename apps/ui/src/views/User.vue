@@ -6,6 +6,7 @@ import {
   _p,
   autoLinkText,
   compareAddresses,
+  formatAddress,
   getCacheHash,
   getSocialNetworksLink,
   shortenAddress
@@ -39,7 +40,7 @@ const userMetadata = reactive({
   following_count: 0
 });
 
-const id = computed(() => route.params.user as string);
+const id = computed(() => formatAddress(route.params.user as string));
 
 const user = computed(() => usersStore.getUser(id.value));
 

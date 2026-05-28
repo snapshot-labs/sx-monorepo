@@ -1,6 +1,6 @@
 import db from './mysql';
 
-const DEFAULT_ALIAS_EXPIRY_DAYS = 30;
+const DEFAULT_ALIAS_EXPIRY_DAYS = 90;
 
 const TYPES_EXECUTABLE_BY_ALIAS: readonly string[] = [
   'follow',

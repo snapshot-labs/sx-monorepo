@@ -16,6 +16,7 @@ import {
   followSpaceTypes,
   proposeTypes,
   rankedChoiceVoteTypes,
+  revokeAliasTypes,
   singleChoiceVoteTypes,
   unfollowSpaceTypes,
   updateProposalTypes,
@@ -36,6 +37,7 @@ import {
   EIP712FollowSpaceMessage,
   EIP712Message,
   EIP712ProposeMessage,
+  EIP712RevokeAliasMessage,
   EIP712SetAliasMessage,
   EIP712UnfollowSpaceMessage,
   EIP712UpdateProposal,
@@ -47,6 +49,7 @@ import {
   FlagProposal,
   FollowSpace,
   Propose,
+  RevokeAlias,
   SetAlias,
   SignatureData,
   UnfollowSpace,
@@ -99,6 +102,7 @@ export class EthereumSig {
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
       | EIP712SetAliasMessage
+      | EIP712RevokeAliasMessage
       | EIP712UpdateUserMessage
       | EIP712UpdateStatementMessage
       | EIP712UpdateSpaceMessage
@@ -146,6 +150,7 @@ export class EthereumSig {
       | FollowSpace
       | UnfollowSpace
       | SetAlias
+      | RevokeAlias
     >
   ) {
     const {
@@ -357,6 +362,21 @@ export class EthereumSig {
     data: SetAlias;
   }): Promise<Envelope<SetAlias>> {
     const signatureData = await this.sign(signer, data, aliasTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async revokeAlias({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: RevokeAlias;
+  }): Promise<Envelope<RevokeAlias>> {
+    const signatureData = await this.sign(signer, data, revokeAliasTypes);
 
     return {
       signatureData,
