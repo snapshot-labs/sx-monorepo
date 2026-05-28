@@ -36,6 +36,8 @@ jobs:
         run: cargo install starknet-devnet@${{ env.STARKNET_DEVNET_VERSION }}
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: bun run typecheck
