@@ -115,7 +115,7 @@ watchEffect(() => {
               }"
             >
               <SpaceAvatar :space="s" :size="20" />
-              {{ s.name }}
+              {{ getOrgProposalLabel(organization, `${s.network}:${s.id}`) || s.name }}
             </UiDropdownItem>
           </template>
         </UiDropdown>
