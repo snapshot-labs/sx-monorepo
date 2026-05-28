@@ -1,6 +1,7 @@
 import { metadataNetwork } from '@/networks';
 import { NavConfig, NavContext } from './types';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
+import IHKey from '~icons/heroicons-outline/key';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHUsers from '~icons/heroicons-outline/users';
 
@@ -20,6 +21,10 @@ export default {
         contacts: {
           name: 'Contacts',
           icon: IHUsers
+        },
+        aliases: {
+          name: 'Aliases',
+          icon: IHKey
         },
         notifications: {
           name: 'Notifications',

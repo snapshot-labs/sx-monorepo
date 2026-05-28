@@ -5,7 +5,7 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 env:
@@ -36,6 +36,8 @@ jobs:
         run: cargo install starknet-devnet@${{ env.STARKNET_DEVNET_VERSION }}
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.7.1
       - run: bun install --frozen-lockfile
       - run: bun run build
       - run: bun run typecheck

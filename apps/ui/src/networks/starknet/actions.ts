@@ -853,6 +853,7 @@ export function createActions(
     followSpace: () => {},
     unfollowSpace: () => {},
     setAlias: async () => {},
+    revokeAlias: async () => {},
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {

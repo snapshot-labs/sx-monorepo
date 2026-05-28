@@ -3,7 +3,7 @@
 
 # Snapshot monorepository
 
-This is the Snapshot monorepository containing a Vue frontend, GraphQL API, transaction relayer, and TypeScript SDK.
+This is the Snapshot monorepository containing a Vue frontend, GraphQL API, a transaction relayer, and a TypeScript SDK.
 
 ## Apps and packages
 
