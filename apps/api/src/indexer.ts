@@ -18,10 +18,12 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function initializeCheckpoint(checkpoint: Checkpoint) {
   if (!GIT_COMMIT) {
-    logger.info('No git commit found, resetting database.');
+    logger.warn(
+      'No git commit found — reset skipped (commented out to prevent accidental production DB wipes; see incident 2026-05-28).'
+    );
 
-    await checkpoint.resetMetadata();
-    await checkpoint.reset();
+    // await checkpoint.resetMetadata();
+    // await checkpoint.reset();
 
     return;
   }
@@ -47,14 +49,14 @@ async function initializeCheckpoint(checkpoint: Checkpoint) {
       );
     }
 
-    logger.info(
+    logger.warn(
       { currentVersionTag, storedVersionTag },
-      'Stored version tag differs from current. Resetting database.'
+      'Stored version tag differs from current — reset skipped (commented out; see incident 2026-05-28).'
     );
   }
 
-  await checkpoint.resetMetadata();
-  await checkpoint.reset();
+  // await checkpoint.resetMetadata();
+  // await checkpoint.reset();
 
   await knex('_metadatas').insert({
     id: 'version_tag',
