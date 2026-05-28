@@ -97,17 +97,28 @@ watchEffect(() => {
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
-        <UiTooltip title="New proposal">
-          <UiButton
-            :to="{
-              name: 'space-editor',
-              params: { space: `${space.network}:${space.id}` }
-            }"
-            uniform
-          >
-            <IH-pencil-alt />
-          </UiButton>
-        </UiTooltip>
+        <UiDropdown>
+          <template #button>
+            <UiTooltip title="New proposal">
+              <UiButton uniform>
+                <IH-pencil-alt />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <template #items>
+            <UiDropdownItem
+              v-for="s in spaces"
+              :key="`${s.network}:${s.id}`"
+              :to="{
+                name: 'space-editor',
+                params: { space: `${s.network}:${s.id}` }
+              }"
+            >
+              <SpaceAvatar :space="s" :size="20" />
+              {{ s.name }}
+            </UiDropdownItem>
+          </template>
+        </UiDropdown>
       </div>
     </div>
     <div class="px-4">
