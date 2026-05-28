@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import './instrument';
-import { fallbackLogger } from '@snapshot-labs/snapshot-sentry';
+import { capture, fallbackLogger } from '@snapshot-labs/snapshot-sentry';
 import cors from 'cors';
 import express from 'express';
 import api from './api';
@@ -13,6 +13,36 @@ import { closeDatabase } from './helpers/mysql';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
 import './helpers/strategies';
+
+/** Crash-loudly handlers for the two paths Node otherwise eats silently.
+ *  Without these, an `uncaughtException` (Node 18+) or
+ *  `unhandledRejection` (Node 20+) terminates the process with no stack
+ *  trace in the logs — exactly the "2-min silence then restart" pattern
+ *  we hit on 2026-05-28. Capture to Sentry first, log a sentinel line,
+ *  then re-throw so the orchestrator restarts cleanly. */
+process.on('uncaughtException', err => {
+  log.error(`[fatal] uncaughtException: ${err?.message}\n${err?.stack}`);
+  capture(err);
+  setTimeout(() => process.exit(1), 200);
+});
+process.on('unhandledRejection', reason => {
+  const err = reason instanceof Error ? reason : new Error(String(reason));
+  log.error(`[fatal] unhandledRejection: ${err.message}\n${err.stack}`);
+  capture(err);
+  setTimeout(() => process.exit(1), 200);
+});
+
+/** Heartbeat — emits one line every 30s so a missing tick is an
+ *  instantly-visible signal in the log stream. The 2-min silent stall
+ *  on 2026-05-28 took ~2 minutes to be noticed and another minute to
+ *  diagnose because the only signal was "no logs". A predictable beat
+ *  lets a Better Stack alert fire on a 60s gap. */
+setInterval(() => {
+  const mem = process.memoryUsage();
+  log.info(
+    `[heartbeat] up ${Math.round(process.uptime())}s | rss ${Math.round(mem.rss / 1048576)}MB | heap ${Math.round(mem.heapUsed / 1048576)}/${Math.round(mem.heapTotal / 1048576)}MB`
+  );
+}, 30e3).unref();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
