@@ -360,7 +360,7 @@ export default async function run() {
       log.info('[spaces] End spaces refresh');
     } catch (err: any) {
       capture(err);
-      log.error(`[spaces] failed to load spaces, ${JSON.stringify(err)}`);
+      log.error('[spaces] failed to load spaces', err);
     }
     await snapshot.utils.sleep(RUN_INTERVAL);
   }
