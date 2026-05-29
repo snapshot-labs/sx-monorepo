@@ -9,16 +9,16 @@ This is the Snapshot monorepository containing a Vue frontend, GraphQL API, a tr
 
 - [`./apps/ui`](./apps/ui): Snapshot official frontend using Vue 3
 - [`./apps/api`](./apps/api): Multichain indexer for Snapshot X using [Checkpoint](https://checkpoint.box)
-- [`./apps/hub`](./apps/hub): Hub for Snapshot network that stores and signs messages
+- [`./apps/hub`](./apps/hub): GraphQL API for the Snapshot offchain protocol
 - [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
 - [`./apps/mcp`](./apps/mcp): MCP server for the Snapshot API
-- [`./apps/sequencer`](./apps/sequencer): Sequencer for Snapshot protocol
+- [`./apps/sequencer`](./apps/sequencer): Sequencer for Snapshot offchain protocol
 - [`./apps/auction`](./apps/auction): Brokester auction frontend using Vue 3
-- [`./apps/highlight`](./apps/highlight): Offchain indexer using Checkpoint
+- [`./apps/highlight`](./apps/highlight): Experimental sequencer for offchain data using Checkpoint
 
 ## Packages
 
-- [`./packages/sx.js`](./packages/sx.js): TypeScript SDK for Snapshot and Snapshot X
+- [`./packages/sx.js`](./packages/sx.js): TypeScript SDK for Snapshot, Snapshot X and Governor
 - [`./packages/tune`](./packages/tune): Vue 3 UI kit for Snapshot apps
 - [`./packages/lock`](./packages/lock): Web3 connector library for Snapshot's Vue app
 
