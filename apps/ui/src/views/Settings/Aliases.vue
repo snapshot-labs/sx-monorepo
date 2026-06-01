@@ -71,13 +71,14 @@ const loading = computed(
 const EXPIRY_SECONDS = ALIAS_EXPIRY_DAYS * 24 * 60 * 60;
 const now = useNow({ interval: 60_000 });
 
-function expiresAt(created: number): number {
-  return created + EXPIRY_SECONDS;
-}
-
-function isExpired(created: number): boolean {
-  return expiresAt(created) * 1000 <= now.value.getTime();
-}
+const aliasItems = computed(() => {
+  const nowSec = now.value.getTime() / 1000;
+  return (aliases.value ?? []).map(alias => {
+    const expiresAt = alias.created ? alias.created + EXPIRY_SECONDS : 0;
+    const isExpired = !!alias.created && nowSec >= expiresAt;
+    return { ...alias, expiresAt, isExpired };
+  });
+});
 </script>
 
 <template>
@@ -88,7 +89,7 @@ function isExpired(created: number): boolean {
     </div>
     <template v-else>
       <div
-        v-for="alias in aliases ?? []"
+        v-for="alias in aliasItems"
         :key="alias.alias"
         class="mx-4 py-3 border-b flex group"
       >
@@ -107,18 +108,18 @@ function isExpired(created: number): boolean {
             <TimeRelative
               v-if="alias.created"
               v-slot="{ relativeTime }"
-              :time="expiresAt(alias.created)"
+              :time="alias.expiresAt"
+              without-suffix
             >
               <span
                 class="text-[17px]"
-                :class="
-                  isExpired(alias.created)
-                    ? 'text-skin-danger'
-                    : 'text-skin-text'
-                "
+                :class="alias.isExpired ? 'text-skin-danger' : 'text-skin-text'"
               >
-                {{ isExpired(alias.created) ? 'Expired' : 'Expires' }}
-                {{ relativeTime }}
+                {{
+                  alias.isExpired
+                    ? `Expired ${relativeTime} ago`
+                    : `Expires in ${relativeTime}`
+                }}
               </span>
             </TimeRelative>
           </div>
