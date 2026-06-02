@@ -8,7 +8,7 @@ export default defineConfig({
   outputDir: '.browser/test-results',
   use: {
     baseURL: 'http://localhost:8080',
-    trace: process.env.CI ? 'on' : 'retain-on-failure'
+    trace: process.env.CI ? 'on-first-retry' : 'retain-on-failure'
   },
   expect: {
     // 5 seconds is not quite enough it seems
