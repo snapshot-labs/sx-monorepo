@@ -1,8 +1,9 @@
 name: E2E Tests
 
 on:
-  push:
   pull_request:
+  push:
+    branches: [master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
