@@ -110,6 +110,12 @@ const paymentNetwork = computed(() =>
   metadataNetwork === 's' ? '1' : '11155111'
 );
 
+const spaceKey = computed(() =>
+  selectedSpace.value
+    ? `${selectedSpace.value.network}:${selectedSpace.value.id}`
+    : ''
+);
+
 const tokens = computed(() => {
   return TOKENS[paymentNetwork.value].filter(t =>
     ACCEPTED_TOKENS_SYMBOL.includes(t.symbol)
@@ -414,7 +420,7 @@ onMounted(() => {
       "
       :barcode-payload="{
         type: 'turbo',
-        params: { space: `${selectedSpace.network}:${selectedSpace.id}` },
+        params: { space: spaceKey },
         ref: referral || undefined
       }"
       @close="handleModalPaymentClose"
