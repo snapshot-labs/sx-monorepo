@@ -17,8 +17,9 @@ export const API_TESTNET_URL =
   import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
 export const SCHNAPS_URLS: Record<string, string> = {
-  s: 'https://schnaps.snapshot.box',
-  's-tn': 'https://testnet-schnaps.snapshot.box'
+  // TODO: revert to prod URLs before merge — sandbox backend for #2140 review
+  s: 'https://schnaps-api-sandbox-stripe-lgba3.ondigitalocean.app',
+  's-tn': 'https://schnaps-api-sandbox-stripe-lgba3.ondigitalocean.app'
 };
 
 export const DOCS_URL = 'https://docs.snapshot.box';
