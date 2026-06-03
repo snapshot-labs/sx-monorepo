@@ -77,7 +77,7 @@ type ApiOptions = {
 const DELEGATES_SUBGRAPH_URL =
   'https://subgrapher.snapshot.org/subgraph/arbitrum/7iEHSsBprpnwCHKULfaQaCA6gU6RcEgnXfD3XtHx4yyc';
 const DELEGATES_ARB_SUBGRAPH_URL =
-  'https://subgrapher.snapshot.org/subgraph/arbitrum/BFeDAWHi9sNCMK8Rtmu4hxQ4PF8DhdPwN4enQsHUDmN2';
+  'https://subgrapher.snapshot.org/subgraph/arbitrum/9ASQUr42RMqc4zyH2po6yQ7CXbajFbk6zq5Qdj3ZgTBp';
 
 const GOVERNOR_DELEGATIONS: Record<string, string> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,
@@ -870,6 +870,9 @@ export function createApi(
     },
     loadAlias: async () => {
       return null;
+    },
+    loadAliases: async () => {
+      return [];
     },
     loadStatement: async () => {
       return null;

@@ -116,6 +116,8 @@ export type EIP712SetAliasMessage = {
   timestamp?: number;
 };
 
+export type EIP712RevokeAliasMessage = EIP712SetAliasMessage;
+
 export type EIP712UpdateUserMessage = {
   from?: string;
   profile: string;
@@ -154,6 +156,7 @@ export type EIP712Message = Required<
   | EIP712FollowSpaceMessage
   | EIP712UnfollowSpaceMessage
   | EIP712SetAliasMessage
+  | EIP712RevokeAliasMessage
   | EIP712UpdateUserMessage
   | EIP712UpdateStatementMessage
   | EIP712UpdateSpaceMessage
@@ -237,6 +240,8 @@ export type SetAlias = {
   alias: string;
   timestamp?: number;
 };
+
+export type RevokeAlias = SetAlias;
 
 export type UpdateUser = {
   from?: string;

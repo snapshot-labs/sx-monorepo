@@ -1,0 +1,140 @@
+@tailwind base;
+@import '@snapshot-labs/tune/style';
+@tailwind utilities;
+
+// App-specific fonts (not in tune)
+
+@font-face {
+  font-family: 'Stolzl Display';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/StolzlDisplay-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Stolzl';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
+}
+
+.notification {
+  color: white !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+// Shot UI kit
+
+.s-input {
+  @apply text-skin-heading border border-skin-border block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3 focus:outline-none;
+}
+
+.s-label {
+  @apply block mb-1;
+}
+
+.s-base {
+  &:focus-within,
+  &.s-error {
+    .s-label-char-count {
+      display: block;
+    }
+  }
+}
+
+.s-form > .s-base:last-child,
+.s-input-pb-0 .s-base {
+  .s-input,
+  &.s-error {
+    @apply mb-0;
+  }
+}
+
+.s-error {
+  @apply mb-2;
+
+  .s-input {
+    @apply border border-skin-danger;
+    @apply mb-1 #{!important};
+  }
+
+  textarea.s-input {
+    &,
+    :focus {
+      @apply outline outline-1 outline-offset-[-1px] outline-skin-danger border-transparent;
+    }
+  }
+
+  .s-label {
+    @apply text-skin-danger;
+  }
+
+  .s-input-error-message {
+    @apply text-skin-danger;
+  }
+}
+
+.s-box {
+  // Adding the gradient fade to the top of the input
+  .s-label:has(+ textarea),
+  .s-base:has(textarea:only-child) {
+    &::before {
+      @apply block bg-gradient-to-b from-skin-border to-transparent h-[8px] absolute top-3.5 left-[1px] right-[1px];
+
+      content: '';
+    }
+  }
+
+  .s-base {
+    @apply relative;
+
+    textarea:only-child {
+      @apply border-t-0 border-transparent;
+    }
+
+    &:has(textarea:only-child)::before {
+      @apply top-0;
+    }
+  }
+
+  .s-label {
+    @apply absolute px-3 mt-1 text-[17px];
+    &:has(+ input[type='checkbox']) {
+      @apply px-0 m-0 ml-3.5;
+    }
+  }
+
+  .s-input {
+    @apply border bg-skin-border rounded-lg pt-[25px] mb-[14px] py-[7px] px-[15px];
+  }
+
+  select {
+    @apply h-[64px];
+  }
+
+  textarea.s-input {
+    @apply min-h-[61px] py-0 border-t-[25px] border-transparent;
+  }
+}
+
+.s-compact {
+  .s-base {
+    @apply relative pt-2;
+  }
+
+  .s-label {
+    @apply absolute left-2 bg-skin-bg -top-1.5 px-2;
+  }
+
+  .s-input {
+    @apply focus-within:border-skin-link;
+  }
+}

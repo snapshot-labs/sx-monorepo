@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
+import { useUiStore } from '@/stores/ui';
 
 const ALIAS_AUTHORIZE_KEYS = {
   check: (
@@ -14,7 +15,9 @@ const ALIAS_AUTHORIZE_KEYS = {
 export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const { web3Account, auth } = useWeb3();
   const queryClient = useQueryClient();
+  const uiStore = useUiStore();
 
+  const network = getNetwork(metadataNetwork);
   const isJustAuthorized = ref(false);
 
   const isValidAddress = computed(() => isAddress(toValue(aliasAddress)));
@@ -32,7 +35,6 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const { data: isAlreadyAuthorized, isPending: isCheckingAlias } = useQuery({
     queryKey: ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
     queryFn: async () => {
-      const network = getNetwork(metadataNetwork);
       try {
         const existing = await network.api.loadAlias(
           toValue(web3Account),
@@ -56,7 +58,6 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
     mutationFn: async () => {
       if (!auth.value || !isValidAddress.value || isSelfAlias.value) return;
 
-      const network = getNetwork(metadataNetwork);
       const envelope = await network.actions.setAlias(
         auth.value.provider,
         checksumAddress.value
@@ -72,6 +73,32 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
     }
   });
 
+  const { mutate: revoke, isPending: isRevoking } = useMutation({
+    mutationFn: async () => {
+      if (!auth.value || !isValidAddress.value) return;
+
+      const envelope = await network.actions.revokeAlias(
+        auth.value.provider,
+        checksumAddress.value
+      );
+      await network.actions.send(envelope);
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(
+        ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
+        false
+      );
+      uiStore.addNotification('success', 'Alias revoked.');
+    },
+    onError: (err: any) => {
+      if (isUserAbortError(err)) return;
+      uiStore.addNotification(
+        'error',
+        err?.message || 'Failed to revoke alias.'
+      );
+    }
+  });
+
   const error = computed(() => {
     if (!mutationError.value || isUserAbortError(mutationError.value))
       return null;
@@ -81,12 +108,14 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   return {
     isAuthorizing,
     isJustAuthorized,
+    isRevoking,
     error,
     isAlreadyAuthorized: computed(() => isAlreadyAuthorized.value ?? false),
     isCheckingAlias,
     isValidAddress,
     isSelfAlias,
     checksumAddress,
-    authorize
+    authorize,
+    revoke
   };
 }

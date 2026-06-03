@@ -50,6 +50,7 @@ const avatarSpace = computed(() =>
         {{ org.spaceIds.length }}
         {{ org.spaceIds.length === 1 ? 'space' : 'spaces' }}
       </span>
+      <slot name="meta" />
     </div>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
     <div class="text-[21px] font-bold flex text-center">
