@@ -70,13 +70,19 @@ Verify with `claude mcp list`.
 
 <Tab title="ChatGPT">
 
-ChatGPT has no install deep link yet, so add the server by hand:
+<Card title="Add to ChatGPT" href="https://chatgpt.com/#settings/ConnectorSettings?create-connector=true" horizontal arrow />
 
-1. Open **Settings > Connectors > Connect to MCP server**.
-2. Paste the URL: `https://mcp.snapshot.box`
-3. Complete the OAuth flow.
+The button opens the new app modal directly. Or open **Settings > Apps** and click **Create** (enable **Developer mode** under Advanced settings if prompted).
 
-Available on Plus, Pro, Business, and Enterprise plans.
+Then fill in the details:
+
+- **Name**: `Snapshot`
+- **MCP Server URL**: `https://mcp.snapshot.box`
+- **Authentication**: `OAuth`
+
+Check the risk acknowledgment box, click **Create**, and complete the OAuth flow to authorize the app.
+
+Custom apps require Developer mode and are available on Plus, Pro, Business, Enterprise, and Edu plans.
 
 </Tab>
 
@@ -142,7 +148,7 @@ The first time the AI calls a write tool, an OAuth window opens so you can autho
   src="/videos/mcp-authorize-alias.mp4"
 ></video>
 
-You can revoke an alias at any time from **Settings > Aliases**.
+You can revoke an alias at any time from **[Settings > Aliases](https://snapshot.box/#/settings/aliases)**.
 
 <video
   autoPlay
@@ -163,7 +169,7 @@ The server exposes 5 tools. The AI selects them automatically based on your prom
 | `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
 | `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
-| `snapshot-follow` | Follow a space. Idempotent. | Yes |
+| `snapshot-follow` | Follow a space. | Yes |
 
 ## How it works
 
@@ -232,7 +238,7 @@ No. The alias can only sign Snapshot governance messages (votes, proposals, foll
 </Accordion>
 
 <Accordion title="How do I revoke access?">
-Revoke the alias from **Settings > Aliases** on Snapshot. This immediately stops the server from acting on your behalf. See [Authentication](#authentication) for a walkthrough.
+Revoke the alias from **[Settings > Aliases](https://snapshot.box/#/settings/aliases)** on Snapshot. This immediately stops the server from acting on your behalf. See [Authentication](#authentication) for a walkthrough.
 </Accordion>
 
 <Accordion title="Is the read API rate-limited?">
