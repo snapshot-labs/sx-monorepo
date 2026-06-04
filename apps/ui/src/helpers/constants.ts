@@ -16,6 +16,11 @@ export const API_URL =
 export const API_TESTNET_URL =
   import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
+export const SCHNAPS_URLS: Record<string, string> = {
+  s: 'https://schnaps.snapshot.box',
+  's-tn': 'https://testnet-schnaps.snapshot.box'
+};
+
 export const DOCS_URL = 'https://docs.snapshot.box';
 
 export const VERIFIED_URL = `${DOCS_URL}/user-guides/spaces/get-verified`;
