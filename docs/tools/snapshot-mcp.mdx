@@ -3,16 +3,30 @@ title: "Snapshot MCP"
 description: "Connect Claude, ChatGPT, Cursor and other AI assistants to Snapshot through the Model Context Protocol."
 ---
 
-A hosted [MCP](https://modelcontextprotocol.io) server that lets AI assistants read governance data and act on your behalf: cast votes, create proposals, follow spaces. All writes are signed by a per-user alias wallet that you authorize once and can revoke at any time.
+A hosted [MCP](https://modelcontextprotocol.io) server that connects AI assistants to Snapshot governance. Ask an assistant to find proposals, check voting power, cast votes, create proposals, or follow spaces, all in plain language.
+
+Connect in under a minute. No install and no API key required.
 
 ```
 https://mcp.snapshot.box
 ```
 
+<Note>
+Reading governance data needs nothing but the connection. Write actions (voting, proposing, following) require a wallet you can sign with, authorized once. See [Authentication](#authentication).
+</Note>
+
+<Tip>
+Building an agent? Point it at [llms.txt](https://docs.snapshot.box/llms.txt) for a machine-readable index of these docs, or [llms-full.txt](https://docs.snapshot.box/llms-full.txt) for their full contents.
+</Tip>
+
 ## Connect
 
 <Tabs>
 <Tab title="Claude.ai">
+
+<Card title="Add to Claude.ai" href="https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Snapshot&connectorUrl=https%3A%2F%2Fmcp.snapshot.box" horizontal />
+
+One-click setup, then authorize the connector. Or add it manually:
 
 1. Open **Settings > Integrations > Add integration**.
 2. Paste the URL: `https://mcp.snapshot.box`
@@ -56,6 +70,8 @@ Verify with `claude mcp list`.
 
 <Tab title="ChatGPT">
 
+ChatGPT has no install deep link yet, so add the server by hand:
+
 1. Open **Settings > Connectors > Connect to MCP server**.
 2. Paste the URL: `https://mcp.snapshot.box`
 3. Complete the OAuth flow.
@@ -66,7 +82,23 @@ Available on Plus, Pro, Business, and Enterprise plans.
 
 <Tab title="Cursor">
 
-Open **Settings > MCP > Add new MCP server**, choose **HTTP**, paste `https://mcp.snapshot.box`.
+<Card title="Add to Cursor" href="cursor://anysphere.cursor-deeplink/mcp/install?name=snapshot&config=eyJ1cmwiOiJodHRwczovL21jcC5zbmFwc2hvdC5ib3gifQ==" horizontal arrow />
+
+Or open **Settings > MCP > Add new MCP server**, choose **HTTP**, paste `https://mcp.snapshot.box`.
+
+</Tab>
+
+<Tab title="VS Code">
+
+<Card title="Add to VS Code" href="https://insiders.vscode.dev/redirect/mcp/install?name=snapshot&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.snapshot.box%22%7D" horizontal />
+
+Or add it from your terminal:
+
+```bash
+code --add-mcp '{"name":"snapshot","url":"https://mcp.snapshot.box"}'
+```
+
+You can also run **MCP: Add Server** from the Command Palette and enter the URL `https://mcp.snapshot.box`.
 
 </Tab>
 
@@ -82,6 +114,18 @@ transport = "http"
 
 </Tab>
 </Tabs>
+
+## Try it
+
+Once connected, ask your assistant in plain language. Start simple, then move to actions:
+
+- *"What proposals are active in `ens.eth` right now?"* (read)
+- *"What's the current voting power of `vitalik.eth` in `ens.eth`?"* (read)
+- *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."* (read)
+- *"Follow `gitcoindao.eth` for me."* (write)
+- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."* (write)
+
+The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act. Read actions run instantly. Write actions ask you to authorize once (see [Authentication](#authentication)).
 
 ## Authentication
 
@@ -121,27 +165,7 @@ The server exposes 5 tools. The AI selects them automatically based on your prom
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
 | `snapshot-follow` | Follow a space. Idempotent. | Yes |
 
-## Example prompts
-
-Once connected, try these prompts to validate the connection:
-
-- *"What proposals are active in `ens.eth` right now?"*
-- *"What's the current voting power of `vitalik.eth` in `ens.eth`?"*
-- *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."*
-- *"Follow `gitcoindao.eth` for me."*
-- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."*
-
-The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act.
-
 ## How it works
-
-<iframe
-  width="100%"
-  height="400"
-  src="https://embed.figma.com/board/dQaTvHwQG7CBSXTKd3RCH8/Snapshot-MCP-Architecture?node-id=&embed-host=share"
-  allowFullScreen
-  style={{ border: "none", borderRadius: "8px" }}
-></iframe>
 
 1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tools.
 2. **Connect.** OAuth 2.0 with PKCE. The server creates a CDP-managed alias wallet, redirects you to Snapshot to authorize it, then issues a JWT.
@@ -208,7 +232,7 @@ No. The alias can only sign Snapshot governance messages (votes, proposals, foll
 </Accordion>
 
 <Accordion title="How do I revoke access?">
-Go to **[Settings > Aliases](https://snapshot.box/#/settings/aliases)** on Snapshot and revoke the alias. See the [aliases page](/user-guides/aliases#revoke-an-alias) for details.
+Revoke the alias from **Settings > Aliases** on Snapshot. This immediately stops the server from acting on your behalf. See [Authentication](#authentication) for a walkthrough.
 </Accordion>
 
 <Accordion title="Is the read API rate-limited?">

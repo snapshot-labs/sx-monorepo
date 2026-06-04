@@ -11,7 +11,7 @@ Aliases are lightweight signer wallets that can act on behalf of your main walle
 
 They **cannot** move tokens or interact with contracts outside of Snapshot.
 
-This is what makes integrations like the [MCP server](/tools/mcp) possible: an AI assistant can act on your behalf without ever having access to your private key.
+This is what makes integrations like the [MCP server](/tools/snapshot-mcp) possible: an AI assistant can act on your behalf without ever having access to your private key.
 
 ## How it works
 
@@ -39,7 +39,7 @@ Replace `{aliasAddress}` with the address you want to authorize. You will see th
 ></video>
 
 <Tip>
-If you are using the [MCP server](/tools/mcp), the alias is created and authorized automatically through an OAuth flow the first time the AI calls a write tool.
+If you are using the [MCP server](/tools/snapshot-mcp), the alias is created and authorized automatically through an OAuth flow the first time the AI calls a write tool.
 </Tip>
 
 ## Manage aliases
@@ -65,7 +65,7 @@ You can revoke an alias at any time using one of two methods:
 Revoking an alias removes its ability to act on your behalf immediately. Any integration using that alias will stop working.
 
 <Warning>
-If you are using the [MCP server](/tools/mcp), disconnecting the connector in your AI client stops the AI from making requests but does **not** revoke the alias. To fully revoke, use one of the methods above.
+If you are using the [MCP server](/tools/snapshot-mcp), disconnecting the connector in your AI client stops the AI from making requests but does **not** revoke the alias. To fully revoke, use one of the methods above.
 </Warning>
 
 ## Security
