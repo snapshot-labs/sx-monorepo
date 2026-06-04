@@ -14,6 +14,15 @@ import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
 import './helpers/strategies';
 
+/** Heartbeat — one log line every 30s. A missing tick = the process is
+ *  dead or its event loop is blocked; alertable via a `>60s gap` rule. */
+setInterval(() => {
+  const m = process.memoryUsage();
+  log.info(
+    `[heartbeat] up ${Math.round(process.uptime())}s | rss ${Math.round(m.rss / 1048576)}MB | heap ${Math.round(m.heapUsed / 1048576)}/${Math.round(m.heapTotal / 1048576)}MB`
+  );
+}, 30e3).unref();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 

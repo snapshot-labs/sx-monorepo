@@ -49,6 +49,9 @@ function isTurbo(turboExpiration: number): boolean {
 }
 
 function getPopularity(space: Metadata): number {
+  // TEMP: pin xmaquina.eth to the top of the explore ranking.
+  if (space.id === 'xmaquina.eth') return Number.MAX_SAFE_INTEGER;
+
   let popularity =
     space.counts.proposalsCount / 20 +
     space.counts.proposalsCount7d +
@@ -357,7 +360,7 @@ export default async function run() {
       log.info('[spaces] End spaces refresh');
     } catch (err: any) {
       capture(err);
-      log.error(`[spaces] failed to load spaces, ${JSON.stringify(err)}`);
+      log.error('[spaces] failed to load spaces', err);
     }
     await snapshot.utils.sleep(RUN_INTERVAL);
   }

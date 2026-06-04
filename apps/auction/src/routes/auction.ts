@@ -7,7 +7,7 @@ import Auctions from '@/views/Auctions.vue';
 
 export default [
   {
-    path: '/auctions',
+    path: '/',
     name: 'auctions',
     component: Auctions
   },
