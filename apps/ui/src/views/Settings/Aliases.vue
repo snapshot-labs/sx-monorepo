@@ -2,14 +2,12 @@
 import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { ALIAS_AVAILABILITY_PERIOD } from '@/composables/useAlias';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
 import { Alias } from '@/types';
 import pkg from '../../../package.json';
-
-// Must match the sequencer's DEFAULT_ALIAS_EXPIRY_DAYS (apps/sequencer/src/helpers/alias.ts).
-const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 90; // 90 days
 
 useTitle('Aliases');
 
