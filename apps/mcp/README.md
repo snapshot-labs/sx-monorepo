@@ -69,11 +69,12 @@ The snapshot block is read from `https://rpc.snapshot.org/<chainId>` based on th
 
 ### `snapshot-follow`
 
-Adds a space to the user's followed list. Calling it again on a space the user already follows is safe — Snapshot does not duplicate the follow.
+Follows or unfollows a space for the user. Both directions are idempotent — following an already-followed space, or unfollowing one the user does not follow, is a harmless no-op.
 
 | Input | Type | Description |
 |-------|------|-------------|
 | `space` | `string` | Space ID slug (e.g. `"ens.eth"`) |
+| `action` | `"follow" \| "unfollow"?` | Whether to follow or unfollow. Defaults to `"follow"`. |
 
 Requires a wallet, same as `snapshot-vote` and `snapshot-propose`.
 

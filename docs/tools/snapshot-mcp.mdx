@@ -169,7 +169,7 @@ The server exposes 5 tools. The AI selects them automatically based on your prom
 | `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
 | `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
-| `snapshot-follow` | Follow a space. | Yes |
+| `snapshot-follow` | Follow or unfollow a space. Set `action` to `"follow"` (default) or `"unfollow"`. | Yes |
 
 ## How it works
 
