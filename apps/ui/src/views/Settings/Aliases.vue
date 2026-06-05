@@ -101,21 +101,21 @@ const loading = computed(
                 <IH-key class="size-[16px] text-skin-text" />
               </UiTooltip>
             </div>
-            <span v-if="alias.created" class="text-skin-text text-[17px]">
-              <TimeRelative v-slot="{ relativeTime }" :time="alias.created">
-                Created {{ relativeTime }}
-              </TimeRelative>
-              ·
-              <template v-if="isExpired(alias.created)">Expired</template>
-              <TimeRelative
-                v-else
-                v-slot="{ relativeTime }"
-                :time="alias.created + ALIAS_AVAILABILITY_PERIOD"
-                without-suffix
-              >
-                Expires in {{ relativeTime }}
-              </TimeRelative>
+            <span
+              v-if="alias.created && isExpired(alias.created)"
+              class="text-skin-danger text-[17px]"
+            >
+              Expired
             </span>
+            <TimeRelative
+              v-else-if="alias.created"
+              v-slot="{ relativeTime }"
+              :time="alias.created"
+            >
+              <span class="text-skin-text text-[17px]">
+                Created {{ relativeTime }}
+              </span>
+            </TimeRelative>
           </div>
         </div>
         <UiButton
