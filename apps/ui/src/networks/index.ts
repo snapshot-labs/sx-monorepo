@@ -122,7 +122,9 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       label: 'Snapshot X',
       apiNetwork: onchainApiNetwork,
       networks: enabledNetworks.filter(
-        network => !offchainNetworks.includes(network)
+        network =>
+          !offchainNetworks.includes(network) &&
+          !governorOnlyNetworks.includes(network)
       ),
       limit: 18
     },
