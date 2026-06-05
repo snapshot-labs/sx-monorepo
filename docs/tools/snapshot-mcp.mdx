@@ -167,7 +167,7 @@ The server exposes 6 tools. The AI selects them automatically based on your prom
 |---|---|---|
 | `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
 | `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
-| `snapshot-whoami` | Return your connected address and profile. | Yes |
+| `snapshot-whoami` | Return your connected address, signer alias, authorization status, and profile. | Yes |
 | `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
 | `snapshot-follow` | Follow or unfollow a space. Set `action` to `"follow"` (default) or `"unfollow"`. | Yes |

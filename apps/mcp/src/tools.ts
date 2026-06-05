@@ -159,23 +159,28 @@ export function registerWhoamiTool(
     'snapshot-whoami',
     {
       description:
-        'Return the connected user\'s address: the wallet bound to this session and auto-injected as `$user` in snapshot-query. Use it to confirm whose behalf the assistant is acting on before a write action. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
+        'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
       inputSchema: {}
     },
     extra =>
       handle('snapshot-whoami', extra, async () => {
-        const { user: address } = await resolveContext(extra);
-        let profile: unknown = null;
-        try {
-          ({ user: profile } = (await gql(
-            'query ($id: String!) { user(id: $id) { name about avatar } }',
-            { id: address }
-          )) as { user: unknown });
-        } catch {
-          // Profile lookup is best-effort; the address alone is the answer.
-        }
+        const { user: address, signer } = await resolveContext(extra);
+        const alias = await signer.getAddress();
+        const [authorized, profile] = await Promise.all([
+          resolveUserFromAlias(alias)
+            .then(u => u?.toLowerCase() === address.toLowerCase())
+            .catch(() => false),
+          gql('query ($id: String!) { user(id: $id) { name about avatar } }', {
+            id: address
+          })
+            .then(r => (r as { user: unknown }).user)
+            // Profile lookup is best-effort; the address alone is still useful.
+            .catch(() => null)
+        ]);
         return {
           address,
+          alias,
+          authorized,
           profile,
           links: { profile: `https://snapshot.box/#/profile/${address}` }
         };

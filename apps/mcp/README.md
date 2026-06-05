@@ -37,7 +37,14 @@ No inputs.
 
 ### `snapshot-whoami`
 
-Returns the connected user's address (the wallet bound to the session and auto-injected as `$user` in `snapshot-query`), along with the user's public profile (`name`, `about`, `avatar`) when one exists. Requires a connected wallet, same as `snapshot-vote`.
+Returns the connected identity and signing capability:
+
+- `address` — the user's account, auto-injected as `$user` in `snapshot-query`.
+- `alias` — the delegated signer wallet that signs writes on the user's behalf.
+- `authorized` — whether that alias is currently authorized for the user. When `false`, the write tools fail until the user re-authorizes.
+- `profile` — the user's public profile (`name`, `about`, `avatar`) when one exists.
+
+Useful as a pre-flight before a write action. Requires a connected wallet, same as `snapshot-vote`.
 
 No inputs.
 
