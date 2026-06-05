@@ -84,10 +84,6 @@ async function deepResolve(
   const provider = getProvider(chainId);
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  // Resolve the name's resolver dynamically from the ENS registry instead of
-  // matching against a hardcoded allowlist. This keeps the lookup
-  // resolver-agnostic so names using newer resolvers (e.g. ENS v2 on Sepolia)
-  // are not silently treated as unresolved.
   const resolverAddress: string = await call(
     provider,
     ENS_CONTRACTS.registryAbi,
