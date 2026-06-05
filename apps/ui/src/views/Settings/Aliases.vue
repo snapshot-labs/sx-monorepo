@@ -2,6 +2,7 @@
 import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { ALIAS_EXPIRY_DAYS } from '@/helpers/constants';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
@@ -66,6 +67,18 @@ const {
 const loading = computed(
   () => web3.value.authLoading || (!!web3Account.value && isPending.value)
 );
+
+const EXPIRY_SECONDS = ALIAS_EXPIRY_DAYS * 24 * 60 * 60;
+const now = useNow({ interval: 60_000 });
+
+const aliasItems = computed(() => {
+  const nowSec = now.value.getTime() / 1000;
+  return (aliases.value ?? []).map(alias => {
+    const expiresAt = alias.created ? alias.created + EXPIRY_SECONDS : 0;
+    const isExpired = !!alias.created && nowSec >= expiresAt;
+    return { ...alias, expiresAt, isExpired };
+  });
+});
 </script>
 
 <template>
@@ -76,7 +89,7 @@ const loading = computed(
     </div>
     <template v-else>
       <div
-        v-for="alias in aliases ?? []"
+        v-for="alias in aliasItems"
         :key="alias.alias"
         class="mx-4 py-3 border-b flex group"
       >
@@ -95,10 +108,18 @@ const loading = computed(
             <TimeRelative
               v-if="alias.created"
               v-slot="{ relativeTime }"
-              :time="alias.created"
+              :time="alias.expiresAt"
+              without-suffix
             >
-              <span class="text-skin-text text-[17px]">
-                Created {{ relativeTime }}
+              <span
+                class="text-[17px]"
+                :class="alias.isExpired ? 'text-skin-danger' : 'text-skin-text'"
+              >
+                {{
+                  alias.isExpired
+                    ? `Expired ${relativeTime} ago`
+                    : `Expires in ${relativeTime}`
+                }}
               </span>
             </TimeRelative>
           </div>
