@@ -2,6 +2,7 @@
 import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { ALIAS_AVAILABILITY_PERIOD } from '@/composables/useAlias';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
@@ -63,6 +64,14 @@ const {
   }
 });
 
+function isExpired(created: number) {
+  return created + ALIAS_AVAILABILITY_PERIOD < Date.now() / 1000;
+}
+
+const sortedAliases = computed(() =>
+  [...(aliases.value ?? [])].sort((a, b) => (b.created ?? 0) - (a.created ?? 0))
+);
+
 const loading = computed(
   () => web3.value.authLoading || (!!web3Account.value && isPending.value)
 );
@@ -76,7 +85,7 @@ const loading = computed(
     </div>
     <template v-else>
       <div
-        v-for="alias in aliases ?? []"
+        v-for="alias in sortedAliases"
         :key="alias.alias"
         class="mx-4 py-3 border-b flex group"
       >
@@ -92,8 +101,14 @@ const loading = computed(
                 <IH-key class="size-[16px] text-skin-text" />
               </UiTooltip>
             </div>
+            <span
+              v-if="alias.created && isExpired(alias.created)"
+              class="text-skin-danger text-[17px]"
+            >
+              Expired
+            </span>
             <TimeRelative
-              v-if="alias.created"
+              v-else-if="alias.created"
               v-slot="{ relativeTime }"
               :time="alias.created"
             >
