@@ -35,6 +35,20 @@ Returns the Snapshot GraphQL schema. Call this before `snapshot-query` only when
 
 No inputs.
 
+### `snapshot-whoami`
+
+Returns the connected identity and signing capability:
+
+- `address` — the user's account, auto-injected as `$user` in `snapshot-query`.
+- `alias` — the delegated signer wallet that signs writes on the user's behalf.
+- `authorized` — whether that alias is currently authorized for the user. When `false`, the write tools fail until the user re-authorizes.
+- `profile` — the user's public profile (`name`, `about`, `avatar`) when one exists.
+- `links.alias` — the page where the user authorizes or revokes the signer alias.
+
+Useful as a pre-flight before a write action. Requires a connected wallet, same as `snapshot-vote`.
+
+No inputs.
+
 ### `snapshot-vote`
 
 Casts a vote on a Snapshot proposal. The proposal's voting `type` and `privacy` are fetched from Snapshot and applied automatically, so the caller does not need to specify them. Re-calling on the same proposal **replaces** the previous vote (this is how the user changes a vote).
