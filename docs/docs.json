@@ -99,7 +99,9 @@
               "user-guides/using-safe-multi-sig",
               "v1-interface/plugins/safesnap-reality",
               "tools/mobile-notifications",
-              "tools/bots"
+              "tools/bots",
+              "user-guides/aliases",
+              "tools/snapshot-mcp"
             ]
           },
           {
