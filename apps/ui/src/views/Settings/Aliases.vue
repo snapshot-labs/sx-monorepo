@@ -8,6 +8,9 @@ import { useUiStore } from '@/stores/ui';
 import { Alias } from '@/types';
 import pkg from '../../../package.json';
 
+// Must match the sequencer's DEFAULT_ALIAS_EXPIRY_DAYS (apps/sequencer/src/helpers/alias.ts).
+const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 90; // 90 days
+
 useTitle('Aliases');
 
 const { web3, web3Account, auth } = useWeb3();
@@ -63,6 +66,10 @@ const {
   }
 });
 
+const sortedAliases = computed(() =>
+  [...(aliases.value ?? [])].sort((a, b) => (b.created ?? 0) - (a.created ?? 0))
+);
+
 const loading = computed(
   () => web3.value.authLoading || (!!web3Account.value && isPending.value)
 );
@@ -76,7 +83,7 @@ const loading = computed(
     </div>
     <template v-else>
       <div
-        v-for="alias in aliases ?? []"
+        v-for="alias in sortedAliases"
         :key="alias.alias"
         class="mx-4 py-3 border-b flex group"
       >
@@ -99,6 +106,15 @@ const loading = computed(
             >
               <span class="text-skin-text text-[17px]">
                 Created {{ relativeTime }}
+              </span>
+            </TimeRelative>
+            <TimeRelative
+              v-if="alias.created"
+              v-slot="{ relativeTime }"
+              :time="alias.created + ALIAS_AVAILABILITY_PERIOD"
+            >
+              <span class="text-skin-text text-[17px]">
+                Expires {{ relativeTime }}
               </span>
             </TimeRelative>
           </div>
