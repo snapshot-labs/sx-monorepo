@@ -92,11 +92,11 @@ async function deepResolve(
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) return null;
 
-  return call(
-    provider,
-    ENS_CONTRACTS.resolverAbi,
-    [resolverAddress, property, params]
-  );
+  return call(provider, ENS_CONTRACTS.resolverAbi, [
+    resolverAddress,
+    property,
+    params
+  ]);
 }
 
 export async function resolveName(name: string, chainId: ENSChainId) {
