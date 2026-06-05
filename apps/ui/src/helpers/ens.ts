@@ -92,11 +92,19 @@ async function deepResolve(
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) return null;
 
-  return call(provider, ENS_CONTRACTS.resolverAbi, [
-    resolverAddress,
-    property,
-    params
-  ]);
+  try {
+    return await call(provider, ENS_CONTRACTS.resolverAbi, [
+      resolverAddress,
+      property,
+      params
+    ]);
+  } catch {
+    // The resolver doesn't implement / reverts on this method (CCIP-read,
+    // ENS v2, or a broken resolver). Treat as "no record", matching the old
+    // multicall path, so callers degrade gracefully (e.g. getSpaceController
+    // falls back to the name owner) instead of throwing.
+    return null;
+  }
 }
 
 export async function resolveName(name: string, chainId: ENSChainId) {
