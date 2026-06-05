@@ -312,21 +312,33 @@ export function registerFollowTool(
     'snapshot-follow',
     {
       description:
-        'Add a Snapshot space to the user\'s followed list. Calling this again on a space the user already follows is a no-op on Snapshot\'s side. Use `follows(where: { follower: $user })` via snapshot-query to list followed spaces.',
+        'Follow or unfollow a Snapshot space for the user. Set `action: "follow"` (default) to add the space to the followed list, or `action: "unfollow"` to remove it. Both are idempotent on Snapshot\'s side: following an already-followed space, or unfollowing a space the user does not follow, is a harmless no-op. Use `follows(where: { follower: $user })` via snapshot-query to list followed spaces.',
       inputSchema: {
-        space: z.string().describe('Space ID slug (e.g. "ens.eth")')
+        space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
+        action: z
+          .enum(['follow', 'unfollow'])
+          .default('follow')
+          .describe('Whether to follow or unfollow the space. Defaults to "follow".')
       }
     },
     (data, extra) =>
       handle('snapshot-follow', extra, async () => {
         const { user: from, signer } = await resolveContext(extra);
         const space = await requireSpace<{ id: string }>(data.space, 'id');
-        const envelope = await sx.followSpace({
+        const payload = {
           signer: signer as Wallet,
           data: { from, space: space.id, network: 's' }
-        });
+        };
+        const envelope =
+          data.action === 'unfollow'
+            ? await sx.unfollowSpace(payload)
+            : await sx.followSpace(payload);
         const result = (await sx.send(envelope)) as unknown;
-        return { result, links: { space: `https://snapshot.box/#/s:${space.id}` } };
+        return {
+          action: data.action,
+          result,
+          links: { space: `https://snapshot.box/#/s:${space.id}` }
+        };
       })
   );
 }
