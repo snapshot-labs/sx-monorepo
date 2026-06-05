@@ -30,6 +30,7 @@ mock.module('../src/hub.ts', () => ({
     })) as { aliases?: { address: string }[] };
     return (result?.aliases ?? [])[0]?.address;
   },
+  getProposalSnapshotBlock: async () => 0,
   schemaCache: Promise.resolve({})
 }));
 

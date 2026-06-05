@@ -117,7 +117,7 @@ export function registerSchemaTool(server: McpServer): void {
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
       inputSchema: {}
     },
-    (extra) => handle('snapshot-schema', extra, () => schemaCache)
+    (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
   );
 }
 
@@ -162,7 +162,7 @@ export function registerWhoamiTool(
         'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
       inputSchema: {}
     },
-    extra =>
+    (_args, extra) =>
       handle('snapshot-whoami', extra, async () => {
         const { user: address, signer } = await resolveContext(extra);
         const alias = await signer.getAddress();
