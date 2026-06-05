@@ -43,6 +43,7 @@ Returns the connected identity and signing capability:
 - `alias` — the delegated signer wallet that signs writes on the user's behalf.
 - `authorized` — whether that alias is currently authorized for the user. When `false`, the write tools fail until the user re-authorizes.
 - `profile` — the user's public profile (`name`, `about`, `avatar`) when one exists.
+- `links.alias` — the page where the user authorizes or revokes the signer alias.
 
 Useful as a pre-flight before a write action. Requires a connected wallet, same as `snapshot-vote`.
 
