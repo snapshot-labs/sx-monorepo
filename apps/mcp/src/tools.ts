@@ -151,6 +151,38 @@ export function registerQueryTool(
   );
 }
 
+export function registerWhoamiTool(
+  server: McpServer,
+  resolveContext: ResolveContext
+): void {
+  server.registerTool(
+    'snapshot-whoami',
+    {
+      description:
+        'Return the connected user\'s address: the wallet bound to this session and auto-injected as `$user` in snapshot-query. Use it to confirm whose behalf the assistant is acting on before a write action. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
+      inputSchema: {}
+    },
+    extra =>
+      handle('snapshot-whoami', extra, async () => {
+        const { user: address } = await resolveContext(extra);
+        let profile: unknown = null;
+        try {
+          ({ user: profile } = (await gql(
+            'query ($id: String!) { user(id: $id) { name about avatar } }',
+            { id: address }
+          )) as { user: unknown });
+        } catch {
+          // Profile lookup is best-effort; the address alone is the answer.
+        }
+        return {
+          address,
+          profile,
+          links: { profile: `https://snapshot.box/#/profile/${address}` }
+        };
+      })
+  );
+}
+
 export function registerVoteTool(
   server: McpServer,
   resolveContext: ResolveContext

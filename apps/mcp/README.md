@@ -35,6 +35,12 @@ Returns the Snapshot GraphQL schema. Call this before `snapshot-query` only when
 
 No inputs.
 
+### `snapshot-whoami`
+
+Returns the connected user's address (the wallet bound to the session and auto-injected as `$user` in `snapshot-query`), along with the user's public profile (`name`, `about`, `avatar`) when one exists. Requires a connected wallet, same as `snapshot-vote`.
+
+No inputs.
+
 ### `snapshot-vote`
 
 Casts a vote on a Snapshot proposal. The proposal's voting `type` and `privacy` are fetched from Snapshot and applied automatically, so the caller does not need to specify them. Re-calling on the same proposal **replaces** the previous vote (this is how the user changes a vote).
