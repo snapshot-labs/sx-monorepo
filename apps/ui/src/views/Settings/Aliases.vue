@@ -64,6 +64,10 @@ const {
   }
 });
 
+function isExpired(created: number) {
+  return created + ALIAS_AVAILABILITY_PERIOD < Date.now() / 1000;
+}
+
 const sortedAliases = computed(() =>
   [...(aliases.value ?? [])].sort((a, b) => (b.created ?? 0) - (a.created ?? 0))
 );
@@ -97,24 +101,21 @@ const loading = computed(
                 <IH-key class="size-[16px] text-skin-text" />
               </UiTooltip>
             </div>
-            <TimeRelative
-              v-if="alias.created"
-              v-slot="{ relativeTime }"
-              :time="alias.created"
-            >
-              <span class="text-skin-text text-[17px]">
+            <span v-if="alias.created" class="text-skin-text text-[17px]">
+              <TimeRelative v-slot="{ relativeTime }" :time="alias.created">
                 Created {{ relativeTime }}
-              </span>
-            </TimeRelative>
-            <TimeRelative
-              v-if="alias.created"
-              v-slot="{ relativeTime }"
-              :time="alias.created + ALIAS_AVAILABILITY_PERIOD"
-            >
-              <span class="text-skin-text text-[17px]">
-                Expires {{ relativeTime }}
-              </span>
-            </TimeRelative>
+              </TimeRelative>
+              ·
+              <template v-if="isExpired(alias.created)">Expired</template>
+              <TimeRelative
+                v-else
+                v-slot="{ relativeTime }"
+                :time="alias.created + ALIAS_AVAILABILITY_PERIOD"
+                without-suffix
+              >
+                Expires in {{ relativeTime }}
+              </TimeRelative>
+            </span>
           </div>
         </div>
         <UiButton
