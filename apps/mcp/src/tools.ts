@@ -7,6 +7,7 @@ import { init as shutterInit } from '@shutter-network/shutter-crypto';
 import { clients, offchainMainnet } from '@snapshot-labs/sx';
 import { z } from 'zod';
 import { type CdpSigner, getWalletForUser } from './cdp.js';
+import logger from './logger.js';
 import {
   getProposalSnapshotBlock,
   gql,
@@ -93,15 +94,15 @@ async function handle(
   const sid = String(ex?.sessionId ?? '-').slice(0, 8);
   const u = ex?.authInfo?.extra?.user;
   const user = u !== undefined && u.length >= 10 ? `${u.slice(0, 6)}...${u.slice(-4)}` : u ?? 'anonymous';
-  const prefix = `[req=${reqId}] [session=${sid}] [tool=${tool}] [user=${user}]`;
-  console.log(`${prefix} start`);
+  const log = logger.child({ reqId, sessionId: sid, tool, user });
+  log.info('tool start');
   try {
     const result = await fn();
-    console.log(`${prefix} ok`);
+    log.info('tool ok');
     return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    console.error(`${prefix} error: ${message}`, e);
+    log.error({ err: e }, 'tool error');
     return {
       content: [{ type: 'text' as const, text: `Error [req=${reqId}]: ${message}` }],
       isError: true
