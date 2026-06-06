@@ -352,7 +352,7 @@ export function registerFollowTool(
     'snapshot-follow',
     {
       description:
-        'Follow or unfollow a Snapshot space for the user. Set `action: "follow"` (default) to add the space to the followed list, or `action: "unfollow"` to remove it. Both are idempotent on Snapshot\'s side: following an already-followed space, or unfollowing a space the user does not follow, is a harmless no-op. Use `follows(where: { follower: $user })` via snapshot-query to list followed spaces.',
+        'Follow or unfollow a Snapshot space for the user. Set `action: "follow"` (default) to add the space to the followed list, or `action: "unfollow"` to remove it. Neither action is idempotent: following an already-followed space errors with "you are already following this space", and unfollowing a space the user does not follow errors with "you can only unfollow a space you follow". Check the current state first via `follows(where: { follower: $user })` (which also lists followed spaces).',
       inputSchema: {
         space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
         action: z

@@ -83,7 +83,7 @@ The snapshot block is read from `https://rpc.snapshot.org/<chainId>` based on th
 
 ### `snapshot-follow`
 
-Follows or unfollows a space for the user. Both directions are idempotent — following an already-followed space, or unfollowing one the user does not follow, is a harmless no-op.
+Follows or unfollows a space for the user. Neither direction is idempotent: following an already-followed space, or unfollowing one the user does not follow, returns an error. Check the current state via `follows(where: { follower: $user })` first.
 
 | Input | Type | Description |
 |-------|------|-------------|
