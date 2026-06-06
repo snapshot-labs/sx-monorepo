@@ -14,6 +14,8 @@ Common patterns:
 
 Timestamps (`created`, `start`, `end`, `updated`) are unix seconds UTC, not ms. Format with `new Date(t * 1000)` and verify the year before showing dates.
 
+Pagination caps: `first` ≤ 1000 on every collection; `skip` ≤ 5000 on `votes`/`proposals` (not on `spaces`). To read past 5000 votes on a proposal, cursor-paginate (`orderBy: "created", orderDirection: desc`, then `where: { created_lt: <last created> }`) instead of increasing `skip`.
+
 Re-calling snapshot-vote on the same proposal replaces the previous vote (this is how to change a vote).
 
 Use snapshot-propose to create a proposal: only `space`, `title`, `body` are required. Voting type, choices, period, snapshot block, and privacy are derived from the space (override only when needed).
