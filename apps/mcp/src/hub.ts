@@ -12,7 +12,17 @@ export async function getProposalSnapshotBlock(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber' })
   });
-  const { result } = (await res.json()) as { result: string };
+  if (!res.ok) {
+    throw new Error(
+      `Failed to resolve snapshot block for chain ${chainId} (HTTP ${res.status})`
+    );
+  }
+  const { result } = (await res.json()) as { result?: string };
+  if (typeof result !== 'string' || !/^0x[0-9a-fA-F]+$/.test(result)) {
+    throw new Error(
+      `Invalid block number for chain ${chainId}: ${JSON.stringify(result)}`
+    );
+  }
   return Math.max(0, parseInt(result, 16) - SNAPSHOT_BLOCK_OFFSET);
 }
 
