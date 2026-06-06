@@ -24,22 +24,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">
-        <AppLink
-          :to="{
-            name: 'space-overview',
-            params: { space: `${element.network}:${element.id}` }
-          }"
-          class="block"
-        >
-          <UiTooltip :title="element.name" placement="right">
-            <SpaceAvatar
-              show-active-proposals
-              :space="element"
-              :size="32"
-              class="!rounded-[4px]"
-            />
-          </UiTooltip>
-        </AppLink>
+        <AppSidebarItem :space="element" />
       </template>
     </draggable>
   </div>

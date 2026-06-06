@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   getOrganizationConfigBySpace,
-  getOrgProposalLabel
+  getOrgProposalLabel,
+  resolveSpaceItem,
+  type OrganizationConfig
 } from './organizations';
+import type { Space } from '@/types';
 
 function org(navItems: any) {
   return { navItems } as any;
@@ -108,4 +111,67 @@ describe('getOrganizationConfigBySpace', () => {
     expect(getOrganizationConfigBySpace('s:ens.eth')?.id).toBe('ens');
     expect(getOrganizationConfigBySpace('s:not-an-org.eth')).toBeNull();
   });
+});
+
+describe('resolveSpaceItem', () => {
+  it('routes to org overview when space belongs to an org', () => {
+    const result = resolveSpaceItem({
+      network: 's',
+      id: 'ens.eth',
+      name: 'ENS Mainnet'
+    } as Space);
+
+    expect(result.link).toEqual({ name: 'org', params: { org: 'ens' } });
+    expect(result.title).toBe('ENS');
+    expect(result.avatarSpace.id).toBe(
+      '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+    );
+    expect(result.avatarSpace.network).toBe('eth');
+  });
+
+  it('routes to space overview when space has no org match', () => {
+    const space = {
+      network: 's',
+      id: 'not-an-org.eth',
+      name: 'Random DAO'
+    } as Space;
+
+    const result = resolveSpaceItem(space);
+
+    expect(result.link).toEqual({
+      name: 'space-overview',
+      params: { space: 's:not-an-org.eth' }
+    });
+    expect(result.avatarSpace).toBe(space);
+  });
+
+  it('skips auto-detection when org is explicitly null', () => {
+    const result = resolveSpaceItem(
+      { network: 's', id: 'ens.eth', name: 'ENS Mainnet' } as Space,
+      null
+    );
+
+    expect(result.link).toEqual({
+      name: 'space-overview',
+      params: { space: 's:ens.eth' }
+    });
+  });
+
+  it('uses an explicit org override', () => {
+    const customOrg: OrganizationConfig = {
+      id: 'custom',
+      name: 'Custom Org',
+      spaceIds: [{ network: 'eth', id: '0xCUSTOM' }]
+    };
+
+    const result = resolveSpaceItem(
+      { network: 's', id: 'not-an-org.eth', name: 'Random DAO' } as Space,
+      customOrg
+    );
+
+    expect(result.link).toEqual({ name: 'org', params: { org: 'custom' } });
+    expect(result.title).toBe('Custom Org');
+    expect(result.avatarSpace.id).toBe('0xCUSTOM');
+  });
+
 });
