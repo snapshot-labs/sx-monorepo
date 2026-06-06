@@ -64,7 +64,7 @@ Requires a wallet to be configured for signing (see [Configuration](#configurati
 
 ### `snapshot-propose`
 
-Creates a Snapshot proposal. Most defaults come from the space itself, so for typical use you only need `space`, `title`, and `body`. The space's enforced voting type, voting period, snapshot block, and privacy mode are read from Snapshot and applied automatically.
+Creates a Snapshot proposal. Most defaults come from the space itself, so for typical use you only need `space`, `title`, and `body`. The space's enforced voting type, voting period, and privacy mode are read from Snapshot and applied automatically.
 
 | Input | Type | Description |
 |-------|------|-------------|
@@ -77,7 +77,7 @@ Creates a Snapshot proposal. Most defaults come from the space itself, so for ty
 | `labels` | `string[]?` | Proposal label IDs |
 | `start` | `number?` | Voting start as a unix timestamp in seconds. Defaults to `now + space.voting.delay`. |
 | `end` | `number?` | Voting end as a unix timestamp in seconds. Defaults to `start + space.voting.period` (3 days if the space sets none). |
-| `shielded` | `boolean?` | Opt into Shutter-encrypted voting. Only honored when the space's `voting.privacy` is `"any"`; spaces with `voting.privacy === "shutter"` always encrypt. |
+| `privacy` | `"shutter" \| "none"?` | Opt into Shutter-encrypted voting with `"shutter"`. Only honored when the space's `voting.privacy` is `"any"`; spaces with `voting.privacy === "shutter"` always encrypt. |
 
 The snapshot block is read from `https://rpc.snapshot.org/<chainId>` based on the space's network. Requires a wallet, same as `snapshot-vote`.
 

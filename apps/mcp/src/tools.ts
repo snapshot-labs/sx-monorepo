@@ -273,7 +273,7 @@ export function registerProposeTool(
     'snapshot-propose',
     {
       description:
-        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, snapshot block, and privacy mode are read from the space and applied automatically. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
+        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, and privacy mode are read from the space and applied automatically; the snapshot block is set to the current chain head of the space\'s network. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
       inputSchema: {
         space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
         title: z.string().min(1).describe('Proposal title'),
