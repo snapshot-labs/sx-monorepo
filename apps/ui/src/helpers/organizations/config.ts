@@ -1,4 +1,5 @@
 import { NavItem } from '@/composables/useNav/types';
+import { offchainNetworks } from '@/networks';
 import { NetworkID, Space, SpaceMetadataTreasury } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
@@ -126,27 +127,15 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     ],
     navItems: {
       proposals: {
-        name: 'Treasury governor',
-        icon: IHNewspaper,
-        link: {
-          name: 'space-proposals',
-          params: { space: 'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4' }
-        },
-        activeRoute: {
-          prefix: 'space-treasury-gov'
-        }
-      },
-      core: {
-        name: 'Core governor',
+        name: 'Onchain voting',
         icon: IHNewspaper,
         link: {
           name: 'space-proposals',
           params: { space: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9' }
         },
         activeRoute: {
-          prefix: 'space-core-gov'
-        },
-        position: 3
+          prefix: ['space-core-gov', 'space-treasury-gov']
+        }
       },
       signals: {
         name: 'Offchain voting',
@@ -295,6 +284,16 @@ export function getCustomRoute(
   spaceId: string
 ): SpaceRoute | undefined {
   return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
+}
+
+export function getOrgOnchainSpaces(
+  organization: Organization | null,
+  network: NetworkID
+): Space[] {
+  if (organization?.id !== 'arbitrum') return [];
+  return organization.spaces.filter(
+    s => s.network === network && !offchainNetworks.includes(s.network)
+  );
 }
 
 export function getOrgProposalLabel(

@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { getOrgProposalLabel } from '@/helpers/organizations';
+import {
+  getOrgOnchainSpaces,
+  getOrgProposalLabel
+} from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
 import { Space } from '@/types';
+
+const ANY_SPACE = 'any';
 
 const props = defineProps<{ space: Space }>();
 
@@ -27,17 +32,46 @@ const {
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
 
+const orgOnchainSpaces = computed(() =>
+  getOrgOnchainSpaces(organization.value, props.space.network)
+);
+
+const hasMultiSpaceFilter = computed(() => orgOnchainSpaces.value.length > 1);
+
+const selectedSpaceId = ref<string>(ANY_SPACE);
+
+const spacesItems = computed(() => [
+  { key: ANY_SPACE, label: 'Any' },
+  ...orgOnchainSpaces.value.map(s => ({
+    key: s.id,
+    label: s.name ?? s.id
+  }))
+]);
+
+const queriedSpaceIds = computed(() => {
+  if (!hasMultiSpaceFilter.value) return [props.space.id];
+  return selectedSpaceId.value === ANY_SPACE
+    ? orgOnchainSpaces.value.map(s => s.id)
+    : [selectedSpaceId.value];
+});
+
+const isMergedList = computed(
+  () => hasMultiSpaceFilter.value && selectedSpaceId.value === ANY_SPACE
+);
+
 const selectIconBaseProps = {
   size: 16
 };
 
-const proposalsLabel = computed(
-  () =>
+const proposalsLabel = computed(() => {
+  if (isMergedList.value) return 'Proposals';
+  return (
     getOrgProposalLabel(
       organization.value,
       `${props.space.network}:${props.space.id}`
     ) ?? 'Proposals'
-);
+  );
+});
 
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
@@ -54,7 +88,7 @@ const {
   isFetchingNextPage
 } = useProposalsQuery(
   toRef(() => props.space.network),
-  toRef(() => props.space.id),
+  queriedSpaceIds,
   {
     state,
     labels
@@ -76,9 +110,12 @@ async function handleEndReached() {
 watchThrottled(
   [
     () => route.query.state as string,
-    () => route.query.labels as string[] | string
+    () => route.query.labels as string[] | string,
+    () => route.query.space as string | undefined,
+    () => props.space.id,
+    () => orgOnchainSpaces.value
   ],
-  ([toState, toLabels]) => {
+  ([toState, toLabels, toSpace, , onchainSpaces]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
@@ -87,17 +124,25 @@ watchThrottled(
       ? normalizedLabels
       : [normalizedLabels];
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
+
+    const validIds = new Set(onchainSpaces.map(s => s.id));
+    const next = toSpace && validIds.has(toSpace) ? toSpace : ANY_SPACE;
+    if (next !== selectedSpaceId.value) selectedSpaceId.value = next;
   },
   { throttle: 1000, immediate: true }
 );
 
 watch(
-  [() => props.space.id, state, labels],
-  ([toSpaceId, toState, toLabels], [fromSpaceId, fromState, fromLabels]) => {
+  [() => props.space.id, state, labels, selectedSpaceId],
+  (
+    [toSpaceId, toState, toLabels, toSpace],
+    [fromSpaceId, fromState, fromLabels, fromSpace]
+  ) => {
     if (
       toSpaceId !== fromSpaceId ||
       toState !== fromState ||
-      toLabels !== fromLabels
+      toLabels !== fromLabels ||
+      toSpace !== fromSpace
     ) {
       const query: LocationQueryRaw = { ...route.query };
 
@@ -111,6 +156,12 @@ watch(
         query.labels = toLabels;
       } else {
         delete query.labels;
+      }
+
+      if (toSpace !== ANY_SPACE) {
+        query.space = toSpace;
+      } else {
+        delete query.space;
       }
 
       if (JSON.stringify(query) !== JSON.stringify(route.query)) {
@@ -132,6 +183,14 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :class="{ 'flex-col-reverse sm:flex-row': space.labels?.length }"
     >
       <div class="flex gap-2">
+        <UiSelectDropdown
+          v-if="hasMultiSpaceFilter"
+          v-model="selectedSpaceId"
+          title="Spaces"
+          gap="12"
+          placement="start"
+          :items="spacesItems"
+        />
         <UiSelectDropdown
           v-model="state"
           title="Status"
@@ -221,7 +280,28 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           :is-error="isVotingPowerError"
           @fetch="fetchVotingPower"
         />
-        <UiTooltip title="New proposal">
+        <UiDropdown v-if="hasMultiSpaceFilter" gap="12" placement="end">
+          <template #button>
+            <UiTooltip title="New proposal">
+              <UiButton type="button" uniform>
+                <IH-pencil-alt />
+              </UiButton>
+            </UiTooltip>
+          </template>
+          <template #items>
+            <UiDropdownItem
+              v-for="s in orgOnchainSpaces"
+              :key="s.id"
+              :to="{
+                name: 'space-editor',
+                params: { space: `${space.network}:${s.id}` }
+              }"
+            >
+              {{ s.name ?? s.id }}
+            </UiDropdownItem>
+          </template>
+        </UiDropdown>
+        <UiTooltip v-else title="New proposal">
           <UiButton
             :to="{
               name: 'space-editor',
@@ -242,6 +322,10 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"
       @end-reached="handleEndReached"
-    />
+    >
+      <template v-if="isMergedList" #item-meta="{ proposal }">
+        {{ proposal.space.name }}
+      </template>
+    </ProposalsList>
   </div>
 </template>
