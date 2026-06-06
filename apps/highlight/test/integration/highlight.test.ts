@@ -14,7 +14,7 @@ const ALIASES_ADDRESS = '0x0000000000000000000000000000000000000001';
 const FAKE_SIGNATURE =
   '0x9a40ce5d706efe66cdc1b9075b866ba25385bf083bbc19b7e1ce315ac2a3957f3a6e075762f6f4723006889ed341ce740e023959f6c600e30586f005f5afa64a1c';
 
-const provider = new StaticJsonRpcProvider('https://rpc.snapshot.org/11155111');
+const provider = new StaticJsonRpcProvider('https://rpc.brovider.xyz/11155111');
 const adapter = new MemoryAdapter();
 const highlight = new Highlight({ adapter, agents: AGENTS_MAP });
 const wallet = new Wallet(PRIVATE_KEY, provider);

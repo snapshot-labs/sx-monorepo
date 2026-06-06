@@ -79,7 +79,7 @@ Creates a Snapshot proposal. Most defaults come from the space itself, so for ty
 | `end` | `number?` | Voting end as a unix timestamp in seconds. Defaults to `start + space.voting.period` (3 days if the space sets none). |
 | `shielded` | `boolean?` | Opt into Shutter-encrypted voting. Only honored when the space's `voting.privacy` is `"any"`; spaces with `voting.privacy === "shutter"` always encrypt. |
 
-The snapshot block is read from `https://rpc.snapshot.org/<chainId>` based on the space's network. Requires a wallet, same as `snapshot-vote`.
+The snapshot block is read from `https://rpc.brovider.xyz/<chainId>` based on the space's network. Requires a wallet, same as `snapshot-vote`.
 
 ### `snapshot-follow`
 

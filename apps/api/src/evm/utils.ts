@@ -1,6 +1,7 @@
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import { createPublicClient, http, PublicClient } from 'viem';
+import { getRpcUrl } from '../config';
 import { EVMConfig, NetworkID, PartialConfig } from './types';
 
 type ProtocolConfig = Pick<EVMConfig, 'sources' | 'templates' | 'abis'>;
@@ -148,7 +149,7 @@ export async function getTimestampFromBlock({
   const nonNativeBlockChainId = NON_NATIVE_BLOCK_CHAIN_ID[networkId];
   const blockClient = nonNativeBlockChainId
     ? createPublicClient({
-        transport: http(`https://rpc.snapshot.org/${nonNativeBlockChainId}`)
+        transport: http(getRpcUrl(nonNativeBlockChainId))
       })
     : client;
 
