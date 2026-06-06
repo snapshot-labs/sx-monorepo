@@ -7,6 +7,7 @@ import { init as shutterInit } from '@shutter-network/shutter-crypto';
 import { clients, offchainMainnet } from '@snapshot-labs/sx';
 import { z } from 'zod';
 import { type CdpSigner, getWalletForUser } from './cdp.js';
+import logger from './logger.js';
 import {
   getProposalSnapshotBlock,
   gql,
@@ -93,15 +94,15 @@ async function handle(
   const sid = String(ex?.sessionId ?? '-').slice(0, 8);
   const u = ex?.authInfo?.extra?.user;
   const user = u !== undefined && u.length >= 10 ? `${u.slice(0, 6)}...${u.slice(-4)}` : u ?? 'anonymous';
-  const prefix = `[req=${reqId}] [session=${sid}] [tool=${tool}] [user=${user}]`;
-  console.log(`${prefix} start`);
+  const log = logger.child({ reqId, sessionId: sid, tool, user });
+  log.info('tool start');
   try {
     const result = await fn();
-    console.log(`${prefix} ok`);
+    log.info('tool ok');
     return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    console.error(`${prefix} error: ${message}`, e);
+    log.error({ err: e }, 'tool error');
     return {
       content: [{ type: 'text' as const, text: `Error [req=${reqId}]: ${message}` }],
       isError: true
@@ -272,7 +273,7 @@ export function registerProposeTool(
     'snapshot-propose',
     {
       description:
-        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, snapshot block, and privacy mode are read from the space and applied automatically. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
+        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, and privacy mode are read from the space and applied automatically; the snapshot block is set to the current chain head of the space\'s network. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
       inputSchema: {
         space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
         title: z.string().min(1).describe('Proposal title'),

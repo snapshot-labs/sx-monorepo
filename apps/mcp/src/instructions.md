@@ -18,6 +18,6 @@ Pagination caps: `first` ≤ 1000 on every collection; `skip` ≤ 5000 on `votes
 
 Re-calling snapshot-vote on the same proposal replaces the previous vote (this is how to change a vote).
 
-Use snapshot-propose to create a proposal: only `space`, `title`, `body` are required. Voting type, choices, period, snapshot block, and privacy are derived from the space (override only when needed).
+Use snapshot-propose to create a proposal: only `space`, `title`, `body` are required. Voting type, choices, period, and privacy are derived from the space (override only when needed); the snapshot block is set automatically to the current chain head of the space's network.
 
 Use snapshot-follow to follow or unfollow a space: `action: "follow"` (default) adds it to the user's followed list, `action: "unfollow"` removes it. Both directions are idempotent no-ops when already in the target state. Followed spaces are queryable via `follows(where: { follower: $user })`.
