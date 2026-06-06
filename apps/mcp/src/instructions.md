@@ -18,4 +18,4 @@ Re-calling snapshot-vote on the same proposal replaces the previous vote (this i
 
 Use snapshot-propose to create a proposal: only `space`, `title`, `body` are required. Voting type, choices, period, snapshot block, and privacy are derived from the space (override only when needed).
 
-Use snapshot-follow to follow or unfollow a space: `action: "follow"` (default) adds it to the user's followed list, `action: "unfollow"` removes it. Neither direction is idempotent: re-following an already-followed space, or unfollowing one the user does not follow, returns an error — check `follows(where: { follower: $user })` first. That same query lists followed spaces.
+Use snapshot-follow to follow or unfollow a space: `action: "follow"` (default) adds it to the user's followed list, `action: "unfollow"` removes it. Following a space you already follow returns an error, and so does unfollowing a space you do not follow, so check `follows(where: { follower: $user })` first. That same query lists followed spaces.
