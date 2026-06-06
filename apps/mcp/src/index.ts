@@ -53,6 +53,14 @@ if (process.argv.includes('--stdio')) {
   const app = createMcpExpressApp({ host: '0.0.0.0' });
   app.set('trust proxy', 1);
 
+  app.get('/', (_req: Request, res: Response): void => {
+    const commit = process.env.COMMIT_HASH ?? '';
+    const version = commit
+      ? `${pkg.version}#${commit.substring(0, 7)}`
+      : pkg.version;
+    res.json({ name: 'snapshot-mcp', version });
+  });
+
   const provider = new SnapshotOAuthProvider();
   app.use(mcpAuthRouter({ provider, issuerUrl: new URL(baseUrl) }));
   app.get('/auth/callback', provider.callback);
