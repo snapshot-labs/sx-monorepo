@@ -172,7 +172,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy: privacy === 'shutter' ? 'shutter' : '',
+        privacy: privacy === 'none' ? '' : privacy,
         labels,
         start,
         end: min_end,
@@ -215,7 +215,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy: privacy === 'shutter' ? 'shutter' : '',
+        privacy: privacy === 'none' ? '' : privacy,
         labels,
         plugins: JSON.stringify(plugins),
         from: account

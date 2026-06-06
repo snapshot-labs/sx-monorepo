@@ -442,6 +442,41 @@ describe('writer/proposal', () => {
           ).rejects.toMatch('not allowed to set privacy');
         });
       });
+
+      describe('when the space is using VOCDONI privacy', () => {
+        beforeEach(() => {
+          mockGetSpace.mockResolvedValueOnce({
+            ...spacesGetSpaceFixtures,
+            voting: { privacy: 'vocdoni' }
+          });
+        });
+
+        it('accepts a proposal with vocdoni privacy', () => {
+          return expect(
+            writer.verify(updateInputPayload(input, { privacy: 'vocdoni' }))
+          ).resolves.toBeUndefined();
+        });
+
+        it('accepts a proposal with undefined privacy', () => {
+          return expect(
+            writer.verify(updateInputPayload(input, { privacy: undefined }))
+          ).resolves.toBeUndefined();
+        });
+
+        it('rejects a proposal with shutter privacy', async () => {
+          expect.assertions(1);
+          await expect(
+            writer.verify(updateInputPayload(input, { privacy: 'shutter' }))
+          ).rejects.toMatch('not allowed to set privacy');
+        });
+
+        it('rejects a proposal with privacy empty string', async () => {
+          expect.assertions(1);
+          await expect(
+            writer.verify(updateInputPayload(input, { privacy: '' }))
+          ).rejects.toMatch('not allowed to set privacy');
+        });
+      });
     });
 
     it('rejects if the snapshot is in the future', async () => {

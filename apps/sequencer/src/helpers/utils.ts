@@ -328,6 +328,15 @@ async function updateWalletConnectWhitelist(
   return true;
 }
 
+// Privacy values that send an encrypted, opaque choice on the wire.
+// - shutter: encrypted at vote time, decrypted server-side after the proposal closes
+// - vocdoni: encrypted at vote time, never decrypted (private forever)
+export function isEncryptedPrivacy(
+  privacy: string | null | undefined
+): boolean {
+  return privacy === 'shutter' || privacy === 'vocdoni';
+}
+
 export function getSpaceController(space: string, network = NETWORK) {
   const tld = space.split('.').slice(-1)[0];
   const tldMapping = {
