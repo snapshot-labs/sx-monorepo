@@ -46,7 +46,24 @@ async function run() {
     resetOnConfigChange: true,
     pinoOptions,
     overridesConfig: overrides,
-    dbConnection: getDatabaseConnection()
+    dbConnection: getDatabaseConnection(),
+    resolvers: {
+      Space: {
+        active_proposal_count: {
+          sql: (knex) =>
+            knex('proposals')
+              .count('*')
+              .where('proposals.space', knex.ref('spaces.id'))
+              .where('proposals._indexer', knex.ref('spaces._indexer'))
+              .where('proposals.start', '<=', knex.raw("extract(epoch from now())::integer"))
+              .where('proposals.max_end', '>', knex.raw("extract(epoch from now())::integer"))
+              .where('proposals.cancelled', false)
+              .where('proposals.executed', false)
+              .where('proposals.vetoed', false)
+              .whereRaw('upper_inf(proposals.block_range)')
+        }
+      }
+    }
   });
 
   await startApiServer(checkpoint);
