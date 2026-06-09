@@ -28,8 +28,7 @@ describe('getHealthReport', () => {
     );
 
     expect(report.healthy).toBe(false);
-    expect(report.indexers[0].lag).toBe(19000);
-    expect(report.indexers[0].healthy).toBe(false);
+    expect(report.indexers[0]).toMatchObject({ lag: 19000, healthy: false });
   });
 
   it('reports unhealthy when chain head cannot be fetched', async () => {
