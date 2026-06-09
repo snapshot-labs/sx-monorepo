@@ -7,7 +7,13 @@ import { expressMiddleware } from '@as-integrations/express4';
 import Checkpoint, { createGetLoader } from '@snapshot-labs/checkpoint';
 import cors from 'cors';
 import express from 'express';
+import {
+  createKnexLastIndexedBlockReader,
+  createStarknetHeadFetchers,
+  getHealthReport
+} from './health';
 import logger from './logger';
+import { starknetConfigs } from './starknet';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -31,6 +37,28 @@ export async function startApiServer(checkpoint: Checkpoint) {
     res.json({
       index: process.env.DATABASE_URL_INDEX ?? 'default'
     });
+  });
+
+  // Indexer health / sync-lag endpoint.
+  //
+  // Reports, per indexer, the last indexed block vs the current chain head and
+  // the derived lag. Returns HTTP 503 when any monitored indexer is unhealthy
+  // (lag over threshold or chain head unreachable) so uptime monitors such as
+  // Betterstack can alert even while the API process itself is up.
+  const headFetchers = createStarknetHeadFetchers(starknetConfigs);
+  app.get('/health', async (req, res) => {
+    try {
+      const { knex } = checkpoint.getBaseContext();
+      const report = await getHealthReport(
+        createKnexLastIndexedBlockReader(knex),
+        headFetchers
+      );
+
+      res.status(report.healthy ? 200 : 503).json(report);
+    } catch (err) {
+      logger.error({ err }, 'failed to build health report');
+      res.status(503).json({ healthy: false, error: 'health check failed' });
+    }
   });
 
   app.use(
