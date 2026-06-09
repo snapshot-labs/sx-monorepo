@@ -6,6 +6,8 @@ import { registerIndexer } from '../register';
 const snConfig = createConfig('sn');
 const snSepConfig = createConfig('sn-sep');
 
+export const starknetConfigs = [snConfig, snSepConfig];
+
 const snIndexer = new starknet.StarknetIndexer(createWriters(snConfig));
 const snSepIndexer = new starknet.StarknetIndexer(createWriters(snSepConfig));
 
