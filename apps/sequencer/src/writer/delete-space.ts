@@ -1,4 +1,5 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
+import snapshot from '@snapshot-labs/snapshot.js';
 import { getSpace } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
@@ -13,7 +14,14 @@ export async function verify(body): Promise<any> {
   if (!space) return Promise.reject('space not found');
 
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
-  const isController = controller.toLowerCase() === body.address.toLowerCase();
+  let isController = false;
+  try {
+    isController =
+      snapshot.utils.getFormattedAddress(controller, 'evm') ===
+      snapshot.utils.getFormattedAddress(body.address, 'evm');
+  } catch {
+    isController = false;
+  }
   if (!isController) return Promise.reject('not allowed');
 }
 

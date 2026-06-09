@@ -1,4 +1,5 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
+import snapshot from '@snapshot-labs/snapshot.js';
 import isEqual from 'lodash/isEqual';
 import { addOrUpdateSpace, getSpace } from '../helpers/actions';
 import log from '../helpers/log';
@@ -42,7 +43,14 @@ export async function verify(body): Promise<any> {
   }
 
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
-  const isController = controller.toLowerCase() === body.address.toLowerCase();
+  let isController = false;
+  try {
+    isController =
+      snapshot.utils.getFormattedAddress(controller, 'evm') ===
+      snapshot.utils.getFormattedAddress(body.address, 'evm');
+  } catch {
+    isController = false;
+  }
 
   const admins = (space?.admins || []).map(admin => admin.toLowerCase());
   const isAdmin = admins.includes(body.address.toLowerCase());
