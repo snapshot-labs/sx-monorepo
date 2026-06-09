@@ -247,7 +247,10 @@ describe('writer/settings', () => {
     describe('on valid data', () => {
       it('accepts the controller even when its address casing differs from the signed message', async () => {
         // getSpaceController returns a checksummed address; the signed message may be lowercased.
-        const lowercasedInput = { ...input, address: input.address.toLowerCase() };
+        const lowercasedInput = {
+          ...input,
+          address: input.address.toLowerCase()
+        };
 
         return expect(verify(lowercasedInput)).resolves.toBeUndefined();
       });
