@@ -1,5 +1,5 @@
+import { getAddress } from '@ethersproject/address';
 import { capture } from '@snapshot-labs/snapshot-sentry';
-import snapshot from '@snapshot-labs/snapshot.js';
 import { getSpace } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
@@ -16,9 +16,7 @@ export async function verify(body): Promise<any> {
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
   let isController = false;
   try {
-    isController =
-      snapshot.utils.getFormattedAddress(controller, 'evm') ===
-      snapshot.utils.getFormattedAddress(body.address, 'evm');
+    isController = getAddress(controller) === getAddress(body.address);
   } catch {
     isController = false;
   }

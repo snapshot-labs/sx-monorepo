@@ -19,6 +19,7 @@
     "test:e2e": "PORT=3003 start-server-and-test 'bun run start:test' http://localhost:3003 'dotenv -e test/.env.test jest --runInBand --collectCoverage=false test/e2e/'"
   },
   "dependencies": {
+    "@ethersproject/address": "^5.8.0",
     "@ethersproject/bignumber": "^5.7.0",
     "@ethersproject/bytes": "^5.6.1",
     "@ethersproject/contracts": "^5.6.2",
