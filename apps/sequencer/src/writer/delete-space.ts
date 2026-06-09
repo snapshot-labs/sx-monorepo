@@ -1,4 +1,3 @@
-import { getAddress } from '@ethersproject/address';
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import { getSpace } from '../helpers/actions';
 import log from '../helpers/log';
@@ -14,12 +13,7 @@ export async function verify(body): Promise<any> {
   if (!space) return Promise.reject('space not found');
 
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
-  let isController = false;
-  try {
-    isController = getAddress(controller) === getAddress(body.address);
-  } catch {
-    isController = false;
-  }
+  const isController = controller.toLowerCase() === body.address.toLowerCase();
   if (!isController) return Promise.reject('not allowed');
 }
 
