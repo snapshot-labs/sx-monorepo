@@ -13,7 +13,7 @@ export async function verify(body): Promise<any> {
   if (!space) return Promise.reject('space not found');
 
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
-  const isController = controller === body.address;
+  const isController = controller.toLowerCase() === body.address.toLowerCase();
   if (!isController) return Promise.reject('not allowed');
 }
 
