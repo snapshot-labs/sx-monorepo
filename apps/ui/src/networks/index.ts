@@ -63,7 +63,6 @@ export const governorNetworks: NetworkID[] = [
   'bnbt',
   'sep'
 ];
-export const governorOnlyNetworks: NetworkID[] = ['bnb', 'bnbt'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
@@ -102,8 +101,7 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
   id => !getNetwork(id).readOnly
 );
 
-export const spaceCreationNetworks: NetworkID[] =
-  enabledReadWriteNetworks.filter(id => !governorOnlyNetworks.includes(id));
+export const spaceCreationNetworks: NetworkID[] = enabledReadWriteNetworks;
 
 const onchainApiNetwork =
   enabledNetworks.find(network => !offchainNetworks.includes(network)) || 'eth';
@@ -122,9 +120,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       label: 'Snapshot X',
       apiNetwork: onchainApiNetwork,
       networks: enabledNetworks.filter(
-        network =>
-          !offchainNetworks.includes(network) &&
-          !governorOnlyNetworks.includes(network)
+        network => !offchainNetworks.includes(network)
       ),
       limit: 18
     },
