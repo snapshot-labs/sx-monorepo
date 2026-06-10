@@ -5,9 +5,40 @@ import {
   type EvmServerAccount
 } from '@coinbase/cdp-sdk';
 
-const POLICY_DESCRIPTION = 'snapshot mcp v7';
+const POLICY_DESCRIPTION = 'snapshot mcp v8';
+
+// Snapshot off-chain EIP-712 envelopes (vote, propose, follow, ...) are all
+// signed via signEvmTypedData under a domain of { name: "snapshot" } with no
+// verifyingContract. The CDP policy engine is fail-secure: if no rule matches a
+// signing request, it is rejected. We therefore need an explicit accept rule
+// for signEvmTypedData; without one, only the typed-data shapes the engine
+// happened to let through (e.g. Vote) succeed while others (Proposal) are
+// rejected with a 401 "Wallet authentication error".
+//
+// An evmTypedDataField criterion is scoped to a single primaryType (it carries
+// the EIP-712 `types`/`primaryType` and matches conditions against the signed
+// message). We add one accept criterion per snapshot envelope the MCP signs,
+// each keyed on its primaryType with a permissive match on the always-present
+// `from` field. This explicitly allows snapshot's typed data without being a
+// blanket allow-everything: raw message signing (signEvmMessage) stays
+// rejected, and value-bearing transaction operations stay rejected.
+const SNAPSHOT_TYPED_DATA_ACCEPT = {
+  action: 'accept',
+  operation: 'signEvmTypedData',
+  criteria: (
+    ['Vote', 'Proposal', 'Follow', 'Unfollow'] as const
+  ).map(primaryType => ({
+    type: 'evmTypedDataField',
+    types: {
+      primaryType,
+      types: { [primaryType]: [{ name: 'from', type: 'string' }] }
+    },
+    conditions: [{ path: 'from', match: '.*' }]
+  }))
+} as const;
 
 const POLICY_RULES = [
+  SNAPSHOT_TYPED_DATA_ACCEPT,
   ...['signEvmTransaction', 'sendEvmTransaction'].map(operation => ({
     action: 'reject',
     operation,
