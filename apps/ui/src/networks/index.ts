@@ -63,7 +63,7 @@ export const governorNetworks: NetworkID[] = [
   'bnbt',
   'sep'
 ];
-export const governorOnlyNetworks: NetworkID[] = ['bnb', 'bnbt'];
+export const governorOnlyNetworks: NetworkID[] = [];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
