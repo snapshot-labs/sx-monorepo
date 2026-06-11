@@ -2,11 +2,24 @@
 import { formatUnits } from '@ethersproject/units';
 import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
+import { useStripeCheckout } from '@/composables/useStripeCheckout';
 import { _n, clone, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
+type PaymentMethod = 'crypto' | 'card';
+
 const FORM = {
   quantity: 1
+};
+
+const PLAN_DEFINITION = {
+  type: 'string',
+  title: 'Billing period',
+  enum: ['monthly', 'yearly'],
+  options: [
+    { id: 'monthly', name: 'Monthly' },
+    { id: 'yearly', name: 'Yearly' }
+  ]
 };
 
 const props = withDefaults(
@@ -16,10 +29,13 @@ const props = withDefaults(
     tokens: Token[];
     network: string;
     barcodePayload: BarcodePayload;
+    space?: string;
+    isAuthValidForCrypto?: boolean;
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
   }>(),
   {
+    isAuthValidForCrypto: false,
     quantityLabel: 'Quantity',
     calculator: (unitPrice: number, quantity: number) => {
       return Number((unitPrice * quantity).toFixed(2));
@@ -27,9 +43,12 @@ const props = withDefaults(
   }
 );
 
+const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
+
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'confirmed'): void;
+  (e: 'connectWallet'): void;
 }>();
 
 const { auth } = useWeb3();
@@ -50,12 +69,17 @@ const { isPending, assetsMap } = useBalances({
   })
 });
 const { isWhiteLabel } = useWhiteLabel();
+const { redirectToCheckout } = useStripeCheckout();
 
+const paymentMethod = ref<PaymentMethod>(
+  props.isAuthValidForCrypto ? 'crypto' : 'card'
+);
 const selectedTokenAddress = ref<string>('');
 const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
+const cardLoading = ref(false);
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -105,18 +129,37 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
-const canSubmit = computed(
-  () =>
-    isTermsAccepted.value &&
-    !isPending.value &&
-    auth.value?.account &&
-    !isInsufficientBalance.value &&
-    formValid.value
+function selectCryptoTab() {
+  if (!props.isAuthValidForCrypto) {
+    emit('connectWallet');
+    return;
+  }
+  paymentMethod.value = 'crypto';
+}
+
+watch(
+  () => props.isAuthValidForCrypto,
+  isValid => {
+    if (isValid) paymentMethod.value = 'crypto';
+  }
 );
 
-const totalAmount = computed(() => {
-  return props.calculator(props.unitPrice, Number(form.value.quantity));
+const canSubmit = computed(() => {
+  if (!isTermsAccepted.value || !formValid.value) return false;
+  if (paymentMethod.value === 'card') return !cardLoading.value;
+  return (
+    !isPending.value && !!auth.value?.account && !isInsufficientBalance.value
+  );
 });
+
+// Card buys a single billing period; crypto can buy multiple.
+const effectiveQuantity = computed(() =>
+  paymentMethod.value === 'card' ? 1 : Number(form.value.quantity)
+);
+
+const totalAmount = computed(() =>
+  props.calculator(props.unitPrice, effectiveQuantity.value)
+);
 
 const formErrors = computed(() => {
   const validator = getValidator(definition.value);
@@ -142,11 +185,25 @@ async function moveToNextStep() {
   });
 }
 
-function handleSubmit() {
+async function handleSubmit() {
   if (!canSubmit.value) return;
 
-  startPaymentProcess();
+  if (paymentMethod.value === 'card') {
+    if (!props.space) return;
+    cardLoading.value = true;
+    try {
+      await redirectToCheckout({
+        space: props.space,
+        plan: plan.value
+      });
+    } catch (err) {
+      cardLoading.value = false;
+      console.error('[stripe] checkout failed', err);
+    }
+    return;
+  }
 
+  startPaymentProcess();
   isHidden.value = true;
   isModalTransactionProgressOpen.value = true;
 }
@@ -165,13 +222,20 @@ watch(
     isPickerShown.value = false;
     isHidden.value = false;
     selectedTokenAddress.value = '';
+    cardLoading.value = false;
+    paymentMethod.value = props.isAuthValidForCrypto ? 'crypto' : 'card';
     form.value = clone(FORM);
   }
 );
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
+  <UiModal
+    :open="open"
+    class="modal-payment"
+    :class="{ hidden: isHidden }"
+    @close="emit('close')"
+  >
     <template #header>
       <h3>Payment</h3>
       <template v-if="isPickerShown">
@@ -194,7 +258,34 @@ watch(
       @pick="handleTokenPick"
     />
     <div v-else class="s-box p-4 space-y-3">
-      <div class="s-base">
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class="flex-1 px-3 py-2 rounded-full border text-sm"
+          :class="
+            paymentMethod === 'crypto'
+              ? 'bg-skin-heading text-skin-bg border-skin-heading'
+              : 'text-skin-link'
+          "
+          @click="selectCryptoTab"
+        >
+          Crypto
+        </button>
+        <button
+          type="button"
+          class="flex-1 px-3 py-2 rounded-full border text-sm"
+          :class="
+            paymentMethod === 'card'
+              ? 'bg-skin-heading text-skin-bg border-skin-heading'
+              : 'text-skin-link'
+          "
+          @click="paymentMethod = 'card'"
+        >
+          Card
+        </button>
+      </div>
+      <UiSelect v-model="plan" :definition="PLAN_DEFINITION" />
+      <div v-if="paymentMethod === 'crypto'" class="s-base">
         <div class="s-label" v-text="'Token *'" />
         <button
           type="button"
@@ -214,7 +305,7 @@ watch(
         </button>
       </div>
       <UiInputNumber
-        v-if="quantityLabel"
+        v-if="quantityLabel && paymentMethod === 'crypto'"
         v-model="form.quantity"
         :definition="definition.properties.quantity"
         :error="formErrors.quantity"
@@ -225,17 +316,22 @@ watch(
         >
           <div class="flex justify-between">
             You will pay
-            <div class="flex items-center gap-1 text-skin-heading">
+            <div
+              class="text-skin-heading"
+              :class="{ 'flex items-center gap-1': paymentMethod === 'crypto' }"
+            >
               <UiStamp
+                v-if="paymentMethod === 'crypto'"
                 :id="`eip155:${network}:${currentToken.contractAddress}`"
                 :size="18"
                 type="token"
               />
-              {{ _n(totalAmount) }} {{ currentToken.symbol }}
+              {{ _n(totalAmount) }}
+              {{ paymentMethod === 'crypto' ? currentToken.symbol : 'USD' }}
             </div>
           </div>
           <div v-if="$slots.summary">
-            <slot name="summary" :quantity="form.quantity" />
+            <slot name="summary" :quantity="effectiveQuantity" />
           </div>
         </div>
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
@@ -262,10 +358,13 @@ watch(
         class="w-full"
         primary
         :disabled="!canSubmit"
-        :loading="isPending"
+        :loading="paymentMethod === 'card' ? cardLoading : isPending"
         @click="handleSubmit"
       >
-        <template v-if="isInsufficientBalance">
+        <template v-if="paymentMethod === 'card'">
+          Continue to checkout
+        </template>
+        <template v-else-if="isInsufficientBalance">
           Insufficient {{ currentToken.symbol }}
         </template>
         <template v-else>Pay</template>
@@ -310,3 +409,9 @@ watch(
     </template>
   </ModalTransactionProgress>
 </template>
+
+<style lang="scss">
+.modal.modal-payment .shell .modal-body {
+  max-height: none;
+}
+</style>
