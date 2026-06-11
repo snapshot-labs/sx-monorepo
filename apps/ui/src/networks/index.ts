@@ -63,6 +63,9 @@ export const governorNetworks: NetworkID[] = [
   'bnbt',
   'sep'
 ];
+// SX core contracts (proxyFactory/masterSpace) are not deployed on these
+// networks, so they support Governor spaces only (no SX space creation/explore).
+export const governorOnlyNetworks: NetworkID[] = ['bnb', 'bnbt'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
@@ -101,7 +104,8 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
   id => !getNetwork(id).readOnly
 );
 
-export const spaceCreationNetworks: NetworkID[] = enabledReadWriteNetworks;
+export const spaceCreationNetworks: NetworkID[] =
+  enabledReadWriteNetworks.filter(id => !governorOnlyNetworks.includes(id));
 
 const onchainApiNetwork =
   enabledNetworks.find(network => !offchainNetworks.includes(network)) || 'eth';
@@ -120,7 +124,9 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       label: 'Snapshot X',
       apiNetwork: onchainApiNetwork,
       networks: enabledNetworks.filter(
-        network => !offchainNetworks.includes(network)
+        network =>
+          !offchainNetworks.includes(network) &&
+          !governorOnlyNetworks.includes(network)
       ),
       limit: 18
     },
