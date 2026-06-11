@@ -142,6 +142,11 @@ export default async function ingestor(req) {
     }
 
     const id = snapshot.utils.getHash(body.data, body.address);
+
+    // Author stored by the writers, lowercased for EVM so it's canonical.
+    const signer =
+      networkDataType === 'evm' ? body.address.toLowerCase() : body.address;
+
     let payload = {};
 
     if (await doesMessageExist(id)) {
@@ -223,7 +228,7 @@ export default async function ingestor(req) {
     }
 
     let legacyBody: any = {
-      address: message.from,
+      address: signer,
       msg: JSON.stringify({
         version: domain.version,
         timestamp: message.timestamp,
@@ -240,7 +245,7 @@ export default async function ingestor(req) {
         type
       )
     ) {
-      legacyBody = message;
+      legacyBody = { ...message, from: signer };
     }
 
     let context;
@@ -281,7 +286,7 @@ export default async function ingestor(req) {
       await storeMsg(
         id,
         ipfs,
-        body.address,
+        signer,
         msg.version,
         msg.timestamp,
         msg.space || '',
