@@ -332,6 +332,27 @@ describe('ingestor', () => {
       expect(dbResult.length).toBe(1);
     });
 
+    it('stores the author normalized to lowercase for a mixed-case EVM submission', async () => {
+      // The ingestor must normalize the EVM signer address once, so that
+      // writers store a canonical lowercase address regardless of how the
+      // client cased it (signature verification is case-insensitive).
+      const mixedCaseAddress = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
+      expect(mixedCaseAddress).not.toBe(mixedCaseAddress.toLowerCase());
+
+      const request = cloneDeep(proposalRequest);
+      request.body.address = mixedCaseAddress;
+      request.body.data.message.from = mixedCaseAddress;
+
+      const typeResult = await ingestor(request);
+      const dbResult = await db.queryAsync(
+        `SELECT author from proposals WHERE id = ? LIMIT 1`,
+        typeResult.id
+      );
+
+      expect(dbResult.length).toBe(1);
+      expect(dbResult[0].author).toBe(mixedCaseAddress.toLowerCase());
+    });
+
     ['vote', 'follow', 'unfollow', 'subscribe', 'unsubscribe'].forEach(type => {
       it.todo(`updates/saves the ${type} in the DB`);
     });
