@@ -2,7 +2,7 @@ import { Signer } from '@ethersproject/abstract-signer';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
-import { call, multicall } from './call';
+import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
 import { getAddresses } from './stamp';
@@ -82,23 +82,29 @@ async function deepResolve(
   params: any[]
 ) {
   const provider = getProvider(chainId);
-  const resolvers = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolvers) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  const calls = [
-    [ENS_CONTRACTS.registry, 'resolver', [node]],
-    ...resolvers.map(resolver => [resolver, property, params])
-  ];
-
-  const [[resolverAddress], ...textRecords]: any[][] = await multicall(
-    chainId.toString(),
+  const resolverAddress: string = await call(
     provider,
-    [...ENS_CONTRACTS.registryAbi, ...ENS_CONTRACTS.resolverAbi],
-    calls
+    ENS_CONTRACTS.registryAbi,
+    [ENS_CONTRACTS.registry, 'resolver', [node]]
   );
 
-  const resolverIndex = resolvers.indexOf(resolverAddress);
-  return resolverIndex !== -1 ? textRecords[resolverIndex]?.[0] : null;
+  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) return null;
+
+  try {
+    return await call(provider, ENS_CONTRACTS.resolverAbi, [
+      resolverAddress,
+      property,
+      params
+    ]);
+  } catch {
+    // The resolver doesn't implement / reverts on this method (CCIP-read,
+    // ENS v2, or a broken resolver). Treat as "no record", matching the old
+    // multicall path, so callers degrade gracefully (e.g. getSpaceController
+    // falls back to the name owner) instead of throwing.
+    return null;
+  }
 }
 
 export async function resolveName(name: string, chainId: ENSChainId) {
@@ -140,8 +146,7 @@ export async function setEnsTextRecord(
   value: string,
   chainId: ENSChainId
 ) {
-  const resolvers = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolvers) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
   const ensHash = namehash(ensNormalize(ens));
 
@@ -151,8 +156,8 @@ export async function setEnsTextRecord(
     [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
   );
 
-  if (!resolvers.includes(resolverAddress))
-    throw new Error('Unsupported resolver');
+  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
+    throw new Error('No resolver set for name');
 
   const contract = new Contract(
     resolverAddress,
