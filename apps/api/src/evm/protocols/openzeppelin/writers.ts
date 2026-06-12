@@ -117,6 +117,22 @@ export function createWriters(
     });
   }
 
+  // Reads quorum at the snapshot timepoint (voteStart), already in the governor's clock.
+  async function getQuorumAtSnapshot({
+    address,
+    timepoint
+  }: {
+    address: `0x${string}`;
+    timepoint: bigint;
+  }) {
+    return client.readContract({
+      address,
+      abi: IGovernorAbi,
+      functionName: 'quorum',
+      args: [timepoint]
+    });
+  }
+
   async function initializeStrategies({
     spaceAddress,
     decimals,
@@ -387,7 +403,9 @@ export function createWriters(
     proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = event.args.voteStart;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
+    // Provisional: snapshot block is still in the future, finalized on first VoteCast.
     proposal.quorum = executionStrategy.quorum;
+    proposal.quorum_finalized = false;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.strategies_indices = space.strategies_indices;
@@ -570,6 +588,20 @@ export function createWriters(
       User.loadEntity(voterAddress, config.indexerName)
     ]);
     if (!space || !proposal || !user) return;
+
+    // Re-read quorum at the snapshot block, now in the past (see handleProposalCreated).
+    if (!proposal.quorum_finalized) {
+      try {
+        const quorum = await getQuorumAtSnapshot({
+          address: spaceAddress,
+          timepoint: BigInt(proposal.snapshot)
+        });
+        proposal.quorum = quorum.toString();
+      } catch (err) {
+        logger.error({ err }, 'Failed to finalize quorum at snapshot block');
+      }
+      proposal.quorum_finalized = true;
+    }
 
     space.vote_count += 1;
     proposal.vote_count += 1;
