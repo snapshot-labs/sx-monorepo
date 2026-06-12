@@ -117,6 +117,28 @@ export function createWriters(
     });
   }
 
+  // Reads quorum at the proposal's voting-start (snapshot) timepoint. `timepoint`
+  // is the value emitted in ProposalCreated.voteStart, which is already expressed
+  // in the governor's clock (an L1 block number on Arbitrum), so no
+  // getActualBlockNumber translation is needed here - unlike getQuorum which has
+  // to translate the indexer's creation block. For OZ governors with a voting
+  // delay, quorum (past-total-supply based) drifts between the creation block and
+  // the snapshot block, so this is the value that must be displayed.
+  async function getQuorumAtSnapshot({
+    address,
+    timepoint
+  }: {
+    address: `0x${string}`;
+    timepoint: bigint;
+  }) {
+    return client.readContract({
+      address,
+      abi: IGovernorAbi,
+      functionName: 'quorum',
+      args: [timepoint]
+    });
+  }
+
   async function initializeStrategies({
     spaceAddress,
     decimals,
@@ -387,7 +409,12 @@ export function createWriters(
     proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = event.args.voteStart;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
+    // Provisional quorum read at the creation block. The correct value is
+    // quorum(snapshot), but the snapshot block (voteStart) is in the future at
+    // index time, so it cannot be read yet. We finalize it lazily on the first
+    // VoteCast (see handleVoteCast), once the snapshot block is in the past.
     proposal.quorum = executionStrategy.quorum;
+    proposal.quorum_finalized = false;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.strategies_indices = space.strategies_indices;
@@ -570,6 +597,24 @@ export function createWriters(
       User.loadEntity(voterAddress, config.indexerName)
     ]);
     if (!space || !proposal || !user) return;
+
+    // Finalize quorum at the voting-start (snapshot) block. At creation time the
+    // snapshot block is in the future so quorum(snapshot) cannot be read, and the
+    // creation-block quorum can drift from it (OZ quorum tracks past total
+    // supply). By the first vote the snapshot block is in the past, so re-read it
+    // once and persist. Guarded by quorum_finalized so we only do it once.
+    if (!proposal.quorum_finalized) {
+      try {
+        const quorum = await getQuorumAtSnapshot({
+          address: spaceAddress,
+          timepoint: BigInt(proposal.snapshot)
+        });
+        proposal.quorum = quorum.toString();
+      } catch (err) {
+        logger.error({ err }, 'Failed to finalize quorum at snapshot block');
+      }
+      proposal.quorum_finalized = true;
+    }
 
     space.vote_count += 1;
     proposal.vote_count += 1;
