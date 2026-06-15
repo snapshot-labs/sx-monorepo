@@ -34,7 +34,11 @@ const queryClient = useQueryClient();
 
 const displayAllChoices = ref(false);
 
-const totalProgress = computed(() => quorumProgress(props.proposal));
+const { quorum } = useGovernorQuorum(() => props.proposal);
+
+const totalProgress = computed(() =>
+  quorumProgress(props.proposal, quorum.value)
+);
 
 const quorumAmount = computed(() => {
   const current = getProposalCurrentQuorum(
@@ -42,7 +46,7 @@ const quorumAmount = computed(() => {
     props.proposal
   );
   const format = (n: number) => _vp(n / 10 ** props.decimals);
-  return `${format(current)} / ${format(props.proposal.quorum)}`;
+  return `${format(current)} / ${format(quorum.value)}`;
 });
 
 const placeholderResults = computed(() =>
