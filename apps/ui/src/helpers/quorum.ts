@@ -25,12 +25,8 @@ export function getProposalCurrentQuorum(
   return Number(proposal.scores[0]) + Number(proposal.scores[2]);
 }
 
-export function quorumProgress(
-  proposal: Proposal,
-  quorumOverride?: number
-): number {
-  const quorum = quorumOverride ?? proposal.quorum;
-  return getProposalCurrentQuorum(proposal.network, proposal) / quorum;
+export function quorumProgress(proposal: Proposal): number {
+  return getProposalCurrentQuorum(proposal.network, proposal) / proposal.quorum;
 }
 
 export function quorumChoiceProgress(
