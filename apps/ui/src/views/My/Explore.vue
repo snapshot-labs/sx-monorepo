@@ -15,10 +15,6 @@ const DEFAULT_PROTOCOL = 'snapshot';
 const DEFAULT_NETWORK = 'all';
 const DEFAULT_CATEGORY = 'all';
 
-// TEMP: XMAQUINA $DEUS launch announcement.
-const openDeus = () =>
-  window.open('https://www.xmaquina.io/#get-deus', '_blank', 'noopener');
-
 const protocols = Object.values(explorePageProtocols)
   .filter(protocol => !protocol.disabled)
   .map(({ key, label }: ProtocolConfig) => ({
@@ -233,16 +229,7 @@ watchEffect(() => setTitle('Explore'));
             :key="space.id"
             :space="space"
             :org="getSpaceOrg(space)"
-          >
-            <template v-if="space.id === 'xmaquina.eth'" #meta>
-              <button
-                type="button"
-                class="ml-2 shrink-0 text-skin-text hover:text-skin-link"
-                @click.stop.prevent="openDeus"
-                v-text="'$DEUS Now Trading'"
-              />
-            </template>
-          </SpacesListItem>
+          />
         </UiContainerInfiniteScroll>
         <UiStateWarning v-else class="px-4 py-3">
           No results found for your search
