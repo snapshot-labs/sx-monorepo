@@ -288,8 +288,6 @@ type Proposal {
   scores_total: BigDecimalVP!
   "Minimum voting power required for execution"
   quorum: BigDecimalVP!
-  "Whether quorum has been (re)read at the voting-start snapshot block (OZ governors only)"
-  quorum_finalized: Boolean!
   "Quorum counting mode (e.g. for_only for Bravo-style where only For votes count)"
   quorum_type: String
   "Parsed total voting power as float"

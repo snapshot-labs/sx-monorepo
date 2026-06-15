@@ -403,9 +403,8 @@ export function createWriters(
     proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = event.args.voteStart;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
-    // Provisional: snapshot block is still in the future, finalized on first VoteCast.
+    // Provisional: snapshot block is still in the future, re-read on each VoteCast.
     proposal.quorum = executionStrategy.quorum;
-    proposal.quorum_finalized = false;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.strategies_indices = space.strategies_indices;
@@ -590,17 +589,17 @@ export function createWriters(
     if (!space || !proposal || !user) return;
 
     // Re-read quorum at the snapshot block, now in the past (see handleProposalCreated).
-    if (!proposal.quorum_finalized) {
-      try {
-        const quorum = await getQuorumAtSnapshot({
-          address: spaceAddress,
-          timepoint: BigInt(proposal.snapshot)
-        });
-        proposal.quorum = quorum.toString();
-      } catch (err) {
-        logger.error({ err }, 'Failed to finalize quorum at snapshot block');
-      }
-      proposal.quorum_finalized = true;
+    // quorum(voteStart) is immutable once voteStart is in the past, so re-reading on
+    // every vote always yields the same value and a transient RPC failure self-heals
+    // on the next vote; the prior value is kept on failure.
+    try {
+      const quorum = await getQuorumAtSnapshot({
+        address: spaceAddress,
+        timepoint: BigInt(proposal.snapshot)
+      });
+      proposal.quorum = quorum.toString();
+    } catch (err) {
+      logger.error({ err }, 'Failed to read quorum at snapshot block');
     }
 
     space.vote_count += 1;
