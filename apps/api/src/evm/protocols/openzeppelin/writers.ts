@@ -403,8 +403,10 @@ export function createWriters(
     proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = event.args.voteStart;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
-    // Provisional: snapshot block is still in the future, re-read on each VoteCast.
+    // Provisional: snapshot block is still in the future. Finalized on the first
+    // successful VoteCast read once the snapshot block is in the past.
     proposal.quorum = executionStrategy.quorum;
+    proposal.quorum_finalized = false;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.strategies_indices = space.strategies_indices;
@@ -588,18 +590,21 @@ export function createWriters(
     ]);
     if (!space || !proposal || !user) return;
 
-    // Re-read quorum at the snapshot block, now in the past (see handleProposalCreated).
-    // quorum(voteStart) is immutable once voteStart is in the past, so re-reading on
-    // every vote always yields the same value and a transient RPC failure self-heals
-    // on the next vote; the prior value is kept on failure.
-    try {
-      const quorum = await getQuorumAtSnapshot({
-        address: spaceAddress,
-        timepoint: BigInt(proposal.snapshot)
-      });
-      proposal.quorum = quorum.toString();
-    } catch (err) {
-      logger.error({ err }, 'Failed to read quorum at snapshot block');
+    // Read quorum once at the snapshot block, now in the past (see handleProposalCreated).
+    // quorum(voteStart) is immutable once voteStart is in the past, so we read it only on
+    // the first vote and mark it finalized. The flag is set true ONLY after a successful
+    // read, so a transient RPC failure leaves it false and the next vote retries.
+    if (!proposal.quorum_finalized) {
+      try {
+        const quorum = await getQuorumAtSnapshot({
+          address: spaceAddress,
+          timepoint: BigInt(proposal.snapshot)
+        });
+        proposal.quorum = quorum.toString();
+        proposal.quorum_finalized = true;
+      } catch (err) {
+        logger.error({ err }, 'Failed to read quorum at snapshot block');
+      }
     }
 
     space.vote_count += 1;
