@@ -4,24 +4,32 @@ import { getNetwork } from '@/networks';
 import { Proposal } from '@/types';
 
 /**
- * TEMPORARY STOPGAP (tied to indexer PR snapshot-labs/sx-monorepo#2172).
+ * TEMPORARY SINGLE-SPACE STOPGAP (tied to indexer PR
+ * snapshot-labs/sx-monorepo#2172 + space resync).
  *
- * For OpenZeppelin Governor spaces the indexer stored `quorum` read at the
- * proposal-CREATION block instead of the snapshot block, so `proposal.quorum`
- * can be wrong. Until the indexer fix lands + spaces are resynced we read
- * `quorum(snapshotBlock)` directly from the governor contract client-side.
- * Scoped to `@openzeppelin/governor` only; falls back to the indexed value.
+ * For this one OpenZeppelin Governor space the indexer stored `quorum` read at
+ * the proposal-CREATION block instead of the snapshot block, so
+ * `proposal.quorum` can be wrong. Until the indexer fix lands + the space is
+ * resynced we read `quorum(snapshotBlock)` directly from the governor contract
+ * client-side, falling back to the indexed value on any error.
+ *
+ * Scoped to ONLY the affected Arbitrum space (`arb1:<governor address>`); every
+ * other space - including other OZ-governor spaces - uses the indexed
+ * `proposal.quorum` unchanged. Remove this whole composable once the resync is
+ * done.
  */
 const ABI = ['function quorum(uint256 timepoint) view returns (uint256)'];
+
+// The only space the override applies to, in the UI `<network>:<address>` form.
+const AFFECTED_SPACE_ID =
+  'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4'.toLowerCase();
 
 // Cache the resolved on-chain quorum per proposal (id is unique).
 const cache = new Map<string, Promise<number>>();
 
 async function resolveQuorum(proposal: Proposal): Promise<number> {
-  if (
-    proposal.space.protocol !== '@openzeppelin/governor' ||
-    !proposal.snapshot
-  ) {
+  const spaceId = `${proposal.network}:${proposal.space.id}`.toLowerCase();
+  if (spaceId !== AFFECTED_SPACE_ID || !proposal.snapshot) {
     return proposal.quorum;
   }
 
