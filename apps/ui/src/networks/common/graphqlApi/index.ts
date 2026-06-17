@@ -427,7 +427,7 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
+    has_execution_window_opened: ['EthRelayer'].includes(
       proposal.execution_strategy_type
     )
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current

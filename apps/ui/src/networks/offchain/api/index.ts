@@ -449,7 +449,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     has_execution_window_opened: state === 'passed',
     // NOTE: ignored
     execution_network: networkId,
-    execution_ready: false,
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',

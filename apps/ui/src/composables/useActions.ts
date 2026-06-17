@@ -485,20 +485,6 @@ export function useActions() {
     return true;
   }
 
-  async function finalizeProposal(proposal: Proposal) {
-    if (!auth.value) return await forceLogin();
-
-    if (auth.value.connector.type === 'argentx')
-      throw new Error('ArgentX is not supported');
-
-    const network = getReadWriteNetwork(proposal.network);
-
-    await wrapPromise(
-      proposal.network,
-      network.actions.finalizeProposal(auth.value.provider, proposal)
-    );
-  }
-
   async function executeTransactions(proposal: Proposal) {
     if (!auth.value) return await forceLogin();
 
@@ -815,7 +801,6 @@ export function useActions() {
     updateProposal: wrapWithErrors(updateProposal),
     flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
-    finalizeProposal: wrapWithErrors(finalizeProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),
