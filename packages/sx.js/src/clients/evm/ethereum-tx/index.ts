@@ -4,8 +4,6 @@ import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
-import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy.json';
-import IsokratiaExecutionStrategyAbi from './abis/IsokratiaExecutionStrategy.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
 import SpaceAbi from './abis/Space.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
@@ -48,23 +46,6 @@ type TimelockExecutionStrategyParams = {
   spaces: string[];
   timelockDelay: bigint;
   quorum: bigint;
-};
-
-type AxiomExecutionStrategyParams = {
-  controller: string;
-  quorum: bigint;
-  contractAddress: string;
-  slotIndex: bigint;
-  space: string;
-  querySchema: string;
-};
-
-type IsokratiaExecutionStrategyParams = {
-  provingTimeAllowance: number;
-  quorum: bigint;
-  queryAddress: string;
-  contractAddress: string;
-  slotIndex: bigint;
 };
 
 type UpdateSettingsInput = {
@@ -196,131 +177,6 @@ export class EthereumTx {
       [controller, vetoGuardian, spaces, timelockDelay, quorum]
     );
     const functionData = timelockExecutionStrategyInterface.encodeFunctionData(
-      'setUp',
-      [initParams]
-    );
-
-    const sender = await signer.getAddress();
-    const salt = await this.getSalt({
-      sender,
-      saltNonce
-    });
-    const address = await proxyFactoryContract.predictProxyAddress(
-      implementationAddress,
-      salt
-    );
-    const response = await proxyFactoryContract.deployProxy(
-      implementationAddress,
-      functionData,
-      saltNonce,
-      this.defaultTransactionOverrides
-    );
-
-    return { address, txId: response.hash };
-  }
-
-  async deployAxiomExecution({
-    signer,
-    params: {
-      controller,
-      quorum,
-      contractAddress,
-      slotIndex,
-      space,
-      querySchema
-    },
-    saltNonce
-  }: {
-    signer: Signer;
-    params: AxiomExecutionStrategyParams;
-    saltNonce?: string;
-  }): Promise<{ txId: string; address: string }> {
-    saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
-
-    const implementationAddress =
-      this.config.networkConfig.executionStrategiesImplementations['Axiom'];
-
-    if (!implementationAddress) {
-      throw new Error('Missing Axiom implementation address');
-    }
-
-    const abiCoder = new AbiCoder();
-    const axiomExecutionStrategyInterface = new Interface(
-      AxiomExecutionStrategyAbi
-    );
-    const proxyFactoryContract = new Contract(
-      this.config.networkConfig.proxyFactory,
-      ProxyFactoryAbi,
-      signer
-    );
-
-    const initParams = abiCoder.encode(
-      ['address', 'uint256', 'address', 'uint256', 'address', 'bytes32'],
-      [controller, quorum, contractAddress, slotIndex, space, querySchema]
-    );
-    const functionData = axiomExecutionStrategyInterface.encodeFunctionData(
-      'setUp',
-      [initParams]
-    );
-
-    const sender = await signer.getAddress();
-    const salt = await this.getSalt({
-      sender,
-      saltNonce
-    });
-    const address = await proxyFactoryContract.predictProxyAddress(
-      implementationAddress,
-      salt
-    );
-    const response = await proxyFactoryContract.deployProxy(
-      implementationAddress,
-      functionData,
-      saltNonce,
-      this.defaultTransactionOverrides
-    );
-
-    return { address, txId: response.hash };
-  }
-
-  async deployIsokratiaExecution({
-    signer,
-    params: {
-      provingTimeAllowance,
-      quorum,
-      queryAddress,
-      contractAddress,
-      slotIndex
-    },
-    saltNonce
-  }: {
-    signer: Signer;
-    params: IsokratiaExecutionStrategyParams;
-    saltNonce?: string;
-  }): Promise<{ txId: string; address: string }> {
-    saltNonce = saltNonce || `0x${randomBytes(32).toString('hex')}`;
-
-    const implementationAddress =
-      this.config.networkConfig.executionStrategiesImplementations['Isokratia'];
-
-    if (!implementationAddress) {
-      throw new Error('Missing Isokratia implementation address');
-    }
-
-    const abiCoder = new AbiCoder();
-    const isokratiaExecutionStrategyInterface = new Interface(
-      IsokratiaExecutionStrategyAbi
-    );
-    const proxyFactoryContract = new Contract(
-      this.config.networkConfig.proxyFactory,
-      ProxyFactoryAbi,
-      signer
-    );
-
-    const initParams = abiCoder.encode(
-      ['uint32', 'uint256', 'address', 'address', 'uint256'],
-      [provingTimeAllowance, quorum, queryAddress, contractAddress, slotIndex]
-    );
-    const functionData = isokratiaExecutionStrategyInterface.encodeFunctionData(
       'setUp',
       [initParams]
     );
