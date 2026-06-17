@@ -153,7 +153,7 @@
       "dependencies": {
         "@graphql-tools/schema": "^10.0.0",
         "@snapshot-labs/keycard": "^0.5.1",
-        "@snapshot-labs/snapshot-metrics": "^1.4.1",
+        "@snapshot-labs/snapshot-metrics": "^1.4.2",
         "@snapshot-labs/snapshot-sentry": "^2.0.0",
         "@snapshot-labs/snapshot.js": "^0.14.11",
         "bluebird": "^3.7.2",
@@ -258,7 +258,7 @@
         "@ethersproject/wallet": "^5.6.2",
         "@shutter-network/shutter-crypto": "^1.0.0",
         "@snapshot-labs/pineapple": "^1.2.1",
-        "@snapshot-labs/snapshot-metrics": "^1.4.1",
+        "@snapshot-labs/snapshot-metrics": "^1.4.2",
         "@snapshot-labs/snapshot-sentry": "^2.0.0",
         "@snapshot-labs/snapshot.js": "^0.14.21",
         "ajv": "8.11.0",
@@ -1616,7 +1616,7 @@
 
     "@snapshot-labs/prettier-config": ["@snapshot-labs/prettier-config@workspace:packages/prettier-config"],
 
-    "@snapshot-labs/snapshot-metrics": ["@snapshot-labs/snapshot-metrics@1.4.1", "", { "dependencies": { "express-prom-bundle": "^6.6.0", "node-fetch": "^2.7.0", "prom-client": "^14.2.0" }, "peerDependencies": { "express": "^4.0.0" } }, "sha512-CojZGxcNReqhQ+F0VRSv9nfmC5MIAoFnhUiumacasOnFlF3OKgPhC52kbf0pHQWk9qrvEyKxR5FWhbXcgFj3qQ=="],
+    "@snapshot-labs/snapshot-metrics": ["@snapshot-labs/snapshot-metrics@1.4.2", "", { "dependencies": { "express-prom-bundle": "^6.6.0", "node-fetch": "^2.7.0", "prom-client": "^14.2.0" }, "peerDependencies": { "express": "^4.0.0" } }, "sha512-84kb5zpmQ9Sf6p/BSGaHl+iUYQqH5VNsB5ftrp+x/t8Gcg/Tf/UIzTBOtcwkwq5YnLnBgFdxHrU+cLAyaNjhSQ=="],
 
     "@snapshot-labs/snapshot-sentry": ["@snapshot-labs/snapshot-sentry@2.0.0", "", { "dependencies": { "@sentry/node": "^10.52.0" } }, "sha512-lTQk/0nHll9WN1hhipzk/l9wq1EiYVH/XAGd+XnqUYKG5UIkeC6DQ9tffkA2M+f2Y1+9GUL85sFLk/B7/G1uJg=="],
 
