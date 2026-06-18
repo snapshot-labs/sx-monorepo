@@ -36,7 +36,7 @@ function instrumentRateLimitedRequests(req, res, next) {
 export default function initMetrics(app: Express) {
   const GRAPHQL_TYPES = Object.keys(operations);
 
-  init(app, {
+  const { stop } = init(app, {
     normalizedPath: [
       ['^/api/scores/.+', '/api/scores/#id'],
       ['^/api/spaces/([^/]+)(/poke)?$', '/api/spaces/#key$2'],
@@ -88,6 +88,8 @@ export default function initMetrics(app: Express) {
 
     next();
   });
+
+  return { stop };
 }
 
 new client.Gauge({
