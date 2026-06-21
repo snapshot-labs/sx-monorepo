@@ -44,13 +44,15 @@ export const PROPOSALS_KEYS = {
   ) => [...PROPOSALS_KEYS.space(networkId, spaceId), 'summary'] as const,
   spaceList: (
     networkId: MaybeRefOrGetter<NetworkID>,
-    spaceId: MaybeRefOrGetter<string>,
+    spacesIds: MaybeRefOrGetter<string[]>,
     filters: Filters,
     query?: MaybeRefOrGetter<string>
   ) =>
     [
-      ...PROPOSALS_KEYS.space(networkId, spaceId),
-      'list',
+      ...PROPOSALS_KEYS.all,
+      'spaceList',
+      networkId,
+      spacesIds,
       { ...filters, query }
     ] as const,
   details: (
@@ -183,14 +185,14 @@ export function useHomeProposalsQuery(
 
 export function useProposalsQuery(
   networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>,
+  spacesIds: MaybeRefOrGetter<string[]>,
   filters: Filters,
   query?: MaybeRefOrGetter<string>
 ) {
   return getProposalsQuery(
-    PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
+    PROPOSALS_KEYS.spaceList(networkId, spacesIds, filters, query),
     networkId,
-    toRef(() => [toValue(spaceId)]),
+    spacesIds,
     filters,
     query
   );
