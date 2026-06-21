@@ -10,7 +10,7 @@ jobs:
     name: Deploy API to staging (${{ matrix.environment }})
     strategy:
       matrix:
-        environment: [api_mainnet, api_testnet]
+        environment: [api_testnet]
     environment: ${{ matrix.environment }}
     concurrency:
       group: ${{ matrix.environment }}

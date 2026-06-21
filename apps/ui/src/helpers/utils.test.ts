@@ -222,6 +222,12 @@ describe('utils', () => {
       );
     });
 
+    it('re-checksums an evm address with a malformed checksum', () => {
+      expect(formatAddress('0x0579A616689f7ed748dC07692A3f150d44b0CA09')).toBe(
+        '0x0579A616689f7ed748dC07692A3F150D44b0CA09'
+      );
+    });
+
     it('returns a padded starknet address', () => {
       expect(formatAddress('0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781')).toBe(
         '0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781'
@@ -316,28 +322,28 @@ describe('utils', () => {
       const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
       const controller = await getSpaceController(spaceId, 's');
       expect(controller).toBe(expectedController);
-    });
+    }, 10000);
 
     it('should return the space controller address for an ENS name on mainnet', async () => {
       const spaceId = 'ens.eth';
       const expectedController = '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9';
       const controller = await getSpaceController(spaceId, 's');
       expect(controller).toBe(expectedController);
-    });
+    }, 10000);
 
     it('should return the space controller address for an ENS name on testnet', async () => {
       const spaceId = 'ens.eth';
       const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
       const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
-    });
+    }, 10000);
 
     it('should return the space controller address for a sonic name on mainnet', async () => {
       const spaceId = 'boorger.sonic';
       const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
       const controller = await getSpaceController(spaceId, 's');
       expect(controller).toBe(expectedController);
-    });
+    }, 10000);
 
     it('should throw an error when getting a sonic name on testnet', async () => {
       const spaceId = 'boorger.sonic';

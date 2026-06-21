@@ -1,10 +1,19 @@
 name: Sequencer Test
 
 on:
-  push:
+  pull_request:
     paths:
       - 'apps/sequencer/**'
       - '.github/workflows/sequencer-test.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'apps/sequencer/**'
+      - '.github/workflows/sequencer-test.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   test:

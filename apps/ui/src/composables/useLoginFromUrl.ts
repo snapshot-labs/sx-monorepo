@@ -15,8 +15,10 @@ export function useLoginFromUrl() {
 
       await login(connector);
 
-      const { as: _as, login: _login, chainId: _chainId, ...query } =
-        router.currentRoute.value.query;
+      const query = { ...router.currentRoute.value.query };
+      delete query.as;
+      delete query.login;
+      delete query.chainId;
       router.push({ query });
     },
     { immediate: true }

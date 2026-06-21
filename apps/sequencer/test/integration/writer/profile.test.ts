@@ -38,7 +38,9 @@ describe('writer/profile', () => {
     });
 
     it('clears the stamp cache if the avatar has changed', async () => {
-      const spy = jest.spyOn(utils, 'clearStampCache');
+      const spy = jest
+        .spyOn(utils, 'clearStampCache')
+        .mockResolvedValue(undefined);
 
       await action(
         {
@@ -57,7 +59,9 @@ describe('writer/profile', () => {
     });
 
     it('clears the stamp cache if the name has changed', async () => {
-      const spy = jest.spyOn(utils, 'clearStampCache');
+      const spy = jest
+        .spyOn(utils, 'clearStampCache')
+        .mockResolvedValue(undefined);
 
       await action(
         {
@@ -76,7 +80,9 @@ describe('writer/profile', () => {
     });
 
     it('does not clear the stamp cache if the avatar nor the name has changed', () => {
-      const spy = jest.spyOn(utils, 'clearStampCache');
+      const spy = jest
+        .spyOn(utils, 'clearStampCache')
+        .mockResolvedValue(undefined);
 
       action(
         {

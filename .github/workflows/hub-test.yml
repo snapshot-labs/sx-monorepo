@@ -1,10 +1,19 @@
 name: Hub Test
 
 on:
-  push:
+  pull_request:
     paths:
       - 'apps/hub/**'
       - '.github/workflows/hub-test.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'apps/hub/**'
+      - '.github/workflows/hub-test.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   test:

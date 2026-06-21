@@ -50,7 +50,8 @@ export async function verify(body): Promise<any> {
     );
   }
 
-  if (proposal.author !== body.address) return Promise.reject('Not the author');
+  if (proposal.author.toLowerCase() !== body.address.toLowerCase())
+    return Promise.reject('Not the author');
 
   const spacePrivacy = space.voting?.privacy ?? 'any';
   const proposalPrivacy = msg.payload.privacy;
