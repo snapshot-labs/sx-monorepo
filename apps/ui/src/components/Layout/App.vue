@@ -32,7 +32,7 @@ const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
 
-useGuestLoginFromUrl();
+useLoginFromUrl();
 
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(event: TouchEvent) {
@@ -73,15 +73,9 @@ const baseSubRouteName = computed(() => {
 
 const hasPlaceHolderSidebar = computed(
   () =>
-    ![
-      'create-space-snapshot',
-      'create-space-snapshot-x',
-      'auction',
-      'auctions',
-      'auction-invite',
-      'auction-upcoming',
-      'auction-verify-standalone'
-    ].includes(String(route.matched[0]?.name)) &&
+    !['create-space-snapshot', 'create-space-snapshot-x'].includes(
+      String(route.matched[0]?.name)
+    ) &&
     ![
       'space-townhall-create',
       'space-townhall-topic',

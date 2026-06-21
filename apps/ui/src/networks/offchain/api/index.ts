@@ -43,6 +43,7 @@ import {
   Vote
 } from '@/types';
 import {
+  ALIASES_BY_ADDRESS_QUERY,
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
   NETWORKS_QUERY,
@@ -448,7 +449,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     has_execution_window_opened: state === 'passed',
     // NOTE: ignored
     execution_network: networkId,
-    execution_ready: false,
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',
@@ -975,6 +975,16 @@ export function createApi(
       });
 
       return aliases?.[0] ?? null;
+    },
+    loadAliases: async (address: string): Promise<Alias[]> => {
+      const {
+        data: { aliases }
+      }: { data: { aliases: Alias[] } } = await apollo.query({
+        query: ALIASES_BY_ADDRESS_QUERY,
+        variables: { address }
+      });
+
+      return aliases ?? [];
     },
     loadStatement: async (
       networkId: NetworkID,

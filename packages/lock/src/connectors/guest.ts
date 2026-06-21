@@ -26,6 +26,15 @@ class GuestProvider extends EventEmitter {
         return this.chainId;
       case 'eth_accounts':
         return [this.selectedAddress];
+      case 'wallet_switchEthereumChain': {
+        // EIP-3326: update chainId, emit chainChanged, return null.
+        const newChainId = Number(args.params?.[0]?.chainId);
+        if (Number.isFinite(newChainId) && newChainId !== this.chainId) {
+          this.chainId = newChainId;
+          this.emit('chainChanged', newChainId);
+        }
+        return null;
+      }
       default:
         throw new Error('Not available when connected as guest');
     }

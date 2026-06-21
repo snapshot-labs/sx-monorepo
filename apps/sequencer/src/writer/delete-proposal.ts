@@ -14,7 +14,7 @@ export async function verify(body): Promise<any> {
   if (
     !admins.includes(body.address.toLowerCase()) &&
     !mods.includes(body.address.toLowerCase()) &&
-    proposal.author !== body.address
+    proposal.author.toLowerCase() !== body.address.toLowerCase()
   )
     return Promise.reject('not authorized to archive proposal');
 }
