@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { Space } from '@/types';
 import {
   getOrganizationConfigBySpace,
   getOrgProposalLabel,
-  resolveSpaceItem,
-  type OrganizationConfig
+  OrganizationConfig,
+  resolveSpaceItem
 } from './organizations';
-import type { Space } from '@/types';
 
 function org(navItems: any) {
   return { navItems } as any;
@@ -173,5 +173,4 @@ describe('resolveSpaceItem', () => {
     expect(result.title).toBe('Custom Org');
     expect(result.avatarSpace.id).toBe('0xCUSTOM');
   });
-
 });

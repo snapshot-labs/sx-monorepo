@@ -1,4 +1,4 @@
-import type { RouteLocationRaw } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
 import { NetworkID, RelatedSpace, Space, SpaceMetadataTreasury } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';

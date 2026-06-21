@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { resolveSpaceItem } from '@/helpers/organizations';
-import type { Space } from '@/types';
+import { Space } from '@/types';
 
 const props = defineProps<{
   space: Space;
