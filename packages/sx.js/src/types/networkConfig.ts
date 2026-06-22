@@ -68,6 +68,19 @@ export type OzVotesStorageProofStrategyConfig = {
   };
 };
 
+// Herodotus Satellite versions of the storage-proof strategies. They read the
+// L1 block from the Satellite contract instead of an on-chain timestamp cache.
+export type EvmSlotValueV2StrategyConfig = {
+  type: 'evmSlotValueV2';
+};
+
+export type OzVotesStorageProofV2StrategyConfig = {
+  type: 'ozVotesStorageProofV2';
+  params: {
+    trace: 208 | 224;
+  };
+};
+
 export type NetworkConfig = {
   eip712ChainId: string;
   spaceFactory: string;
@@ -98,6 +111,8 @@ export type NetworkConfig = {
       | WhitelistStrategyConfig
       | EvmSlotValueStrategyConfig
       | OzVotesStorageProofStrategyConfig
+      | EvmSlotValueV2StrategyConfig
+      | OzVotesStorageProofV2StrategyConfig
       | undefined;
   };
 };
