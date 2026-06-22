@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
+import { WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
 
@@ -29,7 +30,7 @@ describe('merkleWhitelist', () => {
     starkProvider,
     ethUrl,
     networkConfig: starknetSepolia,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   it('should return type', () => {

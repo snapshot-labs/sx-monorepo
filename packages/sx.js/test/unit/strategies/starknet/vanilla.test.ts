@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
+import { WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
 
@@ -12,7 +13,7 @@ describe('vanillaStrategy', () => {
     starkProvider,
     ethUrl,
     networkConfig: starknetSepolia,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   it('should return type', () => {

@@ -2,6 +2,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { describe, expect, it } from 'vitest';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
+import { WHITELIST_SERVER_URL } from '../../../../constants';
 import { starkProvider } from '../../../helpers';
 
 describe('EthereumTx', () => {
@@ -15,7 +16,7 @@ describe('EthereumTx', () => {
     starkProvider,
     networkConfig: starknetSepolia,
     ethUrl,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: WHITELIST_SERVER_URL
   });
 
   const { EthTx } = starknetNetworks['sn-sep'].Authenticators;
