@@ -36,7 +36,7 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 }
 
 const pinia = createPinia();
-const tune = createTune({ iframelyApiKey: 'd155718c86be7d5305ccb6' });
+const tune = createTune({ linkPreviewUrl: 'https://sh5.co/api/og' });
 const app = createApp({ render: () => h(App) })
   .use(router)
   .use(tune);
