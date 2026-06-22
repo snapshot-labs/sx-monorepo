@@ -122,35 +122,6 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  async function finalizeProposal(id: number, params: any, res: Response) {
-    try {
-      const { space, proposalId } = params;
-
-      const response = await fetch(
-        'http://ec2-44-197-171-215.compute-1.amazonaws.com:8000/query',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chainId,
-            space,
-            proposalId,
-            feeData: {
-              maxFeePerGas: '50000000000'
-            }
-          })
-        }
-      );
-
-      const result = await response.text();
-
-      return rpcSuccess(res, result, id);
-    } catch (err) {
-      logger.error({ err }, 'Failed to finalize proposal');
-      return rpcError(res, 500, err, id);
-    }
-  }
-
   async function execute(id: number, params: any, res: Response) {
     try {
       const { space, proposalId, executionParams } = params;
@@ -335,7 +306,6 @@ export const createNetworkHandler = (chainId: number) => {
 
   return {
     send,
-    finalizeProposal,
     execute,
     executeQueuedProposal,
     executeStarknetProposal,
