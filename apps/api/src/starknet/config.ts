@@ -57,9 +57,13 @@ function createOverrides(networkId: keyof typeof CONFIG) {
     herodotusStrategies: [
       config.Strategies.OZVotesStorageProof,
       config.Strategies.OZVotesTrace208StorageProof,
-      config.Strategies.EVMSlotValue
+      config.Strategies.EVMSlotValue,
+      // Herodotus Satellite versions (sx-starknet#641)
+      config.Strategies.OZVotesStorageProofV2,
+      config.Strategies.OZVotesTrace208StorageProofV2,
+      config.Strategies.EVMSlotValueV2
     ]
-      .filter(address => !!address)
+      .filter((address): address is string => !!address)
       .map(strategy => validateAndParseAddress(strategy))
   };
 }
