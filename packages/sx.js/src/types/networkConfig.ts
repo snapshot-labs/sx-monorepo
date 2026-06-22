@@ -5,9 +5,7 @@ export type ExecutorType =
   | 'SimpleQuorumVanilla'
   | 'SimpleQuorumAvatar'
   | 'SimpleQuorumTimelock'
-  | 'EthRelayer'
-  | 'Axiom'
-  | 'Isokratia';
+  | 'EthRelayer';
 
 export type VanillaAuthenticatorConfig = {
   type: 'vanilla';

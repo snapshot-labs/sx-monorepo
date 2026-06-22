@@ -486,7 +486,6 @@ export function createWriters(config: FullConfig) {
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
-    proposal.execution_ready = true;
     proposal.executed = false;
     proposal.vetoed = false;
     proposal.execution_settled = false;

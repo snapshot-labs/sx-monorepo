@@ -193,10 +193,6 @@ type ExecutionStrategy {
   timelock_veto_guardian: String
   "Delay in blocks before timelock execution can proceed"
   timelock_delay: BigInt!
-  "Axiom snapshot contract address for storage proofs (optional)"
-  axiom_snapshot_address: String
-  "Axiom snapshot storage slot for proofs (optional)"
-  axiom_snapshot_slot: BigInt
 }
 
 """
@@ -256,10 +252,6 @@ type Proposal {
   timelock_veto_guardian: String
   "Delay in blocks before timelock execution"
   timelock_delay: BigInt
-  "Axiom snapshot contract address for storage proofs"
-  axiom_snapshot_address: String
-  "Axiom snapshot storage slot for proofs"
-  axiom_snapshot_slot: BigInt
   "Array of treasury addresses involved in execution"
   treasuries: [String!]!
   "Array of strategy indices used for voting"
@@ -304,8 +296,6 @@ type Proposal {
   veto_tx: String
   "Number of votes cast on this proposal"
   vote_count: Int!
-  "Whether proposal is ready for execution"
-  execution_ready: Boolean!
   "Whether proposal has been executed"
   executed: Boolean!
   "Whether proposal has been vetoed"
