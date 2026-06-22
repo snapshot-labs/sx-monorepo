@@ -1,6 +1,5 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory';
 import ProxyFactory from './abis/ProxyFactory';
@@ -161,15 +160,6 @@ export function createConfig(networkId: NetworkID): Config {
           }
         ]
       },
-      AxiomExecutionStrategy: {
-        abi: 'AxiomExecutionStrategy',
-        events: [
-          {
-            name: 'WriteOffchainVotes(uint256,uint256,uint256,uint256,uint256)',
-            fn: 'handleAxiomWriteOffchainVotes'
-          }
-        ]
-      },
       L1AvatarExecutionStrategy: {
         abi: 'L1AvatarExecutionStrategy',
         events: [
@@ -185,7 +175,6 @@ export function createConfig(networkId: NetworkID): Config {
       Space,
       SimpleQuorumAvatarExecutionStrategy,
       SimpleQuorumTimelockExecutionStrategy,
-      AxiomExecutionStrategy,
       L1AvatarExecutionStrategy,
       L1AvatarExecutionStrategyFactory
     },
@@ -196,7 +185,6 @@ export function createConfig(networkId: NetworkID): Config {
       masterSimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
       masterSimpleQuorumTimelock:
         network.ExecutionStrategies.SimpleQuorumTimelock,
-      masterAxiom: network.ExecutionStrategies.Axiom,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower,
       apeGasStrategy: network.Strategies.ApeGas ?? null,

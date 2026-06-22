@@ -10,7 +10,6 @@ const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
     'send',
-    'finalizeProposal',
     'execute',
     'executeQueuedProposal',
     'executeStarknetProposal',
