@@ -149,13 +149,14 @@ export const starknetNetworks = {
         '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e',
       OZVotesTrace208StorageProof:
         '0x50bceb018e677f281b30587406b8210a0d8fbf37e58299bb7c6ec0e8dd212a3',
-      // Herodotus Satellite versions (sx-starknet#641). Addresses pending
-      // deployment; injected via env until hardcoded here.
-      EVMSlotValueV2: process.env.STARKNET_MAINNET_EVM_SLOT_VALUE_V2_ADDRESS,
+      // Herodotus Satellite versions (sx-starknet#641), deployed on sn
+      // against Satellite 0x01ba7d4b…6a79bf2e (chain_id 1).
+      EVMSlotValueV2:
+        '0x5ad1e980d8cb9d6b7ed19a14dfd659287c6005c579edf203388b007861ac9cc',
       OZVotesStorageProofV2:
-        process.env.STARKNET_MAINNET_OZ_VOTES_STORAGE_PROOF_V2_ADDRESS,
+        '0x4a045853c633bf0e9648d83d8413ddf47c9087ad66894ba23bf01d534fe9922',
       OZVotesTrace208StorageProofV2:
-        process.env.STARKNET_MAINNET_OZ_VOTES_TRACE_208_STORAGE_PROOF_V2_ADDRESS
+        '0x57a390dd0c5dbec95ed88e38eaaaa2484dadcc3e42eed633d047f1789eaa1eb'
     },
     ProposalValidations: {
       VotingPower:
