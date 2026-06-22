@@ -2,11 +2,9 @@ import { CallData, uint256 } from 'starknet';
 import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createOzVotesStorageProofStrategy from '../../../../src/strategies/starknet/ozVotesStorageProof';
-import { WHITELIST_SERVER_URL } from '../../../constants';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
-
-const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
@@ -14,7 +12,7 @@ describe('ozVotesStorageProof', () => {
   });
   const config = {
     starkProvider,
-    ethUrl,
+    ethUrl: ETH_RPC_URL,
     networkConfig: starknetSepolia,
     whitelistServerUrl: WHITELIST_SERVER_URL
   };

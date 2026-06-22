@@ -2,11 +2,9 @@ import starknet from 'starknet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createErc20VotesStrategy from '../../../../src/strategies/starknet/erc20Votes';
-import { WHITELIST_SERVER_URL } from '../../../constants';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
-
-const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('erc20VotesStrategy', () => {
   beforeAll(() => {
@@ -37,7 +35,7 @@ describe('erc20VotesStrategy', () => {
   const erc20VotesStrategy = createErc20VotesStrategy();
   const config = {
     starkProvider,
-    ethUrl,
+    ethUrl: ETH_RPC_URL,
     networkConfig: starknetSepolia,
     whitelistServerUrl: WHITELIST_SERVER_URL
   };

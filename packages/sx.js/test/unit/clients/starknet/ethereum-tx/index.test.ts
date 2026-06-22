@@ -2,20 +2,19 @@ import { Wallet } from '@ethersproject/wallet';
 import { describe, expect, it } from 'vitest';
 import { EthereumTx } from '../../../../../src/clients/starknet/ethereum-tx';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
-import { WHITELIST_SERVER_URL } from '../../../../constants';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../../constants';
 import { starkProvider } from '../../../helpers';
 
 describe('EthereumTx', () => {
   const ethPrivateKey =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
-  const ethUrl = process.env.SEPOLIA_NODE_URL as string;
   const wallet = new Wallet(ethPrivateKey);
 
   const ethereumTx = new EthereumTx({
     starkProvider,
     networkConfig: starknetSepolia,
-    ethUrl,
+    ethUrl: ETH_RPC_URL,
     whitelistServerUrl: WHITELIST_SERVER_URL
   });
 

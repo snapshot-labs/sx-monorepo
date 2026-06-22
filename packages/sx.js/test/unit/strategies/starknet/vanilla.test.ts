@@ -1,17 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createVanillaStrategy from '../../../../src/strategies/starknet/vanilla';
-import { WHITELIST_SERVER_URL } from '../../../constants';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
-
-const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('vanillaStrategy', () => {
   const vanillaStrategy = createVanillaStrategy();
   const config = {
     starkProvider,
-    ethUrl,
+    ethUrl: ETH_RPC_URL,
     networkConfig: starknetSepolia,
     whitelistServerUrl: WHITELIST_SERVER_URL
   };
