@@ -75,7 +75,8 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     isContract,
     hasReason,
     connectorType,
-    ignoreRelayer
+    ignoreRelayer,
+    preferRelayerType
   }: {
     authenticators: string[];
     strategies: string[];
@@ -84,6 +85,14 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
+    /**
+     * When set, an authenticator advertising this relayerType is selected over
+     * the default (priority-sorted) one, as long as it supports the current
+     * connector and context. Used to let the user opt into the EthTx
+     * authenticator (a real L1 transaction) instead of the EthSig path, which
+     * is broken on Ledger / hardware wallets due to the empty EIP-712 domain.
+     */
+    preferRelayerType?: AuthenticatorSupportInfo['relayerType'];
   }) {
     type AuthenticatorWithSupportInfo = {
       authenticator: string;
@@ -122,9 +131,16 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         connectors: supportInfo.connectors
       }));
 
-    const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
-      connectors.includes(connectorType)
-    );
+    const supportsConnector = (entry: { connectors: ConnectorType[] }) =>
+      entry.connectors.includes(connectorType);
+
+    const authenticatorInfo =
+      (preferRelayerType
+        ? authenticatorsInfo.find(
+            info =>
+              info.relayerType === preferRelayerType && supportsConnector(info)
+          )
+        : undefined) ?? authenticatorsInfo.find(supportsConnector);
 
     const selectedStrategies = strategies
       .map(

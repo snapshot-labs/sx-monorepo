@@ -454,7 +454,9 @@ export function createActions(
       account: string,
       proposal: Proposal,
       choice: Choice,
-      reason: string
+      reason: string,
+      app: string,
+      preferTx?: boolean
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -472,7 +474,11 @@ export function createActions(
           connectorType,
           isContract,
           hasReason: !!reason,
-          ignoreRelayer: !relayer?.hasMinimumBalance
+          // The EthTx authenticator (evm-tx) sends a real L1 transaction and
+          // does not rely on the relayer, so when the user opts into it we
+          // must not filter relayer-backed authenticators out.
+          ignoreRelayer: preferTx ? false : !relayer?.hasMinimumBalance,
+          preferRelayerType: preferTx ? 'evm-tx' : undefined
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {

@@ -5,6 +5,7 @@ import { LocationQueryValue } from 'vue-router';
 import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -31,7 +32,7 @@ const emit = defineEmits<{
 
 const queryClient = useQueryClient();
 const { vote } = useActions();
-const { web3 } = useWeb3();
+const { web3, auth } = useWeb3();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
 const {
@@ -64,6 +65,29 @@ const modalTransactionOpen = ref(false);
 const modalShareOpen = ref(false);
 const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
+const preferTx = ref(false);
+
+// The EthSig authenticator on Starknet signs an EIP-712 message with an empty
+// domain, which Ledger / hardware wallets reject (blind-signing aside, the
+// empty domain trips them up). The EthTx authenticator instead authenticates
+// via a real L1 transaction the user signs natively, which Ledger handles.
+// We only surface the opt-in when the proposal is on Starknet, the user is
+// connected with an EVM wallet, and the space actually enables an EthTx-style
+// (evm-tx) authenticator.
+const canVoteViaTx = computed<boolean>(() => {
+  if (!isStarknetProposal.value) return false;
+
+  const connectorType = auth.value?.connector.type;
+  if (!connectorType || !EVM_CONNECTORS.includes(connectorType)) return false;
+
+  const network = getNetwork(props.proposal.network);
+
+  return props.proposal.space.authenticators.some(
+    authenticator =>
+      network.helpers.getAuthenticatorSupportInfo(authenticator)
+        ?.relayerType === 'evm-tx'
+  );
+});
 
 const formValidator = getValidator({
   $async: true,
@@ -139,7 +163,8 @@ async function voteFn() {
     props.proposal,
     selectedChoice.value,
     form.value.reason,
-    appName.length <= 128 ? appName : ''
+    appName.length <= 128 ? appName : '',
+    canVoteViaTx.value && preferTx.value
   );
 }
 
@@ -182,6 +207,8 @@ watch(
   [() => props.open, () => web3.value.account],
   async ([open, toAccount], [, fromAccount]) => {
     if (!open) return;
+
+    preferTx.value = false;
 
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       loading.value = true;
@@ -273,6 +300,21 @@ watchEffect(async () => {
           :error="formErrors"
           :definition="{ properties: { reason: REASON_DEFINITION } }"
         />
+      </div>
+      <div v-if="canVoteViaTx" class="border rounded-lg p-3">
+        <label class="flex gap-2.5 cursor-pointer">
+          <input v-model="preferTx" type="checkbox" class="mt-[3px]" />
+          <span class="leading-5">
+            <span class="text-skin-link">
+              Vote with a transaction (for Ledger / hardware wallets)
+            </span>
+            <span class="block text-sm">
+              Sends an on-chain Ethereum transaction instead of a signature. Use
+              this if signing fails on a Ledger or other hardware wallet. This
+              costs gas.
+            </span>
+          </span>
+        </label>
       </div>
     </div>
 
