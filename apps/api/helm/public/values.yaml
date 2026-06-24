@@ -1,0 +1,11 @@
+appName: sx-api
+namespace: testnet
+activeColor: blue
+
+route:
+  enabled: false
+  gatewayName: sx-api
+  gatewayNamespace: gateway
+  host: ''
+
+directHosts: []

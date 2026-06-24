@@ -1,0 +1,21 @@
+appName: sx-api
+color: blue
+
+image:
+  repository: ghcr.io/snapshot-labs/sx-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecret: ghcr
+
+# Set per-env (e.g. pin mainnet to its tainted node pool).
+nodeSelector: {}
+tolerations: []
+
+db:
+  user: postgres
+  name: api
+  storage: 10Gi
+
+api:
+  replicas: 1

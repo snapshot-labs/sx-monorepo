@@ -1,0 +1,33 @@
+{{- range .Values.directHosts }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.appName }}-{{ .color }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: {{ $.Values.appName }}-api
+    color: {{ .color }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $.Values.appName }}-{{ .color }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  parentRefs:
+    - name: {{ $.Values.route.gatewayName }}
+      namespace: {{ $.Values.route.gatewayNamespace }}
+  hostnames:
+    - {{ .host | quote }}
+  rules:
+    - backendRefs:
+        - name: {{ $.Values.appName }}-{{ .color }}
+          port: 80
+{{- end }}

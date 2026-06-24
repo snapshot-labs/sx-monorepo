@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.appName }}-{{ .Values.color }}
+  namespace: {{ .Values.namespace }}
+data:
+  PORT: '3000'
+  ENABLE_SNAPSHOT_X: 'true'
+  ENABLE_GOVERNOR_BRAVO: 'true'
+  ENABLE_OPENZEPPELIN: 'true'
+  ENABLED_NETWORKS: {{ .Values.enabledNetworks | quote }}

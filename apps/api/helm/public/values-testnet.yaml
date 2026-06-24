@@ -1,0 +1,9 @@
+namespace: testnet
+route:
+  enabled: true
+  host: testnet-api.snapshot.box
+directHosts:
+  - color: blue
+    host: testnet-api-1.snapshot.box
+  - color: green
+    host: testnet-api-2.snapshot.box

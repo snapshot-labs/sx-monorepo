@@ -1,0 +1,13 @@
+namespace: mainnet
+enabledNetworks: 'eth,oeth,base,mnt,arb1,ape,bnb,sn'
+
+nodeSelector:
+  doks.digitalocean.com/node-pool: mainnet-pool
+tolerations:
+  - key: workload
+    operator: Equal
+    value: mainnet
+    effect: NoSchedule
+
+db:
+  storage: 30Gi
