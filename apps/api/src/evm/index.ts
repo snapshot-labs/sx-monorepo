@@ -4,8 +4,23 @@ import { registerIndexer } from '../register';
 import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';
 import { createWriters as createOpenZeppelinWriters } from './protocols/openzeppelin/writers';
 import { createWriters as createSnapshotXWriters } from './protocols/snapshot-x/writers';
-import { EVMConfig, Protocols } from './types';
+import { EVMConfig, NetworkID, Protocols } from './types';
 import { applyProtocolPrefixToWriters } from './utils';
+
+const HYPERSYNC_SUPPORTED_NETWORKS = new Set<NetworkID>([
+  'eth',
+  'sep',
+  'oeth',
+  'matic',
+  'arb1',
+  'base',
+  'mnt',
+  'bnb',
+  'bnbt',
+  // Not supported yet
+  // 'ape',
+  'curtis'
+]);
 
 // SnapshotX runs by default unless explicitly disabled
 export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
@@ -64,21 +79,32 @@ function createWriters(config: EVMConfig) {
   return writers;
 }
 
-const ethIndexer = new evm.EvmIndexer(createWriters(ethConfig));
-const sepIndexer = new evm.EvmIndexer(createWriters(sepConfig));
-const oethIndexer = new evm.EvmIndexer(createWriters(oethConfig));
-const maticIndexer = new evm.EvmIndexer(createWriters(maticConfig));
-const arb1Indexer = process.env.HYPERSYNC_API_TOKEN
-  ? new evm.HyperSyncEvmIndexer(createWriters(arb1Config), {
+function createIndexer(config: EVMConfig) {
+  const writers = createWriters(config);
+
+  if (
+    process.env.HYPERSYNC_API_TOKEN &&
+    HYPERSYNC_SUPPORTED_NETWORKS.has(config.indexerName)
+  ) {
+    return new evm.HyperSyncEvmIndexer(writers, {
       apiToken: process.env.HYPERSYNC_API_TOKEN
-    })
-  : new evm.EvmIndexer(createWriters(arb1Config));
-const baseIndexer = new evm.EvmIndexer(createWriters(baseConfig));
-const mntIndexer = new evm.EvmIndexer(createWriters(mntConfig));
-const bnbIndexer = new evm.EvmIndexer(createWriters(bnbConfig));
-const bnbtIndexer = new evm.EvmIndexer(createWriters(bnbtConfig));
-const apeIndexer = new evm.EvmIndexer(createWriters(apeConfig));
-const curtisIndexer = new evm.EvmIndexer(createWriters(curtisConfig));
+    });
+  }
+
+  return new evm.EvmIndexer(writers);
+}
+
+const ethIndexer = createIndexer(ethConfig);
+const sepIndexer = createIndexer(sepConfig);
+const oethIndexer = createIndexer(oethConfig);
+const maticIndexer = createIndexer(maticConfig);
+const arb1Indexer = createIndexer(arb1Config);
+const baseIndexer = createIndexer(baseConfig);
+const mntIndexer = createIndexer(mntConfig);
+const bnbIndexer = createIndexer(bnbConfig);
+const bnbtIndexer = createIndexer(bnbtConfig);
+const apeIndexer = createIndexer(apeConfig);
+const curtisIndexer = createIndexer(curtisConfig);
 
 export function addEvmIndexers(checkpoint: Checkpoint) {
   registerIndexer(checkpoint, ethConfig.indexerName, ethConfig, ethIndexer);
