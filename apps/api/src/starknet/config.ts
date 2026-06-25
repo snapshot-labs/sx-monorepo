@@ -62,9 +62,7 @@ function createOverrides(networkId: keyof typeof CONFIG) {
       config.Strategies.OZVotesStorageProofV2,
       config.Strategies.OZVotesTrace208StorageProofV2,
       config.Strategies.EVMSlotValueV2
-    ]
-      .filter((address): address is string => !!address)
-      .map(strategy => validateAndParseAddress(strategy))
+    ].map(strategy => validateAndParseAddress(strategy))
   };
 }
 
