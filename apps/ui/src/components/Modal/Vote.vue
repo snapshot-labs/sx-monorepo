@@ -69,17 +69,18 @@ const isTxPreferred = ref(false);
 const isAdvancedOpen = ref(false);
 
 const canVoteViaTx = computed<boolean>(() => {
-  if (!isStarknetProposal.value) return false;
-
   const connectorType = auth.value?.connector.type;
-  if (!connectorType || !EVM_CONNECTORS.includes(connectorType)) return false;
+  if (
+    !isStarknetProposal.value ||
+    !connectorType ||
+    !EVM_CONNECTORS.includes(connectorType)
+  ) {
+    return false;
+  }
 
-  const network = getNetwork(props.proposal.network);
-
+  const { helpers } = getNetwork(props.proposal.network);
   return props.proposal.space.authenticators.some(
-    authenticator =>
-      network.helpers.getAuthenticatorSupportInfo(authenticator)
-        ?.relayerType === 'evm-tx'
+    a => helpers.getAuthenticatorSupportInfo(a)?.relayerType === 'evm-tx'
   );
 });
 
