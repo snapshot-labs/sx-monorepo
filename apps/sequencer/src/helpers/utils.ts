@@ -7,6 +7,7 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { Response } from 'express';
 import fetch from 'node-fetch';
+import { BROVIDER_URL, getProvider } from './provider';
 
 const MAINNET_NETWORK_ID_WHITELIST = [
   's',
@@ -25,8 +26,6 @@ const TESTNET_NETWORK_ID_WHITELIST = [
   'linea-testnet',
   'sn-sep'
 ];
-const broviderUrl = process.env.BROVIDER_URL ?? 'https://rpc.snapshot.org';
-
 export const NETWORK_ID_WHITELIST = [
   ...MAINNET_NETWORK_ID_WHITELIST,
   ...TESTNET_NETWORK_ID_WHITELIST
@@ -218,7 +217,7 @@ export const getQuorum = async (
     }
     case 'balance': {
       const { address, methodABI, decimals, quorumModifier = 1 } = options;
-      const provider = snapshot.utils.getProvider(network, { broviderUrl });
+      const provider = getProvider(network);
 
       const votingPower = await snapshot.utils.call(
         provider,
@@ -238,7 +237,7 @@ export const getQuorum = async (
 
     case 'multichainBalance': {
       const { network, strategies, quorumModifier = 1 } = options;
-      const provider = snapshot.utils.getProvider(network, { broviderUrl });
+      const provider = getProvider(network);
       const blocks = await snapshot.utils.getSnapshots(
         network,
         blockTag,
@@ -247,7 +246,7 @@ export const getQuorum = async (
       );
       const requests: Promise<any>[] = strategies.map(s =>
         snapshot.utils.call(
-          snapshot.utils.getProvider(s.network, { broviderUrl }),
+          getProvider(s.network),
           [s.methodABI],
           [s.address, s.methodABI.name],
           {
@@ -341,5 +340,7 @@ export function getSpaceController(space: string, network = NETWORK) {
   };
   const networkId = tldMapping[tld]?.[network] ?? DEFAULT_NETWORK;
 
-  return snapshot.utils.getSpaceController(space, networkId, { broviderUrl });
+  return snapshot.utils.getSpaceController(space, networkId, {
+    broviderUrl: BROVIDER_URL
+  });
 }
