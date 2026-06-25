@@ -456,7 +456,7 @@ export function createActions(
       choice: Choice,
       reason: string,
       app: string,
-      preferTx?: boolean
+      isTxPreferred?: boolean
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
@@ -466,6 +466,8 @@ export function createActions(
         starkProvider
       );
 
+      const preferRelayerType = isTxPreferred ? 'evm-tx' : undefined;
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
@@ -474,10 +476,12 @@ export function createActions(
           connectorType,
           isContract,
           hasReason: !!reason,
-          // evm-tx does not use the relayer, so don't filter relayer-backed
-          // authenticators out when the user opts into it.
-          ignoreRelayer: preferTx ? false : !relayer?.hasMinimumBalance,
-          preferRelayerType: preferTx ? 'evm-tx' : undefined
+          // The preferred (evm-tx) authenticator is relayer-typed but sends a
+          // real transaction, so it must not be filtered out as relayer-backed.
+          ignoreRelayer: preferRelayerType
+            ? false
+            : !relayer?.hasMinimumBalance,
+          preferRelayerType
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {

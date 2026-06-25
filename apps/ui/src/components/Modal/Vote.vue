@@ -65,7 +65,8 @@ const modalTransactionOpen = ref(false);
 const modalShareOpen = ref(false);
 const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
-const preferTx = ref(false);
+const isTxPreferred = ref(false);
+const isAdvancedOpen = ref(false);
 
 const canVoteViaTx = computed<boolean>(() => {
   if (!isStarknetProposal.value) return false;
@@ -157,7 +158,7 @@ async function voteFn() {
     selectedChoice.value,
     form.value.reason,
     appName.length <= 128 ? appName : '',
-    canVoteViaTx.value && preferTx.value
+    isTxPreferred.value
   );
 }
 
@@ -201,7 +202,8 @@ watch(
   async ([open, toAccount], [, fromAccount]) => {
     if (!open) return;
 
-    preferTx.value = false;
+    isTxPreferred.value = false;
+    isAdvancedOpen.value = false;
 
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       loading.value = true;
@@ -294,20 +296,38 @@ watchEffect(async () => {
           :definition="{ properties: { reason: REASON_DEFINITION } }"
         />
       </div>
-      <div v-if="canVoteViaTx" class="border rounded-lg p-3">
-        <label class="flex gap-2.5 cursor-pointer">
-          <input v-model="preferTx" type="checkbox" class="mt-[3px]" />
-          <span class="leading-5">
-            <span class="text-skin-link">
-              Vote with a transaction (for Ledger / hardware wallets)
-            </span>
-            <span class="block text-sm">
-              Sends an on-chain Ethereum transaction instead of a signature. Use
-              this if signing fails on a Ledger or other hardware wallet. This
-              costs gas.
-            </span>
-          </span>
-        </label>
+      <div v-if="canVoteViaTx">
+        <button
+          type="button"
+          class="flex items-center gap-1 text-skin-text text-sm"
+          @click="isAdvancedOpen = !isAdvancedOpen"
+        >
+          Advanced
+          <IH-chevron-down
+            class="w-[14px] h-[14px] transition-transform"
+            :class="{ 'rotate-180': isAdvancedOpen }"
+          />
+        </button>
+        <div
+          class="grid transition-all duration-200"
+          :class="isAdvancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
+        >
+          <div class="overflow-hidden">
+            <label
+              class="flex gap-2.5 items-start cursor-pointer border rounded-lg p-3 mt-2"
+            >
+              <input v-model="isTxPreferred" type="checkbox" class="mt-[3px]" />
+              <span class="leading-5">
+                <span class="text-skin-link">Vote with a transaction</span>
+                <span class="block text-sm text-skin-text">
+                  For Ledger / hardware wallets. Sends an on-chain Ethereum
+                  transaction instead of a signature if signing fails. This
+                  costs gas.
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 

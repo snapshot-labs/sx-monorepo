@@ -202,7 +202,7 @@ export type ReadOnlyNetworkActions = {
     choice: Choice,
     reason: string,
     app: string,
-    preferTx?: boolean
+    isTxPreferred?: boolean
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,

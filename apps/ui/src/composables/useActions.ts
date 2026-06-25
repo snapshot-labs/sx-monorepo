@@ -308,7 +308,7 @@ export function useActions() {
     choice: Choice,
     reason: string,
     app: string,
-    preferTx?: boolean
+    isTxPreferred?: boolean
   ): Promise<string | null> {
     if (!auth.value) {
       await forceLogin();
@@ -328,7 +328,7 @@ export function useActions() {
         choice,
         reason,
         app,
-        preferTx
+        isTxPreferred
       ),
       {
         safeAppContext: 'vote'
