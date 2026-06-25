@@ -26,7 +26,7 @@
         "@as-integrations/express4": "^1.1.2",
         "@faker-js/faker": "^7.4.0",
         "@logtail/pino": "^0.5.5",
-        "@snapshot-labs/checkpoint": "^0.1.0-beta.71",
+        "@snapshot-labs/checkpoint": "^0.1.0-beta.72",
         "@snapshot-labs/sx": "^0.1.0",
         "@types/node": "^22.6.0",
         "cors": "^2.8.5",
@@ -124,7 +124,7 @@
         "@ethersproject/hash": "^5.8.0",
         "@ethersproject/providers": "^5.8.0",
         "@ethersproject/wallet": "^5.8.0",
-        "@snapshot-labs/checkpoint": "^0.1.0-beta.71",
+        "@snapshot-labs/checkpoint": "^0.1.0-beta.72",
         "@snapshot-labs/sx": "^0.1.7",
         "async-lock": "^1.4.0",
         "change-case": "^4.1.2",
@@ -1600,7 +1600,7 @@
 
     "@sinonjs/fake-timers": ["@sinonjs/fake-timers@10.3.0", "", { "dependencies": { "@sinonjs/commons": "^3.0.0" } }, "sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA=="],
 
-    "@snapshot-labs/checkpoint": ["@snapshot-labs/checkpoint@0.1.0-beta.71", "", { "dependencies": { "@graphql-tools/schema": "^8.5.1", "@starknet-io/types-js": "^0.9.2", "connection-string": "^4.3.5", "dataloader": "^2.1.0", "express-graphql": "^0.12.0", "graphql": "^16.5.0", "graphql-fields": "^2.0.3", "graphql-parse-resolve-info": "^4.14.1", "json-to-graphql-query": "^2.2.4", "knex": "^3.1.0", "object-hash": "^3.0.0", "pg": "^8.10.0", "pino": "^9.9.0", "pino-pretty": "^13.1.1", "pluralize": "^8.0.0", "starknet": "~5.19.3", "viem": "^2.36.0", "yargs": "^17.7.2", "zod": "^3.21.4" }, "bin": { "checkpoint": "dist/src/bin/index.js" } }, "sha512-xBA9/l42QT8NulrneyfKeCz+6jOxrEO4z8WI177FHIbh3XwYnK3sZQRXSlIbfsPXlb8uF7gN8iWjqUohNJwrBg=="],
+    "@snapshot-labs/checkpoint": ["@snapshot-labs/checkpoint@0.1.0-beta.72", "", { "dependencies": { "@graphql-tools/schema": "^8.5.1", "@starknet-io/types-js": "^0.9.2", "connection-string": "^4.3.5", "dataloader": "^2.1.0", "express-graphql": "^0.12.0", "graphql": "^16.5.0", "graphql-fields": "^2.0.3", "graphql-parse-resolve-info": "^4.14.1", "json-to-graphql-query": "^2.2.4", "knex": "^3.1.0", "object-hash": "^3.0.0", "pg": "^8.10.0", "pino": "^9.9.0", "pino-pretty": "^13.1.1", "pluralize": "^8.0.0", "starknet": "~5.19.3", "viem": "^2.36.0", "yargs": "^17.7.2", "zod": "^3.21.4" }, "bin": { "checkpoint": "dist/src/bin/index.js" } }, "sha512-BoRyfaXK0IfUKKmqaRiGOFKGp2JAA7p131Q4wdVs4R1uuFZa0WaaHrkd0j5cbRGKJzgz1t/J0NzuMbjEInlXOQ=="],
 
     "@snapshot-labs/eslint-config": ["@snapshot-labs/eslint-config@workspace:packages/eslint-config"],
 
