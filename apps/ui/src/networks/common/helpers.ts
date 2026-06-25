@@ -85,11 +85,6 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
-    /**
-     * When set, an authenticator advertising this relayerType is selected over
-     * the default (priority-sorted) one, as long as it supports the current
-     * connector and context.
-     */
     preferRelayerType?: AuthenticatorSupportInfo['relayerType'];
   }) {
     type AuthenticatorWithSupportInfo = {
@@ -118,10 +113,13 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         return supportInfo.isSupported;
       })
       .sort((a, b) => {
-        const aRelayerPriority = a.supportInfo.priority ?? 0;
-        const bRelayerPriority = b.supportInfo.priority ?? 0;
+        // Preferred relayerType wins over the priority order (priorities >= 0).
+        const rank = ({ supportInfo }: AuthenticatorWithSupportInfo) =>
+          preferRelayerType && supportInfo.relayerType === preferRelayerType
+            ? -1
+            : supportInfo.priority ?? 0;
 
-        return aRelayerPriority - bRelayerPriority;
+        return rank(a) - rank(b);
       })
       .map(({ authenticator, supportInfo }) => ({
         authenticator,
@@ -129,16 +127,9 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         connectors: supportInfo.connectors
       }));
 
-    const supportsConnector = (entry: { connectors: ConnectorType[] }) =>
-      entry.connectors.includes(connectorType);
-
-    const authenticatorInfo =
-      (preferRelayerType
-        ? authenticatorsInfo.find(
-            info =>
-              info.relayerType === preferRelayerType && supportsConnector(info)
-          )
-        : undefined) ?? authenticatorsInfo.find(supportsConnector);
+    const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
+      connectors.includes(connectorType)
+    );
 
     const selectedStrategies = strategies
       .map(
