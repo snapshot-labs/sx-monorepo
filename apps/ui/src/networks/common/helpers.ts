@@ -75,7 +75,8 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     isContract,
     hasReason,
     connectorType,
-    ignoreRelayer
+    ignoreRelayer,
+    preferRelayerType
   }: {
     authenticators: string[];
     strategies: string[];
@@ -84,6 +85,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
+    preferRelayerType?: AuthenticatorSupportInfo['relayerType'];
   }) {
     type AuthenticatorWithSupportInfo = {
       authenticator: string;
@@ -122,9 +124,16 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         connectors: supportInfo.connectors
       }));
 
-    const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
-      connectors.includes(connectorType)
-    );
+    const supportsConnector = (entry: { connectors: ConnectorType[] }) =>
+      entry.connectors.includes(connectorType);
+
+    const authenticatorInfo =
+      (preferRelayerType
+        ? authenticatorsInfo.find(
+            info =>
+              info.relayerType === preferRelayerType && supportsConnector(info)
+          )
+        : undefined) ?? authenticatorsInfo.find(supportsConnector);
 
     const selectedStrategies = strategies
       .map(

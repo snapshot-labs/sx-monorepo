@@ -18,7 +18,7 @@ import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata } from '@/helpers/utils';
+import { createErc1155Metadata, isUserAbortError } from '@/helpers/utils';
 import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
@@ -59,6 +59,31 @@ const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
   'sn-sep': starknetSepolia
 };
+
+function isTypedDataSigningError(err: unknown) {
+  if (err && isUserAbortError(err)) return false;
+
+  const error = err as any;
+  const message = [
+    error?.message,
+    error?.reason,
+    error?.error?.message,
+    error?.data?.message
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  return [
+    'ledger',
+    'typed data',
+    'signtypeddata',
+    'eth_signtypeddata',
+    'eip-712',
+    'eip712',
+    'blind signing'
+  ].some(reason => message.includes(reason));
+}
 
 export function createActions(
   networkId: NetworkID,
@@ -464,72 +489,102 @@ export function createActions(
         starkProvider
       );
 
-      const { relayerType, authenticator, strategies } =
-        pickAuthenticatorAndStrategies({
-          authenticators: proposal.space.authenticators,
-          strategies: proposal.strategies,
-          strategiesIndices: proposal.strategies_indices,
-          connectorType,
-          isContract,
-          hasReason: !!reason,
-          ignoreRelayer: !relayer?.hasMinimumBalance
-        });
+      const pickOptions = {
+        authenticators: proposal.space.authenticators,
+        strategies: proposal.strategies,
+        strategiesIndices: proposal.strategies_indices,
+        connectorType,
+        isContract,
+        hasReason: !!reason
+      };
 
-      if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
+      const selection = pickAuthenticatorAndStrategies({
+        ...pickOptions,
+        ignoreRelayer: !relayer?.hasMinimumBalance
+      });
+
+      if (
+        selection.relayerType &&
+        ['evm', 'evm-tx'].includes(selection.relayerType)
+      ) {
         await verifyNetwork(web3, l1ChainId);
       } else {
         await verifyStarknetNetwork(web3, chainId);
       }
 
-      const strategiesWithMetadata = await Promise.all(
-        strategies.map(async strategy => {
-          const metadataIndex = proposal.strategies_indices.indexOf(
-            strategy.index
-          );
-
-          const params = proposal.strategies_params[strategy.paramsIndex];
-          const metadata = await parseStrategyMetadata(
-            proposal.space.strategies_parsed_metadata[metadataIndex].payload
-          );
-
-          return {
-            ...strategy,
-            params,
-            metadata
-          };
-        })
-      );
-
       let pinned: { cid: string; provider: string } | null = null;
       if (reason) pinned = await helpers.pin({ reason });
 
-      const data = {
-        space: proposal.space.id,
-        authenticator,
-        strategies: strategiesWithMetadata,
-        proposal: Number(proposal.proposal_id),
-        choice: getSdkChoice(choice),
-        metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
-      };
+      async function getData({ authenticator, strategies }: typeof selection) {
+        const strategiesWithMetadata = await Promise.all(
+          strategies.map(async strategy => {
+            const metadataIndex = proposal.strategies_indices.indexOf(
+              strategy.index
+            );
 
-      if (relayerType === 'starknet') {
+            const params = proposal.strategies_params[strategy.paramsIndex];
+            const metadata = await parseStrategyMetadata(
+              proposal.space.strategies_parsed_metadata[metadataIndex].payload
+            );
+
+            return {
+              ...strategy,
+              params,
+              metadata
+            };
+          })
+        );
+
+        return {
+          space: proposal.space.id,
+          authenticator,
+          strategies: strategiesWithMetadata,
+          proposal: Number(proposal.proposal_id),
+          choice: getSdkChoice(choice),
+          metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
+        };
+      }
+
+      if (selection.relayerType === 'starknet') {
         return starkSigClient.vote({
           signer: web3.provider.account,
-          data
+          data: await getData(selection)
         });
-      } else if (relayerType === 'evm') {
-        return ethSigClient.vote({
-          signer: web3.getSigner(),
-          data
-        });
-      } else if (relayerType === 'evm-tx') {
-        return ethTxClient.initializeVote(web3.getSigner(), data, {
-          noWait: isContract
-        });
+      } else if (selection.relayerType === 'evm') {
+        try {
+          return await ethSigClient.vote({
+            signer: web3.getSigner(),
+            data: await getData(selection)
+          });
+        } catch (err) {
+          if (!isTypedDataSigningError(err)) throw err;
+
+          const fallbackSelection = pickAuthenticatorAndStrategies({
+            ...pickOptions,
+            ignoreRelayer: false,
+            preferRelayerType: 'evm-tx'
+          });
+
+          if (fallbackSelection.relayerType !== 'evm-tx') throw err;
+
+          return ethTxClient.initializeVote(
+            web3.getSigner(),
+            await getData(fallbackSelection),
+            { noWait: isContract }
+          );
+        }
+      } else if (selection.relayerType === 'evm-tx') {
+        return ethTxClient.initializeVote(
+          web3.getSigner(),
+          await getData(selection),
+          {
+            noWait: isContract
+          }
+        );
       }
 
       return client.vote(web3.provider.account, {
-        data
+        data: await getData(selection)
       });
     },
     executeTransactions: async (web3: any, proposal: Proposal) => {
