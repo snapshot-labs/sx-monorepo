@@ -26,7 +26,7 @@
         "@as-integrations/express4": "^1.1.2",
         "@faker-js/faker": "^7.4.0",
         "@logtail/pino": "^0.5.5",
-        "@snapshot-labs/checkpoint": "^0.1.0-beta.70",
+        "@snapshot-labs/checkpoint": "^0.1.0-beta.71",
         "@snapshot-labs/sx": "^0.1.0",
         "@types/node": "^22.6.0",
         "cors": "^2.8.5",
@@ -124,7 +124,7 @@
         "@ethersproject/hash": "^5.8.0",
         "@ethersproject/providers": "^5.8.0",
         "@ethersproject/wallet": "^5.8.0",
-        "@snapshot-labs/checkpoint": "^0.1.0-beta.70",
+        "@snapshot-labs/checkpoint": "^0.1.0-beta.71",
         "@snapshot-labs/sx": "^0.1.7",
         "async-lock": "^1.4.0",
         "change-case": "^4.1.2",
@@ -1600,7 +1600,7 @@
 
     "@sinonjs/fake-timers": ["@sinonjs/fake-timers@10.3.0", "", { "dependencies": { "@sinonjs/commons": "^3.0.0" } }, "sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA=="],
 
-    "@snapshot-labs/checkpoint": ["@snapshot-labs/checkpoint@0.1.0-beta.70", "", { "dependencies": { "@graphql-tools/schema": "^8.5.1", "@starknet-io/types-js": "^0.9.2", "connection-string": "^4.3.5", "dataloader": "^2.1.0", "express-graphql": "^0.12.0", "graphql": "^16.5.0", "graphql-fields": "^2.0.3", "graphql-parse-resolve-info": "^4.14.1", "json-to-graphql-query": "^2.2.4", "knex": "^3.1.0", "object-hash": "^3.0.0", "pg": "^8.10.0", "pino": "^9.9.0", "pino-pretty": "^13.1.1", "pluralize": "^8.0.0", "starknet": "~5.19.3", "viem": "^2.36.0", "yargs": "^17.7.2", "zod": "^3.21.4" }, "bin": { "checkpoint": "dist/src/bin/index.js" } }, "sha512-/1gF1h+M2zzrwpCglJUAUcnCT8ffWYw801uAV7ZRa6+wS8tAT8cFg7+ksWrQb10OvskUK3cxdHZ/uJsnq6jLTw=="],
+    "@snapshot-labs/checkpoint": ["@snapshot-labs/checkpoint@0.1.0-beta.71", "", { "dependencies": { "@graphql-tools/schema": "^8.5.1", "@starknet-io/types-js": "^0.9.2", "connection-string": "^4.3.5", "dataloader": "^2.1.0", "express-graphql": "^0.12.0", "graphql": "^16.5.0", "graphql-fields": "^2.0.3", "graphql-parse-resolve-info": "^4.14.1", "json-to-graphql-query": "^2.2.4", "knex": "^3.1.0", "object-hash": "^3.0.0", "pg": "^8.10.0", "pino": "^9.9.0", "pino-pretty": "^13.1.1", "pluralize": "^8.0.0", "starknet": "~5.19.3", "viem": "^2.36.0", "yargs": "^17.7.2", "zod": "^3.21.4" }, "bin": { "checkpoint": "dist/src/bin/index.js" } }, "sha512-xBA9/l42QT8NulrneyfKeCz+6jOxrEO4z8WI177FHIbh3XwYnK3sZQRXSlIbfsPXlb8uF7gN8iWjqUohNJwrBg=="],
 
     "@snapshot-labs/eslint-config": ["@snapshot-labs/eslint-config@workspace:packages/eslint-config"],
 
@@ -5030,6 +5030,8 @@
 
     "anymatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 
+    "api/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+
     "appdmg/async": ["async@1.5.2", "", {}, "sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w=="],
 
     "appdmg/execa": ["execa@1.0.0", "", { "dependencies": { "cross-spawn": "^6.0.0", "get-stream": "^4.0.0", "is-stream": "^1.1.0", "npm-run-path": "^2.0.0", "p-finally": "^1.0.0", "signal-exit": "^3.0.0", "strip-eof": "^1.0.0" } }, "sha512-adbxcyWV46qiHyvSp50TKt05tB4tK3HcmF7/nxfAdhnox83seTDbwnaqKO4sXRy7roHAIFqJP/Rw/AuEbX61LA=="],
@@ -5171,6 +5173,8 @@
     "highlight/@types/express": ["@types/express@4.17.25", "", { "dependencies": { "@types/body-parser": "*", "@types/express-serve-static-core": "^4.17.33", "@types/qs": "*", "@types/serve-static": "^1" } }, "sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw=="],
 
     "highlight/nodemon": ["nodemon@2.0.22", "", { "dependencies": { "chokidar": "^3.5.2", "debug": "^3.2.7", "ignore-by-default": "^1.0.1", "minimatch": "^3.1.2", "pstree.remy": "^1.1.8", "semver": "^5.7.1", "simple-update-notifier": "^1.0.7", "supports-color": "^5.5.0", "touch": "^3.1.0", "undefsafe": "^2.0.5" }, "bin": { "nodemon": "bin/nodemon.js" } }, "sha512-B8YqaKMmyuCO7BowF1Z1/mkPqLk6cs/l63Ojtd6otKjMx47Dq1utxfRxcavH1I7VSaL8n5BUaoutadnsX3AAVQ=="],
+
+    "highlight/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
     "hub/graphql": ["graphql@15.10.2", "", {}, "sha512-1PRqdDPAmViWr4h1GVBT8RoPZfWSGZa7kDzleTilOfVIslsgf+cia3Nl95v1KDmR4iERPaT7WzQ+tN4MJmbg3w=="],
 

@@ -30,8 +30,19 @@ export function getStrategy(
     return createEvmSlotValueStrategy();
   }
 
+  if (strategy.type === 'evmSlotValueV2') {
+    return createEvmSlotValueStrategy({ satellite: true });
+  }
+
   if (strategy.type === 'ozVotesStorageProof') {
     return createOzVotesStorageProofStrategy(strategy.params);
+  }
+
+  if (strategy.type === 'ozVotesStorageProofV2') {
+    return createOzVotesStorageProofStrategy({
+      ...strategy.params,
+      satellite: true
+    });
   }
 
   return null;
