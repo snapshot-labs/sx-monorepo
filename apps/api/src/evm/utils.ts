@@ -1,6 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import { PublicClient } from 'viem';
+import { createPublicClient, http, PublicClient } from 'viem';
 import { EVMConfig, NetworkID, PartialConfig } from './types';
 
 type ProtocolConfig = Pick<EVMConfig, 'sources' | 'templates' | 'abis'>;
@@ -10,6 +10,12 @@ type SourceOrTemplate = {
 };
 
 export const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
+
+const NON_NATIVE_BLOCK_CHAIN_ID: Partial<Record<NetworkID, number>> = {
+  arb1: 1,
+  ape: 1,
+  curtis: 11155111
+};
 
 function applyProtocolPrefixToEvents<T extends SourceOrTemplate>(
   prefix: string,
@@ -109,6 +115,23 @@ export async function getActualBlockNumber({
   });
 }
 
+async function fetchBlockTimestamp({
+  blockNumber,
+  client
+}: {
+  blockNumber: number;
+  client: PublicClient;
+}): Promise<bigint | null> {
+  try {
+    const block = await client.getBlock({
+      blockNumber: BigInt(blockNumber)
+    });
+    return block.timestamp;
+  } catch {
+    return null;
+  }
+}
+
 export async function getTimestampFromBlock({
   networkId,
   blockNumber,
@@ -122,6 +145,19 @@ export async function getTimestampFromBlock({
   currentTimestamp: number;
   client: PublicClient;
 }) {
+  const nonNativeBlockChainId = NON_NATIVE_BLOCK_CHAIN_ID[networkId];
+  const blockClient = nonNativeBlockChainId
+    ? createPublicClient({
+        transport: http(`https://rpc.snapshot.org/${nonNativeBlockChainId}`)
+      })
+    : client;
+
+  const blockTimestamp = await fetchBlockTimestamp({
+    blockNumber,
+    client: blockClient
+  });
+  if (blockTimestamp !== null) return blockTimestamp;
+
   const actualCurrentBlockNumber = await getActualBlockNumber({
     networkId,
     currentBlockNumber,

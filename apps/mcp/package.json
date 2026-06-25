@@ -1,0 +1,41 @@
+{
+  "name": "mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server for the Snapshot API",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "bun build --entrypoints src/index.ts --outdir dist --target node --external @shutter-network/shutter-crypto",
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "stdio": "bun src/index.ts --stdio",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "lint:fix": "bun run lint --fix",
+    "format": "prettier --write src tests"
+  },
+  "dependencies": {
+    "@coinbase/cdp-sdk": "^1.45.0",
+    "@ethersproject/wallet": "^5.8.0",
+    "@logtail/pino": "^0.5.5",
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@shutter-network/shutter-crypto": "1.0.1",
+    "@snapshot-labs/sx": "^0.1.10",
+    "express": "^5.2.1",
+    "jose": "^6.2.2",
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.13",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint-plugin-unicorn": "^56.0.0",
+    "typescript": "^5.9.0"
+  }
+}

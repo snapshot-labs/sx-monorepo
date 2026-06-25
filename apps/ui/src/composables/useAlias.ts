@@ -3,7 +3,8 @@ import { getDefaultProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import pkg from '../../package.json';
 
-const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 30; // 30 days
+// Must match the sequencer's DEFAULT_ALIAS_EXPIRY_DAYS (apps/sequencer/src/helpers/alias.ts).
+export const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 90; // 90 days
 const ALIAS_AVAILABILITY_BUFFER = 60 * 5; // 5 minutes
 
 type GetAliasFn = (

@@ -8,19 +8,20 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "TURBO_TELEMETRY_DISABLED=1 turbo run dev --filter=!mana --filter=!api --filter=!highlight",
+    "dev": "TURBO_TELEMETRY_DISABLED=1 turbo run dev --filter=ui",
     "dev:interactive": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/dev-interactive.ts",
     "dev:electron": "TURBO_TELEMETRY_DISABLED=1 turbo run dev:electron",
-    "build": "TURBO_TELEMETRY_DISABLED=1 turbo run build",
+    "build": "TURBO_TELEMETRY_DISABLED=1 turbo run build --filter=!auction",
     "build:electron": "TURBO_TELEMETRY_DISABLED=1 ELECTRON=true turbo run build:electron",
-    "test": "TURBO_TELEMETRY_DISABLED=1 turbo run test",
-    "test:integration": "TURBO_TELEMETRY_DISABLED=1 turbo run test:integration",
+    "test": "TURBO_TELEMETRY_DISABLED=1 turbo run test --filter=!hub --filter=!sequencer",
+    "test:integration": "TURBO_TELEMETRY_DISABLED=1 turbo run test:integration --filter=!hub --filter=!sequencer",
     "test:e2e": "playwright test --config=playwright.config.ts",
     "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
-    "lint": "TURBO_TELEMETRY_DISABLED=1 turbo run lint lint:scripts",
+    "lint": "TURBO_TELEMETRY_DISABLED=1 turbo run lint lint:scripts --filter=!auction",
     "lint:fix": "TURBO_TELEMETRY_DISABLED=1 turbo run lint:fix && bun run lint:scripts --fix",
     "lint:scripts": "eslint scripts/",
-    "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck",
+    "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck --filter=!auction",
+    "docs": "cd docs && bunx mintlify dev --port 3006",
     "release": "bun run build && changeset publish"
   },
   "prettier": "@snapshot-labs/prettier-config",
@@ -39,6 +40,7 @@
   },
   "resolutions": {
     "error-ex": "1.3.2",
+    "ofetch": "1.3.3",
     "prettier": "3.2.5"
   },
   "engines": {

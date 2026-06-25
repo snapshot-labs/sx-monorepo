@@ -12,7 +12,7 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   '10', // Optimism,
   '56', // Binance Smart Chain
   '97', // Binance Smart Chain Testnet
-  '100', // Gnosis Safe
+  '100', // Gnosis Chain
   '137', // Polygon,
   '324', // ZkSync Era
   '8453', // Base

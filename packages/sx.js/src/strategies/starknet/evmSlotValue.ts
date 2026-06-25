@@ -3,6 +3,7 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { CallData, Contract, LibraryError } from 'starknet';
 import EVMSlotValue from './abis/EVMSlotValue.json';
+import EVMSlotValueV2 from './abis/EVMSlotValueV2.json';
 import { getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
 import {
@@ -15,8 +16,17 @@ import {
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
-export default function createEvmSlotValueStrategy(): Strategy {
-  const type = 'evmSlotValue';
+export default function createEvmSlotValueStrategy({
+  satellite = false
+}: { satellite?: boolean } = {}): Strategy {
+  // `satellite` selects the new Herodotus Satellite contracts, which read the
+  // L1 block from the Satellite live (`get_block_by_timestamp`) instead of from
+  // an on-chain cache populated by a relayer tx (`cached_timestamps`).
+  const type = satellite ? 'evmSlotValueV2' : 'evmSlotValue';
+  const StrategyAbi = satellite ? EVMSlotValueV2 : EVMSlotValue;
+  const timestampMethod = satellite
+    ? 'get_block_by_timestamp'
+    : 'cached_timestamps';
 
   async function getProof(
     l1TokenAddress: string,
@@ -83,8 +93,8 @@ export default function createEvmSlotValueStrategy(): Strategy {
       const { herodotusAccumulatesChainId: chainId } = networkConfig;
       const { contractAddress, slotIndex } = metadata;
 
-      const contract = new Contract(EVMSlotValue, address, starkProvider);
-      const l1BlockNumber = await contract.cached_timestamps(startTimestamp);
+      const contract = new Contract(StrategyAbi, address, starkProvider);
+      const l1BlockNumber = await contract[timestampMethod](startTimestamp);
 
       const storageProof = await getProof(
         contractAddress,
@@ -144,14 +154,14 @@ export default function createEvmSlotValueStrategy(): Strategy {
       }
 
       const contract = new Contract(
-        EVMSlotValue,
+        StrategyAbi,
         strategyAddress,
         clientConfig.starkProvider
       );
 
       let l1BlockNumber: bigint;
       try {
-        l1BlockNumber = await contract.cached_timestamps(timestamp);
+        l1BlockNumber = await contract[timestampMethod](timestamp);
       } catch (err) {
         throw new VotingPowerDetailsError(
           'Timestamp is not cached',

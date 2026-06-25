@@ -7,12 +7,13 @@ import {
   getSocialNetworksLink,
   SOCIAL_NETWORKS
 } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { explorePageProtocols, offchainNetworks } from '@/networks';
 import {
   PROPOSALS_KEYS,
   PROPOSALS_SUMMARY_LIMIT,
   proposalsSummaryQueryFn
 } from '@/queries/proposals';
+import { Space } from '@/types';
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
@@ -83,6 +84,18 @@ const proposals = computed(() =>
 watchEffect(() => {
   if (organization.value) setTitle(organization.value.name);
 });
+
+function getSpaceLabel(s: Space) {
+  const spaceId = `${s.network}:${s.id}`;
+  const navItem = Object.values(organization.value?.navItems ?? {}).find(i => {
+    const link = i.link as { name?: string; params?: { space?: string } };
+    return link?.name === 'space-proposals' && link.params?.space === spaceId;
+  });
+  if (navItem?.name) return navItem.name;
+  const { governor, snapshot, 'snapshot-x': sx } = explorePageProtocols;
+  if (governor.protocols?.includes(s.protocol)) return governor.label;
+  return offchainNetworks.includes(s.network) ? snapshot.label : sx.label;
+}
 </script>
 
 <template>
@@ -98,15 +111,25 @@ watchEffect(() => {
       />
       <div class="absolute right-4 top-4 flex gap-2">
         <UiTooltip title="New proposal">
-          <UiButton
-            :to="{
-              name: 'space-editor',
-              params: { space: `${space.network}:${space.id}` }
-            }"
-            uniform
-          >
-            <IH-pencil-alt />
-          </UiButton>
+          <UiDropdown>
+            <template #button>
+              <UiButton uniform>
+                <IH-pencil-alt />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem
+                v-for="s in spaces"
+                :key="`${s.network}:${s.id}`"
+                :to="{
+                  name: 'space-editor',
+                  params: { space: `${s.network}:${s.id}` }
+                }"
+              >
+                {{ getSpaceLabel(s) }}
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </UiTooltip>
       </div>
     </div>
@@ -123,7 +146,7 @@ watchEffect(() => {
             v-if="!isWhiteLabel"
             class="top-0.5"
             :verified="space.verified"
-            :turbo="space.turbo"
+            :turbo="spaces.some(s => s.turbo)"
             :flagged="space.additionalRawData?.flagged || false"
           />
         </div>

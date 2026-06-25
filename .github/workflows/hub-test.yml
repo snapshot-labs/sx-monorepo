@@ -1,0 +1,29 @@
+name: Hub Test
+
+on:
+  pull_request:
+    paths:
+      - 'apps/hub/**'
+      - '.github/workflows/hub-test.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'apps/hub/**'
+      - '.github/workflows/hub-test.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        target: ['22.6']
+    uses: snapshot-labs/actions/.github/workflows/test.yml@main
+    secrets: inherit
+    with:
+      working_directory: apps/hub
+      mysql_database_name: hub_test
+      target: ${{ matrix.target }}
+      package_manager: bun

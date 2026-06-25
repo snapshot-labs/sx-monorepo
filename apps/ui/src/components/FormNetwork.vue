@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
-import { enabledReadWriteNetworks, getNetwork } from '@/networks';
+import { getNetwork, spaceCreationNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
 const model = defineModel<NetworkID>({
@@ -12,7 +12,7 @@ defineProps<{
   description?: string;
 }>();
 
-const availableNetworks = enabledReadWriteNetworks.map(id => {
+const availableNetworks = spaceCreationNetworks.map(id => {
   const { name, avatar, readOnly } = getNetwork(id);
   return { id, name, avatar, readOnly };
 });

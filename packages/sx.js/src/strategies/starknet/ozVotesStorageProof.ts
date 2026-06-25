@@ -5,6 +5,7 @@ import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { CallData, Contract, LibraryError } from 'starknet';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
+import OZVotesStorageProofV2 from './abis/OZVotesStorageProofV2.json';
 import OzVotesToken from './abis/OzVotesToken.json';
 import { getNestedSlotKey, getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
@@ -19,11 +20,20 @@ import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
 export default function createOzVotesStorageProofStrategy({
-  trace
+  trace,
+  satellite = false
 }: {
   trace: 208 | 224;
+  satellite?: boolean;
 }): Strategy {
-  const type = 'ozVotesStorageProof';
+  // `satellite` selects the new Herodotus Satellite contracts, which read the
+  // L1 block from the Satellite live (`get_block_by_timestamp`) instead of from
+  // an on-chain cache populated by a relayer tx (`cached_timestamps`).
+  const type = satellite ? 'ozVotesStorageProofV2' : 'ozVotesStorageProof';
+  const StrategyAbi = satellite ? OZVotesStorageProofV2 : OZVotesStorageProof;
+  const timestampMethod = satellite
+    ? 'get_block_by_timestamp'
+    : 'cached_timestamps';
 
   async function getProofs(
     l1TokenAddress: string,
@@ -116,12 +126,8 @@ export default function createOzVotesStorageProofStrategy({
       ])) as any;
       const startTimestamp = proposalStruct.start_timestamp;
 
-      const contract = new Contract(
-        OZVotesStorageProof,
-        address,
-        starkProvider
-      );
-      const l1BlockNumber = await contract.cached_timestamps(startTimestamp);
+      const contract = new Contract(StrategyAbi, address, starkProvider);
+      const l1BlockNumber = await contract[timestampMethod](startTimestamp);
 
       const { proofs, checkpointIndex } = await getProofs(
         contractAddress,
@@ -204,14 +210,14 @@ export default function createOzVotesStorageProofStrategy({
       if (numCheckpoints === 0) return 0n;
 
       const contract = new Contract(
-        OZVotesStorageProof,
+        StrategyAbi,
         strategyAddress,
         starkProvider
       );
 
       let l1BlockNumber: bigint;
       try {
-        l1BlockNumber = await contract.cached_timestamps(timestamp);
+        l1BlockNumber = await contract[timestampMethod](timestamp);
       } catch (err) {
         throw new VotingPowerDetailsError(
           'Timestamp is not cached',

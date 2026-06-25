@@ -1,26 +1,33 @@
 <script lang="ts" setup>
+import { OrganizationConfig, resolveSpaceItem } from '@/helpers/organizations';
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { RelatedSpace, Space } from '@/types';
 
-const props = defineProps<{ space: Space | RelatedSpace }>();
-const compositeSpaceId = `${props.space.network}:${props.space.id}`;
+const props = defineProps<{
+  space: Space | RelatedSpace;
+  org?: OrganizationConfig | null;
+}>();
+
+const item = computed(() => resolveSpaceItem(props.space, props.org ?? null));
 </script>
 
 <template>
   <AppLink
-    :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
+    :to="item.link"
     class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
-    <div class="grow flex items-center">
+    <div class="grow flex items-center min-w-0">
       <UiBadgeNetwork
-        :id="space.network"
+        :id="item.avatarSpace.network"
         class="mr-2.5 shrink-0"
-        :size="!offchainNetworks.includes(space.network) ? 16 : 0"
+        :size="
+          !org && !offchainNetworks.includes(item.avatarSpace.network) ? 16 : 0
+        "
       >
-        <SpaceAvatar :space="space" :size="32" class="rounded-md" />
+        <SpaceAvatar :space="item.avatarSpace" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
-      <h3 class="truncate" v-text="space.name" />
+      <h3 class="truncate" v-text="item.title" />
       <UiBadgeSpace
         class="ml-1"
         :verified="space.verified"
@@ -30,6 +37,10 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
           false
         "
       />
+      <span v-if="org" class="ml-2 shrink-0 text-skin-text">
+        {{ org.spaceIds.length }}
+        {{ org.spaceIds.length === 1 ? 'space' : 'spaces' }}
+      </span>
     </div>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
     <div class="text-[21px] font-bold flex text-center">

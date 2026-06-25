@@ -6,12 +6,14 @@ import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
+import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
 
 const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
+const XMAQUINA_SPACE_ID = 's:xmaquina.eth';
 
 function getSettingsRoute(
   tab: string,
@@ -114,6 +116,17 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
   } else {
     items.proposals = { name: 'Proposals', icon: IHNewspaper };
     items.leaderboard = { name: 'Leaderboard', icon: IHUserGroup };
+  }
+
+  if (
+    context.space &&
+    `${context.space.network}:${context.space.id}` === XMAQUINA_SPACE_ID
+  ) {
+    items.docs = {
+      name: 'Docs',
+      icon: IHDocumentText,
+      link: 'https://docs.xmaquina.io/dao/governance'
+    };
   }
 
   if (context.space?.delegations && context.space.delegations.length > 0) {

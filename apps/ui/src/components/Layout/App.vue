@@ -31,6 +31,9 @@ const { setFavicon } = useFavicon();
 const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
+
+useLoginFromUrl();
+
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(event: TouchEvent) {
     const noSideBarSwipe = (event.target as Element)?.closest(
@@ -70,15 +73,9 @@ const baseSubRouteName = computed(() => {
 
 const hasPlaceHolderSidebar = computed(
   () =>
-    ![
-      'create-space-snapshot',
-      'create-space-snapshot-x',
-      'auction',
-      'auctions',
-      'auction-invite',
-      'auction-upcoming',
-      'auction-verify-standalone'
-    ].includes(String(route.matched[0]?.name)) &&
+    !['create-space-snapshot', 'create-space-snapshot-x'].includes(
+      String(route.matched[0]?.name)
+    ) &&
     ![
       'space-townhall-create',
       'space-townhall-topic',

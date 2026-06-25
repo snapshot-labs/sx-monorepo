@@ -9,10 +9,6 @@ type AdditionalProperties = {
   strategies?: {
     ApeGas?: string;
   };
-  executionStrategies?: {
-    Axiom?: string;
-    Isokratia?: string;
-  };
 };
 
 function createStandardConfig(
@@ -21,8 +17,6 @@ function createStandardConfig(
 ) {
   const additionalAuthenticators = additionalProperties.authenticators || {};
   const additionalStrategies = additionalProperties.strategies || {};
-  const additionalExecutionStrategies =
-    additionalProperties.executionStrategies || {};
 
   return {
     Meta: {
@@ -51,10 +45,7 @@ function createStandardConfig(
     },
     ExecutionStrategies: {
       SimpleQuorumAvatar: '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42',
-      SimpleQuorumTimelock: '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4',
-      Axiom: null,
-      Isokratia: null,
-      ...additionalExecutionStrategies
+      SimpleQuorumTimelock: '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
     }
   };
 }
@@ -100,13 +91,7 @@ function createEvmConfig(
 
   const executionStrategiesImplementations = {
     SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
-    SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock,
-    ...(network.ExecutionStrategies.Axiom
-      ? { Axiom: network.ExecutionStrategies.Axiom }
-      : {}),
-    ...(network.ExecutionStrategies.Isokratia
-      ? { Isokratia: network.ExecutionStrategies.Isokratia }
-      : {})
+    SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock
   } as const;
 
   return {
@@ -122,20 +107,16 @@ function createEvmConfig(
   };
 }
 
-const ethMainnetBlockTime = 12.09;
-const ethSepoliaBlockTime = 13.2816;
+const ethMainnetBlockTime = 12;
+const ethSepoliaBlockTime = 12;
 
 export const evmNetworks = {
   eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
   oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
     blockTime: ethSepoliaBlockTime
-    // executionStrategies: {
-    //   Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
-    //   Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
-    // }
   }),
-  matic: createStandardConfig(137, { blockTime: 2.15812 }),
+  matic: createStandardConfig(137, { blockTime: 2 }),
   arb1: createStandardConfig(42161, {
     blockTime: ethMainnetBlockTime,
     hasNonNativeBlockNumbers: true

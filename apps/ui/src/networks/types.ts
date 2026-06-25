@@ -1,5 +1,9 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import {
+  Connector as LockConnector,
+  ConnectorType as LockConnectorType
+} from '@snapshot-labs/lock';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -39,30 +43,8 @@ export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
   labels?: string[];
 } & Record<string, any>;
-export type ConnectorType =
-  | 'argentx'
-  | 'injected'
-  | 'walletconnect'
-  | 'coinbase'
-  | 'gnosis'
-  | 'sequence'
-  | 'unicorn'
-  | 'guest';
-export type Connector = {
-  id: string;
-  type: ConnectorType;
-  info: {
-    name: string;
-    icon?: string | FunctionalComponent;
-    ignoreRecent?: boolean;
-  };
-  options: any;
-  provider: any;
-  autoConnectOnly: boolean;
-  connect: () => void;
-  autoConnect: () => void;
-  disconnect: () => void;
-};
+export type ConnectorType = LockConnectorType;
+export type Connector = LockConnector;
 export type GeneratedMetadata =
   | {
       name: string;
@@ -234,6 +216,7 @@ export type ReadOnlyNetworkActions = {
     from?: string
   );
   setAlias(web3: Web3Provider, alias: string);
+  revokeAlias(web3: Web3Provider | Wallet, alias: string);
   updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
   updateStatement(
     web3: Web3Provider | Wallet,
@@ -282,7 +265,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       metadata: SpaceMetadata;
     }
   );
-  finalizeProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
@@ -366,6 +348,7 @@ export type NetworkApi = {
     alias: string,
     created_gt: number
   ): Promise<Alias | null>;
+  loadAliases(address: string): Promise<Alias[]>;
   loadStatement(
     networkId: NetworkID,
     spaceId: string,
