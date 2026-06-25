@@ -67,13 +67,6 @@ const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
 const preferTx = ref(false);
 
-// The EthSig authenticator on Starknet signs an EIP-712 message with an empty
-// domain, which Ledger / hardware wallets reject (blind-signing aside, the
-// empty domain trips them up). The EthTx authenticator instead authenticates
-// via a real L1 transaction the user signs natively, which Ledger handles.
-// We only surface the opt-in when the proposal is on Starknet, the user is
-// connected with an EVM wallet, and the space actually enables an EthTx-style
-// (evm-tx) authenticator.
 const canVoteViaTx = computed<boolean>(() => {
   if (!isStarknetProposal.value) return false;
 

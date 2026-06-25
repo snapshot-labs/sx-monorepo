@@ -474,9 +474,8 @@ export function createActions(
           connectorType,
           isContract,
           hasReason: !!reason,
-          // The EthTx authenticator (evm-tx) sends a real L1 transaction and
-          // does not rely on the relayer, so when the user opts into it we
-          // must not filter relayer-backed authenticators out.
+          // evm-tx does not use the relayer, so don't filter relayer-backed
+          // authenticators out when the user opts into it.
           ignoreRelayer: preferTx ? false : !relayer?.hasMinimumBalance,
           preferRelayerType: preferTx ? 'evm-tx' : undefined
         });
