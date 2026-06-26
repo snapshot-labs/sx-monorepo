@@ -318,8 +318,8 @@ watchEffect(async () => {
               class="flex gap-2.5 items-start cursor-pointer border rounded-lg p-3 mt-2"
             >
               <input v-model="isTxPreferred" type="checkbox" class="mt-[3px]" />
-              <span class="leading-5">
-                <span class="text-skin-link">Vote with a transaction</span>
+              <span class="leading-5 block space-y-1">
+                <span class="block text-skin-link">Vote with a transaction</span>
                 <span class="block text-sm text-skin-text">
 For Ledger / hardware wallets. Sends an on-chain Ethereum
 transaction instead of a signature. Use this if signing fails on a
