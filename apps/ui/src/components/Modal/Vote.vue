@@ -321,9 +321,9 @@ watchEffect(async () => {
               <span class="leading-5">
                 <span class="text-skin-link">Vote with a transaction</span>
                 <span class="block text-sm text-skin-text">
-                  For Ledger / hardware wallets. Sends an on-chain Ethereum
-                  transaction instead of a signature if signing fails. This
-                  costs gas.
+For Ledger / hardware wallets. Sends an on-chain Ethereum
+transaction instead of a signature. Use this if signing fails on a
+Ledger or other hardware wallet. This costs gas.
                 </span>
               </span>
             </label>
