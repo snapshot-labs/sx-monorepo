@@ -91,6 +91,25 @@ export const createNetworkHandler = (chainId: string) => {
 
       await db.registerTransaction(chainId, type, sender, hash, payload);
 
+      // Verify the write actually landed. A bare onConflict.ignore() combined
+      // with an unconditional rpcSuccess could mask a dropped/non-durable write
+      // at the database gateway, leaving the relayer with nothing to process
+      // and the on-chain commit stuck forever (see #2186). Only report success
+      // if we can read the row back.
+      const persisted = await db.getDataByMessageHash(hash);
+      if (!persisted) {
+        logger.error(
+          { type, sender, hash },
+          'Transaction registration did not persist; refusing to report success'
+        );
+        return rpcError(
+          res,
+          500,
+          new Error('Failed to persist registered transaction'),
+          id
+        );
+      }
+
       return rpcSuccess(res, true, id);
     } catch (err) {
       logger.error({ err }, 'Failed to register transaction');

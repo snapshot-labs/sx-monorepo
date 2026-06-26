@@ -19,7 +19,7 @@ export async function registerTransaction(
   hash: string,
   data: any
 ) {
-  return knex(REGISTERED_TRANSACTIONS)
+  const rows = await knex(REGISTERED_TRANSACTIONS)
     .insert({
       network,
       type,
@@ -27,8 +27,11 @@ export async function registerTransaction(
       hash,
       data
     })
-    .onConflict()
-    .ignore();
+    .onConflict(['sender', 'hash'])
+    .merge({ updated_at: knex.fn.now() })
+    .returning('id');
+
+  return rows[0] ?? null;
 }
 
 export async function getTransactionsToProcess() {
