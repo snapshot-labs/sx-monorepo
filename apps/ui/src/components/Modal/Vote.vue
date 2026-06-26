@@ -319,11 +319,13 @@ watchEffect(async () => {
             >
               <input v-model="isTxPreferred" type="checkbox" class="mt-[3px]" />
               <span class="leading-5 block space-y-1">
-                <span class="block text-skin-link">Vote with a transaction</span>
+                <span class="block text-skin-link"
+                  >Vote with a transaction</span
+                >
                 <span class="block text-sm text-skin-text">
-For Ledger / hardware wallets. Sends an on-chain Ethereum
-transaction instead of a signature. Use this if signing fails on a
-Ledger or other hardware wallet. This costs gas.
+                  For Ledger / hardware wallets. Sends an on-chain Ethereum
+                  transaction instead of a signature. Use this if signing fails
+                  on a Ledger or other hardware wallet. This costs gas.
                 </span>
               </span>
             </label>
