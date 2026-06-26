@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
+import { parseSafeImportFile } from '@/helpers/safe/transactions';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
 import { getChainIdKind, shorten } from '@/helpers/utils';
@@ -37,6 +38,7 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -65,6 +67,31 @@ function openModal(
   editedTx.value = null;
   modalState.value[type] = null;
   modalOpen.value[type] = true;
+}
+
+async function handleImportFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file) return;
+
+  try {
+    const transactions = await parseSafeImportFile(
+      await file.text(),
+      treasury.value?.network
+    );
+
+    model.value = [...model.value, ...transactions];
+    uiStore.addNotification(
+      'success',
+      `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
+    );
+  } catch (err) {
+    uiStore.addNotification(
+      'error',
+      err instanceof Error ? err.message : 'Failed to import Safe file'
+    );
+  }
 }
 
 function editTx(index: number) {
@@ -171,6 +198,15 @@ watch(
               @click="openModal('contractCall')"
             >
               <IH-code />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Import Safe file">
+            <UiButton
+              :disabled="!treasury || disabled"
+              uniform
+              @click="fileInput?.click()"
+            >
+              <IH-upload />
             </UiButton>
           </UiTooltip>
         </div>
@@ -284,5 +320,13 @@ watch(
         @add="addTx"
       />
     </teleport>
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".json"
+      class="hidden"
+      @change="handleImportFile"
+    />
   </div>
 </template>
