@@ -76,7 +76,7 @@ async function handleImportFile(event: Event) {
   if (!file) return;
 
   try {
-    const transactions = parseSafeImportFile(
+    const transactions = await parseSafeImportFile(
       await file.text(),
       treasury.value?.network
     );
