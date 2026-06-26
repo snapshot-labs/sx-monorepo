@@ -13,6 +13,10 @@ import {
 import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
+import {
+  createSafeSnapExecution,
+  SafeSnapExecutionData
+} from '@/helpers/safesnap';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import {
@@ -53,6 +57,11 @@ type ReadOnlyExecutionSafe = {
 
 type ReadOnlyExecutionPlugin = {
   safes: ReadOnlyExecutionSafe[];
+};
+
+type SafeSnapPlugin = {
+  safes: SafeSnapExecutionData[];
+  valid: boolean;
 };
 
 const CONFIGS: Record<number, OffchainNetworkEthereumConfig> = {
@@ -105,10 +114,11 @@ export function createActions(
     executions: ExecutionInfo[] | null,
     originalProposal: Proposal | null
   ) {
-    const supportedPlugins = ['readOnlyExecution'];
+    const supportedPlugins = ['readOnlyExecution', 'safeSnap'];
 
     const plugins = {} as {
       readOnlyExecution?: ReadOnlyExecutionPlugin;
+      safeSnap?: SafeSnapPlugin;
     };
 
     if (originalProposal) {
@@ -122,6 +132,7 @@ export function createActions(
     if (!executions) return plugins;
 
     const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
+    const safeSnapSafes = [] as SafeSnapExecutionData[];
     for (const info of executions) {
       if (!info.transactions.length) continue;
 
@@ -132,11 +143,23 @@ export function createActions(
           chainId: info.chainId,
           transactions: info.transactions
         });
+      } else if (info.strategyType === 'safeSnap') {
+        safeSnapSafes.push(
+          createSafeSnapExecution(
+            info.chainId,
+            info.strategyAddress,
+            info.transactions
+          )
+        );
       }
     }
 
     if (readOnlyExecutionSafes.length > 0) {
       plugins.readOnlyExecution = { safes: readOnlyExecutionSafes };
+    }
+
+    if (safeSnapSafes.length > 0) {
+      plugins.safeSnap = { safes: safeSnapSafes, valid: true };
     }
 
     return plugins;
