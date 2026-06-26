@@ -22,6 +22,14 @@ import { getSalt } from '@/helpers/utils';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
+// An editor transaction that may run as a delegatecall (Safe operation 1),
+// e.g. a 1inch Fusion swap. operation is undefined for a regular call.
+export type ImportedTransaction = Transaction & { operation?: string };
+
+// A Safe Transaction Builder transaction that may also carry an operation
+// (1 = delegatecall), as emitted by the Fusion order builder.
+type ImportTransaction = BatchTransaction & { operation?: string | number };
+
 // Only these messages reach the user; any other error gets a generic toast.
 export class SafeImportError extends Error {}
 
@@ -251,20 +259,26 @@ async function decode(
 }
 
 async function parseSafeTransaction(
-  tx: BatchTransaction,
+  tx: ImportTransaction,
   chainId?: string
-): Promise<Transaction> {
-  return (
+): Promise<ImportedTransaction> {
+  const transaction =
     (tx.contractMethod && fromContractMethod(tx, tx.contractMethod)) ||
     (await decode(tx, chainId)) ||
-    toRaw(tx)
-  );
+    toRaw(tx);
+
+  // Preserve delegatecall transactions (operation 1); a call is the default.
+  return String(tx.operation) === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
+// A transaction may carry an `operation` (1 = delegatecall, e.g. a Fusion
+// swap), which the Transaction Builder standard omits but SafeSnap supports.
 export async function parseSafeImportFile(
   content: string,
   chainId: string
-): Promise<{ transactions: Transaction[]; warnings: string[] }> {
+): Promise<{ transactions: ImportedTransaction[]; warnings: string[] }> {
   const warnings: string[] = [];
   let file: Partial<BatchFile> | null;
   try {
