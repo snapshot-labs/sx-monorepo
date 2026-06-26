@@ -1,3 +1,5 @@
+import { Contract } from '@ethersproject/contracts';
+import { getProvider } from '@/helpers/provider';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { SelectedStrategy, Space, SpaceMetadataTreasury } from '@/types';
@@ -6,31 +8,54 @@ export type StrategyWithTreasury = SelectedStrategy & {
   treasury: SpaceMetadataTreasury;
 };
 
-// Reality module address of the SafeSnap safe covering this treasury, if any.
-// Matched by network: the space config only stores the module, not the Safe.
-function getSafeSnapModule(
-  space: Space,
-  treasury: SpaceMetadataTreasury
-): string | null {
+// Resolve the Gnosis Safe controlled by a Zodiac module (the SafeSnap config
+// only stores the module). Falls back to the module address if unavailable.
+async function getModuleSafe(chainId: string, module: string): Promise<string> {
+  try {
+    const contract = new Contract(
+      module,
+      ['function avatar() view returns (address)'],
+      getProvider(Number(chainId))
+    );
+    return await contract.avatar();
+  } catch {
+    return module;
+  }
+}
+
+// SafeSnap execution strategies, read straight from the space's SafeSnap
+// config (independent of treasuries, like the Snapshot v1 plugin).
+async function getSafeSnapStrategies(
+  space: Space
+): Promise<StrategyWithTreasury[]> {
   const config = space.additionalRawData?.plugins?.safeSnap as
     | {
         address?: string;
         safes?: { network?: string | number; realityAddress?: string }[];
       }
     | undefined;
-  if (!config) return null;
+  if (!config) return [];
 
-  if (Array.isArray(config.safes)) {
-    const safe = config.safes.find(
-      safe => String(safe.network) === treasury.chainId && safe.realityAddress
-    );
-    return safe?.realityAddress ?? null;
-  }
+  const safes = config.safes
+    ? config.safes.filter(safe => safe.realityAddress)
+    : config.address
+      ? [{ network: '1', realityAddress: config.address }]
+      : [];
 
-  // Legacy single-module config (mainnet only).
-  if (config.address && treasury.chainId === '1') return config.address;
+  return Promise.all(
+    safes.map(async safe => {
+      const chainId = String(safe.network ?? '1');
+      const realityAddress = safe.realityAddress as string;
+      const wallet = await getModuleSafe(chainId, realityAddress);
 
-  return null;
+      return {
+        address: realityAddress,
+        destinationAddress: '0x0',
+        type: 'safeSnap',
+        treasury: { name: 'SafeSnap', address: wallet, chainId }
+      };
+    })
+  );
 }
 
 type InputType = Space | null;
@@ -40,41 +65,53 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
 
     if (!space) return null;
 
-    return space.treasuries
-      .map(treasury => {
-        const strategy = space.executors_strategies.find(strategy => {
-          return (
-            strategy.treasury &&
-            strategy.treasury_chain &&
-            treasury.address &&
-            compareAddresses(strategy.treasury, treasury.address) &&
-            treasury.chainId === String(strategy.treasury_chain)
-          );
-        });
+    const treasuryStrategies = space.treasuries.map(treasury => {
+      const strategy = space.executors_strategies.find(strategy => {
+        return (
+          strategy.treasury &&
+          strategy.treasury_chain &&
+          treasury.address &&
+          compareAddresses(strategy.treasury, treasury.address) &&
+          treasury.chainId === String(strategy.treasury_chain)
+        );
+      });
 
-        if (!strategy) {
-          const realityAddress = getSafeSnapModule(space, treasury);
-
-          return {
-            address: realityAddress ?? treasury.address,
-            destinationAddress: '0x0',
-            type: realityAddress ? 'safeSnap' : 'ReadOnlyExecution',
-            treasury
-          };
-        }
-
+      if (!strategy) {
         return {
-          address: strategy.address,
-          destinationAddress: strategy.destination_address,
-          type: strategy.type,
+          address: treasury.address,
+          destinationAddress: '0x0',
+          type: 'ReadOnlyExecution',
           treasury
         };
-      })
-      .filter(
+      }
+
+      return {
+        address: strategy.address,
+        destinationAddress: strategy.destination_address,
+        type: strategy.type,
+        treasury
+      };
+    });
+
+    const safeSnapStrategies = await getSafeSnapStrategies(space);
+
+    // A SafeSnap module supersedes a plain treasury for the same Safe.
+    const strategies = [
+      ...treasuryStrategies.filter(
         strategy =>
-          strategy &&
-          getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
-      ) as StrategyWithTreasury[];
+          !safeSnapStrategies.some(safeSnap =>
+            compareAddresses(
+              safeSnap.treasury.address,
+              strategy.treasury.address
+            )
+          )
+      ),
+      ...safeSnapStrategies
+    ];
+
+    return strategies.filter(strategy =>
+      getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
+    ) as StrategyWithTreasury[];
   }, null);
 
   return {
