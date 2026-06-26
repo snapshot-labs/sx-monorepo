@@ -5,6 +5,8 @@ import {
   RawTransaction,
   Transaction
 } from '@snapshot-labs/sx';
+import { abis } from '@/helpers/abis';
+import { getABI } from '@/helpers/etherscan';
 import { getSalt } from '@/helpers/utils';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
@@ -19,48 +21,6 @@ function parseArg(type: string, value: string) {
   return value;
 }
 
-function toContractCall(
-  tx: BatchTransaction,
-  method: ContractMethod
-): ContractCallTransaction {
-  const inputs = method.inputs ?? [];
-  const abi: JsonFragment[] = [
-    {
-      name: method.name,
-      type: 'function',
-      stateMutability: method.payable ? 'payable' : 'nonpayable',
-      inputs,
-      outputs: []
-    }
-  ];
-  const signature = `${method.name}(${inputs.map(input => input.type).join(',')})`;
-  const args = tx.contractInputsValues ?? {};
-
-  // Safe exports often omit `data`; encode it from the method when missing.
-  const data =
-    tx.data && tx.data !== '0x'
-      ? tx.data
-      : new Interface(abi).encodeFunctionData(
-          signature,
-          inputs.map(input => parseArg(input.type, args[input.name]))
-        );
-
-  return {
-    _type: 'contractCall',
-    to: tx.to,
-    data,
-    value: parseValue(tx.value),
-    salt: getSalt(),
-    _form: {
-      abi,
-      recipient: tx.to,
-      method: signature,
-      args,
-      amount: ''
-    }
-  };
-}
-
 function toRaw(tx: BatchTransaction): RawTransaction {
   return {
     _type: 'raw',
@@ -72,15 +32,109 @@ function toRaw(tx: BatchTransaction): RawTransaction {
   };
 }
 
-function parseSafeTransaction(tx: BatchTransaction): Transaction {
-  return tx.contractMethod ? toContractCall(tx, tx.contractMethod) : toRaw(tx);
+// The single builder for every contract call: decode the calldata with an ABI,
+// or return null when it doesn't match.
+function decodeWithAbi(
+  tx: BatchTransaction,
+  abi: any[]
+): ContractCallTransaction | null {
+  try {
+    const parsed = new Interface(abi).parseTransaction({ data: tx.data! });
+
+    return {
+      _type: 'contractCall',
+      to: tx.to,
+      data: tx.data!,
+      value: parseValue(tx.value),
+      salt: getSalt(),
+      _form: {
+        abi,
+        recipient: tx.to,
+        method: parsed.signature,
+        args: Object.fromEntries(
+          parsed.functionFragment.inputs.map((input, i) => [
+            input.name,
+            String(parsed.args[i])
+          ])
+        ),
+        amount: ''
+      }
+    };
+  } catch {
+    return null;
+  }
+}
+
+// A Safe Transaction Builder transaction carries the method and inputs; build
+// its ABI, encode the calldata when the file omits it, then decode uniformly.
+function fromContractMethod(
+  tx: BatchTransaction,
+  method: ContractMethod
+): ContractCallTransaction | null {
+  const inputs = method.inputs ?? [];
+  const abi: JsonFragment[] = [
+    {
+      name: method.name,
+      type: 'function',
+      stateMutability: method.payable ? 'payable' : 'nonpayable',
+      inputs,
+      outputs: []
+    }
+  ];
+
+  const data =
+    tx.data && tx.data !== '0x'
+      ? tx.data
+      : new Interface(abi).encodeFunctionData(
+          `${method.name}(${inputs.map(input => input.type).join(',')})`,
+          inputs.map(input =>
+            parseArg(input.type, (tx.contractInputsValues ?? {})[input.name])
+          )
+        );
+
+  return decodeWithAbi({ ...tx, data }, abi);
+}
+
+// Decode raw calldata by fetching the contract ABI (Etherscan, with proxy
+// resolution), then standard token ABIs (covers proxies like USDC whose
+// implementation can't be resolved).
+async function decode(
+  tx: BatchTransaction,
+  chainId?: string
+): Promise<ContractCallTransaction | null> {
+  if (!chainId || !tx.data || tx.data === '0x') return null;
+
+  const candidates: any[] = [abis.erc20, abis.erc721];
+  try {
+    candidates.unshift(await getABI(Number(chainId), tx.to));
+  } catch {
+    // No verified ABI; standard token ABIs still cover common calls.
+  }
+
+  for (const abi of candidates) {
+    const decoded = decodeWithAbi(tx, abi);
+    if (decoded) return decoded;
+  }
+
+  return null;
+}
+
+async function parseSafeTransaction(
+  tx: BatchTransaction,
+  chainId?: string
+): Promise<Transaction> {
+  return (
+    (tx.contractMethod && fromContractMethod(tx, tx.contractMethod)) ||
+    (await decode(tx, chainId)) ||
+    toRaw(tx)
+  );
 }
 
 // Parse a Safe Transaction Builder export into editor transactions.
-export function parseSafeImportFile(
+export async function parseSafeImportFile(
   content: string,
   chainId?: string
-): Transaction[] {
+): Promise<Transaction[]> {
   const file = JSON.parse(content) as Partial<BatchFile>;
 
   if (!Array.isArray(file.transactions) || !file.transactions.length) {
@@ -91,5 +145,7 @@ export function parseSafeImportFile(
     throw new Error(`This file is for chain ${file.chainId}, not ${chainId}`);
   }
 
-  return file.transactions.map(parseSafeTransaction);
+  return Promise.all(
+    file.transactions.map(tx => parseSafeTransaction(tx, chainId))
+  );
 }
