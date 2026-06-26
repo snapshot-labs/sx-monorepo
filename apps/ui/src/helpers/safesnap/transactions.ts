@@ -13,7 +13,8 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  // Set when writing a proposal (creation), ignored when reading.
+  // 0 = call, 1 = delegatecall. Read back on parse so an imported
+  // delegatecall (e.g. a Fusion swap) survives editing.
   operation?: string;
   nonce?: string;
 };
@@ -69,7 +70,9 @@ export type SafeSnapExecutionData = {
   txs: SafeSnapTransaction[][];
 };
 
-// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+// Canonical Safe MultiSend v1.3.0 (same address on every supported chain).
+// This is the delegatecall-capable MultiSend (not MultiSendCallOnly), so
+// batches may include delegatecall transactions such as a Fusion swap.
 const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 function parseTransferFunds(
@@ -153,27 +156,36 @@ function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
   return createRawTransaction({ ...tx, salt: '' });
 }
 
-export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
-  switch (tx.type) {
-    case 'transferFunds':
-      return parseTransferFunds(tx);
-    case 'transferNFT':
-      return parseTransferNFT(tx);
-    case 'contractInteraction':
-      return parseContractInteraction(tx);
-    default:
-      return parseRaw(tx);
-  }
+export function parseSafeSnapTransaction(
+  tx: SafeSnapTransaction
+): Transaction & { operation?: string } {
+  const transaction = (() => {
+    switch (tx.type) {
+      case 'transferFunds':
+        return parseTransferFunds(tx);
+      case 'transferNFT':
+        return parseTransferNFT(tx);
+      case 'contractInteraction':
+        return parseContractInteraction(tx);
+      default:
+        return parseRaw(tx);
+    }
+  })();
+
+  // Keep delegatecall transactions editable without losing the operation.
+  return tx.operation === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
 export function serializeSafeSnapTransaction(
-  tx: Transaction
+  tx: Transaction & { operation?: string }
 ): SafeSnapTransaction {
   const base = {
     to: tx.to,
     data: tx.data || '0x',
     value: tx.value || '0',
-    operation: '0',
+    operation: tx.operation ?? '0',
     nonce: '0'
   };
 
