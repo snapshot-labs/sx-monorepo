@@ -16,7 +16,7 @@ import { getSwapLink } from '@/helpers/link';
 import {
   createSafeSnapExecution,
   SafeSnapExecutionData
-} from '@/helpers/safesnap';
+} from '@/helpers/safesnap/transactions';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import {

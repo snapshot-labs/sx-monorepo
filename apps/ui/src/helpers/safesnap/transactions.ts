@@ -204,3 +204,29 @@ export function serializeSafeSnapTransaction(
       return base;
   }
 }
+
+// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
+
+export type SafeSnapExecutionData = {
+  network: string;
+  realityAddress: string;
+  multiSendAddress: string;
+  txs: SafeSnapTransaction[][];
+};
+
+// Build a single-batch SafeSnap (Reality) execution for plugins.safeSnap.safes.
+// The batch is stored as a raw transaction array; SafeSnap recomputes the
+// MultiSend bundle and execution hash from it when the proposal is executed.
+export function createSafeSnapExecution(
+  chainId: number,
+  realityAddress: string,
+  transactions: Transaction[]
+): SafeSnapExecutionData {
+  return {
+    network: String(chainId),
+    realityAddress,
+    multiSendAddress: MULTI_SEND_ADDRESS,
+    txs: [transactions.map(serializeSafeSnapTransaction)]
+  };
+}
