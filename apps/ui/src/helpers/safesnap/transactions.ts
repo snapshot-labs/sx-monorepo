@@ -12,6 +12,9 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
+  // Set when writing a proposal (creation), ignored when reading.
+  operation?: string;
+  nonce?: string;
 };
 
 type SafeSnapTransferFundsTransaction = SafeSnapBaseTransaction & {
@@ -150,5 +153,54 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
       return parseContractInteraction(tx);
     default:
       return parseRaw(tx);
+  }
+}
+
+// Inverse of parseSafeSnapTransaction: turn an editor transaction into a
+// SafeSnap module transaction (operation/nonce default to a single batch).
+export function serializeSafeSnapTransaction(
+  tx: Transaction
+): SafeSnapTransaction {
+  const base = {
+    to: tx.to,
+    data: tx.data || '0x',
+    value: tx.value || '0',
+    operation: '0',
+    nonce: '0'
+  };
+
+  switch (tx._type) {
+    case 'sendToken':
+      return {
+        ...base,
+        type: 'transferFunds',
+        recipient: tx._form.recipient,
+        amount: tx._form.amount,
+        token: {
+          name: tx._form.token.name,
+          decimals: tx._form.token.decimals,
+          symbol: tx._form.token.symbol,
+          address:
+            tx._form.token.address === ETH_CONTRACT
+              ? 'main'
+              : tx._form.token.address
+        }
+      };
+    case 'sendNft':
+      return {
+        ...base,
+        type: 'transferNFT',
+        recipient: tx._form.recipient,
+        collectable: {
+          address: tx._form.nft.address,
+          id: tx._form.nft.id,
+          name: tx._form.nft.name,
+          tokenName: tx._form.nft.collection || ''
+        }
+      };
+    case 'contractCall':
+      return { ...base, type: 'contractInteraction', abi: tx._form.abi };
+    default:
+      return base;
   }
 }
