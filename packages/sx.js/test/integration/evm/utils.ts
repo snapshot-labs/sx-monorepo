@@ -8,6 +8,7 @@ import {
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import randomBytes from 'randombytes';
+import { WHITELIST_SERVER_URL } from '../../constants';
 import AvatarContract from './fixtures/Avatar.json';
 import AvatarExecutionStrategyContract from './fixtures/AvatarExecutionStrategy.json';
 import CompTokenContract from './fixtures/CompToken.json';
@@ -198,7 +199,7 @@ export async function setup(
 
   const ethTxClient = new EthereumTx({
     networkConfig,
-    whitelistServerUrl: 'https://wls.snapshot.box',
+    whitelistServerUrl: WHITELIST_SERVER_URL,
     provider
   });
   const spaceAddress = await ethTxClient.predictSpaceAddress({

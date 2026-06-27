@@ -1,11 +1,12 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { describe, expect, it } from 'vitest';
 import createVanillaStrategy from '../../../../src/strategies/evm/vanilla';
+import { ETH_RPC_URL } from '../../../constants';
 
 describe('vanillaStrategy', () => {
   const vanillaStrategy = createVanillaStrategy();
 
-  const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
+  const provider = new JsonRpcProvider(ETH_RPC_URL);
 
   it('should return type', () => {
     expect(vanillaStrategy.type).toBe('vanilla');
