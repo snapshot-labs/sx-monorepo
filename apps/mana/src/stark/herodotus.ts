@@ -83,11 +83,13 @@ function getSatelliteStrategies(chainId: string): string[] {
 
   const { Strategies } = starknetNetworks[networkId];
 
-  return [
-    Strategies.EVMSlotValueV2,
-    Strategies.OZVotesStorageProofV2,
-    Strategies.OZVotesTrace208StorageProofV2
-  ]
+  return (
+    [
+      Strategies.EVMSlotValueV2,
+      Strategies.OZVotesStorageProofV2,
+      Strategies.OZVotesTrace208StorageProofV2
+    ] as Array<string | undefined>
+  )
     .filter((address): address is string => !!address)
     .map(address => validateAndParseAddress(address));
 }
