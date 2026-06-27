@@ -134,6 +134,23 @@ describe('serializeSafeSnapTransaction', () => {
 
     expect(serializeSafeSnapTransaction(tx).type).toBeUndefined();
   });
+
+  it('preserves a delegatecall operation (e.g. a Fusion swap)', () => {
+    const tx: Transaction & { operation?: string } = {
+      to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
+      value: '0',
+      data: '0xdeadbeef',
+      salt: '',
+      operation: '1',
+      _type: 'raw',
+      _form: { recipient: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769' }
+    };
+
+    const serialized = serializeSafeSnapTransaction(tx);
+    expect(serialized.operation).toBe('1');
+    // Round-trips so editing the proposal keeps the delegatecall.
+    expect(parseSafeSnapTransaction(serialized).operation).toBe('1');
+  });
 });
 
 describe('createSafeSnapExecution', () => {

@@ -1,10 +1,38 @@
 import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
+import { hexConcat, hexZeroPad } from '@ethersproject/bytes';
 import { describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
 import { parseSafeImportFile } from './transactions';
+import { serializeSafeSnapTransaction } from '../safesnap/transactions';
+import fusionSwapMultiSend from './__fixtures__/fusion-swap-multisend.json';
+import fusionSwap from './__fixtures__/fusion-swap.json';
 
 // Decoding fetches the contract ABI; stub it so the test stays offline.
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
+
+// Mirrors how Snapshot v1 (coerceConfig -> createMultiSendTx) re-encodes a
+// stored batch into the MultiSend call that the Safe module executes.
+function encodeMultiSend(
+  txs: { to: string; value: string; data: string; operation?: string }[]
+) {
+  const packed = hexConcat(
+    txs.map(tx => {
+      const data = tx.data || '0x';
+      const length = data === '0x' ? 0 : (data.length - 2) / 2;
+      return hexConcat([
+        hexZeroPad(BigNumber.from(tx.operation || '0').toHexString(), 1),
+        hexZeroPad(tx.to, 20),
+        hexZeroPad(BigNumber.from(tx.value || '0').toHexString(), 32),
+        hexZeroPad(BigNumber.from(length).toHexString(), 32),
+        data
+      ]);
+    })
+  );
+  return new Interface([
+    'function multiSend(bytes transactions)'
+  ]).encodeFunctionData('multiSend', [packed]);
+}
 
 const TRANSFER_ABI = [
   {
@@ -124,6 +152,31 @@ describe('parseSafeImportFile', () => {
         '100'
       )
     ).rejects.toThrow(/chain/);
+  });
+});
+
+describe('1inch Fusion swap import', () => {
+  // Safe Transaction Builder file produced by the Fusion order builder.
+  const content = JSON.stringify(fusionSwap);
+
+  it('captures the delegatecall operation from the file', async () => {
+    const transactions = await parseSafeImportFile(content);
+
+    expect(transactions).toHaveLength(2);
+    // approve -> call, buildAndSignOrder -> delegatecall.
+    expect(transactions[0].operation).toBeUndefined();
+    expect(transactions[1].operation).toBe('1');
+  });
+
+  it('serializes to the exact MultiSend batch the Fusion script produces', async () => {
+    const batch = (await parseSafeImportFile(content)).map(
+      serializeSafeSnapTransaction
+    );
+
+    expect(batch.map(tx => tx.operation)).toEqual(['0', '1']);
+    expect(encodeMultiSend(batch).toLowerCase()).toBe(
+      fusionSwapMultiSend.multiSend.toLowerCase()
+    );
   });
 });
 

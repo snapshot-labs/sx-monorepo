@@ -143,29 +143,39 @@ function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
   };
 }
 
-export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
-  switch (tx.type) {
-    case 'transferFunds':
-      return parseTransferFunds(tx);
-    case 'transferNFT':
-      return parseTransferNFT(tx);
-    case 'contractInteraction':
-      return parseContractInteraction(tx);
-    default:
-      return parseRaw(tx);
-  }
+export function parseSafeSnapTransaction(
+  tx: SafeSnapTransaction
+): Transaction & { operation?: string } {
+  const transaction = (() => {
+    switch (tx.type) {
+      case 'transferFunds':
+        return parseTransferFunds(tx);
+      case 'transferNFT':
+        return parseTransferNFT(tx);
+      case 'contractInteraction':
+        return parseContractInteraction(tx);
+      default:
+        return parseRaw(tx);
+    }
+  })();
+
+  // Keep delegatecall transactions editable without losing the operation.
+  return tx.operation === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
 // Inverse of parseSafeSnapTransaction: turn an editor transaction into a
-// SafeSnap module transaction (operation/nonce default to a single batch).
+// SafeSnap module transaction. operation defaults to a call; imported
+// transactions (e.g. a Fusion swap) may set it to a delegatecall.
 export function serializeSafeSnapTransaction(
-  tx: Transaction
+  tx: Transaction & { operation?: string }
 ): SafeSnapTransaction {
   const base = {
     to: tx.to,
     data: tx.data || '0x',
     value: tx.value || '0',
-    operation: '0',
+    operation: tx.operation ?? '0',
     nonce: '0'
   };
 
@@ -205,7 +215,9 @@ export function serializeSafeSnapTransaction(
   }
 }
 
-// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+// Canonical Safe MultiSend v1.3.0 (same address on every supported chain).
+// This is the delegatecall-capable MultiSend (not MultiSendCallOnly), so
+// batches may include delegatecall transactions such as a Fusion swap.
 const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 export type SafeSnapExecutionData = {
