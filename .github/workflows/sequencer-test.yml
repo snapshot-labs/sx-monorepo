@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         target: ['22.6']
-    uses: snapshot-labs/actions/.github/workflows/test.yml@main
+    uses: snapshot-labs/actions/.github/workflows/test.yml@chore/bump-node20-actions
     secrets: inherit
     with:
       working_directory: apps/sequencer
