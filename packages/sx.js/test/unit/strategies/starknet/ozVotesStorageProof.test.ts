@@ -21,6 +21,12 @@ describe('ozVotesStorageProof', () => {
     expect(ozVotesStorageProofStrategy.type).toBe('ozVotesStorageProof');
   });
 
+  it('should return the satellite type when satellite is enabled', () => {
+    expect(
+      createOzVotesStorageProofStrategy({ trace: 224, satellite: true }).type
+    ).toBe('ozVotesStorageProofV2');
+  });
+
   it('should throw for non-ethereum address', async () => {
     await expect(
       ozVotesStorageProofStrategy.getParams(
