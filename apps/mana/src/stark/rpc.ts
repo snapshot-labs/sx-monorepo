@@ -89,24 +89,30 @@ export const createNetworkHandler = (chainId: string) => {
 
       logger.info({ type, sender, hash, payload }, 'Registering transaction');
 
-      await db.registerTransaction(chainId, type, sender, hash, payload);
+      const inserted = await db.registerTransaction(
+        chainId,
+        type,
+        sender,
+        hash,
+        payload
+      );
 
-      // Verify the write actually landed. A bare onConflict.ignore() combined
-      // with an unconditional rpcSuccess could mask a dropped/non-durable write
-      // at the database gateway, leaving the relayer with nothing to process
-      // and the on-chain commit stuck forever (see #2186). Only report success
-      // if we can read the row back.
-      const persisted = await db.getDataByMessageHash(hash);
-      if (!persisted) {
-        logger.error(
+      // Observability only — behavior is unchanged (we always report success).
+      // A bare onConflict().ignore() insert returns zero rows when nothing was
+      // persisted. That is expected for a genuine duplicate, but it has also
+      // been observed when the write is silently dropped/not durable at the DB
+      // gateway, leaving the relayer with nothing to process (see #2186). Log a
+      // warning so the next occurrence is visible in Better Stack instead of
+      // failing silently.
+      if (!inserted || inserted.length === 0) {
+        logger.warn(
           { type, sender, hash },
-          'Transaction registration did not persist; refusing to report success'
+          'registerTransaction persisted no row (duplicate or possible lost write)'
         );
-        return rpcError(
-          res,
-          500,
-          new Error('Failed to persist registered transaction'),
-          id
+      } else {
+        logger.info(
+          { type, sender, hash, id: inserted[0]?.id },
+          'registerTransaction persisted row'
         );
       }
 

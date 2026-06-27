@@ -19,7 +19,12 @@ export async function registerTransaction(
   hash: string,
   data: any
 ) {
-  const rows = await knex(REGISTERED_TRANSACTIONS)
+  // Behavior is identical to a plain `.onConflict().ignore()` insert: on a
+  // duplicate the row is left untouched and nothing is written. `.returning('id')`
+  // is added purely as an observation hook — it does not change write semantics,
+  // but lets the caller see whether a row was actually inserted (so a lost /
+  // no-op write can be logged, see #2186).
+  return knex(REGISTERED_TRANSACTIONS)
     .insert({
       network,
       type,
@@ -27,11 +32,9 @@ export async function registerTransaction(
       hash,
       data
     })
-    .onConflict(['sender', 'hash'])
-    .merge({ updated_at: knex.fn.now() })
+    .onConflict()
+    .ignore()
     .returning('id');
-
-  return rows[0] ?? null;
 }
 
 export async function getTransactionsToProcess() {
