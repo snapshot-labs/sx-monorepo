@@ -18,12 +18,7 @@ export async function registerTransaction(
   sender: string,
   hash: string,
   data: any
-) {
-  // Behavior is identical to a plain `.onConflict().ignore()` insert: on a
-  // duplicate the row is left untouched and nothing is written. `.returning('id')`
-  // is added purely as an observation hook — it does not change write semantics,
-  // but lets the caller see whether a row was actually inserted (so a lost /
-  // no-op write can be logged, see #2186).
+): Promise<{ id: number }[]> {
   return knex(REGISTERED_TRANSACTIONS)
     .insert({
       network,
