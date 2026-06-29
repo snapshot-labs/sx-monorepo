@@ -91,7 +91,6 @@ gql(`
     authenticators
     proposal_count
     vote_count
-    active_proposal_count
     created
   }
 
@@ -239,7 +238,7 @@ export const SPACES_QUERY = gql(`
       indexer: $indexer
       first: $first
       skip: $skip
-      orderBy: active_proposal_count
+      orderBy: vote_count
       orderDirection: desc
       where: $where
     ) {
