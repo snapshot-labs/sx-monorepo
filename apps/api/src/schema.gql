@@ -69,6 +69,8 @@ type Space {
   proposer_count: Int!
   "Number of unique voters in this space"
   voter_count: Int!
+  "Number of currently active proposals in this space"
+  active_proposal_count: Int! @computed
   "Timestamp when the space was created"
   created: Int!
   "Transaction hash of space creation"
