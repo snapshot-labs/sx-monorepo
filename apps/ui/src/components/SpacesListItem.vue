@@ -54,7 +54,6 @@ const avatarSpace = computed(() =>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
     <div class="text-[21px] font-bold flex text-center">
       <span
-        v-if="space.protocol === 'snapshot'"
         class="w-[50px] md:w-[100px]"
         :class="{ 'text-skin-success': (space.active_proposals ?? 0) > 0 }"
         v-text="_n(space.active_proposals ?? 0, 'compact')"
