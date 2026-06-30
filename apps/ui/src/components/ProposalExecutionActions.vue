@@ -11,19 +11,16 @@ const props = defineProps<{
 
 const { web3 } = useWeb3();
 const {
-  hasFinalize,
   hasExecuteQueued,
   fetchingDetails,
   message,
   warningMessage,
   executionTx,
   executionTxUrl,
-  finalizeProposalSending,
   executeProposalSending,
   executeQueuedProposalSending,
   vetoProposalSending,
   executionCountdown,
-  finalizeProposal,
   executeProposal,
   executeQueuedProposal,
   vetoProposal
@@ -68,16 +65,7 @@ const network = computed(() => getNetwork(props.proposal.network));
     </div>
     <div v-else class="space-y-2">
       <UiButton
-        v-if="hasFinalize"
-        class="w-full"
-        :loading="finalizeProposalSending"
-        @click="finalizeProposal"
-      >
-        <IH-check-circle />
-        Finalize proposal
-      </UiButton>
-      <UiButton
-        v-else-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
+        v-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
         class="w-full"
         :loading="executeProposalSending"
         @click="executeProposal"

@@ -1,7 +1,5 @@
 import createAvatarExecutor from './avatar';
-import createAxiomExecutor from './axiom';
 import createEthRelayerExecutor from './ethRelayer';
-import createIsokratiaExecutor from './isokratia';
 import createVanillaExecutor from './vanilla';
 import { ExecutionInput, ExecutorType } from '../types';
 
@@ -28,20 +26,6 @@ export function getExecutionData(
     return createEthRelayerExecutor({
       destination: input.destination
     }).getExecutionData(executorAddress, input.transactions);
-  }
-
-  if (type === 'Axiom' && input?.transactions) {
-    return createAxiomExecutor().getExecutionData(
-      executorAddress,
-      input.transactions
-    );
-  }
-
-  if (type === 'Isokratia' && input?.transactions) {
-    return createIsokratiaExecutor().getExecutionData(
-      executorAddress,
-      input.transactions
-    );
   }
 
   if (input?.transactions) {

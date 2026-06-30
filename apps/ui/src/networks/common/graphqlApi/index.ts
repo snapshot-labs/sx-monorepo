@@ -36,6 +36,7 @@ import {
   UserActivity,
   Vote
 } from '@/types';
+import { fetchBlockTimestamps } from './blockTimestamps';
 import {
   PROPOSAL_QUERY as HIGHLIGHT_PROPOSAL_QUERY,
   PROPOSALS_QUERY as HIGHLIGHT_PROPOSALS_QUERY,
@@ -77,7 +78,7 @@ type ApiOptions = {
 const DELEGATES_SUBGRAPH_URL =
   'https://subgrapher.snapshot.org/subgraph/arbitrum/7iEHSsBprpnwCHKULfaQaCA6gU6RcEgnXfD3XtHx4yyc';
 const DELEGATES_ARB_SUBGRAPH_URL =
-  'https://subgrapher.snapshot.org/subgraph/arbitrum/BFeDAWHi9sNCMK8Rtmu4hxQ4PF8DhdPwN4enQsHUDmN2';
+  'https://subgrapher.snapshot.org/subgraph/arbitrum/9ASQUr42RMqc4zyH2po6yQ7CXbajFbk6zq5Qdj3ZgTBp';
 
 const GOVERNOR_DELEGATIONS: Record<string, string> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,
@@ -109,6 +110,27 @@ function isProposalWithSpaceMetadata(
   return (
     !!proposal.space.metadata && !!proposal.space.strategies_parsed_metadata
   );
+}
+
+function applyBlockTimestamps(
+  proposal: Proposal,
+  blockTimestamps: Record<number, number>
+): Proposal {
+  return {
+    ...proposal,
+    start:
+      (proposal.start_block_number &&
+        blockTimestamps[proposal.start_block_number]) ||
+      proposal.start,
+    min_end:
+      (proposal.min_end_block_number &&
+        blockTimestamps[proposal.min_end_block_number]) ||
+      proposal.min_end,
+    max_end:
+      (proposal.max_end_block_number &&
+        blockTimestamps[proposal.max_end_block_number]) ||
+      proposal.max_end
+  };
 }
 
 function getProposalState(
@@ -386,8 +408,11 @@ function formatProposal(
   return {
     ...proposal,
     start: Number(proposal.start),
+    start_block_number: Number(proposal.start_block_number) || null,
     min_end: Number(proposal.min_end),
+    min_end_block_number: Number(proposal.min_end_block_number) || null,
     max_end: Number(proposal.max_end),
+    max_end_block_number: Number(proposal.max_end_block_number) || null,
     snapshot: Number(proposal.snapshot),
     execution_time: Number(proposal.execution_time),
     executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
@@ -427,7 +452,7 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
+    has_execution_window_opened: ['EthRelayer'].includes(
       proposal.execution_strategy_type
     )
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
@@ -673,11 +698,23 @@ export function createApi(
         });
       }
 
-      return data.proposals
+      const proposals = data.proposals
         .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
+
+      const blockTimestamps = await fetchBlockTimestamps(
+        networkId,
+        proposals.flatMap(p => [
+          p.start_block_number,
+          p.min_end_block_number,
+          p.max_end_block_number
+        ]),
+        current
+      );
+
+      return proposals.map(p => applyBlockTimestamps(p, blockTimestamps));
     },
     loadProposal: async (
       spaceId: string,
@@ -705,12 +742,25 @@ export function createApi(
       );
 
       if (!isProposalWithSpaceMetadata(data.proposal)) return null;
-      return formatProposal(
+
+      const proposal = formatProposal(
         data.proposal,
         networkId,
         current,
         opts.baseNetworkId
       );
+
+      const blockTimestamps = await fetchBlockTimestamps(
+        networkId,
+        [
+          proposal.start_block_number,
+          proposal.min_end_block_number,
+          proposal.max_end_block_number
+        ],
+        current
+      );
+
+      return applyBlockTimestamps(proposal, blockTimestamps);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,

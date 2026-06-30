@@ -2,11 +2,7 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import gql from 'graphql-tag';
 import { MaybeRefOrGetter, toValue } from 'vue';
-
-const SCHNAPS_URLS: Record<string, string> = {
-  s: 'https://schnaps.snapshot.box/graphql',
-  's-tn': 'https://testnet-schnaps.snapshot.box/graphql'
-};
+import { SCHNAPS_URLS } from '@/helpers/constants';
 
 const PAYMENTS_LIMIT = 20;
 
@@ -43,7 +39,7 @@ async function fetchPayments(
   network: string,
   skip: number
 ): Promise<Payment[]> {
-  const uri = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
+  const uri = `${SCHNAPS_URLS[network] || SCHNAPS_URLS.s}/graphql`;
 
   const client = new ApolloClient({
     uri,

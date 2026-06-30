@@ -29,10 +29,6 @@ function getDatabaseConnection() {
     return process.env.DATABASE_URL;
   }
 
-  if (process.env.DATABASE_URL_INDEX) {
-    return process.env[`DATABASE_URL_${process.env.DATABASE_URL_INDEX}`];
-  }
-
   throw new Error('No valid database connection URL found.');
 }
 
@@ -50,13 +46,21 @@ async function run() {
     resolvers: {
       Space: {
         active_proposal_count: {
-          sql: (knex) =>
+          sql: knex =>
             knex('proposals')
               .count('*')
               .where('proposals.space', knex.ref('spaces.id'))
               .where('proposals._indexer', knex.ref('spaces._indexer'))
-              .where('proposals.start', '<=', knex.raw("extract(epoch from now())::integer"))
-              .where('proposals.max_end', '>', knex.raw("extract(epoch from now())::integer"))
+              .where(
+                'proposals.start',
+                '<=',
+                knex.raw('extract(epoch from now())::integer')
+              )
+              .where(
+                'proposals.max_end',
+                '>',
+                knex.raw('extract(epoch from now())::integer')
+              )
               .where('proposals.cancelled', false)
               .where('proposals.executed', false)
               .where('proposals.vetoed', false)

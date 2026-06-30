@@ -1,7 +1,7 @@
 import { Response } from 'express';
 
-export const IPFS_GATEWAY = process.env.IPFS_GATEWAY || 'pineapple.fyi';
-export const SWARM_GATEWAY =
+const IPFS_GATEWAY = process.env.IPFS_GATEWAY || 'pineapple.fyi';
+const SWARM_GATEWAY =
   process.env.SWARM_GATEWAY || 'api.gateway.ethswarm.org/bzz';
 
 export function getUrl(uri: string, gateway = IPFS_GATEWAY) {

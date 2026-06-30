@@ -12,6 +12,7 @@ import {
 } from '../../../src/clients';
 import { getExecutionData } from '../../../src/executors';
 import { Choice } from '../../../src/types';
+import { MANA_URL, WHITELIST_SERVER_URL } from '../../constants';
 
 describe('sx-starknet', () => {
   const ethUrl = 'http://127.0.0.1:8545';
@@ -56,8 +57,8 @@ describe('sx-starknet', () => {
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
-      whitelistServerUrl: 'https://wls.snapshot.box',
-      manaUrl: 'https://mana.box'
+      whitelistServerUrl: WHITELIST_SERVER_URL,
+      manaUrl: MANA_URL
     };
 
     client = new StarknetTx(clientOpts);
