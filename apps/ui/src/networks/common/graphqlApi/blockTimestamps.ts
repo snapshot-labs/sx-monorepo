@@ -13,9 +13,11 @@ function isEvmNetworkId(
   return networkId in evmConfigs;
 }
 
-// Resolve block numbers to timestamps. Past blocks use real on-chain values;
-// future blocks are estimated from current + blockTime. Failures are silently
-// omitted so callers fall back to the API estimate.
+/**
+ * Resolve block numbers to timestamps. Past blocks use real on-chain values;
+ * future blocks are estimated from current + blockTime. Failures are silently
+ * omitted so callers fall back to the API estimate.
+ */
 export async function fetchBlockTimestamps(
   networkId: NetworkID,
   blockNumbers: (number | null)[],
