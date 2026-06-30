@@ -18,6 +18,9 @@ const config: KnipConfig = {
       entry: ['src/main.ts', 'src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],
       vite: false,
       ignoreDependencies: [
+        // used by the gitignored graphql-codegen output (gql/), which is not
+        // generated on CI since auction is excluded from build/codegen
+        '@graphql-typed-document-node/core',
         '@iconify-json/heroicons-outline',
         '@iconify-json/heroicons-solid',
         'buffer',
