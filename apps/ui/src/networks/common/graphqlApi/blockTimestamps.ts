@@ -7,12 +7,6 @@ const cache = new Map<string, number>();
 const getCacheKey = (networkId: NetworkID, block: number) =>
   `${networkId}:${block}`;
 
-function isEvmNetworkId(
-  networkId: NetworkID
-): networkId is keyof typeof evmConfigs {
-  return networkId in evmConfigs;
-}
-
 /**
  * Resolve block numbers to timestamps. Past blocks use real on-chain values;
  * future blocks are estimated from current + blockTime. Failures are silently
@@ -24,7 +18,7 @@ export async function fetchBlockTimestamps(
   current: number
 ): Promise<Record<number, number>> {
   const result: Record<number, number> = {};
-  if (!isEvmNetworkId(networkId) || !current) return result;
+  if (!(networkId in evmConfigs) || !current) return result;
 
   const blockTime = evmConfigs[networkId].Meta.blockTime;
   const nowTs = Math.floor(Date.now() / 1000);
