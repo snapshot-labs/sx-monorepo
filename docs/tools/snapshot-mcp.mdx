@@ -1,0 +1,252 @@
+---
+title: "Snapshot MCP"
+description: "Connect Claude, ChatGPT, Cursor and other AI assistants to Snapshot through the Model Context Protocol."
+---
+
+A hosted [MCP](https://modelcontextprotocol.io) server that connects AI assistants to Snapshot governance. Ask an assistant to find proposals, check voting power, cast votes, create proposals, or follow spaces, all in plain language.
+
+Connect in under a minute. No install and no API key required.
+
+```
+https://mcp.snapshot.box
+```
+
+<Note>
+Reading governance data needs nothing but the connection. Write actions (voting, proposing, following) require a wallet you can sign with, authorized once. See [Authentication](#authentication).
+</Note>
+
+<Tip>
+Building an agent? Point it at [llms.txt](https://docs.snapshot.box/llms.txt) for a machine-readable index of these docs, or [llms-full.txt](https://docs.snapshot.box/llms-full.txt) for their full contents.
+</Tip>
+
+## Connect
+
+<Tabs>
+<Tab title="Claude.ai">
+
+<Card title="Add to Claude.ai" href="https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Snapshot&connectorUrl=https%3A%2F%2Fmcp.snapshot.box" horizontal target="_blank" rel="noopener noreferrer" />
+
+One-click setup, then authorize the connector. Or add it manually:
+
+1. Open **Settings > Integrations > Add integration**.
+2. Paste the URL: `https://mcp.snapshot.box`
+3. In any chat, click the integration and select **Connect**.
+
+Available on Pro, Team, and Enterprise plans.
+
+</Tab>
+
+<Tab title="Claude Desktop">
+
+Add the server to your config file:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "snapshot": {
+      "type": "http",
+      "url": "https://mcp.snapshot.box"
+    }
+  }
+}
+```
+
+Restart Claude Desktop.
+
+</Tab>
+
+<Tab title="Claude Code">
+
+```bash
+claude mcp add snapshot --transport http https://mcp.snapshot.box
+```
+
+Verify with `claude mcp list`.
+
+</Tab>
+
+<Tab title="ChatGPT">
+
+<Card title="Add to ChatGPT" href="https://chatgpt.com/#settings/ConnectorSettings?create-connector=true" horizontal arrow target="_blank" rel="noopener noreferrer" />
+
+The button opens the new app modal directly. Or open **Settings > Apps** and click **Create** (enable **Developer mode** under Advanced settings if prompted).
+
+Then fill in the details:
+
+- **Name**: `Snapshot`
+- **MCP Server URL**: `https://mcp.snapshot.box`
+- **Authentication**: `OAuth`
+
+Check the risk acknowledgment box, click **Create**, and complete the OAuth flow to authorize the app.
+
+Custom apps require Developer mode and are available on Plus, Pro, Business, Enterprise, and Edu plans.
+
+</Tab>
+
+<Tab title="Cursor">
+
+<Card title="Add to Cursor" href="cursor://anysphere.cursor-deeplink/mcp/install?name=snapshot&config=eyJ1cmwiOiJodHRwczovL21jcC5zbmFwc2hvdC5ib3gifQ==" horizontal arrow target="_blank" rel="noopener noreferrer" />
+
+Or open **Settings > MCP > Add new MCP server**, choose **HTTP**, paste `https://mcp.snapshot.box`.
+
+</Tab>
+
+<Tab title="VS Code">
+
+<Card title="Add to VS Code" href="https://insiders.vscode.dev/redirect/mcp/install?name=snapshot&config=%7B%22url%22%3A%22https%3A%2F%2Fmcp.snapshot.box%22%7D" horizontal target="_blank" rel="noopener noreferrer" />
+
+Or add it from your terminal:
+
+```bash
+code --add-mcp '{"name":"snapshot","url":"https://mcp.snapshot.box"}'
+```
+
+You can also run **MCP: Add Server** from the Command Palette and enter the URL `https://mcp.snapshot.box`.
+
+</Tab>
+
+<Tab title="Codex CLI">
+
+Add the server to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.snapshot]
+url = "https://mcp.snapshot.box"
+transport = "http"
+```
+
+</Tab>
+</Tabs>
+
+## Try it
+
+Once connected, ask your assistant in plain language. Start simple, then move to actions:
+
+- *"What proposals are active in `ens.eth` right now?"* (read)
+- *"What's the current voting power of `vitalik.eth` in `ens.eth`?"* (read)
+- *"Summarize the last 5 closed proposals on `aave.eth` and tell me which passed."* (read)
+- *"Follow `gitcoindao.eth` for me."* (write)
+- *"Vote 'For' on proposal `0xabc...` in `ens.eth`."* (write)
+
+The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act. Read actions run instantly. Write actions ask you to authorize once (see [Authentication](#authentication)).
+
+## Authentication
+
+All write operations (voting, proposing, following) are signed by a Snapshot [alias](/user-guides/aliases), a lightweight signer wallet that can act on your behalf without exposing your main private key.
+
+The first time the AI calls a write tool, an OAuth window opens so you can authorize an alias. This is a one-time step. The alias is created and managed by [Coinbase CDP](https://docs.cdp.coinbase.com).
+
+<video
+  autoPlay
+  muted
+  controls
+  playsInline
+  className="w-full rounded-xl"
+  src="/videos/mcp-authorize-alias.mp4"
+></video>
+
+You can revoke an alias at any time from **[Settings > Aliases](https://snapshot.box/#/settings/aliases)**.
+
+<video
+  autoPlay
+  muted
+  controls
+  playsInline
+  className="w-full rounded-xl"
+  src="/videos/mcp-revoke-alias.mp4"
+></video>
+
+## Available tools
+
+The server exposes 6 tools. The AI selects them automatically based on your prompt.
+
+| Tool | Description | Auth |
+|---|---|---|
+| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
+| `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-whoami` | Return your connected address, signer alias, authorization status, and profile. | Yes |
+| `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
+| `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
+| `snapshot-follow` | Follow or unfollow a space. Set `action` to `"follow"` (default) or `"unfollow"`. | Yes |
+
+## How it works
+
+1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tools.
+2. **Connect.** OAuth 2.0 with PKCE. The server creates a CDP-managed alias wallet, redirects you to Snapshot to authorize it, then issues a JWT.
+3. **Read.** `snapshot-query` and `snapshot-schema` proxy to Snapshot Hub. No wallet needed.
+4. **Write.** Write tools build the EIP-712 envelope, ask CDP to sign with your alias, and submit to the Snapshot sequencer.
+
+The server is stateless. The JWT carries everything (address, CDP account ID, alias).
+
+## Security
+
+| Property | Detail |
+|---|---|
+| **Your main key never leaves your wallet** | Writes are signed by an alias that can only sign Snapshot governance messages. |
+| **Isolated aliases** | Each connection provisions its own [Coinbase CDP](https://docs.cdp.coinbase.com)-managed alias. The server never sees the private key. |
+| **Scoped tokens** | Stateless JWTs (HS256). A stolen token can act as that alias but cannot touch your main wallet. Rotating `JWT_SECRET` invalidates all tokens. |
+| **OAuth with PKCE** | Standards-compliant Authorization Code + PKCE. No client secret required. |
+| **Stateless** | Zero session state. Every request is processed from the JWT alone. |
+| **Revocable** | [Revoke the alias](/user-guides/aliases#revoke-an-alias) at any time from the Snapshot UI. |
+
+## Local mode (stdio)
+
+For local development or scripting, you can run the server in stdio mode with your own Snapshot alias key instead of using the hosted server.
+
+```bash
+git clone https://github.com/snapshot-labs/sx-monorepo
+cd sx-monorepo && bun install
+cd apps/mcp
+ALIAS_PRIVATE_KEY=0x... bun src/index.ts --stdio
+```
+
+Then point your MCP client to the local server:
+
+```json
+{
+  "mcpServers": {
+    "snapshot": {
+      "command": "bun",
+      "args": ["src/index.ts", "--stdio"],
+      "cwd": "/path/to/sx-monorepo/apps/mcp",
+      "env": {
+        "ALIAS_PRIVATE_KEY": "0x..."
+      }
+    }
+  }
+}
+```
+
+| Variable | Description |
+|---|---|
+| `ALIAS_PRIVATE_KEY` | Your Snapshot alias private key. Not your main wallet. |
+| `SNAPSHOT_API_KEY` | Optional. [API key](/tools/api/api-keys) for higher rate limits. |
+
+`ALIAS_PRIVATE_KEY` must be authorized as an alias on Snapshot before it can sign. If it isn't, the tool will return a URL to authorize it.
+
+## FAQ
+
+<AccordionGroup>
+<Accordion title="Do I need to give the AI my private key?">
+No. You authorize a Snapshot alias, a separate signer managed by the MCP server. Your main wallet key stays in your wallet.
+</Accordion>
+
+<Accordion title="Can the AI drain my funds?">
+No. The alias can only sign Snapshot governance messages (votes, proposals, follows). It cannot move tokens or call other contracts.
+</Accordion>
+
+<Accordion title="How do I revoke access?">
+Revoke the alias from **[Settings > Aliases](https://snapshot.box/#/settings/aliases)** on Snapshot. This immediately stops the server from acting on your behalf. See [Authentication](#authentication) for a walkthrough.
+</Accordion>
+
+<Accordion title="Is the read API rate-limited?">
+Yes, the standard Snapshot rate limit applies. Self-host with your own `SNAPSHOT_API_KEY` for higher throughput.
+</Accordion>
+
+<Accordion title="What does the server store?">
+Nothing. The server is stateless. Tokens are self-verifiable JWTs.
+</Accordion>
+</AccordionGroup>

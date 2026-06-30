@@ -6,6 +6,7 @@ import {
 } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
 import { Account, CallData, RpcProvider, uint256 } from 'starknet';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../constants';
 import GnosisSafeL2Contract from './fixtures/l1/GnosisSafeL2.json';
 import GnosisSafeProxyFactoryContract from './fixtures/l1/GnosisSafeProxyFactory.json';
 import L1AvatarExecutionStrategyFactoryContract from './fixtures/l1/L1AvatarExecutionStrategyFactory.json';
@@ -327,8 +328,8 @@ export async function setup({
   const client = new StarknetTx({
     starkProvider: starknetProvider,
     networkConfig,
-    ethUrl: 'https://rpc.brovider.xyz/5',
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    ethUrl: ETH_RPC_URL,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   });
 
   const { address } = await client.deploySpace({

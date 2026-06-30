@@ -103,7 +103,7 @@ export const GOVERNANCES: Partial<
   arb1: {
     'Arbitrum Treasury': {
       name: 'Arbitrum Treasury',
-      about: 'An onchain platform for all',
+      about: 'Powering the programmable economy',
       avatar: 'ipfs://QmWZ5SMRfvcK8tycsDqojQaSiKedgtVkS7CkZdxPgeCVsZ',
       externalUrl: 'https://arbitrum.io',
       github: 'OffchainLabs',
@@ -117,7 +117,7 @@ export const GOVERNANCES: Partial<
     },
     'Arbitrum Core': {
       name: 'Arbitrum Core',
-      about: 'An onchain platform for all',
+      about: 'Powering the programmable economy',
       avatar: 'ipfs://QmWZ5SMRfvcK8tycsDqojQaSiKedgtVkS7CkZdxPgeCVsZ',
       externalUrl: 'https://arbitrum.io',
       github: 'OffchainLabs',

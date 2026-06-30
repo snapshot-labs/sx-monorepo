@@ -339,7 +339,6 @@ export type Proposal = {
   veto_tx: string | null;
   vote_count: number;
   has_execution_window_opened: boolean;
-  execution_ready: boolean;
   vetoed: boolean;
   /**
    * Determines if proposal execution is settled - all transactions have been executed or vetoed.
@@ -405,6 +404,7 @@ export type Follow = {
 export type Alias = {
   address: string;
   alias: string;
+  created?: number;
 };
 
 export type Contact = {

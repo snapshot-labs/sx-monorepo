@@ -3,10 +3,11 @@ import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/starknet/ethereum-sig';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../../constants';
 import { starkProvider } from '../../../helpers';
 
 describe('EthereumSig', () => {
-  const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
+  const provider = new JsonRpcProvider(ETH_RPC_URL);
   const signer = new Wallet(
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
     provider
@@ -15,8 +16,8 @@ describe('EthereumSig', () => {
   const client = new EthereumSig({
     starkProvider,
     networkConfig: starknetSepolia,
-    ethUrl: 'https://rpc.brovider.xyz/5',
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    ethUrl: ETH_RPC_URL,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   });
 
   beforeAll(() => {

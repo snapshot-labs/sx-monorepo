@@ -25,7 +25,6 @@ export type SnapshotXConfig = {
   masterSpace: string;
   masterSimpleQuorumAvatar: string;
   masterSimpleQuorumTimelock: string;
-  masterAxiom: string | null;
   propositionPowerValidationStrategyAddress: string;
   apeGasStrategy: string | null;
   apeGasStrategyDelay: number;
