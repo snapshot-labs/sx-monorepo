@@ -98,12 +98,14 @@ async function deepResolve(
       property,
       params
     ]);
-  } catch {
-    // The resolver doesn't implement / reverts on this method (CCIP-read,
-    // ENS v2, or a broken resolver). Treat as "no record", matching the old
-    // multicall path, so callers degrade gracefully (e.g. getSpaceController
-    // falls back to the name owner) instead of throwing.
-    return null;
+  } catch (err: any) {
+    // The resolver reverts on this method (CCIP-read, ENS v2, or a broken
+    // resolver). Treat as "no record", matching the old multicall path, so
+    // callers degrade gracefully (e.g. getSpaceController falls back to the
+    // name owner) instead of throwing. Network/timeout errors are re-thrown
+    // so a transient RPC failure is not silently read as "no record".
+    if (err?.code === 'CALL_EXCEPTION') return null;
+    throw err;
   }
 }
 
