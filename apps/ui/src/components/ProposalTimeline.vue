@@ -64,36 +64,81 @@ function getExplorerUrl(data: Proposal, tx: string | null) {
   return getNetwork(data.network).helpers.getExplorerUrl(tx, 'transaction');
 }
 
+function getBlockExplorerUrl(
+  networkId: NetworkID,
+  blockNumber: number | null | undefined,
+  timestamp: number
+) {
+  if (!blockNumber || timestamp > now.value) return undefined;
+
+  const network = getNetwork(networkId);
+
+  // Non-native block chains (arb1, ape, curtis) reference L1 blocks
+  return network.helpers.getExplorerUrl(
+    blockNumber.toString(),
+    'block',
+    network.currentChainId
+  );
+}
+
 const states: ComputedRef<State[]> = computed(() => {
   const data = props.data;
   const { created, start, min_end, max_end } = formatTimelineValues();
-  const isProposal = 'proposal_id' in data;
+  const proposal = 'proposal_id' in data ? data : undefined;
   const initial: State[] = [];
 
   if (created) {
     initial.push({
       id: 'created',
       value: created,
-      url: isProposal ? getExplorerUrl(data, data.tx) : undefined
+      url: proposal ? getExplorerUrl(proposal, proposal.tx) : undefined
     });
   }
 
-  initial.push({ id: 'start', value: start });
+  initial.push({
+    id: 'start',
+    value: start,
+    url: getBlockExplorerUrl(data.network, proposal?.start_block_number, start)
+  });
 
   if (min_end === max_end) {
-    initial.push({ id: 'end', value: min_end });
+    initial.push({
+      id: 'end',
+      value: min_end,
+      url: getBlockExplorerUrl(
+        data.network,
+        proposal?.max_end_block_number,
+        min_end
+      )
+    });
   } else {
     initial.push(
-      { id: 'min_end', value: min_end },
-      { id: 'max_end', value: max_end }
+      {
+        id: 'min_end',
+        value: min_end,
+        url: getBlockExplorerUrl(
+          data.network,
+          proposal?.min_end_block_number,
+          min_end
+        )
+      },
+      {
+        id: 'max_end',
+        value: max_end,
+        url: getBlockExplorerUrl(
+          data.network,
+          proposal?.max_end_block_number,
+          max_end
+        )
+      }
     );
   }
 
-  if (isProposal && data.state === 'executed' && data.executed_at) {
+  if (proposal && proposal.state === 'executed' && proposal.executed_at) {
     initial.push({
       id: 'executed',
-      value: data.executed_at,
-      url: getExplorerUrl(data, data.execution_tx)
+      value: proposal.executed_at,
+      url: getExplorerUrl(proposal, proposal.execution_tx)
     });
   }
 

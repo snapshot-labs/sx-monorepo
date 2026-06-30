@@ -9,12 +9,7 @@ import {
 import logger from './logger';
 import { addStarknetIndexers } from './starknet';
 
-const PRODUCTION_INDEXER_DELAY = 60 * 1000;
-
 const GIT_COMMIT = process.env.GIT_COMMIT;
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function initializeCheckpoint(checkpoint: Checkpoint) {
   if (!GIT_COMMIT) {
@@ -66,13 +61,6 @@ async function initializeCheckpoint(checkpoint: Checkpoint) {
 export async function startIndexer(checkpoint: Checkpoint) {
   addStarknetIndexers(checkpoint);
   addEvmIndexers(checkpoint);
-
-  if (IS_PRODUCTION) {
-    logger.info(
-      'Delaying indexer to prevent multiple processes indexing at the same time.'
-    );
-    await sleep(PRODUCTION_INDEXER_DELAY);
-  }
 
   await initializeCheckpoint(checkpoint);
 

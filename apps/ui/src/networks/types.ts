@@ -439,7 +439,13 @@ export type NetworkHelpers = {
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
     id: string,
-    type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
+    type:
+      | 'transaction'
+      | 'address'
+      | 'contract'
+      | 'strategy'
+      | 'token'
+      | 'block',
     chainId?: ChainId
   ): string;
 };

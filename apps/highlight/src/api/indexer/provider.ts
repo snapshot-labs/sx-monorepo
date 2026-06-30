@@ -3,8 +3,6 @@ import { Writer } from './types';
 import Highlight from '../../highlight/highlight';
 import { Event, Unit } from '../../highlight/types';
 
-export let lastIndexedMci = 0;
-
 export class HighlightProvider extends BaseProvider {
   private readonly writers: Record<string, Writer>;
   private highlight: Highlight;
@@ -58,8 +56,6 @@ export class HighlightProvider extends BaseProvider {
       console.log('error when handling block', err);
       throw err;
     }
-
-    lastIndexedMci = blockNumber;
 
     return blockNumber + 1;
   }

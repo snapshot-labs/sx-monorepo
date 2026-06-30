@@ -68,7 +68,7 @@ type ContractDetails = {
 
 const COMP_TOKEN_DECIMALS = 18n;
 
-export async function deployDependency(
+async function deployDependency(
   signer: Signer,
   contractDetails: ContractDetails,
   ...args: any[]

@@ -114,8 +114,9 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
         }, interval);
       }),
     getExplorerUrl: (id, type) => {
-      let dataType: 'tx' | 'contract' | 'token' = 'tx';
+      let dataType: 'tx' | 'contract' | 'token' | 'block' = 'tx';
       if (type === 'token') dataType = 'token';
+      else if (type === 'block') dataType = 'block';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'contract';
 

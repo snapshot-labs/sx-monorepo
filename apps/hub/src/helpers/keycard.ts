@@ -21,4 +21,4 @@ const checkKeycard = async (req, res, next) => {
   return next();
 };
 
-export { keycard, checkKeycard };
+export { checkKeycard };

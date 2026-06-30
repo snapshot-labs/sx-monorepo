@@ -29,10 +29,6 @@ function getDatabaseConnection() {
     return process.env.DATABASE_URL;
   }
 
-  if (process.env.DATABASE_URL_INDEX) {
-    return process.env[`DATABASE_URL_${process.env.DATABASE_URL_INDEX}`];
-  }
-
   throw new Error('No valid database connection URL found.');
 }
 

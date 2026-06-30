@@ -50,7 +50,7 @@ export function generateSpaceStarknetWallet(
   return { address, privateKey: `0x${privateKey}`, starkKeyPubAX };
 }
 
-export async function isAccountDeployed(
+async function isAccountDeployed(
   provider: RpcProvider,
   address: string
 ): Promise<boolean> {
@@ -62,7 +62,7 @@ export async function isAccountDeployed(
   }
 }
 
-export async function deployContract(
+async function deployContract(
   account: Account,
   provider: RpcProvider,
   starkKeyPubAX: string,
