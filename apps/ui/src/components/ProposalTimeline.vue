@@ -70,14 +70,14 @@ function getBlockExplorerUrl(
   timestamp: number
 ) {
   if (!blockNumber || timestamp > now.value) return undefined;
+
   const network = getNetwork(networkId);
+
   // Non-native block chains (arb1, ape, curtis) reference L1 blocks
-  return (
-    network.helpers.getExplorerUrl(
-      blockNumber.toString(),
-      'block',
-      network.currentChainId
-    ) || undefined
+  return network.helpers.getExplorerUrl(
+    blockNumber.toString(),
+    'block',
+    network.currentChainId
   );
 }
 
