@@ -1,3 +1,4 @@
+appName: sx-api
 namespace: mainnet
 route:
   enabled: true

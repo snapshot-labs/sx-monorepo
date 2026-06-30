@@ -1,3 +1,4 @@
+appName: sx-api
 namespace: testnet
 route:
   enabled: true

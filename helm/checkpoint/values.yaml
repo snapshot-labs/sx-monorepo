@@ -1,8 +1,6 @@
-appName: sx-api
 color: blue
 
 image:
-  repository: ghcr.io/snapshot-labs/sx-api
   tag: latest
   pullPolicy: IfNotPresent
 
@@ -11,6 +9,9 @@ imagePullSecret: ghcr
 # Set per-env (e.g. pin mainnet to its tainted node pool).
 nodeSelector: {}
 tolerations: []
+
+# Non-secret env, rendered into the ConfigMap. Set per app/env.
+config: {}
 
 db:
   user: postgres

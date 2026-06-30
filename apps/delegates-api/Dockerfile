@@ -24,28 +24,25 @@ COPY packages/tune/package.json packages/tune/
 FROM base AS build
 RUN bun install --frozen-lockfile --ignore-scripts
 
-COPY apps/api apps/api
-# turbo's build task depends on highlight#codegen, so its source is needed too
-COPY apps/highlight apps/highlight
-COPY packages packages
-RUN bun run build --filter=api
+# delegates-api has no workspace dependencies, so build it directly instead of
+# through turbo (whose build task pulls in unrelated api/highlight codegen).
+COPY apps/delegates-api apps/delegates-api
+RUN cd apps/delegates-api && bun run codegen && bun run build
 
 # Production dependencies
 FROM base AS prod-deps
-RUN bun install --frozen-lockfile --production --ignore-scripts --filter=api
+RUN bun install --frozen-lockfile --production --ignore-scripts --filter=delegates-api
 
 # Runtime
 FROM node:22-alpine AS runtime
 
 ENV NODE_ENV=production
-WORKDIR /app/apps/api
+WORKDIR /app/apps/delegates-api
 
 COPY --from=prod-deps /app /app
 
-COPY --from=build /app/packages/sx.js/dist /app/packages/sx.js/dist
-COPY --from=build /app/packages/sx.js/dist.cjs /app/packages/sx.js/dist.cjs
-COPY --from=build /app/apps/api/src/schema.gql ./src/schema.gql
-COPY --from=build /app/apps/api/dist ./dist
+COPY --from=build /app/apps/delegates-api/src/schema.gql ./src/schema.gql
+COPY --from=build /app/apps/delegates-api/dist ./dist
 
 USER node
 EXPOSE 3000

@@ -1,0 +1,20 @@
+appName: sx-api
+namespace: mainnet
+
+nodeSelector:
+  doks.digitalocean.com/node-pool: mainnet-pool
+tolerations:
+  - key: workload
+    operator: Equal
+    value: mainnet
+    effect: NoSchedule
+
+image:
+  repository: ghcr.io/snapshot-labs/sx-api
+
+config:
+  PORT: '3000'
+  ENABLE_SNAPSHOT_X: 'true'
+  ENABLE_GOVERNOR_BRAVO: 'true'
+  ENABLE_OPENZEPPELIN: 'true'
+  ENABLED_NETWORKS: 'eth,oeth,base,mnt,arb1,ape,bnb,sn'

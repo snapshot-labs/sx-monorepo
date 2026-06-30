@@ -1,5 +1,0 @@
-namespace: testnet
-enabledNetworks: 'sep,curtis,bnbt,sn-sep'
-
-nodeSelector:
-  doks.digitalocean.com/node-pool: testnet-pool

@@ -1,9 +1,8 @@
-appName: sx-api
-namespace: testnet
 activeColor: blue
 
 route:
   enabled: false
+  # Shared Cilium Gateway (see helm/gateway), one per cluster.
   gatewayName: sx-api
   gatewayNamespace: gateway
   host: ''
