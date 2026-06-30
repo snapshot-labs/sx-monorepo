@@ -3,7 +3,7 @@ export const baseDomain = {
   version: '0.1.0'
 };
 
-export const domainTypes = {
+const domainTypes = {
   StarkNetDomain: [
     { name: 'name', type: 'felt252' },
     { name: 'version', type: 'felt252' },
@@ -12,7 +12,7 @@ export const domainTypes = {
   ]
 };
 
-export const sharedTypes = {
+const sharedTypes = {
   Strategy: [
     { name: 'address', type: 'felt252' },
     { name: 'params', type: 'felt*' }

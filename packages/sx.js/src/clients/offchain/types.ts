@@ -2,7 +2,7 @@ import { SignatureData as BaseSignatureData, Privacy } from '../../types';
 
 export type SignatureData = BaseSignatureData;
 
-export type Choice = number | number[] | string | Record<string, number>;
+type Choice = number | number[] | string | Record<string, number>;
 
 export type Envelope<
   T extends
@@ -18,7 +18,7 @@ export type Envelope<
   data: T;
 };
 
-export type StrategyConfig = {
+type StrategyConfig = {
   index: number;
   address: string;
   metadata?: Record<string, any>;

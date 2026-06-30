@@ -219,7 +219,7 @@ export const requestDeduplicatorSize = new client.Gauge({
   help: 'Total number of items in the deduplicator queue'
 });
 
-export const graphqlRequest = new client.Histogram({
+const graphqlRequest = new client.Histogram({
   name: 'graphql_requests_duration_seconds',
   help: 'Duration in seconds of graphql requests',
   labelNames: ['type'],

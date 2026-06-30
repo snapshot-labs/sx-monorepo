@@ -68,7 +68,7 @@ export async function handleProposalMetadata(
   await proposalMetadataItem.save();
 }
 
-export async function handleStrategiesParsedMetadata(
+async function handleStrategiesParsedMetadata(
   metadataUri: string,
   config: CommonConfig
 ) {

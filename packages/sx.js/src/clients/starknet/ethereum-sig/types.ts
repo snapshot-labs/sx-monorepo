@@ -1,4 +1,4 @@
-export const sharedTypes = {
+const sharedTypes = {
   Strategy: [
     { name: 'address', type: 'uint256' },
     { name: 'params', type: 'uint256[]' }
