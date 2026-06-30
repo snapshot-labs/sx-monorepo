@@ -27,12 +27,6 @@ export async function startApiServer(checkpoint: Checkpoint) {
   await server.start();
 
   app.use(cors());
-  app.get('/deployment', (req, res) => {
-    res.json({
-      index: process.env.DATABASE_URL_INDEX ?? 'default'
-    });
-  });
-
   app.use(
     '/',
     express.json({ limit: '50mb' }),
