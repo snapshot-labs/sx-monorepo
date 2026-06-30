@@ -9,6 +9,7 @@ import Checkpoint, {
   LogLevel
 } from '@snapshot-labs/checkpoint';
 import { addEvmIndexers } from './evm';
+import logger, { pinoOptions } from './logger';
 import overridesConfig from './overrides.json';
 import { addStarknetIndexers } from './starknet';
 
@@ -45,7 +46,7 @@ async function run() {
     logLevel: LogLevel.Info,
     resetOnConfigChange: true,
     skipBlockFetching: true,
-    prettifyLogs: process.env.NODE_ENV !== 'production',
+    pinoOptions,
     overridesConfig
   });
 
@@ -66,7 +67,7 @@ async function run() {
     }
   });
 
-  console.log(`Listening at ${url}`);
+  logger.info(`Listening at ${url}`);
 
   if (IS_INDEXER) {
     await startIndexer(checkpoint);
