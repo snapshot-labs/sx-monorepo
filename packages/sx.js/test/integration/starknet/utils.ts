@@ -82,7 +82,7 @@ export type TestConfig = {
   networkConfig: NetworkConfig;
 };
 
-export async function deployDependency(
+async function deployDependency(
   account: Account,
   sierra: any,
   casm: any,
@@ -426,7 +426,7 @@ export async function setup({
   };
 }
 
-export async function setupL1ExecutionStrategy(
+async function setupL1ExecutionStrategy(
   signer: Wallet,
   {
     client,
@@ -508,7 +508,7 @@ export async function setupL1ExecutionStrategy(
   };
 }
 
-export async function postDevnet(path: string, body: Record<string, any>) {
+async function postDevnet(path: string, body: Record<string, any>) {
   const res = await fetch(`http://127.0.0.1:5050/${path}`, {
     method: 'POST',
     headers: {
@@ -520,7 +520,7 @@ export async function postDevnet(path: string, body: Record<string, any>) {
   return res.json();
 }
 
-export function mint(address: string, amount: number, unit: 'FRI' | 'WEI') {
+function mint(address: string, amount: number, unit: 'FRI' | 'WEI') {
   return postDevnet('mint', {
     address,
     amount,
@@ -540,7 +540,7 @@ export function increaseTime(timeIncrease: number) {
   });
 }
 
-export function loadL1MessagingContract(networkUrl: string, address: string) {
+function loadL1MessagingContract(networkUrl: string, address: string) {
   return postDevnet('postman/load_l1_messaging_contract', {
     network_url: networkUrl,
     address

@@ -1,8 +1,8 @@
 import knex from './knex';
 
-export const REGISTERED_TRANSACTIONS = 'registered_transactions';
-export const REGISTERED_PROPOSALS = 'registered_proposals';
-export const APEGAS_PROPOSALS = 'apegas_proposals';
+const REGISTERED_TRANSACTIONS = 'registered_transactions';
+const REGISTERED_PROPOSALS = 'registered_proposals';
+const APEGAS_PROPOSALS = 'apegas_proposals';
 
 export type ApeGasProposal = {
   chainId: number;
@@ -93,10 +93,6 @@ export async function getDataByMessageHash(hash: string) {
     .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
-}
-
-export async function saveApeGasProposal(proposal: ApeGasProposal) {
-  return knex(APEGAS_PROPOSALS).insert(proposal).onConflict().ignore();
 }
 
 export async function updateApeGasProposal(

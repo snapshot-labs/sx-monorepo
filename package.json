@@ -21,7 +21,6 @@
     "lint:fix": "TURBO_TELEMETRY_DISABLED=1 turbo run lint:fix && bun run lint:scripts --fix",
     "lint:scripts": "eslint scripts/",
     "lint:unused": "knip",
-    "lint:unused-deps": "knip --dependencies",
     "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck --filter=!auction",
     "docs": "cd docs && bunx mintlify dev --port 3006",
     "release": "bun run build && changeset publish"
