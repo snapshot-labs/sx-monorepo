@@ -28,6 +28,10 @@ const config: KnipConfig = {
         'util'
       ]
     },
+    'apps/delegates-api': {
+      entry: ['src/index.ts'],
+      ignoreDependencies: ['ts-node']
+    },
     'apps/highlight': {
       entry: ['src/index.ts']
     },
