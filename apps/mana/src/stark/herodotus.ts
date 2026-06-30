@@ -1,4 +1,5 @@
-import { constants } from 'starknet';
+import { starknetNetworks } from '@snapshot-labs/sx';
+import { constants, validateAndParseAddress } from 'starknet';
 import { getClient } from './networks';
 import * as db from '../db';
 import logger from './logger';
@@ -63,6 +64,35 @@ function getApi(accumulatesChainId: string) {
 
 function getId(proposal: ApiProposal) {
   return `${proposal.chainId}-${proposal.l1TokenAddress}-${proposal.strategyAddress}-${proposal.timestamp}`;
+}
+
+function getNetworkId(chainId: string): 'sn' | 'sn-sep' | null {
+  if (chainId === constants.StarknetChainId.SN_MAIN) return 'sn';
+  if (chainId === constants.StarknetChainId.SN_SEPOLIA) return 'sn-sep';
+  return null;
+}
+
+// The Herodotus Satellite versions of the storage-proof voting strategies
+// (sx-starknet#641). The same batch query populates the Satellite contract with
+// the timestamp -> L1 block mapping and the storage root, which voters read
+// on-chain via `get_block_by_timestamp`. So, unlike the legacy strategies, these
+// need no on-chain `cache_timestamp` tx after the query completes.
+function isSatelliteStrategy(
+  chainId: string,
+  strategyAddress: string
+): boolean {
+  const networkId = getNetworkId(chainId);
+  if (!networkId) return false;
+
+  const { Strategies } = starknetNetworks[networkId];
+
+  return [
+    Strategies.EVMSlotValueV2,
+    Strategies.OZVotesStorageProofV2,
+    Strategies.OZVotesTrace208StorageProofV2
+  ]
+    .map(address => validateAndParseAddress(address))
+    .includes(validateAndParseAddress(strategyAddress));
 }
 
 async function getStatus(id: string, accumulatesChainId: string) {
@@ -167,8 +197,6 @@ export async function processProposal(proposal: DbProposal) {
     });
   }
 
-  const { getAccount, herodotusController } = getClient(proposal.chainId);
-  const { account, nonceManager, deployAccount } = getAccount('0x0');
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
@@ -193,6 +221,20 @@ export async function processProposal(proposal: DbProposal) {
 
     throw err;
   }
+
+  // Satellite strategies: the completed batch query has already written the
+  // timestamp -> L1 block mapping and storage root into the Satellite contract,
+  // which voters read on-chain via get_block_by_timestamp. No on-chain
+  // cache_timestamp tx is required, so we are done.
+  if (isSatelliteStrategy(proposal.chainId, proposal.strategyAddress)) {
+    logger.info({ proposalId: proposal.id }, 'Satellite proposal processed');
+    return db.markProposalProcessed(proposal.id);
+  }
+
+  // Legacy strategies (facts registry + timestamp remappers): fetch the remapper
+  // MMR path from the indexer and submit it on-chain via cache_timestamp.
+  const { getAccount, herodotusController } = getClient(proposal.chainId);
+  const { account, nonceManager, deployAccount } = getAccount('0x0');
 
   const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);
 

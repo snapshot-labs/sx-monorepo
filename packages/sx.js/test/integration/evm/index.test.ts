@@ -5,6 +5,7 @@ import { setup, TestConfig } from './utils';
 import { EthereumSig } from '../../../src/clients/evm/ethereum-sig';
 import { EthereumTx } from '../../../src/clients/evm/ethereum-tx';
 import { getExecutionData } from '../../../src/executors';
+import { MANA_URL, WHITELIST_SERVER_URL } from '../../constants';
 
 describe('EthereumTx', () => {
   const PROPOSAL_ID = 1;
@@ -29,8 +30,8 @@ describe('EthereumTx', () => {
 
     const clientOpts = {
       networkConfig: testConfig.networkConfig,
-      whitelistServerUrl: 'https://wls.snapshot.box',
-      manaUrl: 'https://mana.box',
+      whitelistServerUrl: WHITELIST_SERVER_URL,
+      manaUrl: MANA_URL,
       provider
     };
 

@@ -1,6 +1,5 @@
 import { test as base, BrowserContext, chromium } from '@playwright/test';
 import { MetaMaskHelper } from './helpers/metamask';
-export { expect } from '@playwright/test';
 
 const METAMASK_SEED =
   process.env.METAMASK_SEED ||

@@ -1,11 +1,12 @@
 name: Hub Test
 
 on:
-  push:
+  pull_request:
     paths:
       - 'apps/hub/**'
       - '.github/workflows/hub-test.yml'
-  pull_request:
+  push:
+    branches: [master]
     paths:
       - 'apps/hub/**'
       - '.github/workflows/hub-test.yml'

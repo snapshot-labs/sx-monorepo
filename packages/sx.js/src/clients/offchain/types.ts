@@ -2,7 +2,7 @@ import { SignatureData as BaseSignatureData, Privacy } from '../../types';
 
 export type SignatureData = BaseSignatureData;
 
-export type Choice = number | number[] | string | Record<string, number>;
+type Choice = number | number[] | string | Record<string, number>;
 
 export type Envelope<
   T extends
@@ -18,7 +18,7 @@ export type Envelope<
   data: T;
 };
 
-export type StrategyConfig = {
+type StrategyConfig = {
   index: number;
   address: string;
   metadata?: Record<string, any>;
@@ -116,6 +116,8 @@ export type EIP712SetAliasMessage = {
   timestamp?: number;
 };
 
+export type EIP712RevokeAliasMessage = EIP712SetAliasMessage;
+
 export type EIP712UpdateUserMessage = {
   from?: string;
   profile: string;
@@ -154,6 +156,7 @@ export type EIP712Message = Required<
   | EIP712FollowSpaceMessage
   | EIP712UnfollowSpaceMessage
   | EIP712SetAliasMessage
+  | EIP712RevokeAliasMessage
   | EIP712UpdateUserMessage
   | EIP712UpdateStatementMessage
   | EIP712UpdateSpaceMessage
@@ -237,6 +240,8 @@ export type SetAlias = {
   alias: string;
   timestamp?: number;
 };
+
+export type RevokeAlias = SetAlias;
 
 export type UpdateUser = {
   from?: string;

@@ -42,7 +42,7 @@ async function processApeGasProposal(
   });
 }
 
-export async function processApeGasProposals(chainId: number) {
+async function processApeGasProposals(chainId: number) {
   const { provider } = createWalletProxy(chainId);
 
   const multicallContract = new Contract(

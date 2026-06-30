@@ -23,12 +23,6 @@ export type EIP712Ballot = {
   support: number;
 };
 
-export type EIP712BallotWithReason = {
-  proposalId: number;
-  support: number;
-  reason: string;
-};
-
 export type SignatureData = {
   authenticatorType: GovernorBravoAuthenticator;
   address: string;

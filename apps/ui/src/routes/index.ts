@@ -3,11 +3,9 @@ import Splash from '@/components/Layout/Splash.vue';
 import aliases from '@/helpers/aliases.json';
 import { onOrgNavigate } from '@/helpers/organizations';
 import { metadataNetwork } from '@/networks';
-import auctionRoutes from '@/routes/auction';
 import defaultRoutes from '@/routes/default';
 
 const { resolved, isWhiteLabel } = useWhiteLabel();
-const { isAuctionApp } = useApp();
 
 const splashRoute = {
   path: '/:catchAll(.*)*',
@@ -15,16 +13,9 @@ const splashRoute = {
   component: Splash
 };
 
-let routes: RouteRecordRaw[] = [];
-
-if (isAuctionApp.value) {
-  routes = auctionRoutes;
-} else {
-  // At this stage, we're not sure whether the app is a whitelabel
-  const baseRoutes = !resolved.value ? [splashRoute] : defaultRoutes;
-  // In dev mode, include auction routes
-  routes = import.meta.env.DEV ? [...baseRoutes, ...auctionRoutes] : baseRoutes;
-}
+const routes: RouteRecordRaw[] = !resolved.value
+  ? [splashRoute]
+  : defaultRoutes;
 
 const router = createRouter({
   history: createWebHashHistory(),

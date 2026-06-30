@@ -75,7 +75,8 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     isContract,
     hasReason,
     connectorType,
-    ignoreRelayer
+    ignoreRelayer,
+    preferRelayerType
   }: {
     authenticators: string[];
     strategies: string[];
@@ -84,6 +85,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
+    preferRelayerType?: AuthenticatorSupportInfo['relayerType'];
   }) {
     type AuthenticatorWithSupportInfo = {
       authenticator: string;
@@ -111,10 +113,13 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         return supportInfo.isSupported;
       })
       .sort((a, b) => {
-        const aRelayerPriority = a.supportInfo.priority ?? 0;
-        const bRelayerPriority = b.supportInfo.priority ?? 0;
+        // Preferred relayerType wins over the priority order (priorities >= 0).
+        const rank = ({ supportInfo }: AuthenticatorWithSupportInfo) =>
+          preferRelayerType && supportInfo.relayerType === preferRelayerType
+            ? -1
+            : supportInfo.priority ?? 0;
 
-        return aRelayerPriority - bRelayerPriority;
+        return rank(a) - rank(b);
       })
       .map(({ authenticator, supportInfo }) => ({
         authenticator,

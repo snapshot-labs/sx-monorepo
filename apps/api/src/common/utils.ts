@@ -47,7 +47,7 @@ export async function updateCounter(
   await counter.save();
 }
 
-export function getUrl(uri: string, gateway = 'pineapple.fyi') {
+function getUrl(uri: string, gateway = 'pineapple.fyi') {
   const ipfsGateway = `https://${gateway}`;
   if (!uri) return null;
   if (

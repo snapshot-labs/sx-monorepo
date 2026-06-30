@@ -405,6 +405,12 @@ export function createActions(
         data: { alias }
       });
     },
+    async revokeAlias(web3: Web3Provider | Wallet, alias: string) {
+      return client.revokeAlias({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { alias }
+      });
+    },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {
       const profile: Partial<UserProfile> = {
         name: user.name,

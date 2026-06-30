@@ -18,7 +18,6 @@ export const STARKNET_L1_EXECUTION_QUERY = gql`
   }
 `;
 
-const STRATEGIES_WITH_FINALIZE = ['Axiom'];
 const STRATEGIES_WITH_EXTERNAL_DETAILS = ['EthRelayer'];
 
 export function useExecutionActions(
@@ -35,7 +34,6 @@ export function useExecutionActions(
   const message: Ref<string | null> = ref(null);
   const warningMessage: Ref<string | null> = ref(null);
   const executionNetwork = ref<Network>(getNetwork(toValue(proposal).network));
-  const finalizeProposalSending = ref(false);
   const executeProposalSending = ref(false);
   const executeQueuedProposalSending = ref(false);
   const vetoProposalSending = ref(false);
@@ -54,11 +52,6 @@ export function useExecutionActions(
   }, 1000);
 
   const network = computed(() => getNetwork(toValue(proposal).network));
-  const hasFinalize = computed(
-    () =>
-      STRATEGIES_WITH_FINALIZE.includes(toValue(execution).strategyType) &&
-      !toValue(proposal).execution_ready
-  );
   const hasExecuteQueued = computed(() => {
     const executionValue = toValue(execution);
     const proposalValue = toValue(proposal);
@@ -138,16 +131,6 @@ export function useExecutionActions(
     }
   }
 
-  async function finalizeProposal() {
-    finalizeProposalSending.value = true;
-
-    try {
-      await actions.finalizeProposal(toValue(proposal));
-    } finally {
-      finalizeProposalSending.value = false;
-    }
-  }
-
   async function executeProposal() {
     executeProposalSending.value = true;
 
@@ -208,19 +191,16 @@ export function useExecutionActions(
   );
 
   return {
-    hasFinalize,
     hasExecuteQueued,
     fetchingDetails,
     message,
     warningMessage,
     executionTx,
     executionTxUrl,
-    finalizeProposalSending,
     executeProposalSending,
     executeQueuedProposalSending,
     vetoProposalSending,
     executionCountdown,
-    finalizeProposal,
     executeProposal,
     executeQueuedProposal,
     vetoProposal

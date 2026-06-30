@@ -7,7 +7,6 @@ import {
   keccak256,
   parseAbiParameters
 } from 'viem';
-import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactoryAbi from './abis/L1AvatarExecutionStrategyFactory';
 import ProxyFactoryAbi from './abis/ProxyFactory';
@@ -61,9 +60,7 @@ import {
  */
 const KNOWN_EXECUTION_STRATEGIES = [
   'SimpleQuorumAvatar',
-  'SimpleQuorumTimelock',
-  'Axiom',
-  'Isokratia'
+  'SimpleQuorumTimelock'
 ];
 
 const EMPTY_EXECUTION_HASH =
@@ -186,36 +183,6 @@ export function createWriters(
         await executionStrategy.save();
 
         await executeTemplate('SimpleQuorumAvatarExecutionStrategy', {
-          contract: proxyAddress,
-          start: blockNumber
-        });
-
-        break;
-      }
-      case protocolConfig.masterAxiom
-        ? getAddress(protocolConfig.masterAxiom)
-        : Symbol('never'): {
-        const quorum = await client.readContract({
-          address: proxyAddress,
-          abi: AxiomExecutionStrategyAbi,
-          functionName: 'quorum',
-          blockNumber: BigInt(blockNumber)
-        });
-
-        const executionStrategy = new ExecutionStrategy(
-          proxyAddress,
-          config.indexerName
-        );
-        executionStrategy.address = proxyAddress;
-        executionStrategy.type = 'Axiom'; // override because contract returns AxiomExecutionStrategyMock
-        executionStrategy.quorum = quorum.toString();
-        executionStrategy.treasury_chain = protocolConfig.chainId;
-        executionStrategy.treasury = proxyAddress;
-        executionStrategy.timelock_delay = 0n;
-
-        await executionStrategy.save();
-
-        await executeTemplate('AxiomExecutionStrategy', {
           contract: proxyAddress,
           start: blockNumber
         });
@@ -712,9 +679,6 @@ export function createWriters(
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
-      proposal.axiom_snapshot_address =
-        executionStrategy.axiom_snapshot_address;
-      proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
 
       // Find matching strategy and persist it on space object
@@ -727,8 +691,6 @@ export function createWriters(
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
     }
-
-    proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
       let executionHash = await ExecutionHash.loadEntity(
@@ -898,9 +860,6 @@ export function createWriters(
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
-      proposal.axiom_snapshot_address =
-        executionStrategy.axiom_snapshot_address;
-      proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
 
       // Find matching strategy and persist it on space object
@@ -913,8 +872,6 @@ export function createWriters(
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
     }
-
-    proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
       let executionHash = await ExecutionHash.loadEntity(
@@ -977,7 +934,6 @@ export function createWriters(
     if (executionStrategy) {
       switch (executionStrategy.type) {
         case 'SimpleQuorumAvatar':
-        case 'Axiom':
           proposal.execution_settled = true;
           proposal.completed = true;
           proposal.execution_tx = txId;
@@ -1183,34 +1139,6 @@ export function createWriters(
     }
   };
 
-  const handleAxiomWriteOffchainVotes: evm.Writer<
-    typeof AxiomExecutionStrategyAbi,
-    'WriteOffchainVotes'
-  > = async ({ rawEvent, blockNumber, event }) => {
-    if (!rawEvent || !event) return;
-
-    logger.info('Handle axiom write offchain votes');
-
-    const space = await client.readContract({
-      address: rawEvent.address,
-      abi: AxiomExecutionStrategyAbi,
-      functionName: 'space',
-      blockNumber: BigInt(blockNumber)
-    });
-
-    const spaceId = getAddress(space);
-
-    const proposal = await Proposal.loadEntity(
-      `${spaceId}/${event.args.proposalId}`,
-      config.indexerName
-    );
-    if (!proposal) return;
-
-    proposal.execution_ready = true;
-
-    proposal.save();
-  };
-
   const handleL1AvatarExecutionContractDeployed: evm.Writer<
     typeof L1AvatarExecutionStrategyFactoryAbi,
     'ContractDeployed'
@@ -1274,8 +1202,6 @@ export function createWriters(
     handleTimelockProposalExecuted,
     handleTimelockProposalVetoed,
     handleQuorumUpdated,
-    // Axiom
-    handleAxiomWriteOffchainVotes,
     // L1AvatarExecutionStrategyFactory
     handleL1AvatarExecutionContractDeployed,
     // L1AvatarExecutionStrategy
