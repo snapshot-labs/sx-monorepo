@@ -1,13 +1,23 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { getAddress, isAddress } from '@ethersproject/address';
+import { Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
-import { ensNormalize, namehash } from '@ethersproject/hash';
-import { call, multicall } from './call';
+import { dnsEncode, ensNormalize, namehash } from '@ethersproject/hash';
+import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
 import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
+
+const UNIVERSAL_RESOLVER = '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe';
+const UR_ABI = new Interface([
+  'function resolve(bytes name, bytes data) view returns (bytes, address)'
+]);
+const RESOLVER_ABI = new Interface([
+  'function addr(bytes32 node) view returns (address)',
+  'function text(bytes32 node, string key) view returns (string)'
+]);
 
 type ENSContracts = {
   registry: string;
@@ -75,43 +85,32 @@ async function getDNSOwner(domain: string): Promise<string> {
   );
 }
 
-async function deepResolve(
+async function urResolve(
+  name: string,
   chainId: ENSChainId,
-  node: string,
-  property: string,
-  params: any[]
-) {
+  callData: string
+): Promise<string | null> {
   const provider = getProvider(chainId);
-  const resolvers = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolvers) throw new Error('Unsupported chainId');
-
-  const calls = [
-    [ENS_CONTRACTS.registry, 'resolver', [node]],
-    ...resolvers.map(resolver => [resolver, property, params])
-  ];
-
-  const [[resolverAddress], ...textRecords]: any[][] = await multicall(
-    chainId.toString(),
-    provider,
-    [...ENS_CONTRACTS.registryAbi, ...ENS_CONTRACTS.resolverAbi],
-    calls
-  );
-
-  const resolverIndex = resolvers.indexOf(resolverAddress);
-  return resolverIndex !== -1 ? textRecords[resolverIndex]?.[0] : null;
+  const ur = new Contract(UNIVERSAL_RESOLVER, UR_ABI, provider);
+  try {
+    const [result] = await ur.resolve(dnsEncode(name), callData, {
+      ccipReadEnabled: true
+    });
+    if (!result || result === '0x') return null;
+    return result;
+  } catch {
+    return null;
+  }
 }
 
 export async function resolveName(name: string, chainId: ENSChainId) {
-  const resolver = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolver) throw new Error('Unsupported chainId');
-
   const node = namehash(name);
-
-  const address: string = await deepResolve(chainId, node, 'addr', [node]);
-
+  const callData = RESOLVER_ABI.encodeFunctionData('addr', [node]);
+  const result = await urResolve(name, chainId, callData);
+  if (!result) return null;
+  const [address] = RESOLVER_ABI.decodeFunctionResult('addr', result);
   if (address === EVM_EMPTY_ADDRESS) return null;
-
-  return address;
+  return address as string;
 }
 
 export async function getEnsTextRecord(
@@ -119,18 +118,16 @@ export async function getEnsTextRecord(
   record: string,
   chainId: ENSChainId
 ) {
-  const resolvers = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolvers) throw new Error('Unsupported chainId');
-
-  let ensHash: string;
-
   try {
-    ensHash = namehash(ensNormalize(ens));
+    const node = namehash(ensNormalize(ens));
+    const callData = RESOLVER_ABI.encodeFunctionData('text', [node, record]);
+    const result = await urResolve(ens, chainId, callData);
+    if (!result) return null;
+    const [text] = RESOLVER_ABI.decodeFunctionResult('text', result);
+    return text as string || null;
   } catch {
     return null;
   }
-
-  return deepResolve(chainId, ensHash, 'text', [ensHash, record]);
 }
 
 export async function setEnsTextRecord(
