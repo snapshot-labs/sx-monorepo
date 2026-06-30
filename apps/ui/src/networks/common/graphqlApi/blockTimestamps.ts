@@ -4,7 +4,7 @@ import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
 const cache = new Map<string, number>();
-const cacheKey = (networkId: NetworkID, block: number) =>
+const getCacheKey = (networkId: NetworkID, block: number) =>
   `${networkId}:${block}`;
 
 function isEvmNetworkId(
@@ -34,7 +34,7 @@ export async function fetchBlockTimestamps(
       result[block] = Math.round(nowTs + (block - current) * blockTime);
       continue;
     }
-    const cached = cache.get(cacheKey(networkId, block));
+    const cached = cache.get(getCacheKey(networkId, block));
     if (cached) {
       result[block] = cached;
     } else {
@@ -51,7 +51,7 @@ export async function fetchBlockTimestamps(
         const data = await provider.getBlock(block);
         if (data) {
           result[block] = data.timestamp;
-          cache.set(cacheKey(networkId, block), data.timestamp);
+          cache.set(getCacheKey(networkId, block), data.timestamp);
         }
       } catch {}
     })
