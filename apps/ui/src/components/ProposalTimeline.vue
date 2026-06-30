@@ -65,18 +65,18 @@ function getExplorerUrl(data: Proposal, tx: string | null) {
 }
 
 function getBlockExplorerUrl(
-  network: NetworkID,
+  networkId: NetworkID,
   blockNumber: number | null | undefined,
   timestamp: number
 ) {
   if (!blockNumber || timestamp > now.value) return undefined;
-  const networkObj = getNetwork(network);
+  const network = getNetwork(networkId);
   // Non-native block chains (arb1, ape, curtis) reference L1 blocks
   return (
-    networkObj.helpers.getExplorerUrl(
+    network.helpers.getExplorerUrl(
       blockNumber.toString(),
       'block',
-      networkObj.currentChainId
+      network.currentChainId
     ) || undefined
   );
 }
