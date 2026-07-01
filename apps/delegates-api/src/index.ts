@@ -9,6 +9,7 @@ import Checkpoint, {
   LogLevel
 } from '@snapshot-labs/checkpoint';
 import { addEvmIndexers } from './evm';
+import logger, { pinoOptions } from './logger';
 import overridesConfig from './overrides.json';
 import { addStarknetIndexers } from './starknet';
 
@@ -16,26 +17,38 @@ const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
 const schema = fs.readFileSync(schemaFile, 'utf8');
 
-const PRODUCTION_INDEXER_DELAY = 60 * 1000;
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+const GIT_COMMIT = process.env.GIT_COMMIT;
+
+/**
+ * IS_INDEXER is a boolean that determines if the current process is an indexer.
+ *
+ * If not set only GraphQL API will be started.
+ */
+const IS_INDEXER = process.env.IS_INDEXER === 'true';
 
 if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+async function startIndexer(checkpoint: Checkpoint) {
+  addEvmIndexers(checkpoint);
+  addStarknetIndexers(checkpoint);
+
+  const versionTag = GIT_COMMIT ? `commit:${GIT_COMMIT}` : undefined;
+
+  await checkpoint.syncVersion(versionTag);
+  checkpoint.start();
+}
 
 async function run() {
   const checkpoint = new Checkpoint(schema, {
     logLevel: LogLevel.Info,
     resetOnConfigChange: true,
     skipBlockFetching: true,
-    prettifyLogs: process.env.NODE_ENV !== 'production',
+    pinoOptions,
     overridesConfig
   });
-
-  addEvmIndexers(checkpoint);
-  addStarknetIndexers(checkpoint);
 
   const server = new ApolloServer({
     schema: checkpoint.getSchema(),
@@ -54,20 +67,11 @@ async function run() {
     }
   });
 
-  console.log(`Listening at ${url}`);
+  logger.info(`Listening at ${url}`);
 
-  if (process.env.NODE_ENV === 'production') {
-    console.log(
-      'Delaying indexer to prevent multiple processes indexing at the same time.'
-    );
-    await sleep(PRODUCTION_INDEXER_DELAY);
+  if (IS_INDEXER) {
+    await startIndexer(checkpoint);
   }
-
-  await checkpoint.resetMetadata();
-  await checkpoint.reset();
-  console.log('Checkpoint ready');
-
-  await checkpoint.start();
 }
 
 run();

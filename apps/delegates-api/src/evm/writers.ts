@@ -1,5 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
 import { formatUnits } from 'viem';
+import logger from '../logger';
 import { BIGINT_ZERO, DECIMALS, getDelegate, getGovernance } from '../utils';
 import GeneralPurposeFactoryAbi from './abis/GeneralPurposeFactory';
 import TokenAbi from './abis/Token';
@@ -85,7 +86,10 @@ export default function createWriters(indexerName: NetworkID) {
         start: blockNumber
       });
     } else {
-      console.log(`Unknown implementation: ${event.args.implementation}`);
+      logger.warn(
+        { implementation: event.args.implementation },
+        'Unknown implementation'
+      );
     }
   };
 

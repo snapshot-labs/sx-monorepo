@@ -30,7 +30,7 @@ const config: KnipConfig = {
     },
     'apps/delegates-api': {
       entry: ['src/index.ts'],
-      ignoreDependencies: ['ts-node']
+      ignoreDependencies: ['@logtail/pino', 'pino-pretty', 'ts-node']
     },
     'apps/highlight': {
       entry: ['src/index.ts']
