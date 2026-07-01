@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
+import { useStripeCheckout } from '@/composables/useStripeCheckout';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -25,6 +26,13 @@ const turboExpirationDate = computed(() =>
   dayjs(props.space.turbo_expiration * 1000)
 );
 const payments = computed(() => data.value?.pages.flat() || []);
+
+const { getPortalUrl } = useStripeCheckout();
+async function openPortal() {
+  const url = await getPortalUrl(props.space.network);
+  if (url) window.open(url, '_blank', 'noopener');
+}
+
 const statusText = computed(() => {
   if (!props.space.turbo) return 'Free';
 
@@ -152,6 +160,14 @@ const statusText = computed(() => {
           </template>
           <template #items>
             <UiDropdownItem
+              v-if="payment.id.startsWith('stripe:')"
+              @click="openPortal"
+            >
+              <IH-arrow-sm-right class="-rotate-45" :width="16" />
+              Manage subscription
+            </UiDropdownItem>
+            <UiDropdownItem
+              v-else
               :to="
                 getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
               "

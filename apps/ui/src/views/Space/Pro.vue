@@ -97,6 +97,7 @@ const route = useRoute();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
+const uiStore = useUiStore();
 
 const referral: string = route.query.ref as string;
 
@@ -182,11 +183,6 @@ async function handleConnectorPick(connector: Connector) {
   }
 }
 async function handleTurboClick() {
-  if (!auth.value || !isCurrentConnectorSupported.value) {
-    modalConnectorOpen.value = true;
-    return;
-  }
-
   if (!selectedSpace.value) {
     modalSpaceOpen.value = true;
     return;
@@ -218,7 +214,22 @@ function handleModalPaymentClose() {
   selectedSpace.value = props.space || null;
 }
 
+async function handleStripeSuccess() {
+  uiStore.addNotification(
+    'success',
+    'Payment received! Your Pro subscription will be active shortly.'
+  );
+
+  const query = { ...route.query };
+  delete query.stripe_success;
+  router.replace({ query });
+
+  await handlePaymentConfirmed();
+}
+
 onMounted(() => {
+  if (route.query.stripe_success) handleStripeSuccess();
+
   if (
     !selectedSpace.value ||
     offchainNetworks.includes(selectedSpace.value.network)
@@ -406,9 +417,8 @@ onMounted(() => {
     </div>
 
     <ModalPayment
-      v-if="
-        selectedSpace && auth && isCurrentConnectorSupported && modalPaymentOpen
-      "
+      v-if="selectedSpace && modalPaymentOpen"
+      v-model:plan="subscriptionLength"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :calculator="calculator"
@@ -423,6 +433,9 @@ onMounted(() => {
         params: { space: spaceKey },
         ref: referral || undefined
       }"
+      :space="spaceKey"
+      :is-auth-valid-for-crypto="!!isCurrentConnectorSupported"
+      @connect-wallet="modalConnectorOpen = true"
       @close="handleModalPaymentClose"
       @confirmed="handlePaymentConfirmed"
     >
