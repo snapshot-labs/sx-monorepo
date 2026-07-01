@@ -1,0 +1,135 @@
+name: Deploy API
+
+# Builds the sx-api image once, then deploys it to the INACTIVE color (blue-green
+# staging) of BOTH environments (testnet + mainnet).
+#
+# Required configuration:
+#   vars.DOKS_CLUSTER                  - DigitalOcean Kubernetes cluster name or id
+#   secrets.DIGITALOCEAN_ACCESS_TOKEN  - DOKS cluster access
+#   GitHub environments: api_testnet, api_mainnet (hold POSTGRES_PASSWORD,
+#     HYPERSYNC_API_TOKEN, GHCR_PULL_TOKEN, and the LOGTAIL_* secrets)
+#
+# Image is pushed to GHCR (ghcr.io/<owner>/sx-api) via the built-in GITHUB_TOKEN.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/api/**'
+      - 'helm/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/sx-api
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push image
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          docker build -f apps/api/Dockerfile -t "$IMAGE:$TAG" .
+          docker push "$IMAGE:$TAG"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [testnet, mainnet]
+    environment: api_${{ matrix.environment }}
+    concurrency:
+      group: deploy-api-${{ matrix.environment }}
+    env:
+      ENVIRONMENT: ${{ matrix.environment }}
+      CHART: helm/checkpoint
+      APP_NAME: sx-api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure cluster access
+        run: doctl kubernetes cluster kubeconfig save "$DOKS_CLUSTER"
+        env:
+          DOKS_CLUSTER: ${{ vars.DOKS_CLUSTER }}
+
+      - name: Resolve image tag
+        id: tag
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Sync secrets into the namespace
+        run: |
+          NS="$ENVIRONMENT"
+          kubectl get namespace "$NS" >/dev/null 2>&1 || kubectl create namespace "$NS"
+          kubectl -n "$NS" create secret generic "$APP_NAME-secrets" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --from-literal=HYPERSYNC_API_TOKEN="$HYPERSYNC_API_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n "$NS" create secret docker-registry ghcr \
+            --docker-server=ghcr.io \
+            --docker-username="$GITHUB_ACTOR" \
+            --docker-password="$GHCR_PULL_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          HYPERSYNC_API_TOKEN: ${{ secrets.HYPERSYNC_API_TOKEN }}
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+
+      - name: Determine inactive (staging) color
+        id: color
+        run: |
+          NS="$ENVIRONMENT"
+          ACTIVE=$(kubectl -n "$NS" get svc "$APP_NAME" -o jsonpath='{.spec.selector.color}' 2>/dev/null || echo "")
+          if [ "$ACTIVE" = "blue" ]; then INACTIVE=green; else INACTIVE=blue; fi
+          echo "Active color for $APP_NAME in $NS is '${ACTIVE:-none}' -> deploying to '$INACTIVE'"
+          echo "inactive=$INACTIVE" >> "$GITHUB_OUTPUT"
+
+      - name: Sync logtail secret (per color)
+        env:
+          LOGTAIL_HOST_BLUE: ${{ secrets.LOGTAIL_HOST_BLUE }}
+          LOGTAIL_TOKEN_BLUE: ${{ secrets.LOGTAIL_TOKEN_BLUE }}
+          LOGTAIL_HOST_GREEN: ${{ secrets.LOGTAIL_HOST_GREEN }}
+          LOGTAIL_TOKEN_GREEN: ${{ secrets.LOGTAIL_TOKEN_GREEN }}
+        run: |
+          C="${{ steps.color.outputs.inactive }}"
+          HOST_VAR="LOGTAIL_HOST_${C^^}"
+          TOKEN_VAR="LOGTAIL_TOKEN_${C^^}"
+          kubectl -n "$ENVIRONMENT" create secret generic "$APP_NAME-logtail-$C" \
+            --from-literal=LOGTAIL_HOST="${!HOST_VAR}" \
+            --from-literal=LOGTAIL_TOKEN="${!TOKEN_VAR}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy inactive color with Helm
+        run: |
+          helm upgrade --install "$ENVIRONMENT-api-${{ steps.color.outputs.inactive }}" "$CHART" \
+            --namespace "$ENVIRONMENT" --create-namespace \
+            --values "$CHART/values-api-$ENVIRONMENT.yaml" \
+            --set color="${{ steps.color.outputs.inactive }}" \
+            --set image.repository="$IMAGE" \
+            --set image.tag="${{ steps.tag.outputs.tag }}" \
+            --wait --timeout 10m
+
+      - name: Summary
+        run: |
+          echo "Deployed $IMAGE:${{ steps.tag.outputs.tag }} to $ENVIRONMENT / ${{ steps.color.outputs.inactive }} (staging)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Run 'Promote API' for $ENVIRONMENT to cut over once it has caught up." >> "$GITHUB_STEP_SUMMARY"
