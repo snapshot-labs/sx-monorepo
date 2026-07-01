@@ -3,7 +3,12 @@ import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
-import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
+import {
+  captureError,
+  hasStrategyOverride,
+  isEncryptedPrivacy,
+  jsonParse
+} from '../helpers/utils';
 import { updateProposalAndVotes } from '../scores';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
@@ -40,9 +45,11 @@ export async function verify(body): Promise<any> {
   )
     return Promise.reject('not in voting window');
 
-  if (proposal.privacy === 'shutter') {
+  if (isEncryptedPrivacy(proposal.privacy)) {
     if (msg.payload.reason)
-      return Promise.reject('reason not allowed with shutter');
+      return Promise.reject(
+        `reason not allowed with ${proposal.privacy} privacy`
+      );
     if (
       typeof msg.payload.choice !== 'string' ||
       !msg.payload.choice.startsWith('0x')
