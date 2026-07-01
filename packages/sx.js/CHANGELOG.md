@@ -1,5 +1,12 @@
 # @snapshot-labs/sx
 
+## 0.1.12
+
+### Patch Changes
+
+- 3ac9f35: Add evmSlotValueV2 and ozVotesStorageProofV2 strategies on Starknet
+- a515e59: Zero-pad merkle whitelist proof elements to 32 bytes before encoding. The whitelist proof server (wls.snapshot.box) can return proof elements with a stripped leading zero byte (31 bytes), which caused an on-chain `InvalidProof()` revert for whitelisted voters whose proof contained a hash starting with a zero byte.
+
 ## 0.1.11
 
 ### Patch Changes
