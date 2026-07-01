@@ -48,7 +48,6 @@
   "engines": {
     "node": ">=22.6.0"
   },
-  "packageManager": "bun@1.3.9",
   "workspaces": [
     "apps/*",
     "packages/*"
