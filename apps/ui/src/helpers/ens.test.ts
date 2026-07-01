@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { getNameOwner } from './ens';
+import { getNameOwner, resolveName } from './ens';
 
 describe('ens', () => {
+  describe('resolveName', () => {
+    it('should resolve ur.integration-tests.eth to the Universal Resolver integration test address', async () => {
+      const address = await resolveName('ur.integration-tests.eth', 1);
+      expect(address).toBe('0x2222222222222222222222222222222222222222');
+    });
+  });
+
   describe('getNameOwner', () => {
     describe('for names using the onchain resolver', () => {
       it('should return the owner of the name on mainnet', async () => {
