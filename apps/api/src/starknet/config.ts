@@ -54,15 +54,19 @@ function createOverrides(networkId: keyof typeof CONFIG) {
       config.ProposalValidations.VotingPower,
     spaceClassHash: config.Meta.masterSpace,
     verifiedSpaces: CONFIG[networkId].verifiedSpaces,
-    herodotusStrategies: [
-      config.Strategies.OZVotesStorageProof,
-      config.Strategies.OZVotesTrace208StorageProof,
-      config.Strategies.EVMSlotValue,
-      // Herodotus Satellite versions (sx-starknet#641)
-      config.Strategies.OZVotesStorageProofV2,
-      config.Strategies.OZVotesTrace208StorageProofV2,
-      config.Strategies.EVMSlotValueV2
-    ].map(strategy => validateAndParseAddress(strategy))
+    herodotusStrategies: (
+      [
+        config.Strategies.OZVotesStorageProof,
+        config.Strategies.OZVotesTrace208StorageProof,
+        config.Strategies.EVMSlotValue,
+        // Herodotus Satellite versions (sx-starknet#641)
+        config.Strategies.OZVotesStorageProofV2,
+        config.Strategies.OZVotesTrace208StorageProofV2,
+        config.Strategies.EVMSlotValueV2
+      ] as Array<string | undefined>
+    )
+      .filter((address): address is string => !!address)
+      .map(strategy => validateAndParseAddress(strategy))
   };
 }
 

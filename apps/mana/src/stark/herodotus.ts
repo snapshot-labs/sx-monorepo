@@ -77,22 +77,30 @@ function getNetworkId(chainId: string): 'sn' | 'sn-sep' | null {
 // the timestamp -> L1 block mapping and the storage root, which voters read
 // on-chain via `get_block_by_timestamp`. So, unlike the legacy strategies, these
 // need no on-chain `cache_timestamp` tx after the query completes.
+function getSatelliteStrategies(chainId: string): string[] {
+  const networkId = getNetworkId(chainId);
+  if (!networkId) return [];
+
+  const { Strategies } = starknetNetworks[networkId];
+
+  return (
+    [
+      Strategies.EVMSlotValueV2,
+      Strategies.OZVotesStorageProofV2,
+      Strategies.OZVotesTrace208StorageProofV2
+    ] as Array<string | undefined>
+  )
+    .filter((address): address is string => !!address)
+    .map(address => validateAndParseAddress(address));
+}
+
 function isSatelliteStrategy(
   chainId: string,
   strategyAddress: string
 ): boolean {
-  const networkId = getNetworkId(chainId);
-  if (!networkId) return false;
-
-  const { Strategies } = starknetNetworks[networkId];
-
-  return [
-    Strategies.EVMSlotValueV2,
-    Strategies.OZVotesStorageProofV2,
-    Strategies.OZVotesTrace208StorageProofV2
-  ]
-    .map(address => validateAndParseAddress(address))
-    .includes(validateAndParseAddress(strategyAddress));
+  return getSatelliteStrategies(chainId).includes(
+    validateAndParseAddress(strategyAddress)
+  );
 }
 
 async function getStatus(id: string, accumulatesChainId: string) {
