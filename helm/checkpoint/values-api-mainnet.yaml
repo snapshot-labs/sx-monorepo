@@ -12,6 +12,9 @@ tolerations:
 image:
   repository: ghcr.io/snapshot-labs/sx-api
 
+db:
+  storage: 20Gi
+
 config:
   PORT: '3000'
   ENABLE_SNAPSHOT_X: 'true'
