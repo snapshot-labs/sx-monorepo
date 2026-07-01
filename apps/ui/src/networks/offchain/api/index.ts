@@ -3,11 +3,13 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
   DELEGATION_TYPES_NAMES
 } from '@/helpers/constants';
+import { getDelegateRegistryChainIds } from '@/helpers/delegation';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
@@ -89,6 +91,10 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
 
 const SCORES_TICKS_LIMIT = 1000;
 export const SCORES_TICKS_MAX_VOTES = 4000;
+
+function getNetworkName(chainId: string | number) {
+  return networks[String(chainId)]?.name || `Chain ${chainId}`;
+}
 
 function getProposalState(
   networkId: NetworkID,
@@ -492,7 +498,7 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-function formatDelegations(
+export function formatDelegations(
   space: ApiSpace,
   networkId: NetworkID
 ): SpaceMetadataDelegation[] {
@@ -522,16 +528,27 @@ function formatDelegations(
   }
 
   if (basicDelegationStrategy) {
-    const chainId = space.network;
-
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
-      delegations.push({
-        name: DELEGATION_TYPES_NAMES['delegate-registry'],
-        apiType: 'delegate-registry',
-        apiUrl,
-        contractAddress: space.id,
-        chainId
+      const chainIds = getDelegateRegistryChainIds(
+        space.strategies.map(strategy => strategy.name),
+        space.strategies
+      );
+      const delegationChainIds = chainIds.length ? chainIds : [space.network];
+      const hasMultipleDelegateRegistryChains = delegationChainIds.length > 1;
+
+      delegationChainIds.forEach(chainId => {
+        const name = hasMultipleDelegateRegistryChains
+          ? `${DELEGATION_TYPES_NAMES['delegate-registry']} - ${getNetworkName(chainId)}`
+          : DELEGATION_TYPES_NAMES['delegate-registry'];
+
+        delegations.push({
+          name,
+          apiType: 'delegate-registry',
+          apiUrl,
+          contractAddress: space.id,
+          chainId
+        });
       });
     }
   }
