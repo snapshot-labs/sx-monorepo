@@ -46,7 +46,7 @@
     "@snapshot-labs/lock": "0.3.2",
     "@snapshot-labs/tune": "0.1.0",
     "@snapshot-labs/pineapple": "^1.2.1",
-    "@snapshot-labs/snapshot.js": "^0.14.20",
+    "@snapshot-labs/snapshot.js": "^0.14.24",
     "@snapshot-labs/sx": "^0.1.11",
     "@tanstack/vue-query": "^5.64.2",
     "@tiptap/core": "^3.4.1",
