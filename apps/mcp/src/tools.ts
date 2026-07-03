@@ -116,7 +116,8 @@ export function registerSchemaTool(server: McpServer): void {
     {
       description:
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
-      inputSchema: {}
+      inputSchema: {},
+      annotations: { readOnlyHint: true }
     },
     (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
   );
@@ -137,7 +138,8 @@ export function registerQueryTool(
           .record(z.string(), z.unknown())
           .optional()
           .describe('GraphQL variables')
-      }
+      },
+      annotations: { readOnlyHint: true }
     },
     ({ query, variables }, extra) =>
       handle('snapshot-query', extra, async () => {
@@ -161,7 +163,8 @@ export function registerWhoamiTool(
     {
       description:
         'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
-      inputSchema: {}
+      inputSchema: {},
+      annotations: { readOnlyHint: true }
     },
     (_args, extra) =>
       handle('snapshot-whoami', extra, async () => {
@@ -215,7 +218,8 @@ export function registerVoteTool(
           .describe(
             'Reason for the vote (ignored on shutter-encrypted proposals)'
           )
-      }
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
     },
     (data, extra) =>
       handle('snapshot-vote', extra, async () => {
@@ -285,7 +289,8 @@ export function registerProposeTool(
         start: z.number().int().optional().describe('Voting start (unix seconds). Defaults to now + space.voting.delay.'),
         end: z.number().int().optional().describe('Voting end (unix seconds). Defaults to start + space.voting.period (3 days if unset).'),
         privacy: z.enum(['shutter', 'none']).optional().describe('Shutter shielded voting. Only honored when the space\'s voting.privacy is "any" (or already "shutter", in which case it is forced).')
-      }
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false }
     },
     (data, extra) =>
       handle('snapshot-propose', extra, async () => {
@@ -360,7 +365,8 @@ export function registerFollowTool(
           .enum(['follow', 'unfollow'])
           .default('follow')
           .describe('Whether to follow or unfollow the space. Defaults to "follow".')
-      }
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true }
     },
     (data, extra) =>
       handle('snapshot-follow', extra, async () => {
