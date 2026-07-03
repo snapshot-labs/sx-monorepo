@@ -69,27 +69,19 @@ export function createConstants(
     [config.Strategies.EVMSlotValue]: true,
     [config.Strategies.OZVotesStorageProof]: true,
     [config.Strategies.OZVotesTrace208StorageProof]: true,
-    ...(config.Strategies.EVMSlotValueV2 && {
-      [config.Strategies.EVMSlotValueV2]: true
-    }),
-    ...(config.Strategies.OZVotesStorageProofV2 && {
-      [config.Strategies.OZVotesStorageProofV2]: true
-    }),
-    ...(config.Strategies.OZVotesTrace208StorageProofV2 && {
-      [config.Strategies.OZVotesTrace208StorageProofV2]: true
-    })
+    [config.Strategies.EVMSlotValueV2]: true,
+    [config.Strategies.OZVotesStorageProofV2]: true,
+    [config.Strategies.OZVotesTrace208StorageProofV2]: true
   };
 
-  const STORAGE_PROOF_STRATEGIES_TYPES = (
-    [
-      config.Strategies.EVMSlotValue,
-      config.Strategies.OZVotesStorageProof,
-      config.Strategies.OZVotesTrace208StorageProof,
-      config.Strategies.EVMSlotValueV2,
-      config.Strategies.OZVotesStorageProofV2,
-      config.Strategies.OZVotesTrace208StorageProofV2
-    ] as (string | undefined)[]
-  ).filter((address): address is string => !!address);
+  const STORAGE_PROOF_STRATEGIES_TYPES: string[] = [
+    config.Strategies.EVMSlotValue,
+    config.Strategies.OZVotesStorageProof,
+    config.Strategies.OZVotesTrace208StorageProof,
+    config.Strategies.EVMSlotValueV2,
+    config.Strategies.OZVotesStorageProofV2,
+    config.Strategies.OZVotesTrace208StorageProofV2
+  ];
 
   const SUPPORTED_EXECUTORS = {
     EthRelayer: true
@@ -114,17 +106,11 @@ export function createConstants(
       'OZ Votes storage proof (trace 224, deprecated)',
     [config.Strategies.OZVotesTrace208StorageProof]:
       'OZ Votes storage proof (trace 208, deprecated)',
-    ...(config.Strategies.EVMSlotValueV2 && {
-      [config.Strategies.EVMSlotValueV2]: 'EVM slot value'
-    }),
-    ...(config.Strategies.OZVotesStorageProofV2 && {
-      [config.Strategies.OZVotesStorageProofV2]:
-        'OZ Votes storage proof (trace 224)'
-    }),
-    ...(config.Strategies.OZVotesTrace208StorageProofV2 && {
-      [config.Strategies.OZVotesTrace208StorageProofV2]:
-        'OZ Votes storage proof (trace 208)'
-    })
+    [config.Strategies.EVMSlotValueV2]: 'EVM slot value',
+    [config.Strategies.OZVotesStorageProofV2]:
+      'OZ Votes storage proof (trace 224)',
+    [config.Strategies.OZVotesTrace208StorageProofV2]:
+      'OZ Votes storage proof (trace 208)'
   };
 
   const EXECUTORS = {
@@ -560,17 +546,7 @@ export function createConstants(
 
   const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES =
     EDITOR_VOTING_STRATEGIES.filter(
-      strategy =>
-        !(
-          [
-            config.Strategies.EVMSlotValue,
-            config.Strategies.OZVotesStorageProof,
-            config.Strategies.OZVotesTrace208StorageProof,
-            config.Strategies.EVMSlotValueV2,
-            config.Strategies.OZVotesStorageProofV2,
-            config.Strategies.OZVotesTrace208StorageProofV2
-          ] as string[]
-        ).includes(strategy.address)
+      strategy => !STORAGE_PROOF_STRATEGIES_TYPES.includes(strategy.address)
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [
