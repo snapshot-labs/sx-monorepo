@@ -46,8 +46,19 @@ type DbProposal = {
   herodotusId: string | null;
 };
 
-function getApi(accumulatesChainId: string) {
-  if (accumulatesChainId === '1') {
+// Host/key selection is by strategy generation, not chain:
+//
+// - Satellite V2 strategies use the official Herodotus API (api.herodotus.cloud)
+//   with HERODOTUS_API_KEY on BOTH Starknet mainnet and sepolia. They resolve the
+//   timestamp -> L1 block mapping and storage root entirely on-chain via the
+//   Satellite contract, so they never touch the indexer's remapper endpoints.
+//
+// - Legacy storage-proof strategies keep the frozen host for mainnet
+//   (snapshot.api.herodotus.cloud + snapshot.rs-indexer, HERODOTUS_LEGACY_API_KEY)
+//   because they still depend on snapshot.rs-indexer's /remappers/binsearch-path.
+//   Legacy sepolia already runs on the official host.
+function getApi(accumulatesChainId: string, isSatellite: boolean) {
+  if (!isSatellite && accumulatesChainId === '1') {
     return {
       apiUrl: 'https://snapshot.api.herodotus.cloud',
       indexerUrl: 'https://snapshot.rs-indexer.api.herodotus.cloud',
@@ -95,8 +106,12 @@ function isSatelliteStrategy(
     .includes(validateAndParseAddress(strategyAddress));
 }
 
-async function getStatus(id: string, accumulatesChainId: string) {
-  const { apiUrl, apiKey } = getApi(accumulatesChainId);
+async function getStatus(
+  id: string,
+  accumulatesChainId: string,
+  isSatellite: boolean
+) {
+  const { apiUrl, apiKey } = getApi(accumulatesChainId, isSatellite);
 
   const res = await fetch(
     `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`,
@@ -119,6 +134,11 @@ async function submitBatch(proposal: ApiProposal) {
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID, FEE } = mapping;
 
+  const isSatellite = isSatelliteStrategy(
+    proposal.chainId,
+    proposal.strategyAddress
+  );
+
   const body: any = {
     destinationChainId: DESTINATION_CHAIN_ID,
     fee: FEE,
@@ -135,7 +155,7 @@ async function submitBatch(proposal: ApiProposal) {
     }
   };
 
-  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID);
+  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID, isSatellite);
   const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
     method: 'post',
     headers: {
@@ -182,7 +202,10 @@ export async function registerProposal(proposal: ApiProposal) {
   try {
     await submitBatch(proposal);
   } catch (err) {
-    logger.error({ err, proposal }, 'Failed to submit herodotus batch');
+    logger.error(
+      { err, proposalId: getId(proposal), proposal },
+      'Failed to submit herodotus batch'
+    );
   }
 }
 
@@ -201,8 +224,17 @@ export async function processProposal(proposal: DbProposal) {
   if (!mapping) throw new Error('Invalid chainId');
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
 
+  const isSatellite = isSatelliteStrategy(
+    proposal.chainId,
+    proposal.strategyAddress
+  );
+
   try {
-    const status = await getStatus(proposal.herodotusId, ACCUMULATES_CHAIN_ID);
+    const status = await getStatus(
+      proposal.herodotusId,
+      ACCUMULATES_CHAIN_ID,
+      isSatellite
+    );
     if (status !== 'DONE') {
       logger.info(
         { herodotusId: proposal.herodotusId, status },
@@ -226,7 +258,7 @@ export async function processProposal(proposal: DbProposal) {
   // timestamp -> L1 block mapping and storage root into the Satellite contract,
   // which voters read on-chain via get_block_by_timestamp. No on-chain
   // cache_timestamp tx is required, so we are done.
-  if (isSatelliteStrategy(proposal.chainId, proposal.strategyAddress)) {
+  if (isSatellite) {
     logger.info({ proposalId: proposal.id }, 'Satellite proposal processed');
     return db.markProposalProcessed(proposal.id);
   }
@@ -236,7 +268,7 @@ export async function processProposal(proposal: DbProposal) {
   const { getAccount, herodotusController } = getClient(proposal.chainId);
   const { account, nonceManager, deployAccount } = getAccount('0x0');
 
-  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);
+  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID, isSatellite);
 
   const res = await fetch(
     `${indexerUrl}/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,
