@@ -3,7 +3,7 @@
 This API uses the Checkpoint SDK to index ERC20Votes delegate information across
 multiple EVM chains and Starknet.
 
-For more about how Checkpoint works, refer to its documentation here: https://docs.checkpoint.box
+For more about how Checkpoint works, refer to its documentation here: https://docs.checkpoint.snapshot.box
 
 ## Getting Started (Local Development)
 

@@ -8,7 +8,7 @@ This is the Snapshot monorepository containing a Vue frontend, GraphQL API, a tr
 ## Apps
 
 - [`./apps/ui`](./apps/ui): Snapshot official frontend using Vue 3
-- [`./apps/api`](./apps/api): Multichain indexer for Snapshot X using [Checkpoint](https://checkpoint.box)
+- [`./apps/api`](./apps/api): Multichain indexer for Snapshot X using [Checkpoint](https://checkpoint.snapshot.box)
 - [`./apps/hub`](./apps/hub): GraphQL API for the Snapshot offchain protocol
 - [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
 - [`./apps/mcp`](./apps/mcp): MCP server for the Snapshot API

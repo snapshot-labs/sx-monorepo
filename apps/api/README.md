@@ -4,7 +4,7 @@
 
 This API uses Checkpoint SDK to index Snapshot X and Governor spaces information on multiple EVM chains and Starknet.
 
-For more about how checkpoint works, refer to its documentation here: https://docs.checkpoint.box
+For more about how checkpoint works, refer to its documentation here: https://docs.checkpoint.snapshot.box
 
 ## Getting Started (Local Development)
 
