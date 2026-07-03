@@ -91,6 +91,7 @@ gql(`
     authenticators
     proposal_count
     vote_count
+    active_proposal_count
     created
   }
 
