@@ -470,7 +470,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
     flag_code: proposal.flagCode,
-    plugins: proposal.plugins
+    plugins: proposal.plugins,
+    app: proposal.app
   };
 }
 
@@ -488,7 +489,8 @@ function formatVote(vote: ApiVote): Vote {
     vp: vote.vp,
     reason: vote.reason,
     created: vote.created,
-    tx: vote.ipfs
+    tx: vote.ipfs,
+    app: vote.app
   };
 }
 

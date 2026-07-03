@@ -104,6 +104,7 @@ const hasVoted = computed(
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+          <UiBadgeApp :app="proposal.app" />
           <UiPill v-if="proposal.author.role" :label="proposal.author.role" />
         </AppLink>
       </template>

@@ -177,6 +177,7 @@ const PROPOSAL_FRAGMENT = gql`
     plugins
     flagged
     flagCode
+    app
   }
 `;
 
@@ -295,6 +296,7 @@ export const VOTES_QUERY = gql`
       vp
       reason
       created
+      app
     }
   }
 `;
