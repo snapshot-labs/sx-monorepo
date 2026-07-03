@@ -354,6 +354,7 @@ export type Proposal = {
   plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;
+  app?: string;
 };
 
 export type UserProfile = {
@@ -427,6 +428,7 @@ export type Vote = {
   reason?: string;
   created: number;
   tx: string;
+  app?: string;
 };
 
 export type Member = {
