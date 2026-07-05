@@ -1,5 +1,7 @@
+const SNAPSHOT_HUB_URL =
+  process.env.SNAPSHOT_HUB_URL ?? 'https://hub.snapshot.org/graphql';
 const SNAPSHOT_API_URL =
-  process.env.SNAPSHOT_API_URL ?? 'https://hub.snapshot.org/graphql';
+  process.env.SNAPSHOT_API_URL ?? 'https://api.snapshot.box';
 
 // Reorg buffer (mirrors sx-monorepo's EDITOR_SNAPSHOT_OFFSET).
 const SNAPSHOT_BLOCK_OFFSET = 4;
@@ -16,17 +18,17 @@ export async function getProposalSnapshotBlock(
   return Math.max(0, parseInt(result, 16) - SNAPSHOT_BLOCK_OFFSET);
 }
 
-export async function gql(
+async function request(
+  url: string,
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  apiKey?: string
 ): Promise<Record<string, unknown>> {
-  const res = await fetch(SNAPSHOT_API_URL, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(process.env.SNAPSHOT_API_KEY && {
-        'x-api-key': process.env.SNAPSHOT_API_KEY
-      })
+      ...(apiKey && { 'x-api-key': apiKey })
     },
     body: JSON.stringify({ query, variables })
   });
@@ -43,10 +45,21 @@ export async function gql(
   return json.data;
 }
 
+type Gql = (
+  query: string,
+  variables?: Record<string, unknown>
+) => Promise<Record<string, unknown>>;
+
+export const hubGql: Gql = (query, variables) =>
+  request(SNAPSHOT_HUB_URL, query, variables, process.env.SNAPSHOT_API_KEY);
+
+export const apiGql: Gql = (query, variables) =>
+  request(SNAPSHOT_API_URL, query, variables);
+
 export async function resolveUserFromAlias(
   alias: string
 ): Promise<string | undefined> {
-  const result = (await gql(
+  const result = (await hubGql(
     `query Aliases($where: AliasWhere) {
       aliases(first: 1, skip: 0, where: $where) { address }
     }`,
@@ -57,15 +70,11 @@ export async function resolveUserFromAlias(
 
 const BUILTIN_TYPES = new Set(['String', 'Boolean', 'Int', 'Float', 'ID']);
 
-const REMOVED_QUERIES = new Set([
-  'options',
-  'plugins',
-  'skins',
-  'subscriptions',
-  'messages'
-]);
-
-export const schemaCache: Promise<unknown> = gql(`{
+async function loadSchema(
+  api: Gql,
+  removedQueries: Set<string>
+): Promise<unknown> {
+  const data = await api(`{
   __schema {
     queryType {
       fields {
@@ -84,7 +93,7 @@ export const schemaCache: Promise<unknown> = gql(`{
       enumValues { name }
     }
   }
-}`).then(data => {
+}`);
   const schema = data.__schema as {
     queryType: { fields: { name: string }[] };
     types: { name: string }[];
@@ -93,8 +102,18 @@ export const schemaCache: Promise<unknown> = gql(`{
     t => !t.name.startsWith('__') && !BUILTIN_TYPES.has(t.name)
   );
   schema.queryType.fields = schema.queryType.fields.filter(
-    f => !REMOVED_QUERIES.has(f.name)
+    f => !removedQueries.has(f.name)
   );
 
   return schema;
-});
+}
+
+export const hubSchemaCache = loadSchema(
+  hubGql,
+  new Set(['options', 'plugins', 'skins', 'subscriptions', 'messages'])
+);
+// Checkpoint sync-state internals, not governance data.
+export const apiSchemaCache = loadSchema(
+  apiGql,
+  new Set(['_checkpoint', '_checkpoints', '_metadata', '_metadatas'])
+);

@@ -9,10 +9,12 @@ import { z } from 'zod';
 import { type CdpSigner, getWalletForUser } from './cdp.js';
 import logger from './logger.js';
 import {
+  apiGql,
+  apiSchemaCache,
   getProposalSnapshotBlock,
-  gql,
-  resolveUserFromAlias,
-  schemaCache
+  hubGql,
+  hubSchemaCache,
+  resolveUserFromAlias
 } from './hub.js';
 
 const sx = new clients.OffchainEthereumSig({ networkConfig: offchainMainnet });
@@ -76,7 +78,7 @@ type SpaceInfo = {
 };
 
 async function requireSpace<T>(id: string, fields: string): Promise<T> {
-  const { space } = (await gql(
+  const { space } = (await hubGql(
     `query ($id: String!) { space(id: $id) { ${fields} } }`,
     { id }
   )) as { space: T | null };
@@ -110,48 +112,76 @@ async function handle(
   }
 }
 
+const SCHEMA_TOOLS = [
+  {
+    name: 'snapshot-hub-schema',
+    description:
+      'Returns the schema of the Snapshot hub API (offchain spaces, the DEFAULT API). Large response: call only when a snapshot-hub-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
+    schema: hubSchemaCache
+  },
+  {
+    name: 'snapshot-api-schema',
+    description:
+      'ONCHAIN spaces only, NOT the default: returns the schema of the Snapshot API (api.snapshot.box, Snapshot X and Governor spaces). Large response: call only when a snapshot-api-query fails on an unknown field, not preemptively.',
+    schema: apiSchemaCache
+  }
+];
+
 export function registerSchemaTool(server: McpServer): void {
-  server.registerTool(
-    'snapshot-schema',
-    {
-      description:
-        'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
-      inputSchema: {},
-      annotations: { readOnlyHint: true }
-    },
-    (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
-  );
+  for (const { name, description, schema } of SCHEMA_TOOLS) {
+    server.registerTool(
+      name,
+      { description, inputSchema: {}, annotations: { readOnlyHint: true } },
+      (_args, extra) => handle(name, extra, () => schema)
+    );
+  }
 }
+
+const QUERY_TOOLS = [
+  {
+    name: 'snapshot-hub-query',
+    description:
+      'DEFAULT Snapshot query tool: execute any GraphQL query against the Snapshot hub API (offchain spaces, ids like "ens.eth"). Use it for every Snapshot question unless the user explicitly asks about onchain spaces (then use snapshot-api-query). The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Timestamps are unix seconds UTC. Use snapshot-hub-schema only when this query errors on an unknown field.',
+    api: hubGql
+  },
+  {
+    name: 'snapshot-api-query',
+    description:
+      'ONCHAIN spaces only, NOT the default: execute any GraphQL query against the Snapshot API (api.snapshot.box), which indexes Snapshot X and Governor spaces (`Space.protocol` is "snapshot-x" or "governor-bravo"). Use snapshot-hub-query instead unless the user explicitly asks about onchain spaces or gives a space id that is a contract address (offchain space ids are slugs like "ens.eth"). Every query takes an `indexer` argument selecting the network: "eth", "oeth", "base", "arb1", "mnt", "ape" (EVM) or "sn" (Starknet). It does NOT default to Ethereum, so always pass it. Space ids are contract addresses (e.g. `space(indexer: "eth", id: "0x...")`), proposal ids are "<space address>/<proposal_id>", and space names / proposal titles and bodies live under `metadata`. Spaces and proposals expose `link` (their snapshot.box URL) and every entity exposes `_indexer` (its network). The user\'s address is auto-bound as $user like in snapshot-hub-query. Common queries: `proposals(indexer: "eth", where: { space: "0x..." })`; `leaderboards(indexer: "eth", where: { user: $user })` for the user\'s activity. Use snapshot-api-schema only when this query errors on an unknown field.',
+    api: apiGql
+  }
+];
 
 export function registerQueryTool(
   server: McpServer,
   resolveContext: ResolveContext
 ): void {
-  server.registerTool(
-    'snapshot-query',
-    {
-      description:
-        'Execute any GraphQL query against the Snapshot API. The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Timestamps are unix seconds UTC. Use snapshot-schema only when this query errors on an unknown field.',
-      inputSchema: {
-        query: z.string().describe('GraphQL query string'),
-        variables: z
-          .record(z.string(), z.unknown())
-          .optional()
-          .describe('GraphQL variables')
+  for (const { name, description, api } of QUERY_TOOLS) {
+    server.registerTool(
+      name,
+      {
+        description,
+        inputSchema: {
+          query: z.string().describe('GraphQL query string'),
+          variables: z
+            .record(z.string(), z.unknown())
+            .optional()
+            .describe('GraphQL variables')
+        },
+        annotations: { readOnlyHint: true }
       },
-      annotations: { readOnlyHint: true }
-    },
-    ({ query, variables }, extra) =>
-      handle('snapshot-query', extra, async () => {
-        let user: string | undefined;
-        try {
-          ({ user } = await resolveContext(extra));
-        } catch {
-          // Anonymous read-only queries are still allowed.
-        }
-        return gql(query, user ? { ...variables, user } : variables);
-      })
-  );
+      ({ query, variables }, extra) =>
+        handle(name, extra, async () => {
+          let user: string | undefined;
+          try {
+            ({ user } = await resolveContext(extra));
+          } catch {
+            // Anonymous read-only queries are still allowed.
+          }
+          return api(query, user ? { ...variables, user } : variables);
+        })
+    );
+  }
 }
 
 export function registerWhoamiTool(
@@ -162,7 +192,7 @@ export function registerWhoamiTool(
     'snapshot-whoami',
     {
       description:
-        'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
+        'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-hub-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
       inputSchema: {},
       annotations: { readOnlyHint: true }
     },
@@ -174,9 +204,10 @@ export function registerWhoamiTool(
           resolveUserFromAlias(alias)
             .then(u => u?.toLowerCase() === address.toLowerCase())
             .catch(() => false),
-          gql('query ($id: String!) { user(id: $id) { name about avatar } }', {
-            id: address
-          })
+          hubGql(
+            'query ($id: String!) { user(id: $id) { name about avatar } }',
+            { id: address }
+          )
             .then(r => (r as { user: unknown }).user)
             // Profile lookup is best-effort; the address alone is still useful.
             .catch(() => null)
@@ -224,7 +255,7 @@ export function registerVoteTool(
     (data, extra) =>
       handle('snapshot-vote', extra, async () => {
         const { user: from, signer } = await resolveContext(extra);
-        const { proposal } = (await gql(
+        const { proposal } = (await hubGql(
           'query ($id: String!) { proposal(id: $id) { type privacy } }',
           { id: data.proposal }
         )) as { proposal: { type: string; privacy: string } | null };

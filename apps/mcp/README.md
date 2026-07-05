@@ -2,13 +2,15 @@
 
 # Snapshot MCP
 
-A [Model Context Protocol](https://modelcontextprotocol.io) server for [Snapshot](https://snapshot.box). Lets AI assistants read governance data (spaces, proposals, votes, voting power) and act on the user's behalf (cast votes, create proposals, follow spaces) through Snapshot's GraphQL API. Available as a hosted endpoint at `https://mcp.snapshot.box`, or self-hostable.
+A [Model Context Protocol](https://modelcontextprotocol.io) server for [Snapshot](https://snapshot.box). Lets AI assistants read governance data (spaces, proposals, votes, voting power) and act on the user's behalf (cast votes, create proposals, follow spaces) through Snapshot's GraphQL APIs. Available as a hosted endpoint at `https://mcp.snapshot.box`, or self-hostable.
 
 ## Tools
 
-### `snapshot-query`
+Snapshot has two GraphQL read APIs. The hub (`snapshot-hub-*`, offchain spaces) is the default: assistants use it unless the user explicitly asks about onchain spaces. The Snapshot API (`snapshot-api-*`) covers onchain spaces only (Snapshot X and Governor).
 
-Runs any GraphQL query against the Snapshot API. The user's address is auto-bound as `$user` — declare it in the query and reference it; do not pass it in `variables`.
+### `snapshot-hub-query`
+
+Runs any GraphQL query against the Snapshot hub API (offchain spaces). The user's address is auto-bound as `$user` — declare it in the query and reference it; do not pass it in `variables`.
 
 | Input | Type | Description |
 |-------|------|-------------|
@@ -29,9 +31,43 @@ query ($space: String!) {
 }
 ```
 
-### `snapshot-schema`
+### `snapshot-hub-schema`
 
-Returns the Snapshot GraphQL schema. Call this before `snapshot-query` only when a query fails on an unknown field or filter. The response is large, so do not call it preemptively.
+Returns the Snapshot hub GraphQL schema. Call this before `snapshot-hub-query` only when a query fails on an unknown field or filter. The response is large, so do not call it preemptively.
+
+No inputs.
+
+### `snapshot-api-query`
+
+Runs any GraphQL query against the [Snapshot API](https://api.snapshot.box) (`api.snapshot.box`), which indexes onchain spaces — both Snapshot X and Governor (`Space.protocol` is `snapshot-x` or `governor-bravo`). Every query takes an `indexer` argument selecting the network — `eth`, `oeth`, `base`, `arb1`, `mnt`, `ape` (EVM) or `sn` (Starknet). Space ids are contract addresses, proposal ids are `<space address>/<proposal_id>`, and space names / proposal titles and bodies live under `metadata`. The user's address is auto-bound as `$user`, same as `snapshot-hub-query`.
+
+| Input | Type | Description |
+|-------|------|-------------|
+| `query` | `string` | GraphQL query string |
+| `variables` | `object?` | GraphQL variables |
+
+**Example — fetch the latest proposals for an onchain space:**
+```graphql
+query ($space: String!) {
+  proposals(
+    indexer: "eth"
+    first: 10
+    orderBy: created
+    orderDirection: desc
+    where: { space: $space }
+  ) {
+    id
+    metadata { title }
+    scores_total_parsed
+    vote_count
+    max_end
+  }
+}
+```
+
+### `snapshot-api-schema`
+
+Returns the GraphQL schema of the Snapshot API. Call this before `snapshot-api-query` only when a query fails on an unknown field or filter. The response is large, so do not call it preemptively.
 
 No inputs.
 
@@ -39,7 +75,7 @@ No inputs.
 
 Returns the connected identity and signing capability:
 
-- `address` — the user's account, auto-injected as `$user` in `snapshot-query`.
+- `address` — the user's account, auto-injected as `$user` in `snapshot-hub-query`.
 - `alias` — the delegated signer wallet that signs writes on the user's behalf.
 - `authorized` — whether that alias is currently authorized for the user. When `false`, the write tools fail until the user re-authorizes.
 - `profile` — the user's public profile (`name`, `about`, `avatar`) when one exists.
@@ -153,7 +189,8 @@ Copy `.env.example` to `.env` and configure:
 | Variable | Description |
 |----------|-------------|
 | `SNAPSHOT_API_KEY` | [Snapshot API key](https://docs.snapshot.box/tools/api/api-keys) for higher rate limits (optional) |
-| `SNAPSHOT_API_URL` | GraphQL endpoint (default `https://hub.snapshot.org/graphql`) |
+| `SNAPSHOT_HUB_URL` | Hub GraphQL endpoint (default `https://hub.snapshot.org/graphql`) |
+| `SNAPSHOT_API_URL` | Snapshot API endpoint for onchain spaces (default `https://api.snapshot.box`) |
 | `PORT` | HTTP server port (default: `8080`) |
 | `BASE_URL` | Public URL for OAuth metadata (e.g. `https://mcp.snapshot.box`) |
 | `JWT_SECRET` | HS256 secret used to sign access tokens — **required for HTTP mode** (≥32 chars; `openssl rand -hex 32`) |

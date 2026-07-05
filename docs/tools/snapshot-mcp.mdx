@@ -131,7 +131,7 @@ Once connected, ask your assistant in plain language. Start simple, then move to
 - *"Follow `gitcoindao.eth` for me."* (write)
 - *"Vote 'For' on proposal `0xabc...` in `ens.eth`."* (write)
 
-The AI chains tools automatically: `snapshot-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act. Read actions run instantly. Write actions ask you to authorize once (see [Authentication](#authentication)).
+The AI chains tools automatically: `snapshot-hub-query` to discover data, then `snapshot-vote`, `snapshot-propose`, or `snapshot-follow` to act. Read actions run instantly. Write actions ask you to authorize once (see [Authentication](#authentication)).
 
 ## Authentication
 
@@ -161,12 +161,14 @@ You can revoke an alias at any time from **[Settings > Aliases](https://snapshot
 
 ## Available tools
 
-The server exposes 6 tools. The AI selects them automatically based on your prompt.
+The server exposes 8 tools. The AI selects them automatically based on your prompt. Reads default to the offchain hub. The AI uses the `snapshot-api-*` tools only when you explicitly ask about onchain spaces (Snapshot X or Governor).
 
 | Tool | Description | Auth |
 |---|---|---|
-| `snapshot-query` | Run any GraphQL query against Snapshot. Auto-binds your address as `$user`. | No |
-| `snapshot-schema` | Return the GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-hub-query` | Run any GraphQL query against the Snapshot hub API (offchain spaces, the default). Auto-binds your address as `$user`. | No |
+| `snapshot-hub-schema` | Return the hub GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-api-query` | Run any GraphQL query against the Snapshot API (onchain Snapshot X and Governor spaces). Auto-binds your address as `$user`. | No |
+| `snapshot-api-schema` | Return the Snapshot API GraphQL schema. Used when a query fails on an unknown field. | No |
 | `snapshot-whoami` | Return your connected address, signer alias, authorization status, and profile. | Yes |
 | `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
@@ -176,7 +178,7 @@ The server exposes 6 tools. The AI selects them automatically based on your prom
 
 1. **Discover.** The client fetches `/.well-known/oauth-authorization-server` and the MCP manifest to learn endpoints and tools.
 2. **Connect.** OAuth 2.0 with PKCE. The server creates a CDP-managed alias wallet, redirects you to Snapshot to authorize it, then issues a JWT.
-3. **Read.** `snapshot-query` and `snapshot-schema` proxy to Snapshot Hub. No wallet needed.
+3. **Read.** The hub tools proxy to Snapshot Hub, and the api tools proxy to the Snapshot API. No wallet needed.
 4. **Write.** Write tools build the EIP-712 envelope, ask CDP to sign with your alias, and submit to the Snapshot sequencer.
 
 The server is stateless. The JWT carries everything (address, CDP account ID, alias).
