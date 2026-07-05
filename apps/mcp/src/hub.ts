@@ -73,7 +73,7 @@ const BUILTIN_TYPES = new Set(['String', 'Boolean', 'Int', 'Float', 'ID']);
 async function loadSchema(
   api: Gql,
   removedQueries: Set<string>
-): Promise<unknown> {
+): Promise<string> {
   const data = await api(`{
   __schema {
     queryType {
@@ -98,14 +98,22 @@ async function loadSchema(
     queryType: { fields: { name: string }[] };
     types: { name: string }[];
   };
+  // Drop introspection/builtin types and the generated filter/order input
+  // types. The latter are ~90% of the payload and fully mechanical (a `where`
+  // field per column plus _gt/_lt/_in/_contains… suffixes); that grammar is
+  // documented on the query tools instead.
   schema.types = schema.types.filter(
-    t => !t.name.startsWith('__') && !BUILTIN_TYPES.has(t.name)
+    t =>
+      !t.name.startsWith('_') &&
+      !BUILTIN_TYPES.has(t.name) &&
+      !/(_filter|_orderBy|Where)$/.test(t.name)
   );
   schema.queryType.fields = schema.queryType.fields.filter(
     f => !removedQueries.has(f.name)
   );
 
-  return schema;
+  // Serialize compact: the schema is machine-read, so indentation is dead weight.
+  return JSON.stringify(schema);
 }
 
 export const hubSchemaCache = loadSchema(

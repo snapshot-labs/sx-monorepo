@@ -33,13 +33,13 @@ query ($space: String!) {
 
 ### `snapshot-hub-schema`
 
-Returns the Snapshot hub GraphQL schema. Call this before `snapshot-hub-query` only when a query fails on an unknown field or filter. The response is large, so do not call it preemptively.
+Returns the Snapshot hub GraphQL schema: query fields and entity types. Call this before `snapshot-hub-query` only when a query fails on an unknown field. Filter input types are omitted (filters are field names with suffixes like `_in`, `_contains`, `_gt`). Still a large response, so do not call it preemptively.
 
 No inputs.
 
 ### `snapshot-api-query`
 
-Runs any GraphQL query against the [Snapshot API](https://api.snapshot.box) (`api.snapshot.box`), which indexes onchain spaces — both Snapshot X and Governor (`Space.protocol` is `snapshot-x` or `governor-bravo`). Every query takes an `indexer` argument selecting the network — `eth`, `oeth`, `base`, `arb1`, `mnt`, `ape` (EVM) or `sn` (Starknet). Space ids are contract addresses, proposal ids are `<space address>/<proposal_id>`, and space names / proposal titles and bodies live under `metadata`. The user's address is auto-bound as `$user`, same as `snapshot-hub-query`.
+Runs any GraphQL query against the [Snapshot API](https://api.snapshot.box) (`api.snapshot.box`), which indexes onchain spaces — both Snapshot X and Governor (`Space.protocol` is `snapshot-x` or `governor-bravo`). Every query takes an `indexer` argument selecting the network — `eth`, `oeth`, `base`, `arb1`, `mnt`, `ape` (EVM) or `sn` (Starknet). Space ids are contract addresses, proposal ids are `<space address>/<proposal_id>`, and space names / proposal titles and bodies live under `metadata`. Filter `where` by any scalar field, exact or with a suffix `_gt`, `_lt`, `_gte`, `_lte`, `_in`, `_contains` (filter a relation by its id scalar, e.g. `space`); order with `orderBy` / `orderDirection`. The user's address is auto-bound as `$user`, same as `snapshot-hub-query`.
 
 | Input | Type | Description |
 |-------|------|-------------|
@@ -67,7 +67,7 @@ query ($space: String!) {
 
 ### `snapshot-api-schema`
 
-Returns the GraphQL schema of the Snapshot API. Call this before `snapshot-api-query` only when a query fails on an unknown field or filter. The response is large, so do not call it preemptively.
+Returns the GraphQL schema of the Snapshot API: query fields and entity types. Call this before `snapshot-api-query` only when a query fails on an unknown field. Filter and `orderBy` input types are omitted (their grammar is described on `snapshot-api-query`), which keeps the response small. Still large-ish, so do not call it preemptively.
 
 No inputs.
 

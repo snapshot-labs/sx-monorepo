@@ -101,7 +101,11 @@ async function handle(
   try {
     const result = await fn();
     log.info('tool ok');
-    return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
+    // A string result is already-serialized text (e.g. the compact schema blob);
+    // objects get pretty-printed for readability.
+    const text =
+      typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+    return { content: [{ type: 'text' as const, text }] };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error({ err: e }, 'tool error');
@@ -116,13 +120,13 @@ const SCHEMA_TOOLS = [
   {
     name: 'snapshot-hub-schema',
     description:
-      'Returns the schema of the Snapshot hub API (offchain spaces, the DEFAULT API). Large response: call only when a snapshot-hub-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
+      'Returns the schema of the Snapshot hub API (offchain spaces, the DEFAULT API): query fields and entity types. Large response: call only when a snapshot-hub-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
     schema: hubSchemaCache
   },
   {
     name: 'snapshot-api-schema',
     description:
-      'ONCHAIN spaces only, NOT the default: returns the schema of the Snapshot API (api.snapshot.box, Snapshot X and Governor spaces). Large response: call only when a snapshot-api-query fails on an unknown field, not preemptively.',
+      'ONCHAIN spaces only, NOT the default: returns the schema of the Snapshot API (api.snapshot.box, Snapshot X and Governor spaces): query fields and entity types. Filter and orderBy input types are omitted (their grammar is on snapshot-api-query). Large response: call only when a snapshot-api-query fails on an unknown field, not preemptively.',
     schema: apiSchemaCache
   }
 ];
@@ -141,13 +145,13 @@ const QUERY_TOOLS = [
   {
     name: 'snapshot-hub-query',
     description:
-      'DEFAULT Snapshot query tool: execute any GraphQL query against the Snapshot hub API (offchain spaces, ids like "ens.eth"). Use it for every Snapshot question unless the user explicitly asks about onchain spaces (then use snapshot-api-query). The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Timestamps are unix seconds UTC. Use snapshot-hub-schema only when this query errors on an unknown field.',
+      'DEFAULT Snapshot query tool: execute any GraphQL query against the Snapshot hub API (offchain spaces, ids like "ens.eth"). Use it for every Snapshot question unless the user explicitly asks about onchain spaces (then use snapshot-api-query). The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Filters are field names with suffixes like `_in`, `_contains`, `_gt`, `_gte`, `_lt`, `_lte` (e.g. `space_in`, `title_contains`, `created_gt`). Timestamps are unix seconds UTC. Use snapshot-hub-schema only when this query errors on an unknown field.',
     api: hubGql
   },
   {
     name: 'snapshot-api-query',
     description:
-      'ONCHAIN spaces only, NOT the default: execute any GraphQL query against the Snapshot API (api.snapshot.box), which indexes Snapshot X and Governor spaces (`Space.protocol` is "snapshot-x" or "governor-bravo"). Use snapshot-hub-query instead unless the user explicitly asks about onchain spaces or gives a space id that is a contract address (offchain space ids are slugs like "ens.eth"). Every query takes an `indexer` argument selecting the network: "eth", "oeth", "base", "arb1", "mnt", "ape" (EVM) or "sn" (Starknet). It does NOT default to Ethereum, so always pass it. Space ids are contract addresses (e.g. `space(indexer: "eth", id: "0x...")`), proposal ids are "<space address>/<proposal_id>", and space names / proposal titles and bodies live under `metadata`. Spaces and proposals expose `link` (their snapshot.box URL) and every entity exposes `_indexer` (its network). The user\'s address is auto-bound as $user like in snapshot-hub-query. Common queries: `proposals(indexer: "eth", where: { space: "0x..." })`; `leaderboards(indexer: "eth", where: { user: $user })` for the user\'s activity. Use snapshot-api-schema only when this query errors on an unknown field.',
+      'ONCHAIN spaces only, NOT the default: execute any GraphQL query against the Snapshot API (api.snapshot.box), which indexes Snapshot X and Governor spaces (`Space.protocol` is "snapshot-x" or "governor-bravo"). Use snapshot-hub-query instead unless the user explicitly asks about onchain spaces or gives a space id that is a contract address (offchain space ids are slugs like "ens.eth"). Every query takes an `indexer` argument selecting the network: "eth", "oeth", "base", "arb1", "mnt", "ape" (EVM) or "sn" (Starknet). It does NOT default to Ethereum, so always pass it. Space ids are contract addresses (e.g. `space(indexer: "eth", id: "0x...")`), proposal ids are "<space address>/<proposal_id>", and space names / proposal titles and bodies live under `metadata`. Spaces and proposals expose `link` (their snapshot.box URL) and every entity exposes `_indexer` (its network). The user\'s address is auto-bound as $user like in snapshot-hub-query. Common queries: `proposals(indexer: "eth", where: { space: "0x..." })`; `leaderboards(indexer: "eth", where: { user: $user })` for the user\'s activity. Filtering: `where` takes any scalar field, either exact (`space: "0x..."`) or with a suffix `_gt`, `_gte`, `_lt`, `_lte`, `_in`, `_not`, `_not_in`, `_contains`, `_contains_nocase` (e.g. `created_gt`, `id_in`); filter by a related entity using its id/address scalar (e.g. `space`, `author`), NOT a nested object. Order with `orderBy: <field>, orderDirection: asc | desc`. Use snapshot-api-schema only when this query errors on an unknown field.',
     api: apiGql
   }
 ];

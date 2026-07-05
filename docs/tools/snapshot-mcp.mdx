@@ -166,9 +166,9 @@ The server exposes 8 tools. The AI selects them automatically based on your prom
 | Tool | Description | Auth |
 |---|---|---|
 | `snapshot-hub-query` | Run any GraphQL query against the Snapshot hub API (offchain spaces, the default). Auto-binds your address as `$user`. | No |
-| `snapshot-hub-schema` | Return the hub GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-hub-schema` | Return the hub GraphQL schema (query fields and entity types). Used when a query fails on an unknown field. | No |
 | `snapshot-api-query` | Run any GraphQL query against the Snapshot API (onchain Snapshot X and Governor spaces). Auto-binds your address as `$user`. | No |
-| `snapshot-api-schema` | Return the Snapshot API GraphQL schema. Used when a query fails on an unknown field. | No |
+| `snapshot-api-schema` | Return the Snapshot API GraphQL schema (query fields and entity types). Used when a query fails on an unknown field. | No |
 | `snapshot-whoami` | Return your connected address, signer alias, authorization status, and profile. | Yes |
 | `snapshot-vote` | Cast a vote. Voting type and privacy are auto-detected. Re-calling replaces the previous vote. | Yes |
 | `snapshot-propose` | Create a proposal. Only `space`, `title`, and `body` are required. | Yes |
