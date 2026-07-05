@@ -39,7 +39,7 @@ No inputs.
 
 ### `snapshot-api-query`
 
-Runs any GraphQL query against the [Snapshot API](https://api.snapshot.box) (`api.snapshot.box`), which indexes onchain spaces — both Snapshot X and Governor (`Space.protocol` is `snapshot-x` or `governor-bravo`). Every query takes an `indexer` argument selecting the network — `eth`, `oeth`, `base`, `arb1`, `mnt`, `ape` (EVM) or `sn` (Starknet). Space ids are contract addresses, proposal ids are `<space address>/<proposal_id>`, and space names / proposal titles and bodies live under `metadata`. Filter `where` by any scalar field, exact or with a suffix `_gt`, `_lt`, `_gte`, `_lte`, `_in`, `_contains` (filter a relation by its id scalar, e.g. `space`); order with `orderBy` / `orderDirection`. The user's address is auto-bound as `$user`, same as `snapshot-hub-query`.
+Runs any GraphQL query against the [Snapshot API](https://api.snapshot.box) (`api.snapshot.box`), which indexes onchain spaces — both Snapshot X and Governor (`Space.protocol` is `snapshot-x` or `governor-bravo`). Every query takes an `indexer` argument selecting the network — `eth`, `oeth`, `base`, `arb1`, `mnt`, `ape` (EVM) or `sn` (Starknet). Space ids are contract addresses, proposal ids are `<space address>/<proposal_id>`, and space names / proposal titles and bodies live under `metadata`. Filter `where` by any scalar field, exact or with a suffix `_gt`, `_lt`, `_gte`, `_lte`, `_in`, `_contains` (filter a relation by its id scalar, e.g. `space`). Order with `orderBy: created` — an unquoted enum field name (the hub, by contrast, takes a quoted `orderBy: "created"`). The user's address is auto-bound as `$user`, same as `snapshot-hub-query`.
 
 | Input | Type | Description |
 |-------|------|-------------|

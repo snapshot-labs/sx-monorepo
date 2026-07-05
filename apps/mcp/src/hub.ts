@@ -39,10 +39,23 @@ async function request(
   };
 
   if (!json.data) {
-    throw new Error(json.errors?.[0]?.message ?? 'GraphQL returned no data');
+    throw new Error(hintFor(json.errors?.[0]?.message));
   }
 
   return json.data;
+}
+
+// GraphQL's enum/string mismatch errors repeat the value verbatim on both
+// sides ('cannot represent non-enum value: "created"… Did you mean "created"?'),
+// so the quote/unquote fix is invisible. Spell it out — the hub wants quoted
+// strings for orderBy, the Snapshot API wants unquoted enums, a common trip-up.
+function hintFor(message: string | undefined): string {
+  if (!message) return 'GraphQL returned no data';
+  if (/cannot represent non-enum value/.test(message))
+    return `${message} (pass this argument as an unquoted enum, e.g. orderBy: created)`;
+  if (/cannot represent a non string value/.test(message))
+    return `${message} (pass this argument as a quoted string, e.g. orderBy: "created")`;
+  return message;
 }
 
 type Gql = (
