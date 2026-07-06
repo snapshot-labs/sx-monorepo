@@ -354,7 +354,7 @@ export type Proposal = {
    */
   completed: boolean;
   cancelled: boolean;
-  /** Inco confidential reveal — set after `tryExecute`. Null/undefined for non-confidential or pre-reveal proposals. */
+  /** Inco confidential reveal — set after `finalizeReveal`. Null/undefined for non-confidential or pre-reveal proposals. */
   is_quorum_reached?: boolean | null;
   is_support_achieved?: boolean | null;
   state: ProposalState;

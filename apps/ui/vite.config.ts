@@ -84,8 +84,7 @@ export default defineConfig({
       events: require.resolve('events'),
       util: require.resolve('util'),
       buffer: require.resolve('buffer'),
-      // `@inco/js`'s ECIES path imports `crypto` (Node) — alias to a browser
-      // shim. Same goes for the rolldown inject in the build target.
+      // `@inco/lightning-js`'s ECIES path imports Node `crypto` — browser shim.
       crypto: require.resolve('crypto-browserify')
     },
     dedupe: ['@popperjs/core']
