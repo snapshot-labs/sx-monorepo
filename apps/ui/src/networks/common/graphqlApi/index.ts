@@ -155,12 +155,9 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
-  // Inco confidential reveal — populated by `DecisionFlagsRevealed` from
-  // `Space.tryExecute` (always, both approved + rejected paths). Once both
-  // flags are non-null the proposal is in a terminal state regardless of
-  // whether `executed` was set: approved means the contract ran the action
-  // and emitted ProposalExecuted (executed=true above), so this branch only
-  // catches the rejected case where neither path made `executed=true`.
+  // Inco confidential reveal (set by `ProposalResultRevealed`). Reveal and
+  // execute are separate, so a revealed proposal is 'rejected' (terminal) or
+  // 'passed' (ready to execute — the 'executed' case is handled above).
   if (
     proposal.is_quorum_reached !== null &&
     proposal.is_quorum_reached !== undefined &&
@@ -168,8 +165,23 @@ function getProposalState(
     proposal.is_support_achieved !== undefined
   ) {
     return proposal.is_quorum_reached && proposal.is_support_achieved
-      ? 'executed'
+      ? 'passed'
       : 'rejected';
+  }
+
+  // Confidential proposals before reveal: per-choice scores are encrypted (read
+  // as 0), so the score-based pass/fail below would wrongly mark a voting-ended
+  // proposal as 'rejected'. The outcome is unknown until someone reveals, so
+  // surface voting-end as 'closed' (awaiting reveal) — the reveal button settles
+  // it into 'passed'/'rejected'/'executed'.
+  if (proposal.space?.confidential) {
+    if (Number(proposal.start_block_number ?? proposal.start) > current) {
+      return 'pending';
+    }
+    if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
+      return 'closed';
+    }
+    return 'active';
   }
 
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
@@ -356,6 +368,8 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    // Indexer returns nullable Boolean; the Space type uses boolean | undefined.
+    confidential: space.confidential ?? undefined,
     voting_delay: Number(space.voting_delay),
     min_voting_period: Number(space.min_voting_period),
     max_voting_period: Number(space.max_voting_period),

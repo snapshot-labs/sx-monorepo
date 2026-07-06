@@ -1,8 +1,8 @@
 /**
  * Browser-side glue between Snapshot's ethers-flavored UI and the Inco
- * confidential-voting SDK.
+ * confidential-voting SDK (`@inco/lightning-js`, the v1 rename of `@inco/js`).
  *
- * `@inco/js` is hard-wired to viem (it takes a viem `PublicClient` for chain
+ * The SDK is hard-wired to viem (it takes a viem `PublicClient` for chain
  * reads and a viem `WalletClient` for attested-decrypt signatures). The UI
  * stays ethers-native, so this module bridges:
  *   - viem `PublicClient` is built from `http()` against Base Sepolia.
@@ -10,12 +10,9 @@
  *     user's MetaMask/WalletConnect signs the decryption-request typed data.
  *
  * Everything is dynamic-imported. Loading this module pulls in viem and
- * `@inco/js`; route-code that doesn't touch confidential voting never imports
- * it, so non-Inco users pay zero bundle cost.
+ * `@inco/lightning-js`; route-code that doesn't touch confidential voting never
+ * imports it, so non-Inco users pay zero bundle cost.
  */
-
-/** Inco SDK's chain key. Base Sepolia is the only supported network for now. */
-const INCO_CHAIN_KEY = 'baseSepolia84532' as const;
 
 const RPC_FALLBACK = 'https://sepolia.base.org';
 
@@ -33,11 +30,14 @@ export type DecryptionResult = {
   signatures: Hex[];
 };
 
+// Inline import() types keep the SDKs lazy; a top-level import would bundle them.
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 type CachedSdk = {
   inco: typeof import('@snapshot-labs/sx').inco;
   viem: typeof import('viem');
   baseSepolia: import('viem/chains').Chain;
 };
+/* eslint-enable @typescript-eslint/consistent-type-imports */
 
 let cached: CachedSdk | null = null;
 
@@ -60,8 +60,11 @@ async function loadSdk(): Promise<CachedSdk> {
 function getRpcUrl(): string {
   const env =
     typeof import.meta !== 'undefined'
-      ? (import.meta as ImportMeta & { env?: { VITE_BASE_SEPOLIA_RPC_URL?: string } })
-          .env?.VITE_BASE_SEPOLIA_RPC_URL
+      ? (
+          import.meta as ImportMeta & {
+            env?: { VITE_BASE_SEPOLIA_RPC_URL?: string };
+          }
+        ).env?.VITE_BASE_SEPOLIA_RPC_URL
       : undefined;
   return env || RPC_FALLBACK;
 }
@@ -90,7 +93,9 @@ async function buildWalletClient(account: `0x${string}`) {
   return viem.createWalletClient({
     account,
     chain: baseSepolia,
-    transport: viem.custom(eth as { request: (args: unknown) => Promise<unknown> })
+    transport: viem.custom(
+      eth as { request: (args: unknown) => Promise<unknown> }
+    )
   });
 }
 
@@ -111,8 +116,7 @@ export async function encryptChoice({
   choice: number | bigint;
 }): Promise<Hex> {
   const { inco } = await loadSdk();
-  const publicClient = await buildPublicClient();
-  const zap = await inco.getZap(publicClient, INCO_CHAIN_KEY);
+  const zap = await inco.getZap();
   return inco.encryptChoice({
     zap,
     space: space as Hex,
@@ -122,15 +126,93 @@ export async function encryptChoice({
 }
 
 /**
- * Read `getQuorumAndSupportHandles(proposalId)` from the Space, then request
- * attested decryption for both handles. Returns the data shape that
- * `client.tryExecute(...)` expects.
- *
- * `account` is the address that holds the decrypt ACL — for the v1 contract
- * this is the proposal author (or any voter, but author is the canonical
- * trigger). The wallet at this address must be connected and able to sign.
+ * Read the current per-vote Inco fee (the `msg.value` a confidential `vote()`
+ * must forward — one `newEuint256` per vote). Read from the Inco executor.
  */
-export async function decryptDecisionFlags({
+export async function getVoteFee(): Promise<bigint> {
+  const { inco } = await loadSdk();
+  const publicClient = await buildPublicClient();
+  const zap = await inco.getZap();
+  return inco.getFee({ zap, publicClient });
+}
+
+/**
+ * Read the on-chain reveal state of a confidential proposal: whether
+ * `finalizeReveal` has run and, if so, the cleartext per-choice counts and the
+ * computed pass/fail. Used to decide whether the reveal step is still needed and
+ * whether `execute` should be attempted (it reverts on a rejected proposal).
+ */
+export async function getRevealState({
+  space,
+  proposal
+}: {
+  space: string;
+  proposal: number | bigint;
+}): Promise<{
+  revealed: boolean;
+  against: bigint;
+  for: bigint;
+  abstain: bigint;
+  passed: boolean;
+}> {
+  const publicClient = await buildPublicClient();
+  const abi = [
+    {
+      type: 'function',
+      name: 'revealed',
+      inputs: [{ name: 'proposalId', type: 'uint256' }],
+      outputs: [{ name: '', type: 'bool' }],
+      stateMutability: 'view'
+    },
+    {
+      type: 'function',
+      name: 'result',
+      inputs: [{ name: 'proposalId', type: 'uint256' }],
+      outputs: [
+        { name: 'againstVotes', type: 'uint256' },
+        { name: 'forVotes', type: 'uint256' },
+        { name: 'abstainVotes', type: 'uint256' },
+        { name: 'passed', type: 'bool' }
+      ],
+      stateMutability: 'view'
+    }
+  ] as const;
+
+  const [revealed, result] = await Promise.all([
+    publicClient.readContract({
+      address: space as Hex,
+      abi,
+      functionName: 'revealed',
+      args: [BigInt(proposal)]
+    }) as Promise<boolean>,
+    publicClient.readContract({
+      address: space as Hex,
+      abi,
+      functionName: 'result',
+      args: [BigInt(proposal)]
+    }) as Promise<readonly [bigint, bigint, bigint, boolean]>
+  ]);
+
+  return {
+    revealed,
+    against: result[0],
+    for: result[1],
+    abstain: result[2],
+    passed: result[3]
+  };
+}
+
+/**
+ * Reveal step 2: read `getVoteTallyHandles(proposalId)` (the three frozen
+ * encrypted tallies, indexed `[against, for, abstain]`), then request attested
+ * decryption for all three. Returns the data shape `client.finalizeReveal(...)`
+ * expects, in that order.
+ *
+ * `account` is the address that holds the decrypt ACL — i.e. whoever already
+ * landed `requestReveal(...)` (reveal is permissionless after voting ends). The
+ * wallet at this address must be connected and able to sign the decrypt request.
+ */
+export async function decryptTallies({
   space,
   proposal,
   account
@@ -138,37 +220,40 @@ export async function decryptDecisionFlags({
   space: string;
   proposal: number | bigint;
   account: string;
-}): Promise<{ quorum: DecryptionResult; support: DecryptionResult }> {
+}): Promise<DecryptionResult[]> {
   const { inco } = await loadSdk();
   const publicClient = await buildPublicClient();
-  const zap = await inco.getZap(publicClient, INCO_CHAIN_KEY);
+  const zap = await inco.getZap();
 
   const handles = (await publicClient.readContract({
     address: space as Hex,
     abi: [
       {
         type: 'function',
-        name: 'getQuorumAndSupportHandles',
+        name: 'getVoteTallyHandles',
         inputs: [{ name: 'proposalId', type: 'uint256' }],
         outputs: [
-          { name: 'quorumHandle', type: 'bytes32' },
-          { name: 'supportHandle', type: 'bytes32' }
+          { name: 'againstHandle', type: 'bytes32' },
+          { name: 'forHandle', type: 'bytes32' },
+          { name: 'abstainHandle', type: 'bytes32' }
         ],
         stateMutability: 'view'
       }
     ] as const,
-    functionName: 'getQuorumAndSupportHandles',
+    functionName: 'getVoteTallyHandles',
     args: [BigInt(proposal)]
-  })) as [Hex, Hex];
+  })) as [Hex, Hex, Hex];
 
   const walletClient = await buildWalletClient(account as Hex);
   const results = await inco.decryptHandles({
     zap,
     walletClient,
-    handles
+    handles: handles as unknown as Hex[]
   });
-  if (results.length !== 2 || !results[0] || !results[1]) {
-    throw new Error('Inco decryption did not return the expected handle pair');
+  if (results.length !== 3 || results.some(r => !r)) {
+    throw new Error(
+      'Inco decryption did not return the expected three tally handles'
+    );
   }
-  return { quorum: results[0], support: results[1] };
+  return results;
 }
