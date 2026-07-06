@@ -10,6 +10,8 @@ type HerodotusConfig = {
   FEE: string;
 };
 
+const TIMESTAMP_AVAILABILITY_BUFFER = 60;
+
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
 const HERODOTUS_LEGACY_API_KEY = process.env.HERODOTUS_LEGACY_API_KEY || '';
 const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
@@ -128,7 +130,10 @@ async function getStatus(
   return { queryStatus, info };
 }
 
-async function submitBatch(proposal: ApiProposal) {
+async function submitBatch(proposal: DbProposal) {
+  const [, l1TokenAddress] = proposal.id.split('-');
+  if (!l1TokenAddress) throw new Error('Invalid proposal id');
+
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
@@ -146,7 +151,7 @@ async function submitBatch(proposal: ApiProposal) {
       [ACCUMULATES_CHAIN_ID]: {
         [`timestamp:${proposal.timestamp}`]: {
           accounts: {
-            [proposal.l1TokenAddress]: {
+            [l1TokenAddress]: {
               props: ['STORAGE_ROOT']
             }
           }
@@ -173,13 +178,13 @@ async function submitBatch(proposal: ApiProposal) {
         { proposal },
         'Invalid account address or ENS in herodotus batch proposal'
       );
-      return db.markProposalProcessed(getId(proposal));
+      return db.markProposalProcessed(proposal.id);
     }
 
     throw new Error(result.error);
   }
 
-  await db.updateProposal(getId(proposal), {
+  await db.updateProposal(proposal.id, {
     herodotusId: result.internalId
   });
 }
@@ -198,30 +203,22 @@ export async function registerProposal(proposal: ApiProposal) {
     strategyAddress: proposal.strategyAddress,
     herodotusId: null
   });
-
-  try {
-    await submitBatch(proposal);
-  } catch (err) {
-    logger.error(
-      { err, proposalId: getId(proposal), proposal },
-      'Failed to submit herodotus batch'
-    );
-  }
-}
-
-function resubmitBatch(proposal: DbProposal) {
-  const [, l1TokenAddress] = proposal.id.split('-');
-  if (!l1TokenAddress) throw new Error('Invalid proposal id');
-
-  return submitBatch({
-    ...proposal,
-    l1TokenAddress
-  });
 }
 
 export async function processProposal(proposal: DbProposal) {
+  const isTimestampAvailable =
+    proposal.timestamp <=
+    Math.floor(Date.now() / 1000) - TIMESTAMP_AVAILABILITY_BUFFER;
+  if (!isTimestampAvailable) {
+    logger.info(
+      { proposalId: proposal.id, timestamp: proposal.timestamp },
+      'Proposal timestamp is not available on L1 yet'
+    );
+    return;
+  }
+
   if (!proposal.herodotusId) {
-    return resubmitBatch(proposal);
+    return submitBatch(proposal);
   }
 
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
@@ -250,7 +247,7 @@ export async function processProposal(proposal: DbProposal) {
           { proposalId: proposal.id, herodotusId: proposal.herodotusId, info },
           'Query was rejected because timestamp was not available yet, submitting a new batch'
         );
-        return resubmitBatch(proposal);
+        return submitBatch(proposal);
       }
 
       logger.error(
