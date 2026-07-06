@@ -72,6 +72,7 @@ export const governorNetworks: NetworkID[] = [
 // SX core contracts (proxyFactory/masterSpace) are not deployed on these
 // networks, so they support Governor spaces only (no SX space creation/explore).
 export const governorOnlyNetworks: NetworkID[] = ['bnb', 'bnbt'];
+export const incoOnlyNetworks: NetworkID[] = ['basesep'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
@@ -133,9 +134,20 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       networks: enabledNetworks.filter(
         network =>
           !offchainNetworks.includes(network) &&
-          !governorOnlyNetworks.includes(network)
+          !governorOnlyNetworks.includes(network) &&
+          !incoOnlyNetworks.includes(network)
       ),
       limit: 18
+    },
+    // Inco × Snapshot X — confidential voting on Base Sepolia. Disabled unless
+    // basesep is opted into VITE_ENABLED_NETWORKS (no hosted indexer yet).
+    incoXsnapshotx: {
+      key: 'incoXsnapshotx',
+      label: 'Inco × Snapshot X',
+      apiNetwork: 'basesep',
+      networks: ['basesep'],
+      limit: 18,
+      disabled: !enabledNetworks.includes('basesep')
     },
     governor: {
       key: 'governor',

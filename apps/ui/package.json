@@ -41,7 +41,7 @@
     "@ethersproject/wallet": "^5.8.0",
     "@headlessui-float/vue": "^0.15.0",
     "@headlessui/vue": "^1.7.23",
-    "@inco/js": "^0.7.10",
+    "@inco/lightning-js": "^1.0.0",
     "@reown/walletkit": "^1.2.11",
     "@snapshot-labs/highlight": "^0.1.0-beta.2",
     "@snapshot-labs/lock": "0.3.2",
