@@ -5,15 +5,22 @@ import { getNetwork, spaceCreationNetworks } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
+// When set, the network is preselected and the Network step is hidden.
+const props = defineProps<{ fixedNetworkId?: NetworkID }>();
+
 const STEPS: StepRecords = {
   profile: {
     title: 'Profile',
     isValid: () => !stepsErrors.value['profile']
   },
-  network: {
-    title: 'Network',
-    isValid: () => true
-  },
+  ...(props.fixedNetworkId
+    ? {}
+    : {
+        network: {
+          title: 'Network',
+          isValid: () => true
+        }
+      }),
   strategies: {
     title: 'Strategies',
     isValid: () => votingStrategies.value.length > 0
@@ -69,7 +76,9 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(spaceCreationNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(
+  props.fixedNetworkId ?? spaceCreationNetworks[0]
+);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
