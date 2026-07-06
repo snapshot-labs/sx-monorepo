@@ -1,9 +1,9 @@
 /**
  * Inco confidential-voting wrapper.
  *
- * `@inco/js` is declared as an optional peerDependency. This module dynamic-imports it
- * the first time `getZap()` is called so non-Inco consumers of sx.js don't pay the
- * bundle cost.
+ * `@inco/lightning-js` (the v1 rename of `@inco/js`) is declared as an optional
+ * peerDependency. This module dynamic-imports it the first time `getZap()` is called
+ * so non-Inco consumers of sx.js don't pay the bundle cost.
  *
  * The shape of `IncoClient`, viem's `PublicClient` / `WalletClient`, and the
  * decryption-result objects are intentionally typed loosely (`unknown`-ish) — sx.js
@@ -18,7 +18,7 @@ export type IncoClient = unknown;
 type ViemPublicClient = unknown;
 type ViemWalletClient = unknown;
 
-/** Encoded attestation accepted by `Space.tryExecute`. */
+/** Encoded attestation accepted by `Space.finalizeReveal`. */
 export type DecryptionAttestation = {
   handle: `0x${string}`;
   value: `0x${string}`;
@@ -35,21 +35,21 @@ let cachedSdk: { lite: any; main: any } | null = null;
 
 async function loadIncoSdk() {
   if (cachedSdk) return cachedSdk;
-  // @inco/js is an optional peer dep — type resolution is intentionally suppressed.
-  // Runtime resolution happens only when a caller invokes confidential-voting flows.
-  // CJS interop: bundlers sometimes wrap CJS named exports under `.default`,
-  // sometimes expose them at top level. Normalize both shapes.
+  // @inco/lightning-js is an optional peer dep — type resolution is intentionally
+  // suppressed. Runtime resolution happens only when a caller invokes confidential-
+  // voting flows. CJS interop: bundlers sometimes wrap CJS named exports under
+  // `.default`, sometimes expose them at top level. Normalize both shapes.
   const [liteRaw, mainRaw] = await Promise.all([
     // @ts-ignore optional peer dep — types may not resolve under all
     // moduleResolution modes; sx.js stays bundler-agnostic by design.
-    import('@inco/js/lite').catch(() => {
+    import('@inco/lightning-js/lite').catch(() => {
       throw new Error(
-        '@inco/js is required for confidential voting. Install it as a peer dep: ' +
-          'bun add @inco/js'
+        '@inco/lightning-js is required for confidential voting. Install it as a peer dep: ' +
+          'bun add @inco/lightning-js'
       );
     }),
     // @ts-ignore optional peer dep
-    import('@inco/js')
+    import('@inco/lightning-js')
   ]);
   const lite = unwrap(liteRaw);
   const main = unwrap(mainRaw);
@@ -73,16 +73,11 @@ function unwrap(mod: any): any {
  *
  * Internally uses `Lightning.baseSepoliaTestnet()` — the hardcoded convenience
  * method that resolves to the latest `pepper=testnet, chainId=84532` deployment
- * from the static table baked into `@inco/js`. No chain RPC client needed at
- * construction time. (Decryption is the only flow that needs a viem
- * walletClient; see `decryptHandles`.)
- *
- * The `_publicClient` arg is accepted for backwards-compat with earlier
- * iterations of this helper; it's ignored.
+ * from the static table baked into `@inco/lightning-js`. No chain RPC client
+ * needed at construction time. (Decryption needs a viem walletClient and fee
+ * reads need a viem publicClient; see `decryptHandles` / `getFee`.)
  */
-export async function getZap(
-  _publicClient?: ViemPublicClient
-): Promise<IncoClient> {
+export async function getZap(): Promise<IncoClient> {
   const { lite } = await loadIncoSdk();
   return lite.Lightning.baseSepoliaTestnet();
 }
@@ -116,9 +111,40 @@ export async function encryptChoice({
 }
 
 /**
+ * Read the current per-ciphertext Inco fee from the executor contract. Each
+ * confidential `vote()` ingests one ciphertext (`newEuint256`), so this is the
+ * `msg.value` to forward per vote. `publicClient` is any viem PublicClient.
+ */
+export async function getFee({
+  zap,
+  publicClient
+}: {
+  zap: IncoClient;
+  publicClient: ViemPublicClient;
+}): Promise<bigint> {
+  const z = zap as any;
+  const pc = publicClient as any;
+  return pc.readContract({
+    address: z.executorAddress,
+    abi: [
+      {
+        inputs: [],
+        name: 'getFee',
+        outputs: [{ name: '', type: 'uint256' }],
+        stateMutability: 'pure',
+        type: 'function'
+      }
+    ],
+    functionName: 'getFee'
+  }) as Promise<bigint>;
+}
+
+/**
  * Request attested decryption of one or more encrypted handles. The walletClient
- * must be authorized in the Space's ACL (proposal author, voter, or the Space itself
- * for self-decryption flows). Returns the data shape that `Space.tryExecute` expects.
+ * must be authorized in the Space's ACL — for the reveal/execute-split flow that
+ * means the caller has already landed `requestReveal(...)`, which grants decrypt
+ * access to the three frozen tally handles. Returns the data shape that
+ * `Space.finalizeReveal` expects (one entry per handle, in input order).
  *
  * The Inco TEE covalidator may take a few seconds to produce attestations; callers
  * should retry on transient `not ready` errors. We don't retry here so retry policy

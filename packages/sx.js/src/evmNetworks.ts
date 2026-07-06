@@ -186,24 +186,24 @@ export const evmNetworks = {
   // Base Sepolia Inco confidential reference deployment.
   basesep: createStandardConfig(84532, {
     blockTime: 2,
-    proxyFactory: '0x06a0c3B26C13B444fEdb3B2988892E359dCb8B06',
-    masterSpace: '0xcb8eB47d52286c0fc1B5A0F4e0720f2E7db077Ac',
+    proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+    masterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
     authenticators: {
       EthSig: null,
       EthSigV2: null,
-      EthTx: '0x67a7d86F6c8B3E7FF3063D26A28D58e989850e4D'
+      EthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
     },
     strategies: {
-      Vanilla: '0x5513d0e1b3E273d9373f3D4Cfbb8f1940556EDd2',
+      Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673',
       Comp: null,
       OZVotes: null,
       Whitelist: null
     },
     proposalValidations: {
-      VotingPower: '0x18aE195EaA8E8D9Cc387CC13Db5727357BF9f4d7'
+      VotingPower: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
     },
     executionStrategies: {
-      SimpleQuorumAvatar: '0x7Ddcb1F2Ca1b1079Ad4BeeA2aDD0A7D792e16143',
+      SimpleQuorumAvatar: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
       SimpleQuorumTimelock: null
     }
   })
