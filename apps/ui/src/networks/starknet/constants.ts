@@ -74,7 +74,7 @@ export function createConstants(
     [config.Strategies.OZVotesTrace208StorageProofV2]: true
   };
 
-  const STORAGE_PROOF_STRATEGIES_TYPES = [
+  const STORAGE_PROOF_STRATEGIES_TYPES: string[] = [
     config.Strategies.EVMSlotValue,
     config.Strategies.OZVotesStorageProof,
     config.Strategies.OZVotesTrace208StorageProof,
