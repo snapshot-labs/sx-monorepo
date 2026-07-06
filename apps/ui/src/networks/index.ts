@@ -139,8 +139,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       ),
       limit: 18
     },
-    // Inco × Snapshot X — confidential voting on Base Sepolia. Disabled unless
-    // basesep is opted into VITE_ENABLED_NETWORKS (no hosted indexer yet).
+    // Confidential voting on Base Sepolia; off unless basesep enabled.
     incoXsnapshotx: {
       key: 'incoXsnapshotx',
       label: 'Inco × Snapshot X',

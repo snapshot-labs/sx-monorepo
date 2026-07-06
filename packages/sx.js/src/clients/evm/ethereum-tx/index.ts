@@ -441,8 +441,7 @@ export class EthereumTx {
       abi,
       signer
     );
-    // Confidential (Inco) voter-pays: forward the per-vote Inco fee as msg.value.
-    // The authenticator's `authenticate(...)` is payable and relays it to `Space.vote`.
+    // Confidential voter forwards per-vote Inco fee.
     const overrides =
       isConfidential && envelope.data.fee !== undefined
         ? { ...this.defaultTransactionOverrides, value: envelope.data.fee }
@@ -476,15 +475,7 @@ export class EthereumTx {
     return opts.noWait ? null : promise;
   }
 
-  /**
-   * Confidential-mode reveal, step 1 of 2. Grants the caller off-chain decrypt
-   * access to the proposal's now-frozen vote tallies. Only callable once the voting
-   * period has ended (`block.number >= maxEndBlockNumber`); reverts otherwise. The
-   * reveal is permissionless — anyone may call it after voting ends.
-   *
-   * After this lands, read the handles with `getVoteTallyHandles(...)`, decrypt them
-   * with `inco.decryptHandles(...)`, then submit `finalizeReveal(...)`.
-   */
+  // Reveal step 1: grant caller decrypt access.
   async requestReveal(
     {
       signer,
@@ -502,15 +493,7 @@ export class EthereumTx {
     return opts.noWait ? null : promise;
   }
 
-  /**
-   * Confidential-mode reveal, step 2 of 2. Submits the three attested tally
-   * decryptions (indexed `[against, for, abstain]`) so the Space verifies each
-   * attestation, stores the cleartext counts, computes quorum/support/passed
-   * on-chain, and emits `ProposalResultRevealed`. One-time per proposal.
-   *
-   * `tallies` come from `inco.decryptHandles(zap, walletClient, handles)` where
-   * `handles` is the tuple returned by `getVoteTallyHandles(...)`, in the same order.
-   */
+  // Reveal step 2: submit three attested tallies.
   async finalizeReveal(
     {
       signer,
@@ -546,7 +529,7 @@ export class EthereumTx {
     return opts.noWait ? null : promise;
   }
 
-  /** Read the three encrypted vote-tally handles `[against, for, abstain]`. */
+  // Read three encrypted tally handles [against, for, abstain].
   async getVoteTallyHandles({
     signer,
     space,
@@ -562,7 +545,7 @@ export class EthereumTx {
     return [against, forHandle, abstain];
   }
 
-  /** Top up a confidential Space with ETH so it can pay Inco compute fees. */
+  // Fund Space's ETH to pay Inco fees.
   async fundSpace(
     {
       signer,

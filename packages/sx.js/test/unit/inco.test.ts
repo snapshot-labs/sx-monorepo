@@ -17,7 +17,7 @@ const lightningInstance = {
   encrypt: vi.fn(async () => '0xdeadbeef' as `0x${string}`),
   attestedDecrypt: vi.fn(async (_w: unknown, handles: string[]) => {
     void _w;
-    // Tally decryptions are uint256 counts: against=2, for=5, abstain=1.
+    // Tally counts: against=2, for=5, abstain=1.
     const counts = [2n, 5n, 1n];
     return handles.map((h, i) => ({
       handle: h,
@@ -32,8 +32,7 @@ const Lightning = {
 };
 
 vi.mock('@inco/lightning-js/lite', () => ({ Lightning }));
-// `unwrap()` probes `mod.Lightning` first; vitest's mock throws on access to an
-// undefined named export (real ESM returns undefined), so expose it on both.
+// unwrap() probes mod.Lightning; expose on both mocks.
 vi.mock('@inco/lightning-js', () => ({ Lightning, handleTypes }));
 
 describe('inco wrapper', () => {

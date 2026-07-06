@@ -79,12 +79,7 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   84532: evmBaseSepolia
 };
 
-/**
- * Cheap detector for confidential-voting Spaces. Prefers the API-reported flag
- * (`space.confidential` from the indexer) but falls back to "deployed on the
- * Inco chain" so brand-new spaces also flow correctly before the indexer has
- * marked them.
- */
+// Confidential if flagged, or on Inco chain (pre-indexer).
 function isConfidentialSpace(
   space: { confidential?: boolean | null },
   chainId: number
@@ -645,28 +640,14 @@ export function createActions(
 
       const sdkChoice = getSdkChoice(choice);
 
-      // Inco confidential mode: encrypt the choice before sending. The on-chain
-      // Space's `vote(...,bytes ciphertext,...)` ABI variant is selected by
-      // sx.js when `Vote.ciphertext` is set. The ciphertext must be bound to
-      // the *voter* (not msg.sender), since EthSigAuthenticator forwards into
-      // Space.vote() and msg.sender there is the authenticator.
-      //
-      // CRITICAL: derive the voter from `signer.getAddress()` rather than the
-      // web3 store `account` so the encryption binding matches the address
-      // sx.js encodes into the on-chain vote() call. Any drift (case, stale
-      // store) makes the contract's `ciphertext.newEuint256(voter)` produce a
-      // junk handle — userChoice ends up != 1, the For accumulator never
-      // increments, and the revealed tally is silently wrong. See
-      // snapshotx/inco-base-sepolia-runner negative-cases.ts
-      // `wrongCiphertextOwnerCase`.
+      // Bind ciphertext to signer address, not web3 store.
       const isConfidential = isConfidentialSpace(proposal.space, chainId);
       let ciphertext: string | undefined;
       let fee: string | undefined;
       if (isConfidential) {
         const { encryptChoice, getVoteFee } = await import('@/helpers/inco');
         const voterAddress = await signer.getAddress();
-        // vote() is payable: the voter forwards the per-vote Inco fee, which the
-        // authenticator relays via msg.value.
+        // vote() is payable; voter forwards per-vote Inco fee.
         [ciphertext, fee] = await Promise.all([
           encryptChoice({
             space: proposal.space.id,
@@ -689,8 +670,6 @@ export function createActions(
         chainId
       };
 
-      // Confidential votes must be sent directly (vote() is payable and the
-      // relayer can't forward msg.value / has no fee budget for basesep).
       if (relayerType === 'evm' && !isConfidential) {
         return ethSigClient.vote({
           signer,
@@ -730,15 +709,7 @@ export function createActions(
         });
       }
 
-      // Confidential-voting reveal + execute (reveal/execute split). Three on-chain
-      // steps, gated to after the voting period:
-      //   1. requestReveal(id)  — grants the caller decrypt access to the frozen tallies
-      //   2. decrypt the 3 tally handles off-chain (Inco TEE) + finalizeReveal(id, …)
-      //      — posts the cleartext counts and computes pass/fail on-chain
-      //   3. execute(id, payload) — only if the proposal passed
-      // Reveal is permissionless; we skip it if the proposal is already revealed.
-      // Mana relay is bypassed: the relayer has no decrypt ACL, and reveal is the
-      // user's own signed flow (see docs/CONFIDENTIAL_VOTING.md, Decision O3).
+      // Reveal/execute split, gated to after voting ends.
       if (isConfidentialSpace(proposal.space, chainId)) {
         const signer = getSigner(web3);
         const account = await signer.getAddress();
@@ -747,9 +718,7 @@ export function createActions(
           '@/helpers/inco'
         );
 
-        // Vanilla-execution confidential proposals are created with no actions;
-        // executionParams must match propose time (`'0x'`). With actions, encode
-        // the same way as the legacy path below.
+        // Vanilla proposals: executionParams must match propose ('0x').
         const executionParams =
           proposal.executions && proposal.executions.length > 0
             ? getExecutionData(
@@ -767,7 +736,7 @@ export function createActions(
         let passed = initial.passed;
 
         if (!initial.revealed) {
-          // 1. requestReveal — must be mined before decryption (it grants the ACL).
+          // requestReveal grants ACL; must mine before decrypt.
           const requestTx = await client.requestReveal({
             signer,
             space: proposal.space.id,
@@ -775,7 +744,7 @@ export function createActions(
           });
           if (requestTx) await requestTx.wait();
 
-          // 2. decrypt the three frozen tallies, then finalizeReveal.
+          // Decrypt frozen tallies, then finalizeReveal.
           const tallies = await decryptTallies({
             space: proposal.space.id,
             proposal: proposalId,
@@ -797,9 +766,7 @@ export function createActions(
           ).passed;
         }
 
-        // 3. Only execute if the proposal passed; a rejected proposal has nothing
-        // to execute (execute() reverts with ProposalNotPassed). The reveal above
-        // already settled the verdict on-chain for the indexer to pick up.
+        // Execute only if passed; else execute() reverts.
         if (!passed) return null;
 
         return client.execute({

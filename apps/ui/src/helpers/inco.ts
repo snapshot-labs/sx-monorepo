@@ -1,18 +1,4 @@
-/**
- * Browser-side glue between Snapshot's ethers-flavored UI and the Inco
- * confidential-voting SDK (`@inco/lightning-js`, the v1 rename of `@inco/js`).
- *
- * The SDK is hard-wired to viem (it takes a viem `PublicClient` for chain
- * reads and a viem `WalletClient` for attested-decrypt signatures). The UI
- * stays ethers-native, so this module bridges:
- *   - viem `PublicClient` is built from `http()` against Base Sepolia.
- *   - viem `WalletClient` is built from `custom(window.ethereum)` so the
- *     user's MetaMask/WalletConnect signs the decryption-request typed data.
- *
- * Everything is dynamic-imported. Loading this module pulls in viem and
- * `@inco/lightning-js`; route-code that doesn't touch confidential voting never
- * imports it, so non-Inco users pay zero bundle cost.
- */
+// Bridges ethers UI to viem-based Inco SDK; lazy-loaded.
 
 const RPC_FALLBACK = 'https://sepolia.base.org';
 
@@ -30,7 +16,7 @@ export type DecryptionResult = {
   signatures: Hex[];
 };
 
-// Inline import() types keep the SDKs lazy; a top-level import would bundle them.
+// Inline import() types keep SDKs lazy.
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 type CachedSdk = {
   inco: typeof import('@snapshot-labs/sx').inco;
@@ -52,11 +38,7 @@ async function loadSdk(): Promise<CachedSdk> {
   return cached;
 }
 
-/**
- * Read the RPC URL the UI should use for Inco SDK reads. Prefer the env override
- * (`VITE_BASE_SEPOLIA_RPC_URL`) so QA / demo can swap to a paid endpoint without
- * code changes; fall back to the public URL otherwise.
- */
+// Env override lets QA/demo swap RPC endpoint.
 function getRpcUrl(): string {
   const env =
     typeof import.meta !== 'undefined'
@@ -77,11 +59,7 @@ async function buildPublicClient() {
   });
 }
 
-/**
- * Build a viem walletClient backed by the user's injected provider. Throws if
- * no `window.ethereum` is available — Inco decryption flows require the user's
- * wallet to sign a typed-data request.
- */
+// Wallet client over injected provider; decrypt needs a signature.
 async function buildWalletClient(account: `0x${string}`) {
   const { viem, baseSepolia } = await loadSdk();
   const eth = (globalThis as { ethereum?: unknown }).ethereum;
@@ -99,12 +77,7 @@ async function buildWalletClient(account: `0x${string}`) {
   });
 }
 
-/**
- * Encrypt a vote choice as an Inco `euint256` ciphertext bound to (voter, space).
- *
- * Choice mapping is the on-chain Space's: 0 = Against, 1 = For, 2 = Abstain.
- * Pass the result as `Vote.ciphertext` to `client.vote(...)`.
- */
+// Encrypt choice to euint256 bound to (voter, space).
 export async function encryptChoice({
   space,
   voter,
@@ -112,7 +85,7 @@ export async function encryptChoice({
 }: {
   space: string;
   voter: string;
-  /** SDK-numeric choice (0=Against, 1=For, 2=Abstain) — call `getSdkChoice` first. */
+  /** 0=Against, 1=For, 2=Abstain; call getSdkChoice first. */
   choice: number | bigint;
 }): Promise<Hex> {
   const { inco } = await loadSdk();
@@ -125,10 +98,7 @@ export async function encryptChoice({
   });
 }
 
-/**
- * Read the current per-vote Inco fee (the `msg.value` a confidential `vote()`
- * must forward — one `newEuint256` per vote). Read from the Inco executor.
- */
+// Per-vote Inco fee; vote() forwards it as msg.value.
 export async function getVoteFee(): Promise<bigint> {
   const { inco } = await loadSdk();
   const publicClient = await buildPublicClient();
@@ -136,12 +106,7 @@ export async function getVoteFee(): Promise<bigint> {
   return inco.getFee({ zap, publicClient });
 }
 
-/**
- * Read the on-chain reveal state of a confidential proposal: whether
- * `finalizeReveal` has run and, if so, the cleartext per-choice counts and the
- * computed pass/fail. Used to decide whether the reveal step is still needed and
- * whether `execute` should be attempted (it reverts on a rejected proposal).
- */
+// On-chain reveal state; gates reveal + execute.
 export async function getRevealState({
   space,
   proposal
@@ -202,16 +167,7 @@ export async function getRevealState({
   };
 }
 
-/**
- * Reveal step 2: read `getVoteTallyHandles(proposalId)` (the three frozen
- * encrypted tallies, indexed `[against, for, abstain]`), then request attested
- * decryption for all three. Returns the data shape `client.finalizeReveal(...)`
- * expects, in that order.
- *
- * `account` is the address that holds the decrypt ACL — i.e. whoever already
- * landed `requestReveal(...)` (reveal is permissionless after voting ends). The
- * wallet at this address must be connected and able to sign the decrypt request.
- */
+// Decrypt 3 tally handles; account must hold decrypt ACL.
 export async function decryptTallies({
   space,
   proposal,

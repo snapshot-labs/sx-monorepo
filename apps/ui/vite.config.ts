@@ -84,7 +84,7 @@ export default defineConfig({
       events: require.resolve('events'),
       util: require.resolve('util'),
       buffer: require.resolve('buffer'),
-      // `@inco/lightning-js`'s ECIES path imports Node `crypto` — browser shim.
+      // Browser shim for Inco SDK's Node crypto.
       crypto: require.resolve('crypto-browserify')
     },
     dedupe: ['@popperjs/core']

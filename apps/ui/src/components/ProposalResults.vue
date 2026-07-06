@@ -47,18 +47,14 @@ const quorumAmount = computed(() => {
   return `${format(current)} / ${format(proposal.value.quorum)}`;
 });
 
-// Revealed once `finalizeReveal` has run and the indexer wrote the result.
-// Before: tallies are encrypted (lock UI); after: exact counts render as bars.
+// Encrypted until reveal; then show real counts.
 const isConfidentialRevealed = computed(
   () =>
     !!props.proposal.space?.confidential &&
     props.proposal.is_quorum_reached != null
 );
 
-// True when per-choice tallies are encrypted and not displayable as numbers.
-// Shutter (offchain) sets `privacy = 'shutter'` until reveal; Inco (onchain)
-// keeps the per-choice tallies encrypted until the reveal/execute-split reveal
-// lands. Both render the lock-icon UI instead of 0/0% while encrypted.
+// Encrypted tallies (Shutter/Inco): show lock, not numbers.
 const isEncryptedTally = computed(() => {
   if (props.proposal.privacy !== 'none') return true;
   if (props.proposal.space?.confidential) return !isConfidentialRevealed.value;

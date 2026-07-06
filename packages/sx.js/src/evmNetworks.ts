@@ -88,12 +88,7 @@ function createIncoConfig(
     },
     Strategies: {
       Vanilla: additionalProperties.strategies.Vanilla,
-      // Snapshot-X-canonical strategies aren't deployed on Inco yet. Use
-      // distinct (lowercase, never-checksummed) sentinel addresses so
-      // `createEvmConfig`'s type registry doesn't collapse them onto the
-      // Vanilla address — last-write-wins on a shared key would otherwise
-      // mis-register Vanilla as `type: 'whitelist'`. They are dead keys and
-      // are never used as actual contract addresses.
+      // Sentinels avoid strategy type-registry collision.
       Comp: '0x0000000000000000000000000000000000000c01',
       OZVotes: '0x0000000000000000000000000000000000000c02',
       Whitelist: '0x0000000000000000000000000000000000000c03',
@@ -208,21 +203,7 @@ export const evmNetworks = {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
   }),
-  /**
-   * Base Sepolia (chainId 84532) — Inco confidential voting reference deployment.
-   *
-   * NOT a generic SX deployment. The master Space and authenticators here are the
-   * Inco-flavored variants from the `feat/inco-reveal-execute-split` contracts:
-   * encrypted, voter-pays-fee `vote()` (payable; forwards `inco.getFee()`), and the
-   * reveal/execute split (`requestReveal` → `finalizeReveal` → `execute`) that
-   * reveals exact per-choice counts. The `confidential: true` Meta flag tells the
-   * SDK/UI to swap to the encrypted-vote ABI and EIP-712 type.
-   *
-   * Deployed via `snapshotx/script/DeployIncoStack.s.sol` against `@inco/lightning`
-   * v1 (executor 0x4b99...8624 — the same one `@inco/lightning-js` v1 targets) at
-   * block 42969459; see `snapshotx/deployments/inco-base-sepolia.json`. The
-   * authenticators are payable (they forward the per-vote fee to the Space).
-   */
+  // Base Sepolia Inco confidential reference deployment.
   basesep: createIncoConfig(84532, {
     blockTime: 2,
     proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
