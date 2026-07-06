@@ -58,20 +58,9 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
-  /**
-   * Confidential mode (Inco). When set, the SDK sends the encrypted bytes to the
-   * Space's `vote(...,bytes ciphertext,...)` ABI variant and signs over the
-   * Inco-flavored EIP-712 type. Produce this with `inco.encryptChoice(...)`.
-   * `choice` must still be supplied so non-confidential code paths and analytics
-   * stay consistent — the on-chain contract only sees `ciphertext`.
-   */
+  /** Confidential (Inco) encrypted vote; from encryptChoice. */
   ciphertext?: string;
-  /**
-   * Confidential mode (Inco), voter-pays fee. The reveal/execute-split Space makes
-   * `vote(...)` payable and requires `msg.value >= inco.getFee()` (the per-vote
-   * `newEuint256` cost). The authenticator forwards this value to the Space. Read
-   * it from the Inco executor (`inco.getFee(...)`) and pass it as a wei string/bigint.
-   */
+  /** Confidential (Inco) per-vote fee forwarded as msg.value. */
   fee?: string | bigint;
 };
 
