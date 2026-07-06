@@ -1,0 +1,5 @@
+apiVersion: v2
+name: checkpoint-public
+description: Public ingress (Service + HTTPRoute) for a Checkpoint app.
+type: application
+version: 0.1.0

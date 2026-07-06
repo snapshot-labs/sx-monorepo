@@ -1,49 +1,72 @@
 name: Promote API
 
+# Cuts over an environment by upgrading the public Helm release to point at the
+# currently-inactive color.
+#
+# Required configuration:
+#   vars.DOKS_CLUSTER
+#   secrets.DIGITALOCEAN_ACCESS_TOKEN
+#   GitHub environments: api_testnet_promote, api_mainnet_promote
+
 on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Environment to promote'
-        required: true
+        description: Environment to promote
         type: choice
-        options:
-        - api_mainnet
-        - api_testnet
+        options: [testnet, mainnet]
+        required: true
 
 jobs:
-  promote-api:
-    environment: ${{ inputs.environment }}_promote
-    concurrency: ${{ inputs.environment }}
+  promote:
     runs-on: ubuntu-latest
+    environment: api_${{ inputs.environment }}_promote
+    concurrency:
+      group: promote-api-${{ inputs.environment }}
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      PUBLIC_CHART: helm/public
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    - name: Install doctl
-      uses: digitalocean/action-doctl@v2
-      with:
-        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-    - name: Get deployments
-      id: get-deployments
-      uses: ./.github/actions/get-deployments
-      with:
-        public-api-url: ${{ vars.PUBLIC_API_URL }}
-        app-1-id: ${{ vars.APP_1_ID }}
-        app-2-id: ${{ vars.APP_2_ID }}
-    - name: Promoting staging to production
-      run: |
-        doctl apps spec get "$APP_ID" --format "json" | \
-        jq '.services[0].envs |= map(if .key == "DATABASE_URL_INDEX" then .value = "'$NEW_INDEX'" else . end)' | \
-        doctl apps update "$APP_ID" --update-sources --wait --spec -
-      env:
-        APP_ID: ${{ vars.PUBLIC_API_APP_ID }}
-        NEW_INDEX: ${{ steps.get-deployments.outputs.staging-index }}
-    - name: Get new deployments
-      id: get-new-deployments
-      uses: ./.github/actions/get-deployments
-      with:
-        public-api-url: ${{ vars.PUBLIC_API_URL }}
-        app-1-id: ${{ vars.APP_1_ID }}
-        app-2-id: ${{ vars.APP_2_ID }}
-    - name: Deploying new changes to new staging
-      run: doctl apps create-deployment ${{ steps.get-new-deployments.outputs.staging-app-id }}
+      - uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure cluster access
+        run: doctl kubernetes cluster kubeconfig save "$DOKS_CLUSTER"
+        env:
+          DOKS_CLUSTER: ${{ vars.DOKS_CLUSTER }}
+
+      - name: Determine active/inactive colors
+        id: color
+        run: |
+          NS="$ENVIRONMENT"
+          ACTIVE=$(kubectl -n "$NS" get svc sx-api -o jsonpath='{.spec.selector.color}')
+          if [ "$ACTIVE" = "blue" ]; then INACTIVE=green; else INACTIVE=blue; fi
+          echo "Promoting $NS: $ACTIVE -> $INACTIVE"
+          echo "namespace=$NS" >> "$GITHUB_OUTPUT"
+          echo "inactive=$INACTIVE" >> "$GITHUB_OUTPUT"
+
+      - name: Verify target color is healthy
+        run: |
+          NS="${{ steps.color.outputs.namespace }}"
+          C="${{ steps.color.outputs.inactive }}"
+          kubectl -n "$NS" rollout status "deploy/sx-api-api-$C" --timeout=120s
+          kubectl -n "$NS" rollout status "deploy/sx-api-indexer-$C" --timeout=120s
+
+      - name: Flip public Service via Helm
+        run: |
+          C="${{ steps.color.outputs.inactive }}"
+          helm upgrade --install "$ENVIRONMENT-public" "$PUBLIC_CHART" \
+            --namespace "$ENVIRONMENT" --create-namespace \
+            --values "$PUBLIC_CHART/values-api-$ENVIRONMENT.yaml" \
+            --set activeColor="$C"
+          echo "Promoted $ENVIRONMENT: public traffic now served by $C." >> "$GITHUB_STEP_SUMMARY"
