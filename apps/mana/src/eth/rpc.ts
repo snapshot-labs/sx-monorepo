@@ -56,11 +56,15 @@ const NETWORKS = new Map<number, EvmNetworkConfig>([
   [11155111, evmSepolia]
 ]);
 
+// Only expose networks Mana actually has a config for in `NETWORKS`. sx.js's
+// `evmNetworks` includes basesep (84532) for the Inco confidential integration,
+// but Mana intentionally doesn't relay it (no decrypt ACL — see
+// docs/CONFIDENTIAL_VOTING.md, Decision O3). Without this filter, building the
+// handler map below throws "Unsupported chainId" on startup for 84532.
 export const NETWORK_IDS = new Map<number, string>(
-  Object.entries(evmNetworks).map(([networkId, config]) => [
-    config.Meta.eip712ChainId,
-    networkId
-  ])
+  Object.entries(evmNetworks)
+    .filter(([, config]) => NETWORKS.has(config.Meta.eip712ChainId))
+    .map(([networkId, config]) => [config.Meta.eip712ChainId, networkId])
 );
 
 export const createNetworkHandler = (chainId: number) => {
