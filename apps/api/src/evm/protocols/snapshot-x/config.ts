@@ -13,8 +13,7 @@ import { NetworkID, SnapshotXConfig } from '../../types';
 // and pick up only fresh proposals/votes). Numeric block height. Falls back to
 // the Phase-0 demo deploy block when unset.
 const BASESEP_START_BLOCK_ENV = process.env.BASESEP_START_BLOCK;
-// Block of the reveal/execute-split stack deploy (ProxyFactory + master Space) on
-// @inco/lightning v1; see snapshotx/deployments/inco-base-sepolia.json.
+// Reveal/execute-split stack deploy block.
 const BASESEP_DEFAULT_START = 42969459;
 
 const START_BLOCKS: Record<NetworkID, number> = {
@@ -36,11 +35,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
     : BASESEP_DEFAULT_START
 };
 
-// Pre-factory Inco Spaces deployed directly (not via the ProxyFactory). The
-// reveal/execute-split deployment ships a real ProxyFactory, so confidential
-// Spaces are now created through the UI and discovered via the factory's
-// `ProxyDeployed` event — no static entries needed. Kept for the rare hand-
-// deployed Space (add its address here to backfill).
+// Backfill for hand-deployed (non-factory) Inco Spaces.
 const STATIC_INCO_SPACES: Partial<Record<NetworkID, string[]>> = {};
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -96,11 +91,7 @@ const SPACE_TEMPLATE_EVENTS = [
     fn: 'handleProposalUpdated'
   },
   { name: 'ProposalExecuted(uint256)', fn: 'handleProposalExecuted' },
-  // Inco confidential reveal — fires from `finalizeReveal` regardless of
-  // outcome (approved or rejected). Carries the decrypted per-choice counts
-  // (against, for, abstain) + pass/fail so the indexer can persist the public
-  // tally and verdict without polling on-chain reads. Non-Inco Spaces never
-  // emit this; safe no-op on legacy networks.
+  // Inco confidential reveal; no-op on legacy chains.
   {
     name: 'ProposalResultRevealed(uint256,uint256,uint256,uint256,bool)',
     fn: 'handleProposalResultRevealed'

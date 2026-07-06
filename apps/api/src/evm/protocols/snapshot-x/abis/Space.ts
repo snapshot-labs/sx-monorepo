@@ -1441,11 +1441,7 @@ export default [
     ],
     stateMutability: 'view'
   },
-  // Always emitted by `finalizeReveal` after the encrypted per-choice tallies
-  // are decrypted and verified — covers both approved and rejected paths.
-  // Carries the public cleartext counts + pass/fail. Non-Inco Spaces never emit
-  // this; topic-0 is unique to this signature so there's no listener collision
-  // on legacy networks.
+  // Public tally + verdict on confidential reveal.
   {
     type: 'event',
     name: 'ProposalResultRevealed',

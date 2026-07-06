@@ -952,12 +952,7 @@ export function createWriters(
       }
     }
 
-    // Confidential (Inco): `execute()` runs after a separate `finalizeReveal`,
-    // so the verdict + public counts are already on the entity. But confidential
-    // spaces use the Vanilla executor singleton, which has no ExecutionStrategy
-    // entity — the switch above is skipped, so settle here, else the UI parks
-    // the proposal in 'queued'. Gated to basesep to keep the Space load off the
-    // hot path on every legacy chain.
+    // Vanilla executor has no entity; settle here.
     if (config.indexerName === 'basesep') {
       const space = await Space.loadEntity(spaceId, config.indexerName);
       if (space?.confidential) {
@@ -972,17 +967,7 @@ export function createWriters(
     await proposal.save();
   };
 
-  // Inco confidential reveal. Always emitted by `Space.finalizeReveal` (approved
-  // OR rejected path) so the indexer can persist the now-public per-choice tally
-  // and the verdict without polling on-chain views. Non-Inco Spaces never emit
-  // this event — the topic-0 is unique to this signature, so legacy chains see
-  // no traffic and incur no cost from the subscription.
-  //
-  // Reveal and execute are separate steps. This handler settles the *tally*
-  // (counts go public, `completed = true`) and the verdict flags. For a passed
-  // proposal the subsequent `execute()` emits `ProposalExecuted`, which marks
-  // `executed`/`execution_settled` (see handleProposalExecuted). A rejected
-  // proposal is terminal here — its state resolves to 'rejected' from the flags.
+  // Public per-choice tally + verdict on reveal.
   const handleProposalResultRevealed: evm.Writer<
     typeof SpaceAbi,
     'ProposalResultRevealed'
@@ -994,8 +979,7 @@ export function createWriters(
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    // Contract choice indices are 0=Against, 1=For, 2=Abstain; Snapshot's
-    // score buckets are 1=For, 2=Against, 3=Abstain.
+    // contract 0/1/2 = Against/For/Abstain -> scores_2/1/3
     const againstVotes = BigInt(event.args.againstVotes);
     const forVotes = BigInt(event.args.forVotes);
     const abstainVotes = BigInt(event.args.abstainVotes);
@@ -1022,14 +1006,12 @@ export function createWriters(
       proposal.vp_decimals
     );
 
-    // Reproduce the on-chain semantics: quorum counts For + Abstain, support is
-    // For > Against. `event.args.passed` equals the AND of these.
+    // quorum = For+Abstain; support = For>Against.
     proposal.is_support_achieved = forVotes > againstVotes;
     proposal.is_quorum_reached =
       forVotes + abstainVotes >= BigInt(proposal.quorum);
 
-    // The tally is final and public now (voting has ended and counts are
-    // revealed), so the proposal is "completed" regardless of the execute step.
+    // Completed at reveal, independent of execute step.
     proposal.completed = true;
 
     await proposal.save();
