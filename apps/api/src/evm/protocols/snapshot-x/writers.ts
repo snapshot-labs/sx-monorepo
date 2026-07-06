@@ -952,22 +952,41 @@ export function createWriters(
       }
     }
 
-    // Confidential-voting Space.tryExecute fires `DecisionFlagsRevealed`
-    // before `ProposalExecuted` on the approved path, so the flags +
-    // settlement fields are already on the entity. Nothing extra to do here.
+    // Confidential (Inco): `execute()` runs after a separate `finalizeReveal`,
+    // so the verdict + public counts are already on the entity. But confidential
+    // spaces use the Vanilla executor singleton, which has no ExecutionStrategy
+    // entity — the switch above is skipped, so settle here, else the UI parks
+    // the proposal in 'queued'. Gated to basesep to keep the Space load off the
+    // hot path on every legacy chain.
+    if (config.indexerName === 'basesep') {
+      const space = await Space.loadEntity(spaceId, config.indexerName);
+      if (space?.confidential) {
+        proposal.execution_settled = true;
+        proposal.completed = true;
+        proposal.execution_tx = txId;
+        proposal.executed_at = BigInt(now);
+        proposal.executed_at_block_number = BigInt(blockNumber);
+      }
+    }
 
     await proposal.save();
   };
 
-  // Inco confidential reveal. Always emitted by `Space.tryExecute` (approved
-  // OR rejected path) so the indexer can persist the verdict without polling
-  // on-chain views. Non-Inco Spaces never emit this event — the topic-0 is
-  // unique to this signature, so legacy chains see no traffic and incur no
-  // cost from the subscription.
-  const handleDecisionFlagsRevealed: evm.Writer<
+  // Inco confidential reveal. Always emitted by `Space.finalizeReveal` (approved
+  // OR rejected path) so the indexer can persist the now-public per-choice tally
+  // and the verdict without polling on-chain views. Non-Inco Spaces never emit
+  // this event — the topic-0 is unique to this signature, so legacy chains see
+  // no traffic and incur no cost from the subscription.
+  //
+  // Reveal and execute are separate steps. This handler settles the *tally*
+  // (counts go public, `completed = true`) and the verdict flags. For a passed
+  // proposal the subsequent `execute()` emits `ProposalExecuted`, which marks
+  // `executed`/`execution_settled` (see handleProposalExecuted). A rejected
+  // proposal is terminal here — its state resolves to 'rejected' from the flags.
+  const handleProposalResultRevealed: evm.Writer<
     typeof SpaceAbi,
-    'DecisionFlagsRevealed'
-  > = async ({ block, blockNumber, txId, rawEvent, event }) => {
+    'ProposalResultRevealed'
+  > = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     const spaceId = getAddress(rawEvent.address);
@@ -975,19 +994,43 @@ export function createWriters(
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    const now = Number(block?.timestamp ?? getCurrentTimestamp());
+    // Contract choice indices are 0=Against, 1=For, 2=Abstain; Snapshot's
+    // score buckets are 1=For, 2=Against, 3=Abstain.
+    const againstVotes = BigInt(event.args.againstVotes);
+    const forVotes = BigInt(event.args.forVotes);
+    const abstainVotes = BigInt(event.args.abstainVotes);
+    const totalVotes = againstVotes + forVotes + abstainVotes;
 
-    proposal.is_quorum_reached = event.args.quorumReached;
-    proposal.is_support_achieved = event.args.supportAchieved;
-    // Mark settlement here so the UI doesn't park rejected proposals in the
-    // 'queued' state (no ExecutionStrategy entity exists for the Vanilla
-    // singleton confidential spaces use as their default executor — without
-    // this the lifecycle state stays Pending until max_end).
-    proposal.execution_settled = true;
+    proposal.scores_1 = forVotes.toString();
+    proposal.scores_1_parsed = getParsedVP(
+      proposal.scores_1,
+      proposal.vp_decimals
+    );
+    proposal.scores_2 = againstVotes.toString();
+    proposal.scores_2_parsed = getParsedVP(
+      proposal.scores_2,
+      proposal.vp_decimals
+    );
+    proposal.scores_3 = abstainVotes.toString();
+    proposal.scores_3_parsed = getParsedVP(
+      proposal.scores_3,
+      proposal.vp_decimals
+    );
+    proposal.scores_total = totalVotes.toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
+    );
+
+    // Reproduce the on-chain semantics: quorum counts For + Abstain, support is
+    // For > Against. `event.args.passed` equals the AND of these.
+    proposal.is_support_achieved = forVotes > againstVotes;
+    proposal.is_quorum_reached =
+      forVotes + abstainVotes >= BigInt(proposal.quorum);
+
+    // The tally is final and public now (voting has ended and counts are
+    // revealed), so the proposal is "completed" regardless of the execute step.
     proposal.completed = true;
-    proposal.execution_tx = txId;
-    proposal.executed_at = BigInt(now);
-    proposal.executed_at_block_number = BigInt(blockNumber);
 
     await proposal.save();
   };
@@ -1350,7 +1393,7 @@ export function createWriters(
     handleProposalCancelled,
     handleProposalUpdated,
     handleProposalExecuted,
-    handleDecisionFlagsRevealed,
+    handleProposalResultRevealed,
     handleVoteCast,
     handleConfidentialVoteCast,
     // SimpleQuorumTimelockExecutionStrategy
