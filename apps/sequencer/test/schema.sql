@@ -202,6 +202,22 @@ CREATE TABLE leaderboard (
   INDEX vp_value (vp_value)
 );
 
+CREATE TABLE points_ledger (
+  user VARCHAR(100) NOT NULL,
+  source VARCHAR(24) NOT NULL,
+  ref VARCHAR(100) NOT NULL,
+  amount DECIMAL(13,3) NOT NULL DEFAULT 0.000,
+  created INT(11) NOT NULL,
+  PRIMARY KEY (user, source, ref),
+  INDEX ref (ref)
+);
+
+CREATE TABLE points (
+  user VARCHAR(100) NOT NULL,
+  total DECIMAL(13,3) NOT NULL DEFAULT 0.000,
+  PRIMARY KEY (user)
+);
+
 CREATE TABLE skins (
   id VARCHAR(100) NOT NULL,
   bg_color VARCHAR(7) DEFAULT NULL,

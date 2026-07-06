@@ -8,6 +8,7 @@ import deleteProposalVotes from './helpers/deleteProposalVotes';
 import log from './helpers/log';
 import initMetrics from './helpers/metrics';
 import refreshModeration from './helpers/moderation';
+import awardPoints from './helpers/points';
 import refreshProposalsScoresValue from './helpers/proposalsScoresValue';
 import refreshProposalsVpValue from './helpers/proposalStrategiesValue';
 import rateLimit from './helpers/rateLimit';
@@ -28,6 +29,7 @@ async function startServer() {
   refreshProposalsScoresValue();
   refreshVotesVpValue();
   deleteProposalVotes();
+  awardPoints();
 
   await initializeStrategies();
   refreshStrategies();
