@@ -32,7 +32,7 @@ function isDisabled(plan: (typeof PLANS)[number]) {
 }
 
 function planSummary(plan: (typeof PLANS)[number]) {
-  return `${_n(plan.quotaPerApp, 'compact')} requests / mo per app · ${plan.rateLimit} · ${plan.support}`;
+  return `${_n(plan.quotaPerApp, 'compact')} requests / mo per app · ${plan.rateLimit}`;
 }
 
 async function handlePayClick() {

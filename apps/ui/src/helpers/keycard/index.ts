@@ -10,16 +10,14 @@ export const PLANS: Plan[] = [
     name: 'Free',
     price: 0,
     quotaPerApp: 200_000,
-    rateLimit: '60 requests / min',
-    support: 'Community support'
+    rateLimit: '60 requests / min'
   },
   {
     id: 'starter',
     name: 'Starter',
     price: 9,
     quotaPerApp: 1_000_000,
-    rateLimit: 'No rate limit',
-    support: 'Email support'
+    rateLimit: 'No rate limit'
   },
   {
     id: 'pro',
@@ -27,7 +25,6 @@ export const PLANS: Plan[] = [
     price: 49,
     quotaPerApp: 5_000_000,
     rateLimit: 'No rate limit',
-    support: 'Priority support',
     popular: true
   },
   {
@@ -35,8 +32,7 @@ export const PLANS: Plan[] = [
     name: 'Scale',
     price: 199,
     quotaPerApp: 20_000_000,
-    rateLimit: 'No rate limit',
-    support: 'Dedicated support'
+    rateLimit: 'No rate limit'
   }
 ];
 

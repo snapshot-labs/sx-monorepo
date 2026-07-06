@@ -6,7 +6,6 @@ export type Plan = {
   price: number;
   quotaPerApp: number;
   rateLimit: string;
-  support: string;
   popular?: boolean;
 };
 
