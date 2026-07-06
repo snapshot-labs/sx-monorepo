@@ -5,7 +5,7 @@ import { getNetwork, spaceCreationNetworks } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
-// When set, the network is preselected and the Network step is hidden.
+// When set, preselects network and hides Network step.
 const props = defineProps<{ fixedNetworkId?: NetworkID }>();
 
 const STEPS: StepRecords = {
