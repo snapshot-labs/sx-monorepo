@@ -10,7 +10,7 @@ export default {
   isVisible({ route }: NavContext) {
     return route.name !== 'settings-alias-authorize';
   },
-  getConfig({ isWhiteLabel }: NavContext): NavConfig {
+  getConfig({ route, isWhiteLabel }: NavContext): NavConfig {
     return {
       items: {
         spaces: {
@@ -30,6 +30,12 @@ export default {
           name: 'Notifications',
           icon: IHAtSymbol,
           hidden: metadataNetwork !== 's' || isWhiteLabel
+        },
+        'api-keys': {
+          name: 'API keys',
+          icon: IHKey,
+          // Not discoverable from the menu yet: only shown while on the page
+          hidden: route.name !== 'settings-api-keys'
         }
       }
     };
