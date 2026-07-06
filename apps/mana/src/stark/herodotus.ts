@@ -122,10 +122,10 @@ async function getStatus(
     }
   );
 
-  const { queryStatus, error } = await res.json();
+  const { queryStatus, info, error } = await res.json();
   if (error) throw new Error(error);
 
-  return queryStatus;
+  return { queryStatus, info };
 }
 
 async function submitBatch(proposal: ApiProposal) {
@@ -209,15 +209,19 @@ export async function registerProposal(proposal: ApiProposal) {
   }
 }
 
+function resubmitBatch(proposal: DbProposal) {
+  const [, l1TokenAddress] = proposal.id.split('-');
+  if (!l1TokenAddress) throw new Error('Invalid proposal id');
+
+  return submitBatch({
+    ...proposal,
+    l1TokenAddress
+  });
+}
+
 export async function processProposal(proposal: DbProposal) {
   if (!proposal.herodotusId) {
-    const [, l1TokenAddress] = proposal.id.split('-');
-    if (!l1TokenAddress) throw new Error('Invalid proposal id');
-
-    return submitBatch({
-      ...proposal,
-      l1TokenAddress
-    });
+    return resubmitBatch(proposal);
   }
 
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
@@ -230,14 +234,35 @@ export async function processProposal(proposal: DbProposal) {
   );
 
   try {
-    const status = await getStatus(
+    const { queryStatus, info } = await getStatus(
       proposal.herodotusId,
       ACCUMULATES_CHAIN_ID,
       isSatellite
     );
-    if (status !== 'DONE') {
+
+    if (queryStatus === 'REJECTED') {
+      const isTimestampNotAvailableYet = Boolean(
+        info?.some((message: string) => message.startsWith('Too big:'))
+      );
+
+      if (isTimestampNotAvailableYet) {
+        logger.warn(
+          { proposalId: proposal.id, herodotusId: proposal.herodotusId, info },
+          'Query was rejected because timestamp was not available yet, submitting a new batch'
+        );
+        return resubmitBatch(proposal);
+      }
+
+      logger.error(
+        { proposalId: proposal.id, herodotusId: proposal.herodotusId, info },
+        'Query was rejected'
+      );
+      return;
+    }
+
+    if (queryStatus !== 'DONE') {
       logger.info(
-        { herodotusId: proposal.herodotusId, status },
+        { herodotusId: proposal.herodotusId, status: queryStatus },
         'Proposal is not ready yet'
       );
       return;
