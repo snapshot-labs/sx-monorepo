@@ -48,18 +48,8 @@ type DbProposal = {
   herodotusId: string | null;
 };
 
-// Host/key selection is by strategy generation, not chain:
-//
-// - Satellite V2 strategies use the official Herodotus API (api.herodotus.cloud)
-//   with HERODOTUS_API_KEY on BOTH Starknet mainnet and sepolia. They resolve the
-//   timestamp -> L1 block mapping and storage root entirely on-chain via the
-//   Satellite contract, so they never touch the indexer's remapper endpoints.
-//
-// - Legacy storage-proof strategies keep the frozen host for mainnet
-//   (snapshot.api.herodotus.cloud + snapshot.rs-indexer, HERODOTUS_LEGACY_API_KEY)
-//   because they still depend on snapshot.rs-indexer's /remappers/binsearch-path.
-//   Legacy sepolia already runs on the official host.
 function getApi(accumulatesChainId: string, isSatellite: boolean) {
+  // NOTE: Deprecated - can be removed once we migrate to V2 strategies.
   if (!isSatellite && accumulatesChainId === '1') {
     return {
       apiUrl: 'https://snapshot.api.herodotus.cloud',
@@ -85,11 +75,6 @@ function getNetworkId(chainId: string): 'sn' | 'sn-sep' | null {
   return null;
 }
 
-// The Herodotus Satellite versions of the storage-proof voting strategies
-// (sx-starknet#641). The same batch query populates the Satellite contract with
-// the timestamp -> L1 block mapping and the storage root, which voters read
-// on-chain via `get_block_by_timestamp`. So, unlike the legacy strategies, these
-// need no on-chain `cache_timestamp` tx after the query completes.
 function isSatelliteStrategy(
   chainId: string,
   strategyAddress: string
