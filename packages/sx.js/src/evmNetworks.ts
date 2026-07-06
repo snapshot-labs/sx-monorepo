@@ -212,36 +212,33 @@ export const evmNetworks = {
    * Base Sepolia (chainId 84532) — Inco confidential voting reference deployment.
    *
    * NOT a generic SX deployment. The master Space and authenticators here are the
-   * Inco-flavored variants (encrypted vote ciphertext + attested-decryption
-   * `tryExecute`). The `confidential: true` Meta flag tells the SDK/UI to swap to
-   * the encrypted-vote ABI and EIP-712 type.
+   * Inco-flavored variants from the `feat/inco-reveal-execute-split` contracts:
+   * encrypted, voter-pays-fee `vote()` (payable; forwards `inco.getFee()`), and the
+   * reveal/execute split (`requestReveal` → `finalizeReveal` → `execute`) that
+   * reveals exact per-choice counts. The `confidential: true` Meta flag tells the
+   * SDK/UI to swap to the encrypted-vote ABI and EIP-712 type.
    *
-   * Addresses come from the most recent happy-path smoke deploy. There is no
-   * proxy factory yet — Spaces are deployed directly, so `proxyFactory` is the
-   * zero address. Replace with a Snapshot-team-blessed deployment once that
-   * exists. See `INTEGRATION_PROGRESS.md` Section 7 for proof-of-deploy tx
-   * hashes.
+   * Deployed via `snapshotx/script/DeployIncoStack.s.sol` against `@inco/lightning`
+   * v1 (executor 0x4b99...8624 — the same one `@inco/lightning-js` v1 targets) at
+   * block 42969459; see `snapshotx/deployments/inco-base-sepolia.json`. The
+   * authenticators are payable (they forward the per-vote fee to the Space).
    */
   basesep: createIncoConfig(84532, {
     blockTime: 2,
-    // Inco-flavored ProxyFactory deployed for the Base Sepolia reference (no
-    // shared SX factory exists for Inco yet). Tx hash recorded in
-    // INTEGRATION_PROGRESS.md §7.
-    proxyFactory: '0x06a0c3B26C13B444fEdb3B2988892E359dCb8B06',
-    // Master Space implementation.
-    masterSpace: '0xA501B7D9B1e353C573a7497e3ECF5d15f4c25caA',
+    proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+    masterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
     authenticators: {
-      EthSig: '0x009ABB61d7E868aEf944F133Ca104e24FC3D5162',
-      EthTx: '0x67a7d86F6c8B3E7FF3063D26A28D58e989850e4D'
+      EthSig: '0x69A9c5626860f53f9b4fD5F2936d74eC93417677',
+      EthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
     },
     strategies: {
-      Vanilla: '0x5513d0e1b3E273d9373f3D4Cfbb8f1940556EDd2'
+      Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673'
     },
     proposalValidations: {
-      Vanilla: '0x18aE195EaA8E8D9Cc387CC13Db5727357BF9f4d7'
+      Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
     },
     executionStrategies: {
-      Vanilla: '0x7Ddcb1F2Ca1b1079Ad4BeeA2aDD0A7D792e16143'
+      Vanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
     }
   })
 } as const;
