@@ -1413,25 +1413,48 @@ export default [
   },
   {
     type: 'function',
-    name: 'getQuorumAndSupportHandles',
+    name: 'getVoteTallyHandles',
     inputs: [{ name: 'proposalId', type: 'uint256' }],
     outputs: [
-      { name: 'quorumHandle', type: 'bytes32' },
-      { name: 'supportHandle', type: 'bytes32' }
+      { name: 'againstHandle', type: 'bytes32' },
+      { name: 'forHandle', type: 'bytes32' },
+      { name: 'abstainHandle', type: 'bytes32' }
     ],
     stateMutability: 'view'
   },
-  // Always emitted by `tryExecute` after the encrypted decision flags are
-  // decrypted and stored — covers both approved and rejected paths.
-  // Non-Inco Spaces never emit this; topic-0 is unique to this signature so
-  // there's no listener collision on legacy networks.
+  {
+    type: 'function',
+    name: 'revealed',
+    inputs: [{ name: 'proposalId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'bool' }],
+    stateMutability: 'view'
+  },
+  {
+    type: 'function',
+    name: 'result',
+    inputs: [{ name: 'proposalId', type: 'uint256' }],
+    outputs: [
+      { name: 'againstVotes', type: 'uint256' },
+      { name: 'forVotes', type: 'uint256' },
+      { name: 'abstainVotes', type: 'uint256' },
+      { name: 'passed', type: 'bool' }
+    ],
+    stateMutability: 'view'
+  },
+  // Always emitted by `finalizeReveal` after the encrypted per-choice tallies
+  // are decrypted and verified — covers both approved and rejected paths.
+  // Carries the public cleartext counts + pass/fail. Non-Inco Spaces never emit
+  // this; topic-0 is unique to this signature so there's no listener collision
+  // on legacy networks.
   {
     type: 'event',
-    name: 'DecisionFlagsRevealed',
+    name: 'ProposalResultRevealed',
     inputs: [
-      { name: 'proposalId', type: 'uint256', indexed: true },
-      { name: 'quorumReached', type: 'bool', indexed: false },
-      { name: 'supportAchieved', type: 'bool', indexed: false }
+      { name: 'proposalId', type: 'uint256', indexed: false },
+      { name: 'againstVotes', type: 'uint256', indexed: false },
+      { name: 'forVotes', type: 'uint256', indexed: false },
+      { name: 'abstainVotes', type: 'uint256', indexed: false },
+      { name: 'passed', type: 'bool', indexed: false }
     ],
     anonymous: false
   }

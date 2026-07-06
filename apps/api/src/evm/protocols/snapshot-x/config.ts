@@ -13,7 +13,9 @@ import { NetworkID, SnapshotXConfig } from '../../types';
 // and pick up only fresh proposals/votes). Numeric block height. Falls back to
 // the Phase-0 demo deploy block when unset.
 const BASESEP_START_BLOCK_ENV = process.env.BASESEP_START_BLOCK;
-const BASESEP_DEFAULT_START = 41187231;
+// Block of the reveal/execute-split stack deploy (ProxyFactory + master Space) on
+// @inco/lightning v1; see snapshotx/deployments/inco-base-sepolia.json.
+const BASESEP_DEFAULT_START = 42969459;
 
 const START_BLOCKS: Record<NetworkID, number> = {
   eth: 18962278,
@@ -34,9 +36,12 @@ const START_BLOCKS: Record<NetworkID, number> = {
     : BASESEP_DEFAULT_START
 };
 
-const STATIC_INCO_SPACES: Partial<Record<NetworkID, string[]>> = {
-  basesep: ['0xcb8eB47d52286c0fc1B5A0F4e0720f2E7db077Ac']
-};
+// Pre-factory Inco Spaces deployed directly (not via the ProxyFactory). The
+// reveal/execute-split deployment ships a real ProxyFactory, so confidential
+// Spaces are now created through the UI and discovered via the factory's
+// `ProxyDeployed` event — no static entries needed. Kept for the rare hand-
+// deployed Space (add its address here to backfill).
+const STATIC_INCO_SPACES: Partial<Record<NetworkID, string[]>> = {};
 
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -91,13 +96,14 @@ const SPACE_TEMPLATE_EVENTS = [
     fn: 'handleProposalUpdated'
   },
   { name: 'ProposalExecuted(uint256)', fn: 'handleProposalExecuted' },
-  // Inco confidential reveal — fires from `tryExecute` regardless of
-  // outcome (approved or rejected). Carries the decrypted flags so the
-  // indexer can persist the verdict without polling on-chain reads.
-  // Non-Inco Spaces never emit this; safe no-op on legacy networks.
+  // Inco confidential reveal — fires from `finalizeReveal` regardless of
+  // outcome (approved or rejected). Carries the decrypted per-choice counts
+  // (against, for, abstain) + pass/fail so the indexer can persist the public
+  // tally and verdict without polling on-chain reads. Non-Inco Spaces never
+  // emit this; safe no-op on legacy networks.
   {
-    name: 'DecisionFlagsRevealed(uint256,bool,bool)',
-    fn: 'handleDecisionFlagsRevealed'
+    name: 'ProposalResultRevealed(uint256,uint256,uint256,uint256,bool)',
+    fn: 'handleProposalResultRevealed'
   },
   // Legacy plaintext-choice VoteCasts.
   { name: 'VoteCast(uint256,address,uint8,uint256)', fn: 'handleVoteCast' },
