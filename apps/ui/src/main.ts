@@ -1,13 +1,4 @@
-// Polyfill Node `Buffer` global for the browser. `@inco/js`'s ECIES
-// encryption path uses Buffer internally and Vite externalizes `buffer` in
-// dev mode (production builds already inject via vite.config rolldown).
 import { Buffer } from 'buffer';
-
-if (typeof globalThis.Buffer === 'undefined') {
-  // @ts-expect-error - assigning Node typing onto window-like globalThis.
-  globalThis.Buffer = Buffer;
-}
-
 import { createTune } from '@snapshot-labs/tune';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
@@ -15,6 +6,12 @@ import App from '@/App.vue';
 import { SIDEKICK_URL } from '@/helpers/constants';
 import router from '@/routes';
 import '@/style.scss';
+
+// Polyfill the Buffer global for `@inco/lightning-js`'s ECIES path (Vite
+// externalizes `buffer` in dev). ES imports hoist, so this runs before use.
+if (typeof globalThis.Buffer === 'undefined') {
+  globalThis.Buffer = Buffer;
+}
 
 const knownHosts = [
   'app.safe.global',

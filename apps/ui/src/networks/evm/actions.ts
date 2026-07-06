@@ -656,18 +656,25 @@ export function createActions(
       // sx.js encodes into the on-chain vote() call. Any drift (case, stale
       // store) makes the contract's `ciphertext.newEuint256(voter)` produce a
       // junk handle — userChoice ends up != 1, the For accumulator never
-      // increments, and tryExecute decrypts (false, false) → looks identical
-      // to a rejected proposal. See snapshotx/inco-base-sepolia-runner
-      // negative-cases.ts `wrongCiphertextOwnerCase`.
+      // increments, and the revealed tally is silently wrong. See
+      // snapshotx/inco-base-sepolia-runner negative-cases.ts
+      // `wrongCiphertextOwnerCase`.
+      const isConfidential = isConfidentialSpace(proposal.space, chainId);
       let ciphertext: string | undefined;
-      if (isConfidentialSpace(proposal.space, chainId)) {
-        const { encryptChoice } = await import('@/helpers/inco');
+      let fee: string | undefined;
+      if (isConfidential) {
+        const { encryptChoice, getVoteFee } = await import('@/helpers/inco');
         const voterAddress = await signer.getAddress();
-        ciphertext = await encryptChoice({
-          space: proposal.space.id,
-          voter: voterAddress,
-          choice: sdkChoice
-        });
+        // vote() is payable: the voter forwards the per-vote Inco fee, which the
+        // authenticator relays via msg.value.
+        [ciphertext, fee] = await Promise.all([
+          encryptChoice({
+            space: proposal.space.id,
+            voter: voterAddress,
+            choice: sdkChoice
+          }),
+          getVoteFee().then(f => f.toString())
+        ]);
       }
 
       const data = {
@@ -677,11 +684,14 @@ export function createActions(
         proposal: Number(proposal.proposal_id),
         choice: sdkChoice,
         ...(ciphertext ? { ciphertext } : {}),
+        ...(fee !== undefined ? { fee } : {}),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
 
-      if (relayerType === 'evm') {
+      // Confidential votes must be sent directly (vote() is payable and the
+      // relayer can't forward msg.value / has no fee budget for basesep).
+      if (relayerType === 'evm' && !isConfidential) {
         return ethSigClient.vote({
           signer,
           data
@@ -720,26 +730,26 @@ export function createActions(
         });
       }
 
-      // Confidential-voting execution: read encrypted decision-flag handles
-      // from the Space, request attested decryption from Inco's TEE
-      // covalidator, then call `tryExecute` with the attestations. Mana relay
-      // is bypassed because the relayer wallet doesn't have decrypt ACL on the
-      // current Inco contract — only the proposal author does (see
-      // INTEGRATION_PROGRESS.md Open Decision O3).
+      // Confidential-voting reveal + execute (reveal/execute split). Three on-chain
+      // steps, gated to after the voting period:
+      //   1. requestReveal(id)  — grants the caller decrypt access to the frozen tallies
+      //   2. decrypt the 3 tally handles off-chain (Inco TEE) + finalizeReveal(id, …)
+      //      — posts the cleartext counts and computes pass/fail on-chain
+      //   3. execute(id, payload) — only if the proposal passed
+      // Reveal is permissionless; we skip it if the proposal is already revealed.
+      // Mana relay is bypassed: the relayer has no decrypt ACL, and reveal is the
+      // user's own signed flow (see docs/CONFIDENTIAL_VOTING.md, Decision O3).
       if (isConfidentialSpace(proposal.space, chainId)) {
         const signer = getSigner(web3);
-        const author = await signer.getAddress();
-        const { decryptDecisionFlags } = await import('@/helpers/inco');
-        const { quorum, support } = await decryptDecisionFlags({
-          space: proposal.space.id,
-          proposal: Number(proposal.proposal_id),
-          account: author
-        });
+        const account = await signer.getAddress();
+        const proposalId = Number(proposal.proposal_id);
+        const { decryptTallies, getRevealState } = await import(
+          '@/helpers/inco'
+        );
 
-        // Inco confidential proposals can be created with no on-chain
-        // actions (Vanilla execution). For those, executionParams must match
-        // what was passed at propose time (`'0x'`). For proposals with
-        // actions, encode the same way as the legacy path below.
+        // Vanilla-execution confidential proposals are created with no actions;
+        // executionParams must match propose time (`'0x'`). With actions, encode
+        // the same way as the legacy path below.
         const executionParams =
           proposal.executions && proposal.executions.length > 0
             ? getExecutionData(
@@ -750,15 +760,53 @@ export function createActions(
               ).executionParams[0]
             : '0x';
 
-        return client.tryExecute({
+        const initial = await getRevealState({
+          space: proposal.space.id,
+          proposal: proposalId
+        });
+        let passed = initial.passed;
+
+        if (!initial.revealed) {
+          // 1. requestReveal — must be mined before decryption (it grants the ACL).
+          const requestTx = await client.requestReveal({
+            signer,
+            space: proposal.space.id,
+            proposal: proposalId
+          });
+          if (requestTx) await requestTx.wait();
+
+          // 2. decrypt the three frozen tallies, then finalizeReveal.
+          const tallies = await decryptTallies({
+            space: proposal.space.id,
+            proposal: proposalId,
+            account
+          });
+          const finalizeTx = await client.finalizeReveal({
+            signer,
+            space: proposal.space.id,
+            proposal: proposalId,
+            tallies
+          });
+          if (finalizeTx) await finalizeTx.wait();
+
+          passed = (
+            await getRevealState({
+              space: proposal.space.id,
+              proposal: proposalId
+            })
+          ).passed;
+        }
+
+        // 3. Only execute if the proposal passed; a rejected proposal has nothing
+        // to execute (execute() reverts with ProposalNotPassed). The reveal above
+        // already settled the verdict on-chain for the indexer to pick up.
+        if (!passed) return null;
+
+        return client.execute({
           signer,
           space: proposal.space.id,
-          proposal: Number(proposal.proposal_id),
-          executionParams,
-          quorumAttestation: quorum.attestation,
-          quorumSignatures: quorum.signatures,
-          supportAttestation: support.attestation,
-          supportSignatures: support.signatures
+          proposal: proposalId,
+          executionParams
         });
       }
 

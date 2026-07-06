@@ -31,6 +31,23 @@ const { flagProposal, cancelProposal, executeTransactions } = useActions();
 async function handleConfidentialExecute() {
   await executeTransactions(props.proposal);
 }
+
+// Reveal is gated on-chain to after the voting period ends
+// (`block.number >= maxEndBlockNumber`); mirror that in the button so users
+// don't trigger a `VotingPeriodNotEnded` revert. Already-revealed-and-rejected
+// proposals are hidden (verdict is settled, nothing to execute).
+const confidentialVotingEnded = computed(
+  () => props.proposal.max_end * 1000 <= Date.now()
+);
+const showConfidentialReveal = computed(() => {
+  const p = props.proposal;
+  if (!p.space.confidential || p.state === 'executed' || p.cancelled)
+    return false;
+  // Pre-reveal: show once voting has ended. Post-reveal: only if it passed
+  // (still needs an execute tx); a rejected reveal is terminal.
+  if (p.is_quorum_reached == null) return confidentialVotingEnded.value;
+  return !!(p.is_quorum_reached && p.is_support_achieved);
+});
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -580,37 +597,28 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <!--
-        DEMO ONLY — confidential (Inco) `tryExecute` test button. The legacy
-        SX execute button is gated by `proposal.scores[0] > scores[1]` etc.,
-        which can't be evaluated for confidential proposals because per-choice
-        scores stay encrypted. Until the canonical UI gating is updated, this
-        button always shows for confidential spaces in non-terminal states so
-        the proposal author can trigger attested decryption + tryExecute.
+        DEMO ONLY — confidential (Inco) reveal + execute button. The legacy SX
+        execute button is gated by plaintext score comparisons, which can't be
+        evaluated while the per-choice tallies are encrypted. Until the canonical
+        UI gating is updated, this drives the reveal/execute split for
+        confidential spaces: requestReveal -> attested-decrypt the 3 tallies ->
+        finalizeReveal (posts the public counts + verdict) -> execute() if it
+        passed. Only shown after the voting period has ended.
         Remove (or move into ProposalExecutionsList properly) before the PR.
       -->
-      <div
-        v-if="
-          proposal.space.confidential &&
-          !proposal.executed &&
-          !proposal.cancelled
-        "
-        class="my-3 p-3 border rounded-lg"
-      >
+      <div v-if="showConfidentialReveal" class="my-3 p-3 border rounded-lg">
         <UiEyebrow class="mb-2 flex items-center gap-2">
           <IH-lock-closed />
           <span>Confidential reveal</span>
         </UiEyebrow>
         <div class="mb-3 text-sm text-skin-text">
-          Encrypted vote tallies stay private. Click below to request attested
-          decryption of the quorum / support flags from Inco's covalidator and
-          submit them with the proposal's <code>tryExecute</code>. Two wallet
-          prompts: typed-data for the decrypt request, then the on-chain tx.
+          Voting has ended. Reveal the final encrypted tallies: this requests
+          attested decryption of the three vote counts from Inco's covalidator
+          and posts them on-chain via <code>finalizeReveal</code> (making the
+          result public), then runs <code>execute</code> if the proposal passed.
+          Up to three wallet prompts.
         </div>
-        <UiButton
-          primary
-          class="w-full"
-          @click="handleConfidentialExecute"
-        >
+        <UiButton primary class="w-full" @click="handleConfidentialExecute">
           <IH-play /> Reveal &amp; execute
         </UiButton>
       </div>

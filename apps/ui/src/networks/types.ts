@@ -475,7 +475,11 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
+export type ExplorePageProtocol =
+  | 'snapshot'
+  | 'snapshot-x'
+  | 'governor'
+  | 'incoXsnapshotx';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
