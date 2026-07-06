@@ -155,9 +155,7 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
-  // Inco confidential reveal (set by `ProposalResultRevealed`). Reveal and
-  // execute are separate, so a revealed proposal is 'rejected' (terminal) or
-  // 'passed' (ready to execute — the 'executed' case is handled above).
+  // Revealed confidential proposal: 'passed' or 'rejected'.
   if (
     proposal.is_quorum_reached !== null &&
     proposal.is_quorum_reached !== undefined &&
@@ -169,11 +167,7 @@ function getProposalState(
       : 'rejected';
   }
 
-  // Confidential proposals before reveal: per-choice scores are encrypted (read
-  // as 0), so the score-based pass/fail below would wrongly mark a voting-ended
-  // proposal as 'rejected'. The outcome is unknown until someone reveals, so
-  // surface voting-end as 'closed' (awaiting reveal) — the reveal button settles
-  // it into 'passed'/'rejected'/'executed'.
+  // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
   if (proposal.space?.confidential) {
     if (Number(proposal.start_block_number ?? proposal.start) > current) {
       return 'pending';
@@ -368,7 +362,7 @@ function formatSpace(
 ): Space {
   return {
     ...space,
-    // Indexer returns nullable Boolean; the Space type uses boolean | undefined.
+    // Indexer nullable Boolean to boolean | undefined.
     confidential: space.confidential ?? undefined,
     voting_delay: Number(space.voting_delay),
     min_voting_period: Number(space.min_voting_period),

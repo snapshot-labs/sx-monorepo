@@ -32,10 +32,7 @@ async function handleConfidentialExecute() {
   await executeTransactions(props.proposal);
 }
 
-// Reveal is gated on-chain to after the voting period ends
-// (`block.number >= maxEndBlockNumber`); mirror that in the button so users
-// don't trigger a `VotingPeriodNotEnded` revert. Already-revealed-and-rejected
-// proposals are hidden (verdict is settled, nothing to execute).
+// Mirror on-chain gate; avoid VotingPeriodNotEnded revert.
 const confidentialVotingEnded = computed(
   () => props.proposal.max_end * 1000 <= Date.now()
 );
@@ -43,8 +40,7 @@ const showConfidentialReveal = computed(() => {
   const p = props.proposal;
   if (!p.space.confidential || p.state === 'executed' || p.cancelled)
     return false;
-  // Pre-reveal: show once voting has ended. Post-reveal: only if it passed
-  // (still needs an execute tx); a rejected reveal is terminal.
+  // Pre-reveal after voting ends; post-reveal only if passed.
   if (p.is_quorum_reached == null) return confidentialVotingEnded.value;
   return !!(p.is_quorum_reached && p.is_support_achieved);
 });
@@ -596,16 +592,7 @@ onBeforeUnmount(() => destroyAudio());
           />
         </div>
       </div>
-      <!--
-        DEMO ONLY — confidential (Inco) reveal + execute button. The legacy SX
-        execute button is gated by plaintext score comparisons, which can't be
-        evaluated while the per-choice tallies are encrypted. Until the canonical
-        UI gating is updated, this drives the reveal/execute split for
-        confidential spaces: requestReveal -> attested-decrypt the 3 tallies ->
-        finalizeReveal (posts the public counts + verdict) -> execute() if it
-        passed. Only shown after the voting period has ended.
-        Remove (or move into ProposalExecutionsList properly) before the PR.
-      -->
+      <!-- DEMO only: move into ProposalExecutionsList before merge. -->
       <div v-if="showConfidentialReveal" class="my-3 p-3 border rounded-lg">
         <UiEyebrow class="mb-2 flex items-center gap-2">
           <IH-lock-closed />

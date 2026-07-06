@@ -7,8 +7,7 @@ import { SIDEKICK_URL } from '@/helpers/constants';
 import router from '@/routes';
 import '@/style.scss';
 
-// Polyfill the Buffer global for `@inco/lightning-js`'s ECIES path (Vite
-// externalizes `buffer` in dev). ES imports hoist, so this runs before use.
+// Buffer polyfill for Inco SDK's ECIES path (dev).
 if (typeof globalThis.Buffer === 'undefined') {
   globalThis.Buffer = Buffer;
 }
