@@ -66,10 +66,10 @@
     "vitest": "^3.2.4"
   },
   "peerDependencies": {
-    "@inco/js": "^0.7.10"
+    "@inco/lightning-js": "^1.0.0"
   },
   "peerDependenciesMeta": {
-    "@inco/js": {
+    "@inco/lightning-js": {
       "optional": true
     }
   },

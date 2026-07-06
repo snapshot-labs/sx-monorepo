@@ -66,6 +66,13 @@ export type Vote = {
    * stay consistent — the on-chain contract only sees `ciphertext`.
    */
   ciphertext?: string;
+  /**
+   * Confidential mode (Inco), voter-pays fee. The reveal/execute-split Space makes
+   * `vote(...)` payable and requires `msg.value >= inco.getFee()` (the per-vote
+   * `newEuint256` cost). The authenticator forwards this value to the Space. Read
+   * it from the Inco executor (`inco.getFee(...)`) and pass it as a wei string/bigint.
+   */
+  fee?: string | bigint;
 };
 
 export type Call = {

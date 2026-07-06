@@ -441,10 +441,13 @@ export class EthereumTx {
       abi,
       signer
     );
-    const promise = authenticatorContract.authenticate(
-      ...args,
-      this.defaultTransactionOverrides
-    );
+    // Confidential (Inco) voter-pays: forward the per-vote Inco fee as msg.value.
+    // The authenticator's `authenticate(...)` is payable and relays it to `Space.vote`.
+    const overrides =
+      isConfidential && envelope.data.fee !== undefined
+        ? { ...this.defaultTransactionOverrides, value: envelope.data.fee }
+        : this.defaultTransactionOverrides;
+    const promise = authenticatorContract.authenticate(...args, overrides);
 
     return opts.noWait ? null : promise;
   }
@@ -474,52 +477,77 @@ export class EthereumTx {
   }
 
   /**
-   * Confidential-mode execute. Submits attested decryptions for the proposal's
-   * encrypted quorum + support flags so the on-chain Space can verify and (if both
-   * decrypted to true) finalize the proposal. Use only against Inco-flavored Spaces;
-   * non-confidential spaces don't have this method and will revert.
+   * Confidential-mode reveal, step 1 of 2. Grants the caller off-chain decrypt
+   * access to the proposal's now-frozen vote tallies. Only callable once the voting
+   * period has ended (`block.number >= maxEndBlockNumber`); reverts otherwise. The
+   * reveal is permissionless — anyone may call it after voting ends.
    *
-   * Pass `{handle, value}` attestations and covalidator signatures from
-   * `inco.decryptHandles(...)`.
+   * After this lands, read the handles with `getVoteTallyHandles(...)`, decrypt them
+   * with `inco.decryptHandles(...)`, then submit `finalizeReveal(...)`.
    */
-  async tryExecute(
+  async requestReveal(
     {
       signer,
       space,
-      proposal,
-      executionParams,
-      quorumAttestation,
-      quorumSignatures,
-      supportAttestation,
-      supportSignatures
-    }: {
-      signer: Signer;
-      space: string;
-      proposal: number;
-      executionParams: string;
-      quorumAttestation: { handle: string; value: string };
-      quorumSignatures: string[];
-      supportAttestation: { handle: string; value: string };
-      supportSignatures: string[];
-    },
+      proposal
+    }: { signer: Signer; space: string; proposal: number },
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceIncoAbi, signer);
-    const promise = spaceContract.tryExecute(
+    const promise = spaceContract.requestReveal(
       proposal,
-      executionParams,
-      quorumAttestation,
-      quorumSignatures,
-      supportAttestation,
-      supportSignatures,
       this.defaultTransactionOverrides
     );
 
     return opts.noWait ? null : promise;
   }
 
-  /** Read both encrypted decision-flag handles for a proposal. */
-  async getQuorumAndSupportHandles({
+  /**
+   * Confidential-mode reveal, step 2 of 2. Submits the three attested tally
+   * decryptions (indexed `[against, for, abstain]`) so the Space verifies each
+   * attestation, stores the cleartext counts, computes quorum/support/passed
+   * on-chain, and emits `ProposalResultRevealed`. One-time per proposal.
+   *
+   * `tallies` come from `inco.decryptHandles(zap, walletClient, handles)` where
+   * `handles` is the tuple returned by `getVoteTallyHandles(...)`, in the same order.
+   */
+  async finalizeReveal(
+    {
+      signer,
+      space,
+      proposal,
+      tallies
+    }: {
+      signer: Signer;
+      space: string;
+      proposal: number;
+      tallies: {
+        attestation: { handle: string; value: string };
+        signatures: string[];
+      }[];
+    },
+    opts: CallOptions = {}
+  ) {
+    if (tallies.length !== 3) {
+      throw new Error(
+        `finalizeReveal expects exactly 3 tallies [against, for, abstain], got ${tallies.length}`
+      );
+    }
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.finalizeReveal(
+      proposal,
+      tallies.map(t => ({
+        attestation: t.attestation,
+        signatures: t.signatures
+      })),
+      this.defaultTransactionOverrides
+    );
+
+    return opts.noWait ? null : promise;
+  }
+
+  /** Read the three encrypted vote-tally handles `[against, for, abstain]`. */
+  async getVoteTallyHandles({
     signer,
     space,
     proposal
@@ -527,10 +555,11 @@ export class EthereumTx {
     signer: Signer;
     space: string;
     proposal: number;
-  }): Promise<[string, string]> {
+  }): Promise<[string, string, string]> {
     const spaceContract = new Contract(space, SpaceIncoAbi, signer);
-    const [q, s] = await spaceContract.getQuorumAndSupportHandles(proposal);
-    return [q, s];
+    const [against, forHandle, abstain] =
+      await spaceContract.getVoteTallyHandles(proposal);
+    return [against, forHandle, abstain];
   }
 
   /** Top up a confidential Space with ETH so it can pay Inco compute fees. */
