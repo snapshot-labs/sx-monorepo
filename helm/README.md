@@ -19,7 +19,8 @@ and the gateway; resources are namespaced by `appName`.
 
 > Run commands from the repo root (chart paths are `helm/...`). Examples below use
 > `api` in `testnet` — swap the values prefix (`api` → `delegates`) and release
-> name for the other app.
+> name for the other app. Release names: `api` uses `<env>-<color>` / `<env>-public`,
+> `delegates` uses `<env>-delegates-<color>` / `<env>-delegates-public`.
 
 ## Gateway (once per cluster)
 
@@ -38,7 +39,7 @@ kubectl -n testnet create secret generic sx-api-secrets \
   --from-literal=HYPERSYNC_API_TOKEN=<token>
 kubectl -n testnet create secret docker-registry ghcr \
   --docker-server=ghcr.io --docker-username=<gh-user> --docker-password=<pat>
-helm upgrade --install testnet-api-public helm/public -n testnet \
+helm upgrade --install testnet-public helm/public -n testnet \
   -f helm/public/values-api-testnet.yaml --set activeColor=blue
 ```
 
@@ -53,7 +54,7 @@ per app (`<appName>-secrets`); `delegates` bootstraps the same way with
 kubectl -n testnet create secret generic sx-api-logtail-blue \
   --from-literal=LOGTAIL_HOST=<host> --from-literal=LOGTAIL_TOKEN=<token>
 
-helm upgrade --install testnet-api-blue helm/checkpoint -n testnet \
+helm upgrade --install testnet-blue helm/checkpoint -n testnet \
   -f helm/checkpoint/values-api-testnet.yaml \
   --set color=blue --set image.tag=<sha> --wait
 ```
@@ -65,13 +66,13 @@ same tag resumes.
 
 ```bash
 # point traffic at green
-helm upgrade testnet-api-public helm/public -n testnet \
+helm upgrade testnet-public helm/public -n testnet \
   -f helm/public/values-api-testnet.yaml --set activeColor=green
 ```
 
 ## Remove a color
 
 ```bash
-helm uninstall testnet-api-blue -n testnet
+helm uninstall testnet-blue -n testnet
 kubectl -n testnet delete pvc postgres-data-sx-api-db-blue-0
 ```
