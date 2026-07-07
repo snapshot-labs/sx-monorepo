@@ -17,7 +17,4 @@ db:
 
 config:
   PORT: '3000'
-  ENABLE_SNAPSHOT_X: 'true'
-  ENABLE_GOVERNOR_BRAVO: 'true'
-  ENABLE_OPENZEPPELIN: 'true'
   ENABLED_NETWORKS: 'eth,oeth,base,mnt,arb1,ape,bnb,sn'
