@@ -4,7 +4,7 @@ import { resolver } from './resolver';
 describe('resolver', () => {
   describe('ENS resolution', () => {
     it('should resolve an ENS name on eth network', async () => {
-      const result = await resolver.resolveName('boorger.eth', 'eth');
+      const result = await resolver.resolveName('whopper.boorger.eth', 'eth');
 
       expect(result).toEqual({
         networkId: 'eth',
