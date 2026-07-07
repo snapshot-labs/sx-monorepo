@@ -1,4 +1,4 @@
-name: Promote API
+name: Promote Delegates API
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       environment:
         description: Environment to promote
         type: choice
-        options: [testnet, mainnet]
+        options: [mainnet]
         required: true
 
 jobs:
@@ -15,5 +15,6 @@ jobs:
     secrets: inherit
     with:
       environment: ${{ inputs.environment }}
-      app_key: api
-      app_name: sx-api
+      app_key: delegates
+      app_name: delegates
+      release_infix: delegates-
