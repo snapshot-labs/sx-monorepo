@@ -49,8 +49,16 @@ type DbProposal = {
 };
 
 function getApi(accumulatesChainId: string, isSatellite: boolean) {
+  if (isSatellite) {
+    return {
+      apiUrl: 'https://mission-control.api.herodotus.cloud',
+      indexerUrl: null,
+      apiKey: HERODOTUS_API_KEY
+    };
+  }
+
   // NOTE: Deprecated - can be removed once we migrate to V2 strategies.
-  if (!isSatellite && accumulatesChainId === '1') {
+  if (accumulatesChainId === '1') {
     return {
       apiUrl: 'https://snapshot.api.herodotus.cloud',
       indexerUrl: 'https://snapshot.rs-indexer.api.herodotus.cloud',
@@ -97,8 +105,32 @@ async function getStatus(
   id: string,
   accumulatesChainId: string,
   isSatellite: boolean
-) {
+): Promise<{ queryStatus: string; info?: string[] }> {
   const { apiUrl, apiKey } = getApi(accumulatesChainId, isSatellite);
+
+  if (isSatellite) {
+    const res = await fetch(`${apiUrl}/get_queries/${id}`, {
+      headers: {
+        accept: 'application/json',
+        'api-key': apiKey
+      }
+    });
+
+    const { queries, error } = await res.json();
+    if (error) throw new Error(error);
+
+    const statuses: string[] = queries.map(
+      (query: { status: string }) => query.status
+    );
+
+    const anyFailed = statuses.some(
+      status => status === 'FAILED' || status === 'REJECTED'
+    );
+    if (anyFailed) return { queryStatus: 'REJECTED', info: statuses };
+
+    const allCompleted = statuses.every(status => status === 'COMPLETED');
+    return { queryStatus: allCompleted ? 'DONE' : statuses.join(', ') };
+  }
 
   const res = await fetch(
     `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`,
@@ -129,16 +161,12 @@ async function submitBatch(proposal: DbProposal) {
     proposal.strategyAddress
   );
 
-  const body: any = {
-    destinationChainId: DESTINATION_CHAIN_ID,
-    fee: FEE,
-    data: {
-      [ACCUMULATES_CHAIN_ID]: {
-        [`timestamp:${proposal.timestamp}`]: {
-          accounts: {
-            [l1TokenAddress]: {
-              props: ['STORAGE_ROOT']
-            }
+  const data = {
+    [ACCUMULATES_CHAIN_ID]: {
+      [`timestamp:${proposal.timestamp}`]: {
+        accounts: {
+          [l1TokenAddress]: {
+            props: ['STORAGE_ROOT']
           }
         }
       }
@@ -146,7 +174,15 @@ async function submitBatch(proposal: DbProposal) {
   };
 
   const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID, isSatellite);
-  const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
+
+  const url = isSatellite
+    ? `${apiUrl}/submit-request`
+    : `${apiUrl}/submit-batch-query?apiKey=${apiKey}`;
+  const body = isSatellite
+    ? { destination_chain_id: DESTINATION_CHAIN_ID, data }
+    : { destinationChainId: DESTINATION_CHAIN_ID, fee: FEE, data };
+
+  const res = await fetch(url, {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
@@ -170,7 +206,7 @@ async function submitBatch(proposal: DbProposal) {
   }
 
   await db.updateProposal(proposal.id, {
-    herodotusId: result.internalId
+    herodotusId: isSatellite ? result.request_id : result.internalId
   });
 }
 
