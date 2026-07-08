@@ -10,16 +10,16 @@ const DAY = 86_400_000;
 
 export function keyCost(key: ApiKey): number {
   return (
-    key.usage.hub * PRICE_PER_REQUEST.hub +
-    key.usage.score * PRICE_PER_REQUEST.score
+    (key.usage?.hub ?? 0) * PRICE_PER_REQUEST.hub +
+    (key.usage?.score ?? 0) * PRICE_PER_REQUEST.score
   );
 }
 
 export function accountUsage(account: Account) {
   return account.keys.reduce(
     (total, key) => ({
-      hub: total.hub + key.usage.hub,
-      score: total.score + key.usage.score
+      hub: total.hub + (key.usage?.hub ?? 0),
+      score: total.score + (key.usage?.score ?? 0)
     }),
     { hub: 0, score: 0 }
   );
@@ -30,7 +30,7 @@ export function accountSpend(account: Account): number {
 }
 
 export function accountBalance(account: Account): number {
-  return FREE_CREDIT + account.topups - accountSpend(account);
+  return FREE_CREDIT + (account.topups ?? 0) - accountSpend(account);
 }
 
 function randomHex(length: number): string {
@@ -65,13 +65,25 @@ function seedAccount(): Account {
   };
 }
 
+function isValidAccount(value: any): value is Account {
+  return (
+    !!value &&
+    typeof value.topups === 'number' &&
+    Array.isArray(value.keys) &&
+    value.keys.every((key: any) => typeof key?.key === 'string')
+  );
+}
+
 function load(address: string): Account {
   const raw = localStorage.getItem(
     `${STORAGE_PREFIX}.${address.toLowerCase()}`
   );
   if (raw) {
     try {
-      return JSON.parse(raw);
+      const parsed = JSON.parse(raw);
+      // Reseed if the stored shape is stale (e.g. an older mock version) or
+      // corrupt, so the demo can't render NaN / undefined values.
+      if (isValidAccount(parsed)) return parsed;
     } catch {
       // fall through and reseed on corrupt data
     }
