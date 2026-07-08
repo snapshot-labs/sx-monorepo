@@ -1,47 +1,36 @@
 // Mock keycard client. Persists per-address state in localStorage so the
-// whole flow (create key, usage, upgrade) is explorable without keycard-api.
+// whole flow (create key, usage, top up) is explorable without keycard-api.
 // Swap these functions for JSON-RPC calls once the API lands.
 import { sleep } from '@/helpers/utils';
-import { Account, Plan, PlanId } from './types';
-
-export const PLANS: Plan[] = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    quotaPerApp: 200_000,
-    rateLimit: '60 requests / min'
-  },
-  {
-    id: 'starter',
-    name: 'Starter',
-    price: 9,
-    quotaPerApp: 1_000_000,
-    rateLimit: 'No rate limit'
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    price: 49,
-    quotaPerApp: 5_000_000,
-    rateLimit: 'No rate limit',
-    popular: true
-  },
-  {
-    id: 'scale',
-    name: 'Scale',
-    price: 199,
-    quotaPerApp: 20_000_000,
-    rateLimit: 'No rate limit'
-  }
-];
+import { Account, ApiKey, FREE_CREDIT, PRICE_PER_REQUEST } from './types';
 
 const STORAGE_PREFIX = 'keycard.demo';
 
 const DAY = 86_400_000;
 
-export function getPlan(id: PlanId): Plan {
-  return PLANS.find(plan => plan.id === id) ?? PLANS[0];
+export function keyCost(key: ApiKey): number {
+  return (
+    key.usage.hub * PRICE_PER_REQUEST.hub +
+    key.usage.score * PRICE_PER_REQUEST.score
+  );
+}
+
+export function accountUsage(account: Account) {
+  return account.keys.reduce(
+    (total, key) => ({
+      hub: total.hub + key.usage.hub,
+      score: total.score + key.usage.score
+    }),
+    { hub: 0, score: 0 }
+  );
+}
+
+export function accountSpend(account: Account): number {
+  return account.keys.reduce((total, key) => total + keyCost(key), 0);
+}
+
+export function accountBalance(account: Account): number {
+  return FREE_CREDIT + account.topups - accountSpend(account);
 }
 
 function randomHex(length: number): string {
@@ -50,19 +39,25 @@ function randomHex(length: number): string {
     .join('');
 }
 
+function newKeySecret(): string {
+  return `snap_${randomHex(40)}`;
+}
+
 function seedAccount(): Account {
   return {
-    plan: 'free',
+    topups: 0,
     keys: [
       {
         id: randomHex(8),
         name: 'Production',
+        key: newKeySecret(),
         created: Date.now() - 34 * DAY,
         usage: { hub: 98_410, score: 31_770 }
       },
       {
         id: randomHex(8),
         name: 'Staging',
+        key: newKeySecret(),
         created: Date.now() - 12 * DAY,
         usage: { hub: 26_120, score: 13_440 }
       }
@@ -74,7 +69,13 @@ function load(address: string): Account {
   const raw = localStorage.getItem(
     `${STORAGE_PREFIX}.${address.toLowerCase()}`
   );
-  if (raw) return JSON.parse(raw);
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      // fall through and reseed on corrupt data
+    }
+  }
 
   const account = seedAccount();
   save(address, account);
@@ -100,17 +101,18 @@ export async function createKey(
   await sleep(500);
 
   const account = load(address);
-  const secret = randomHex(40);
+  const key = newKeySecret();
 
   account.keys.push({
     id: randomHex(8),
     name,
+    key,
     created: Date.now(),
     usage: { hub: 0, score: 0 }
   });
   save(address, account);
 
-  return { account, key: `snap_${secret}` };
+  return { account, key };
 }
 
 export async function revokeKey(address: string, id: string): Promise<Account> {
@@ -123,14 +125,11 @@ export async function revokeKey(address: string, id: string): Promise<Account> {
   return account;
 }
 
-export async function upgradePlan(
-  address: string,
-  plan: PlanId
-): Promise<Account> {
-  await sleep(400);
+export async function topUp(address: string, amount: number): Promise<Account> {
+  await sleep(1400);
 
   const account = load(address);
-  account.plan = plan;
+  account.topups += amount;
   save(address, account);
 
   return account;

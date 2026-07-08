@@ -1,37 +1,52 @@
 import {
+  accountBalance,
+  accountSpend,
+  accountUsage,
   fetchAccount,
-  getPlan,
   createKey as sendCreateKey,
   revokeKey as sendRevokeKey,
-  upgradePlan as sendUpgradePlan
+  topUp as sendTopUp
 } from '@/helpers/keycard';
-import { Account, ApiKey, Plan, PlanId } from '@/helpers/keycard/types';
+import { Account, ApiKey } from '@/helpers/keycard/types';
 import { sleep } from '@/helpers/utils';
+import pkg from '../../package.json';
 
-// Simulates the wallet EIP-712 signature prompt. Replaced by a real
-// _signTypedData call once keycard-api verifies signatures.
-const fakeSign = () => sleep(1200);
-
-// Simulates payment confirmation (schnaps / Stripe later).
-const fakePayment = () => sleep(1400);
-
+// A user is "verified" once they have an alias in this browser — the alias
+// system lets them manage keys without signing each action. The demo flag
+// simulates that one-time setup without touching the real alias storage.
 export function useApiKeys() {
   const { web3 } = useWeb3();
+  const aliases = useStorage(
+    `${pkg.name}.aliases`,
+    {} as Record<string, string>
+  );
+  const demoVerified = useStorage(
+    'keycard.demo.verified',
+    {} as Record<string, boolean>
+  );
 
   const account = ref<Account | null>(null);
   const isLoading = ref(true);
+  const isError = ref(false);
+  const isVerifying = ref(false);
 
   const address = computed(() => web3.value.account);
+  const isVerified = computed(() => {
+    if (!address.value) return false;
+    return (
+      !!aliases.value[address.value] ||
+      !!demoVerified.value[address.value.toLowerCase()]
+    );
+  });
   const keys = computed<ApiKey[]>(() => account.value?.keys ?? []);
-  const plan = computed<Plan>(() => getPlan(account.value?.plan ?? 'free'));
+  const balance = computed(() =>
+    account.value ? accountBalance(account.value) : 0
+  );
   const usage = computed(() =>
-    keys.value.reduce(
-      (total, key) => ({
-        hub: total.hub + key.usage.hub,
-        score: total.score + key.usage.score
-      }),
-      { hub: 0, score: 0 }
-    )
+    account.value ? accountUsage(account.value) : { hub: 0, score: 0 }
+  );
+  const spend = computed(() =>
+    account.value ? accountSpend(account.value) : 0
   );
 
   async function loadAccount() {
@@ -43,15 +58,30 @@ export function useApiKeys() {
 
     try {
       isLoading.value = true;
+      isError.value = false;
       account.value = await fetchAccount(address.value);
+    } catch (err) {
+      console.error('Failed to load API keys account', err);
+      isError.value = true;
     } finally {
       isLoading.value = false;
     }
   }
 
-  async function createKey(name: string): Promise<string> {
-    await fakeSign();
+  async function verify() {
+    try {
+      isVerifying.value = true;
+      await sleep(1200);
+      demoVerified.value = {
+        ...demoVerified.value,
+        [address.value.toLowerCase()]: true
+      };
+    } finally {
+      isVerifying.value = false;
+    }
+  }
 
+  async function createKey(name: string): Promise<string> {
     const result = await sendCreateKey(address.value, name);
     account.value = result.account;
 
@@ -59,26 +89,28 @@ export function useApiKeys() {
   }
 
   async function revokeKey(id: string) {
-    await fakeSign();
-
     account.value = await sendRevokeKey(address.value, id);
   }
 
-  async function upgradePlan(planId: PlanId) {
-    await fakePayment();
-
-    account.value = await sendUpgradePlan(address.value, planId);
+  async function topUp(amount: number) {
+    account.value = await sendTopUp(address.value, amount);
   }
 
   watch(address, loadAccount, { immediate: true });
 
   return {
     isLoading,
+    isError,
+    reload: loadAccount,
+    isVerified,
+    isVerifying,
+    verify,
     keys,
-    plan,
+    balance,
     usage,
+    spend,
     createKey,
     revokeKey,
-    upgradePlan
+    topUp
   };
 }

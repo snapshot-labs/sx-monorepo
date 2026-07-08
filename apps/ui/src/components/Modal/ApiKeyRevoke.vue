@@ -13,13 +13,13 @@ const emit = defineEmits<{
 
 const uiStore = useUiStore();
 
-const step = ref<'confirm' | 'signing'>('confirm');
+const isRevoking = ref(false);
 
 async function handleRevokeClick() {
-  if (!props.apiKey) return;
+  if (!props.apiKey || isRevoking.value) return;
 
   try {
-    step.value = 'signing';
+    isRevoking.value = true;
     await props.revokeKey(props.apiKey.id);
     uiStore.addNotification(
       'success',
@@ -32,43 +32,36 @@ async function handleRevokeClick() {
       'error',
       'An error occurred while revoking your API key, please try again.'
     );
-    step.value = 'confirm';
+  } finally {
+    isRevoking.value = false;
   }
 }
 
 watch(
   () => props.open,
   open => {
-    if (open) return;
-
-    step.value = 'confirm';
+    if (!open) isRevoking.value = false;
   }
 );
 </script>
 
 <template>
-  <UiModal :open="open" :closeable="step !== 'signing'" @close="emit('close')">
+  <UiModal :open="open" :closeable="!isRevoking" @close="emit('close')">
     <template #header>
       <h3>Revoke API key</h3>
     </template>
-    <div v-if="step === 'confirm'" class="p-4">
+    <div class="p-4">
       Are you sure you want to revoke
       <span class="text-skin-heading" v-text="apiKey?.name" />? Requests made
       with this key will stop working immediately. This cannot be undone.
     </div>
-    <div v-else class="p-4 py-8 flex flex-col items-center gap-3 text-center">
-      <UiLoading />
-      <h4 class="text-skin-heading">Waiting for signature</h4>
-      <div class="text-sm leading-[18px] max-w-[280px]">
-        Confirm the signature request in your wallet to revoke the key.
-      </div>
-    </div>
-    <template v-if="step === 'confirm'" #footer>
+    <template #footer>
       <UiButton
         class="w-full !text-skin-danger !border-skin-danger"
+        :loading="isRevoking"
         @click="handleRevokeClick"
       >
-        Sign & revoke key
+        Revoke key
       </UiButton>
     </template>
   </UiModal>
