@@ -2,12 +2,12 @@
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
-const MIN_AMOUNT = 50;
+const MIN_AMOUNT = 5;
 const MAX_AMOUNT = 100_000;
 const AMOUNTS = [50, 100, 250];
 
 const FORM_STATE = {
-  amount: MIN_AMOUNT
+  amount: AMOUNTS[0]
 };
 
 const DEFINITION = {
