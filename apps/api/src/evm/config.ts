@@ -42,16 +42,9 @@ export function createConfig(indexerName: NetworkID): EVMConfig {
     );
   }
 
-  // Snapshot's RPC proxy doesn't cover Base Sepolia (Inco demo chain). Fall back
-  // to env override or the public endpoint. Other chains keep the proxy URL.
-  const networkNodeUrl =
-    indexerName === 'basesep'
-      ? process.env.BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org'
-      : getRpcUrl(network.Meta.eip712ChainId);
-
   return {
     indexerName,
-    network_node_url: networkNodeUrl,
+    network_node_url: getRpcUrl(network.Meta.eip712ChainId),
     ...partialConfig,
     state_retention_blocks: 5000,
     max_blocks_per_request: MAX_BLOCKS_PER_REQUEST[indexerName],
