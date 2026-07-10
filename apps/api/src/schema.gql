@@ -314,9 +314,9 @@ type Proposal {
   "Whether proposal has been executed"
   executed: Boolean!
   "Confidential-voting decryption: did the encrypted For+Abstain tally reach quorum? Populated from `Space.isQuorumReached(proposalId)` after `tryExecute`. Null for non-confidential spaces or pre-execution proposals."
-  is_quorum_reached: Boolean
+  quorum_reached: Boolean
   "Confidential-voting decryption: did encrypted For exceed encrypted Against? Populated from `Space.isSupportAchieved(proposalId)` after `tryExecute`. Null for non-confidential spaces or pre-execution proposals."
-  is_support_achieved: Boolean
+  support_achieved: Boolean
   "Whether proposal has been vetoed"
   vetoed: Boolean!
   "Whether proposal execution has been settled"

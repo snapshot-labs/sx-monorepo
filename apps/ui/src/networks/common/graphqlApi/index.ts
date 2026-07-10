@@ -157,12 +157,12 @@ function getProposalState(
 
   // Revealed confidential proposal: 'passed' or 'rejected'.
   if (
-    proposal.is_quorum_reached !== null &&
-    proposal.is_quorum_reached !== undefined &&
-    proposal.is_support_achieved !== null &&
-    proposal.is_support_achieved !== undefined
+    proposal.quorum_reached !== null &&
+    proposal.quorum_reached !== undefined &&
+    proposal.support_achieved !== null &&
+    proposal.support_achieved !== undefined
   ) {
-    return proposal.is_quorum_reached && proposal.is_support_achieved
+    return proposal.quorum_reached && proposal.support_achieved
       ? 'passed'
       : 'rejected';
   }
@@ -487,8 +487,8 @@ function formatProposal(
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
       : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
-    is_quorum_reached: proposal.is_quorum_reached ?? null,
-    is_support_achieved: proposal.is_support_achieved ?? null,
+    quorum_reached: proposal.quorum_reached ?? null,
+    support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
     privacy: 'none',

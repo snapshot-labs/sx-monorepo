@@ -1027,8 +1027,8 @@ export function createWriters(
     );
 
     // quorum = For+Abstain; support = For>Against.
-    proposal.is_support_achieved = forVotes > againstVotes;
-    proposal.is_quorum_reached =
+    proposal.support_achieved = forVotes > againstVotes;
+    proposal.quorum_reached =
       forVotes + abstainVotes >= BigInt(proposal.quorum);
 
     // Completed at reveal, independent of execute step.
