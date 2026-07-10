@@ -259,6 +259,10 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
       ?.isUsingOnlySigAuthenticators ?? false
 );
 
+const isMissingExecution = computed(
+  () => props.space.protocol === 'snapshot-x-inco' && !hasExecution.value
+);
+
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
@@ -272,7 +276,8 @@ const canSubmit = computed(() => {
     disabledStrategiesList.value.length ||
     unsupportedPremiumStrategiesList.value.length ||
     isSafeInvalidNetwork.value ||
-    isUsingOnlyInoperativeSigAuthenticators.value
+    isUsingOnlyInoperativeSigAuthenticators.value ||
+    isMissingExecution.value
   ) {
     return false;
   }
@@ -696,6 +701,9 @@ watchEffect(() => {
               class="text-rose-500 dark:text-neutral-100 font-semibold"
               >Go to settings</AppLink
             >
+          </UiAlert>
+          <UiAlert v-else-if="isMissingExecution" type="error" class="mb-4">
+            Proposals on Inco spaces require execution.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
