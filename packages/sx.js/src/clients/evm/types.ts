@@ -129,11 +129,20 @@ export type EIP712UpdateProposalMessage = {
   salt: number;
 };
 
-export type EIP712VoteMessage = {
-  space: string;
-  voter: string;
-  proposalId: number;
-  choice: number;
-  userVotingStrategies: IndexedConfig[];
-  voteMetadataURI: string;
-};
+export type EIP712VoteMessage =
+  | {
+      space: string;
+      voter: string;
+      proposalId: number;
+      choice: number;
+      userVotingStrategies: IndexedConfig[];
+      voteMetadataURI: string;
+    }
+  | {
+      space: string;
+      voter: string;
+      proposalId: number;
+      ciphertext: string;
+      userVotingStrategies: IndexedConfig[];
+      voteMetadataURI: string;
+    };
