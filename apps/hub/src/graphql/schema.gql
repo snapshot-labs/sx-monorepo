@@ -191,25 +191,25 @@ input MessageWhere {
 "A signed message envelope submitted to the Snapshot sequencer"
 type Message {
   "Message counter index, used for ordering"
-  mci: Int
+  mci: Int!
   "Unique message identifier"
-  id: String
+  id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Address of the message sender"
-  address: String
+  address: String!
   "Protocol version"
-  version: String
+  version: String!
   "Unix timestamp of when the message was submitted"
-  timestamp: Int
+  timestamp: Int!
   "Space ID this message belongs to"
   space: String
   "Message type (e.g. proposal, vote, delete-proposal)"
-  type: String
+  type: String!
   "Cryptographic signature"
-  sig: String
+  sig: String!
   "Sequencer receipt"
-  receipt: String
+  receipt: String!
 }
 
 input ProposalWhere {
@@ -440,7 +440,7 @@ type Space {
   "Unique identifier for the space (e.g. \"ens.eth\")"
   id: String!
   "Display name of the space"
-  name: String
+  name: String!
   "Whether the space is private"
   private: Boolean!
   "Description of the space"
@@ -506,23 +506,23 @@ type Space {
   "Labels that can be applied to proposals"
   labels: [Label]!
   "Number of currently active proposals"
-  activeProposals: Int
+  activeProposals: Int!
   "Total number of proposals"
-  proposalsCount: Int
+  proposalsCount: Int!
   "Number of proposals created in the last 24 hours"
-  proposalsCount1d: Int
+  proposalsCount1d: Int!
   "Number of proposals created in the last 7 days"
-  proposalsCount7d: Int
+  proposalsCount7d: Int!
   "Number of proposals created in the last 30 days"
-  proposalsCount30d: Int
+  proposalsCount30d: Int!
   "Total number of followers"
-  followersCount: Int
+  followersCount: Int!
   "Number of new followers in the last 7 days"
-  followersCount7d: Int
+  followersCount7d: Int!
   "Total number of votes cast"
-  votesCount: Int
+  votesCount: Int!
   "Number of votes cast in the last 7 days"
-  votesCount7d: Int
+  votesCount7d: Int!
   "Parent space (for sub-spaces)"
   parent: Space
   "Child sub-spaces"
@@ -532,13 +532,13 @@ type Space {
   "Proposal template"
   template: String
   "Whether the space is verified"
-  verified: Boolean
+  verified: Boolean!
   "Whether the space has been flagged"
   flagged: Boolean!
   "Flag reason code"
-  flagCode: Int
+  flagCode: Int!
   "Whether the space is hibernated (inactive)"
-  hibernated: Boolean
+  hibernated: Boolean!
   "Whether turbo mode is enabled"
   turbo: Boolean!
   "Unix timestamp when turbo mode expires"
@@ -678,7 +678,7 @@ type Strategy {
   "Strategy identifier"
   name: String!
   "Network ID this strategy operates on"
-  network: String
+  network: String!
   "Strategy-specific parameters"
   params: Any
 }
@@ -732,7 +732,7 @@ type Vote {
   "Voting power state (e.g. final, pending)"
   vp_state: String!
   "Monetary value of the voting power"
-  vp_value: Float
+  vp_value: Float!
 }
 
 "An address alias mapping"
@@ -914,11 +914,11 @@ type BoostSettings {
 "Voting power information"
 type Vp {
   "Total voting power"
-  vp: Float
+  vp: Float!
   "Voting power broken down by strategy"
-  vp_by_strategy: [Float]
+  vp_by_strategy: [Float]!
   "Voting power state (e.g. final, pending)"
-  vp_state: String
+  vp_state: String!
 }
 
 "Leaderboard entry for a user in a space"
@@ -934,7 +934,7 @@ type Leaderboard {
   "Unix timestamp of the user's most recent vote"
   lastVote: Int
   "Monetary value of the user's voting power"
-  vpValue: Float
+  vpValue: Float!
 }
 
 "A configuration option"

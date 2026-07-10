@@ -50,6 +50,18 @@ const SKIN_SETTINGS = [
   'logo'
 ];
 
+const SPACE_COUNT_FIELDS = [
+  'activeProposals',
+  'proposalsCount',
+  'proposalsCount1d',
+  'proposalsCount7d',
+  'proposalsCount30d',
+  'followersCount',
+  'followersCount7d',
+  'votesCount',
+  'votesCount7d'
+];
+
 export function checkLimits(args: any = {}, type) {
   const { where = {} } = args;
   const typeLimits = { ...ARG_LIMITS.default, ...(ARG_LIMITS[type] || {}) };
@@ -105,6 +117,10 @@ export function formatSpace({
 
   space.id = id;
   space.created = created;
+  // counts default to 0 for spaces not yet in the metadata cache
+  SPACE_COUNT_FIELDS.forEach(field => {
+    space[field] = space[field] ?? 0;
+  });
   space.domain = domain || '';
   space.private = space.private || false;
   space.avatar = space.avatar || '';
@@ -389,17 +405,16 @@ function needsRelatedSpacesData(requestedFields): boolean {
 }
 
 function mapRelatedSpacesToSpaces(spaces, relatedSpaces) {
-  if (!relatedSpaces.length) return spaces;
-
+  // drop parents/children that no longer resolve to an existing space,
+  // as their id-only skeleton would violate the non-null Space fields
   return spaces.map(space => {
     if (space.children) {
       space.children = space.children
-        .map(c => relatedSpaces.find(s => s.id === c.id) || c)
+        .map(c => relatedSpaces.find(s => s.id === c.id))
         .filter(s => s);
     }
     if (space.parent) {
-      space.parent =
-        relatedSpaces.find(s => s.id === space.parent.id) || space.parent;
+      space.parent = relatedSpaces.find(s => s.id === space.parent.id) || null;
     }
     return space;
   });
