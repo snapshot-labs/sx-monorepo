@@ -442,11 +442,11 @@ type Space {
   "Display name of the space"
   name: String
   "Whether the space is private"
-  private: Boolean
+  private: Boolean!
   "Description of the space"
-  about: String
+  about: String!
   "URL of the space avatar image"
-  avatar: String
+  avatar: String!
   "URL of the space cover image"
   cover: String
   "URL to the space terms of service"
@@ -478,33 +478,33 @@ type Space {
   "Custom skin settings"
   skinSettings: SkinSettings
   "Custom domain for the space"
-  domain: String
+  domain: String!
   "Voting strategies used to calculate voting power"
   strategies: [Strategy]
   "List of admin addresses"
-  admins: [String]
+  admins: [String]!
   "List of member addresses"
-  members: [String]
+  members: [String]!
   "List of moderator addresses"
-  moderators: [String]
+  moderators: [String]!
   "Proposal filters configuration"
-  filters: SpaceFilters
+  filters: SpaceFilters!
   "Enabled plugins configuration"
-  plugins: Any
+  plugins: Any!
   "Voting configuration"
-  voting: SpaceVoting
+  voting: SpaceVoting!
   "Space categories"
-  categories: [String]
+  categories: [String]!
   "Proposal validation strategy"
-  validation: Validation
+  validation: Validation!
   "Vote validation strategy"
-  voteValidation: Validation
+  voteValidation: Validation!
   "Delegation portal configuration"
   delegationPortal: DelegationPortal
   "Treasury addresses managed by the space"
-  treasuries: [Treasury]
+  treasuries: [Treasury]!
   "Labels that can be applied to proposals"
-  labels: [Label]
+  labels: [Label]!
   "Number of currently active proposals"
   activeProposals: Int
   "Total number of proposals"
@@ -526,7 +526,7 @@ type Space {
   "Parent space (for sub-spaces)"
   parent: Space
   "Child sub-spaces"
-  children: [Space]
+  children: [Space]!
   "Voting guidelines link"
   guidelines: String
   "Proposal template"
@@ -534,19 +534,19 @@ type Space {
   "Whether the space is verified"
   verified: Boolean
   "Whether the space has been flagged"
-  flagged: Boolean
+  flagged: Boolean!
   "Flag reason code"
   flagCode: Int
   "Whether the space is hibernated (inactive)"
   hibernated: Boolean
   "Whether turbo mode is enabled"
-  turbo: Boolean
+  turbo: Boolean!
   "Unix timestamp when turbo mode expires"
-  turboExpiration: Int
+  turboExpiration: Int!
   "Ranking score"
   rank: Float
   "Boost settings"
-  boost: BoostSettings
+  boost: BoostSettings!
   "Unix timestamp of when the space was created"
   created: Int!
 }
@@ -554,25 +554,25 @@ type Space {
 "Ranked list of spaces with aggregated metrics"
 type RankingObject {
   "List of ranked spaces"
-  items: [Space]
+  items: [Space]!
   "Aggregated metrics for the ranking query"
-  metrics: Metrics
+  metrics: Metrics!
 }
 
 "Aggregated metrics for ranking queries"
 type Metrics {
   "Total number of spaces matching the query"
-  total: Int
+  total: Int!
   "Breakdown of spaces by category"
-  categories: Any
+  categories: Any!
 }
 
 "Proposal filtering configuration for a space"
 type SpaceFilters {
   "Minimum score required to create a proposal"
-  minScore: Float
+  minScore: Float!
   "Whether only members can create proposals"
-  onlyMembers: Boolean
+  onlyMembers: Boolean!
 }
 
 "Voting configuration for a space"
@@ -588,13 +588,13 @@ type SpaceVoting {
   "How quorum is calculated"
   quorumType: String!
   "Whether votes are hidden until the voting period ends"
-  blind: Boolean
+  blind: Boolean!
   "Whether the abstain option is hidden"
-  hideAbstain: Boolean
+  hideAbstain: Boolean!
   "Privacy mode for votes (e.g. shutter)"
-  privacy: String
+  privacy: String!
   "Whether aliased voting is enabled"
-  aliased: Boolean
+  aliased: Boolean!
 }
 
 "proposal created on a space"
@@ -602,7 +602,7 @@ type Proposal {
   "Unique proposal identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Address of the proposal author"
   author: String!
   "Unix timestamp of when the proposal was created"
@@ -610,23 +610,23 @@ type Proposal {
   "Unix timestamp of the last update"
   updated: Int
   "The space this proposal belongs to"
-  space: Space
+  space: Space!
   "Network ID"
   network: String!
   "Token symbol"
   symbol: String!
   "Voting type (e.g. single-choice, approval, quadratic, ranked-choice, weighted, basic)"
-  type: String
+  type: String!
   "Voting strategies used for this proposal"
   strategies: [Strategy]!
   "Proposal validation strategy"
-  validation: Validation
+  validation: Validation!
   "Enabled plugins"
   plugins: Any!
   "Proposal title"
   title: String!
   "Proposal body in Markdown"
-  body: String
+  body: String!
   "URL to the discussion thread"
   discussion: String!
   "List of voting choices"
@@ -642,35 +642,35 @@ type Proposal {
   "How quorum is calculated"
   quorumType: String!
   "Privacy mode for votes"
-  privacy: String
+  privacy: String!
   "Block number snapshot for voting power calculation"
-  snapshot: Int
+  snapshot: Int!
   "Current state of the proposal (active, pending, closed)"
-  state: String
+  state: String!
   "Direct link to the proposal"
-  link: String
+  link: String!
   "Application that created the proposal"
-  app: String
+  app: String!
   "Vote scores per choice"
-  scores: [Float]
+  scores: [Float]!
   "Vote scores broken down by strategy"
-  scores_by_strategy: Any
+  scores_by_strategy: Any!
   "Scoring state (e.g. final, pending)"
-  scores_state: String
+  scores_state: String!
   "Total score across all choices"
-  scores_total: Float
+  scores_total: Float!
   "Unix timestamp of when scores were last updated"
-  scores_updated: Int
+  scores_updated: Int!
   "Total monetary value of scores"
-  scores_total_value: Float
+  scores_total_value: Float!
   "Voting power value breakdown by strategy"
-  vp_value_by_strategy: Any
+  vp_value_by_strategy: Any!
   "Total number of votes"
-  votes: Int
+  votes: Int!
   "Whether the proposal has been flagged"
-  flagged: Boolean
+  flagged: Boolean!
   "Flag reason code"
-  flagCode: Int
+  flagCode: Int!
 }
 
 "A voting strategy used to calculate voting power"
@@ -708,7 +708,7 @@ type Vote {
   "Unique vote identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Address of the voter"
   voter: String!
   "Unix timestamp of when the vote was cast"
@@ -720,17 +720,17 @@ type Vote {
   "The voter's choice (format depends on voting type)"
   choice: Any!
   "Additional vote metadata"
-  metadata: Any
+  metadata: Any!
   "Reason provided by the voter"
-  reason: String
+  reason: String!
   "Application used to cast the vote"
-  app: String
+  app: String!
   "Voting power of the voter"
-  vp: Float
+  vp: Float!
   "Voting power broken down by strategy"
-  vp_by_strategy: [Float]
+  vp_by_strategy: [Float]!
   "Voting power state (e.g. final, pending)"
-  vp_state: String
+  vp_state: String!
   "Monetary value of the voting power"
   vp_value: Float
 }
@@ -740,7 +740,7 @@ type Alias {
   "Unique alias identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Primary address"
   address: String!
   "Aliased address"
@@ -752,9 +752,9 @@ type Alias {
 "Role and permissions for an address in a space"
 type Role {
   "Space ID"
-  space: String
+  space: String!
   "List of permissions granted"
-  permissions: [String]
+  permissions: [String]!
 }
 
 "A follow relationship between an address and a space"
@@ -762,7 +762,7 @@ type Follow {
   "Unique follow identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Address of the follower"
   follower: String!
   "The space being followed"
@@ -778,7 +778,7 @@ type Subscription {
   "Unique subscription identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String
+  ipfs: String!
   "Address of the subscriber"
   address: String!
   "The space being subscribed to"
@@ -824,21 +824,21 @@ type Statement {
   "Unique statement identifier"
   id: String!
   "IPFS content identifier"
-  ipfs: String!
+  ipfs: String
   "Space ID this statement belongs to"
   space: String!
   "Network ID"
-  network: String
+  network: String!
   "Short bio of the delegate"
   about: String
   "Delegate address"
-  delegate: String
+  delegate: String!
   "Full delegate statement text"
   statement: String
   "Discourse forum username"
   discourse: String
   "Statement status"
-  status: String
+  status: String!
   "Source of the statement"
   source: String
   "Unix timestamp of when the statement was created"
@@ -852,7 +852,7 @@ type Item {
   "Item identifier"
   id: String!
   "Number of spaces using this item"
-  spacesCount: Int
+  spacesCount: Int!
 }
 
 "A voting strategy with full metadata"
@@ -872,13 +872,13 @@ type StrategyItem {
   "Description of the strategy"
   about: String
   "Number of spaces using this strategy"
-  spacesCount: Int
+  spacesCount: Int!
   "Number of verified spaces using this strategy"
-  verifiedSpacesCount: Int
+  verifiedSpacesCount: Int!
   "Whether voting power depend on other addresses or not"
-  override: Boolean
+  override: Boolean!
   "Whether the strategy is disabled"
-  disabled: Boolean
+  disabled: Boolean!
 }
 
 "A treasury managed by a space"
@@ -906,9 +906,9 @@ type Label {
 "Boost settings for a space"
 type BoostSettings {
   "Whether boosting is enabled"
-  enabled: Boolean
+  enabled: Boolean!
   "Whether bribe-based boosting is enabled"
-  bribeEnabled: Boolean
+  bribeEnabled: Boolean!
 }
 
 "Voting power information"
@@ -924,13 +924,13 @@ type Vp {
 "Leaderboard entry for a user in a space"
 type Leaderboard {
   "Space ID"
-  space: String
+  space: String!
   "User address"
-  user: String
+  user: String!
   "Number of proposals created"
-  proposalsCount: Int
+  proposalsCount: Int!
   "Number of votes cast"
-  votesCount: Int
+  votesCount: Int!
   "Unix timestamp of the user's most recent vote"
   lastVote: Int
   "Monetary value of the user's voting power"
@@ -940,9 +940,9 @@ type Leaderboard {
 "A configuration option"
 type Option {
   "Option name"
-  name: String
+  name: String!
   "Option value"
-  value: String
+  value: String!
 }
 
 "Custom theme settings for a space skin"
@@ -976,7 +976,7 @@ type Network {
   "Network display name"
   name: String!
   "Whether this is a premium network"
-  premium: Boolean
+  premium: Boolean!
   "Number of spaces using this network"
-  spacesCount: Int
+  spacesCount: Int!
 }

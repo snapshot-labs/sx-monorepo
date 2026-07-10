@@ -44,7 +44,7 @@ async function query(parent, args, context?, info?) {
 
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
-    SELECT v.* FROM votes v
+    SELECT v.*, spaces.created as spaceCreated FROM votes v
     INNER JOIN spaces ON spaces.id = v.space
     WHERE spaces.deleted = 0 AND v.cb != -3 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
@@ -101,6 +101,7 @@ async function query(parent, args, context?, info?) {
         p.id AS id,
         spaces.settings,
         spaces.domain as spaceDomain,
+        spaces.created as spaceCreated,
         spaces.flagged as spaceFlagged,
         spaces.verified as spaceVerified,
         spaces.turbo_expiration as spaceTurboExpiration,

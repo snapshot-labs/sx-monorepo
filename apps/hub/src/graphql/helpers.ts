@@ -97,12 +97,14 @@ export function formatSpace({
   turboExpiration,
   flagged,
   hibernated,
-  skinSettings
+  skinSettings,
+  created
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
   const space = { ...jsonParse(settings, {}), ...spaceMetadata.counts };
 
   space.id = id;
+  space.created = created;
   space.domain = domain || '';
   space.private = space.private || false;
   space.avatar = space.avatar || '';
@@ -467,7 +469,8 @@ export function formatProposal(proposal) {
     turboExpiration: proposal.spaceTurboExpiration,
     flagged: proposal.spaceFlagged,
     hibernated: proposal.spaceHibernated,
-    skinSettings: formatSkinSettings(proposal)
+    skinSettings: formatSkinSettings(proposal),
+    created: proposal.spaceCreated
   });
   const networkPrefix = network === 'testnet' ? 's-tn' : 's';
   proposal.link = `https://${domain}/#/${networkPrefix}:${proposal.space.id}/proposal/${proposal.id}`;
@@ -496,7 +499,8 @@ export function formatVote(vote) {
     turboExpiration: vote.spaceTurboExpiration,
     flagged: vote.spaceFlagged,
     hibernated: vote.spaceHibernated,
-    skinSettings: formatSkinSettings(vote)
+    skinSettings: formatSkinSettings(vote),
+    created: vote.spaceCreated
   });
   return vote;
 }
@@ -510,7 +514,8 @@ export function formatFollow(follow) {
     turboExpiration: follow.spaceTurboExpiration,
     flagged: follow.spaceFlagged,
     hibernated: follow.spaceHibernated,
-    skinSettings: formatSkinSettings(follow)
+    skinSettings: formatSkinSettings(follow),
+    created: follow.spaceCreated
   });
   return follow;
 }
@@ -524,7 +529,8 @@ export function formatSubscription(subscription) {
     turboExpiration: subscription.spaceTurboExpiration,
     flagged: subscription.spaceFlagged,
     hibernated: subscription.spaceHibernated,
-    skinSettings: formatSkinSettings(subscription)
+    skinSettings: formatSkinSettings(subscription),
+    created: subscription.spaceCreated
   });
   return subscription;
 }
