@@ -1,6 +1,5 @@
 import { RouteLocationRaw } from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
-import { offchainNetworks } from '@/networks';
 import { NetworkID, RelatedSpace, Space, SpaceMetadataTreasury } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
@@ -28,6 +27,8 @@ export type OrganizationConfig = {
   navItems?: Record<string, Partial<NavItem>>;
   /** Org-level treasuries (read-only display). */
   treasuries?: SpaceMetadataTreasury[];
+  /** Spaces merged by the Spaces filter on the proposals page. */
+  proposalSpaces?: { network: NetworkID; ids: string[] };
 };
 
 export type Organization = OrganizationConfig & {
@@ -105,6 +106,13 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         chainId: '42161'
       }
     ],
+    proposalSpaces: {
+      network: 'arb1',
+      ids: [
+        '0x789fC99093B09aD01C34DC7251D0C89ce743e5a4',
+        '0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9'
+      ]
+    },
     routes: [
       {
         path: 'treasury-gov',
@@ -325,14 +333,18 @@ export function getCustomRoute(
   return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
 }
 
-export function getOrgOnchainSpaces(
+export function getOrgProposalSpaces(
   organization: Organization | null,
   network: NetworkID
 ): Space[] {
-  if (organization?.id !== 'arbitrum') return [];
-  return organization.spaces.filter(
-    s => s.network === network && !offchainNetworks.includes(s.network)
-  );
+  const group = organization?.proposalSpaces;
+  if (!group || group.network !== network) return [];
+
+  return group.ids
+    .map(id =>
+      organization.spaces.find(s => s.network === network && s.id === id)
+    )
+    .filter((s): s is Space => !!s);
 }
 
 export function getOrgProposalLabel(

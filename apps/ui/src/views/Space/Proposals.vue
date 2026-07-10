@@ -2,8 +2,8 @@
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import {
-  getOrgOnchainSpaces,
-  getOrgProposalLabel
+  getOrgProposalLabel,
+  getOrgProposalSpaces
 } from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
@@ -32,17 +32,17 @@ const {
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
 
-const orgOnchainSpaces = computed(() =>
-  getOrgOnchainSpaces(organization.value, props.space.network)
+const orgProposalSpaces = computed(() =>
+  getOrgProposalSpaces(organization.value, props.space.network)
 );
 
-const hasMultiSpaceFilter = computed(() => orgOnchainSpaces.value.length > 1);
+const hasMultiSpaceFilter = computed(() => orgProposalSpaces.value.length > 1);
 
 const selectedSpaceId = ref<string>(ANY_SPACE);
 
 const spacesItems = computed(() => [
   { key: ANY_SPACE, label: 'Any' },
-  ...orgOnchainSpaces.value.map(s => ({
+  ...orgProposalSpaces.value.map(s => ({
     key: s.id,
     label: s.name ?? s.id
   }))
@@ -51,7 +51,7 @@ const spacesItems = computed(() => [
 const queriedSpaceIds = computed(() => {
   if (!hasMultiSpaceFilter.value) return [props.space.id];
   return selectedSpaceId.value === ANY_SPACE
-    ? orgOnchainSpaces.value.map(s => s.id)
+    ? orgProposalSpaces.value.map(s => s.id)
     : [selectedSpaceId.value];
 });
 
@@ -113,9 +113,9 @@ watchThrottled(
     () => route.query.labels as string[] | string,
     () => route.query.space as string | undefined,
     () => props.space.id,
-    () => orgOnchainSpaces.value
+    () => orgProposalSpaces.value
   ],
-  ([toState, toLabels, toSpace, , onchainSpaces]) => {
+  ([toState, toLabels, toSpace, , proposalSpaces]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
@@ -125,7 +125,7 @@ watchThrottled(
       : [normalizedLabels];
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
 
-    const validIds = new Set(onchainSpaces.map(s => s.id));
+    const validIds = new Set(proposalSpaces.map(s => s.id));
     const next = toSpace && validIds.has(toSpace) ? toSpace : ANY_SPACE;
     if (next !== selectedSpaceId.value) selectedSpaceId.value = next;
   },
@@ -290,7 +290,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           </template>
           <template #items>
             <UiDropdownItem
-              v-for="s in orgOnchainSpaces"
+              v-for="s in orgProposalSpaces"
               :key="s.id"
               :to="{
                 name: 'space-editor',

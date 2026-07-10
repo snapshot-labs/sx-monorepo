@@ -2,8 +2,8 @@ export {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
   getOrganizationConfigBySpace,
-  getOrgOnchainSpaces,
   getOrgProposalLabel,
+  getOrgProposalSpaces,
   resolveSpaceItem,
   type Organization,
   type OrganizationConfig
