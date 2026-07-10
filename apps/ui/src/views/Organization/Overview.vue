@@ -110,9 +110,9 @@ function getSpaceLabel(s: Space) {
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
-        <DropdownNewProposal :spaces="spaces">
+        <ButtonNewProposal :spaces="spaces">
           <template #label="{ space: s }">{{ getSpaceLabel(s) }}</template>
-        </DropdownNewProposal>
+        </ButtonNewProposal>
       </div>
     </div>
     <div class="px-4">

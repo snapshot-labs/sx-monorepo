@@ -2,11 +2,21 @@
 import { Space } from '@/types';
 
 defineProps<{ spaces: Space[]; gap?: string; placement?: 'start' | 'end' }>();
+
+function getEditorRoute(s: Space) {
+  return {
+    name: 'space-editor',
+    params: { space: `${s.network}:${s.id}` }
+  };
+}
 </script>
 
 <template>
   <UiTooltip title="New proposal">
-    <UiDropdown :gap="gap" :placement="placement">
+    <UiButton v-if="spaces.length === 1" :to="getEditorRoute(spaces[0])" uniform>
+      <IH-pencil-alt />
+    </UiButton>
+    <UiDropdown v-else :gap="gap" :placement="placement">
       <template #button>
         <UiButton uniform>
           <IH-pencil-alt />
@@ -16,10 +26,7 @@ defineProps<{ spaces: Space[]; gap?: string; placement?: 'start' | 'end' }>();
         <UiDropdownItem
           v-for="s in spaces"
           :key="`${s.network}:${s.id}`"
-          :to="{
-            name: 'space-editor',
-            params: { space: `${s.network}:${s.id}` }
-          }"
+          :to="getEditorRoute(s)"
         >
           <slot name="label" :space="s">{{ s.name }}</slot>
         </UiDropdownItem>
