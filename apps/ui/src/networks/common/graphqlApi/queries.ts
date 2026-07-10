@@ -25,7 +25,6 @@ gql(`
     protocol
     verified
     turbo
-    confidential
     metadata {
       name
       avatar

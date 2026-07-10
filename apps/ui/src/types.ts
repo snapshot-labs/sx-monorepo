@@ -214,8 +214,6 @@ export type Space = {
   privacy: SpacePrivacy;
   voting_power_symbol: string;
   active_proposals: number | null;
-  /** Inco confidential-voting Space — votes are encrypted on-chain. */
-  confidential?: boolean;
   controller: string;
   voting_delay: number;
   voting_types: VoteType[];
@@ -294,8 +292,6 @@ export type Proposal = {
     executors: string[];
     executors_types: string[];
     strategies_parsed_metadata: StrategyParsedMetadata[];
-    /** Inco confidential-voting Space — votes are encrypted on-chain. */
-    confidential?: boolean;
   };
   author: {
     id: string;
