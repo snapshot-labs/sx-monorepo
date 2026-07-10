@@ -28,9 +28,16 @@ const turboExpirationDate = computed(() =>
 const payments = computed(() => data.value?.pages.flat() || []);
 
 const { getPortalUrl } = useStripeCheckout();
+const uiStore = useUiStore();
+
 async function openPortal() {
-  const url = await getPortalUrl(props.space.network);
-  if (url) window.open(url, '_blank', 'noopener');
+  try {
+    const url = await getPortalUrl(props.space.network);
+    if (url) window.open(url, '_blank', 'noopener');
+  } catch (err) {
+    console.error('[stripe] portal failed', err);
+    uiStore.addNotification('error', 'Failed to open the billing portal');
+  }
 }
 
 const statusText = computed(() => {
