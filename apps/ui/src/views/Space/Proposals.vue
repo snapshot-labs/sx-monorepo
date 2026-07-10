@@ -46,7 +46,7 @@ const spacesItems = computed(() => [
   { key: ANY_SPACE, label: 'Any' },
   ...orgProposalSpaces.value.map(s => ({
     key: s.id,
-    label: s.name ?? s.id
+    label: s.name
   }))
 ]);
 
@@ -307,7 +307,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
                 params: { space: `${space.network}:${s.id}` }
               }"
             >
-              {{ s.name ?? s.id }}
+              {{ s.name }}
             </UiDropdownItem>
           </template>
         </UiDropdown>
