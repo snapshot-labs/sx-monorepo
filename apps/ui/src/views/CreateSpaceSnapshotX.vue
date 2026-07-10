@@ -1,26 +1,29 @@
 <script setup lang="ts">
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, spaceCreationNetworks } from '@/networks';
+import {
+  spaceCreationNetworks as defaultSpaceCreationNetworks,
+  getNetwork
+} from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
-// When set, preselects network and hides Network step.
-const props = defineProps<{ fixedNetworkId?: NetworkID }>();
+const props = withDefaults(
+  defineProps<{ spaceCreationNetworks?: NetworkID[] }>(),
+  {
+    spaceCreationNetworks: () => defaultSpaceCreationNetworks
+  }
+);
 
 const STEPS: StepRecords = {
   profile: {
     title: 'Profile',
     isValid: () => !stepsErrors.value['profile']
   },
-  ...(props.fixedNetworkId
-    ? {}
-    : {
-        network: {
-          title: 'Network',
-          isValid: () => true
-        }
-      }),
+  network: {
+    title: 'Network',
+    isValid: () => true
+  },
   strategies: {
     title: 'Strategies',
     isValid: () => votingStrategies.value.length > 0
@@ -76,9 +79,7 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(
-  props.fixedNetworkId ?? spaceCreationNetworks[0]
-);
+const selectedNetworkId: Ref<NetworkID> = ref(props.spaceCreationNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -171,6 +172,7 @@ watch(selectedNetworkId, () => {
           v-else-if="currentStep === 'network'"
           v-model="selectedNetworkId"
           title="Space network"
+          :space-creation-networks="props.spaceCreationNetworks"
         />
         <FormStrategies
           v-else-if="currentStep === 'strategies'"
