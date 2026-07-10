@@ -184,16 +184,15 @@ export class EthereumSig {
       this.config
     );
 
-    const isConfidential = !!data.ciphertext;
-    const message: EIP712VoteMessage = isConfidential
-      ? ({
+    const message: EIP712VoteMessage = data.ciphertext
+      ? {
           space: data.space,
           voter,
           proposalId: data.proposal,
           ciphertext: data.ciphertext,
           userVotingStrategies,
           voteMetadataURI: data.metadataUri
-        } as unknown as EIP712VoteMessage)
+        }
       : {
           space: data.space,
           voter,
@@ -207,7 +206,7 @@ export class EthereumSig {
       signer,
       data.authenticator,
       message,
-      isConfidential ? voteTypesInco : voteTypes
+      data.ciphertext ? voteTypesInco : voteTypes
     );
 
     return {
