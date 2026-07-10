@@ -201,8 +201,7 @@ export function createConfig(networkId: NetworkID): Config {
         network.ExecutionStrategies.SimpleQuorumTimelock,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower,
-      apeGasStrategy:
-        (network.Strategies as { ApeGas?: string | null }).ApeGas ?? null,
+      apeGasStrategy: network.Strategies.ApeGas ?? null,
       apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     }
   };
