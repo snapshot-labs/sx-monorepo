@@ -1,0 +1,21 @@
+scalar Id
+scalar Text
+scalar BigIntVP
+scalar BigDecimalVP
+
+type Governance {
+  id: String!
+  currentDelegates: Int!
+  totalDelegates: Int!
+  delegatedVotesRaw: BigIntVP!
+  delegatedVotes: BigDecimalVP!
+}
+
+type Delegate {
+  id: String!
+  governance: Governance
+  user: String!
+  delegatedVotesRaw: BigIntVP!
+  delegatedVotes: BigDecimalVP!
+  tokenHoldersRepresentedAmount: Int!
+}

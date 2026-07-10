@@ -5,6 +5,7 @@ import { LocationQueryValue } from 'vue-router';
 import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -31,7 +32,7 @@ const emit = defineEmits<{
 
 const queryClient = useQueryClient();
 const { vote } = useActions();
-const { web3 } = useWeb3();
+const { web3, auth } = useWeb3();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
 const {
@@ -64,6 +65,24 @@ const modalTransactionOpen = ref(false);
 const modalShareOpen = ref(false);
 const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
+const isTxPreferred = ref(false);
+const isAdvancedOpen = ref(false);
+
+const canVoteViaTx = computed<boolean>(() => {
+  const connectorType = auth.value?.connector.type;
+  if (
+    !isStarknetProposal.value ||
+    !connectorType ||
+    !EVM_CONNECTORS.includes(connectorType)
+  ) {
+    return false;
+  }
+
+  const { helpers } = getNetwork(props.proposal.network);
+  return props.proposal.space.authenticators.some(
+    a => helpers.getAuthenticatorSupportInfo(a)?.relayerType === 'evm-tx'
+  );
+});
 
 const formValidator = getValidator({
   $async: true,
@@ -139,7 +158,8 @@ async function voteFn() {
     props.proposal,
     selectedChoice.value,
     form.value.reason,
-    appName.length <= 128 ? appName : ''
+    appName.length <= 128 ? appName : '',
+    isTxPreferred.value
   );
 }
 
@@ -182,6 +202,9 @@ watch(
   [() => props.open, () => web3.value.account],
   async ([open, toAccount], [, fromAccount]) => {
     if (!open) return;
+
+    isTxPreferred.value = false;
+    isAdvancedOpen.value = false;
 
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       loading.value = true;
@@ -273,6 +296,41 @@ watchEffect(async () => {
           :error="formErrors"
           :definition="{ properties: { reason: REASON_DEFINITION } }"
         />
+      </div>
+      <div v-if="canVoteViaTx">
+        <button
+          type="button"
+          class="flex items-center gap-1 text-skin-text text-sm"
+          @click="isAdvancedOpen = !isAdvancedOpen"
+        >
+          Advanced
+          <IH-chevron-down
+            class="w-[14px] h-[14px] transition-transform"
+            :class="{ 'rotate-180': isAdvancedOpen }"
+          />
+        </button>
+        <div
+          class="grid transition-all duration-200"
+          :class="isAdvancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
+        >
+          <div class="overflow-hidden">
+            <label
+              class="flex gap-2.5 items-start cursor-pointer border rounded-lg p-3 mt-2"
+            >
+              <input v-model="isTxPreferred" type="checkbox" class="mt-[3px]" />
+              <span class="leading-5 block space-y-1">
+                <span class="block text-skin-link"
+                  >Vote with a transaction</span
+                >
+                <span class="block text-sm text-skin-text">
+                  For Ledger / hardware wallets. Sends an on-chain Ethereum
+                  transaction instead of a signature. Use this if signing fails
+                  on a Ledger or other hardware wallet. This costs gas.
+                </span>
+              </span>
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 

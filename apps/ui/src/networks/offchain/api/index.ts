@@ -412,8 +412,11 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     created: proposal.created,
     edited: proposal.updated,
     start: proposal.start,
+    start_block_number: null,
     min_end: proposal.end,
+    min_end_block_number: null,
     max_end: proposal.end,
+    max_end_block_number: null,
     snapshot: proposal.snapshot,
     quorum: proposal.quorum,
     quorum_type: proposal.quorumType,
@@ -449,7 +452,6 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     has_execution_window_opened: state === 'passed',
     // NOTE: ignored
     execution_network: networkId,
-    execution_ready: false,
     execution_hash: '',
     execution_time: 0,
     execution_strategy: '',
@@ -468,7 +470,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
     flag_code: proposal.flagCode,
-    plugins: proposal.plugins
+    plugins: proposal.plugins,
+    app: proposal.app
   };
 }
 
@@ -486,7 +489,8 @@ function formatVote(vote: ApiVote): Vote {
     vp: vote.vp,
     reason: vote.reason,
     created: vote.created,
-    tx: vote.ipfs
+    tx: vote.ipfs,
+    app: vote.app
   };
 }
 

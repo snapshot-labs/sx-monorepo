@@ -49,9 +49,6 @@ function isTurbo(turboExpiration: number): boolean {
 }
 
 function getPopularity(space: Metadata): number {
-  // TEMP: pin xmaquina.eth to the top of the explore ranking.
-  if (space.id === 'xmaquina.eth') return Number.MAX_SAFE_INTEGER;
-
   let popularity =
     space.counts.proposalsCount / 20 +
     space.counts.proposalsCount7d +

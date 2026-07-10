@@ -383,6 +383,7 @@ onBeforeUnmount(() => destroyAudio());
           <div class="flex flex-col ml-2 leading-4 gap-1">
             <div>
               {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+              <UiBadgeApp :app="proposal.app" />
               <UiPill
                 v-if="proposal.author.role"
                 :label="proposal.author.role"

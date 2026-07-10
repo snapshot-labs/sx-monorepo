@@ -1,0 +1,5 @@
+apiVersion: v2
+name: sx-api-gateway
+description: Shared Cilium Gateway
+type: application
+version: 0.1.0

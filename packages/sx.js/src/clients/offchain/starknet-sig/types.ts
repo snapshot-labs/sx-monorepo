@@ -3,7 +3,7 @@ export const baseDomain = {
   version: '0.1.0'
 };
 
-export const domainTypes = {
+const domainTypes = {
   StarkNetDomain: [
     { name: 'name', type: 'felt' },
     { name: 'version', type: 'felt' },

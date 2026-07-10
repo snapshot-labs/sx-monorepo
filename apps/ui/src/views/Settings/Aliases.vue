@@ -2,7 +2,7 @@
 import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
-import { ALIAS_EXPIRY_DAYS } from '@/helpers/constants';
+import { ALIAS_AVAILABILITY_PERIOD } from '@/composables/useAlias';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
@@ -68,16 +68,21 @@ const loading = computed(
   () => web3.value.authLoading || (!!web3Account.value && isPending.value)
 );
 
-const EXPIRY_SECONDS = ALIAS_EXPIRY_DAYS * 24 * 60 * 60;
 const now = useNow({ interval: 60_000 });
 
 const aliasItems = computed(() => {
   const nowSec = now.value.getTime() / 1000;
-  return (aliases.value ?? []).map(alias => {
-    const expiresAt = alias.created ? alias.created + EXPIRY_SECONDS : 0;
-    const isExpired = !!alias.created && nowSec >= expiresAt;
-    return { ...alias, expiresAt, isExpired };
-  });
+
+  return [...(aliases.value ?? [])]
+    .sort((a, b) => (b.created ?? 0) - (a.created ?? 0))
+    .map(alias => {
+      const expiresAt = alias.created
+        ? alias.created + ALIAS_AVAILABILITY_PERIOD
+        : 0;
+      const isExpired = !!alias.created && nowSec >= expiresAt;
+
+      return { ...alias, expiresAt, isExpired };
+    });
 });
 </script>
 

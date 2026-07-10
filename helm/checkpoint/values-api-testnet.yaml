@@ -1,0 +1,12 @@
+appName: sx-api
+namespace: testnet
+
+nodeSelector:
+  doks.digitalocean.com/node-pool: testnet-pool
+
+image:
+  repository: ghcr.io/snapshot-labs/sx-api
+
+config:
+  PORT: '3000'
+  ENABLED_NETWORKS: 'sep,curtis,bnbt,sn-sep'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
-import { enabledReadWriteNetworks, getNetwork } from '@/networks';
+import { getNetwork, spaceCreationNetworks } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
@@ -69,7 +69,7 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(enabledReadWriteNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(spaceCreationNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { OrganizationConfig } from '@/helpers/organizations';
+import { OrganizationConfig, resolveSpaceItem } from '@/helpers/organizations';
 import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { RelatedSpace, Space } from '@/types';
@@ -8,35 +8,26 @@ const props = defineProps<{
   space: Space | RelatedSpace;
   org?: OrganizationConfig | null;
 }>();
-const linkTo = computed(() =>
-  props.org
-    ? { name: 'org', params: { org: props.org.id } }
-    : {
-        name: 'space-overview',
-        params: { space: `${props.space.network}:${props.space.id}` }
-      }
-);
-const avatarSpace = computed(() =>
-  props.org
-    ? { ...props.org.spaceIds[0], avatar: '', active_proposals: 0 }
-    : props.space
-);
+
+const item = computed(() => resolveSpaceItem(props.space, props.org ?? null));
 </script>
 
 <template>
   <AppLink
-    :to="linkTo"
+    :to="item.link"
     class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
     <div class="grow flex items-center min-w-0">
       <UiBadgeNetwork
-        :id="avatarSpace.network"
+        :id="item.avatarSpace.network"
         class="mr-2.5 shrink-0"
-        :size="!org && !offchainNetworks.includes(avatarSpace.network) ? 16 : 0"
+        :size="
+          !org && !offchainNetworks.includes(item.avatarSpace.network) ? 16 : 0
+        "
       >
-        <SpaceAvatar :space="avatarSpace" :size="32" class="rounded-md" />
+        <SpaceAvatar :space="item.avatarSpace" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
-      <h3 class="truncate" v-text="org?.name ?? space.name" />
+      <h3 class="truncate" v-text="item.title" />
       <UiBadgeSpace
         class="ml-1"
         :verified="space.verified"
@@ -50,12 +41,10 @@ const avatarSpace = computed(() =>
         {{ org.spaceIds.length }}
         {{ org.spaceIds.length === 1 ? 'space' : 'spaces' }}
       </span>
-      <slot name="meta" />
     </div>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
     <div class="text-[21px] font-bold flex text-center">
       <span
-        v-if="space.protocol === 'snapshot'"
         class="w-[50px] md:w-[100px]"
         :class="{ 'text-skin-success': (space.active_proposals ?? 0) > 0 }"
         v-text="_n(space.active_proposals ?? 0, 'compact')"

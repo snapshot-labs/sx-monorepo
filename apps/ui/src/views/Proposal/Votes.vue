@@ -197,10 +197,12 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
-              <h4
-                class="truncate"
-                v-text="vote.voter.name || shortenAddress(vote.voter.id)"
-              />
+              <h4 class="flex items-center gap-1">
+                <span class="truncate">
+                  {{ vote.voter.name || shortenAddress(vote.voter.id) }}
+                </span>
+                <UiBadgeApp :app="vote.app" />
+              </h4>
               <UiAddress
                 :address="vote.voter.id"
                 class="text-[17px] text-skin-text truncate"

@@ -1,0 +1,16 @@
+appName: delegates
+namespace: mainnet
+
+nodeSelector:
+  doks.digitalocean.com/node-pool: mainnet-pool
+tolerations:
+  - key: workload
+    operator: Equal
+    value: mainnet
+    effect: NoSchedule
+
+image:
+  repository: ghcr.io/snapshot-labs/delegates-api
+
+config:
+  PORT: '3000'

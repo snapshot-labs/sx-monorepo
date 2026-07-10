@@ -7,6 +7,7 @@ import { init as shutterInit } from '@shutter-network/shutter-crypto';
 import { clients, offchainMainnet } from '@snapshot-labs/sx';
 import { z } from 'zod';
 import { type CdpSigner, getWalletForUser } from './cdp.js';
+import logger from './logger.js';
 import {
   getProposalSnapshotBlock,
   gql,
@@ -93,15 +94,15 @@ async function handle(
   const sid = String(ex?.sessionId ?? '-').slice(0, 8);
   const u = ex?.authInfo?.extra?.user;
   const user = u !== undefined && u.length >= 10 ? `${u.slice(0, 6)}...${u.slice(-4)}` : u ?? 'anonymous';
-  const prefix = `[req=${reqId}] [session=${sid}] [tool=${tool}] [user=${user}]`;
-  console.log(`${prefix} start`);
+  const log = logger.child({ reqId, sessionId: sid, tool, user });
+  log.info('tool start');
   try {
     const result = await fn();
-    console.log(`${prefix} ok`);
+    log.info('tool ok');
     return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    console.error(`${prefix} error: ${message}`, e);
+    log.error({ err: e }, 'tool error');
     return {
       content: [{ type: 'text' as const, text: `Error [req=${reqId}]: ${message}` }],
       isError: true
@@ -115,9 +116,10 @@ export function registerSchemaTool(server: McpServer): void {
     {
       description:
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
-      inputSchema: {}
+      inputSchema: {},
+      annotations: { readOnlyHint: true }
     },
-    (extra) => handle('snapshot-schema', extra, () => schemaCache)
+    (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
   );
 }
 
@@ -136,7 +138,8 @@ export function registerQueryTool(
           .record(z.string(), z.unknown())
           .optional()
           .describe('GraphQL variables')
-      }
+      },
+      annotations: { readOnlyHint: true }
     },
     ({ query, variables }, extra) =>
       handle('snapshot-query', extra, async () => {
@@ -147,6 +150,47 @@ export function registerQueryTool(
           // Anonymous read-only queries are still allowed.
         }
         return gql(query, user ? { ...variables, user } : variables);
+      })
+  );
+}
+
+export function registerWhoamiTool(
+  server: McpServer,
+  resolveContext: ResolveContext
+): void {
+  server.registerTool(
+    'snapshot-whoami',
+    {
+      description:
+        'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
+      inputSchema: {},
+      annotations: { readOnlyHint: true }
+    },
+    (_args, extra) =>
+      handle('snapshot-whoami', extra, async () => {
+        const { user: address, signer } = await resolveContext(extra);
+        const alias = await signer.getAddress();
+        const [authorized, profile] = await Promise.all([
+          resolveUserFromAlias(alias)
+            .then(u => u?.toLowerCase() === address.toLowerCase())
+            .catch(() => false),
+          gql('query ($id: String!) { user(id: $id) { name about avatar } }', {
+            id: address
+          })
+            .then(r => (r as { user: unknown }).user)
+            // Profile lookup is best-effort; the address alone is still useful.
+            .catch(() => null)
+        ]);
+        return {
+          address,
+          alias,
+          authorized,
+          profile,
+          links: {
+            profile: `https://snapshot.box/#/profile/${address}`,
+            alias: `https://snapshot.box/#/settings/alias/authorize/${alias}`
+          }
+        };
       })
   );
 }
@@ -174,7 +218,8 @@ export function registerVoteTool(
           .describe(
             'Reason for the vote (ignored on shutter-encrypted proposals)'
           )
-      }
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
     },
     (data, extra) =>
       handle('snapshot-vote', extra, async () => {
@@ -232,7 +277,7 @@ export function registerProposeTool(
     'snapshot-propose',
     {
       description:
-        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, snapshot block, and privacy mode are read from the space and applied automatically. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
+        'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, and privacy mode are read from the space and applied automatically; the snapshot block is set to the current chain head of the space\'s network. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
       inputSchema: {
         space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
         title: z.string().min(1).describe('Proposal title'),
@@ -244,7 +289,8 @@ export function registerProposeTool(
         start: z.number().int().optional().describe('Voting start (unix seconds). Defaults to now + space.voting.delay.'),
         end: z.number().int().optional().describe('Voting end (unix seconds). Defaults to start + space.voting.period (3 days if unset).'),
         privacy: z.enum(['shutter', 'none']).optional().describe('Shutter shielded voting. Only honored when the space\'s voting.privacy is "any" (or already "shutter", in which case it is forced).')
-      }
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false }
     },
     (data, extra) =>
       handle('snapshot-propose', extra, async () => {
@@ -312,21 +358,34 @@ export function registerFollowTool(
     'snapshot-follow',
     {
       description:
-        'Add a Snapshot space to the user\'s followed list. Calling this again on a space the user already follows is a no-op on Snapshot\'s side. Use `follows(where: { follower: $user })` via snapshot-query to list followed spaces.',
+        'Follow or unfollow a Snapshot space for the user. Set `action: "follow"` (default) to add the space to the followed list, or `action: "unfollow"` to remove it. Following a space you already follow returns the error "you are already following this space", and unfollowing a space you do not follow returns "you can only unfollow a space you follow". Check the current state first via `follows(where: { follower: $user })`, which also lists followed spaces.',
       inputSchema: {
-        space: z.string().describe('Space ID slug (e.g. "ens.eth")')
-      }
+        space: z.string().describe('Space ID slug (e.g. "ens.eth")'),
+        action: z
+          .enum(['follow', 'unfollow'])
+          .default('follow')
+          .describe('Whether to follow or unfollow the space. Defaults to "follow".')
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true }
     },
     (data, extra) =>
       handle('snapshot-follow', extra, async () => {
         const { user: from, signer } = await resolveContext(extra);
         const space = await requireSpace<{ id: string }>(data.space, 'id');
-        const envelope = await sx.followSpace({
+        const payload = {
           signer: signer as Wallet,
           data: { from, space: space.id, network: 's' }
-        });
+        };
+        const envelope =
+          data.action === 'unfollow'
+            ? await sx.unfollowSpace(payload)
+            : await sx.followSpace(payload);
         const result = (await sx.send(envelope)) as unknown;
-        return { result, links: { space: `https://snapshot.box/#/s:${space.id}` } };
+        return {
+          action: data.action,
+          result,
+          links: { space: `https://snapshot.box/#/s:${space.id}` }
+        };
       })
   );
 }

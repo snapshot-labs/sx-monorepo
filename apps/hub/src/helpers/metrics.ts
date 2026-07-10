@@ -36,7 +36,7 @@ function instrumentRateLimitedRequests(req, res, next) {
 export default function initMetrics(app: Express) {
   const GRAPHQL_TYPES = Object.keys(operations);
 
-  init(app, {
+  const { stop } = init(app, {
     normalizedPath: [
       ['^/api/scores/.+', '/api/scores/#id'],
       ['^/api/spaces/([^/]+)(/poke)?$', '/api/spaces/#key$2'],
@@ -88,6 +88,8 @@ export default function initMetrics(app: Express) {
 
     next();
   });
+
+  return { stop };
 }
 
 new client.Gauge({
@@ -217,7 +219,7 @@ export const requestDeduplicatorSize = new client.Gauge({
   help: 'Total number of items in the deduplicator queue'
 });
 
-export const graphqlRequest = new client.Histogram({
+const graphqlRequest = new client.Histogram({
   name: 'graphql_requests_duration_seconds',
   help: 'Duration in seconds of graphql requests',
   labelNames: ['type'],

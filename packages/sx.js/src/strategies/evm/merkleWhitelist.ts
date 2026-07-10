@@ -1,4 +1,5 @@
 import { AbiCoder } from '@ethersproject/abi';
+import { hexZeroPad } from '@ethersproject/bytes';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import {
   ClientConfig,
@@ -86,10 +87,18 @@ export default function createMerkleWhitelist(): Strategy {
 
       if (!proof) throw new Error('Signer is not in whitelist');
 
+      // The whitelist proof server (wls.snapshot.box) can return proof
+      // elements with a stripped leading zero byte (31 bytes instead of a
+      // full bytes32). Left-pad each element to 32 bytes so the encoded proof
+      // is valid on-chain (otherwise voters whose proof contains a hash
+      // starting with a zero byte hit InvalidProof()). No-op for correct
+      // 32-byte values.
+      const normalizedProof = proof.proof.map(node => hexZeroPad(node, 32));
+
       const abiCoder = new AbiCoder();
       return abiCoder.encode(
         ['bytes32[]', 'tuple(address, uint96)'],
-        [proof.proof, whitelist[proof.index]]
+        [normalizedProof, whitelist[proof.index]]
       );
     },
     async getVotingPower(

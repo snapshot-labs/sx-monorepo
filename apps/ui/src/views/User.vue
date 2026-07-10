@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { getUserStats } from '@/helpers/efp';
 import {
   _n,
   _p,
@@ -33,13 +32,6 @@ const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
-const userMetadata = reactive({
-  loading: false,
-  loaded: false,
-  followers_count: 0,
-  following_count: 0
-});
-
 const id = computed(() => formatAddress(route.params.user as string));
 
 const user = computed(() => usersStore.getUser(id.value));
@@ -47,21 +39,6 @@ const user = computed(() => usersStore.getUser(id.value));
 const socials = computed(() => getSocialNetworksLink(user.value));
 
 const cb = computed(() => getCacheHash(user.value?.avatar));
-
-async function loadUserMetadata(userId: string) {
-  userMetadata.loading = true;
-
-  try {
-    const userStats = await getUserStats(userId);
-
-    userMetadata.followers_count = userStats.followers_count;
-    userMetadata.following_count = userStats.following_count;
-    userMetadata.loading = false;
-    userMetadata.loaded = true;
-  } catch {
-    userMetadata.loading = false;
-  }
-}
 
 async function fetchSpacesAndStore(ids: string[]) {
   if (!ids.length) return;
@@ -140,7 +117,6 @@ watch(
   id,
   async userId => {
     loaded.value = false;
-    userMetadata.loaded = false;
 
     if (!isValidAddress(userId)) {
       loaded.value = true;
@@ -149,7 +125,6 @@ watch(
 
     await usersStore.fetchUser(userId);
     loadActivities(userId);
-    loadUserMetadata(userId);
 
     loaded.value = true;
   },
@@ -195,20 +170,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 flex flex-col xs:flex-row xs:items-center gap-x-2">
+        <div class="mb-3">
           <UiAddress :address="user.id" copy-button="always" />
-          <div v-if="userMetadata.loaded" class="flex items-center gap-2">
-            <span class="hidden xs:inline">·</span>
-            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
-              {{ _n(userMetadata.following_count) }}
-              <span class="text-skin-text">following</span>
-            </AppLink>
-            ·
-            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
-              {{ _n(userMetadata.followers_count) }}
-              <span class="text-skin-text">followers</span>
-            </AppLink>
-          </div>
         </div>
         <div
           v-if="user.about"
