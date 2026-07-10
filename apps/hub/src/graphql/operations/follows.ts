@@ -39,9 +39,9 @@ export default async function (parent, args) {
       spaces.turbo_expiration as spaceTurboExpiration,
       spaces.hibernated as spaceHibernated
     FROM follows f
-    LEFT JOIN spaces ON spaces.id = f.space
+    INNER JOIN spaces ON spaces.id = f.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE 1=1 ${queryStr}
+    WHERE spaces.deleted = 0 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
 

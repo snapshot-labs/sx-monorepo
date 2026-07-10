@@ -42,7 +42,7 @@ export default async function (parent, args) {
     FROM subscriptions s
     INNER JOIN spaces ON spaces.id = s.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE spaces.settings IS NOT NULL ${queryStr}
+    WHERE spaces.deleted = 0 AND spaces.settings IS NOT NULL ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
