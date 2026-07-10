@@ -351,8 +351,8 @@ export type Proposal = {
   completed: boolean;
   cancelled: boolean;
   /** Set after finalizeReveal; null pre-reveal or non-confidential. */
-  is_quorum_reached?: boolean | null;
-  is_support_achieved?: boolean | null;
+  quorum_reached?: boolean | null;
+  support_achieved?: boolean | null;
   state: ProposalState;
   privacy: Privacy;
   plugins: Record<string, unknown>;

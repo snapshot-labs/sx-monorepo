@@ -53,7 +53,7 @@ const isIncoProposal = computed(
 
 // Encrypted until reveal; then show real counts.
 const isConfidentialRevealed = computed(
-  () => isIncoProposal.value && props.proposal.is_quorum_reached != null
+  () => isIncoProposal.value && props.proposal.quorum_reached != null
 );
 
 // Encrypted tallies (Shutter/Inco): show lock, not numbers.
@@ -69,10 +69,10 @@ const isEncryptedTally = computed(() => {
 // actually revealed, which is exactly the signal we want for showing the
 // verdict — no lifecycle gate needed, no on-chain fallback needed.
 const revealedQuorumReached = computed(
-  () => props.proposal.is_quorum_reached ?? null
+  () => props.proposal.quorum_reached ?? null
 );
 const revealedSupportAchieved = computed(
-  () => props.proposal.is_support_achieved ?? null
+  () => props.proposal.support_achieved ?? null
 );
 
 const showVerdict = computed(() => {
