@@ -9,13 +9,6 @@ import Space from './abis/Space';
 import { MANA_URL } from '../../../config';
 import { NetworkID, SnapshotXConfig } from '../../types';
 
-// Override `basesep` start block via env (for testing — skip historical replay
-// and pick up only fresh proposals/votes). Numeric block height. Falls back to
-// the Phase-0 demo deploy block when unset.
-const BASESEP_START_BLOCK_ENV = process.env.BASESEP_START_BLOCK;
-// Reveal/execute-split stack deploy block.
-const BASESEP_DEFAULT_START = 42969459;
-
 const START_BLOCKS: Record<NetworkID, number> = {
   eth: 18962278,
   sep: 4519171,
@@ -28,11 +21,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
   bnbt: Infinity,
   ape: 12100384,
   curtis: 16682282,
-  // Inco demo deploy on Base Sepolia (see INTEGRATION_PROGRESS.md §7). Override
-  // with `BASESEP_START_BLOCK=<current-head>` to skip the replay during tests.
-  basesep: BASESEP_START_BLOCK_ENV
-    ? Number(BASESEP_START_BLOCK_ENV)
-    : BASESEP_DEFAULT_START
+  basesep: 42969459
 };
 
 // Backfill for hand-deployed (non-factory) Inco Spaces.
