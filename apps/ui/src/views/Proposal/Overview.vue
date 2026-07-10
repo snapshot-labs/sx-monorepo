@@ -43,8 +43,8 @@ const showConfidentialReveal = computed(() => {
 
   if (proposal.state === 'executed' || proposal.cancelled) return false;
   // Pre-reveal after voting ends; post-reveal only if passed.
-  if (proposal.is_quorum_reached == null) return confidentialVotingEnded.value;
-  return !!(proposal.is_quorum_reached && proposal.is_support_achieved);
+  if (proposal.quorum_reached == null) return confidentialVotingEnded.value;
+  return !!(proposal.quorum_reached && proposal.support_achieved);
 });
 const { createDraft } = useEditor();
 const {
