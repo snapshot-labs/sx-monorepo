@@ -113,7 +113,10 @@ export function createConfig(networkId: NetworkID): Config {
             name: 'ProposalCreated(uint256,address,(address,uint32,address,uint32,uint32,uint8,bytes32,uint256),string,bytes)',
             fn: 'handleProposalCreated'
           },
-          { name: 'ProposalCancelled(uint256)', fn: 'handleProposalCancelled' },
+          {
+            name: 'ProposalCancelled(uint256)',
+            fn: 'handleProposalCancelled'
+          },
           {
             name: 'ProposalUpdated(uint256,(address,bytes),string)',
             fn: 'handleProposalUpdated'
