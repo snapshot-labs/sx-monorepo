@@ -19,18 +19,10 @@ const { organization } = useOrganization();
 const router = useRouter();
 const route = useRoute();
 const { web3 } = useWeb3();
-const {
-  data: votingPower,
-  isPending: isVotingPowerPending,
-  isError: isVotingPowerError,
-  refetch: fetchVotingPower
-} = useSpaceVotingPowerQuery(
-  toRef(() => web3.value.account),
-  toRef(props, 'space')
-);
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
+const selectedSpaceId = ref<string>(ANY_SPACE);
 
 const orgProposalSpaces = computed(() =>
   getOrgProposalSpaces(organization.value, props.space.network)
@@ -38,7 +30,17 @@ const orgProposalSpaces = computed(() =>
 
 const hasMultiSpaceFilter = computed(() => orgProposalSpaces.value.length > 1);
 
-const selectedSpaceId = ref<string>(ANY_SPACE);
+/** The space all space-specific context (voting power, labels, heading) is
+ *  bound to. `null` when showing the merged list. */
+const selectedSpace = computed(() => {
+  if (!hasMultiSpaceFilter.value) return props.space;
+
+  return (
+    orgProposalSpaces.value.find(s => s.id === selectedSpaceId.value) ?? null
+  );
+});
+
+const isMergedList = computed(() => !selectedSpace.value);
 
 const spacesItems = computed(() => [
   { key: ANY_SPACE, label: 'Any' },
@@ -50,34 +52,41 @@ const spacesItems = computed(() => [
 
 const queriedSpaceIds = computed(() => {
   if (!hasMultiSpaceFilter.value) return [props.space.id];
+
   return selectedSpaceId.value === ANY_SPACE
     ? orgProposalSpaces.value.map(s => s.id)
     : [selectedSpaceId.value];
 });
-
-const isMergedList = computed(
-  () => hasMultiSpaceFilter.value && selectedSpaceId.value === ANY_SPACE
-);
 
 const selectIconBaseProps = {
   size: 16
 };
 
 const proposalsLabel = computed(() => {
-  if (isMergedList.value) return 'Proposals';
-  return (
-    getOrgProposalLabel(
-      organization.value,
-      `${props.space.network}:${props.space.id}`
-    ) ?? 'Proposals'
-  );
+  const spaceId = selectedSpace.value
+    ? `${props.space.network}:${selectedSpace.value.id}`
+    : undefined;
+
+  return getOrgProposalLabel(organization.value, spaceId) ?? 'Proposals';
 });
 
 const spaceLabels = computed(() => {
-  if (!props.space.labels) return {};
+  if (!selectedSpace.value?.labels) return {};
 
-  return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
+  return Object.fromEntries(
+    selectedSpace.value.labels.map(label => [label.id, label])
+  );
 });
+
+const {
+  data: votingPower,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useSpaceVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(() => selectedSpace.value ?? props.space)
+);
 
 const {
   data,
@@ -180,7 +189,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
   <div>
     <div
       class="flex justify-between p-4 gap-2 gap-y-3 flex-row"
-      :class="{ 'flex-col-reverse sm:flex-row': space.labels?.length }"
+      :class="{ 'flex-col-reverse sm:flex-row': selectedSpace?.labels?.length }"
     >
       <div class="flex gap-2">
         <UiSelectDropdown
@@ -221,10 +230,10 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
             }
           ]"
         />
-        <div v-if="space.labels?.length" class="sm:relative">
+        <div v-if="selectedSpace?.labels?.length" class="sm:relative">
           <PickerLabel
             v-model="labels"
-            :labels="space.labels"
+            :labels="selectedSpace.labels"
             :button-props="{
               class: [
                 'flex items-center gap-2 relative rounded-full leading-[100%] min-w-[75px] max-w-[230px] border button h-[42px] top-1 text-skin-link bg-skin-bg'
@@ -274,6 +283,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       </div>
       <div class="flex gap-2 truncate">
         <IndicatorVotingPower
+          v-if="selectedSpace"
           :network-id="space.network"
           :voting-power="votingPower"
           :is-loading="isVotingPowerPending"

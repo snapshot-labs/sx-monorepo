@@ -347,28 +347,33 @@ export function getOrgProposalSpaces(
     .filter((s): s is Space => !!s);
 }
 
+/** Org-level label for a space's proposals list. Without a spaceId (e.g. the
+ *  merged multi-space list), resolves to the proposals nav item's name. */
 export function getOrgProposalLabel(
   organization: Organization | null,
-  spaceId: string
+  spaceId?: string
 ): string | undefined {
   const navItems = organization?.navItems;
   if (!navItems) return undefined;
 
-  // Spaces merged by the proposals-page filter share a single nav item, so
-  // they are distinguished by their own name instead
-  const [network, id] = spaceId.split(':');
-  const group = organization.proposalSpaces;
-  if (group && group.network === network && group.ids.includes(id)) {
-    return organization.spaces.find(s => s.network === network && s.id === id)
-      ?.name;
+  if (spaceId) {
+    // Spaces merged by the proposals-page filter share a single nav item, so
+    // they are distinguished by their own name instead
+    const [network, id] = spaceId.split(':');
+    const group = organization.proposalSpaces;
+    if (group && group.network === network && group.ids.includes(id)) {
+      return organization.spaces.find(s => s.network === network && s.id === id)
+        ?.name;
+    }
+
+    const match = Object.values(navItems).find(item => {
+      if (typeof item.link !== 'object') return false;
+      const link = item.link as NavLink;
+
+      return link.name === 'space-proposals' && link.params?.space === spaceId;
+    });
+    if (match?.name) return match.name;
   }
 
-  const match = Object.values(navItems).find(item => {
-    if (typeof item.link !== 'object') return false;
-    const link = item.link as NavLink;
-
-    return link.name === 'space-proposals' && link.params?.space === spaceId;
-  });
-
-  return match?.name ?? navItems.proposals?.name;
+  return navItems.proposals?.name;
 }
