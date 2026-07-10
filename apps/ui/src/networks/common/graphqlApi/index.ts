@@ -168,7 +168,7 @@ function getProposalState(
   }
 
   // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
-  if (proposal.space?.confidential) {
+  if (proposal.space?.protocol === 'snapshot-x-inco') {
     if (Number(proposal.start_block_number ?? proposal.start) > current) {
       return 'pending';
     }
@@ -362,8 +362,6 @@ function formatSpace(
 ): Space {
   return {
     ...space,
-    // Indexer nullable Boolean to boolean | undefined.
-    confidential: space.confidential ?? undefined,
     voting_delay: Number(space.voting_delay),
     min_voting_period: Number(space.min_voting_period),
     max_voting_period: Number(space.max_voting_period),
@@ -450,7 +448,7 @@ function formatProposal(
       // trip this anti-spam heuristic.
       (proposal.metadata.execution === null &&
         proposal.execution_strategy !== emptyAddress &&
-        !proposal.space.confidential),
+        proposal.space.protocol !== 'snapshot-x-inco'),
     space: {
       id: proposal.space.id,
       protocol: proposal.space.protocol,
@@ -466,7 +464,6 @@ function formatProposal(
         proposal.space.strategies_parsed_metadata,
         proposal.strategies_indices
       ),
-      confidential: proposal.space.confidential ?? undefined,
       terms: ''
     },
     author: {

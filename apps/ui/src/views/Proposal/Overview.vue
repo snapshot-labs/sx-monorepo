@@ -37,12 +37,14 @@ const confidentialVotingEnded = computed(
   () => props.proposal.max_end * 1000 <= Date.now()
 );
 const showConfidentialReveal = computed(() => {
-  const p = props.proposal;
-  if (!p.space.confidential || p.state === 'executed' || p.cancelled)
-    return false;
+  const { proposal } = props;
+
+  if (proposal.space.protocol !== 'snapshot-x-inco') return false;
+
+  if (proposal.state === 'executed' || proposal.cancelled) return false;
   // Pre-reveal after voting ends; post-reveal only if passed.
-  if (p.is_quorum_reached == null) return confidentialVotingEnded.value;
-  return !!(p.is_quorum_reached && p.is_support_achieved);
+  if (proposal.is_quorum_reached == null) return confidentialVotingEnded.value;
+  return !!(proposal.is_quorum_reached && proposal.is_support_achieved);
 });
 const { createDraft } = useEditor();
 const {

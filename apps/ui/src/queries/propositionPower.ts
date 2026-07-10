@@ -61,7 +61,7 @@ async function getPropositionPower(space: Space, block: number | null) {
   // so legacy SX spaces with no validation strategies (likely misconfigured)
   // keep their previous behavior.
   if (
-    space.confidential &&
+    space.protocol === 'snapshot-x-inco' &&
     !space.voting_power_validation_strategy_strategies.length
   ) {
     vpItem.canPropose = true;
@@ -94,7 +94,7 @@ async function getPropositionPower(space: Space, block: number | null) {
     // aren't introspectable off-chain. Defer to the on-chain validation at
     // submit time. For every other network, rethrow — masking errors on
     // mainnet would let users hit a broken submit flow without warning.
-    if (!space.confidential) throw err;
+    if (space.protocol !== 'snapshot-x-inco') throw err;
     console.warn(
       'Proposition power preview failed for confidential space; allowing propose:',
       err

@@ -4,6 +4,17 @@ scalar BigInt
 scalar BigDecimalVP
 
 """
+SpaceImplementation stores first implementation address for a space.
+This is used to detect Space protocol at SpaceCreated.
+"""
+type SpaceImplementation {
+  "Unique identifier for the space"
+  id: String!
+  "Implementation address"
+  implementation: String!
+}
+
+"""
 Space represents a DAO or governance organization on Snapshot X
 """
 type Space {
@@ -61,8 +72,6 @@ type Space {
   "Parsed metadata for voting power validation strategies"
   voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
-  "Inco confidential-voting Space (votes are stored as encrypted ciphertexts; only quorum/support pass-fail flags are revealed). False/null for legacy spaces."
-  confidential: Boolean
   "Total number of proposals created in this space"
   proposal_count: Int!
   "Total number of votes cast in this space"

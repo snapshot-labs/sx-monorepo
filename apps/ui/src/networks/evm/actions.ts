@@ -79,15 +79,6 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   84532: evmBaseSepolia
 };
 
-// Confidential if flagged, or on Inco chain (pre-indexer).
-function isConfidentialSpace(
-  space: { confidential?: boolean | null },
-  chainId: number
-): boolean {
-  if (space.confidential) return true;
-  return chainId === 84532;
-}
-
 export function createActions(
   provider: Provider,
   helpers: NetworkHelpers,
@@ -342,7 +333,7 @@ export function createActions(
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
         };
-      } else if (isConfidentialSpace(space, chainId)) {
+      } else if (space.protocol === 'snapshot-x-inco') {
         // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
         // accumulating each encrypted vote, so a zero-address strategy reverts
         // the vote. Fall back to the network's default Vanilla execution
@@ -463,7 +454,7 @@ export function createActions(
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
         };
-      } else if (isConfidentialSpace(space, chainId)) {
+      } else if (space.protocol === 'snapshot-x-inco') {
         // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
         // accumulating each encrypted vote, so a zero-address strategy reverts
         // the vote. Fall back to the network's default Vanilla execution
@@ -641,7 +632,7 @@ export function createActions(
       const sdkChoice = getSdkChoice(choice);
 
       // Bind ciphertext to signer address, not web3 store.
-      const isConfidential = isConfidentialSpace(proposal.space, chainId);
+      const isConfidential = space.protocol === 'snapshot-x-inco';
       let ciphertext: string | undefined;
       let fee: string | undefined;
       if (isConfidential) {
@@ -710,7 +701,7 @@ export function createActions(
       }
 
       // Reveal/execute split, gated to after voting ends.
-      if (isConfidentialSpace(proposal.space, chainId)) {
+      if (proposal.space.protocol === 'snapshot-x-inco') {
         const signer = getSigner(web3);
         const account = await signer.getAddress();
         const proposalId = Number(proposal.proposal_id);

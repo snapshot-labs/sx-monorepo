@@ -27,6 +27,7 @@ import {
   Leaderboard,
   Proposal,
   Space,
+  SpaceImplementation,
   SpaceMetadataItem,
   StarknetL1Execution,
   User,
@@ -66,6 +67,10 @@ const KNOWN_EXECUTION_STRATEGIES = [
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
+const INCO_MASTER_SPACE = getAddress(
+  '0x3F31D742D3158b07434A041e26B47e9EB94e010C'
+);
+
 export function createWriters(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
@@ -87,6 +92,14 @@ export function createWriters(
 
     switch (implementationAddress) {
       case getAddress(protocolConfig.masterSpace): {
+        const spaceImplementation = new SpaceImplementation(
+          proxyAddress,
+          config.indexerName
+        );
+
+        spaceImplementation.implementation = implementationAddress;
+        await spaceImplementation.save();
+
         await executeTemplate('Space', {
           contract: proxyAddress,
           start: blockNumber
@@ -208,13 +221,22 @@ export function createWriters(
     const id = getAddress(event.args.space);
     const { votingStrategies } = event.args.input;
 
+    const spaceImplementation = await SpaceImplementation.loadEntity(
+      id,
+      config.indexerName
+    );
+
+    if (!spaceImplementation) {
+      logger.warn('Space implementation not found, skipping space creation');
+      return;
+    }
+
     const space = new Space(id, config.indexerName);
-    space.protocol = 'snapshot-x';
-    // basesep only hosts Inco confidential Spaces — flag at SpaceCreated time
-    // so the UI lock-icon path triggers immediately, before any vote arrives.
-    // The lazy flip in handleConfidentialVoteCast still acts as a backstop for
-    // legacy spaces that predate this assignment.
-    space.confidential = config.indexerName === 'basesep';
+    space.protocol =
+      spaceImplementation.implementation === INCO_MASTER_SPACE
+        ? 'snapshot-x-inco'
+        : 'snapshot-x';
+
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -952,16 +974,14 @@ export function createWriters(
       }
     }
 
-    // Vanilla executor has no entity; settle here.
-    if (config.indexerName === 'basesep') {
-      const space = await Space.loadEntity(spaceId, config.indexerName);
-      if (space?.confidential) {
-        proposal.execution_settled = true;
-        proposal.completed = true;
-        proposal.execution_tx = txId;
-        proposal.executed_at = BigInt(now);
-        proposal.executed_at_block_number = BigInt(blockNumber);
-      }
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+
+    if (space?.protocol === 'snapshot-x-inco') {
+      proposal.execution_settled = true;
+      proposal.completed = true;
+      proposal.execution_tx = txId;
+      proposal.executed_at = BigInt(now);
+      proposal.executed_at_block_number = BigInt(blockNumber);
     }
 
     await proposal.save();
@@ -1137,7 +1157,7 @@ export function createWriters(
   // (no plaintext `choice`), so per-choice score tallies are unknowable until the
   // proposal is `tryExecute`d (and even then, only the pass/fail flags decrypt).
   // We only touch the totals-side state; `vote.choice = 0` is a sentinel meaning
-  // "encrypted — see `space.confidential`".
+  // "encrypted
   const handleConfidentialVoteCast: evm.Writer<
     typeof SpaceAbi,
     'VoteCast' | 'VoteCastWithMetadata'
@@ -1169,7 +1189,6 @@ export function createWriters(
     vote.space = spaceId;
     vote.proposal = proposalId.toString();
     vote.voter = voter;
-    // 0 is a sentinel; UI must check `space.confidential` before showing a choice.
     vote.choice = 0;
     vote.vp = vp.toString();
     vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
@@ -1221,9 +1240,6 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (space) {
       space.vote_count += 1;
-      // Lazy-detect: any space that emits a confidential VoteCast IS confidential.
-      // Saves an extra implementation-address lookup at SpaceCreated time.
-      if (!space.confidential) space.confidential = true;
       if (leaderboardItem.vote_count === 1) space.voter_count += 1;
       await space.save();
     }
