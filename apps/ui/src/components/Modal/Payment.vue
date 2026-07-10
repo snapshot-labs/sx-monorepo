@@ -70,6 +70,7 @@ const { isPending, assetsMap } = useBalances({
 });
 const { isWhiteLabel } = useWhiteLabel();
 const { redirectToCheckout } = useStripeCheckout();
+const uiStore = useUiStore();
 
 const paymentMethod = ref<PaymentMethod>(
   props.isAuthValidForCrypto ? 'crypto' : 'card'
@@ -199,6 +200,10 @@ async function handleSubmit() {
     } catch (err) {
       cardLoading.value = false;
       console.error('[stripe] checkout failed', err);
+      uiStore.addNotification(
+        'error',
+        err instanceof Error ? err.message : 'Failed to start checkout'
+      );
     }
     return;
   }
