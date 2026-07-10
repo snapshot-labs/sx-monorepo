@@ -332,16 +332,6 @@ export function createActions(
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
         };
-      } else if (space.protocol === 'snapshot-x-inco') {
-        // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
-        // accumulating each encrypted vote, so a zero-address strategy reverts
-        // the vote. Fall back to the network's default Vanilla execution
-        // strategy for confidential spaces with no actions.
-        selectedExecutionStrategy = {
-          addr: networkConfig.executionStrategiesImplementations
-            .SimpleQuorumAvatar,
-          params: '0x'
-        };
       } else {
         selectedExecutionStrategy = {
           addr: '0x0000000000000000000000000000000000000000',
@@ -452,16 +442,6 @@ export function createActions(
             executionInfo.destinationAddress,
             convertToMetaTransactions(executionInfo.transactions)
           ).executionParams[0]
-        };
-      } else if (space.protocol === 'snapshot-x-inco') {
-        // Inco's `Space.vote()` calls `executionStrategy.getQuorum()` while
-        // accumulating each encrypted vote, so a zero-address strategy reverts
-        // the vote. Fall back to the network's default Vanilla execution
-        // strategy for confidential spaces with no actions.
-        selectedExecutionStrategy = {
-          addr: networkConfig.executionStrategiesImplementations
-            .SimpleQuorumAvatar,
-          params: '0x'
         };
       } else {
         selectedExecutionStrategy = {
