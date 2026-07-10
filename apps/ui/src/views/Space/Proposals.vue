@@ -121,10 +121,9 @@ watchThrottled(
     () => route.query.state as string,
     () => route.query.labels as string[] | string,
     () => route.query.space as string | undefined,
-    () => props.space.id,
-    () => orgProposalSpaces.value
+    orgProposalSpaces
   ],
-  ([toState, toLabels, toSpace, , proposalSpaces]) => {
+  ([toState, toLabels, toSpace]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
@@ -134,9 +133,9 @@ watchThrottled(
       : [normalizedLabels];
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
 
-    const validIds = new Set(proposalSpaces.map(s => s.id));
-    const next = toSpace && validIds.has(toSpace) ? toSpace : ANY_SPACE;
-    if (next !== selectedSpaceId.value) selectedSpaceId.value = next;
+    const isValidSpace =
+      toSpace && orgProposalSpaces.value.some(s => s.id === toSpace);
+    selectedSpaceId.value = isValidSpace ? toSpace : ANY_SPACE;
   },
   { throttle: 1000, immediate: true }
 );
