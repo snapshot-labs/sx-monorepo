@@ -124,9 +124,7 @@ Inco executor (chain-wide v1 deployment, not deployed by us): `0x4b9911b0191B0b6
 
 ### Decision D1: Protocol identifier
 
-At the data layer, a per-space `confidential: boolean` flag on the existing `snapshot-x` protocol — _not_ a new on-chain protocol. Schema impact is one nullable column; only `vote` and `executeTransactions` actions branch.
-
-For the create/explore UX, there is _also_ a UI-only protocol, **`snapshot-x-inco`** (`apps/ui/src/networks/index.ts`), mapped to the `basesep` network with its own create page (`/create/incoXsnapshotx`, network locked to basesep). It's gated to when basesep is opted into `VITE_ENABLED_NETWORKS`. This is purely a frontend surface — spaces it creates are ordinary `snapshot-x` spaces with `confidential = true`.
+Inco spaces use custom `snapshot-x-inco` protocol; only `vote` and `executeTransactions` actions branch.
 
 ### Decision D2: Per-choice tally reveal
 

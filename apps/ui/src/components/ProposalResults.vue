@@ -47,17 +47,19 @@ const quorumAmount = computed(() => {
   return `${format(current)} / ${format(proposal.value.quorum)}`;
 });
 
+const isIncoProposal = computed(
+  () => props.proposal.space?.protocol === 'snapshot-x-inco'
+);
+
 // Encrypted until reveal; then show real counts.
 const isConfidentialRevealed = computed(
-  () =>
-    !!props.proposal.space?.confidential &&
-    props.proposal.is_quorum_reached != null
+  () => isIncoProposal.value && props.proposal.is_quorum_reached != null
 );
 
 // Encrypted tallies (Shutter/Inco): show lock, not numbers.
 const isEncryptedTally = computed(() => {
   if (props.proposal.privacy !== 'none') return true;
-  if (props.proposal.space?.confidential) return !isConfidentialRevealed.value;
+  if (isIncoProposal.value) return !isConfidentialRevealed.value;
   return false;
 });
 
@@ -74,7 +76,7 @@ const revealedSupportAchieved = computed(
 );
 
 const showVerdict = computed(() => {
-  if (!props.proposal.space?.confidential) return false;
+  if (!isIncoProposal.value) return false;
   return (
     revealedQuorumReached.value !== null &&
     revealedSupportAchieved.value !== null
@@ -183,13 +185,12 @@ onMounted(() => {
   <div
     v-else-if="
       isEncryptedTally &&
-      (props.proposal.state === 'active' ||
-        !!props.proposal.space?.confidential) &&
+      (props.proposal.state === 'active' || isIncoProposal) &&
       withDetails
     "
     class="space-y-1"
   >
-    <div v-if="props.proposal.space?.confidential">
+    <div v-if="isIncoProposal">
       Per-choice tallies stay encrypted on-chain while voting is open. Once the
       voting period ends, anyone can reveal the final counts, which are then
       public and the proposal is settled.
@@ -284,7 +285,7 @@ onMounted(() => {
         <IH-lock-closed
           v-if="
             (proposal.privacy !== 'none' && !proposal.completed) ||
-            (!!proposal.space?.confidential && !isConfidentialRevealed)
+            (isIncoProposal && !isConfidentialRevealed)
           "
           class="size-[16px] shrink-0"
         />
