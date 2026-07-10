@@ -478,8 +478,8 @@ export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 export type ExplorePageProtocol =
   | 'snapshot'
   | 'snapshot-x'
-  | 'governor'
-  | 'incoXsnapshotx';
+  | 'snapshot-x-inco'
+  | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
