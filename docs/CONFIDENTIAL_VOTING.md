@@ -78,13 +78,13 @@ The Inco `VoteCast(uint256, address, uint256)` and the legacy `VoteCast(uint256,
 | `ProposalResultRevealed(uint256,uint256,uint256,uint256,bool)` | `handleProposalResultRevealed` | Writes the now-public per-choice counts and the verdict (see below); marks the tally `completed`                                                                                           |
 | `ProposalExecuted(uint256)`                                    | `handleProposalExecuted`       | For confidential spaces, settles execution (`execution_settled`, `completed`, `executed_at`) — the Vanilla executor singleton has no `ExecutionStrategy` entity, so this is set explicitly |
 
-`handleProposalResultRevealed` maps the contract's choice indices (0=Against, 1=For, 2=Abstain) onto Snapshot's score buckets (`scores_1`=For, `scores_2`=Against, `scores_3`=Abstain), and recomputes `is_support_achieved = for > against` and `is_quorum_reached = (for + abstain) >= quorum`.
+`handleProposalResultRevealed` maps the contract's choice indices (0=Against, 1=For, 2=Abstain) onto Snapshot's score buckets (`scores_1`=For, `scores_2`=Against, `scores_3`=Abstain), and recomputes `support_achieved = for > against` and `quorum_reached = (for + abstain) >= quorum`.
 
 The schema additions are nullable + additive:
 
 - `Space.confidential: Boolean` (null/false = legacy)
-- `Proposal.is_quorum_reached: Boolean` (null until revealed)
-- `Proposal.is_support_achieved: Boolean` (null until revealed)
+- `Proposal.quorum_reached: Boolean` (null until revealed)
+- `Proposal.support_achieved: Boolean` (null until revealed)
 
 ## SDK shape
 
