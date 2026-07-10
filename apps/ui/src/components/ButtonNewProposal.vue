@@ -13,7 +13,11 @@ function getEditorRoute(s: Space) {
 
 <template>
   <UiTooltip title="New proposal">
-    <UiButton v-if="spaces.length === 1" :to="getEditorRoute(spaces[0])" uniform>
+    <UiButton
+      v-if="spaces.length === 1"
+      :to="getEditorRoute(spaces[0])"
+      uniform
+    >
       <IH-pencil-alt />
     </UiButton>
     <UiDropdown v-else :gap="gap" :placement="placement">

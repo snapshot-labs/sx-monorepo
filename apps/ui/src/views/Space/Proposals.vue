@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import {
-  getOrgProposalLabel,
-  getOrgProposalSpaces
-} from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
@@ -12,10 +8,19 @@ import { Space } from '@/types';
 
 const ANY_SPACE = 'any';
 
-const props = defineProps<{ space: Space }>();
+const props = withDefaults(
+  defineProps<{
+    space: Space;
+    /** Selectable spaces (same network); >1 enables the Spaces filter with a
+     *  merged list as the "Any" default */
+    groupSpaces?: Space[];
+    /** Resolves the list heading; receives the selected space (null = merged) */
+    getTitle?: (space: Space | null) => string | undefined;
+  }>(),
+  { groupSpaces: () => [], getTitle: undefined }
+);
 
 const { setTitle } = useTitle();
-const { organization } = useOrganization();
 const router = useRouter();
 const route = useRoute();
 const { web3 } = useWeb3();
@@ -24,27 +29,21 @@ const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
 const selectedSpaceId = ref<string>(ANY_SPACE);
 
-const orgProposalSpaces = computed(() =>
-  getOrgProposalSpaces(organization.value, props.space.network)
-);
-
-const hasMultiSpaceFilter = computed(() => orgProposalSpaces.value.length > 1);
+const hasMultiSpaceFilter = computed(() => props.groupSpaces.length > 1);
 
 /** The space all space-specific context (voting power, labels, heading) is
  *  bound to. `null` when showing the merged list. */
 const selectedSpace = computed(() => {
   if (!hasMultiSpaceFilter.value) return props.space;
 
-  return (
-    orgProposalSpaces.value.find(s => s.id === selectedSpaceId.value) ?? null
-  );
+  return props.groupSpaces.find(s => s.id === selectedSpaceId.value) ?? null;
 });
 
 const isMergedList = computed(() => !selectedSpace.value);
 
 const spacesItems = computed(() => [
   { key: ANY_SPACE, label: 'Any' },
-  ...orgProposalSpaces.value.map(s => ({
+  ...props.groupSpaces.map(s => ({
     key: s.id,
     label: s.name
   }))
@@ -54,7 +53,7 @@ const queriedSpaceIds = computed(() => {
   if (!hasMultiSpaceFilter.value) return [props.space.id];
 
   return selectedSpaceId.value === ANY_SPACE
-    ? orgProposalSpaces.value.map(s => s.id)
+    ? props.groupSpaces.map(s => s.id)
     : [selectedSpaceId.value];
 });
 
@@ -62,13 +61,9 @@ const selectIconBaseProps = {
   size: 16
 };
 
-const proposalsLabel = computed(() => {
-  const spaceId = selectedSpace.value
-    ? `${props.space.network}:${selectedSpace.value.id}`
-    : undefined;
-
-  return getOrgProposalLabel(organization.value, spaceId) ?? 'Proposals';
-});
+const proposalsLabel = computed(
+  () => props.getTitle?.(selectedSpace.value) ?? 'Proposals'
+);
 
 const spaceLabels = computed(() => {
   if (!selectedSpace.value?.labels) return {};
@@ -121,7 +116,7 @@ watchThrottled(
     () => route.query.state as string,
     () => route.query.labels as string[] | string,
     () => route.query.space as string | undefined,
-    orgProposalSpaces
+    () => props.groupSpaces
   ],
   ([toState, toLabels, toSpace]) => {
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
@@ -134,7 +129,7 @@ watchThrottled(
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
 
     const isValidSpace =
-      toSpace && orgProposalSpaces.value.some(s => s.id === toSpace);
+      toSpace && props.groupSpaces.some(s => s.id === toSpace);
     selectedSpaceId.value = isValidSpace ? toSpace : ANY_SPACE;
   },
   { throttle: 1000, immediate: true }
@@ -290,7 +285,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           @fetch="fetchVotingPower"
         />
         <ButtonNewProposal
-          :spaces="hasMultiSpaceFilter ? orgProposalSpaces : [space]"
+          :spaces="hasMultiSpaceFilter ? groupSpaces : [space]"
           gap="12"
           placement="end"
         />

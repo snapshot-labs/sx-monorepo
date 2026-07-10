@@ -1,5 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import OrganizationOverview from '@/views/Organization/Overview.vue';
+import OrganizationProposals from '@/views/Organization/Proposals.vue';
 import Organization from '@/views/Organization.vue';
 import ProposalExecution from '@/views/Proposal/Execution.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
@@ -10,7 +11,6 @@ import Settings from '@/views/Settings.vue';
 import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
-import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
@@ -29,7 +29,7 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
     {
       path: ':space/proposals',
       name: `${prefix}-proposals`,
-      component: SpaceProposals
+      component: OrganizationProposals
     },
     {
       path: ':space/proposal/:proposal?',
