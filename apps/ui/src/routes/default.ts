@@ -54,11 +54,10 @@ export default [
     component: CreateSpaceSnapshotX
   },
   {
-    // Inco create flow, network locked to basesep.
     path: '/create/snapshot-x-inco',
     name: 'create-space-snapshot-x-inco',
     component: CreateSpaceSnapshotX,
-    props: { fixedNetworkId: 'basesep' }
+    props: { spaceCreationNetworks: ['basesep'] }
   },
   {
     path: '/create/snapshot',
