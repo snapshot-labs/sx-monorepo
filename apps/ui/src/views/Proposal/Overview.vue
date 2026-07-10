@@ -11,7 +11,7 @@ import {
 } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
-import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { invalidateSpaceProposals } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
 const WHITELISTED_SPACES: string[] = ['kleros.eth', 'gnosis.eth'];
@@ -235,12 +235,11 @@ async function handleFlagClick() {
   try {
     const result = await flagProposal(props.proposal);
     if (result) {
-      queryClient.invalidateQueries({
-        queryKey: PROPOSALS_KEYS.space(
-          props.proposal.network,
-          props.proposal.space.id
-        )
-      });
+      invalidateSpaceProposals(
+        queryClient,
+        props.proposal.network,
+        props.proposal.space.id
+      );
 
       uiStore.addNotification('success', 'Proposal flagged successfully.');
 
@@ -259,12 +258,11 @@ async function handleCancelClick() {
   try {
     const result = await cancelProposal(props.proposal);
     if (result) {
-      queryClient.invalidateQueries({
-        queryKey: PROPOSALS_KEYS.space(
-          props.proposal.network,
-          props.proposal.space.id
-        )
-      });
+      invalidateSpaceProposals(
+        queryClient,
+        props.proposal.network,
+        props.proposal.space.id
+      );
 
       uiStore.addNotification('success', 'Proposal cancelled successfully.');
 

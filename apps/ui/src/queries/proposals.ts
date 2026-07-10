@@ -75,6 +75,31 @@ export const PROPOSALS_KEYS = {
     ] as const
 };
 
+/** Invalidates all proposals queries related to a space: summary, details,
+ *  and any list (single or merged) that includes the space. */
+export function invalidateSpaceProposals(
+  queryClient: QueryClient,
+  networkId: NetworkID,
+  spaceId: string
+) {
+  queryClient.invalidateQueries({
+    queryKey: PROPOSALS_KEYS.space(networkId, spaceId)
+  });
+  queryClient.invalidateQueries({
+    predicate: ({ queryKey }) => {
+      const [scope, tag, keyNetworkId, spacesIds] = queryKey;
+
+      return (
+        scope === 'proposals' &&
+        tag === 'spaceList' &&
+        keyNetworkId === networkId &&
+        Array.isArray(spacesIds) &&
+        spacesIds.includes(spaceId)
+      );
+    }
+  });
+}
+
 async function withAuthorNames(proposals: Proposal[]) {
   const names = await getNames(proposals.map(proposal => proposal.author.id));
 

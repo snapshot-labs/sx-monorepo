@@ -8,7 +8,7 @@ import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
-import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { invalidateSpaceProposals } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
@@ -413,9 +413,7 @@ async function handleProposeClick() {
       }
     }
     if (result) {
-      queryClient.invalidateQueries({
-        queryKey: PROPOSALS_KEYS.space(props.space.network, props.space.id)
-      });
+      invalidateSpaceProposals(queryClient, props.space.network, props.space.id);
     }
 
     if (

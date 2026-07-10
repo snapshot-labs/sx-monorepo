@@ -9,7 +9,7 @@ import {
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { invalidateSpaceProposals } from '@/queries/proposals';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -121,12 +121,11 @@ async function refreshScores() {
     const result = await response.json();
 
     if (result.result === true) {
-      queryClient.invalidateQueries({
-        queryKey: PROPOSALS_KEYS.space(
-          props.proposal.network,
-          props.proposal.space.id
-        )
-      });
+      invalidateSpaceProposals(
+        queryClient,
+        props.proposal.network,
+        props.proposal.space.id
+      );
     }
   } catch (err) {
     console.warn('Failed to refresh scores', err);
