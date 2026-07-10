@@ -1,7 +1,5 @@
 // Bridges ethers UI to viem-based Inco SDK; lazy-loaded.
 
-const RPC_FALLBACK = 'https://sepolia.base.org';
-
 type Hex = `0x${string}`;
 
 export type DecryptionAttestation = {
@@ -38,24 +36,11 @@ async function loadSdk(): Promise<CachedSdk> {
   return cached;
 }
 
-// Env override lets QA/demo swap RPC endpoint.
-function getRpcUrl(): string {
-  const env =
-    typeof import.meta !== 'undefined'
-      ? (
-          import.meta as ImportMeta & {
-            env?: { VITE_BASE_SEPOLIA_RPC_URL?: string };
-          }
-        ).env?.VITE_BASE_SEPOLIA_RPC_URL
-      : undefined;
-  return env || RPC_FALLBACK;
-}
-
 async function buildPublicClient() {
   const { viem, baseSepolia } = await loadSdk();
   return viem.createPublicClient({
     chain: baseSepolia,
-    transport: viem.http(getRpcUrl())
+    transport: viem.http('https://rpc.snapshot.org/84532')
   });
 }
 
