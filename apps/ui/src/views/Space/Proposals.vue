@@ -289,27 +289,12 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           :is-error="isVotingPowerError"
           @fetch="fetchVotingPower"
         />
-        <UiDropdown v-if="hasMultiSpaceFilter" gap="12" placement="end">
-          <template #button>
-            <UiTooltip title="New proposal">
-              <UiButton type="button" uniform>
-                <IH-pencil-alt />
-              </UiButton>
-            </UiTooltip>
-          </template>
-          <template #items>
-            <UiDropdownItem
-              v-for="s in orgProposalSpaces"
-              :key="s.id"
-              :to="{
-                name: 'space-editor',
-                params: { space: `${space.network}:${s.id}` }
-              }"
-            >
-              {{ s.name }}
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
+        <DropdownNewProposal
+          v-if="hasMultiSpaceFilter"
+          :spaces="orgProposalSpaces"
+          gap="12"
+          placement="end"
+        />
         <UiTooltip v-else title="New proposal">
           <UiButton
             :to="{

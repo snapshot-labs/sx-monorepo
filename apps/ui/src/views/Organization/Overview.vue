@@ -110,27 +110,9 @@ function getSpaceLabel(s: Space) {
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
-        <UiTooltip title="New proposal">
-          <UiDropdown>
-            <template #button>
-              <UiButton uniform>
-                <IH-pencil-alt />
-              </UiButton>
-            </template>
-            <template #items>
-              <UiDropdownItem
-                v-for="s in spaces"
-                :key="`${s.network}:${s.id}`"
-                :to="{
-                  name: 'space-editor',
-                  params: { space: `${s.network}:${s.id}` }
-                }"
-              >
-                {{ getSpaceLabel(s) }}
-              </UiDropdownItem>
-            </template>
-          </UiDropdown>
-        </UiTooltip>
+        <DropdownNewProposal :spaces="spaces">
+          <template #label="{ space: s }">{{ getSpaceLabel(s) }}</template>
+        </DropdownNewProposal>
       </div>
     </div>
     <div class="px-4">
