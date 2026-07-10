@@ -413,7 +413,11 @@ async function handleProposeClick() {
       }
     }
     if (result) {
-      invalidateSpaceProposals(queryClient, props.space.network, props.space.id);
+      invalidateSpaceProposals(
+        queryClient,
+        props.space.network,
+        props.space.id
+      );
     }
 
     if (
