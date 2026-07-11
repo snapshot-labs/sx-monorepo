@@ -4,6 +4,15 @@ scalar BigInt
 scalar BigDecimalVP
 
 """
+Proposal state derived from its voting window timestamps
+"""
+enum ProposalState {
+  pending
+  active
+  closed
+}
+
+"""
 Space represents a DAO or governance organization on Snapshot X
 """
 type Space {
@@ -300,8 +309,8 @@ type Proposal {
   veto_tx: String
   "Number of votes cast on this proposal"
   vote_count: Int!
-  "Current state based on voting window timestamps ('pending', 'active', 'closed')"
-  state: String! @computed
+  "Current state based on voting window timestamps"
+  state: ProposalState! @computed
   "Whether proposal has been executed"
   executed: Boolean!
   "Whether proposal has been vetoed"
