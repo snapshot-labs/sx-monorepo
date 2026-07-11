@@ -79,11 +79,11 @@ async function query(parent, args, context?, info?) {
           })
         ])
       );
-      votes = votes.map(vote => {
-        if (spaces[vote.space.id])
-          return { ...vote, space: spaces[vote.space.id] };
-        return vote;
-      });
+      // drop votes whose space can not be resolved, as their space skeleton
+      // would violate the non-null Space fields
+      votes = votes
+        .filter(vote => spaces[vote.space.id])
+        .map(vote => ({ ...vote, space: spaces[vote.space.id] }));
     } catch (err: any) {
       capture(err, { args, context, info });
       log.error(`[graphql] votes, ${JSON.stringify(err)}`);
