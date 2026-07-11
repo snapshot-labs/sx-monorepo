@@ -706,7 +706,7 @@ export function createApi(
         }
       });
 
-      const votes = (data.votes ?? []) as ApiVote[];
+      const votes = data.votes ?? [];
       const names = await getNames(votes.map(vote => vote.voter));
 
       return votes.map(vote => {
@@ -731,7 +731,7 @@ export function createApi(
         }
       });
 
-      const votes = (data.votes ?? []) as ApiVote[];
+      const votes = data.votes ?? [];
 
       return Object.fromEntries(
         votes.map(vote => [
@@ -899,11 +899,11 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          (data.leaderboards ?? []).filter(Boolean).map(leaderboard => ({
-            id: leaderboard!.user ?? '',
-            spaceId: `${networkId}:${leaderboard!.space}`,
-            vote_count: leaderboard!.votesCount ?? 0,
-            proposal_count: leaderboard!.proposalsCount ?? 0
+          (data.leaderboards ?? []).map(leaderboard => ({
+            id: leaderboard.user ?? '',
+            spaceId: `${networkId}:${leaderboard.space}`,
+            vote_count: leaderboard.votesCount ?? 0,
+            proposal_count: leaderboard.proposalsCount ?? 0
           }))
         );
     },
@@ -937,11 +937,11 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          (data.leaderboards ?? []).filter(Boolean).map(leaderboard => ({
-            id: leaderboard!.user ?? '',
-            spaceId: leaderboard!.space ?? '',
-            vote_count: leaderboard!.votesCount ?? 0,
-            proposal_count: leaderboard!.proposalsCount ?? 0
+          (data.leaderboards ?? []).map(leaderboard => ({
+            id: leaderboard.user ?? '',
+            spaceId: leaderboard.space ?? '',
+            vote_count: leaderboard.votesCount ?? 0,
+            proposal_count: leaderboard.proposalsCount ?? 0
           }))
         );
     },
@@ -953,9 +953,9 @@ export function createApi(
         variables: { first: 25, follower: userId }
       });
 
-      return (data.follows ?? []).filter(Boolean).map(follow => ({
-        ...follow!,
-        space: { ...follow!.space, network: follow!.network }
+      return (data.follows ?? []).map(follow => ({
+        ...follow,
+        space: { ...follow.space, network: follow.network }
       })) as unknown as Follow[];
     },
     loadAlias: async (
@@ -1006,7 +1006,7 @@ export function createApi(
         }
       });
 
-      return (data.statements ?? []).filter(Boolean) as Statement[];
+      return (data.statements ?? []) as Statement[];
     },
     loadStrategies: async () => {
       const { data } = await apollo.query({ query: STRATEGIES_QUERY });
@@ -1027,11 +1027,11 @@ export function createApi(
       const { data } = await apollo.query({ query: NETWORKS_QUERY });
 
       return Object.fromEntries(
-        (data.networks ?? []).filter(Boolean).map(network => [
-          network!.id,
+        (data.networks ?? []).map(network => [
+          network.id,
           {
-            spaces_count: network!.spacesCount ?? 0,
-            premium: network!.premium ?? false
+            spaces_count: network.spacesCount ?? 0,
+            premium: network.premium ?? false
           }
         ])
       );
@@ -1039,7 +1039,7 @@ export function createApi(
     loadSettings: async (): Promise<Setting[]> => {
       const { data } = await apollo.query({ query: SETTINGS_QUERY });
 
-      return (data.options ?? []).filter(Boolean) as Setting[];
+      return (data.options ?? []) as Setting[];
     },
     loadLastIndexedBlock: async () => null
   };
