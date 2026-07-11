@@ -138,11 +138,12 @@ export function formatSpace({
     ? { delegationNetwork: '1', ...space.delegationPortal }
     : null;
   space.boost = space.boost || { enabled: true, bribeEnabled: false };
-  space.strategies = space.strategies?.map(strategy => ({
-    ...strategy,
-    // By default return space network if strategy network is not defined
-    network: strategy.network || space.network
-  }));
+  space.strategies =
+    space.strategies?.map(strategy => ({
+      ...strategy,
+      // By default return space network if strategy network is not defined
+      network: strategy.network || space.network
+    })) || [];
   if (!space.validation && space.filters.minScore) {
     space.validation = {
       name: 'basic',

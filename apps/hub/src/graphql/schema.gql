@@ -480,7 +480,7 @@ type Space {
   "Custom domain for the space"
   domain: String!
   "Voting strategies used to calculate voting power"
-  strategies: [Strategy!]
+  strategies: [Strategy!]!
   "List of admin addresses"
   admins: [String!]!
   "List of member addresses"
