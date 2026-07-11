@@ -134,6 +134,7 @@ export function formatSpace({
   space.voting.aliased = space.voting.aliased || false;
   space.voting.hideAbstain = space.voting.hideAbstain || false;
   space.voteValidation = space.voteValidation || { name: 'any', params: {} };
+  space.voteValidation.params = space.voteValidation.params || {};
   space.delegationPortal = space.delegationPortal
     ? { delegationNetwork: '1', ...space.delegationPortal }
     : null;
@@ -151,6 +152,7 @@ export function formatSpace({
     };
   }
   space.validation = space.validation || { name: 'any', params: {} };
+  space.validation.params = space.validation.params || {};
   space.treasuries = space.treasuries || [];
   space.labels = (space.labels || []).map(label => ({
     ...label,
@@ -469,6 +471,7 @@ export function formatProposal(proposal) {
       params: {}
     };
   }
+  proposal.validation.params = proposal.validation.params || {};
   proposal.plugins = jsonParse(proposal.plugins, {});
   proposal.scores = jsonParse(proposal.scores, []);
   proposal.scores_by_strategy = jsonParse(proposal.scores_by_strategy, []);
