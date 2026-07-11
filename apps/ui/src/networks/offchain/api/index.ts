@@ -877,8 +877,7 @@ export function createApi(
         twitter: user?.twitter || '',
         github: user?.github || '',
         lens: user?.lens || '',
-        farcaster: user?.farcaster || '',
-        votesCount: user?.votesCount ?? undefined
+        farcaster: user?.farcaster || ''
       };
     },
     loadUserActivities(userId: string): Promise<UserActivity[]> {
