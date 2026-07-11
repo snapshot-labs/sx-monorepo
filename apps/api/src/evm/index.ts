@@ -4,42 +4,26 @@ import { registerIndexer } from '../register';
 import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';
 import { createWriters as createOpenZeppelinWriters } from './protocols/openzeppelin/writers';
 import { createWriters as createSnapshotXWriters } from './protocols/snapshot-x/writers';
-import { EVMConfig, Protocols } from './types';
+import { EVMConfig } from './types';
 import { applyProtocolPrefixToWriters } from './utils';
 
-// SnapshotX runs by default unless explicitly disabled
-export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
-export const ENABLE_GOVERNOR_BRAVO =
-  process.env.ENABLE_GOVERNOR_BRAVO === 'true';
-export const ENABLE_OPENZEPPELIN = process.env.ENABLE_OPENZEPPELIN === 'true';
-
-const protocols: Protocols = {
-  snapshotX: ENABLE_SNAPSHOT_X,
-  governorBravo: ENABLE_GOVERNOR_BRAVO,
-  openZeppelin: ENABLE_OPENZEPPELIN
-};
-
-const ethConfig = createConfig('eth', protocols);
-const sepConfig = createConfig('sep', protocols);
-const oethConfig = createConfig('oeth', protocols);
-const maticConfig = createConfig('matic', protocols);
-const arb1Config = createConfig('arb1', protocols);
-const baseConfig = createConfig('base', protocols);
-const mntConfig = createConfig('mnt', protocols);
-const bnbConfig = createConfig('bnb', protocols);
-const bnbtConfig = createConfig('bnbt', protocols);
-const apeConfig = createConfig('ape', protocols);
-const curtisConfig = createConfig('curtis', protocols);
+const ethConfig = createConfig('eth');
+const sepConfig = createConfig('sep');
+const oethConfig = createConfig('oeth');
+const maticConfig = createConfig('matic');
+const arb1Config = createConfig('arb1');
+const baseConfig = createConfig('base');
+const mntConfig = createConfig('mnt');
+const bnbConfig = createConfig('bnb');
+const bnbtConfig = createConfig('bnbt');
+const apeConfig = createConfig('ape');
+const curtisConfig = createConfig('curtis');
 
 function createWriters(config: EVMConfig) {
-  let writers: Record<string, evm.Writer> = {};
-
-  if (config.snapshotXConfig) {
-    writers = applyProtocolPrefixToWriters(
-      'snapshotX',
-      createSnapshotXWriters(config, config.snapshotXConfig)
-    );
-  }
+  let writers = applyProtocolPrefixToWriters(
+    'snapshotX',
+    createSnapshotXWriters(config, config.snapshotXConfig)
+  );
 
   if (config.governorBravoConfig) {
     writers = {

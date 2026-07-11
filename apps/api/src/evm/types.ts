@@ -13,12 +13,6 @@ export type NetworkID =
   | 'ape'
   | 'curtis';
 
-export type Protocols = {
-  snapshotX: boolean;
-  governorBravo: boolean;
-  openZeppelin: boolean;
-};
-
 export type SnapshotXConfig = {
   chainId: number;
   manaRpcUrl: string;
@@ -40,7 +34,7 @@ export type OpenZeppelinConfig = {
 
 export type EVMConfig = {
   indexerName: NetworkID;
-  snapshotXConfig?: SnapshotXConfig;
+  snapshotXConfig: SnapshotXConfig;
   governorBravoConfig?: GovernorBravoConfig;
   openZeppelinConfig?: OpenZeppelinConfig;
 } & CheckpointConfig;
