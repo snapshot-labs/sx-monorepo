@@ -52,8 +52,5 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ],
-  "patchedDependencies": {
-    "@snapshot-labs/checkpoint@0.1.0-beta.74": "patches/@snapshot-labs%2Fcheckpoint@0.1.0-beta.74.patch"
-  }
+  ]
 }
