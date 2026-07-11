@@ -812,9 +812,9 @@ type User {
   "Unix timestamp of when the profile was created"
   created: Int
   "Total number of votes cast"
-  votesCount: Int
+  votesCount: Int!
   "Total number of proposals created"
-  proposalsCount: Int
+  proposalsCount: Int!
   "Unix timestamp of the user's most recent vote"
   lastVote: Int
 }
