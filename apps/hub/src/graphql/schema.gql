@@ -894,13 +894,13 @@ type Treasury {
 "A label that can be applied to proposals"
 type Label {
   "Label identifier"
-  id: String
+  id: String!
   "Label display name"
-  name: String
+  name: String!
   "Label description"
   description: String
   "Hex color code"
-  color: String
+  color: String!
 }
 
 "Boost settings for a space"
