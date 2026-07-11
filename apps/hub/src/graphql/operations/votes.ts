@@ -45,6 +45,7 @@ async function query(parent, args, context?, info?) {
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.* FROM votes v
+    INNER JOIN spaces s ON s.id = v.space AND s.deleted = 0
     WHERE v.cb != -3 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
   `;
@@ -78,8 +79,9 @@ async function query(parent, args, context?, info?) {
           })
         ])
       );
-      // drop votes whose space can not be resolved, as their space skeleton
-      // would violate the non-null Space fields
+      // the main query already excludes deleted spaces; this only drops votes
+      // whose space was deleted between the two queries, as their space
+      // skeleton would violate the non-null Space fields
       votes = votes
         .filter(vote => spaces[vote.space.id])
         .map(vote => ({ ...vote, space: spaces[vote.space.id] }));
@@ -107,15 +109,16 @@ async function query(parent, args, context?, info?) {
       FROM proposals p
       INNER JOIN spaces ON spaces.id = p.space
       LEFT JOIN skins ON spaces.id = skins.id
-      WHERE spaces.settings IS NOT NULL AND p.id IN (?)
+      WHERE spaces.deleted = 0 AND spaces.settings IS NOT NULL AND p.id IN (?)
     `;
     try {
       let proposals = await db.queryAsync(query, [proposalIds]);
       proposals = Object.fromEntries(
         proposals.map(proposal => [proposal.id, formatProposal(proposal)])
       );
-      // drop votes whose proposal can not be resolved, as a null proposal
-      // would violate the non-null Proposal field
+      // drop votes whose proposal can not be resolved (hard-deleted proposal
+      // whose votes are not yet marked cb = -3), as a null proposal would
+      // violate the non-null Proposal field
       votes = votes
         .filter(vote => proposals[vote.proposal])
         .map(vote => ({ ...vote, proposal: proposals[vote.proposal] }));
