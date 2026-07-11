@@ -266,6 +266,8 @@ type Proposal {
   vp_decimals: Int!
   "Type of proposal (e.g., 'basic', 'single-choice')"
   type: String!
+  "Array of voting choice labels (index 0 = choice 1)"
+  choices: [String!]!
   "Voting power for choice 1"
   scores_1: BigDecimalVP!
   "Parsed voting power for choice 1 as float"

@@ -1,4 +1,4 @@
-import { dropIpfs, getExecutionHash, getJSON } from './utils';
+import { BASIC_CHOICES, dropIpfs, getExecutionHash, getJSON } from './utils';
 import {
   ProposalMetadataItem,
   StrategiesParsedMetadataDataItem,
@@ -23,13 +23,13 @@ export async function handleProposalMetadata(
     dropIpfs(metadataUri),
     config.indexerName
   );
-  if (exists) return;
+  if (exists) return exists;
 
   const proposalMetadataItem = new ProposalMetadataItem(
     dropIpfs(metadataUri),
     config.indexerName
   );
-  proposalMetadataItem.choices = ['For', 'Against', 'Abstain'];
+  proposalMetadataItem.choices = BASIC_CHOICES;
   proposalMetadataItem.labels = [];
 
   const metadata: any = await getJSON(metadataUri);
@@ -66,6 +66,8 @@ export async function handleProposalMetadata(
   }
 
   await proposalMetadataItem.save();
+
+  return proposalMetadataItem;
 }
 
 async function handleStrategiesParsedMetadata(

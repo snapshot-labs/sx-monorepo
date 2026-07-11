@@ -19,6 +19,7 @@ import {
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../../../.checkpoint/models';
 import {
+  BASIC_CHOICES,
   getCurrentTimestamp,
   getParsedVP,
   getProposalLink,
@@ -356,6 +357,7 @@ export function createWriters(
     proposal.execution_strategy_details = executionStrategy.id;
     proposal.vp_decimals = spaceDataEntry.decimals;
     proposal.type = 'basic';
+    proposal.choices = BASIC_CHOICES;
     proposal.quorum_type = 'for_only';
     proposal.created = Number(block?.timestamp ?? getCurrentTimestamp());
     proposal.tx = txId;
@@ -395,7 +397,7 @@ export function createWriters(
 
     proposalMetadata.title = getProposalTitle(proposalBody);
     proposalMetadata.body = getProposalBody(proposalBody);
-    proposalMetadata.choices = ['For', 'Against', 'Abstain'];
+    proposalMetadata.choices = BASIC_CHOICES;
     proposalMetadata.execution = JSON.stringify(execution);
 
     let leaderboardItem = await Leaderboard.loadEntity(

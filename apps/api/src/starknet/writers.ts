@@ -27,6 +27,7 @@ import {
   handleVoteMetadata
 } from '../common/ipfs';
 import {
+  BASIC_CHOICES,
   dropIpfs,
   getCurrentTimestamp,
   getParsedVP,
@@ -468,6 +469,7 @@ export function createWriters(config: FullConfig) {
     );
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
+    proposal.choices = BASIC_CHOICES;
     proposal.scores_1 = '0';
     proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
@@ -538,7 +540,7 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleProposalMetadata(
+      const metadataItem = await handleProposalMetadata(
         'starknet',
         proposal.execution_strategy_type,
         proposal.execution_destination,
@@ -548,6 +550,7 @@ export function createWriters(config: FullConfig) {
       );
 
       proposal.metadata = dropIpfs(metadataUri);
+      proposal.choices = metadataItem.choices;
     } catch (err) {
       logger.warn({ err }, 'Failed to handle proposal metadata');
     }
@@ -715,7 +718,7 @@ export function createWriters(config: FullConfig) {
     }
 
     try {
-      await handleProposalMetadata(
+      const metadataItem = await handleProposalMetadata(
         'starknet',
         proposal.execution_strategy_type,
         proposal.execution_destination,
@@ -725,6 +728,7 @@ export function createWriters(config: FullConfig) {
       );
 
       proposal.metadata = dropIpfs(metadataUri);
+      proposal.choices = metadataItem.choices;
       proposal.edited = block?.timestamp ?? getCurrentTimestamp();
     } catch (err) {
       logger.warn({ err }, 'Failed to handle proposal metadata');

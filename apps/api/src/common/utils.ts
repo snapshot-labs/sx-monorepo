@@ -8,6 +8,8 @@ import { UI_URL } from '../config';
 
 type ExecutionType = Parameters<typeof getExecutionData>[0];
 
+export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
+
 export function getSpaceLink({
   networkId,
   spaceId
