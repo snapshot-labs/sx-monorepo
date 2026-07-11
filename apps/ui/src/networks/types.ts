@@ -343,7 +343,7 @@ export type NetworkApi = {
       | 'proposal_count-asc',
     user?: string
   ): Promise<UserActivity[]>;
-  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
+  loadFollows(userId: string): Promise<Follow[]>;
   loadAlias(
     address: string,
     alias: string,
