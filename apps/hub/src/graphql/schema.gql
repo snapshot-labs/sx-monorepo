@@ -526,7 +526,7 @@ type Space {
   "Parent space (for sub-spaces)"
   parent: Space
   "Child sub-spaces"
-  children: [Space]!
+  children: [Space!]!
   "Voting guidelines link"
   guidelines: String
   "Proposal template"
@@ -554,7 +554,7 @@ type Space {
 "Ranked list of spaces with aggregated metrics"
 type RankingObject {
   "List of ranked spaces"
-  items: [Space]!
+  items: [Space!]!
   "Aggregated metrics for the ranking query"
   metrics: Metrics!
 }
