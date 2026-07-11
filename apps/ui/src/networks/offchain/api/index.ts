@@ -633,7 +633,7 @@ export function createApi(
           }
         });
 
-        const page = (data.votes ?? []) as {
+        const page = data.votes as {
           choice: number;
           vp: number;
           created: number;
@@ -706,7 +706,7 @@ export function createApi(
         }
       });
 
-      const votes = data.votes ?? [];
+      const votes = data.votes;
       const names = await getNames(votes.map(vote => vote.voter));
 
       return votes.map(vote => {
@@ -731,7 +731,7 @@ export function createApi(
         }
       });
 
-      const votes = data.votes ?? [];
+      const votes = data.votes;
 
       return Object.fromEntries(
         votes.map(vote => [
@@ -788,7 +788,7 @@ export function createApi(
         }
       });
 
-      const proposals = (data.proposals ?? []) as ApiProposal[];
+      const proposals = data.proposals as ApiProposal[];
       return proposals.map(proposal => formatProposal(proposal, networkId));
     },
     loadProposal: async (
@@ -848,7 +848,7 @@ export function createApi(
         }
       });
 
-      const spaces = (data.spaces ?? []) as ApiSpace[];
+      const spaces = data.spaces as ApiSpace[];
       return spaces.map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
@@ -899,7 +899,7 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          (data.leaderboards ?? []).map(leaderboard => ({
+          data.leaderboards.map(leaderboard => ({
             id: leaderboard.user ?? '',
             spaceId: `${networkId}:${leaderboard.space}`,
             vote_count: leaderboard.votesCount ?? 0,
@@ -937,7 +937,7 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          (data.leaderboards ?? []).map(leaderboard => ({
+          data.leaderboards.map(leaderboard => ({
             id: leaderboard.user ?? '',
             spaceId: leaderboard.space ?? '',
             vote_count: leaderboard.votesCount ?? 0,
@@ -953,7 +953,7 @@ export function createApi(
         variables: { first: 25, follower: userId }
       });
 
-      return (data.follows ?? []).map(follow => ({
+      return data.follows.map(follow => ({
         ...follow,
         space: { ...follow.space, network: follow.network }
       })) as unknown as Follow[];
@@ -968,7 +968,7 @@ export function createApi(
         variables: { address, alias: aliasAddress, created_gt }
       });
 
-      const alias = data.aliases?.[0];
+      const alias = data.aliases[0];
       return alias ? (alias as Alias) : null;
     },
     loadAliases: async (address: string): Promise<Alias[]> => {
@@ -977,7 +977,7 @@ export function createApi(
         variables: { address }
       });
 
-      return (data.aliases ?? []) as Alias[];
+      return data.aliases as Alias[];
     },
     loadStatement: async (
       networkId: NetworkID,
@@ -991,7 +991,7 @@ export function createApi(
         }
       });
 
-      const statement = data.statements?.[0];
+      const statement = data.statements[0];
       return statement ? (statement as Statement) : null;
     },
     loadStatements: async (
@@ -1006,12 +1006,12 @@ export function createApi(
         }
       });
 
-      return (data.statements ?? []) as Statement[];
+      return data.statements as Statement[];
     },
     loadStrategies: async () => {
       const { data } = await apollo.query({ query: STRATEGIES_QUERY });
 
-      return ((data.strategies ?? []) as ApiStrategy[]).map(formatStrategy);
+      return (data.strategies as ApiStrategy[]).map(formatStrategy);
     },
     loadStrategy: async (id: string) => {
       const { data } = await apollo.query({
@@ -1027,7 +1027,7 @@ export function createApi(
       const { data } = await apollo.query({ query: NETWORKS_QUERY });
 
       return Object.fromEntries(
-        (data.networks ?? []).map(network => [
+        data.networks.map(network => [
           network.id,
           {
             spaces_count: network.spacesCount ?? 0,
@@ -1039,7 +1039,7 @@ export function createApi(
     loadSettings: async (): Promise<Setting[]> => {
       const { data } = await apollo.query({ query: SETTINGS_QUERY });
 
-      return (data.options ?? []) as Setting[];
+      return data.options as Setting[];
     },
     loadLastIndexedBlock: async () => null
   };
