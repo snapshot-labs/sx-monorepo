@@ -84,6 +84,7 @@ gql(`
     parent {
       ...offchainRelatedSpaceFragment
     }
+    # needed for settings
     terms
     private
     flagged
@@ -225,7 +226,7 @@ export const PROPOSALS_QUERY = gql(`
 `);
 
 export const SPACES_QUERY = gql(`
-  query Spaces($first: Int!, $skip: Int!, $where: SpaceWhere) {
+  query Spaces($first: Int, $skip: Int, $where: SpaceWhere) {
     spaces(first: $first, skip: $skip, where: $where) {
       ...offchainSpaceFragment
     }
@@ -233,7 +234,7 @@ export const SPACES_QUERY = gql(`
 `);
 
 export const RANKING_QUERY = gql(`
-  query Ranking($first: Int!, $skip: Int!, $where: RankingWhere) {
+  query Ranking($first: Int, $skip: Int, $where: RankingWhere) {
     ranking(first: $first, skip: $skip, where: $where) {
       items {
         ...offchainSpaceFragment
@@ -251,7 +252,7 @@ export const SPACE_QUERY = gql(`
 `);
 
 export const USER_VOTES_QUERY = gql(`
-  query UserVotes($first: Int!, $skip: Int!, $spaceIds: [String], $voter: String) {
+  query UserVotes($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
     votes(
       first: $first
       skip: $skip
@@ -263,7 +264,7 @@ export const USER_VOTES_QUERY = gql(`
 `);
 
 export const USER_FOLLOWS_QUERY = gql(`
-  query UserFollows($follower: String!, $first: Int!) {
+  query UserFollows($follower: String!, $first: Int) {
     follows(where: { follower: $follower }, first: $first) {
       network
       space {
