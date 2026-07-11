@@ -115,10 +115,11 @@ async function query(parent, args, context?, info?) {
       proposals = Object.fromEntries(
         proposals.map(proposal => [proposal.id, formatProposal(proposal)])
       );
-      votes = votes.map(vote => {
-        vote.proposal = proposals[vote.proposal];
-        return vote;
-      });
+      // drop votes whose proposal can not be resolved, as a null proposal
+      // would violate the non-null Proposal field
+      votes = votes
+        .filter(vote => proposals[vote.proposal])
+        .map(vote => ({ ...vote, proposal: proposals[vote.proposal] }));
     } catch (err: any) {
       capture(err, { args, context, info });
       log.error(`[graphql] votes, ${JSON.stringify(err)}`);

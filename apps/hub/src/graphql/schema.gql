@@ -716,7 +716,7 @@ type Vote {
   "The space this vote was cast in"
   space: Space!
   "The proposal this vote was cast on"
-  proposal: Proposal
+  proposal: Proposal!
   "The voter's choice (format depends on voting type)"
   choice: Any!
   "Additional vote metadata"
