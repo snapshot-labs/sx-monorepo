@@ -51,7 +51,6 @@ async function query(parent, args, context?, info?) {
   params.push(skip, first);
   try {
     votes = await db.queryAsync(query, params);
-    // TODO: we need settings in the vote as its being passed to formatSpace inside formatVote, Maybe we dont need to do this?
     votes = votes.map(vote => formatVote(vote));
   } catch (err: any) {
     capture(err, { args, context, info });

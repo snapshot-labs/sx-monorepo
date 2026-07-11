@@ -4,7 +4,7 @@ import castArray from 'lodash/castArray';
 import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import db from '../helpers/mysql';
-import { spacesMetadata } from '../helpers/spaces';
+import { DEFAULT_COUNTS, spacesMetadata } from '../helpers/spaces';
 import { jsonParse } from '../helpers/utils';
 
 const network = process.env.NETWORK || 'testnet';
@@ -48,18 +48,6 @@ const SKIN_SETTINGS = [
   'primary_color',
   'theme',
   'logo'
-];
-
-const SPACE_COUNT_FIELDS = [
-  'activeProposals',
-  'proposalsCount',
-  'proposalsCount1d',
-  'proposalsCount7d',
-  'proposalsCount30d',
-  'followersCount',
-  'followersCount7d',
-  'votesCount',
-  'votesCount7d'
 ];
 
 export function checkLimits(args: any = {}, type) {
@@ -113,15 +101,17 @@ export function formatSpace({
   created
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
-  const space = { ...jsonParse(settings, {}), ...spaceMetadata.counts };
+  const space = {
+    ...jsonParse(settings, {}),
+    // counts default to 0 for spaces not yet in the metadata cache
+    ...DEFAULT_COUNTS,
+    ...spaceMetadata.counts
+  };
 
   space.id = id;
   space.created = created;
-  // counts default to 0 for spaces not yet in the metadata cache
-  SPACE_COUNT_FIELDS.forEach(field => {
-    space[field] = space[field] ?? 0;
-  });
   space.domain = domain || '';
+  space.name = space.name || id;
   space.private = space.private || false;
   space.avatar = space.avatar || '';
   space.about = space.about || '';
@@ -405,16 +395,17 @@ function needsRelatedSpacesData(requestedFields): boolean {
 }
 
 function mapRelatedSpacesToSpaces(spaces, relatedSpaces) {
+  const relatedSpacesById = new Map(relatedSpaces.map(s => [s.id, s]));
   // drop parents/children that no longer resolve to an existing space,
   // as their id-only skeleton would violate the non-null Space fields
   return spaces.map(space => {
     if (space.children) {
       space.children = space.children
-        .map(c => relatedSpaces.find(s => s.id === c.id))
+        .map(c => relatedSpacesById.get(c.id))
         .filter(s => s);
     }
     if (space.parent) {
-      space.parent = relatedSpaces.find(s => s.id === space.parent.id) || null;
+      space.parent = relatedSpacesById.get(space.parent.id) || null;
     }
     return space;
   });
