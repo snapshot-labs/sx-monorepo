@@ -1,0 +1,30 @@
+diff --git a/node_modules/@snapshot-labs/checkpoint/.bun-tag-87fbb095939e2943 b/.bun-tag-87fbb095939e2943
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/src/graphql/controller.js b/dist/src/graphql/controller.js
+index dc1d773081100587d604d910299f2634008aa85a..da46008efa9bbcc978a52979906d904de6c955c4 100644
+--- a/dist/src/graphql/controller.js
++++ b/dist/src/graphql/controller.js
+@@ -343,15 +343,18 @@ class GqlEntityController {
+                     };
+                 }
+                 if (nonNullFieldType.name !== 'Text') {
+-                    whereInputConfig.fields[`${field.name}`] = { type: nonNullFieldType };
++                    const filterType = nonNullFieldType instanceof graphql_1.GraphQLEnumType
++                        ? graphql_1.GraphQLString
++                        : nonNullFieldType;
++                    whereInputConfig.fields[`${field.name}`] = { type: filterType };
+                     whereInputConfig.fields[`${field.name}_not`] = {
+-                        type: nonNullFieldType
++                        type: filterType
+                     };
+                     whereInputConfig.fields[`${field.name}_in`] = {
+-                        type: new graphql_1.GraphQLList(nonNullFieldType)
++                        type: new graphql_1.GraphQLList(filterType)
+                     };
+                     whereInputConfig.fields[`${field.name}_not_in`] = {
+-                        type: new graphql_1.GraphQLList(nonNullFieldType)
++                        type: new graphql_1.GraphQLList(filterType)
+                     };
+                 }
+                 orderByValues[field.name] = { value: field.name };
