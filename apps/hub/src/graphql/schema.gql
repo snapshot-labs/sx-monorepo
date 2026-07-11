@@ -884,11 +884,11 @@ type StrategyItem {
 "A treasury managed by a space"
 type Treasury {
   "Treasury display name"
-  name: String
+  name: String!
   "Treasury wallet address"
-  address: String
+  address: String!
   "Network ID the treasury is on"
-  network: String
+  network: String!
 }
 
 "A label that can be applied to proposals"
