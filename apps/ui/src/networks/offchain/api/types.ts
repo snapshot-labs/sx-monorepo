@@ -9,10 +9,8 @@ import {
 
 type Override<T, U> = Omit<T, keyof U> & U;
 
-type Treasury = { name: string; network: string; address: string };
 type Label = { id: string; name: string; description: string; color: string };
 type Strategy = { name: string; network: string; params: Record<string, any> };
-type Validation = { name: string; params: Record<string, any> };
 
 type SpaceVoting = {
   delay: number | null;
@@ -44,11 +42,7 @@ export type ApiSpace = Override<
     network: string;
     symbol: string;
     terms: string;
-    treasuries: Treasury[];
-    labels: Label[];
     strategies: Strategy[];
-    validation: Validation;
-    voteValidation: Validation;
     voting: SpaceVoting;
     delegationPortal: DelegationPortal | null;
     plugins: Record<string, any>;
@@ -68,7 +62,6 @@ export type ApiProposal = Override<
     quorumType: 'default' | 'rejection';
     plugins: Record<string, any>;
     strategies: Strategy[];
-    validation: Validation;
     space: {
       id: string;
       name: string;
