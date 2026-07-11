@@ -5,7 +5,8 @@ import {
   fetchAccount,
   createKey as sendCreateKey,
   revokeKey as sendRevokeKey,
-  topUp as sendTopUp
+  topUp as sendTopUp,
+  STORAGE_PREFIX
 } from '@/helpers/keycard';
 import { Account, ApiKey } from '@/helpers/keycard/types';
 import { sleep } from '@/helpers/utils';
@@ -15,13 +16,13 @@ import pkg from '../../package.json';
 // system lets them manage keys without signing each action. The demo flag
 // simulates that one-time setup without touching the real alias storage.
 export function useApiKeys() {
-  const { web3 } = useWeb3();
+  const { web3Account: address } = useWeb3();
   const aliases = useStorage(
     `${pkg.name}.aliases`,
     {} as Record<string, string>
   );
   const demoVerified = useStorage(
-    'keycard.demo.verified',
+    `${STORAGE_PREFIX}.verified`,
     {} as Record<string, boolean>
   );
 
@@ -30,7 +31,6 @@ export function useApiKeys() {
   const isError = ref(false);
   const isVerifying = ref(false);
 
-  const address = computed(() => web3.value.account);
   const isVerified = computed(() => {
     if (!address.value) return false;
     return (

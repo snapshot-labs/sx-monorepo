@@ -2,11 +2,21 @@
 // whole flow (create key, usage, top up) is explorable without keycard-api.
 // Swap these functions for JSON-RPC calls once the API lands.
 import { sleep } from '@/helpers/utils';
-import { Account, ApiKey, FREE_CREDIT, PRICE_PER_REQUEST } from './types';
+import { Account, ApiKey, Usage } from './types';
 
-const STORAGE_PREFIX = 'keycard.demo';
+export const STORAGE_PREFIX = 'keycard.demo';
 
 const DAY = 86_400_000;
+
+// Free credit granted to every account, in USD.
+export const FREE_CREDIT = 50;
+
+// Price per request in USD, per API. Kept low and per-API so heavier APIs
+// cost more; can be changed later without repricing past usage.
+export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
+  hub: 0.0001,
+  score: 0.0002
+};
 
 export function keyCost(key: ApiKey): number {
   return (
@@ -15,7 +25,7 @@ export function keyCost(key: ApiKey): number {
   );
 }
 
-export function accountUsage(account: Account) {
+export function accountUsage(account: Account): Usage {
   return account.keys.reduce(
     (total, key) => ({
       hub: total.hub + (key.usage?.hub ?? 0),
@@ -30,7 +40,7 @@ export function accountSpend(account: Account): number {
 }
 
 export function accountBalance(account: Account): number {
-  return FREE_CREDIT + (account.topups ?? 0) - accountSpend(account);
+  return FREE_CREDIT + account.topups - accountSpend(account);
 }
 
 function randomHex(length: number): string {
@@ -48,14 +58,14 @@ function seedAccount(): Account {
     topups: 0,
     keys: [
       {
-        id: randomHex(8),
+        id: crypto.randomUUID(),
         name: 'Production',
         key: newKeySecret(),
         created: Date.now() - 34 * DAY,
         usage: { hub: 98_410, score: 31_770 }
       },
       {
-        id: randomHex(8),
+        id: crypto.randomUUID(),
         name: 'Staging',
         key: newKeySecret(),
         created: Date.now() - 12 * DAY,
@@ -116,7 +126,7 @@ export async function createKey(
   const key = newKeySecret();
 
   account.keys.push({
-    id: randomHex(8),
+    id: crypto.randomUUID(),
     name,
     key,
     created: Date.now(),

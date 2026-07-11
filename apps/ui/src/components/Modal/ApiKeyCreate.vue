@@ -2,7 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
-const FORM_STATE = {
+const DEFAULT_FORM_STATE = {
   name: ''
 };
 
@@ -34,7 +34,7 @@ const uiStore = useUiStore();
 
 const step = ref<'form' | 'success'>('form');
 const isCreating = ref(false);
-const form = ref(clone(FORM_STATE));
+const form = ref(clone(DEFAULT_FORM_STATE));
 const apiKey = ref('');
 
 const formValidator = getValidator(DEFINITION);
@@ -73,7 +73,7 @@ watch(
 
     step.value = 'form';
     isCreating.value = false;
-    form.value = clone(FORM_STATE);
+    form.value = clone(DEFAULT_FORM_STATE);
     apiKey.value = '';
   }
 );

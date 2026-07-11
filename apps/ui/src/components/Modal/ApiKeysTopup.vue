@@ -6,7 +6,7 @@ const MIN_AMOUNT = 5;
 const MAX_AMOUNT = 100_000;
 const AMOUNTS = [50, 100, 250];
 
-const FORM_STATE = {
+const DEFAULT_FORM_STATE = {
   amount: AMOUNTS[0]
 };
 
@@ -37,7 +37,7 @@ const emit = defineEmits<{
 const uiStore = useUiStore();
 
 const step = ref<'select' | 'paying' | 'success'>('select');
-const form = ref(clone(FORM_STATE));
+const form = ref(clone(DEFAULT_FORM_STATE));
 
 const formValidator = getValidator(DEFINITION);
 
@@ -70,7 +70,7 @@ watch(
     if (open) return;
 
     step.value = 'select';
-    form.value = clone(FORM_STATE);
+    form.value = clone(DEFAULT_FORM_STATE);
   }
 );
 </script>
