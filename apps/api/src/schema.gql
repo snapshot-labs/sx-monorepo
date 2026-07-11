@@ -300,6 +300,8 @@ type Proposal {
   veto_tx: String
   "Number of votes cast on this proposal"
   vote_count: Int!
+  "Current state based on voting window timestamps ('pending', 'active', 'closed')"
+  state: String! @computed
   "Whether proposal has been executed"
   executed: Boolean!
   "Whether proposal has been vetoed"
