@@ -13,7 +13,7 @@ type Query {
     where: SpaceWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Space]
+  ): [Space!]
 
   "Returns a ranked list of spaces with aggregated metrics"
   ranking(first: Int! = 20, skip: Int! = 0, where: RankingWhere): RankingObject
@@ -28,7 +28,7 @@ type Query {
     where: ProposalWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Proposal]
+  ): [Proposal!]
 
   "Returns a single vote by its ID"
   vote(id: String!): Vote
@@ -40,7 +40,7 @@ type Query {
     where: VoteWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Vote]
+  ): [Vote!]
 
   "Returns a list of address aliases with optional filtering, ordering, and pagination"
   aliases(
@@ -49,10 +49,10 @@ type Query {
     where: AliasWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Alias]
+  ): [Alias!]
 
   "Returns the roles and permissions for a given address"
-  roles(where: RolesWhere!): [Role]
+  roles(where: RolesWhere!): [Role!]
 
   "Returns a list of space followers with optional filtering, ordering, and pagination"
   follows(
@@ -61,7 +61,7 @@ type Query {
     where: FollowWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Follow]
+  ): [Follow!]
 
   "Returns a list of proposal subscriptions with optional filtering, ordering, and pagination"
   subscriptions(
@@ -70,7 +70,7 @@ type Query {
     where: SubscriptionWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Subscription]
+  ): [Subscription!]
 
   "Returns a list of users with optional filtering, ordering, and pagination"
   users(
@@ -79,7 +79,7 @@ type Query {
     where: UsersWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [User]
+  ): [User!]
 
   "Returns a list of delegate statements with optional filtering, ordering, and pagination"
   statements(
@@ -88,7 +88,7 @@ type Query {
     where: StatementsWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Statement]
+  ): [Statement!]
 
   "Returns a single user by their address"
   user(id: String!): User
@@ -97,19 +97,19 @@ type Query {
   statement(id: String!): Statement
 
   "Returns all available space skins"
-  skins: [Item]
+  skins: [Item!]
 
   "Returns all supported networks"
-  networks: [Network]
+  networks: [Network!]
 
   "Returns all available proposal validations"
-  validations: [Item]
+  validations: [Item!]
 
   "Returns all available plugins"
-  plugins: [Item]
+  plugins: [Item!]
 
   "Returns all available voting strategies"
-  strategies: [StrategyItem]
+  strategies: [StrategyItem!]
 
   "Returns a single voting strategy by its ID"
   strategy(id: String!): StrategyItem
@@ -124,7 +124,7 @@ type Query {
     where: MessageWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Message]
+  ): [Message!]
 
   "Returns leaderboard entries for spaces with optional filtering, ordering, and pagination"
   leaderboards(
@@ -133,10 +133,10 @@ type Query {
     where: LeaderboardsWhere
     orderBy: String
     orderDirection: OrderDirection
-  ): [Leaderboard]
+  ): [Leaderboard!]
 
   "Returns all available configuration options"
-  options: [Option]
+  options: [Option!]
 }
 
 input SpaceWhere {
