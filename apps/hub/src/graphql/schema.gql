@@ -482,11 +482,11 @@ type Space {
   "Voting strategies used to calculate voting power"
   strategies: [Strategy]
   "List of admin addresses"
-  admins: [String]!
+  admins: [String!]!
   "List of member addresses"
-  members: [String]!
+  members: [String!]!
   "List of moderator addresses"
-  moderators: [String]!
+  moderators: [String!]!
   "Proposal filters configuration"
   filters: SpaceFilters!
   "Enabled plugins configuration"
@@ -494,7 +494,7 @@ type Space {
   "Voting configuration"
   voting: SpaceVoting!
   "Space categories"
-  categories: [String]!
+  categories: [String!]!
   "Proposal validation strategy"
   validation: Validation!
   "Vote validation strategy"
