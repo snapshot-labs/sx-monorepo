@@ -434,8 +434,15 @@ async function fetchRelatedSpaces(spaces) {
   });
 }
 
-export async function handleRelatedSpaces(info: any, spaces: any[]) {
-  const requestedFields = info ? graphqlFields(info) : {};
+export async function handleRelatedSpaces(
+  info: any,
+  spaces: any[],
+  fieldsPath?: string
+) {
+  let requestedFields = info ? graphqlFields(info) : {};
+  // when the spaces are nested in the response (e.g. ranking.items),
+  // look up parent/children in the wrapped selection
+  if (fieldsPath) requestedFields = requestedFields[fieldsPath] || {};
   if (needsRelatedSpacesData(requestedFields)) {
     checkRelatedSpacesNesting(requestedFields);
     const relatedSpaces = await fetchRelatedSpaces(spaces);
