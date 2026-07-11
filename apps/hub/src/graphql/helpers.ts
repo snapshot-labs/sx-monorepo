@@ -138,11 +138,12 @@ export function formatSpace({
     ? { delegationNetwork: '1', ...space.delegationPortal }
     : null;
   space.boost = space.boost || { enabled: true, bribeEnabled: false };
-  space.strategies = space.strategies?.map(strategy => ({
-    ...strategy,
-    // By default return space network if strategy network is not defined
-    network: strategy.network || space.network
-  }));
+  space.strategies =
+    space.strategies?.map(strategy => ({
+      ...strategy,
+      // By default return space network if strategy network is not defined
+      network: strategy.network || space.network
+    })) || [];
   if (!space.validation && space.filters.minScore) {
     space.validation = {
       name: 'basic',
@@ -151,7 +152,10 @@ export function formatSpace({
   }
   space.validation = space.validation || { name: 'any', params: {} };
   space.treasuries = space.treasuries || [];
-  space.labels = space.labels || [];
+  space.labels = (space.labels || []).map(label => ({
+    ...label,
+    description: label.description || ''
+  }));
   space.skinSettings = skinSettings;
 
   space.verified = verified;

@@ -480,7 +480,7 @@ type Space {
   "Custom domain for the space"
   domain: String!
   "Voting strategies used to calculate voting power"
-  strategies: [Strategy!]
+  strategies: [Strategy!]!
   "List of admin addresses"
   admins: [String!]!
   "List of member addresses"
@@ -894,13 +894,13 @@ type Treasury {
 "A label that can be applied to proposals"
 type Label {
   "Label identifier"
-  id: String
+  id: String!
   "Label display name"
-  name: String
+  name: String!
   "Label description"
-  description: String
+  description: String!
   "Hex color code"
-  color: String
+  color: String!
 }
 
 "Boost settings for a space"
