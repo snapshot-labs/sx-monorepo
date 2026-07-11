@@ -480,13 +480,13 @@ type Space {
   "Custom domain for the space"
   domain: String!
   "Voting strategies used to calculate voting power"
-  strategies: [Strategy]
+  strategies: [Strategy!]
   "List of admin addresses"
-  admins: [String]!
+  admins: [String!]!
   "List of member addresses"
-  members: [String]!
+  members: [String!]!
   "List of moderator addresses"
-  moderators: [String]!
+  moderators: [String!]!
   "Proposal filters configuration"
   filters: SpaceFilters!
   "Enabled plugins configuration"
@@ -494,7 +494,7 @@ type Space {
   "Voting configuration"
   voting: SpaceVoting!
   "Space categories"
-  categories: [String]!
+  categories: [String!]!
   "Proposal validation strategy"
   validation: Validation!
   "Vote validation strategy"
@@ -502,9 +502,9 @@ type Space {
   "Delegation portal configuration"
   delegationPortal: DelegationPortal
   "Treasury addresses managed by the space"
-  treasuries: [Treasury]!
+  treasuries: [Treasury!]!
   "Labels that can be applied to proposals"
-  labels: [Label]!
+  labels: [Label!]!
   "Number of currently active proposals"
   activeProposals: Int!
   "Total number of proposals"
@@ -618,7 +618,7 @@ type Proposal {
   "Voting type (e.g. single-choice, approval, quadratic, ranked-choice, weighted, basic)"
   type: String!
   "Voting strategies used for this proposal"
-  strategies: [Strategy]!
+  strategies: [Strategy!]!
   "Proposal validation strategy"
   validation: Validation!
   "Enabled plugins"
@@ -630,9 +630,9 @@ type Proposal {
   "URL to the discussion thread"
   discussion: String!
   "List of voting choices"
-  choices: [String]!
+  choices: [String!]!
   "Labels applied to this proposal"
-  labels: [String]!
+  labels: [String!]!
   "Unix timestamp of when voting starts"
   start: Int!
   "Unix timestamp of when voting ends"
@@ -652,7 +652,7 @@ type Proposal {
   "Application that created the proposal"
   app: String!
   "Vote scores per choice"
-  scores: [Float]!
+  scores: [Float!]!
   "Vote scores broken down by strategy"
   scores_by_strategy: Any!
   "Scoring state (e.g. final, pending)"
@@ -754,7 +754,7 @@ type Role {
   "Space ID"
   space: String!
   "List of permissions granted"
-  permissions: [String]!
+  permissions: [String!]!
 }
 
 "A follow relationship between an address and a space"
