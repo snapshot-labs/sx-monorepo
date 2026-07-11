@@ -16,7 +16,7 @@ type Query {
   ): [Space!]!
 
   "Returns a ranked list of spaces with aggregated metrics"
-  ranking(first: Int! = 20, skip: Int! = 0, where: RankingWhere): RankingObject
+  ranking(first: Int! = 20, skip: Int! = 0, where: RankingWhere): RankingObject!
 
   "Returns a single proposal by its ID"
   proposal(id: String!): Proposal
@@ -115,7 +115,7 @@ type Query {
   strategy(id: String!): StrategyItem
 
   "Calculates the voting power for a voter in a space, optionally for a specific proposal"
-  vp(voter: String!, space: String!, proposal: String): Vp
+  vp(voter: String!, space: String!, proposal: String): Vp!
 
   "Returns a list of signed messages (envelopes) with optional filtering, ordering, and pagination"
   messages(
