@@ -164,10 +164,10 @@ export function formatSpace({
   space.labels = space.labels || [];
   space.skinSettings = skinSettings;
 
-  space.verified = verified ?? null;
+  space.verified = verified;
   space.flagged = flagged > 0;
   space.flagCode = flagged;
-  space.hibernated = hibernated ?? null;
+  space.hibernated = hibernated;
   space.turbo = new Date((turboExpiration || 0) * 1000) > new Date();
   space.turboExpiration = turboExpiration ?? 0;
   space.rank = spaceMetadata?.rank ?? null;
