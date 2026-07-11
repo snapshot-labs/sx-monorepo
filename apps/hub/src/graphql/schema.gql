@@ -688,7 +688,7 @@ type Validation {
   "Validation identifier"
   name: String!
   "Validation-specific parameters"
-  params: Any
+  params: Any!
 }
 
 "Delegation portal configuration"
