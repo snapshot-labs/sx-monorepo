@@ -44,10 +44,6 @@ export type ApiSpace = Override<
     network: string;
     symbol: string;
     terms: string;
-    admins: string[];
-    members: string[];
-    moderators: string[];
-    categories: string[];
     treasuries: Treasury[];
     labels: Label[];
     strategies: Strategy[];
@@ -68,9 +64,6 @@ export type ApiProposal = Override<
     type: VoteType;
     state: 'active' | 'pending' | 'closed';
     scores_state: 'invalid' | 'pending' | 'final';
-    scores: number[];
-    choices: string[];
-    labels: string[];
     privacy: 'shutter' | '';
     quorumType: 'default' | 'rejection';
     plugins: Record<string, any>;
