@@ -152,7 +152,10 @@ export function formatSpace({
   }
   space.validation = space.validation || { name: 'any', params: {} };
   space.treasuries = space.treasuries || [];
-  space.labels = space.labels || [];
+  space.labels = (space.labels || []).map(label => ({
+    ...label,
+    description: label.description || ''
+  }));
   space.skinSettings = skinSettings;
 
   space.verified = verified;
