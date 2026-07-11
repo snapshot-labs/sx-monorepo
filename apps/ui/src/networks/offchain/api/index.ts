@@ -828,7 +828,7 @@ export function createApi(
             where
           }
         });
-        return ((data.ranking?.items ?? []) as ApiSpace[]).map(space =>
+        return (data.ranking.items as ApiSpace[]).map(space =>
           formatSpace(space, networkId, constants)
         );
       }
