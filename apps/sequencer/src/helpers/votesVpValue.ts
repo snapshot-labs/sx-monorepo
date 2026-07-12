@@ -3,17 +3,21 @@ import snapshot from '@snapshot-labs/snapshot.js';
 import { z } from 'zod';
 import log from './log';
 import db from './mysql';
-import { CB } from '../constants';
+import { addPoints } from './points';
+import { CB, POINTS_START_TIMESTAMP } from '../constants';
 
 type ProposalVpValues = Map<
   string,
-  { cb: number; vpValueByStrategy: number[] }
+  { cb: number; start: number; vpValueByStrategy: number[] }
 >;
 
 type Datum = {
   id: string;
   voter: string;
   space: string;
+  proposal: string;
+  proposalStart: number;
+  created: number;
   vpState: string;
   vpByStrategy: number[];
   vpValueByStrategy: number[];
@@ -44,12 +48,13 @@ async function getPendingVotes(): Promise<
     voter: string;
     space: string;
     proposal: string;
+    created: number;
     vpState: string;
     vpByStrategy: number[];
   }[]
 > {
   const query = `
-    SELECT id, voter, space, proposal, vp_state, vp_by_strategy
+    SELECT id, voter, space, proposal, created, vp_state, vp_by_strategy
     FROM votes
     WHERE cb = ?
     LIMIT ?`;
@@ -63,6 +68,7 @@ async function getPendingVotes(): Promise<
     voter: r.voter,
     space: r.space,
     proposal: r.proposal,
+    created: r.created,
     vpState: r.vp_state,
     vpByStrategy: JSON.parse(r.vp_by_strategy)
   }));
@@ -74,7 +80,7 @@ async function getProposalVpValues(): Promise<ProposalVpValues> {
 
   while (true) {
     const query = `
-      SELECT id, cb, vp_value_by_strategy
+      SELECT id, cb, start, vp_value_by_strategy
       FROM proposals
       WHERE cb IN (?) AND votes > 0 AND id > ?
       ORDER BY id
@@ -90,6 +96,7 @@ async function getProposalVpValues(): Promise<ProposalVpValues> {
     for (const r of results) {
       map.set(r.id, {
         cb: r.cb,
+        start: r.start,
         vpValueByStrategy:
           r.cb === CB.INELIGIBLE ? [] : JSON.parse(r.vp_value_by_strategy)
       });
@@ -110,6 +117,7 @@ async function refreshVotesVpValues(data: Datum[]) {
   const vpValues: Map<string, number> = new Map();
   const cbValues: Map<string, number> = new Map();
   const leaderboardPairs: Set<string> = new Set();
+  const pointsEntries: Parameters<typeof addPoints>[0][] = [];
 
   for (const datum of data) {
     if (datum.proposalCb === CB.INELIGIBLE) {
@@ -133,6 +141,19 @@ async function refreshVotesVpValues(data: Datum[]) {
         validatedDatum.vpState === 'final' ? CB.FINAL : CB.PENDING_FINAL
       );
 
+      if (
+        validatedDatum.vpState === 'final' &&
+        datum.proposalStart >= POINTS_START_TIMESTAMP
+      ) {
+        pointsEntries.push({
+          user: validatedDatum.voter,
+          source: 'vote',
+          ref: datum.proposal,
+          amount: value,
+          created: datum.created
+        });
+      }
+
       leaderboardPairs.add(`${validatedDatum.voter}:${validatedDatum.space}`);
     } catch (err) {
       capture(err);
@@ -143,6 +164,12 @@ async function refreshVotesVpValues(data: Datum[]) {
   }
 
   if (!ids.length) return;
+
+  // Awarded before votes are marked FINAL: a failure here leaves the batch in
+  // cb pending, so it retries next cycle; addPoints dedups on retry
+  for (const entry of pointsEntries) {
+    await addPoints(entry);
+  }
 
   const vpCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');
   const cbCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');
@@ -201,6 +228,9 @@ async function processBatch(
         id: v.id,
         voter: v.voter,
         space: v.space,
+        proposal: v.proposal,
+        proposalStart: proposal.start,
+        created: v.created,
         vpState: v.vpState,
         vpByStrategy: v.vpByStrategy,
         vpValueByStrategy: proposal.vpValueByStrategy,
