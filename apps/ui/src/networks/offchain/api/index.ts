@@ -38,7 +38,6 @@ import {
   SpaceMetadataDelegation,
   SpaceMetadataTreasury,
   Statement,
-  Theme,
   User,
   UserActivity,
   Vote
@@ -200,7 +199,7 @@ function formatSpace(
       border_color: skinSettings?.border_color || '',
       heading_color: skinSettings?.heading_color || '',
       primary_color: skinSettings?.primary_color || '',
-      theme: (skinSettings?.theme || 'light') as Theme,
+      theme: skinSettings?.theme === 'dark' ? 'dark' : 'light',
       logo: skinSettings?.logo ?? undefined
     };
   }
