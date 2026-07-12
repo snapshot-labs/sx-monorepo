@@ -160,8 +160,7 @@ async function refreshVotesVpValues(data: Datum[]) {
 
   if (!ids.length) return;
 
-  // Awarded before votes are marked FINAL: a failure here leaves the batch in
-  // cb pending, so it retries next cycle; addPoints dedups on retry
+  // Before votes are marked FINAL, so a failure retries next cycle
   await addPoints(pointsEntries);
 
   const vpCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');

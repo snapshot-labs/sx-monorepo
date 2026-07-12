@@ -9,10 +9,8 @@ type LedgerEntry = {
   actionDate: number;
 };
 
-// Records points awards and refreshes the users' totals.
 // INSERT IGNORE keeps the first assignment: points never change once given,
-// so retries and duplicate calls are safe. Totals are recomputed from the
-// ledger, making it idempotent
+// so duplicate calls are safe; the totals recompute is idempotent
 export async function addPoints(entries: LedgerEntry[]) {
   const eligible = entries.filter(e => e.actionDate >= POINTS_START_TIMESTAMP);
   if (!eligible.length) return;
