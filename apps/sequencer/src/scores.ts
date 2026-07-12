@@ -8,7 +8,7 @@ import { hasStrategyOverride, sha256 } from './helpers/utils';
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 const FINALIZE_SCORE_SECONDS_DELAY = 60;
 
-async function getProposal(id: string): Promise<any | undefined> {
+export async function getProposal(id: string): Promise<any | undefined> {
   const query = 'SELECT * FROM proposals WHERE id = ? LIMIT 1';
   const [proposal] = await db.queryAsync(query, [id]);
   if (!proposal) return;
@@ -26,7 +26,7 @@ async function getProposal(id: string): Promise<any | undefined> {
   return proposal;
 }
 
-async function getVotes(proposalId: string): Promise<any[] | undefined> {
+export async function getVotes(proposalId: string): Promise<any[] | undefined> {
   const query =
     'SELECT id, choice, voter, vp, vp_by_strategy, vp_state, vp_value FROM votes WHERE proposal = ?';
   const votes = await db.queryAsync(query, [proposalId]);
@@ -87,7 +87,11 @@ async function updateVotesVp(
   );
 }
 
-async function updateProposalScores(proposal: any, scores: any, votes: number) {
+export async function updateProposalScores(
+  proposal: any,
+  scores: any,
+  votes: number
+) {
   const ts = (Date.now() / 1e3).toFixed();
   const query = `
     UPDATE proposals
