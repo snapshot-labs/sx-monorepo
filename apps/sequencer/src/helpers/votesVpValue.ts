@@ -115,7 +115,7 @@ async function refreshVotesVpValues(data: Datum[]) {
   const vpValues: Map<string, number> = new Map();
   const cbValues: Map<string, number> = new Map();
   const leaderboardPairs: Set<string> = new Set();
-  const pointsEntries: Parameters<typeof addPoints>[0][] = [];
+  const pointsEntries: Parameters<typeof addPoints>[0] = [];
 
   for (const datum of data) {
     if (datum.proposalCb === CB.INELIGIBLE) {
@@ -162,9 +162,7 @@ async function refreshVotesVpValues(data: Datum[]) {
 
   // Awarded before votes are marked FINAL: a failure here leaves the batch in
   // cb pending, so it retries next cycle; addPoints dedups on retry
-  for (const entry of pointsEntries) {
-    await addPoints(entry);
-  }
+  await addPoints(pointsEntries);
 
   const vpCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');
   const cbCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');

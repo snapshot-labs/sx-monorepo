@@ -9,30 +9,27 @@ type LedgerEntry = {
   actionDate: number;
 };
 
-// Records a points award and refreshes the user's total.
+// Records points awards and refreshes the users' totals.
 // INSERT IGNORE keeps the first assignment: points never change once given,
-// so retries and duplicate calls are safe. The total is recomputed from the
+// so retries and duplicate calls are safe. Totals are recomputed from the
 // ledger, making it idempotent
-export async function addPoints(entry: LedgerEntry) {
-  if (entry.actionDate < POINTS_START_TIMESTAMP) return;
+export async function addPoints(entries: LedgerEntry[]) {
+  const eligible = entries.filter(e => e.actionDate >= POINTS_START_TIMESTAMP);
+  if (!eligible.length) return;
 
   const query = `
     INSERT IGNORE INTO points_ledger (user, action, ref, amount, action_date)
-    VALUES (?, ?, ?, ?, ?);
+    VALUES ?;
     INSERT INTO points (user, total)
     SELECT user, SUM(amount)
     FROM points_ledger
-    WHERE user = ?
+    WHERE user IN (?)
     GROUP BY user
     ON DUPLICATE KEY UPDATE total = VALUES(total);
   `;
 
   await db.queryAsync(query, [
-    entry.user,
-    entry.action,
-    entry.ref,
-    entry.amount,
-    entry.actionDate,
-    entry.user
+    eligible.map(e => [e.user, e.action, e.ref, e.amount, e.actionDate]),
+    [...new Set(eligible.map(e => e.user))]
   ]);
 }
