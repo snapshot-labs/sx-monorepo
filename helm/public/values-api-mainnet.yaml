@@ -1,0 +1,10 @@
+appName: sx-api
+namespace: mainnet
+route:
+  enabled: true
+  host: api.snapshot.box
+directHosts:
+  - color: blue
+    host: api-1.snapshot.box
+  - color: green
+    host: api-2.snapshot.box

@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'apps/mana/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   deploy_mana_prod:
@@ -14,13 +18,9 @@ jobs:
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1000
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy if files have changed
-        run: ./scripts/deploy-changed.sh apps/mana ${{ vars.DIGITALOCEAN_APP_ID }}
+      - name: Deploy
+        run: doctl apps create-deployment ${{ vars.DIGITALOCEAN_APP_ID }}
