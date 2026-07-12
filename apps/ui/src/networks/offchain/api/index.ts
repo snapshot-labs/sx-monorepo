@@ -188,7 +188,7 @@ function formatSpace(
     };
   }
 
-  function formatSkinSettings(skinSettings: SkinSettings): SkinSettings {
+  function formatSkinSettings(skinSettings: SkinSettings | null): SkinSettings {
     return {
       bg_color: skinSettings?.bg_color || '',
       link_color: skinSettings?.link_color || '',
@@ -281,7 +281,7 @@ function formatSpace(
     voting_power_validation_strategies_parsed_metadata: [],
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
-    terms: space.terms,
+    terms: space.terms ?? '',
     privacy: space.voting.privacy || 'none',
     guidelines: space.guidelines,
     template: space.template,
@@ -446,7 +446,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executors_types: [],
       strategies_parsed_metadata: [],
       labels: proposal.space.labels,
-      terms: proposal.space.terms
+      terms: proposal.space.terms ?? ''
     },
     execution_strategy_type: executionType,
     has_execution_window_opened: state === 'passed',

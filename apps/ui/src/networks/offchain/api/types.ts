@@ -1,9 +1,4 @@
-import {
-  DelegationType,
-  SkinSettings,
-  SpaceMetadataLabel,
-  VoteType
-} from '@/types';
+import { DelegationType, SkinSettings, VoteType } from '@/types';
 import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
@@ -36,12 +31,10 @@ export type ApiRelatedSpace = OffchainRelatedSpaceFragmentFragment;
 export type ApiSpace = Override<
   OffchainSpaceFragmentFragment,
   {
-    symbol: string;
-    terms: string;
     voting: SpaceVoting;
     delegationPortal: DelegationPortal | null;
     plugins: Record<string, any>;
-    skinSettings: SkinSettings;
+    skinSettings: SkinSettings | null;
   }
 >;
 
@@ -54,10 +47,6 @@ export type ApiProposal = Override<
     privacy: 'shutter' | '';
     quorumType: 'default' | 'rejection';
     plugins: Record<string, any>;
-    space: Override<
-      OffchainProposalFragmentFragment['space'],
-      { symbol: string; terms: string; labels: SpaceMetadataLabel[] }
-    >;
   }
 >;
 
