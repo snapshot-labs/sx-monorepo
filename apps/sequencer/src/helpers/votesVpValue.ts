@@ -145,7 +145,7 @@ async function refreshVotesVpValues(data: Datum[]) {
           action: 'proposal/vote',
           ref: datum.proposal,
           amount: value,
-          created: datum.created
+          actionDate: datum.created
         });
       }
 

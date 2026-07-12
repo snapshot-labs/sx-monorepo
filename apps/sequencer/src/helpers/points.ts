@@ -6,7 +6,7 @@ type LedgerEntry = {
   action: string;
   ref: string;
   amount: number;
-  created: number;
+  actionDate: number;
 };
 
 // Records a points award and refreshes the user's total.
@@ -14,10 +14,10 @@ type LedgerEntry = {
 // so retries and duplicate calls are safe. The total is recomputed from the
 // ledger, making it idempotent
 export async function addPoints(entry: LedgerEntry) {
-  if (entry.created < POINTS_START_TIMESTAMP) return;
+  if (entry.actionDate < POINTS_START_TIMESTAMP) return;
 
   const query = `
-    INSERT IGNORE INTO points_ledger (user, action, ref, amount, created)
+    INSERT IGNORE INTO points_ledger (user, action, ref, amount, action_date)
     VALUES (?, ?, ?, ?, ?);
     INSERT INTO points (user, total)
     SELECT user, SUM(amount)
@@ -32,7 +32,7 @@ export async function addPoints(entry: LedgerEntry) {
     entry.action,
     entry.ref,
     entry.amount,
-    entry.created,
+    entry.actionDate,
     entry.user
   ]);
 }
