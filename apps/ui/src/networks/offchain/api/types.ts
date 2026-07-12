@@ -1,4 +1,9 @@
-import { DelegationType, SkinSettings, VoteType } from '@/types';
+import {
+  DelegationType,
+  SkinSettings,
+  SpaceMetadataLabel,
+  VoteType
+} from '@/types';
 import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
@@ -9,7 +14,6 @@ import {
 
 type Override<T, U> = Omit<T, keyof U> & U;
 
-type Label = { id: string; name: string; description: string; color: string };
 type Strategy = { name: string; network: string; params: Record<string, any> };
 
 type SpaceVoting = {
@@ -71,7 +75,7 @@ export type ApiProposal = Override<
       moderators: string[];
       members: string[];
       symbol: string;
-      labels: Label[];
+      labels: SpaceMetadataLabel[];
       terms: string;
     };
   }
@@ -79,9 +83,4 @@ export type ApiProposal = Override<
 
 export type ApiVote = OffchainVoteFragmentFragment;
 
-export type ApiStrategy = Override<
-  OffchainStrategyFragmentFragment,
-  {
-    author: string;
-  }
->;
+export type ApiStrategy = OffchainStrategyFragmentFragment;

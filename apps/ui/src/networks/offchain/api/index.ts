@@ -942,8 +942,6 @@ export function createApi(
         );
     },
     loadFollows: async (userId: string): Promise<Follow[]> => {
-      if (!userId) return [];
-
       const { data } = await apollo.query({
         query: USER_FOLLOWS_QUERY,
         variables: {
