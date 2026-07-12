@@ -860,17 +860,17 @@ type StrategyItem {
   "Strategy identifier"
   id: String!
   "Display name"
-  name: String
+  name: String!
   "Strategy author"
-  author: String
+  author: String!
   "Strategy version"
-  version: String
+  version: String!
   "JSON schema for strategy parameters"
   schema: Any
   "Example configurations"
   examples: [Any]
   "Description of the strategy"
-  about: String
+  about: String!
   "Number of spaces using this strategy"
   spacesCount: Int!
   "Number of verified spaces using this strategy"

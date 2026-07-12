@@ -44,6 +44,10 @@ async function loadStrategies() {
   strategies = Object.values(res)
     .map((strategy: any) => {
       strategy.id = strategy.key;
+      strategy.name = strategy.name || strategy.key;
+      strategy.author = strategy.author || '';
+      strategy.version = strategy.version || '';
+      strategy.about = strategy.about || '';
       strategy.spacesCount = strategy.spacesCount || 0;
       strategy.verifiedSpacesCount = strategy.verifiedSpacesCount || 0;
       strategy.override = strategy.dependOnOtherAddress || false;
