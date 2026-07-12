@@ -38,6 +38,7 @@ import {
   SpaceMetadataDelegation,
   SpaceMetadataTreasury,
   Statement,
+  Theme,
   User,
   UserActivity,
   Vote
@@ -188,7 +189,9 @@ function formatSpace(
     };
   }
 
-  function formatSkinSettings(skinSettings: SkinSettings | null): SkinSettings {
+  function formatSkinSettings(
+    skinSettings: ApiSpace['skinSettings']
+  ): SkinSettings {
     return {
       bg_color: skinSettings?.bg_color || '',
       link_color: skinSettings?.link_color || '',
@@ -197,8 +200,8 @@ function formatSpace(
       border_color: skinSettings?.border_color || '',
       heading_color: skinSettings?.heading_color || '',
       primary_color: skinSettings?.primary_color || '',
-      theme: skinSettings?.theme || 'light',
-      logo: skinSettings?.logo
+      theme: (skinSettings?.theme || 'light') as Theme,
+      logo: skinSettings?.logo ?? undefined
     };
   }
 

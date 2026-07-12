@@ -1,4 +1,4 @@
-import { DelegationType, SkinSettings, VoteType } from '@/types';
+import { DelegationType, VoteType } from '@/types';
 import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
@@ -31,7 +31,6 @@ export type ApiSpace = Override<
     >;
     delegationPortal: DelegationPortal | null;
     plugins: Record<string, any>;
-    skinSettings: SkinSettings | null;
   }
 >;
 

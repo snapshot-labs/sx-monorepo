@@ -199,9 +199,7 @@ export function useWhiteLabel() {
 
       isWhiteLabel.value = true;
       skinSettings.value =
-        mapping?.skinSettings ||
-        space.value?.additionalRawData?.skinSettings ||
-        undefined;
+        mapping?.skinSettings || space.value?.additionalRawData?.skinSettings;
     } catch (err) {
       console.log(err);
       failed.value = true;
