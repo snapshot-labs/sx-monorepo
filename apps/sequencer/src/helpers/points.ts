@@ -3,7 +3,7 @@ import { POINTS_START_TIMESTAMP } from '../constants';
 
 type LedgerEntry = {
   user: string;
-  source: string;
+  action: string;
   ref: string;
   amount: number;
   created: number;
@@ -17,7 +17,7 @@ export async function addPoints(entry: LedgerEntry) {
   if (entry.created < POINTS_START_TIMESTAMP) return;
 
   const query = `
-    INSERT IGNORE INTO points_ledger (user, source, ref, amount, created)
+    INSERT IGNORE INTO points_ledger (user, action, ref, amount, created)
     VALUES (?, ?, ?, ?, ?);
     INSERT INTO points (user, total)
     SELECT user, SUM(amount)
@@ -29,7 +29,7 @@ export async function addPoints(entry: LedgerEntry) {
 
   await db.queryAsync(query, [
     entry.user,
-    entry.source,
+    entry.action,
     entry.ref,
     entry.amount,
     entry.created,

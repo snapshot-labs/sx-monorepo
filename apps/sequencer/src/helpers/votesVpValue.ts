@@ -142,7 +142,7 @@ async function refreshVotesVpValues(data: Datum[]) {
       if (validatedDatum.vpState === 'final') {
         pointsEntries.push({
           user: validatedDatum.voter,
-          source: 'vote',
+          action: 'proposal/vote',
           ref: datum.proposal,
           amount: value,
           created: datum.created

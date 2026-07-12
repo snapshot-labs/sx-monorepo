@@ -194,11 +194,11 @@ CREATE TABLE leaderboard (
 
 CREATE TABLE points_ledger (
   user VARCHAR(100) NOT NULL,
-  source VARCHAR(24) NOT NULL,
+  action VARCHAR(24) NOT NULL,
   ref VARCHAR(100) NOT NULL,
   amount DECIMAL(13,3) NOT NULL DEFAULT 0.000,
   created INT(11) NOT NULL,
-  PRIMARY KEY (user, source, ref),
+  PRIMARY KEY (user, action, ref),
   INDEX ref (ref)
 );
 
