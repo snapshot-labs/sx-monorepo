@@ -4,11 +4,11 @@ import { z } from 'zod';
 import log from './log';
 import db from './mysql';
 import { addPoints } from './points';
-import { CB, POINTS_START_TIMESTAMP } from '../constants';
+import { CB } from '../constants';
 
 type ProposalVpValues = Map<
   string,
-  { cb: number; start: number; vpValueByStrategy: number[] }
+  { cb: number; vpValueByStrategy: number[] }
 >;
 
 type Datum = {
@@ -16,7 +16,6 @@ type Datum = {
   voter: string;
   space: string;
   proposal: string;
-  proposalStart: number;
   created: number;
   vpState: string;
   vpByStrategy: number[];
@@ -80,7 +79,7 @@ async function getProposalVpValues(): Promise<ProposalVpValues> {
 
   while (true) {
     const query = `
-      SELECT id, cb, start, vp_value_by_strategy
+      SELECT id, cb, vp_value_by_strategy
       FROM proposals
       WHERE cb IN (?) AND votes > 0 AND id > ?
       ORDER BY id
@@ -96,7 +95,6 @@ async function getProposalVpValues(): Promise<ProposalVpValues> {
     for (const r of results) {
       map.set(r.id, {
         cb: r.cb,
-        start: r.start,
         vpValueByStrategy:
           r.cb === CB.INELIGIBLE ? [] : JSON.parse(r.vp_value_by_strategy)
       });
@@ -141,10 +139,7 @@ async function refreshVotesVpValues(data: Datum[]) {
         validatedDatum.vpState === 'final' ? CB.FINAL : CB.PENDING_FINAL
       );
 
-      if (
-        validatedDatum.vpState === 'final' &&
-        datum.proposalStart >= POINTS_START_TIMESTAMP
-      ) {
+      if (validatedDatum.vpState === 'final') {
         pointsEntries.push({
           user: validatedDatum.voter,
           source: 'vote',
@@ -229,7 +224,6 @@ async function processBatch(
         voter: v.voter,
         space: v.space,
         proposal: v.proposal,
-        proposalStart: proposal.start,
         created: v.created,
         vpState: v.vpState,
         vpByStrategy: v.vpByStrategy,

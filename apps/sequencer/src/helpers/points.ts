@@ -1,4 +1,5 @@
 import db from './mysql';
+import { POINTS_START_TIMESTAMP } from '../constants';
 
 type LedgerEntry = {
   user: string;
@@ -13,6 +14,8 @@ type LedgerEntry = {
 // so retries and duplicate calls are safe. The total is recomputed from the
 // ledger, making it idempotent
 export async function addPoints(entry: LedgerEntry) {
+  if (entry.created < POINTS_START_TIMESTAMP) return;
+
   const query = `
     INSERT IGNORE INTO points_ledger (user, source, ref, amount, created)
     VALUES (?, ?, ?, ?, ?);
