@@ -9,16 +9,6 @@ import {
 
 type Override<T, U> = Omit<T, keyof U> & U;
 
-type SpaceVoting = {
-  delay: number | null;
-  period: number | null;
-  type: VoteType | '' | null;
-  quorum: number | null;
-  quorumType: 'default' | 'rejection';
-  privacy: '' | 'shutter' | 'any';
-  hideAbstain: boolean | null;
-};
-
 type DelegationPortal = {
   delegationType: DelegationType | 'compound-governor';
   delegationContract: string;
@@ -31,7 +21,14 @@ export type ApiRelatedSpace = OffchainRelatedSpaceFragmentFragment;
 export type ApiSpace = Override<
   OffchainSpaceFragmentFragment,
   {
-    voting: SpaceVoting;
+    voting: Override<
+      OffchainSpaceFragmentFragment['voting'],
+      {
+        type: VoteType | '' | null;
+        quorumType: 'default' | 'rejection';
+        privacy: '' | 'shutter' | 'any';
+      }
+    >;
     delegationPortal: DelegationPortal | null;
     plugins: Record<string, any>;
     skinSettings: SkinSettings | null;
