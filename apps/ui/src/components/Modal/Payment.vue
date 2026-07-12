@@ -130,8 +130,12 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
+// intent flag: user clicked Crypto and was sent to connect a wallet
+const hasPendingCryptoIntent = ref(false);
+
 function selectCryptoTab() {
   if (!props.isAuthValidForCrypto) {
+    hasPendingCryptoIntent.value = true;
     emit('connectWallet');
     return;
   }
@@ -141,7 +145,14 @@ function selectCryptoTab() {
 watch(
   () => props.isAuthValidForCrypto,
   isValid => {
-    if (isValid) paymentMethod.value = 'crypto';
+    if (isValid) {
+      if (hasPendingCryptoIntent.value) {
+        hasPendingCryptoIntent.value = false;
+        paymentMethod.value = 'crypto';
+      }
+    } else if (paymentMethod.value === 'crypto') {
+      paymentMethod.value = 'card';
+    }
   }
 );
 
@@ -228,6 +239,7 @@ watch(
     isHidden.value = false;
     selectedTokenAddress.value = '';
     cardLoading.value = false;
+    hasPendingCryptoIntent.value = false;
     paymentMethod.value = props.isAuthValidForCrypto ? 'crypto' : 'card';
     form.value = clone(FORM);
   }
