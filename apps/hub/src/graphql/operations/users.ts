@@ -43,7 +43,7 @@ export default async function (parent, args) {
     const users = await db.queryAsync(query, params);
     ids.forEach(element => {
       if (!users.find((u: any) => u.id === element)) {
-        users.push({ id: element });
+        users.push({ id: element, votesCount: 0, proposalsCount: 0 });
       }
     });
     if (!users.length) return [];

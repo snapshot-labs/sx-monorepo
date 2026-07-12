@@ -45,14 +45,13 @@ async function query(parent, args, context?, info?) {
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.* FROM votes v
-    INNER JOIN spaces ON spaces.id = v.space
-    WHERE spaces.deleted = 0 AND v.cb != -3 ${queryStr}
+    INNER JOIN spaces s ON s.id = v.space AND s.deleted = 0
+    WHERE v.cb != -3 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
     votes = await db.queryAsync(query, params);
-    // TODO: we need settings in the vote as its being passed to formatSpace inside formatVote, Maybe we dont need to do this?
     votes = votes.map(vote => formatVote(vote));
   } catch (err: any) {
     capture(err, { args, context, info });
@@ -80,11 +79,12 @@ async function query(parent, args, context?, info?) {
           })
         ])
       );
-      votes = votes.map(vote => {
-        if (spaces[vote.space.id])
-          return { ...vote, space: spaces[vote.space.id] };
-        return vote;
-      });
+      // the main query already excludes deleted spaces; this only drops votes
+      // whose space was deleted between the two queries, as their space
+      // skeleton would violate the non-null Space fields
+      votes = votes
+        .filter(vote => spaces[vote.space.id])
+        .map(vote => ({ ...vote, space: spaces[vote.space.id] }));
     } catch (err: any) {
       capture(err, { args, context, info });
       log.error(`[graphql] votes, ${JSON.stringify(err)}`);
@@ -101,6 +101,7 @@ async function query(parent, args, context?, info?) {
         p.id AS id,
         spaces.settings,
         spaces.domain as spaceDomain,
+        spaces.created as spaceCreated,
         spaces.flagged as spaceFlagged,
         spaces.verified as spaceVerified,
         spaces.turbo_expiration as spaceTurboExpiration,
@@ -108,17 +109,19 @@ async function query(parent, args, context?, info?) {
       FROM proposals p
       INNER JOIN spaces ON spaces.id = p.space
       LEFT JOIN skins ON spaces.id = skins.id
-      WHERE spaces.settings IS NOT NULL AND p.id IN (?)
+      WHERE spaces.deleted = 0 AND spaces.settings IS NOT NULL AND p.id IN (?)
     `;
     try {
       let proposals = await db.queryAsync(query, [proposalIds]);
       proposals = Object.fromEntries(
         proposals.map(proposal => [proposal.id, formatProposal(proposal)])
       );
-      votes = votes.map(vote => {
-        vote.proposal = proposals[vote.proposal];
-        return vote;
-      });
+      // drop votes whose proposal can not be resolved (hard-deleted proposal
+      // whose votes are not yet marked cb = -3), as a null proposal would
+      // violate the non-null Proposal field
+      votes = votes
+        .filter(vote => proposals[vote.proposal])
+        .map(vote => ({ ...vote, proposal: proposals[vote.proposal] }));
     } catch (err: any) {
       capture(err, { args, context, info });
       log.error(`[graphql] votes, ${JSON.stringify(err)}`);

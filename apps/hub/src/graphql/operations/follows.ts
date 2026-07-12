@@ -34,6 +34,7 @@ export default async function (parent, args) {
       f.id AS id,
       spaces.settings,
       spaces.domain as spaceDomain,
+      spaces.created as spaceCreated,
       spaces.flagged as spaceFlagged,
       spaces.verified as spaceVerified,
       spaces.turbo_expiration as spaceTurboExpiration,
