@@ -914,11 +914,11 @@ type BoostSettings {
 "Voting power information"
 type Vp {
   "Total voting power"
-  vp: Float!
+  vp: Float
   "Voting power broken down by strategy"
-  vp_by_strategy: [Float]!
+  vp_by_strategy: [Float]
   "Voting power state (e.g. final, pending)"
-  vp_state: String!
+  vp_state: String
 }
 
 "Leaderboard entry for a user in a space"
