@@ -157,16 +157,24 @@ watch(
 );
 
 const canSubmit = computed(() => {
-  if (!isTermsAccepted.value || !formValid.value) return false;
+  if (!isTermsAccepted.value) return false;
+  // Card doesn't use the quantity field, so its validity is crypto-only.
   if (paymentMethod.value === 'card') return !cardLoading.value;
   return (
-    !isPending.value && !!auth.value?.account && !isInsufficientBalance.value
+    formValid.value &&
+    !isPending.value &&
+    !!auth.value?.account &&
+    !isInsufficientBalance.value
   );
 });
 
 // Card buys a single billing period; crypto can buy multiple.
+const isQuantityAdjustable = computed(() => paymentMethod.value === 'crypto');
+
 const effectiveQuantity = computed(() =>
-  paymentMethod.value === 'card' ? 1 : Number(form.value.quantity)
+  // Clamp so a cleared/invalid quantity doesn't flash "You will pay 0"
+  // while the user edits; submission is still gated by formValid.
+  isQuantityAdjustable.value ? Math.max(1, Number(form.value.quantity) || 1) : 1
 );
 
 const totalAmount = computed(() =>
@@ -322,7 +330,7 @@ watch(
         </button>
       </div>
       <UiInputNumber
-        v-if="quantityLabel && paymentMethod === 'crypto'"
+        v-if="quantityLabel && isQuantityAdjustable"
         v-model="form.quantity"
         :definition="definition.properties.quantity"
         :error="formErrors.quantity"
