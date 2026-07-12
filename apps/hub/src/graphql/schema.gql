@@ -470,7 +470,7 @@ type Space {
   "Discourse forum category ID"
   discourseCategory: Int
   "Network ID the space primarily operates on"
-  network: String
+  network: String!
   "Token symbol used in the space"
   symbol: String
   "Custom skin/theme ID"
