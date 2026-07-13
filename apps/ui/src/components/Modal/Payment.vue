@@ -142,6 +142,12 @@ function selectCryptoTab() {
   paymentMethod.value = 'crypto';
 }
 
+function selectCardTab() {
+  // clear any pending crypto intent so a later connect doesn't hijack the tab
+  hasPendingCryptoIntent.value = false;
+  paymentMethod.value = 'card';
+}
+
 watch(
   () => props.isAuthValidForCrypto,
   isValid => {
@@ -150,7 +156,12 @@ watch(
         hasPendingCryptoIntent.value = false;
         paymentMethod.value = 'crypto';
       }
-    } else if (paymentMethod.value === 'crypto') {
+    } else if (
+      paymentMethod.value === 'crypto' &&
+      !isHidden.value &&
+      !isModalTransactionProgressOpen.value
+    ) {
+      // don't switch tabs (and thus the amount) while a payment is in flight
       paymentMethod.value = 'card';
     }
   }
@@ -282,102 +293,108 @@ watch(
       :search-value="''"
       @pick="handleTokenPick"
     />
-    <div v-else class="s-box p-4 space-y-3">
-      <div class="flex gap-2">
+    <template v-else>
+      <div class="flex space-x-3 border-b px-4">
         <button
           type="button"
-          class="flex-1 px-3 py-2 rounded-full border text-sm"
+          class="flex items-center gap-2 py-2 mb-[-1px] text-sm uppercase tracking-[1px] hover:text-skin-link"
           :class="
             paymentMethod === 'crypto'
-              ? 'bg-skin-heading text-skin-bg border-skin-heading'
-              : 'text-skin-link'
+              ? 'text-skin-link border-b border-skin-link'
+              : 'text-skin-text'
           "
           @click="selectCryptoTab"
         >
+          <IH-cash />
           Crypto
         </button>
         <button
           type="button"
-          class="flex-1 px-3 py-2 rounded-full border text-sm"
+          class="flex items-center gap-2 py-2 mb-[-1px] text-sm uppercase tracking-[1px] hover:text-skin-link"
           :class="
             paymentMethod === 'card'
-              ? 'bg-skin-heading text-skin-bg border-skin-heading'
-              : 'text-skin-link'
+              ? 'text-skin-link border-b border-skin-link'
+              : 'text-skin-text'
           "
-          @click="paymentMethod = 'card'"
+          @click="selectCardTab"
         >
+          <IH-credit-card />
           Card
         </button>
       </div>
-      <UiSelect v-model="plan" :definition="PLAN_DEFINITION" />
-      <div v-if="paymentMethod === 'crypto'" class="s-base">
-        <div class="s-label" v-text="'Token *'" />
-        <button
-          type="button"
-          class="s-input text-left h-[61px]"
-          @click="isPickerShown = true"
-        >
-          <div class="flex items-center">
-            <UiStamp
-              v-if="currentToken"
-              :id="`eip155:${network}:${currentToken.contractAddress}`"
-              type="token"
-              class="mr-2"
-              :size="20"
-            />
-            <div class="truncate" v-text="currentToken.symbol" />
-          </div>
-        </button>
-      </div>
-      <UiInputNumber
-        v-if="quantityLabel && isQuantityAdjustable"
-        v-model="form.quantity"
-        :definition="definition.properties.quantity"
-        :error="formErrors.quantity"
-      />
-      <div class="space-y-3">
-        <div
-          class="border rounded-lg text-[17px] bg-skin-border/40 p-3 py-2.5 space-y-1"
-        >
-          <div class="flex justify-between">
-            You will pay
-            <div
-              class="text-skin-heading"
-              :class="{ 'flex items-center gap-1': paymentMethod === 'crypto' }"
-            >
+      <div class="s-box p-4 space-y-3">
+        <UiSelect v-model="plan" :definition="PLAN_DEFINITION" />
+        <div v-if="paymentMethod === 'crypto'" class="s-base">
+          <div class="s-label" v-text="'Token *'" />
+          <button
+            type="button"
+            class="s-input text-left h-[61px]"
+            @click="isPickerShown = true"
+          >
+            <div class="flex items-center">
               <UiStamp
-                v-if="paymentMethod === 'crypto'"
+                v-if="currentToken"
                 :id="`eip155:${network}:${currentToken.contractAddress}`"
-                :size="18"
                 type="token"
+                class="mr-2"
+                :size="20"
               />
-              {{ _n(totalAmount) }}
-              {{ paymentMethod === 'crypto' ? currentToken.symbol : 'USD' }}
+              <div class="truncate" v-text="currentToken.symbol" />
+            </div>
+          </button>
+        </div>
+        <UiInputNumber
+          v-if="quantityLabel && isQuantityAdjustable"
+          v-model="form.quantity"
+          :definition="definition.properties.quantity"
+          :error="formErrors.quantity"
+        />
+        <div class="space-y-3">
+          <div
+            class="border rounded-lg text-[17px] bg-skin-border/40 p-3 py-2.5 space-y-1"
+          >
+            <div class="flex justify-between">
+              You will pay
+              <div
+                class="text-skin-heading"
+                :class="{
+                  'flex items-center gap-1': paymentMethod === 'crypto'
+                }"
+              >
+                <UiStamp
+                  v-if="paymentMethod === 'crypto'"
+                  :id="`eip155:${network}:${currentToken.contractAddress}`"
+                  :size="18"
+                  type="token"
+                />
+                {{ _n(totalAmount) }}
+                {{ paymentMethod === 'crypto' ? currentToken.symbol : 'USD' }}
+              </div>
+            </div>
+            <div v-if="$slots.summary">
+              <slot name="summary" :quantity="effectiveQuantity" />
             </div>
           </div>
-          <div v-if="$slots.summary">
-            <slot name="summary" :quantity="effectiveQuantity" />
-          </div>
+          <UiCheckbox v-model="isTermsAccepted" class="text-start">
+            <div class="text-skin-text leading-[22px] top-[-1px] relative">
+              I have read and agree to the
+              <span @click.stop>
+                <AppLink
+                  is-external
+                  :to="
+                    isWhiteLabel
+                      ? 'https://snapshot.box/#/terms-of-use'
+                      : { name: 'site-terms' }
+                  "
+                  @click.stop
+                  >Terms of service</AppLink
+                ></span
+              >.
+            </div>
+          </UiCheckbox>
         </div>
-        <UiCheckbox v-model="isTermsAccepted" class="text-start">
-          <div class="text-skin-text leading-[22px] top-[-1px] relative">
-            I have read and agree to the
-            <span @click.stop>
-              <AppLink
-                is-external
-                :to="
-                  isWhiteLabel
-                    ? 'https://snapshot.box/#/terms-of-use'
-                    : { name: 'site-terms' }
-                "
-                @click.stop
-                >Terms of service</AppLink
-              ></span
-            >.
-          </div>
-        </UiCheckbox>
       </div>
-    </div>
+    </template>
     <template v-if="!isPickerShown" #footer>
       <UiButton
         class="w-full"
