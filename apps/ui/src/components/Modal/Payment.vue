@@ -323,7 +323,11 @@ watch(
         </button>
       </div>
       <div class="s-box p-4 space-y-3">
-        <UiSelect v-model="plan" :definition="PLAN_DEFINITION" />
+        <UiSelect
+          v-if="paymentMethod === 'card'"
+          v-model="plan"
+          :definition="PLAN_DEFINITION"
+        />
         <div v-if="paymentMethod === 'crypto'" class="s-base">
           <div class="s-label" v-text="'Token *'" />
           <button

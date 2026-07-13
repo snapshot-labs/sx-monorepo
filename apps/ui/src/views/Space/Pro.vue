@@ -102,6 +102,11 @@ const uiStore = useUiStore();
 const referral: string = route.query.ref as string;
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const nextRenewalDate = computed(() =>
+  dayjs()
+    .add(1, subscriptionLength.value === 'yearly' ? 'year' : 'month')
+    .format('D MMM YYYY')
+);
 const selectedSpace = ref<Space | null>(props.space || null);
 const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
@@ -456,8 +461,9 @@ onMounted(() => {
         <div class="flex justify-between">
           <template v-if="paymentMethod === 'card'">
             <div>Auto-renews</div>
-            <div class="text-skin-heading capitalize">
-              {{ subscriptionLength }}
+            <div class="text-skin-heading">
+              {{ nextRenewalDate }}
+              <span class="capitalize">({{ subscriptionLength }})</span>
             </div>
           </template>
           <template v-else>
