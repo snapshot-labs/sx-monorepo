@@ -108,7 +108,7 @@ async function handleVerify() {
           <span class="inline-block" v-text="DESCRIPTION" />
         </div>
         <UiButton class="shrink-0" @click="isCreateModalOpen = true">
-          <IH-plus class="inline-block" />
+          <IH-plus class="shrink-0 size-[16px]" />
           New API key
         </UiButton>
       </div>
@@ -155,41 +155,55 @@ async function handleVerify() {
       </div>
 
       <UiSectionHeader class="mt-4" label="Keys" />
+      <UiColumnHeader class="space-x-3">
+        <div class="grow text-left">Name</div>
+        <div class="hidden sm:flex w-[150px]">Created</div>
+        <div class="w-[110px] flex justify-end">Spent</div>
+        <div class="min-w-3.5" />
+      </UiColumnHeader>
 
       <UiStateWarning v-if="keys.length === 0" class="px-4 py-3">
         No API keys yet. Create one to start using the Snapshot APIs.
       </UiStateWarning>
-      <div v-else class="px-4 max-w-[592px] space-y-3">
+      <div v-else class="px-4">
         <div
           v-for="key in keys"
           :key="key.id"
-          class="border rounded-lg p-3 space-y-3"
+          class="border-b flex space-x-3 py-3 items-center"
         >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div
-                class="text-skin-link font-semibold truncate"
-                v-text="key.name"
-              />
-              <div class="text-sm text-skin-text">
-                Created {{ _t(key.created / 1000, 'MMM D, YYYY') }} · ${{
-                  keyCost(key).toFixed(2)
-                }}
-                spent
-              </div>
-            </div>
-            <UiTooltip title="Revoke key">
-              <button
-                type="button"
-                class="text-skin-link hover:text-skin-danger shrink-0 flex"
-                aria-label="Revoke key"
-                @click="keyToRevoke = key"
-              >
-                <IH-trash class="size-[18px]" />
-              </button>
-            </UiTooltip>
+          <div class="grow overflow-hidden flex items-center gap-2">
+            <div
+              class="text-skin-link font-semibold truncate"
+              v-text="key.name"
+            />
+            <ApiKeyField :value="key.key" masked inline class="shrink-0" />
           </div>
-          <ApiKeyField :value="key.key" maskable />
+          <div class="hidden sm:flex w-[150px] shrink-0 items-center">
+            {{ _t(key.created / 1000, 'MMM D, YYYY') }}
+          </div>
+          <div class="w-[110px] shrink-0 flex items-center justify-end">
+            ${{ keyCost(key).toFixed(2) }}
+          </div>
+
+          <UiDropdown>
+            <template #button>
+              <div class="flex items-center h-full">
+                <button
+                  type="button"
+                  class="text-skin-link"
+                  aria-label="Key actions"
+                >
+                  <IH-dots-horizontal />
+                </button>
+              </div>
+            </template>
+            <template #items>
+              <UiDropdownItem @click="keyToRevoke = key">
+                <IH-trash :width="16" />
+                Revoke key
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
       </div>
     </template>
