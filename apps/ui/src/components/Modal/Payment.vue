@@ -22,6 +22,8 @@ const PLAN_DEFINITION = {
   ]
 };
 
+const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
+
 const props = withDefaults(
   defineProps<{
     open: boolean;
@@ -42,8 +44,6 @@ const props = withDefaults(
     }
   }
 );
-
-const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
 
 const emit = defineEmits<{
   (e: 'close'): void;
@@ -80,7 +80,7 @@ const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
-const cardLoading = ref(false);
+const isCardLoading = ref(false);
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -170,7 +170,7 @@ watch(
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
   // Card doesn't use the quantity field, so its validity is crypto-only.
-  if (paymentMethod.value === 'card') return !cardLoading.value;
+  if (paymentMethod.value === 'card') return !isCardLoading.value;
   return (
     formValid.value &&
     !isPending.value &&
@@ -221,14 +221,14 @@ async function handleSubmit() {
 
   if (paymentMethod.value === 'card') {
     if (!props.space) return;
-    cardLoading.value = true;
+    isCardLoading.value = true;
     try {
       await redirectToCheckout({
         space: props.space,
         plan: plan.value
       });
     } catch (err) {
-      cardLoading.value = false;
+      isCardLoading.value = false;
       console.error('[stripe] checkout failed', err);
       uiStore.addNotification(
         'error',
@@ -257,7 +257,7 @@ watch(
     isPickerShown.value = false;
     isHidden.value = false;
     selectedTokenAddress.value = '';
-    cardLoading.value = false;
+    isCardLoading.value = false;
     hasPendingCryptoIntent.value = false;
     paymentMethod.value = props.isAuthValidForCrypto ? 'crypto' : 'card';
     form.value = clone(FORM);
@@ -400,7 +400,7 @@ watch(
         class="w-full"
         primary
         :disabled="!canSubmit"
-        :loading="paymentMethod === 'card' ? cardLoading : isPending"
+        :loading="paymentMethod === 'card' ? isCardLoading : isPending"
         @click="handleSubmit"
       >
         <template v-if="paymentMethod === 'card'">
