@@ -27,11 +27,11 @@ export function useStripeCheckout() {
       })
     });
 
-    const { result, error_description } = (await res
+    const { result, error_description } = ((await res
       .json()
       .catch(err =>
         console.error('[stripe] failed to parse checkout response', err)
-      )) as SchnapsResponse;
+      )) ?? {}) as SchnapsResponse;
 
     if (!res.ok || !result?.url) {
       throw new Error(error_description || 'Failed to start checkout');
@@ -46,11 +46,11 @@ export function useStripeCheckout() {
 
     if (!res.ok) throw new Error('Failed to get billing portal URL');
 
-    const { result } = (await res
+    const { result } = ((await res
       .json()
       .catch(err =>
         console.error('[stripe] failed to parse portal response', err)
-      )) as SchnapsResponse;
+      )) ?? {}) as SchnapsResponse;
 
     return result?.url ?? null;
   }
