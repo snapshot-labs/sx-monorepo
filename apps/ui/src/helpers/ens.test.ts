@@ -12,11 +12,13 @@ describe('ens', () => {
   describe('getNameOwner', () => {
     describe('for names using the onchain resolver', () => {
       it('should return the owner of the name on mainnet', async () => {
+        // Mainnet UR does not expose findOwner yet — falls back to v1 registry
         const owner = await getNameOwner('ens.eth', 1);
         expect(owner).toBe('0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9');
       });
 
       it('should return the owner of the name on testnet', async () => {
+        // Sepolia UR has findOwner; unmigrated names return zero and fall back to v1
         const owner = await getNameOwner('ens.eth', 11155111);
         expect(owner).toBe('0x179A862703a4adfb29896552DF9e307980D19285');
       });

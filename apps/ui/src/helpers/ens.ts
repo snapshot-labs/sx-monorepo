@@ -12,7 +12,9 @@ export type ENSChainId = 1 | 11155111;
 
 const UNIVERSAL_RESOLVER = '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe';
 const UR_ABI = new Interface([
-  'function resolve(bytes name, bytes data) view returns (bytes, address)'
+  'function resolve(bytes name, bytes data) view returns (bytes, address)',
+  // ENSv2-only today (available on Sepolia; mainnet UR does not expose it yet)
+  'function findOwner(bytes name) view returns (address)'
 ]);
 const RESOLVER_ABI = new Interface([
   'function addr(bytes32 node) view returns (address)',
@@ -104,6 +106,62 @@ async function urResolve(
   }
 }
 
+/**
+ * ENSv2 ownership via Universal Resolver.findOwner.
+ * Returns null when unsupported (e.g. mainnet UR), on revert, or for
+ * unmigrated names (zero address) so callers can fall back to the v1 registry.
+ */
+async function urFindOwner(
+  name: string,
+  chainId: ENSChainId
+): Promise<string | null> {
+  const provider = getProvider(chainId);
+  const ur = new Contract(UNIVERSAL_RESOLVER, UR_ABI, provider);
+  try {
+    const owner: string = await ur.findOwner(dnsEncode(name));
+    if (!owner || owner === EVM_EMPTY_ADDRESS) return null;
+    return owner;
+  } catch {
+    return null;
+  }
+}
+
+async function getNameOwnerV1(name: string, chainId: ENSChainId) {
+  const provider = getProvider(chainId);
+  const ensHash = namehash(name);
+
+  let owner = await call(
+    provider,
+    ENS_CONTRACTS.registryAbi,
+    [ENS_CONTRACTS.registry, 'owner', [ensHash]],
+    {
+      blockTag: 'latest'
+    }
+  );
+
+  if (!name.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
+    const resolvedAddress = (await getAddresses([name], chainId))[name];
+    const nameTokens = name.split('.');
+
+    if (nameTokens.length > 2) {
+      owner = resolvedAddress || EVM_EMPTY_ADDRESS;
+    } else if (nameTokens.length === 2 && resolvedAddress) {
+      owner = await getDNSOwner(name);
+    }
+  }
+
+  if (owner !== ENS_CONTRACTS.nameWrappers[chainId]) return owner;
+
+  return call(
+    provider,
+    ENS_CONTRACTS.nameWrapperAbi,
+    [ENS_CONTRACTS.nameWrappers[chainId], 'ownerOf', [ensHash]],
+    {
+      blockTag: 'latest'
+    }
+  );
+}
+
 export async function resolveName(name: string, chainId: ENSChainId) {
   const node = namehash(name);
   const callData = RESOLVER_ABI.encodeFunctionData('addr', [node]);
@@ -162,39 +220,12 @@ export async function setEnsTextRecord(
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
-  const provider = getProvider(chainId);
-  const ensHash = namehash(name);
+  // Prefer UR.findOwner (ENSv2). Falls back to v1 registry for unmigrated
+  // names and chains where findOwner is not yet available (e.g. mainnet).
+  const urOwner = await urFindOwner(name, chainId);
+  if (urOwner) return urOwner;
 
-  let owner = await call(
-    provider,
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'owner', [ensHash]],
-    {
-      blockTag: 'latest'
-    }
-  );
-
-  if (!name.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = (await getAddresses([name], chainId))[name];
-    const nameTokens = name.split('.');
-
-    if (nameTokens.length > 2) {
-      owner = resolvedAddress || EVM_EMPTY_ADDRESS;
-    } else if (nameTokens.length === 2 && resolvedAddress) {
-      owner = await getDNSOwner(name);
-    }
-  }
-
-  if (owner !== ENS_CONTRACTS.nameWrappers[chainId]) return owner;
-
-  return call(
-    provider,
-    ENS_CONTRACTS.nameWrapperAbi,
-    [ENS_CONTRACTS.nameWrappers[chainId], 'ownerOf', [ensHash]],
-    {
-      blockTag: 'latest'
-    }
-  );
+  return getNameOwnerV1(name, chainId);
 }
 
 export async function getSpaceController(name: string, chainId: ENSChainId) {
