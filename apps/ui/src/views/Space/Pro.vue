@@ -220,15 +220,28 @@ async function handleStripeSuccess() {
     'Payment received! Your Pro subscription will be active shortly.'
   );
 
+  // The standalone /pro route has no space in its URL, so it's carried back
+  // through the Stripe redirect via the success_url query param.
+  const spaceKey = route.query.space as string | undefined;
+
   const query = { ...route.query };
   delete query.stripe_success;
+  delete query.space;
   router.replace({ query });
 
-  await handlePaymentConfirmed();
+  if (spaceKey) {
+    await queryClient.invalidateQueries({
+      queryKey: ['spaces', 'detail', spaceKey]
+    });
+  }
 }
 
 onMounted(() => {
-  if (route.query.stripe_success) handleStripeSuccess();
+  if (route.query.stripe_success) {
+    handleStripeSuccess().catch(err =>
+      console.error('[stripe] post-checkout refresh failed', err)
+    );
+  }
 
   if (
     !selectedSpace.value ||

@@ -22,7 +22,9 @@ export function useStripeCheckout() {
       body: JSON.stringify({
         space,
         plan,
-        success_url: `${base}?stripe_success=1`,
+        // carry the space so /pro (which has no space in its URL) can refetch
+        // Pro status after Stripe redirects back
+        success_url: `${base}?stripe_success=1&space=${encodeURIComponent(space)}`,
         cancel_url: base
       })
     });
