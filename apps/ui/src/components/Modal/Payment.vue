@@ -372,7 +372,11 @@ watch(
               </div>
             </div>
             <div v-if="$slots.summary">
-              <slot name="summary" :quantity="effectiveQuantity" />
+              <slot
+                name="summary"
+                :quantity="effectiveQuantity"
+                :payment-method="paymentMethod"
+              />
             </div>
           </div>
           <UiCheckbox v-model="isTermsAccepted" class="text-start">

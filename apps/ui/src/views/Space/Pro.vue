@@ -452,26 +452,34 @@ onMounted(() => {
       @close="handleModalPaymentClose"
       @confirmed="handlePaymentConfirmed"
     >
-      <template #summary="{ quantity }">
+      <template #summary="{ quantity, paymentMethod }">
         <div class="flex justify-between">
-          <div>End date</div>
-          <div class="text-skin-heading">
-            {{
-              dayjs(
-                (selectedSpace.turbo_expiration || 0) * 1e3 > Date.now()
-                  ? selectedSpace.turbo_expiration * 1e3
-                  : new Date()
-              )
-                .add(
-                  quantity,
-                  subscriptionLength === 'yearly' ? 'year' : 'month'
+          <template v-if="paymentMethod === 'card'">
+            <div>Auto-renews</div>
+            <div class="text-skin-heading capitalize">
+              {{ subscriptionLength }}
+            </div>
+          </template>
+          <template v-else>
+            <div>End date</div>
+            <div class="text-skin-heading">
+              {{
+                dayjs(
+                  (selectedSpace.turbo_expiration || 0) * 1e3 > Date.now()
+                    ? selectedSpace.turbo_expiration * 1e3
+                    : new Date()
                 )
-                .format('D MMM YYYY')
-            }}
-            ({{ quantity }}
-            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
-            }}{{ quantity > 1 ? 's' : '' }})
-          </div>
+                  .add(
+                    quantity,
+                    subscriptionLength === 'yearly' ? 'year' : 'month'
+                  )
+                  .format('D MMM YYYY')
+              }}
+              ({{ quantity }}
+              {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+              }}{{ quantity > 1 ? 's' : '' }})
+            </div>
+          </template>
         </div>
       </template>
       <template #transactionModalSuccessTitle>
