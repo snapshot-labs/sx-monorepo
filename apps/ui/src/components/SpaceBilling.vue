@@ -31,22 +31,11 @@ const { getPortalUrl } = useStripeCheckout();
 const uiStore = useUiStore();
 
 async function openPortal() {
-  // Open a blank tab synchronously within the click gesture so the popup
-  // blocker doesn't block it after the awaited fetch (no features string, so
-  // it's a real tab, not a popup window); navigate it once we have the URL.
-  const portalTab = window.open('', '_blank');
   try {
     const url = await getPortalUrl(props.space.network);
     if (!url) throw new Error('No billing portal URL');
-    if (portalTab) {
-      portalTab.opener = null;
-      portalTab.location.href = url;
-    } else {
-      // popup blocked despite the gesture — fall back to same-tab navigation
-      window.location.href = url;
-    }
+    window.location.href = url;
   } catch (err) {
-    portalTab?.close();
     console.error('[stripe] portal failed', err);
     uiStore.addNotification('error', 'Failed to open the billing portal');
   }
