@@ -80,7 +80,7 @@ jobs:
       - name: Flip public Service via Helm
         run: |
           C="${{ steps.color.outputs.inactive }}"
-          helm upgrade --install "$ENVIRONMENT-${RELEASE_INFIX}public" "$PUBLIC_CHART" \
+          helm upgrade --install "${ENVIRONMENT}-${RELEASE_INFIX}public" "$PUBLIC_CHART" \
             --namespace "$ENVIRONMENT" --create-namespace \
             --values "$PUBLIC_CHART/values-$APP_KEY-$ENVIRONMENT.yaml" \
             --set activeColor="$C"

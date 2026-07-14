@@ -145,7 +145,7 @@ jobs:
 
       - name: Deploy inactive color with Helm
         run: |
-          helm upgrade --install "$ENVIRONMENT-$RELEASE_INFIX${{ steps.color.outputs.inactive }}" "$CHART" \
+          helm upgrade --install "${ENVIRONMENT}-${RELEASE_INFIX}${{ steps.color.outputs.inactive }}" "$CHART" \
             --namespace "$ENVIRONMENT" --create-namespace \
             --values "$CHART/values-$APP_KEY-$ENVIRONMENT.yaml" \
             --set color="${{ steps.color.outputs.inactive }}" \
