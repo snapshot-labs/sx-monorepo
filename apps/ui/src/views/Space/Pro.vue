@@ -225,8 +225,6 @@ async function handleStripeSuccess() {
     'Payment received! Your Pro subscription will be active shortly.'
   );
 
-  // The standalone /pro route has no space in its URL, so it's carried back
-  // through the Stripe redirect via the success_url query param.
   const spaceKey = route.query.space as string | undefined;
 
   const query = { ...route.query };

@@ -130,7 +130,6 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
-// intent flag: user clicked Crypto and was sent to connect a wallet
 const hasPendingCryptoIntent = ref(false);
 
 function selectCryptoTab() {
@@ -143,7 +142,6 @@ function selectCryptoTab() {
 }
 
 function selectCardTab() {
-  // clear any pending crypto intent so a later connect doesn't hijack the tab
   hasPendingCryptoIntent.value = false;
   paymentMethod.value = 'card';
 }
@@ -161,7 +159,6 @@ watch(
       !isHidden.value &&
       !isModalTransactionProgressOpen.value
     ) {
-      // don't switch tabs (and thus the amount) while a payment is in flight
       paymentMethod.value = 'card';
     }
   }
@@ -169,7 +166,6 @@ watch(
 
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
-  // Card doesn't use the quantity field, so its validity is crypto-only.
   if (paymentMethod.value === 'card') return !isCardLoading.value;
   return (
     formValid.value &&
@@ -179,12 +175,9 @@ const canSubmit = computed(() => {
   );
 });
 
-// Card buys a single billing period; crypto can buy multiple.
 const isQuantityAdjustable = computed(() => paymentMethod.value === 'crypto');
 
 const effectiveQuantity = computed(() =>
-  // Clamp so a cleared/invalid quantity doesn't flash "You will pay 0"
-  // while the user edits; submission is still gated by formValid.
   isQuantityAdjustable.value ? Math.max(1, Number(form.value.quantity) || 1) : 1
 );
 
