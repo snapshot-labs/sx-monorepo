@@ -1,0 +1,25 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/api/**'
+      - 'helm/**'
+      - '.github/workflows/deploy-api.yml'
+      - '.github/workflows/_deploy-app.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-app.yml
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+    with:
+      app_key: api
+      app_name: sx-api
+      image_name: sx-api
+      dockerfile: apps/api/Dockerfile
+      environments: '["testnet", "mainnet"]'

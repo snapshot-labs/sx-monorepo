@@ -1,0 +1,20 @@
+name: Promote Delegates API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to promote
+        type: choice
+        options: [mainnet]
+        required: true
+
+jobs:
+  promote:
+    uses: ./.github/workflows/_promote-app.yml
+    secrets: inherit
+    with:
+      environment: ${{ inputs.environment }}
+      app_key: delegates
+      app_name: delegates
+      release_infix: delegates-

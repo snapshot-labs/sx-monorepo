@@ -3,11 +3,12 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { describe, expect, it } from 'vitest';
 import createMerkleWhitelist from '../../../../src/strategies/evm/merkleWhitelist';
+import { ETH_RPC_URL } from '../../../constants';
 
 describe('merkleWhitelistStrategy', () => {
   const whitelistStrategy = createMerkleWhitelist();
 
-  const provider = new JsonRpcProvider('https://rpc.brovider.xyz/5');
+  const provider = new JsonRpcProvider(ETH_RPC_URL);
 
   const whitelist = [['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', 21n]] as [
     string,

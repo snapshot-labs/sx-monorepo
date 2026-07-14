@@ -2,6 +2,11 @@ import { Account } from 'starknet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { StarknetSig } from '../../../../../src/clients/starknet/starknet-sig';
 import { starknetNetworks, starknetSepolia } from '../../../../../src/networks';
+import {
+  ETH_RPC_URL,
+  MANA_URL,
+  WHITELIST_SERVER_URL
+} from '../../../../constants';
 import { starkProvider } from '../../../helpers';
 
 describe('StarknetSig', () => {
@@ -14,9 +19,9 @@ describe('StarknetSig', () => {
   const client = new StarknetSig({
     starkProvider,
     networkConfig: starknetSepolia,
-    ethUrl: 'https://rpc.brovider.xyz/5',
-    manaUrl: 'https://mana.box',
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    ethUrl: ETH_RPC_URL,
+    manaUrl: MANA_URL,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   });
 
   beforeAll(() => {

@@ -2,10 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { starknetSepolia } from '../../../../src/networks';
 import createMerkleWhitelistStrategy from '../../../../src/strategies/starknet/merkleWhitelist';
 import { AddressType, Leaf } from '../../../../src/utils/merkletree';
+import { ETH_RPC_URL, WHITELIST_SERVER_URL } from '../../../constants';
 import { proposeEnvelope } from '../../fixtures';
 import { starkProvider } from '../../helpers';
-
-const ethUrl = process.env.SEPOLIA_NODE_URL as string;
 
 describe('merkleWhitelist', () => {
   const leaf = new Leaf(
@@ -27,9 +26,9 @@ describe('merkleWhitelist', () => {
   const merkleWhitelist = createMerkleWhitelistStrategy();
   const config = {
     starkProvider,
-    ethUrl,
+    ethUrl: ETH_RPC_URL,
     networkConfig: starknetSepolia,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   it('should return type', () => {

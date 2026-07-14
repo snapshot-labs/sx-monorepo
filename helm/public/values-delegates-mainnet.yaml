@@ -1,0 +1,10 @@
+appName: delegates
+namespace: mainnet
+route:
+  enabled: true
+  host: delegates-api.snapshot.box
+directHosts:
+  - color: blue
+    host: delegates-api-1.snapshot.box
+  - color: green
+    host: delegates-api-2.snapshot.box

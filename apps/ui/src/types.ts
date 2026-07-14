@@ -306,10 +306,16 @@ export type Proposal = {
   executions: ProposalExecution[];
   /** Timestamp when proposal starts */
   start: number;
+  /** Block number when proposal starts (null for offchain) */
+  start_block_number: number | null;
   /** Timestamp when proposal can end at the earliest */
   min_end: number;
+  /** Block number when proposal can end at the earliest (null for offchain) */
+  min_end_block_number: number | null;
   /** Timestamp when proposal can end at the latest */
   max_end: number;
+  /** Block number when proposal can end at the latest (null for offchain) */
+  max_end_block_number: number | null;
   snapshot: number;
   executed_at: number | null;
   choices: string[];
@@ -333,7 +339,6 @@ export type Proposal = {
   veto_tx: string | null;
   vote_count: number;
   has_execution_window_opened: boolean;
-  execution_ready: boolean;
   vetoed: boolean;
   /**
    * Determines if proposal execution is settled - all transactions have been executed or vetoed.
@@ -349,6 +354,7 @@ export type Proposal = {
   plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;
+  app?: string;
 };
 
 export type UserProfile = {
@@ -422,6 +428,7 @@ export type Vote = {
   reason?: string;
   created: number;
   tx: string;
+  app?: string;
 };
 
 export type Member = {

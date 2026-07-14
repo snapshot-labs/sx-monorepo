@@ -3,6 +3,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/evm/ethereum-sig';
 import { evmSepolia } from '../../../../../src/evmNetworks';
+import { MANA_URL, WHITELIST_SERVER_URL } from '../../../../constants';
 
 describe('EthereumSig', () => {
   const space = '0xef8cd9081d7969c5cdcbb84dd8d577d2daefb649';
@@ -16,8 +17,8 @@ describe('EthereumSig', () => {
   );
   const ethSigClient = new EthereumSig({
     networkConfig: evmSepolia,
-    whitelistServerUrl: 'https://wls.snapshot.box',
-    manaUrl: 'https://mana.box',
+    whitelistServerUrl: WHITELIST_SERVER_URL,
+    manaUrl: MANA_URL,
     provider
   });
 

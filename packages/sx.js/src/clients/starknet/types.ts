@@ -124,7 +124,7 @@ export type Vote = {
   metadataUri: string;
 };
 
-export type Message = Propose | Vote | UpdateProposal;
+type Message = Propose | Vote | UpdateProposal;
 
 export type Envelope<T extends Message> = {
   signatureData?: SignatureData;

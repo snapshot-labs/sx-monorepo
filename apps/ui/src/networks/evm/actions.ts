@@ -23,7 +23,6 @@ import {
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
-import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
@@ -617,10 +616,6 @@ export function createActions(
         chainId
       };
 
-      if (!isContract && proposal.execution_strategy_type === 'Axiom') {
-        return highlightVote({ signer, data });
-      }
-
       if (relayerType === 'evm') {
         return ethSigClient.vote({
           signer,
@@ -637,14 +632,6 @@ export function createActions(
         },
         { noWait: isContract && connectorType !== 'sequence' }
       );
-    },
-    finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
-      await executionCall('eth', chainId, 'finalizeProposal', {
-        space: proposal.space.id,
-        proposalId: proposal.proposal_id
-      });
-
-      return null;
     },
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);

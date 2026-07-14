@@ -35,6 +35,20 @@ Returns the Snapshot GraphQL schema. Call this before `snapshot-query` only when
 
 No inputs.
 
+### `snapshot-whoami`
+
+Returns the connected identity and signing capability:
+
+- `address` — the user's account, auto-injected as `$user` in `snapshot-query`.
+- `alias` — the delegated signer wallet that signs writes on the user's behalf.
+- `authorized` — whether that alias is currently authorized for the user. When `false`, the write tools fail until the user re-authorizes.
+- `profile` — the user's public profile (`name`, `about`, `avatar`) when one exists.
+- `links.alias` — the page where the user authorizes or revokes the signer alias.
+
+Useful as a pre-flight before a write action. Requires a connected wallet, same as `snapshot-vote`.
+
+No inputs.
+
 ### `snapshot-vote`
 
 Casts a vote on a Snapshot proposal. The proposal's voting `type` and `privacy` are fetched from Snapshot and applied automatically, so the caller does not need to specify them. Re-calling on the same proposal **replaces** the previous vote (this is how the user changes a vote).
@@ -50,7 +64,7 @@ Requires a wallet to be configured for signing (see [Configuration](#configurati
 
 ### `snapshot-propose`
 
-Creates a Snapshot proposal. Most defaults come from the space itself, so for typical use you only need `space`, `title`, and `body`. The space's enforced voting type, voting period, snapshot block, and privacy mode are read from Snapshot and applied automatically.
+Creates a Snapshot proposal. Most defaults come from the space itself, so for typical use you only need `space`, `title`, and `body`. The space's enforced voting type, voting period, and privacy mode are read from Snapshot and applied automatically.
 
 | Input | Type | Description |
 |-------|------|-------------|
@@ -63,17 +77,18 @@ Creates a Snapshot proposal. Most defaults come from the space itself, so for ty
 | `labels` | `string[]?` | Proposal label IDs |
 | `start` | `number?` | Voting start as a unix timestamp in seconds. Defaults to `now + space.voting.delay`. |
 | `end` | `number?` | Voting end as a unix timestamp in seconds. Defaults to `start + space.voting.period` (3 days if the space sets none). |
-| `shielded` | `boolean?` | Opt into Shutter-encrypted voting. Only honored when the space's `voting.privacy` is `"any"`; spaces with `voting.privacy === "shutter"` always encrypt. |
+| `privacy` | `"shutter" \| "none"?` | Opt into Shutter-encrypted voting with `"shutter"`. Only honored when the space's `voting.privacy` is `"any"`; spaces with `voting.privacy === "shutter"` always encrypt. |
 
 The snapshot block is read from `https://rpc.snapshot.org/<chainId>` based on the space's network. Requires a wallet, same as `snapshot-vote`.
 
 ### `snapshot-follow`
 
-Adds a space to the user's followed list. Calling it again on a space the user already follows is safe — Snapshot does not duplicate the follow.
+Follows or unfollows a space for the user. Following a space you already follow returns an error, and so does unfollowing a space you do not follow. Check the current state with `follows(where: { follower: $user })` before calling this.
 
 | Input | Type | Description |
 |-------|------|-------------|
 | `space` | `string` | Space ID slug (e.g. `"ens.eth"`) |
+| `action` | `"follow" \| "unfollow"?` | Whether to follow or unfollow. Defaults to `"follow"`. |
 
 Requires a wallet, same as `snapshot-vote` and `snapshot-propose`.
 

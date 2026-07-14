@@ -42,7 +42,7 @@ export async function verify(body): Promise<any> {
   }
 
   const controller = await getSpaceController(msg.space, SNAPSHOT_ENV);
-  const isController = controller === body.address;
+  const isController = controller.toLowerCase() === body.address.toLowerCase();
 
   const admins = (space?.admins || []).map(admin => admin.toLowerCase());
   const isAdmin = admins.includes(body.address.toLowerCase());

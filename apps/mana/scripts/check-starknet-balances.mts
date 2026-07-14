@@ -26,7 +26,7 @@ type BalanceInfo = {
   ethBalance: bigint;
 };
 
-const MANA_URL = 'https://mana.box';
+const MANA_URL = 'https://mana.snapshot.box';
 const ETH_TOKEN_ADDRESS =
   '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7';
 const STARK_TOKEN_ADDRESS =

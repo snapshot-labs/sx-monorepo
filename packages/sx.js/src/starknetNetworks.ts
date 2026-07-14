@@ -59,6 +59,35 @@ function createStarknetConfig(
             }
           }
         } as const)
+      : {}),
+    ...(network.Strategies.EVMSlotValueV2
+      ? ({
+          [validateAndParseAddress(network.Strategies.EVMSlotValueV2)]: {
+            type: 'evmSlotValueV2'
+          }
+        } as const)
+      : {}),
+    ...(network.Strategies.OZVotesStorageProofV2
+      ? ({
+          [validateAndParseAddress(network.Strategies.OZVotesStorageProofV2)]: {
+            type: 'ozVotesStorageProofV2',
+            params: {
+              trace: 224
+            }
+          }
+        } as const)
+      : {}),
+    ...(network.Strategies.OZVotesTrace208StorageProofV2
+      ? ({
+          [validateAndParseAddress(
+            network.Strategies.OZVotesTrace208StorageProofV2
+          )]: {
+            type: 'ozVotesStorageProofV2',
+            params: {
+              trace: 208
+            }
+          }
+        } as const)
       : {})
   } as const;
 
@@ -119,7 +148,15 @@ export const starknetNetworks = {
       OZVotesStorageProof:
         '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e',
       OZVotesTrace208StorageProof:
-        '0x50bceb018e677f281b30587406b8210a0d8fbf37e58299bb7c6ec0e8dd212a3'
+        '0x50bceb018e677f281b30587406b8210a0d8fbf37e58299bb7c6ec0e8dd212a3',
+      // Herodotus Satellite versions (sx-starknet#641), deployed on sn
+      // against Satellite 0x01ba7d4b…6a79bf2e (chain_id 1).
+      EVMSlotValueV2:
+        '0x5ad1e980d8cb9d6b7ed19a14dfd659287c6005c579edf203388b007861ac9cc',
+      OZVotesStorageProofV2:
+        '0x4a045853c633bf0e9648d83d8413ddf47c9087ad66894ba23bf01d534fe9922',
+      OZVotesTrace208StorageProofV2:
+        '0x57a390dd0c5dbec95ed88e38eaaaa2484dadcc3e42eed633d047f1789eaa1eb'
     },
     ProposalValidations: {
       VotingPower:
@@ -171,7 +208,15 @@ export const starknetNetworks = {
       OZVotesStorageProof:
         '0x2713fd8af933632635212ac1217494b043c3e8ea58409433fa9273072191397',
       OZVotesTrace208StorageProof:
-        '0x5ade144027c3d704256b83e96c92364c5fd7a85e72dd929f02effe47cf30962'
+        '0x5ade144027c3d704256b83e96c92364c5fd7a85e72dd929f02effe47cf30962',
+      // Herodotus Satellite versions (sx-starknet#641), deployed on sn-sep
+      // against Satellite 0x00421cd9…676e (chain_id 11155111).
+      EVMSlotValueV2:
+        '0x1ba0da16bba191e8f5eb9e8906aefad6520eb65dc5b258132e5f00831649ad6',
+      OZVotesStorageProofV2:
+        '0x3ca72ed07a894987e5cf8bf6b7ac2aa3b0a58f790de6ea9e2d31dcd19df9407',
+      OZVotesTrace208StorageProofV2:
+        '0x36ba74e0619f7e25654cee7f9c95d5aa902c5d11c934735a4ee538102e2f2b1'
     },
     ProposalValidations: {
       VotingPower:

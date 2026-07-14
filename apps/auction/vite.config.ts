@@ -56,9 +56,6 @@ export default defineConfig({
       }
     })
   ],
-  optimizeDeps: {
-    exclude: ['@snapshot-labs/sx']
-  },
   build: {
     target: 'esnext',
     commonjsOptions: {
