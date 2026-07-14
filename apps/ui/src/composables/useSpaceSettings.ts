@@ -472,7 +472,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   }
 
   function getInitialVotingProperties(space: Space) {
-    const validPrivacyTypes = ['shutter', 'any'];
+    const validPrivacyTypes = ['shutter', 'vocdoni', 'any'];
     const spaceVoteType = space.additionalRawData?.voting.type;
     const privacyValue = space.privacy;
 

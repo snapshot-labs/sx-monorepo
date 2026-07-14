@@ -56,7 +56,7 @@ export type ApiSpace = {
     type: VoteType | '' | null;
     quorum: number | null;
     quorumType?: 'default' | 'rejection';
-    privacy: '' | 'shutter' | 'any';
+    privacy: '' | 'shutter' | 'vocdoni' | 'any';
     hideAbstain: boolean;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
@@ -135,7 +135,7 @@ export type ApiProposal = {
   created: number;
   updated: number | null;
   votes: number;
-  privacy: 'shutter' | '';
+  privacy: 'shutter' | 'vocdoni' | '';
   plugins: Record<string, any>;
   flagged: boolean;
   flagCode: number;

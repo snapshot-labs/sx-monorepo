@@ -12,7 +12,7 @@ import log from './helpers/log';
 import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
 import relayer, { issueReceipt } from './helpers/relayer';
-import { getIp, jsonParse, sha256 } from './helpers/utils';
+import { getIp, isEncryptedPrivacy, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
 
 const NETWORK_METADATA = {
@@ -203,7 +203,7 @@ export default async function ingestor(req) {
       if (type === 'vote-string') {
         const proposal = await getProposal(message.space, message.proposal);
         if (!proposal) return Promise.reject('unknown proposal');
-        if (proposal.privacy !== 'shutter') {
+        if (!isEncryptedPrivacy(proposal.privacy)) {
           try {
             choice = JSON.parse(message.choice);
           } catch {

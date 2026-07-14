@@ -105,8 +105,21 @@ const otherResultsSummary = computed(() => {
   );
 });
 
+const isPermanentlyPrivate = computed(
+  () => props.proposal.privacy === 'vocdoni'
+);
+
+// Per-choice results are hidden while a shutter proposal is still open, and
+// hidden forever for vocdoni proposals (the choice is never decrypted).
+const resultsHidden = computed(
+  () =>
+    isPermanentlyPrivate.value ||
+    (props.proposal.privacy !== 'none' && !props.proposal.completed)
+);
+
 const isFinalizing = computed(() => {
   return (
+    !isPermanentlyPrivate.value &&
     offchainNetworks.includes(props.proposal.network) &&
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
@@ -148,13 +161,18 @@ onMounted(() => {
   </div>
   <div
     v-else-if="
-      props.proposal.privacy !== 'none' &&
-      props.proposal.state === 'active' &&
-      withDetails
+      withDetails &&
+      (isPermanentlyPrivate ||
+        (props.proposal.privacy !== 'none' &&
+          props.proposal.state === 'active'))
     "
     class="space-y-1"
   >
-    <div>
+    <div v-if="isPermanentlyPrivate">
+      Choices are encrypted and never revealed. Only the list of voters and
+      their voting power are public.
+    </div>
+    <div v-else>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
@@ -210,10 +228,7 @@ onMounted(() => {
           :content="proposal.choices[result.choice - 1]"
           class="grow"
         />
-        <IH-lock-closed
-          v-if="proposal.privacy !== 'none' && !proposal.completed"
-          class="size-[16px] shrink-0"
-        />
+        <IH-lock-closed v-if="resultsHidden" class="size-[16px] shrink-0" />
         <template v-else>
           <div>
             {{ _vp(result.score / 10 ** decimals) }}
@@ -257,10 +272,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
-    <div
-      v-else-if="props.proposal.privacy === 'none' || props.proposal.completed"
-      class="h-full flex items-center"
-    >
+    <div v-else-if="!resultsHidden" class="h-full flex items-center">
       <div
         class="rounded-full h-[6px] overflow-hidden"
         :style="{
