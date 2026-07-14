@@ -1,5 +1,8 @@
 import { RouteRecordRaw } from 'vue-router';
 import OrganizationOverview from '@/views/Organization/Overview.vue';
+import OrganizationUserProposals from '@/views/Organization/User/Proposals.vue';
+import OrganizationUserVotes from '@/views/Organization/User/Votes.vue';
+import OrganizationUser from '@/views/Organization/User.vue';
 import Organization from '@/views/Organization.vue';
 import ProposalExecution from '@/views/Proposal/Execution.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
@@ -12,10 +15,7 @@ import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
-import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
-import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
-import SpaceUser from '@/views/SpaceUser.vue';
 import Topic from '@/views/Topic.vue';
 
 function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
@@ -86,7 +86,7 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
     {
       path: 'profile/:user',
       name: `${prefix}-user`,
-      component: SpaceUser,
+      component: OrganizationUser,
       children: [
         {
           path: '',
@@ -96,12 +96,12 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
         {
           path: 'proposals',
           name: `${prefix}-user-proposals`,
-          component: SpaceUserProposals
+          component: OrganizationUserProposals
         },
         {
           path: 'votes',
           name: `${prefix}-user-votes`,
-          component: SpaceUserVotes
+          component: OrganizationUserVotes
         }
       ]
     }
