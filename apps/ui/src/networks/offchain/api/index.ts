@@ -3,6 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
@@ -498,7 +499,7 @@ function formatDelegations(
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const basicDelegationStrategy = space.strategies.find(strategy =>
+  const delegateRegistryStrategies = space.strategies.filter(strategy =>
     DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
@@ -521,18 +522,33 @@ function formatDelegations(
     });
   }
 
-  if (basicDelegationStrategy) {
-    const chainId = space.network;
-
+  if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
-      delegations.push({
-        name: DELEGATION_TYPES_NAMES['delegate-registry'],
-        apiType: 'delegate-registry',
-        apiUrl,
-        contractAddress: space.id,
-        chainId
-      });
+      const chainIds = [
+        ...new Set(
+          delegateRegistryStrategies.map(
+            strategy => strategy.network || space.network
+          )
+        )
+      ];
+
+      for (const chainId of chainIds) {
+        const networkName = (
+          networks as Record<string, { name: string } | undefined>
+        )[String(chainId)]?.name;
+
+        delegations.push({
+          name:
+            chainIds.length > 1
+              ? `${DELEGATION_TYPES_NAMES['delegate-registry']} (${networkName ?? `Chain ${chainId}`})`
+              : DELEGATION_TYPES_NAMES['delegate-registry'],
+          apiType: 'delegate-registry',
+          apiUrl,
+          contractAddress: space.id,
+          chainId
+        });
+      }
     }
   }
 
