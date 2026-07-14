@@ -1,9 +1,10 @@
 import { metadataNetwork } from '@/networks';
 import { NavConfig, NavContext } from './types';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
+import IHCode from '~icons/heroicons-outline/code';
 import IHKey from '~icons/heroicons-outline/key';
-import IHStop from '~icons/heroicons-outline/stop';
 import IHUsers from '~icons/heroicons-outline/users';
+import IHViewGrid from '~icons/heroicons-outline/view-grid';
 
 export default {
   routeName: 'settings',
@@ -15,8 +16,13 @@ export default {
       items: {
         spaces: {
           name: 'My spaces',
-          icon: IHStop,
+          icon: IHViewGrid,
           hidden: isWhiteLabel
+        },
+        notifications: {
+          name: 'Notifications',
+          icon: IHAtSymbol,
+          hidden: metadataNetwork !== 's' || isWhiteLabel
         },
         contacts: {
           name: 'Contacts',
@@ -26,10 +32,9 @@ export default {
           name: 'Aliases',
           icon: IHKey
         },
-        notifications: {
-          name: 'Notifications',
-          icon: IHAtSymbol,
-          hidden: metadataNetwork !== 's' || isWhiteLabel
+        'api-keys': {
+          name: 'API keys',
+          icon: IHCode
         }
       }
     };
