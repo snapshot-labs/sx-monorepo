@@ -15,7 +15,8 @@ export function useStripeCheckout() {
     const [network] = space.split(':');
     const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
 
-    const base = window.location.href.split('?')[0];
+    const { origin, pathname, hash } = window.location;
+    const base = `${origin}${pathname}${hash.split('?')[0]}`;
     const res = await fetch(`${baseUrl}/stripe/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
