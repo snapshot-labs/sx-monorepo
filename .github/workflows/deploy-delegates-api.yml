@@ -1,0 +1,26 @@
+name: Deploy Delegates API
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/delegates-api/**'
+      - 'helm/**'
+      - '.github/workflows/deploy-delegates-api.yml'
+      - '.github/workflows/_deploy-app.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-app.yml
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
+    with:
+      app_key: delegates
+      app_name: delegates
+      image_name: delegates-api
+      dockerfile: apps/delegates-api/Dockerfile
+      environments: '["mainnet"]'
+      release_infix: delegates-
