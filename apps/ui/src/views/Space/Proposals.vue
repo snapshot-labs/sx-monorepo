@@ -127,15 +127,16 @@ watchThrottled(
     state.value = ['any', 'active', 'pending', 'closed'].includes(toState)
       ? (toState as NonNullable<ProposalsFilter['state']>)
       : 'any';
+
+    const isValidSpace =
+      toSpace && orgProposalSpaces.value.some(s => s.id === toSpace);
+    selectedSpaceId.value = isValidSpace ? toSpace : ANY_SPACE;
+
     let normalizedLabels = toLabels || [];
     normalizedLabels = Array.isArray(normalizedLabels)
       ? normalizedLabels
       : [normalizedLabels];
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
-
-    const isValidSpace =
-      toSpace && orgProposalSpaces.value.some(s => s.id === toSpace);
-    selectedSpaceId.value = isValidSpace ? toSpace : ANY_SPACE;
   },
   { throttle: 1000, immediate: true }
 );
