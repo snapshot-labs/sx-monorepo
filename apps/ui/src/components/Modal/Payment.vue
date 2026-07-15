@@ -138,6 +138,7 @@ const canSubmit = computed(() => {
     formValid.value &&
     !isPending.value &&
     !!auth.value?.account &&
+    props.isAuthValidForCrypto &&
     !isInsufficientBalance.value
   );
 });
