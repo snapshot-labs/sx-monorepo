@@ -34,11 +34,11 @@ const STARK_TOKEN_ADDRESS =
 
 const CONFIG: Record<NetworkID, NetworkConfig> = {
   sn: {
-    rpcUrl: 'https://rpc.brovider.xyz/sn',
+    rpcUrl: 'https://rpc.brovider.xyz/sn?client=mana',
     apiUrl: 'https://api.snapshot.box'
   },
   'sn-sep': {
-    rpcUrl: 'https://rpc.brovider.xyz/sn-sep',
+    rpcUrl: 'https://rpc.brovider.xyz/sn-sep?client=mana',
     apiUrl: 'https://testnet-api.snapshot.box'
   }
 };

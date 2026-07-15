@@ -10,8 +10,8 @@ type Source = {
 };
 
 const NETWORK_NODE_URLS: Record<NetworkID, string> = {
-  eth: 'https://rpc.snapshot.org/1'
-  // arb1: 'https://rpc.snapshot.org/42161'
+  eth: 'https://rpc.brovider.xyz/1?client=delegates-api'
+  // arb1: 'https://rpc.brovider.xyz/42161?client=delegates-api'
 };
 
 const TOKEN_SOURCES: Record<NetworkID, Source[]> = {
