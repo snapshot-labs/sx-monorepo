@@ -24,7 +24,7 @@ export function useStripeCheckout() {
         space,
         plan,
         success_url: `${base}?stripe_success=1&space=${encodeURIComponent(space)}`,
-        cancel_url: base
+        cancel_url: `${origin}${pathname}${hash}`
       })
     });
 
