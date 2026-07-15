@@ -2,7 +2,6 @@
 import { formatUnits } from '@ethersproject/units';
 import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
-import { useStripeCheckout } from '@/composables/useStripeCheckout';
 import { _n, clone, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 

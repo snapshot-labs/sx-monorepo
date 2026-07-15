@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { useStripeCheckout } from '@/composables/useStripeCheckout';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
