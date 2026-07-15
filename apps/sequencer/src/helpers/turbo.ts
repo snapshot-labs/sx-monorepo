@@ -10,6 +10,7 @@ type Space = {
 
 const SCHNAPS_API_URL = process.env.SCHNAPS_API_URL;
 const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
+const EVM_INDEXER = process.env.NETWORK === 'mainnet' ? 'eth' : 'sep';
 const RUN_INTERVAL = 10 * 1e3; // 10 seconds
 
 const provider = snapshot.utils.getProvider(
@@ -71,7 +72,7 @@ async function updateTurboStatuses(
 async function getSpacesExpirationDates(): Promise<Space[]> {
   const query = `
     query GetSpaces {
-      _metadata(id: "last_indexed_block") {
+      _metadata(id: "last_indexed_block", indexer: "${EVM_INDEXER}") {
         id
         value
       }
@@ -96,6 +97,13 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
 
     if (data.errors) {
       capture(data);
+      return [];
+    }
+
+    if (!data.data._metadata) {
+      console.log(
+        `Schnaps last_indexed_block missing for indexer "${EVM_INDEXER}". Skipping update.`
+      );
       return [];
     }
 
