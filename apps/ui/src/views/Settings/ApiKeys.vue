@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { FREE_CREDIT, keyCost } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
-import { _n, _t } from '@/helpers/utils';
+import { _t } from '@/helpers/utils';
 
 const DESCRIPTION =
   'Access the Snapshot APIs, billed per request from your credit balance.';
@@ -19,8 +19,9 @@ const {
   verify,
   keys,
   balance,
-  usage,
   spend,
+  dailyUsage,
+  monthlyUsage,
   createKey,
   revokeKey,
   topUp
@@ -30,10 +31,18 @@ const isCreateModalOpen = ref(false);
 const isTopupModalOpen = ref(false);
 const keyToRevoke = ref<ApiKey | null>(null);
 
-const meters = computed(() => [
-  { label: 'Hub API', reqs: usage.value.hub },
-  { label: 'Score API', reqs: usage.value.score }
-]);
+const PERIOD_ITEMS = [
+  { key: 'day', label: 'Day' },
+  { key: 'month', label: 'Month' }
+] as const;
+
+const usagePeriod = ref<'day' | 'month'>('day');
+const usageSeries = computed(() =>
+  usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
+);
+const usageRangeLabel = computed(() =>
+  usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
+);
 
 // Credit depletion: how much of the total credit (free + top-ups) is spent.
 const creditUsedRatio = computed(() => {
@@ -141,15 +150,20 @@ async function handleVerify() {
               :style="{ width: creditBarWidth }"
             />
           </div>
-          <div class="border-t mt-3 pt-3 space-y-2">
-            <div
-              v-for="meter in meters"
-              :key="meter.label"
-              class="flex items-center justify-between text-sm"
-            >
-              <div class="text-skin-heading" v-text="meter.label" />
-              <div>{{ _n(meter.reqs) }} requests</div>
+          <div class="border-t mt-4 pt-4">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <UiEyebrow class="font-medium">Usage</UiEyebrow>
+              <UiSelectDropdown
+                v-model="usagePeriod"
+                title="Period"
+                placement="end"
+                :items="PERIOD_ITEMS"
+              />
             </div>
+            <ApiUsageChart
+              :series="usageSeries"
+              :range-label="usageRangeLabel"
+            />
           </div>
         </div>
       </div>

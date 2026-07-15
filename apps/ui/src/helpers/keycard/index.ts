@@ -1,18 +1,15 @@
 // Mock keycard client. Persists per-address state in localStorage so the
 // whole flow (create key, usage, top up) is explorable without keycard-api.
-// Swap these functions for JSON-RPC calls once the API lands.
 import { sleep } from '@/helpers/utils';
-import { Account, ApiKey, Usage } from './types';
+import { Account, ApiKey, Usage, UsageBucket, UsageHistory } from './types';
 
 export const STORAGE_PREFIX = 'keycard.demo';
 
 const DAY = 86_400_000;
 
-// Free credit granted to every account, in USD.
 export const FREE_CREDIT = 50;
 
-// Price per request in USD, per API. Kept low and per-API so heavier APIs
-// cost more; can be changed later without repricing past usage.
+// Price per request in USD, per API.
 export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   hub: 0.0001,
   score: 0.0002
@@ -41,6 +38,56 @@ export function accountSpend(account: Account): number {
 
 export function accountBalance(account: Account): number {
   return FREE_CREDIT + account.topups - accountSpend(account);
+}
+
+// Deterministic pseudo-random so the demo chart doesn't reshuffle each render.
+function seededUnit(seed: number): number {
+  const value = Math.sin(seed) * 10_000;
+  return value - Math.floor(value);
+}
+
+function buildDailyUsage(account: Account, days = 30): UsageBucket[] {
+  const { hub, score } = accountUsage(account);
+  const active = hub + score > 0;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const buckets: UsageBucket[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    const seed = Math.floor(date.getTime() / DAY);
+    buckets.push({
+      label: date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      }),
+      ts: Math.floor(date.getTime() / 1000),
+      hub: active ? Math.round(300 + seededUnit(seed) * 1500) : 0,
+      score: active ? Math.round(80 + seededUnit(seed + 7) * 500) : 0
+    });
+  }
+  return buckets;
+}
+
+function buildMonthlyUsage(account: Account, months = 12): UsageBucket[] {
+  const { hub, score } = accountUsage(account);
+  const active = hub + score > 0;
+
+  const now = new Date();
+  const buckets: UsageBucket[] = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const seed = date.getFullYear() * 12 + date.getMonth();
+    buckets.push({
+      label: date.toLocaleDateString('en-US', { month: 'short' }),
+      ts: Math.floor(date.getTime() / 1000),
+      hub: active ? Math.round(9_000 + seededUnit(seed) * 40_000) : 0,
+      score: active ? Math.round(3_000 + seededUnit(seed + 7) * 15_000) : 0
+    });
+  }
+  return buckets;
 }
 
 function randomHex(length: number): string {
@@ -111,9 +158,23 @@ function save(address: string, account: Account) {
   );
 }
 
+// --- keycard-api calls (mock) ---
+// Each stands in for a keycard-api JSON-RPC method; swap the bodies for
+// network calls to go live.
+
 export async function fetchAccount(address: string): Promise<Account> {
   await sleep(400);
   return load(address);
+}
+
+// Maps to the reqs_daily / reqs_monthly aggregation on keycard-api.
+export async function fetchUsage(address: string): Promise<UsageHistory> {
+  await sleep(400);
+  const account = load(address);
+  return {
+    daily: buildDailyUsage(account),
+    monthly: buildMonthlyUsage(account)
+  };
 }
 
 export async function createKey(

@@ -1,8 +1,9 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import {
   accountBalance,
   accountSpend,
-  accountUsage,
   fetchAccount,
+  fetchUsage,
   createKey as sendCreateKey,
   revokeKey as sendRevokeKey,
   topUp as sendTopUp,
@@ -17,6 +18,8 @@ import pkg from '../../package.json';
 // simulates that one-time setup without touching the real alias storage.
 export function useApiKeys() {
   const { web3Account: address } = useWeb3();
+  const queryClient = useQueryClient();
+
   const aliases = useStorage(
     `${pkg.name}.aliases`,
     {} as Record<string, string>
@@ -25,10 +28,6 @@ export function useApiKeys() {
     `${STORAGE_PREFIX}.verified`,
     {} as Record<string, boolean>
   );
-
-  const account = ref<Account | null>(null);
-  const isLoading = ref(true);
-  const isError = ref(false);
   const isVerifying = ref(false);
 
   const isVerified = computed(() => {
@@ -38,34 +37,63 @@ export function useApiKeys() {
       !!demoVerified.value[address.value.toLowerCase()]
     );
   });
+
+  const accountQueryKey = ['keycard', 'account', address] as const;
+
+  const {
+    data: account,
+    isPending,
+    isError,
+    refetch: refetchAccount
+  } = useQuery({
+    queryKey: accountQueryKey,
+    queryFn: () => fetchAccount(address.value),
+    enabled: () => !!address.value
+  });
+
+  const { data: usageHistory, refetch: refetchUsage } = useQuery({
+    queryKey: ['keycard', 'usage', address] as const,
+    queryFn: () => fetchUsage(address.value),
+    enabled: () => !!address.value
+  });
+
+  const isLoading = computed(() => !!address.value && isPending.value);
   const keys = computed<ApiKey[]>(() => account.value?.keys ?? []);
   const balance = computed(() =>
     account.value ? accountBalance(account.value) : 0
   );
-  const usage = computed(() =>
-    account.value ? accountUsage(account.value) : { hub: 0, score: 0 }
-  );
   const spend = computed(() =>
     account.value ? accountSpend(account.value) : 0
   );
+  const dailyUsage = computed(() => usageHistory.value?.daily ?? []);
+  const monthlyUsage = computed(() => usageHistory.value?.monthly ?? []);
 
-  async function loadAccount() {
-    if (!address.value) {
-      account.value = null;
-      isLoading.value = false;
-      return;
-    }
+  function cacheAccount(next: Account) {
+    queryClient.setQueryData(accountQueryKey, next);
+  }
 
-    try {
-      isLoading.value = true;
-      isError.value = false;
-      account.value = await fetchAccount(address.value);
-    } catch (err) {
-      console.error('Failed to load API keys account', err);
-      isError.value = true;
-    } finally {
-      isLoading.value = false;
-    }
+  const { mutateAsync: sendCreate } = useMutation({
+    mutationFn: (name: string) => sendCreateKey(address.value, name),
+    onSuccess: ({ account: next }) => cacheAccount(next)
+  });
+  const { mutateAsync: sendRevoke } = useMutation({
+    mutationFn: (id: string) => sendRevokeKey(address.value, id),
+    onSuccess: cacheAccount
+  });
+  const { mutateAsync: sendTop } = useMutation({
+    mutationFn: (amount: number) => sendTopUp(address.value, amount),
+    onSuccess: cacheAccount
+  });
+
+  async function createKey(name: string): Promise<string> {
+    const { key } = await sendCreate(name);
+    return key;
+  }
+  async function revokeKey(id: string): Promise<void> {
+    await sendRevoke(id);
+  }
+  async function topUp(amount: number): Promise<void> {
+    await sendTop(amount);
   }
 
   async function verify() {
@@ -81,34 +109,23 @@ export function useApiKeys() {
     }
   }
 
-  async function createKey(name: string): Promise<string> {
-    const result = await sendCreateKey(address.value, name);
-    account.value = result.account;
-
-    return result.key;
+  function reload() {
+    refetchAccount();
+    refetchUsage();
   }
-
-  async function revokeKey(id: string) {
-    account.value = await sendRevokeKey(address.value, id);
-  }
-
-  async function topUp(amount: number) {
-    account.value = await sendTopUp(address.value, amount);
-  }
-
-  watch(address, loadAccount, { immediate: true });
 
   return {
     isLoading,
     isError,
-    reload: loadAccount,
+    reload,
     isVerified,
     isVerifying,
     verify,
     keys,
     balance,
-    usage,
     spend,
+    dailyUsage,
+    monthlyUsage,
     createKey,
     revokeKey,
     topUp

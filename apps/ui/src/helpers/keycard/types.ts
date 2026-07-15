@@ -15,3 +15,13 @@ export type Account = {
   topups: number;
   keys: ApiKey[];
 };
+
+export type UsageBucket = Usage & {
+  label: string;
+  ts: number;
+};
+
+export type UsageHistory = {
+  daily: UsageBucket[];
+  monthly: UsageBucket[];
+};
