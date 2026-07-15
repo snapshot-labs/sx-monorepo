@@ -81,6 +81,7 @@ const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
 const isCardLoading = ref(false);
+const hasPendingCryptoIntent = ref(false);
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -130,40 +131,6 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
-const hasPendingCryptoIntent = ref(false);
-
-function selectCryptoTab() {
-  if (!props.isAuthValidForCrypto) {
-    hasPendingCryptoIntent.value = true;
-    emit('connectWallet');
-    return;
-  }
-  paymentMethod.value = 'crypto';
-}
-
-function selectCardTab() {
-  hasPendingCryptoIntent.value = false;
-  paymentMethod.value = 'card';
-}
-
-watch(
-  () => props.isAuthValidForCrypto,
-  isValid => {
-    if (isValid) {
-      if (hasPendingCryptoIntent.value) {
-        hasPendingCryptoIntent.value = false;
-        paymentMethod.value = 'crypto';
-      }
-    } else if (
-      paymentMethod.value === 'crypto' &&
-      !isHidden.value &&
-      !isModalTransactionProgressOpen.value
-    ) {
-      paymentMethod.value = 'card';
-    }
-  }
-);
-
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
   if (paymentMethod.value === 'card') return !isCardLoading.value;
@@ -193,6 +160,20 @@ const formErrors = computed(() => {
 const formValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
+
+function selectCryptoTab() {
+  if (!props.isAuthValidForCrypto) {
+    hasPendingCryptoIntent.value = true;
+    emit('connectWallet');
+    return;
+  }
+  paymentMethod.value = 'crypto';
+}
+
+function selectCardTab() {
+  hasPendingCryptoIntent.value = false;
+  paymentMethod.value = 'card';
+}
 
 async function moveToNextStep() {
   if (isLastStep.value) {
@@ -240,6 +221,24 @@ function handleTokenPick(address: string) {
   selectedTokenAddress.value = address;
   isPickerShown.value = false;
 }
+
+watch(
+  () => props.isAuthValidForCrypto,
+  isValid => {
+    if (isValid) {
+      if (hasPendingCryptoIntent.value) {
+        hasPendingCryptoIntent.value = false;
+        paymentMethod.value = 'crypto';
+      }
+    } else if (
+      paymentMethod.value === 'crypto' &&
+      !isHidden.value &&
+      !isModalTransactionProgressOpen.value
+    ) {
+      paymentMethod.value = 'card';
+    }
+  }
+);
 
 watch(
   () => props.open,

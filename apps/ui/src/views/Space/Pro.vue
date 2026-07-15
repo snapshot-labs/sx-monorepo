@@ -102,15 +102,16 @@ const uiStore = useUiStore();
 const referral: string = route.query.ref as string;
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const selectedSpace = ref<Space | null>(props.space || null);
+const modalPaymentOpen = ref(false);
+const modalSpaceOpen = ref(false);
+const modalConnectorOpen = ref(false);
+
 const nextRenewalDate = computed(() =>
   dayjs()
     .add(1, subscriptionLength.value === 'yearly' ? 'year' : 'month')
     .format('D MMM YYYY')
 );
-const selectedSpace = ref<Space | null>(props.space || null);
-const modalPaymentOpen = ref(false);
-const modalSpaceOpen = ref(false);
-const modalConnectorOpen = ref(false);
 
 const paymentNetwork = computed(() =>
   metadataNetwork === 's' ? '1' : '11155111'

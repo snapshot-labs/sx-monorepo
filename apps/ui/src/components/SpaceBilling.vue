@@ -21,25 +21,14 @@ const {
   toRef(() => props.space.network)
 );
 
+const { getPortalUrl } = useStripeCheckout();
+const uiStore = useUiStore();
+
 const chainId = computed(() => getNetwork(props.space.network).chainId);
 const turboExpirationDate = computed(() =>
   dayjs(props.space.turbo_expiration * 1000)
 );
 const payments = computed(() => data.value?.pages.flat() || []);
-
-const { getPortalUrl } = useStripeCheckout();
-const uiStore = useUiStore();
-
-async function openPortal() {
-  try {
-    const url = await getPortalUrl(props.space.network);
-    if (!url) throw new Error('No billing portal URL');
-    window.location.href = url;
-  } catch (err) {
-    console.error('[stripe] portal failed', err);
-    uiStore.addNotification('error', 'Failed to open the billing portal');
-  }
-}
 
 const statusText = computed(() => {
   if (!props.space.turbo) return 'Free';
@@ -64,6 +53,17 @@ const statusText = computed(() => {
 
   return 'Active';
 });
+
+async function openPortal() {
+  try {
+    const url = await getPortalUrl(props.space.network);
+    if (!url) throw new Error('No billing portal URL');
+    window.location.href = url;
+  } catch (err) {
+    console.error('[stripe] portal failed', err);
+    uiStore.addNotification('error', 'Failed to open the billing portal');
+  }
+}
 </script>
 
 <template>
