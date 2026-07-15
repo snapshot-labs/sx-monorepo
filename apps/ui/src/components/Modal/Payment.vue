@@ -256,6 +256,10 @@ watch(
     form.value = clone(FORM);
   }
 );
+
+useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
+  if (event.persisted) isCardLoading.value = false;
+});
 </script>
 
 <template>
