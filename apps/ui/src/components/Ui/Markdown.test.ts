@@ -7,23 +7,14 @@ vi.mock('@iconify-json/heroicons-outline', () => ({
   icons: { icons: { duplicate: { body: '' }, check: { body: '' } } }
 }));
 
-const GLOBAL = {
-  stubs: {
-    'router-link': true
-  }
-};
-
-it('renders a fenced code block language label as text, not HTML', async () => {
+it('renders a fenced code block language label as text, not HTML', () => {
   const payload =
     "```<img src=1 onerror=[].constructor.constructor(atob('aW1wb3J0'))()>\n# treasury transfer\n```";
 
   const wrapper = mount(Markdown, {
     props: { body: payload },
-    attachTo: document.body,
-    global: GLOBAL
+    attachTo: document.body
   });
-
-  await wrapper.vm.$nextTick();
 
   expect(wrapper.element.querySelector('img')).toBeNull();
   expect(wrapper.find('.title-bar').text()).toContain('<img');
@@ -31,7 +22,7 @@ it('renders a fenced code block language label as text, not HTML', async () => {
   wrapper.unmount();
 });
 
-it('does not execute onerror handlers smuggled through the fence info string', async () => {
+it('does not execute onerror handlers smuggled through the fence info string', () => {
   const spy = vi.fn();
   (window as any).__xssProbe = spy;
 
@@ -39,12 +30,8 @@ it('does not execute onerror handlers smuggled through the fence info string', a
 
   const wrapper = mount(Markdown, {
     props: { body: payload },
-    attachTo: document.body,
-    global: GLOBAL
+    attachTo: document.body
   });
-
-  await wrapper.vm.$nextTick();
-  await new Promise(resolve => setTimeout(resolve, 0));
 
   expect(spy).not.toHaveBeenCalled();
   expect(wrapper.element.querySelector('img')).toBeNull();
