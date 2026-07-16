@@ -266,6 +266,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
     :open="open"
     class="modal-payment"
     :class="{ hidden: isHidden }"
+    :closeable="!isCardLoading"
     @close="emit('close')"
   >
     <template #header>
