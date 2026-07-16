@@ -3,10 +3,6 @@ import { mount } from '@vue/test-utils';
 import { expect, it, vi } from 'vitest';
 import Markdown from './Markdown.vue';
 
-vi.mock('@iconify-json/heroicons-outline', () => ({
-  icons: { icons: { duplicate: { body: '' }, check: { body: '' } } }
-}));
-
 it('renders a fenced code block language label as text, not HTML', () => {
   const payload =
     "```<img src=1 onerror=[].constructor.constructor(atob('aW1wb3J0'))()>\n# treasury transfer\n```";
