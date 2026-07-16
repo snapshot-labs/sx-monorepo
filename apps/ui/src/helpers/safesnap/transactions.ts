@@ -12,6 +12,9 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
+  // Set when writing a proposal (creation), ignored when reading.
+  operation?: string;
+  nonce?: string;
 };
 
 type SafeSnapTransferFundsTransaction = SafeSnapBaseTransaction & {
@@ -151,4 +154,79 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
     default:
       return parseRaw(tx);
   }
+}
+
+// Inverse of parseSafeSnapTransaction: turn an editor transaction into a
+// SafeSnap module transaction (operation/nonce default to a single batch).
+export function serializeSafeSnapTransaction(
+  tx: Transaction
+): SafeSnapTransaction {
+  const base = {
+    to: tx.to,
+    data: tx.data || '0x',
+    value: tx.value || '0',
+    operation: '0',
+    nonce: '0'
+  };
+
+  switch (tx._type) {
+    case 'sendToken':
+      return {
+        ...base,
+        type: 'transferFunds',
+        recipient: tx._form.recipient,
+        amount: tx._form.amount,
+        token: {
+          name: tx._form.token.name,
+          decimals: tx._form.token.decimals,
+          symbol: tx._form.token.symbol,
+          address:
+            tx._form.token.address === ETH_CONTRACT
+              ? 'main'
+              : tx._form.token.address
+        }
+      };
+    case 'sendNft':
+      return {
+        ...base,
+        type: 'transferNFT',
+        recipient: tx._form.recipient,
+        collectable: {
+          address: tx._form.nft.address,
+          id: tx._form.nft.id,
+          name: tx._form.nft.name,
+          tokenName: tx._form.nft.collection || ''
+        }
+      };
+    case 'contractCall':
+      return { ...base, type: 'contractInteraction', abi: tx._form.abi };
+    default:
+      return base;
+  }
+}
+
+// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
+
+export type SafeSnapExecutionData = {
+  network: string;
+  realityAddress: string;
+  multiSendAddress: string;
+  txs: SafeSnapTransaction[][];
+};
+
+// Build a single-batch SafeSnap (Reality) execution for plugins.safeSnap.safes.
+// The batch is stored as a raw transaction array; SafeSnap recomputes the
+// MultiSend bundle and execution hash from it when the proposal is executed.
+export function createSafeSnapExecution(
+  chainId: number,
+  realityAddress: string,
+  transactions: Transaction[]
+): SafeSnapExecutionData {
+  return {
+    network: String(chainId),
+    realityAddress,
+    multiSendAddress: MULTI_SEND_ADDRESS,
+    txs: [transactions.map(serializeSafeSnapTransaction)]
+  };
 }
