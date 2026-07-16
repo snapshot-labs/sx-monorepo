@@ -9,6 +9,8 @@ const DAY = 86_400_000;
 
 export const FREE_CREDIT = 50;
 
+export const MAX_KEYS = 10;
+
 // Price per request in USD, per API.
 export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   hub: 0.0001,
@@ -184,6 +186,18 @@ export async function createKey(
   await sleep(500);
 
   const account = load(address);
+  if (account.keys.length >= MAX_KEYS) {
+    throw new Error(`You can create up to ${MAX_KEYS} API keys.`);
+  }
+  if (
+    account.keys.some(
+      existing =>
+        existing.name.trim().toLowerCase() === name.trim().toLowerCase()
+    )
+  ) {
+    throw new Error('A key with this name already exists.');
+  }
+
   const key = newKeySecret();
 
   account.keys.push({

@@ -24,6 +24,7 @@ const DEFINITION = {
 const props = defineProps<{
   open: boolean;
   createKey: (name: string) => Promise<string>;
+  existingNames: string[];
 }>();
 
 const emit = defineEmits<{
@@ -43,9 +44,23 @@ const formErrors = computed(() =>
   formValidator.validate(form.value, { skipEmptyOptionalFields: true })
 );
 
+const trimmedName = computed(() => form.value.name.trim());
+
+const duplicateError = computed(() =>
+  trimmedName.value &&
+  props.existingNames.some(
+    existing =>
+      existing.trim().toLowerCase() === trimmedName.value.toLowerCase()
+  )
+    ? 'A key with this name already exists.'
+    : ''
+);
+
 const canSubmit = computed(
   () =>
-    !Object.keys(formErrors.value).length && form.value.name.trim().length > 0
+    !Object.keys(formErrors.value).length &&
+    trimmedName.value.length > 0 &&
+    !duplicateError.value
 );
 
 async function handleSubmit() {
@@ -88,7 +103,7 @@ watch(
       <UiInputString
         v-model="form.name"
         :definition="DEFINITION.properties.name"
-        :error="formErrors.name"
+        :error="duplicateError || formErrors.name"
         @keyup.enter="handleSubmit"
       />
       <div class="text-sm leading-[18px] px-1">
@@ -98,7 +113,8 @@ watch(
     <div v-else class="p-4 space-y-3">
       <ApiKeyField :value="apiKey" />
       <div class="text-sm leading-[18px]">
-        You can copy this key any time from your keys list.
+        Keep this key secret — anyone with it can spend your credit. You can
+        copy it any time from your keys list.
       </div>
     </div>
     <template #footer>

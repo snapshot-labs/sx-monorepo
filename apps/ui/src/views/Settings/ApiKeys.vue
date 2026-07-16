@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FREE_CREDIT, keyCost } from '@/helpers/keycard';
+import { FREE_CREDIT, keyCost, MAX_KEYS } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
 import { _t } from '@/helpers/utils';
 
@@ -30,6 +30,8 @@ const {
 const isCreateModalOpen = ref(false);
 const isTopupModalOpen = ref(false);
 const keyToRevoke = ref<ApiKey | null>(null);
+
+const atKeyLimit = computed(() => keys.value.length >= MAX_KEYS);
 
 const PERIOD_ITEMS = [
   { key: 'day', label: 'Day' },
@@ -116,10 +118,19 @@ async function handleVerify() {
           <h3>API keys</h3>
           <span class="inline-block" v-text="DESCRIPTION" />
         </div>
-        <UiButton class="shrink-0" @click="isCreateModalOpen = true">
-          <IH-plus class="shrink-0 size-[16px]" />
-          New API key
-        </UiButton>
+        <UiTooltip
+          class="shrink-0"
+          :title="
+            atKeyLimit
+              ? `You can create up to ${MAX_KEYS} keys — revoke one to add another`
+              : ''
+          "
+        >
+          <UiButton :disabled="atKeyLimit" @click="isCreateModalOpen = true">
+            <IH-plus class="shrink-0 size-[16px]" />
+            New API key
+          </UiButton>
+        </UiTooltip>
       </div>
 
       <div class="px-4 mt-4 max-w-[592px]">
@@ -225,6 +236,7 @@ async function handleVerify() {
   <ModalApiKeyCreate
     :open="isCreateModalOpen"
     :create-key="createKey"
+    :existing-names="keys.map(key => key.name)"
     @close="isCreateModalOpen = false"
   />
   <ModalApiKeyRevoke
