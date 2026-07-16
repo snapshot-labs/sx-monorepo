@@ -1,0 +1,63 @@
+{
+  "name": "@snapshot-labs/private-vote-sdk",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Vendored fork of @shutter-network/urban-verified-crypto. Threshold-ElGamal homomorphic vote ballot construction and verification over BLS12-381 for Snapshot's permanent private voting.",
+  "upstream": {
+    "repo": "https://github.com/Urban-Verified/shutter-voting-sdk",
+    "commit": "17dcaf5364007803967ab50a355e8f110ca089c0"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "test": "jest",
+    "bench": "NODE_OPTIONS='--expose-gc' jest --config benchmarks/bench.config.js",
+    "gen-vectors": "ts-node scripts/gen-vectors.ts",
+    "build": "tsup && node scripts/copy-wasm.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Urban-Verified/shutter-voting-sdk.git"
+  },
+  "homepage": "https://github.com/Urban-Verified/shutter-voting-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/Urban-Verified/shutter-voting-sdk/issues"
+  },
+  "author": "Shutter Network",
+  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "fast-check": "^4.7.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "browser-or-node": "^3.0.0",
+    "viem": "^2.23.2"
+  },
+  "keywords": [
+    "shutter",
+    "voting",
+    "bls12-381",
+    "threshold-encryption",
+    "elgamal",
+    "zero-knowledge"
+  ]
+}

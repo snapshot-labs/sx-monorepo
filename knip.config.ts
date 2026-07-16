@@ -57,7 +57,8 @@ const config: KnipConfig = {
         'forge.config.js'
       ],
       vite: false,
-      ignore: ['src/assets/styles/highlightjs/**'],
+      // public/blst.js is a runtime-served asset copied from the SDK
+      ignore: ['src/assets/styles/highlightjs/**', 'public/blst.js'],
       ignoreDependencies: [
         '@vue/cli-plugin-babel',
         '@babel/core',
@@ -76,6 +77,16 @@ const config: KnipConfig = {
       ignoreDependencies: ['events']
     },
     'packages/prettier-config': {},
+    'packages/private-vote-sdk': {
+      entry: ['scripts/*.{ts,mjs}'],
+      // benchmarks are run manually; blst/types.ts and the test-vector
+      // schema are pure declaration files kept as public SDK surface
+      ignore: [
+        'benchmarks/**',
+        'src/crypto/blst/types.ts',
+        'tests/vectors/_schema.ts'
+      ]
+    },
     'packages/sx.js': {
       ignoreBinaries: ['anvil', 'starknet-devnet']
     },

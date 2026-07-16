@@ -1,0 +1,19 @@
+{
+  "name": "budget_exact_B3",
+  "description": "Exact-budget DLEQ: votes [1,1,1] with ΣvI = B = 3.",
+  "version": 1,
+  "inputs": {
+    "mpk": "95b68caa86e4687fa26a8d6cc495930f09993212da66ce2554b19569c0004dcfcbc38ebae255fbc56930870f88bfc9cd19711d35200448ee4ad0035786ef4d7f5b9d5cbfce2f7434d5e2a5d230e9417fa6291e62182fba5f453882658d7a2e8d",
+    "mode": "exact",
+    "budget": 3,
+    "ct_sum": {
+      "c1": "a95d902b682b2f061de0b1491516f2dc49039b208dab0d11b958a0d8c1dfb78923cb2a418a2a3f441ad7f91b500213740ebccaa2374bc6b4eb565fed28e8ab10d362e87dcf4850e1e384ddf2b1d71237cf611e7f4b16123f4bdd549439a88b99",
+      "c2": "b9461d1a1f2ba74cfff899de5b21d836b19cf3bf17e3e43178a5a039b0d6281d1c2f266061e0a2f3701b150922f6874a01146c38622cb717bffbd0cfbedfed53b289f85724182cc40b2ca22291c8afb181749147355190d575273d6d37cf05c5"
+    },
+    "transcript_label": "vec:budget:exact_B3",
+    "proof_encoded": "169bddf48368409863b77ec8e97fb61f2f8ac5092d9d720f29abe24c87d8677a5ba16d60295bd833f1507eefed2f1c63ae27be7d97ed377ce7a5ec463438cda8"
+  },
+  "expected": {
+    "verify": true
+  }
+}

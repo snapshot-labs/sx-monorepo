@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getChoiceText } from '@/helpers/utils';
+import { getChoiceText, getEncryptedChoicePreview } from '@/helpers/utils';
 import { Proposal, Vote } from '@/types';
 
 withDefaults(
@@ -16,7 +16,21 @@ withDefaults(
 
 <template>
   <div
-    v-if="proposal.privacy !== 'none' && !proposal.completed"
+    v-if="proposal.privacy === 'shutter-elgamal'"
+    class="flex gap-1 items-center max-w-full truncate"
+  >
+    <IH-lock-closed class="size-[16px] shrink-0" />
+    <UiTooltip
+      title="This ballot is permanently encrypted under the keypers' threshold key. Only the combined tally is ever decrypted, and individual choices are never revealed."
+      class="max-w-full truncate"
+    >
+      <span class="font-mono text-skin-heading leading-[22px] truncate">
+        {{ getEncryptedChoicePreview(vote.choice) }}
+      </span>
+    </UiTooltip>
+  </div>
+  <div
+    v-else-if="proposal.privacy !== 'none' && !proposal.completed"
     class="flex gap-1 items-center"
   >
     <span class="text-skin-heading leading-[22px]">Encrypted choice</span>

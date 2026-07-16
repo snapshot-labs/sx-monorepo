@@ -9,6 +9,7 @@ import {
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { getOffchainHubApiBase } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal as ProposalType } from '@/types';
 
@@ -33,6 +34,7 @@ const props = withDefaults(
 const queryClient = useQueryClient();
 
 const displayAllChoices = ref(false);
+const showEncryptedInfo = ref(false);
 
 const { proposal } = useGovernorQuorum(() => props.proposal);
 
@@ -105,10 +107,17 @@ const otherResultsSummary = computed(() => {
   );
 });
 
+const dkgFailed = computed(
+  () =>
+    props.proposal.privacy === 'shutter-elgamal' &&
+    props.proposal.te_dkg_status === 'dkg_failed'
+);
+
 const isFinalizing = computed(() => {
   return (
     offchainNetworks.includes(props.proposal.network) &&
     !props.proposal.completed &&
+    !dkgFailed.value &&
     ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
   );
 });
@@ -139,7 +148,27 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="isFinalizing && withDetails" class="border rounded-lg px-3 py-2.5">
+  <div
+    v-if="
+      dkgFailed &&
+      withDetails &&
+      !['pending', 'active'].includes(props.proposal.state)
+    "
+    class="border border-red-500/40 rounded-lg px-3 py-2.5"
+  >
+    <div class="flex items-center gap-2 text-red-500">
+      <IH-x-circle class="shrink-0" />
+      Encryption setup failed
+    </div>
+    <div class="text-sm text-skin-text mt-1">
+      The keypers could not complete distributed key generation. No votes could
+      be cast and no results are available for this proposal.
+    </div>
+  </div>
+  <div
+    v-else-if="isFinalizing && withDetails"
+    class="border rounded-lg px-3 py-2.5"
+  >
     <div class="flex items-center gap-2 text-skin-link">
       <IH-exclamation-circle class="shrink-0" />
       Finalizing results
@@ -154,9 +183,43 @@ onMounted(() => {
     "
     class="space-y-1"
   >
-    <div>
-      All votes are encrypted and will be decrypted only after the voting period
-      is over, making the results visible.
+    <div
+      v-if="proposal.privacy === 'shutter-elgamal'"
+      class="flex items-center justify-between rounded-lg border px-3 py-2"
+    >
+      <span class="flex items-center gap-2 text-skin-link">
+        <IH-lock-closed class="size-[16px] shrink-0" />
+        Encrypted ballots sealed
+      </span>
+      <span class="font-mono">{{ _n(proposal.vote_count) }}</span>
+    </div>
+    <button
+      v-if="proposal.privacy === 'shutter-elgamal'"
+      type="button"
+      class="flex items-center gap-1 text-sm text-skin-text"
+      @click="showEncryptedInfo = !showEncryptedInfo"
+    >
+      <IH-chevron-right
+        class="size-[14px] shrink-0 transition-transform"
+        :class="{ 'rotate-90': showEncryptedInfo }"
+      />
+      Why can't I see results yet?
+    </button>
+    <div
+      v-if="proposal.privacy === 'shutter-elgamal' && showEncryptedInfo"
+      class="text-sm text-skin-text pl-[18px]"
+    >
+      Every ballot stays encrypted under the keypers' shared key while voting is
+      open. The running totals cannot be computed by anyone, not even the
+      keypers, until voting closes. Only then are the combined totals decrypted
+      and published. Individual choices are never revealed.
+    </div>
+    <div
+      v-else-if="proposal.privacy !== 'shutter-elgamal'"
+      class="text-sm text-skin-text"
+    >
+      Votes are encrypted while voting is open. When the voting period ends, the
+      results are decrypted and published.
     </div>
     <div v-if="proposal.quorum" class="flex items-center justify-between">
       <span class="text-skin-link">
@@ -295,4 +358,22 @@ onMounted(() => {
     <IC-Shutter class="w-[80px]" />
     <IH-arrow-sm-right class="-rotate-45" />
   </AppLink>
+  <TeCryptoSetupCard
+    v-if="
+      proposal.privacy === 'shutter-elgamal' &&
+      withDetails &&
+      offchainNetworks.includes(proposal.network)
+    "
+    :proposal="proposal"
+  />
+  <TeVerifyTallyPanel
+    v-if="
+      proposal.privacy === 'shutter-elgamal' &&
+      proposal.completed &&
+      withDetails &&
+      offchainNetworks.includes(proposal.network)
+    "
+    :proposal="proposal"
+    :api-base-url="getOffchainHubApiBase(proposal.network)"
+  />
 </template>

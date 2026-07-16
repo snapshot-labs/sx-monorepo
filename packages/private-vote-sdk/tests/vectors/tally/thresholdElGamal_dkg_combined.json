@@ -1,0 +1,42 @@
+{
+  "name": "thresholdElGamal_dkg_combined",
+  "description": "Cross-impl interop: thresholdElGamal Feldman VSS DKG (n=3, t=2); all 3 keypers' partial decryptions on Enc(m=7) under the joint mpk. The SDK Lagrange-combines them and BSGS-recovers the plaintext, asserting V == 7.",
+  "version": 1,
+  "inputs": {
+    "ct_sum": {
+      "c1": "86d6cbe5ee0260786af60013310119d57db28130c799bac84084efbcbb1eb1499d38a2d5b088a8241f6b752eac444f3a014298382104e2edb4e1d356942091234199174b4050d32450d4ca3ad818443bc4362b28e6ebb45f3586b73fc5a5ff16",
+      "c2": "97408fe7dd823ddb9271fda71d8d8f9a68194634b5a14d60bcf75660a33c3aaa5a68c2e3c3590682c387c34407c9536d11e93479f143e4e6c05f93213c694b3af6f93e79490a2defe2563ac601d6a38b45665e5dfb39b1ea8c66a425041619a1"
+    },
+    "committee_pks": [
+      "8c67b7294a4febd9f1da6f8a9620baa5803e5e45fb779380f71ee5a60ee7412fbe91bf45226810d7c71e2fccf62cf55d1442f51d98203626cd7e6aa7a8e1b07172f8963a99eb36fea042050f244d9b7f089cb7a043be0b53039cefb5fe024abc",
+      "b8034d69b21fd764cd255b42226ab8cbab842e967b9cf17e51f4a7ed342f6f717328227742fb1ce2a14a555d04db317101cf8df419c17e7746244a216992e4d1a0e9991f6aafa04711839a101dbbeb8c7fbf524b156a9086df84a12c00f870a2",
+      "8e1809f5d137bd1be8c1b208cdf3b4aff4c70be95489f77f320c6f081d88e189a00f73f3c2d1471fbef59d109d76e2150a73769244025ee61dd6b1acd84dcf6e550dc556da7aeb2c0a5e944f6b2575ae29c1fe760ba3967a82167f9c620fd57b"
+    ],
+    "alphas": [
+      "1",
+      "2",
+      "3"
+    ],
+    "upper_bound": "1000",
+    "shares": [
+      {
+        "keyper_index": 1,
+        "sigma": "93cdfa097babae5e210a1973972564047e2ae5b5250dd9b6b3f16e365a9581cee8982eabf20226c181860a344874e31e1210c01ce01651e714efe0e25a4a9755ae70acff5d7b6503e42c909bfee248381197fa1f0d6e4c5405aed74b592a15b4",
+        "dleq_proof": "4cc82ce3d5c764ff489f3c65850e109f17870242b3d0cde30dae593eadbdadfd53728806392ce4de9e98ab9d371798b0cad02e9e513a5e5ec19f7fc11211a040"
+      },
+      {
+        "keyper_index": 2,
+        "sigma": "ad5a587cada15893df2eb9bfd23e538ab7a66c72f68a50326f41e49399336fa88d0ff6ea2f6a67148129195067d508ee02be9117c79622c23c05dd5dcefb3b8811af1ed6869e8fa557cb46d46fdf104cf07745ee50818f724c79a30fa237d1dc",
+        "dleq_proof": "50be23ad014eb274b302aa6b28fffa4c101d622a3b8536aeb1f1efbd0c3724f42170553f1e5a60c5efda6952d3e04ec25637ee245a4df64cc532c10fe9b09a35"
+      },
+      {
+        "keyper_index": 3,
+        "sigma": "846868d8a1ef0626c4ca55ccdaaa6164898e0b85908da1f4adde74b9ff28201e17eb68ffa975bb51a82172459da51b5416e08bb56cb6114716d402a703f5887804db751fa76d4751d8fce2d055a277c840e6ac048816d54931d9dcee9e5e85de",
+        "dleq_proof": "278b1a5339ea89d6557ff1a6ec5d9eee0258f561fa10c428adbfced757acae79352c7855530b028d16acbf7ffccf0d69b787a1cfefc7f80e2b5392cf78bc8b93"
+      }
+    ]
+  },
+  "expected": {
+    "V": "7"
+  }
+}

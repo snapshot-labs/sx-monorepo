@@ -12,6 +12,7 @@ import initMetrics from './helpers/metrics';
 import { closeDatabase } from './helpers/mysql';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
+import te from './te';
 import './helpers/strategies';
 
 /** Heartbeat — one log line every 30s. A missing tick = the process is
@@ -37,6 +38,7 @@ app.set('trust proxy', 1);
 app.use(checkKeycard, rateLimit);
 app.use('/api', api);
 app.use('/api/eip4824', eip4824);
+app.use('/api', te);
 app.use('/graphql', graphql);
 
 fallbackLogger(app);

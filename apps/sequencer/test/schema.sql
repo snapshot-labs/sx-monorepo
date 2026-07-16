@@ -69,6 +69,17 @@ CREATE TABLE proposals (
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
+  -- Threshold-ElGamal private voting (privacy='shutter-elgamal').
+  -- All te_* columns are NULL when privacy is not 'shutter-elgamal'.
+  -- te_mpk is also NULL between proposal creation and DKG completion.
+  te_config JSON DEFAULT NULL,
+  te_mpk VARBINARY(96) DEFAULT NULL,
+  te_committee_pks JSON DEFAULT NULL,
+  te_threshold_t INT DEFAULT NULL,
+  te_threshold_n INT DEFAULT NULL,
+  te_keyper_urls JSON DEFAULT NULL,
+  te_keyper_addresses JSON DEFAULT NULL,
+  te_aggregate JSON DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),
@@ -116,6 +127,37 @@ CREATE TABLE votes (
   INDEX idx_votes_on_vp_value (vp_value),
   INDEX idx_votes_on_space_created_desc_id (space, created DESC, id),
   INDEX idx_votes_on_cb_proposal (cb, proposal)
+);
+
+-- Threshold-ElGamal partial decryption shares posted by keypers after the
+-- voting window closes. The tally worker reads these, runs verifyDecryptionShare
+-- on each, Lagrange-combines `t+1` valid shares per candidate, and recovers
+-- the per-candidate plaintext total via baby-step giant-step.
+-- Append-only: PRIMARY KEY enforces one share per (proposal, keyper, candidate).
+CREATE TABLE te_decryption_shares (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  candidate INT NOT NULL,
+  sigma VARBINARY(96) NOT NULL,
+  proof_e VARBINARY(32) NOT NULL,
+  proof_z VARBINARY(32) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index, candidate),
+  INDEX idx_te_shares_proposal (proposal_id),
+  INDEX idx_te_shares_posted (posted_at)
+);
+
+-- Pre-finalisation DKG submissions: see apps/hub/src/helpers/schema.sql.
+CREATE TABLE te_dkg_submissions (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  keyper_address VARCHAR(42) NOT NULL,
+  mpk_hex VARCHAR(200) NOT NULL,
+  committee_pks_hex MEDIUMTEXT NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index),
+  INDEX idx_te_dkg_match (proposal_id, mpk_hex(64))
 );
 
 CREATE TABLE follows (

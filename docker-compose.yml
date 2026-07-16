@@ -1,0 +1,213 @@
+# Permanent private voting - full backend stack.
+#
+# Brings up everything a Snapshot operator needs to run threshold-ElGamal
+# private voting locally or on a server:
+#
+#   mysql       snapshot_hub + snapshot_sequencer databases (schema auto-loaded)
+#   hub         GraphQL + REST API, collects DKG results            :3000
+#   sequencer   vote ingestion + tally worker                       :3001
+#   keyper1..3  threshold committee (Feldman VSS DKG + decryption)   :5001-5003
+#   auto-dkg    watches for new private proposals and runs DKG
+#
+# The UI is run separately on the host (apps/ui, `bun run dev`) and points at
+# the hub on :3000 and sequencer on :3001.
+#
+# Quick start:
+#   cp .env.example .env        # optional - sensible dev defaults are baked in
+#   mkdir -p mysql-data keyper-state/keyper1 keyper-state/keyper2 keyper-state/keyper3
+#   docker compose up --build
+#
+# State directories on the host (bind-mounted, gitignored):
+#   mysql-data/        MySQL data dir. The MySQL image entrypoint starts as root, chowns the
+#                      directory to the mysql user (UID 999) internally, then re-execs as mysql —
+#                      so no manual chown is needed on Linux or Mac.
+#   keyper-state/      Fernet-encrypted DKG secrets per keyper (see services/keypers/README.md).
+#
+# Then create a permanent-private proposal from the UI; auto-dkg generates its
+# threshold key within a few seconds and the proposal becomes votable.
+
+services:
+  mysql:
+    image: mysql:8.0
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --max_connections=300
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+      - ./apps/hub/src/helpers/schema.sql:/schema/hub-schema.sql:ro
+      - ./apps/sequencer/src/helpers/schema.sql:/schema/sequencer-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  hub:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    image: sx-backend:local
+    command: ["bun", "run", "apps/hub/src/index.ts"]
+    environment:
+      PORT: "3000"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQUENCER_URL: http://sequencer:3001
+      # DEV ONLY — publicly-known key; set HUB_RELAYER_PK in .env for production.
+      RELAYER_PK: ${HUB_RELAYER_PK:-0x0123456789012345678901234567890123456789012345678901234567890123}
+      STAMP_URL: https://stamp.fyi
+      SCORE_API_URL: https://score.snapshot.org
+      SIDEKICK_URL: https://sh5.co
+      KEYCARD_URL: ""
+      RATE_LIMIT_DATABASE_URL: ""
+    ports:
+      - "${HUB_PORT:-3000}:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "const r = await fetch('http://localhost:3000/api'); process.exit(r ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  sequencer:
+    image: sx-backend:local
+    command: ["bun", "run", "apps/sequencer/src/index.ts"]
+    environment:
+      PORT: "3001"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      # DEV ONLY — publicly-known key; set SEQ_RELAYER_PK in .env for production.
+      RELAYER_PK: ${SEQ_RELAYER_PK:-0x4d39b13c6ed0c1a3d9e8e5f3b1c2a8e7f6d5c4b3a2918273645566f7e8d9c0b1}
+      DEFAULT_NETWORK: "11155111"
+      SHUTTER_URL: ""
+      SIDEKICK_URL: https://sh5.co
+      SCORE_API_URL: https://score.snapshot.org
+      SCHNAPS_API_URL: https://schnaps.snapshot.box
+      BROVIDER_URL: https://rpc.snapshot.org
+      OVERLORD_URL: https://overlord.snapshot.box
+      # DEV ONLY — publicly-known secret; set SEQ_AUTH_SECRET in .env for production.
+      AUTH_SECRET: ${SEQ_AUTH_SECRET:-1dfd84a695705665668c260222ded178d1f1d62d251d7bee8148428dac6d0487}
+      WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID:-e6454bd61aba40b786e866a69bd4c5c6}
+      LAST_CB: "1"
+      MIN_DKG_LEAD_TIME_S: "${MIN_DKG_LEAD_TIME_S:-180}"
+    ports:
+      - "${SEQ_PORT:-3001}:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      hub:
+        condition: service_started
+    restart: unless-stopped
+
+  keyper1:
+    build:
+      context: ./services/keypers
+    image: sx-keypers:local
+    command: ["python", "/app/src/keyper.py", "--id", "1", "--port", "5001", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: http://hub:3000
+      # DEV ONLY — this default is a publicly-known key committed to the repo.
+      # Production deployments MUST set KEYPER_PRIVATE_KEY_1 in .env.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_1:-0x4e057a764bb4fec72d8a09c7e04862cf293f87103459f216b41a885f36e27b6d}
+      KEYPER_DKG_RETENTION_TIME: "${KEYPER_DKG_RETENTION_TIME:-172800}"
+      KEYPER_DKG_PRUNE_INTERVAL_S: "${KEYPER_DKG_PRUNE_INTERVAL_S:-3600}"
+    volumes:
+      - ./keyper-state/keyper1:/keyper-state
+    depends_on:
+      hub:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  keyper2:
+    image: sx-keypers:local
+    command: ["python", "/app/src/keyper.py", "--id", "2", "--port", "5002", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: http://hub:3000
+      # DEV ONLY — publicly-known key; set KEYPER_PRIVATE_KEY_2 in .env for production.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_2:-0x99f276d9a8045c01649f153f69b1c446a24aee8fd546a147fe5e29cc061edc88}
+      KEYPER_DKG_RETENTION_TIME: "${KEYPER_DKG_RETENTION_TIME:-172800}"
+      KEYPER_DKG_PRUNE_INTERVAL_S: "${KEYPER_DKG_PRUNE_INTERVAL_S:-3600}"
+    volumes:
+      - ./keyper-state/keyper2:/keyper-state
+    depends_on:
+      hub:
+        condition: service_started
+      keyper1:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5002/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  keyper3:
+    image: sx-keypers:local
+    command: ["python", "/app/src/keyper.py", "--id", "3", "--port", "5003", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: http://hub:3000
+      # DEV ONLY — publicly-known key; set KEYPER_PRIVATE_KEY_3 in .env for production.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_3:-0xfdf5c2f83276e56c374b54aaef3c0a3f989ad11d3f6a1faf29373e5e528ea94c}
+      KEYPER_DKG_RETENTION_TIME: "${KEYPER_DKG_RETENTION_TIME:-172800}"
+      KEYPER_DKG_PRUNE_INTERVAL_S: "${KEYPER_DKG_PRUNE_INTERVAL_S:-3600}"
+    volumes:
+      - ./keyper-state/keyper3:/keyper-state
+    depends_on:
+      hub:
+        condition: service_started
+      keyper1:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5003/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  auto-dkg:
+    image: sx-keypers:local
+    command: ["python", "/app/src/auto_dkg.py"]
+    environment:
+      KEYPER_URLS: http://keyper1:5001,http://keyper2:5002,http://keyper3:5003
+      TE_THRESHOLD_T: "1"
+      TE_WEIGHTED_BUDGET: "${TE_WEIGHTED_BUDGET:-100}"
+      POLL_INTERVAL_S: "2"
+      HUB_DB_HOST: mysql
+      HUB_DB_PORT: "3306"
+      HUB_DB_USER: root
+      HUB_DB_PASSWORD: ""
+      HUB_DB_NAME: snapshot_hub
+    depends_on:
+      mysql:
+        condition: service_healthy
+      hub:
+        condition: service_started
+      keyper1:
+        condition: service_healthy
+      keyper2:
+        condition: service_healthy
+      keyper3:
+        condition: service_healthy
+    restart: unless-stopped
+

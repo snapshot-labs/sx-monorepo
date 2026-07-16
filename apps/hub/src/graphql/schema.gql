@@ -667,6 +667,24 @@ type Proposal {
   vp_value_by_strategy: Any
   "Total number of votes"
   votes: Int
+  "Threshold-ElGamal config (privacy='shutter-elgamal' only). { variant, mode, numCandidates, budget, d? }."
+  te_config: Any
+  "Threshold-ElGamal joint public key as 0x-prefixed hex of compressed G2 (96 bytes). Null until DKG completes."
+  te_mpk: String
+  "Threshold-ElGamal committee public keys as a JSON array of 0x-prefixed hex compressed-G2 strings."
+  te_committee_pks: Any
+  "Threshold-ElGamal reconstruction threshold (minimum honest keypers needed to decrypt the tally)."
+  te_threshold_t: Int
+  "Threshold-ElGamal committee size."
+  te_threshold_n: Int
+  "Threshold-ElGamal keyper HTTP endpoints, JSON array of strings."
+  te_keyper_urls: Any
+  "Threshold-ElGamal keyper Ethereum signing addresses, JSON array of 0x-checksummed strings. The hub's auth allow-list for DKG and decryption-share submissions."
+  te_keyper_addresses: Any
+  "Threshold-ElGamal homomorphic ciphertext aggregate, persisted at tally start so re-finalization is replayable. Null until tally begins."
+  te_aggregate: Any
+  "Threshold-ElGamal DKG status. Null while pending or after success; 'dkg_failed' when all retry attempts are exhausted."
+  te_dkg_status: String
   "Whether the proposal has been flagged"
   flagged: Boolean
   "Flag reason code"

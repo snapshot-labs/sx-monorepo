@@ -623,6 +623,36 @@ export function getChoiceWeight(
   return isNaN(percent) ? 0 : percent;
 }
 
+// For threshold-ElGamal (`shutter-elgamal`) votes the stored `choice` is an
+// encrypted ballot envelope ({ vk, ciphertexts, zkProof, ... }) that is NEVER
+// decrypted at the individual level — only the homomorphic sum is. Render a
+// short, honest preview of the underlying ciphertext instead of trying to map
+// it onto choice labels (which produces "NaN% for undefined").
+export function getEncryptedChoicePreview(choice: Choice): string {
+  const envelope = choice as Record<string, any> | null;
+  let hex: string | undefined;
+
+  if (envelope && typeof envelope === 'object') {
+    const ciphertexts = envelope.ciphertexts;
+    if (Array.isArray(ciphertexts) && ciphertexts.length) {
+      const first = ciphertexts[0];
+      hex = typeof first === 'string' ? first : first?.c1 ?? first?.c2;
+    }
+    if (!hex && typeof envelope.vk === 'string') hex = envelope.vk;
+  }
+
+  if (!hex) {
+    try {
+      hex = JSON.stringify(choice);
+    } catch {
+      hex = String(choice);
+    }
+  }
+
+  if (hex.length <= 24) return hex;
+  return `${hex.slice(0, 14)}…${hex.slice(-8)}`;
+}
+
 export function getChoiceText(availableChoices: string[], choice: Choice) {
   if (typeof choice === 'string') {
     const basicChoices = {

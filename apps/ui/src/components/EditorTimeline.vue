@@ -25,6 +25,8 @@ const props = defineProps<{
   min_end: number;
   // eslint-disable-next-line vue/prop-name-casing
   max_end: number;
+  // eslint-disable-next-line vue/prop-name-casing
+  min_start?: number;
 }>();
 
 const { getDurationFromCurrent } = useMetaStore();
@@ -41,7 +43,7 @@ const isOffchainSpace = computed(() =>
 
 const minDates = computed(() => {
   return {
-    start: props.created,
+    start: Math.max(props.created, props.min_start ?? 0),
     min_end: props.start + MIN_VOTING_PERIOD
   };
 });

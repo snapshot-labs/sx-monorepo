@@ -124,6 +124,23 @@ const SPACE_FRAGMENT = gql`
   }
 `;
 
+// The te_* proposal columns only exist in the local private-voting hub
+// schema. Production hubs reject queries containing unknown fields, which
+// would blank every proposal list, so request them only when a local hub
+// is configured.
+const TE_PROPOSAL_FIELDS = (import.meta as any).env?.VITE_LOCAL_HUB_URL
+  ? `
+    te_config
+    te_mpk
+    te_dkg_status
+    te_committee_pks
+    te_threshold_t
+    te_threshold_n
+    te_keyper_urls
+    te_keyper_addresses
+    te_aggregate`
+  : '';
+
 const PROPOSAL_FRAGMENT = gql`
   fragment offchainProposalFragment on Proposal {
     id
@@ -174,6 +191,7 @@ const PROPOSAL_FRAGMENT = gql`
     updated
     votes
     privacy
+    ${TE_PROPOSAL_FIELDS}
     plugins
     flagged
     flagCode

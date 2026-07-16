@@ -1,0 +1,9 @@
+# Test fixture vectors are byte-identity-checked across the TS SDK and the
+# Python backend by scripts/parity-gate.mjs. They MUST round-trip through git
+# without line-ending conversion or the gate will report false drift.
+packages/private-vote-sdk/tests/vectors/**/*.json text eol=lf
+
+# Shell scripts are executed inside Linux containers (e.g. the MySQL init
+# script mounted into the mysql container). They must keep LF endings or the
+# shebang breaks on a CRLF checkout.
+*.sh text eol=lf

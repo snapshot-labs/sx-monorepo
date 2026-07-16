@@ -156,7 +156,9 @@ export function useEditor() {
       spaceVoteTypes.set(id, types);
       spacePrivacies.set(
         id,
-        space.privacy === 'any' ? ['none', 'shutter'] : [space.privacy]
+        space.privacy === 'any'
+          ? ['none', 'shutter', 'shutter-elgamal']
+          : [space.privacy]
       );
       spaceDelays.set(id, space.voting_delay);
       spaceMinPeriods.set(id, space.min_voting_period);

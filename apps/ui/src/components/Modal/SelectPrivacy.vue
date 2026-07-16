@@ -2,7 +2,12 @@
 import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
 import { SpacePrivacy } from '@/types';
 
-const votingTypes: SpacePrivacy[] = ['any', 'shutter', 'none'];
+const votingTypes: SpacePrivacy[] = [
+  'any',
+  'shutter',
+  'shutter-elgamal',
+  'none'
+];
 
 defineProps<{
   open: boolean;

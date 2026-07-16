@@ -252,6 +252,18 @@ export function useProposalQuery(
       if (!proposal) return null;
 
       return (await withAuthorNames([proposal]))[0];
+    },
+    refetchInterval: data => {
+      const p = data.state.data;
+      if (
+        p?.privacy === 'shutter-elgamal' &&
+        ['pending', 'active'].includes(p?.state) &&
+        !p?.te_mpk &&
+        !p?.te_dkg_status
+      ) {
+        return 5000;
+      }
+      return false;
     }
   });
 }

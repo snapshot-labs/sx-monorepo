@@ -19,6 +19,10 @@ import {
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 const broviderUrl = process.env.BROVIDER_URL || 'https://rpc.snapshot.org';
+const MIN_DKG_LEAD_TIME_S = parseInt(
+  process.env.MIN_DKG_LEAD_TIME_S || '180',
+  10
+);
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -154,6 +158,17 @@ export async function verify(body): Promise<any> {
     spacePrivacy !== proposalPrivacy
   ) {
     return Promise.reject('not allowed to set privacy');
+  }
+
+  const effectivePrivacy =
+    spacePrivacy !== 'any' ? spacePrivacy : proposalPrivacy ?? '';
+  if (effectivePrivacy === 'shutter-elgamal') {
+    const now = Math.floor(Date.now() / 1e3);
+    if (msg.payload.start - now < MIN_DKG_LEAD_TIME_S) {
+      return Promise.reject(
+        `shutter-elgamal proposals must start at least ${MIN_DKG_LEAD_TIME_S}s from now to allow DKG to complete`
+      );
+    }
   }
 
   try {

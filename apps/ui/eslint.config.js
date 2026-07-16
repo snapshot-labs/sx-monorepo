@@ -11,6 +11,7 @@ export default [
     }
   },
   {
-    ignores: ['**/gql/**']
+    // public/blst.js is emscripten output copied from the private-vote-sdk
+    ignores: ['**/gql/**', 'public/blst.js']
   }
 ];

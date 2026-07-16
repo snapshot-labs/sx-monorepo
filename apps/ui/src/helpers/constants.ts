@@ -11,6 +11,15 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+// Minimum number of seconds between "now" and the start of a shutter-elgamal
+// proposal's voting window. Gives the keyper committee time to run DKG and
+// publish the master public key before ballots start flowing in. Must be
+// >= the sequencer's MIN_DKG_LEAD_TIME_S (default 180); override via
+// VITE_MIN_DKG_LEAD_TIME_S if the backend value diverges.
+export const MIN_DKG_LEAD_TIME_S = Number(
+  import.meta.env.VITE_MIN_DKG_LEAD_TIME_S ?? 180
+);
+
 export const API_URL =
   import.meta.env.VITE_API_URL ?? 'https://api.snapshot.box';
 export const API_TESTNET_URL =
@@ -189,6 +198,11 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  },
+  'shutter-elgamal': {
+    label: 'Permanent private voting',
+    description:
+      'Choices are encrypted and never decrypted: only the aggregate tally is ever revealed. Powered by threshold-ElGamal homomorphic tallying.'
   },
   any: {
     label: 'Any',
