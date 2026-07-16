@@ -493,15 +493,48 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+export function formatDelegateRegistryDelegations(
+  space: Pick<ApiSpace, 'id' | 'network' | 'strategies'>,
+  apiUrl: string
+): SpaceMetadataDelegation[] {
+  const registries = new Map<string, SpaceMetadataDelegation>();
+
+  for (const strategy of space.strategies) {
+    if (!DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)) continue;
+
+    const chainId =
+      strategy.params?.delegationNetwork || strategy.network || space.network;
+    const contractAddress = strategy.params?.delegationSpace || space.id;
+
+    registries.set(`${chainId}:${contractAddress}`, {
+      name: DELEGATION_TYPES_NAMES['delegate-registry'],
+      apiType: 'delegate-registry',
+      apiUrl,
+      contractAddress,
+      chainId
+    });
+  }
+
+  const delegations = [...registries.values()];
+  if (delegations.length < 2) return delegations;
+
+  return delegations.map(delegation => {
+    const networkName = (
+      networks as Record<string, { name: string } | undefined>
+    )[delegation.chainId as string]?.name;
+
+    return {
+      ...delegation,
+      name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${networkName ?? `Chain ${delegation.chainId}`})`
+    };
+  });
+}
+
 function formatDelegations(
   space: ApiSpace,
   networkId: NetworkID
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
-
-  const delegateRegistryStrategies = space.strategies.filter(strategy =>
-    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
-  );
 
   if (space.delegationPortal) {
     const apiType =
@@ -522,34 +555,11 @@ function formatDelegations(
     });
   }
 
-  if (delegateRegistryStrategies.length) {
-    const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
-    if (apiUrl) {
-      const chainIds = [
-        ...new Set(
-          delegateRegistryStrategies.map(
-            strategy => strategy.network || space.network
-          )
-        )
-      ];
-
-      for (const chainId of chainIds) {
-        const networkName = (
-          networks as Record<string, { name: string } | undefined>
-        )[String(chainId)]?.name;
-
-        delegations.push({
-          name:
-            chainIds.length > 1
-              ? `${DELEGATION_TYPES_NAMES['delegate-registry']} (${networkName ?? `Chain ${chainId}`})`
-              : DELEGATION_TYPES_NAMES['delegate-registry'],
-          apiType: 'delegate-registry',
-          apiUrl,
-          contractAddress: space.id,
-          chainId
-        });
-      }
-    }
+  const delegateRegistryApiUrl = DELEGATE_REGISTRY_URLS[networkId];
+  if (delegateRegistryApiUrl) {
+    delegations.push(
+      ...formatDelegateRegistryDelegations(space, delegateRegistryApiUrl)
+    );
   }
 
   const splitDelegationStrategy = space.strategies.find(strategy =>

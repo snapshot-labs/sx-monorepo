@@ -362,9 +362,7 @@ export function useDelegates(
     const { data } = await client.query({
       query,
       variables: {
-        space: isApeChainDelegateRegistry
-          ? delegation.contractAddress
-          : space.id,
+        space: delegation.contractAddress,
         delegator
       }
     });
