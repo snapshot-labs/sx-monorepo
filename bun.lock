@@ -387,7 +387,7 @@
         "@graphql-codegen/cli": "^5.0.4",
         "@graphql-codegen/client-preset": "^5.2.4",
         "@graphql-typed-document-node/core": "^3.2.0",
-        "@iconify-json/heroicons-outline": "^1.1.7",
+        "@iconify-json/heroicons-outline": "^1.2.1",
         "@iconify-json/heroicons-solid": "^1.1.8",
         "@snapshot-labs/eslint-config-vue": "^0.1.0",
         "@storybook/addon-a11y": "^9.0.18",
@@ -1112,7 +1112,7 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
-    "@iconify-json/heroicons-outline": ["@iconify-json/heroicons-outline@1.1.10", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-3sPszsoIlLLLxxXxJkla6GuNNpJrie/84iE8cbDi+NMkaeHMsfVTOHh3LxLsPRaTBFTSlGflJ2ZWAb1e3Ae7Gw=="],
+    "@iconify-json/heroicons-outline": ["@iconify-json/heroicons-outline@1.2.1", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-QNYV4/KsW8Ww9a3B+hxDntS5BwLLbErKpL1V3MkvB8X+ZVTX5VLxjlj8rAEih+GCDWzaiZJOrdO/pagvsuBkXg=="],
 
     "@iconify-json/heroicons-solid": ["@iconify-json/heroicons-solid@1.1.11", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-Nzhjs8voo4d+gcrfhlY/F0bRonEmLHT1+DeD2nYubvAF151pxXPqTS9bRB49Hqpdxl1l9LS2VTPtQPRypj/csQ=="],
 
@@ -5157,6 +5157,8 @@
     "appdmg/async": ["async@1.5.2", "", {}, "sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w=="],
 
     "appdmg/execa": ["execa@1.0.0", "", { "dependencies": { "cross-spawn": "^6.0.0", "get-stream": "^4.0.0", "is-stream": "^1.1.0", "npm-run-path": "^2.0.0", "p-finally": "^1.0.0", "signal-exit": "^3.0.0", "strip-eof": "^1.0.0" } }, "sha512-adbxcyWV46qiHyvSp50TKt05tB4tK3HcmF7/nxfAdhnox83seTDbwnaqKO4sXRy7roHAIFqJP/Rw/AuEbX61LA=="],
+
+    "auction/@iconify-json/heroicons-outline": ["@iconify-json/heroicons-outline@1.1.10", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-3sPszsoIlLLLxxXxJkla6GuNNpJrie/84iE8cbDi+NMkaeHMsfVTOHh3LxLsPRaTBFTSlGflJ2ZWAb1e3Ae7Gw=="],
 
     "auction/typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
