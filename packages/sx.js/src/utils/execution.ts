@@ -8,10 +8,6 @@ import {
   Transaction
 } from '../types';
 
-const BROVIDER_URL = 'https://rpc.brovider.xyz';
-const getRpcUrl = (chainId: number) =>
-  `${BROVIDER_URL}/${chainId}?client=sx.js`;
-
 type Abi = (Fragment | JsonFragment | string)[];
 
 type CallInfo = {
@@ -19,6 +15,10 @@ type CallInfo = {
   calldata: `0x${string}` | '';
   value: string;
 };
+
+const BROVIDER_URL = 'https://rpc.brovider.xyz';
+const getRpcUrl = (chainId: number) =>
+  `${BROVIDER_URL}/${chainId}?client=sx.js`;
 
 const ABI_CACHE = new Map<`${number}:0x${string}`, Abi>();
 const CUSTOM_PROXY_RESOLVERS = {
