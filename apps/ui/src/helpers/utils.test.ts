@@ -6,6 +6,7 @@ import {
   _vp,
   abiToDefinition,
   createErc1155Metadata,
+  escapeHtml,
   formatAddress,
   getSpaceController,
   getStampUrl,
@@ -14,6 +15,27 @@ import {
 } from './utils';
 
 describe('utils', () => {
+  describe('escapeHtml', () => {
+    it('should neutralize an img onerror XSS payload', () => {
+      expect(escapeHtml('<img src=x onerror=alert(1)>')).toBe(
+        '&lt;img src=x onerror=alert(1)&gt;'
+      );
+    });
+
+    it('should escape all HTML-sensitive characters', () => {
+      expect(escapeHtml(`<>&"'`)).toBe('&lt;&gt;&amp;&quot;&#39;');
+    });
+
+    it('should leave plain text untouched', () => {
+      expect(escapeHtml('USDC')).toBe('USDC');
+    });
+
+    it('should handle nullish input', () => {
+      expect(escapeHtml(undefined as unknown as string)).toBe('');
+      expect(escapeHtml(null as unknown as string)).toBe('');
+    });
+  });
+
   describe('uniqBy', () => {
     it('should return unique values by key', () => {
       const arr = [
