@@ -1,27 +1,15 @@
+import { beforeAll, describe, expect, it } from 'vitest';
 import { G2Point, initCurves } from '@snapshot-labs/private-vote-sdk';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { pseudonymFor } from './teBallot';
 import {
-  AuditBallot,
-  AuditPayload,
-  BallotsPayload,
+  type AuditBallot,
+  type AuditPayload,
+  type BallotsPayload,
+  aggregateBallots,
   fingerprintHex,
   shortHex,
-  verifyBallots,
   verifyTally
 } from './teVerify';
-
-// ---------------------------------------------------------------------------
-// Mock verifyBallot so fake ballot envelopes pass the ZK check in verifyBallots.
-// All other SDK exports (G2Point, addCt, scalarMulCt, …) stay real so the
-// accumulation path exercises the actual WASM allocation and destroyWasm calls.
-// ---------------------------------------------------------------------------
-vi.mock('@snapshot-labs/private-vote-sdk', async importOriginal => {
-  const mod =
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-    await importOriginal<typeof import('@snapshot-labs/private-vote-sdk')>();
-  return { ...mod, verifyBallot: vi.fn(() => ({ ok: true })) };
-});
 
 const PROPOSAL_ID = `0x${'11'.repeat(32)}`;
 const BASE_CONFIG = {
@@ -143,139 +131,103 @@ describe('shortHex', () => {
 });
 
 // ---------------------------------------------------------------------------
-// verifyBallots: structural rejections (no WASM point allocation needed)
+// aggregateBallots: structural rejections (no WASM point allocation needed)
+//
+// aggregateBallots deliberately does not re-run verifyBallot or the
+// pseudonym-binding check -- those already ran server-side at cast time
+// (apps/sequencer/src/writer/vote.ts's verify()). So there's no "te_config
+// missing" or "pseudonym mismatch" failure mode to test here anymore; these
+// tests only cover what aggregateBallots itself still does: aggregate and
+// compare.
 // ---------------------------------------------------------------------------
-describe('verifyBallots: structural rejections', () => {
-  it('throws when te_config is missing', async () => {
-    await expect(
-      verifyBallots(
-        PROPOSAL_ID,
-        { te_mpk: G2_GEN_HEX, te_config: null, ballots: [] },
-        makeDummyAggregate()
-      )
-    ).rejects.toThrow('te_config missing');
-  });
-
+describe('aggregateBallots: structural rejections', () => {
   it('throws when expectedAggregate is falsy', async () => {
     await expect(
-      verifyBallots(PROPOSAL_ID, makeBallotsPayload([]), null as any)
+      aggregateBallots(makeBallotsPayload([]), null as any)
     ).rejects.toThrow('No published aggregate');
   });
 
-  it('marks an empty-choice ballot as failure', async () => {
-    const result = await verifyBallots(
-      PROPOSAL_ID,
+  it('skips an empty-choice ballot without crashing, but it cannot match', async () => {
+    const result = await aggregateBallots(
       makeBallotsPayload([
         { voter: `0x${'11'.repeat(20)}`, vp: 1, choice: null }
       ]),
       makeDummyAggregate()
     );
-    expect(result.failures).toHaveLength(1);
-    expect(result.failures[0].reason).toBe('empty ballot');
-    expect(result.verifiedCount).toBe(0);
+    expect(result.total).toBe(1);
+    // Nothing was accumulated (the only ballot was skipped), so the
+    // recomputed aggregate (all-null) cannot match any published aggregate.
+    expect(result.aggregateMatches).toBe(false);
   });
 
-  it('marks a pseudonym-mismatch ballot as failure', async () => {
-    const result = await verifyBallots(
-      PROPOSAL_ID,
-      makeBallotsPayload([
-        {
-          voter: `0x${'11'.repeat(20)}`,
-          vp: 1,
-          choice: {
-            electionId: PROPOSAL_ID,
-            pseudonym: `0x${'00'.repeat(32)}`, // wrong; does not match keccak(voter||proposalId)
-            vk: `0x${'00'.repeat(48)}`,
-            ciphertexts: Array.from(
-              { length: BASE_CONFIG.numCandidates },
-              () => ({
-                c1: G2_GEN_HEX,
-                c2: G2_GEN_HEX
-              })
-            ),
-            zkProof: '0x',
-            voterSignature: `0x${'00'.repeat(80)}`
-          }
-        }
-      ]),
-      makeDummyAggregate()
-    );
-    expect(result.failures).toHaveLength(1);
-    expect(result.failures[0].reason).toBe('pseudonym mismatch');
-  });
-
-  it('counts zero-weight ballots as verified but skips accumulation', async () => {
-    const result = await verifyBallots(
-      PROPOSAL_ID,
+  it('skips zero-weight ballots from accumulation', async () => {
+    const result = await aggregateBallots(
       makeBallotsPayload([makeBallot(1, 0)]),
       makeDummyAggregate()
     );
-    expect(result.failures).toHaveLength(0);
-    expect(result.verifiedCount).toBe(1);
+    expect(result.total).toBe(1);
+    expect(result.aggregateMatches).toBe(false);
   });
 
-  it('counts total correctly across mixed pass/fail ballots', async () => {
+  it('counts total across all ballots regardless of skips', async () => {
     const ballots = [
       makeBallot(1, 1),
-      { voter: `0x${'ff'.repeat(20)}`, vp: 1, choice: null }, // empty → failure
+      { voter: `0x${'ff'.repeat(20)}`, vp: 1, choice: null }, // skipped, still counted
       makeBallot(3, 2)
     ];
-    const result = await verifyBallots(
-      PROPOSAL_ID,
+    const result = await aggregateBallots(
       makeBallotsPayload(ballots),
       makeDummyAggregate()
     );
     expect(result.total).toBe(3);
-    expect(result.verifiedCount).toBe(2);
-    expect(result.failures).toHaveLength(1);
-    expect(result.failures[0].reason).toBe('empty ballot');
+  });
+
+  it('matches when a single vp=1 ballot equals the published aggregate', async () => {
+    // makeBallot's ciphertexts and makeAuditPayload's aggregate ciphertexts
+    // both default to the G2 generator, so a lone vp=1 ballot (raw reuse,
+    // no scalarMulCt) reproduces the published aggregate exactly.
+    const audit = makeAuditPayload();
+    const result = await aggregateBallots(
+      makeBallotsPayload([makeBallot(1, 1)]),
+      audit.aggregate
+    );
+    expect(result.total).toBe(1);
+    expect(result.aggregateMatches).toBe(true);
   });
 });
 
 // ---------------------------------------------------------------------------
-// verifyBallots: WASM accumulation path (smoke test + scalarMulCt branch)
+// aggregateBallots: WASM accumulation path (smoke test + scalarMulCt branch)
 //
-// 200 voters × 3 candidates exercises both the vp=1 (raw reuse) and vp=2
+// 150 voters × 3 candidates exercises both the vp=1 (raw reuse) and vp=2
 // (scalarMulCt) branches of the accumulation loop, as well as the addCt
 // prev/weighted cleanup. The test proves the code path completes without a
 // WASM abort. A full OOM regression (requiring ~7,000+ G2 ops without the
 // fix) is covered by the SDK's `npm run bench:wasm` script.
 // ---------------------------------------------------------------------------
-describe('verifyBallots: WASM accumulation path', () => {
+describe('aggregateBallots: WASM accumulation path', () => {
   const NUM_CANDIDATES = 3;
 
   it('vp=1 path: accumulates 100 ballots through the raw-reuse branch without WASM abort', async () => {
     const ballots = Array.from({ length: 100 }, (_, i) =>
       makeBallot(i + 1, 1, NUM_CANDIDATES)
     );
-    const result = await verifyBallots(
-      PROPOSAL_ID,
-      {
-        te_mpk: G2_GEN_HEX,
-        te_config: { ...BASE_CONFIG, numCandidates: NUM_CANDIDATES },
-        ballots
-      },
+    const result = await aggregateBallots(
+      { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, ballots },
       makeDummyAggregate(NUM_CANDIDATES)
     );
-    expect(result.verifiedCount).toBe(100);
-    expect(result.failures).toHaveLength(0);
+    expect(result.total).toBe(100);
   }, 30_000);
 
   it('vp=2 path: accumulates 50 ballots through the scalarMulCt branch without WASM abort', async () => {
     const ballots = Array.from({ length: 50 }, (_, i) =>
       makeBallot(i + 200, 2, NUM_CANDIDATES)
     );
-    const result = await verifyBallots(
-      PROPOSAL_ID,
-      {
-        te_mpk: G2_GEN_HEX,
-        te_config: { ...BASE_CONFIG, numCandidates: NUM_CANDIDATES },
-        ballots
-      },
+    const result = await aggregateBallots(
+      { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, ballots },
       makeDummyAggregate(NUM_CANDIDATES)
     );
-    expect(result.verifiedCount).toBe(50);
-    expect(result.failures).toHaveLength(0);
+    expect(result.total).toBe(50);
   }, 30_000);
 });
 
