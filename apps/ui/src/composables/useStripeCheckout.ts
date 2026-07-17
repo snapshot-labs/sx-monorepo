@@ -41,19 +41,21 @@ export function useStripeCheckout() {
     window.location.href = result.url;
   }
 
-  async function getPortalUrl(network: string): Promise<string | null> {
+  async function getPortalUrl(network: string): Promise<string> {
     const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
     const res = await fetch(`${baseUrl}/stripe/portal`);
 
-    if (!res.ok) throw new Error('Failed to get billing portal URL');
-
-    const { result } = ((await res
+    const { result, error_description } = ((await res
       .json()
       .catch(err =>
         console.error('[stripe] failed to parse portal response', err)
       )) ?? {}) as SchnapsResponse;
 
-    return result?.url ?? null;
+    if (!res.ok || !result?.url) {
+      throw new Error(error_description || 'Failed to get billing portal URL');
+    }
+
+    return result.url;
   }
 
   return { redirectToCheckout, getPortalUrl };

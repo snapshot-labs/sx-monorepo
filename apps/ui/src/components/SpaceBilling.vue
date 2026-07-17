@@ -23,6 +23,8 @@ const {
 const { getPortalUrl } = useStripeCheckout();
 const uiStore = useUiStore();
 
+const portalPaymentId = ref<string | null>(null);
+
 const chainId = computed(() => getNetwork(props.space.network).chainId);
 const turboExpirationDate = computed(() =>
   dayjs(props.space.turbo_expiration * 1000)
@@ -53,16 +55,26 @@ const statusText = computed(() => {
   return 'Active';
 });
 
-async function openPortal() {
+async function openPortal(paymentId: string) {
+  if (portalPaymentId.value) return;
+
+  portalPaymentId.value = paymentId;
   try {
     const url = await getPortalUrl(props.space.network);
-    if (!url) throw new Error('No billing portal URL');
     window.location.href = url;
   } catch (err) {
+    portalPaymentId.value = null;
     console.error('[stripe] portal failed', err);
-    uiStore.addNotification('error', 'Failed to open the billing portal');
+    uiStore.addNotification(
+      'error',
+      err instanceof Error ? err.message : 'Failed to open the billing portal'
+    );
   }
 }
+
+useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
+  if (event.persisted) portalPaymentId.value = null;
+});
 </script>
 
 <template>
@@ -157,7 +169,11 @@ async function openPortal() {
           </span>
         </div>
 
-        <UiDropdown>
+        <UiLoading
+          v-if="portalPaymentId === payment.id"
+          class="flex items-center"
+        />
+        <UiDropdown v-else>
           <template #button>
             <div class="flex items-center h-full">
               <button type="button" class="text-skin-link">
@@ -168,7 +184,7 @@ async function openPortal() {
           <template #items>
             <UiDropdownItem
               v-if="payment.id.startsWith('stripe:')"
-              @click="openPortal"
+              @click="openPortal(payment.id)"
             >
               <IH-arrow-sm-right class="-rotate-45" :width="16" />
               Manage subscription
