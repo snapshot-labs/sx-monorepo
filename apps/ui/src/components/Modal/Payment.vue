@@ -11,16 +11,6 @@ const FORM = {
   quantity: 1
 };
 
-const PLAN_DEFINITION = {
-  type: 'string',
-  title: 'Billing period',
-  enum: ['monthly', 'yearly'],
-  options: [
-    { id: 'monthly', name: 'Monthly' },
-    { id: 'yearly', name: 'Yearly' }
-  ]
-};
-
 const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
 
 const props = withDefaults(
@@ -71,16 +61,13 @@ const { isWhiteLabel } = useWhiteLabel();
 const { redirectToCheckout } = useStripeCheckout();
 const uiStore = useUiStore();
 
-const paymentMethod = ref<PaymentMethod>(
-  props.isAuthValidForCrypto ? 'crypto' : 'card'
-);
+const paymentMethod = ref<PaymentMethod>('crypto');
 const selectedTokenAddress = ref<string>('');
 const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
 const isCardLoading = ref(false);
-const hasPendingCryptoIntent = ref(false);
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -130,6 +117,10 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
+const needsLogin = computed(
+  () => paymentMethod.value === 'crypto' && !props.isAuthValidForCrypto
+);
+
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
   if (paymentMethod.value === 'card') return !isCardLoading.value;
@@ -145,7 +136,9 @@ const canSubmit = computed(() => {
 const isQuantityAdjustable = computed(() => paymentMethod.value === 'crypto');
 
 const effectiveQuantity = computed(() =>
-  isQuantityAdjustable.value ? Math.max(1, Number(form.value.quantity) || 1) : 1
+  isQuantityAdjustable.value
+    ? Math.max(1, Math.floor(Number(form.value.quantity)) || 1)
+    : 1
 );
 
 const totalAmount = computed(() =>
@@ -160,20 +153,6 @@ const formErrors = computed(() => {
 const formValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
-
-function selectCryptoTab() {
-  if (!props.isAuthValidForCrypto) {
-    hasPendingCryptoIntent.value = true;
-    emit('connectWallet');
-    return;
-  }
-  paymentMethod.value = 'crypto';
-}
-
-function selectCardTab() {
-  hasPendingCryptoIntent.value = false;
-  paymentMethod.value = 'card';
-}
 
 async function moveToNextStep() {
   if (isLastStep.value) {
@@ -191,6 +170,11 @@ async function moveToNextStep() {
 }
 
 async function handleSubmit() {
+  if (needsLogin.value) {
+    emit('connectWallet');
+    return;
+  }
+
   if (!canSubmit.value) return;
 
   if (paymentMethod.value === 'card') {
@@ -225,18 +209,7 @@ function handleTokenPick(address: string) {
 watch(
   () => props.isAuthValidForCrypto,
   isValid => {
-    if (isValid) {
-      if (hasPendingCryptoIntent.value) {
-        hasPendingCryptoIntent.value = false;
-        paymentMethod.value = 'crypto';
-      }
-    } else if (
-      paymentMethod.value === 'crypto' &&
-      !isHidden.value &&
-      !isModalTransactionProgressOpen.value
-    ) {
-      paymentMethod.value = 'card';
-    }
+    if (!isValid) isPickerShown.value = false;
   }
 );
 
@@ -250,8 +223,7 @@ watch(
     isHidden.value = false;
     selectedTokenAddress.value = '';
     isCardLoading.value = false;
-    hasPendingCryptoIntent.value = false;
-    paymentMethod.value = props.isAuthValidForCrypto ? 'crypto' : 'card';
+    paymentMethod.value = 'crypto';
     form.value = clone(FORM);
   }
 );
@@ -286,7 +258,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
       :assets="filteredAssets"
       :address="auth?.account || ''"
       :network="network"
-      :loading="isPending"
+      :loading="isPending && !!auth?.account"
       :search-value="''"
       @pick="handleTokenPick"
     />
@@ -300,7 +272,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
               ? 'text-skin-link border-b border-skin-link'
               : 'text-skin-text'
           "
-          @click="selectCryptoTab"
+          @click="paymentMethod = 'crypto'"
         >
           <IH-cash />
           Crypto
@@ -313,18 +285,13 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
               ? 'text-skin-link border-b border-skin-link'
               : 'text-skin-text'
           "
-          @click="selectCardTab"
+          @click="paymentMethod = 'card'"
         >
           <IH-credit-card />
           Card
         </button>
       </div>
       <div class="s-box p-4 space-y-3">
-        <UiSelect
-          v-if="paymentMethod === 'card'"
-          v-model="plan"
-          :definition="PLAN_DEFINITION"
-        />
         <div v-if="paymentMethod === 'crypto'" class="s-base">
           <div class="s-label" v-text="'Token *'" />
           <button
@@ -404,13 +371,14 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
       <UiButton
         class="w-full"
         primary
-        :disabled="!canSubmit"
-        :loading="paymentMethod === 'card' ? isCardLoading : isPending"
+        :disabled="!needsLogin && !canSubmit"
+        :loading="
+          paymentMethod === 'card' ? isCardLoading : !needsLogin && isPending
+        "
         @click="handleSubmit"
       >
-        <template v-if="paymentMethod === 'card'">
-          Continue to checkout
-        </template>
+        <template v-if="needsLogin">Log in</template>
+        <template v-else-if="paymentMethod === 'card'">Checkout</template>
         <template v-else-if="isInsufficientBalance">
           Insufficient {{ currentToken.symbol }}
         </template>

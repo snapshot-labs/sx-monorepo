@@ -98,6 +98,7 @@ const { limits } = useSettings();
 const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
 const uiStore = useUiStore();
+const { setTitle } = useTitle();
 
 const referral: string = route.query.ref as string;
 
@@ -239,6 +240,14 @@ async function handleStripeSuccess() {
     });
   }
 }
+
+watchEffect(() =>
+  setTitle(
+    selectedSpace.value
+      ? `Snapshot Pro - ${selectedSpace.value.name}`
+      : 'Snapshot Pro'
+  )
+);
 
 onMounted(() => {
   if (route.query.stripe_success) {
