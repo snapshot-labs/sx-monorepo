@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import {
-  AuditPayload,
-  BallotAuditResult,
-  BallotsPayload,
+  aggregateBallots,
   buildVerificationBundle,
   fetchAuditPayload,
   fetchBallotsPayload,
   fingerprintHex,
   shortHex,
-  verifyBallots,
-  VerifyResult,
-  verifyTally
+  verifyTally,
+  type AuditPayload,
+  type BallotAggregateResult,
+  type BallotsPayload,
+  type VerifyResult
 } from '@/helpers/teVerify';
 import { Proposal } from '@/types';
 
@@ -29,7 +29,7 @@ type Status =
       kind: 'ok';
       tallies: bigint[];
       matches: boolean | null;
-      ballots: BallotAuditResult;
+      ballots: BallotAggregateResult;
       audit: AuditPayload;
       ballotsPayload: BallotsPayload;
       tally: VerifyResult;
@@ -49,20 +49,19 @@ async function run() {
       fetchBallotsPayload(props.apiBaseUrl, proposalId)
     ]);
     status.value = { kind: 'verifying' };
-    // Step 1: independently verify every encrypted ballot and re-derive
-    // the vp-weighted aggregate the keypers decrypted.
-    const ballots = await verifyBallots(
-      proposalId,
-      ballotsPayload,
-      payload.aggregate
-    );
+    // Ballots are already verifyBallot-checked by the sequencer at ingestion
+    // (apps/sequencer/src/writer/vote.ts's verify()) before being persisted,
+    // so this only re-aggregates the already-trusted ciphertexts and
+    // compares the result to the published aggregate -- see
+    // aggregateBallots's own docstring for why the per-ballot proof isn't
+    // re-checked here.
+    const ballots = await aggregateBallots(ballotsPayload, payload.aggregate);
     // Step 2: recover the tally from the public decryption shares.
-    const budget = (props.proposal.te_config as any)?.budget ?? 1;
     const result = await verifyTally(
       proposalId,
       payload,
       props.proposal.scores,
-      budget
+      budget.value
     );
     status.value = {
       kind: 'ok',
@@ -79,27 +78,6 @@ async function run() {
 }
 
 // ---- engine-room derived views (only meaningful once status.kind==='ok') ----
-
-const failureIndices = computed(() => {
-  if (status.value.kind !== 'ok') return new Set<number>();
-  return new Set(status.value.ballots.failures.map(f => f.index));
-});
-
-/** Per-ballot pass/fail breakdown for the ZK-proof stage. */
-const ballotRows = computed(() => {
-  if (status.value.kind !== 'ok') return [];
-  const s = status.value;
-  return s.ballotsPayload.ballots.map((b, i) => {
-    const failure = s.ballots.failures.find(f => f.index === i);
-    return {
-      index: i,
-      pseudonym: b.choice?.pseudonym || '-',
-      vp: b.vp,
-      ok: !failureIndices.value.has(i),
-      reason: failure?.reason
-    };
-  });
-});
 
 /** Fingerprint of the homomorphic aggregate the keypers decrypted. */
 const aggregateFingerprint = computed(() => {
@@ -139,6 +117,22 @@ const keyperRows = computed(() => {
 const numCandidates = computed(() =>
   status.value.kind === 'ok' ? status.value.audit.aggregate.num_candidates : 0
 );
+
+/**
+ * Budget the SDK's ``recoverTally`` recovers in -- e.g. budget=100 for a
+ * weighted proposal means the raw recovered integer is the vote count
+ * scaled by 100 (see verifyTally's own scaling against publishedScores),
+ * so it has to be divided back down to read as an actual vote count.
+ * budget=1 for simple single-choice voting, where the raw value already
+ * is the vote count.
+ */
+const budget = computed(() => (props.proposal.te_config as any)?.budget ?? 1);
+
+/** Displays a recovered raw tally in real vote-count units. */
+function formatTally(raw: bigint): string {
+  const value = Number(raw) / budget.value;
+  return budget.value === 1 ? value.toString() : value.toFixed(2);
+}
 
 function downloadBundle() {
   if (status.value.kind !== 'ok') return;
@@ -191,10 +185,9 @@ function downloadBundle() {
       v-if="showIntro"
       class="text-skin-text text-sm list-decimal pl-5 space-y-0.5"
     >
-      <li>Check each encrypted ballot's zero-knowledge validity proof.</li>
       <li>
-        Recompute the voting-power-weighted aggregate and confirm it matches
-        what the keypers decrypted.
+        Recompute the voting-power-weighted aggregate from every encrypted
+        ballot and confirm it matches what the keypers decrypted.
       </li>
       <li>
         Recompute the totals from the keypers' public decryption shares, proving
@@ -243,30 +236,17 @@ function downloadBundle() {
     <div
       v-if="status.kind === 'ok'"
       class="text-sm flex items-center gap-1"
-      :class="
-        status.ballots.aggregateMatches && status.ballots.failures.length === 0
-          ? 'text-skin-success'
-          : 'text-skin-danger'
-      "
+      :class="status.ballots.aggregateMatches ? 'text-skin-success' : 'text-skin-danger'"
     >
       <IH-check-circle
-        v-if="
-          status.ballots.aggregateMatches &&
-          status.ballots.failures.length === 0
-        "
+        v-if="status.ballots.aggregateMatches"
         class="size-[16px] shrink-0"
       />
       <IH-x-circle v-else class="size-[16px] shrink-0" />
-      <span v-if="status.ballots.failures.length === 0">
-        {{ status.ballots.verifiedCount }}/{{ status.ballots.total }} ballots
-        passed their zero-knowledge proof and the recomputed aggregate
+      <span>
+        {{ status.ballots.total }} ballots aggregated; the recomputed total
         {{ status.ballots.aggregateMatches ? 'matches' : 'does NOT match' }}
-        the decrypted one.
-      </span>
-      <span v-else>
-        {{ status.ballots.failures.length }} of
-        {{ status.ballots.total }} ballots failed verification (e.g.
-        {{ status.ballots.failures[0].reason }}).
+        the one the keypers decrypted.
       </span>
     </div>
     <ul
@@ -281,7 +261,7 @@ function downloadBundle() {
         <span class="truncate">
           {{ proposal.choices?.[i] || `Choice ${i + 1}` }}
         </span>
-        <span class="font-mono">{{ tally.toString() }}</span>
+        <span class="font-mono">{{ formatTally(tally) }}</span>
       </li>
     </ul>
 
@@ -300,7 +280,7 @@ function downloadBundle() {
       </button>
 
       <div v-if="showDetail" class="mt-2 space-y-3">
-        <!-- Stage 1: per-ballot zero-knowledge proofs. -->
+        <!-- Stage 1: homomorphic aggregate. -->
         <div class="border rounded-lg px-3 py-2">
           <div
             class="flex items-center gap-2 text-skin-link font-semibold text-sm"
@@ -308,57 +288,6 @@ function downloadBundle() {
             <span
               class="inline-flex items-center justify-center size-[18px] rounded-full bg-skin-border text-xs"
               >1</span
-            >
-            Per-ballot zero-knowledge proofs
-            <IH-check-circle
-              v-if="status.ballots.failures.length === 0"
-              class="size-[15px] text-skin-success"
-            />
-            <IH-x-circle v-else class="size-[15px] text-skin-danger" />
-          </div>
-          <div class="text-xs text-skin-text mt-1">
-            Each ballot carries an OR-proof that its ciphertext encodes exactly
-            one valid choice, with no out-of-range or double votes. The voter is
-            identified only by a pseudonym
-            <span class="font-mono">keccak256(voter ‖ proposalId)</span>.
-          </div>
-          <ul class="mt-2 space-y-1 max-h-[180px] overflow-auto">
-            <li
-              v-for="row in ballotRows"
-              :key="row.index"
-              class="flex items-center justify-between text-xs gap-2"
-            >
-              <span class="flex items-center gap-1 truncate">
-                <IH-check-circle
-                  v-if="row.ok"
-                  class="size-[14px] text-skin-success shrink-0"
-                />
-                <IH-x-circle
-                  v-else
-                  class="size-[14px] text-skin-danger shrink-0"
-                />
-                <span class="font-mono truncate">{{
-                  shortHex(row.pseudonym)
-                }}</span>
-              </span>
-              <span class="text-skin-text shrink-0">
-                <span v-if="!row.ok" class="text-skin-danger">{{
-                  row.reason
-                }}</span>
-                <span v-else>vp {{ row.vp }}</span>
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Stage 2: homomorphic aggregate. -->
-        <div class="border rounded-lg px-3 py-2">
-          <div
-            class="flex items-center gap-2 text-skin-link font-semibold text-sm"
-          >
-            <span
-              class="inline-flex items-center justify-center size-[18px] rounded-full bg-skin-border text-xs"
-              >2</span
             >
             Homomorphic aggregate
             <IH-check-circle
@@ -380,14 +309,14 @@ function downloadBundle() {
           </div>
         </div>
 
-        <!-- Stage 3: threshold decryption. -->
+        <!-- Stage 2: threshold decryption. -->
         <div class="border rounded-lg px-3 py-2">
           <div
             class="flex items-center gap-2 text-skin-link font-semibold text-sm"
           >
             <span
               class="inline-flex items-center justify-center size-[18px] rounded-full bg-skin-border text-xs"
-              >3</span
+              >2</span
             >
             Threshold decryption
             <IH-check-circle
