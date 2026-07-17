@@ -658,8 +658,8 @@ export function getChoiceText(availableChoices: string[], choice: Choice) {
     .join(', ');
 }
 
-export function escapeHtml(text: string) {
-  return String(text ?? '')
+export function escapeHtml(text: string | null | undefined) {
+  return (text ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

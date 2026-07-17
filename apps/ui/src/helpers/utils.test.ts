@@ -31,8 +31,8 @@ describe('utils', () => {
     });
 
     it('should handle nullish input', () => {
-      expect(escapeHtml(undefined as unknown as string)).toBe('');
-      expect(escapeHtml(null as unknown as string)).toBe('');
+      expect(escapeHtml(undefined)).toBe('');
+      expect(escapeHtml(null)).toBe('');
     });
   });
 
