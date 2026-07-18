@@ -41,6 +41,11 @@ describe('votes resolver index usage', () => {
     );
     expect(votesSql).toContain('v.space = ?');
     expect(votesSql).toContain('v.proposal = ?');
+    // id tie-break must match the created direction so the composite index is
+    // scanned (backward) instead of triggering a filesort.
+    expect(votesSql.replace(/\s+/g, ' ')).toContain(
+      'ORDER BY v.created DESC, v.id DESC'
+    );
     expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
   });
 

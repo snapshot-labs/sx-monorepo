@@ -72,6 +72,9 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
+  // Keep the id tie-break in the same direction as the primary sort so the
+  // proposal-scoped created path is a pure (backward) scan of the composite
+  // (space, proposal, created, id) index instead of a filesort.
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.* FROM votes v ${indexHint}
