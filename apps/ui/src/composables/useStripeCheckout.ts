@@ -3,6 +3,7 @@ import { SCHNAPS_URLS } from '@/helpers/constants';
 type CheckoutParams = {
   space: string;
   plan: 'monthly' | 'yearly';
+  email?: string;
 };
 
 type SchnapsResponse = {
@@ -11,7 +12,7 @@ type SchnapsResponse = {
 };
 
 export function useStripeCheckout() {
-  async function redirectToCheckout({ space, plan }: CheckoutParams) {
+  async function redirectToCheckout({ space, plan, email }: CheckoutParams) {
     const [network] = space.split(':');
     const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
 
@@ -23,6 +24,7 @@ export function useStripeCheckout() {
       body: JSON.stringify({
         space,
         plan,
+        email,
         success_url: `${base}?stripe_success=1&space=${encodeURIComponent(space)}`,
         cancel_url: `${origin}${pathname}${hash}`
       })
