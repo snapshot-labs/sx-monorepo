@@ -79,4 +79,41 @@ describe('votes resolver index usage', () => {
     const [votesSql] = queryAsync.mock.calls[0];
     expect(votesSql).not.toContain('FORCE INDEX');
   });
+
+  it('keeps the v.id ASC tie-break on a descending non-proposal query', async () => {
+    queryAsync.mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      orderDirection: 'desc',
+      where: { voter: '0x0000000000000000000000000000000000000001' }
+    });
+
+    const [votesSql] = queryAsync.mock.calls[0];
+    expect(votesSql).not.toContain('FORCE INDEX');
+    expect(votesSql.replace(/\s+/g, ' ')).toContain(
+      'ORDER BY v.created DESC, v.id ASC'
+    );
+  });
+
+  it('keeps the v.id ASC tie-break for a proposal query ordered by vp', async () => {
+    queryAsync
+      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+      .mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      orderBy: 'vp',
+      orderDirection: 'desc',
+      where: { proposal: PROPOSAL }
+    });
+
+    const [votesSql] = queryAsync.mock.calls[1];
+    expect(votesSql).not.toContain('FORCE INDEX');
+    expect(votesSql.replace(/\s+/g, ' ')).toContain(
+      'ORDER BY v.vp DESC, v.id ASC'
+    );
+  });
 });
