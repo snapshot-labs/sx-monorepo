@@ -72,15 +72,15 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
-  // Only match the id tie-break to the primary sort on the proposal-scoped path,
-  // where it turns the composite (space, proposal, created, id) index into a pure
-  // (backward) scan instead of a filesort. Every other query keeps the historical
-  // v.id ASC tie-break so their ordering and page boundaries do not change.
-  const idDirection = forceProposalIndex ? orderDirection : 'ASC';
+  // Match the id tie-break to the primary sort direction. The second sort field
+  // only breaks ties between equal-value rows, so its direction has no effect on
+  // correctness. On the proposal-scoped path it also turns the composite
+  // (space, proposal, created, id) index into a pure (backward) scan instead of a
+  // filesort.
   const query = `
     SELECT v.* FROM votes v ${indexHint}
     WHERE 1 = 1 ${queryStr}
-    ORDER BY ${orderBy} ${orderDirection}, v.id ${idDirection} LIMIT ?, ?
+    ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
