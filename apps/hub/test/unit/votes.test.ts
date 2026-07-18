@@ -80,7 +80,7 @@ describe('votes resolver index usage', () => {
     expect(votesSql).not.toContain('FORCE INDEX');
   });
 
-  it('keeps the v.id ASC tie-break on a descending non-proposal query', async () => {
+  it('matches the id tie-break to the sort direction on a non-proposal query', async () => {
     queryAsync.mockResolvedValueOnce([]);
 
     await fetchVotes(null, {
@@ -93,11 +93,11 @@ describe('votes resolver index usage', () => {
     const [votesSql] = queryAsync.mock.calls[0];
     expect(votesSql).not.toContain('FORCE INDEX');
     expect(votesSql.replace(/\s+/g, ' ')).toContain(
-      'ORDER BY v.created DESC, v.id ASC'
+      'ORDER BY v.created DESC, v.id DESC'
     );
   });
 
-  it('keeps the v.id ASC tie-break for a proposal query ordered by vp', async () => {
+  it('matches the id tie-break to the sort direction for a proposal query ordered by vp', async () => {
     queryAsync
       .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
       .mockResolvedValueOnce([]);
@@ -113,7 +113,23 @@ describe('votes resolver index usage', () => {
     const [votesSql] = queryAsync.mock.calls[1];
     expect(votesSql).not.toContain('FORCE INDEX');
     expect(votesSql.replace(/\s+/g, ' ')).toContain(
-      'ORDER BY v.vp DESC, v.id ASC'
+      'ORDER BY v.vp DESC, v.id DESC'
+    );
+  });
+
+  it('matches the id tie-break to an ascending sort direction', async () => {
+    queryAsync.mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      orderDirection: 'asc',
+      where: { voter: '0x0000000000000000000000000000000000000001' }
+    });
+
+    const [votesSql] = queryAsync.mock.calls[0];
+    expect(votesSql.replace(/\s+/g, ' ')).toContain(
+      'ORDER BY v.created ASC, v.id ASC'
     );
   });
 });
