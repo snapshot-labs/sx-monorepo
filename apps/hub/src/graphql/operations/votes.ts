@@ -72,10 +72,13 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
+  // Keep the id tie-break in the same direction as the primary sort so the
+  // proposal-scoped created path is a pure (backward) scan of the composite
+  // (space, proposal, created, id) index instead of a filesort.
   const query = `
     SELECT v.* FROM votes v ${indexHint}
     WHERE 1 = 1 ${queryStr}
-    ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
+    ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
