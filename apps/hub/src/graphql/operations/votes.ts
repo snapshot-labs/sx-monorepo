@@ -13,7 +13,8 @@ import {
 
 async function query(parent, args, context?, info?) {
   const requestedFields = info ? graphqlFields(info) : {};
-  const { first, skip, where = {} } = args;
+  const { first, skip } = args;
+  const where = { ...(args.where || {}) };
 
   checkLimits(args, 'votes');
 
@@ -29,6 +30,25 @@ async function query(parent, args, context?, info?) {
     vp: 'number',
     vp_state: 'string'
   };
+
+  // Constrain space so a single-proposal filter can seek the composite index
+  // (space, proposal, created, id) rather than scan votes ordered by created.
+  if (
+    typeof where.proposal === 'string' &&
+    where.space === undefined &&
+    where.space_in === undefined
+  ) {
+    try {
+      const proposalRows = await db.queryAsync(
+        'SELECT space FROM proposals WHERE id = ? LIMIT 1',
+        [where.proposal]
+      );
+      if (proposalRows.length > 0) where.space = proposalRows[0].space;
+    } catch (err: any) {
+      capture(err, { args, context, info });
+    }
+  }
+
   const whereQuery = buildWhereQuery(fields, 'v', where);
   const queryStr = whereQuery.query;
   const params: any[] = whereQuery.params;
@@ -42,8 +62,18 @@ async function query(parent, args, context?, info?) {
 
   let votes: any[] = [];
 
+  // Force the composite index; for large spaces the optimizer otherwise picks a
+  // (space, created) index and scans millions of rows until the LIMIT is filled.
+  const forceProposalIndex =
+    typeof where.proposal === 'string' &&
+    typeof where.space === 'string' &&
+    orderBy === 'v.created';
+  const indexHint = forceProposalIndex
+    ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
+    : '';
+
   const query = `
-    SELECT v.* FROM votes v
+    SELECT v.* FROM votes v ${indexHint}
     WHERE 1 = 1 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
   `;
