@@ -49,6 +49,25 @@ describe('votes resolver index usage', () => {
     expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
   });
 
+  it('returns empty without querying votes when the proposal does not exist', async () => {
+    queryAsync.mockResolvedValueOnce([]);
+
+    const result = await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: { proposal: PROPOSAL }
+    });
+
+    expect(result).toEqual([]);
+    // Only the proposal->space lookup runs; the votes SELECT is skipped.
+    expect(queryAsync).toHaveBeenCalledTimes(1);
+    const [lookupSql] = queryAsync.mock.calls[0];
+    expect(lookupSql).toContain('FROM proposals');
+    expect(
+      queryAsync.mock.calls.some(([sql]) => sql.includes('FROM votes'))
+    ).toBe(false);
+  });
+
   it('does not look up space when it is already provided', async () => {
     queryAsync.mockResolvedValueOnce([]);
 

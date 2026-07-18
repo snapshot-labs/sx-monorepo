@@ -43,7 +43,11 @@ async function query(parent, args, context?, info?) {
         'SELECT space FROM proposals WHERE id = ? LIMIT 1',
         [where.proposal]
       );
-      if (proposalRows.length > 0) where.space = proposalRows[0].space;
+      // Proposal doesn't exist: no space to scope by and thus no votes to
+      // return. Skip the votes query entirely instead of falling through to the
+      // un-indexed slow path.
+      if (proposalRows.length === 0) return [];
+      where.space = proposalRows[0].space;
     } catch (err: any) {
       capture(err, { args, context, info });
     }
