@@ -8,6 +8,7 @@ import {
   evmApe,
   evmArbitrum,
   evmBase,
+  evmBaseSepolia,
   evmBnb,
   evmBnbt,
   evmCurtis,
@@ -73,7 +74,9 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   1: evmMainnet,
   33139: evmApe,
   33111: evmCurtis,
-  11155111: evmSepolia
+  11155111: evmSepolia,
+  // Inco confidential-voting reference chain (Base Sepolia).
+  84532: evmBaseSepolia
 };
 
 export function createActions(
@@ -606,17 +609,39 @@ export function createActions(
       let pinned: { cid: string; provider: string } | null = null;
       if (reason) pinned = await helpers.pin({ reason });
 
+      const sdkChoice = getSdkChoice(choice);
+
+      // Bind ciphertext to signer address, not web3 store.
+      const isConfidential = space.protocol === 'snapshot-x-inco';
+      let ciphertext: string | undefined;
+      let fee: string | undefined;
+      if (isConfidential) {
+        const { encryptChoice, getVoteFee } = await import('@/helpers/inco');
+        const voterAddress = await signer.getAddress();
+        // vote() is payable; voter forwards per-vote Inco fee.
+        [ciphertext, fee] = await Promise.all([
+          encryptChoice({
+            space: proposal.space.id,
+            voter: voterAddress,
+            choice: sdkChoice
+          }),
+          getVoteFee().then(f => f.toString())
+        ]);
+      }
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: Number(proposal.proposal_id),
-        choice: getSdkChoice(choice),
+        choice: sdkChoice,
+        ...(ciphertext ? { ciphertext } : {}),
+        ...(fee !== undefined ? { fee } : {}),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
 
-      if (relayerType === 'evm') {
+      if (relayerType === 'evm' && !isConfidential) {
         return ethSigClient.vote({
           signer,
           data
@@ -652,6 +677,74 @@ export function createActions(
           transactions: convertToMetaTransactions(
             proposal.executions[0].transactions
           )
+        });
+      }
+
+      // Reveal/execute split, gated to after voting ends.
+      if (proposal.space.protocol === 'snapshot-x-inco') {
+        const signer = getSigner(web3);
+        const account = await signer.getAddress();
+        const proposalId = Number(proposal.proposal_id);
+        const { decryptTallies, getRevealState } = await import(
+          '@/helpers/inco'
+        );
+
+        // Vanilla proposals: executionParams must match propose ('0x').
+        const executionParams =
+          proposal.executions && proposal.executions.length > 0
+            ? getExecutionData(
+                proposal.space,
+                proposal.execution_strategy,
+                proposal.execution_destination,
+                convertToMetaTransactions(proposal.executions[0].transactions)
+              ).executionParams[0]
+            : '0x';
+
+        const initial = await getRevealState({
+          space: proposal.space.id,
+          proposal: proposalId
+        });
+        let passed = initial.passed;
+
+        if (!initial.revealed) {
+          // requestReveal grants ACL; must mine before decrypt.
+          const requestTx = await client.requestReveal({
+            signer,
+            space: proposal.space.id,
+            proposal: proposalId
+          });
+          if (requestTx) await requestTx.wait();
+
+          // Decrypt frozen tallies, then finalizeReveal.
+          const tallies = await decryptTallies({
+            space: proposal.space.id,
+            proposal: proposalId,
+            account
+          });
+          const finalizeTx = await client.finalizeReveal({
+            signer,
+            space: proposal.space.id,
+            proposal: proposalId,
+            tallies
+          });
+          if (finalizeTx) await finalizeTx.wait();
+
+          passed = (
+            await getRevealState({
+              space: proposal.space.id,
+              proposal: proposalId
+            })
+          ).passed;
+        }
+
+        // Execute only if passed; else execute() reverts.
+        if (!passed) return null;
+
+        return client.execute({
+          signer,
+          space: proposal.space.id,
+          proposal: proposalId,
+          executionParams
         });
       }
 

@@ -18,6 +18,7 @@ const bnbConfig = createConfig('bnb');
 const bnbtConfig = createConfig('bnbt');
 const apeConfig = createConfig('ape');
 const curtisConfig = createConfig('curtis');
+const basesepConfig = createConfig('basesep');
 
 function createWriters(config: EVMConfig) {
   let writers = applyProtocolPrefixToWriters(
@@ -63,6 +64,7 @@ const bnbIndexer = new evm.EvmIndexer(createWriters(bnbConfig));
 const bnbtIndexer = new evm.EvmIndexer(createWriters(bnbtConfig));
 const apeIndexer = new evm.EvmIndexer(createWriters(apeConfig));
 const curtisIndexer = new evm.EvmIndexer(createWriters(curtisConfig));
+const basesepIndexer = new evm.EvmIndexer(createWriters(basesepConfig));
 
 export function addEvmIndexers(checkpoint: Checkpoint) {
   registerIndexer(checkpoint, ethConfig.indexerName, ethConfig, ethIndexer);
@@ -85,5 +87,11 @@ export function addEvmIndexers(checkpoint: Checkpoint) {
     curtisConfig.indexerName,
     curtisConfig,
     curtisIndexer
+  );
+  registerIndexer(
+    checkpoint,
+    basesepConfig.indexerName,
+    basesepConfig,
+    basesepIndexer
   );
 }

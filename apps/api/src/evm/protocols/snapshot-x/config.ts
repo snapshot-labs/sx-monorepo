@@ -20,7 +20,8 @@ const START_BLOCKS: Record<NetworkID, number> = {
   bnb: Infinity,
   bnbt: Infinity,
   ape: 12100384,
-  curtis: 16682282
+  curtis: 16682282,
+  basesep: 42969459
 };
 
 type Config = Pick<CheckpointConfig, 'sources' | 'templates' | 'abis'> & {
@@ -124,6 +125,12 @@ export function createConfig(networkId: NetworkID): Config {
             name: 'ProposalExecuted(uint256)',
             fn: 'handleProposalExecuted'
           },
+          // Inco confidential reveal; no-op on legacy chains.
+          {
+            name: 'ProposalResultRevealed(uint256,uint256,uint256,uint256,bool)',
+            fn: 'handleProposalResultRevealed'
+          },
+          // Legacy plaintext-choice VoteCasts.
           {
             name: 'VoteCast(uint256,address,uint8,uint256)',
             fn: 'handleVoteCast'
@@ -131,6 +138,16 @@ export function createConfig(networkId: NetworkID): Config {
           {
             name: 'VoteCastWithMetadata(uint256,address,uint8,uint256,string)',
             fn: 'handleVoteCast'
+          },
+          // Inco confidential VoteCasts (no `choice` arg). Different topic-0 → no
+          // collision with the legacy variants.
+          {
+            name: 'VoteCast(uint256,address,uint256)',
+            fn: 'handleConfidentialVoteCast'
+          },
+          {
+            name: 'VoteCastWithMetadata(uint256,address,uint256,string)',
+            fn: 'handleConfidentialVoteCast'
           }
         ]
       },

@@ -47,3 +47,24 @@ export const voteTypes = {
     { name: 'params', type: 'bytes' }
   ]
 };
+
+/**
+ * EIP-712 vote types for Inco confidential Spaces. The plaintext `uint8 choice`
+ * is replaced with `bytes ciphertext` (the Inco-encrypted vote). Domain stays the
+ * same (`name: "snapshot-x", version: "1.0.0"`); the typehash differs because the
+ * struct field changed.
+ */
+export const voteTypesInco = {
+  Vote: [
+    { name: 'space', type: 'address' },
+    { name: 'voter', type: 'address' },
+    { name: 'proposalId', type: 'uint256' },
+    { name: 'ciphertext', type: 'bytes' },
+    { name: 'userVotingStrategies', type: 'IndexedStrategy[]' },
+    { name: 'voteMetadataURI', type: 'string' }
+  ],
+  IndexedStrategy: [
+    { name: 'index', type: 'uint8' },
+    { name: 'params', type: 'bytes' }
+  ]
+};

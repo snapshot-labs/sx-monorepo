@@ -34,6 +34,14 @@ const BROKESTER_INDEXER_MAPPINGS = {
 const BROKESTER_API_URL =
   process.env.BROKESTER_API_URL || 'https://api.brokester.box';
 
+// Inco confidential-voting chain (Base Sepolia, 84532) is intentionally absent.
+// `tryExecute` requires a TEE-attested decryption that's gated by the on-chain
+// ACL — only the proposal author / voter / Space hold decrypt rights, and the
+// Mana relayer wallet has none of those. Adding the chain here would invite
+// silent failures; instead the UI calls `tryExecute` directly with the user's
+// signer (apps/ui/src/networks/evm/actions.ts), and `createNetworkHandler`
+// below short-circuits any stray confidential-exec request with
+// "Unsupported chainId".
 const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [56, evmBnb],
@@ -48,11 +56,11 @@ const NETWORKS = new Map<number, EvmNetworkConfig>([
   [11155111, evmSepolia]
 ]);
 
+// Skip chains Mana has no config for (basesep).
 export const NETWORK_IDS = new Map<number, string>(
-  Object.entries(evmNetworks).map(([networkId, config]) => [
-    config.Meta.eip712ChainId,
-    networkId
-  ])
+  Object.entries(evmNetworks)
+    .filter(([, config]) => NETWORKS.has(config.Meta.eip712ChainId))
+    .map(([networkId, config]) => [config.Meta.eip712ChainId, networkId])
 );
 
 export const createNetworkHandler = (chainId: number) => {

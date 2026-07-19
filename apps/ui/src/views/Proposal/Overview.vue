@@ -25,7 +25,27 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { flagProposal, cancelProposal } = useActions();
+const { flagProposal, cancelProposal, executeTransactions } = useActions();
+
+// DEMO ONLY — confidential reveal & execute wrapper. See template comment.
+async function handleConfidentialExecute() {
+  await executeTransactions(props.proposal);
+}
+
+// Mirror on-chain gate; avoid VotingPeriodNotEnded revert.
+const confidentialVotingEnded = computed(
+  () => props.proposal.max_end * 1000 <= Date.now()
+);
+const showConfidentialReveal = computed(() => {
+  const { proposal } = props;
+
+  if (proposal.space.protocol !== 'snapshot-x-inco') return false;
+
+  if (proposal.state === 'executed' || proposal.cancelled) return false;
+  // Pre-reveal after voting ends; post-reveal only if passed.
+  if (proposal.quorum_reached == null) return confidentialVotingEnded.value;
+  return !!(proposal.quorum_reached && proposal.support_achieved);
+});
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -573,6 +593,23 @@ onBeforeUnmount(() => destroyAudio());
             :executions="proposal.executions"
           />
         </div>
+      </div>
+      <!-- DEMO only: move into ProposalExecutionsList before merge. -->
+      <div v-if="showConfidentialReveal" class="my-3 p-3 border rounded-lg">
+        <UiEyebrow class="mb-2 flex items-center gap-2">
+          <IH-lock-closed />
+          <span>Confidential reveal</span>
+        </UiEyebrow>
+        <div class="mb-3 text-sm text-skin-text">
+          Voting has ended. Reveal the final encrypted tallies: this requests
+          attested decryption of the three vote counts from Inco's covalidator
+          and posts them on-chain via <code>finalizeReveal</code> (making the
+          result public), then runs <code>execute</code> if the proposal passed.
+          Up to three wallet prompts.
+        </div>
+        <UiButton primary class="w-full" @click="handleConfidentialExecute">
+          <IH-play /> Reveal &amp; execute
+        </UiButton>
       </div>
       <div>
         <AppLink

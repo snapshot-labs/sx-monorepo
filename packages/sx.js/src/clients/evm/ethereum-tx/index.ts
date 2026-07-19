@@ -5,6 +5,7 @@ import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
 import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
 import ProxyFactoryAbi from './abis/ProxyFactory.json';
+import SpaceIncoAbi from './abis/Space.inco.json';
 import SpaceAbi from './abis/Space.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import { getAuthenticator } from '../../../authenticators/evm';
@@ -409,11 +410,14 @@ export class EthereumTx {
       this.config
     );
 
-    const spaceInterface = new Interface(SpaceAbi);
+    const isConfidential = !!envelope.data.ciphertext;
+    const spaceInterface = new Interface(
+      isConfidential ? SpaceIncoAbi : SpaceAbi
+    );
     const functionData = spaceInterface.encodeFunctionData('vote', [
       voterAddress,
       envelope.data.proposal,
-      envelope.data.choice,
+      isConfidential ? envelope.data.ciphertext : envelope.data.choice,
       userVotingStrategies,
       envelope.data.metadataUri
     ]);
@@ -437,10 +441,12 @@ export class EthereumTx {
       abi,
       signer
     );
-    const promise = authenticatorContract.authenticate(
-      ...args,
-      this.defaultTransactionOverrides
-    );
+    // Confidential voter forwards per-vote Inco fee.
+    const overrides =
+      isConfidential && envelope.data.fee !== undefined
+        ? { ...this.defaultTransactionOverrides, value: envelope.data.fee }
+        : this.defaultTransactionOverrides;
+    const promise = authenticatorContract.authenticate(...args, overrides);
 
     return opts.noWait ? null : promise;
   }
@@ -465,6 +471,94 @@ export class EthereumTx {
       executionParams,
       this.defaultTransactionOverrides
     );
+
+    return opts.noWait ? null : promise;
+  }
+
+  // Reveal step 1: grant caller decrypt access.
+  async requestReveal(
+    {
+      signer,
+      space,
+      proposal
+    }: { signer: Signer; space: string; proposal: number },
+    opts: CallOptions = {}
+  ) {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.requestReveal(
+      proposal,
+      this.defaultTransactionOverrides
+    );
+
+    return opts.noWait ? null : promise;
+  }
+
+  // Reveal step 2: submit three attested tallies.
+  async finalizeReveal(
+    {
+      signer,
+      space,
+      proposal,
+      tallies
+    }: {
+      signer: Signer;
+      space: string;
+      proposal: number;
+      tallies: {
+        attestation: { handle: string; value: string };
+        signatures: string[];
+      }[];
+    },
+    opts: CallOptions = {}
+  ) {
+    if (tallies.length !== 3) {
+      throw new Error(
+        `finalizeReveal expects exactly 3 tallies [against, for, abstain], got ${tallies.length}`
+      );
+    }
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.finalizeReveal(
+      proposal,
+      tallies.map(t => ({
+        attestation: t.attestation,
+        signatures: t.signatures
+      })),
+      this.defaultTransactionOverrides
+    );
+
+    return opts.noWait ? null : promise;
+  }
+
+  // Read three encrypted tally handles [against, for, abstain].
+  async getVoteTallyHandles({
+    signer,
+    space,
+    proposal
+  }: {
+    signer: Signer;
+    space: string;
+    proposal: number;
+  }): Promise<[string, string, string]> {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const [against, forHandle, abstain] =
+      await spaceContract.getVoteTallyHandles(proposal);
+    return [against, forHandle, abstain];
+  }
+
+  // Fund Space's ETH to pay Inco fees.
+  async fundSpace(
+    {
+      signer,
+      space,
+      amount
+    }: { signer: Signer; space: string; amount: string },
+    opts: CallOptions = {}
+  ) {
+    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
+    const promise = spaceContract.fund({
+      ...this.defaultTransactionOverrides,
+      value: amount
+    });
 
     return opts.noWait ? null : promise;
   }

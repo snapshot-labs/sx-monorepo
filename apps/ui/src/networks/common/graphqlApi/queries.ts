@@ -158,6 +158,8 @@ gql(`
     vetoed
     execution_settled
     cancelled
+    quorum_reached
+    support_achieved
   }
 `);
 
