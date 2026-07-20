@@ -141,11 +141,14 @@ const parsedTitle = computedAsync(
     const names = await getNames([recipient]);
     const name = names[recipient] || shorten(recipient);
 
-    return title.value.replace('<b>_NAME_</b>', `<b>${escapeHtml(name)}</b>`);
+    return title.value.replace(
+      '<b>_NAME_</b>',
+      () => `<b>${escapeHtml(name)}</b>`
+    );
   },
   title.value.replace(
     '<b>_NAME_</b>',
-    `<b>${escapeHtml(shorten(props.tx._form.recipient))}</b>`
+    () => `<b>${escapeHtml(shorten(props.tx._form.recipient))}</b>`
   )
 );
 </script>
