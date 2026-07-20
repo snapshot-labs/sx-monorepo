@@ -116,7 +116,7 @@ describe('votes resolver index usage', () => {
     );
   });
 
-  it('matches the id tie-break to the sort direction for a proposal query ordered by vp', async () => {
+  it('does not force the index for a proposal query ordered by vp', async () => {
     queryAsync
       .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
       .mockResolvedValueOnce([]);
@@ -131,9 +131,64 @@ describe('votes resolver index usage', () => {
 
     const [votesSql] = queryAsync.mock.calls[1];
     expect(votesSql).not.toContain('FORCE INDEX');
-    expect(votesSql.replace(/\s+/g, ' ')).toContain(
-      'ORDER BY v.vp DESC, v.id DESC'
+  });
+
+  it('does not force the index when a selective filter accompanies the proposal', async () => {
+    queryAsync
+      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+      .mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: {
+        proposal: PROPOSAL,
+        voter: '0x0000000000000000000000000000000000000001'
+      }
+    });
+
+    const [votesSql] = queryAsync.mock.calls[1];
+    expect(votesSql).not.toContain('FORCE INDEX');
+  });
+
+  it('collapses a single-element proposal_in onto the indexed path', async () => {
+    queryAsync
+      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+      .mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: { proposal_in: [PROPOSAL] }
+    });
+
+    const [lookupSql, lookupParams] = queryAsync.mock.calls[0];
+    expect(lookupSql).toContain('FROM proposals');
+    expect(lookupParams).toEqual([PROPOSAL]);
+
+    const [votesSql, votesParams] = queryAsync.mock.calls[1];
+    expect(votesSql).toContain(
+      'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     );
+    expect(votesSql).toContain('v.proposal = ?');
+    expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
+  });
+
+  it('rejects when the proposal space lookup fails instead of running the unscoped votes query', async () => {
+    queryAsync.mockRejectedValueOnce(new Error('lookup failed'));
+
+    await expect(
+      fetchVotes(null, {
+        first: 1000,
+        skip: 0,
+        where: { proposal: PROPOSAL }
+      })
+    ).rejects.toThrow('request failed');
+
+    expect(queryAsync).toHaveBeenCalledTimes(1);
+    expect(
+      queryAsync.mock.calls.some(([sql]) => sql.includes('FROM votes'))
+    ).toBe(false);
   });
 
   it('matches the id tie-break to an ascending sort direction', async () => {
