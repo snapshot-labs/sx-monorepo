@@ -11,13 +11,6 @@ const FORM = {
   quantity: 1
 };
 
-const EMAIL_DEFINITION = {
-  type: 'string',
-  format: 'email',
-  title: 'Email',
-  examples: ['you@example.com']
-};
-
 const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
 
 const props = withDefaults(
@@ -75,7 +68,6 @@ const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
 const isCardLoading = ref(false);
-const email = ref('');
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -129,20 +121,9 @@ const needsLogin = computed(
   () => paymentMethod.value === 'crypto' && !props.isAuthValidForCrypto
 );
 
-const isEmailValid = computed(() =>
-  /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.value.trim())
-);
-
-const emailError = computed(() =>
-  email.value.trim() && !isEmailValid.value
-    ? 'Please enter a valid email'
-    : undefined
-);
-
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
-  if (paymentMethod.value === 'card')
-    return isEmailValid.value && !isCardLoading.value;
+  if (paymentMethod.value === 'card') return !isCardLoading.value;
   return (
     formValid.value &&
     !isPending.value &&
@@ -202,8 +183,7 @@ async function handleSubmit() {
     try {
       await redirectToCheckout({
         space: props.space,
-        plan: plan.value,
-        email: email.value.trim()
+        plan: plan.value
       });
     } catch (err) {
       isCardLoading.value = false;
@@ -243,7 +223,6 @@ watch(
     isHidden.value = false;
     selectedTokenAddress.value = '';
     isCardLoading.value = false;
-    email.value = '';
     paymentMethod.value = 'crypto';
     form.value = clone(FORM);
   }
@@ -313,12 +292,6 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
         </button>
       </div>
       <div class="s-box p-4 space-y-3">
-        <UiInputString
-          v-if="paymentMethod === 'card'"
-          v-model="email"
-          :definition="EMAIL_DEFINITION"
-          :error="emailError"
-        />
         <div v-if="paymentMethod === 'crypto'" class="s-base">
           <div class="s-label" v-text="'Token *'" />
           <button
