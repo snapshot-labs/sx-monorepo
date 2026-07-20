@@ -337,21 +337,6 @@ export function useDelegates(
       throw new Error('getDelegation is only supported for delegate-registry');
     }
 
-    const delegationSubgraph = DELEGATION_SUBGRAPHS[delegation.chainId];
-    if (!delegationSubgraph) {
-      throw new Error('Delegation subgraph not found');
-    }
-
-    const client = new ApolloClient({
-      uri: delegationSubgraph,
-      cache: new InMemoryCache(),
-      defaultOptions: {
-        query: {
-          fetchPolicy: 'no-cache'
-        }
-      }
-    });
-
     const isApeChainDelegateRegistry =
       delegation.apiType === 'apechain-delegate-registry';
 
@@ -359,15 +344,37 @@ export function useDelegates(
       ? DELEGATIONS_RAW_QUERY
       : DELEGATIONS_QUERY;
 
-    const { data } = await client.query({
-      query,
-      variables: {
-        space: delegation.contractAddress,
-        delegator
-      }
-    });
+    const chainIds =
+      delegation.chainIds && delegation.chainIds.length
+        ? delegation.chainIds
+        : [delegation.chainId];
 
-    return data.delegations[0] ?? null;
+    for (const chainId of chainIds) {
+      const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
+      if (!delegationSubgraph) continue;
+
+      const client = new ApolloClient({
+        uri: delegationSubgraph,
+        cache: new InMemoryCache(),
+        defaultOptions: {
+          query: {
+            fetchPolicy: 'no-cache'
+          }
+        }
+      });
+
+      const { data } = await client.query({
+        query,
+        variables: {
+          space: delegation.contractAddress,
+          delegator
+        }
+      });
+
+      if (data.delegations[0]) return data.delegations[0];
+    }
+
+    return null;
   }
 
   return {
