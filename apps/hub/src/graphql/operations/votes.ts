@@ -31,6 +31,18 @@ async function query(parent, args, context?, info?) {
     vp_state: 'string'
   };
 
+  // A single-element proposal_in is the same filter as proposal; collapse it so
+  // it takes the indexed path below. An empty array still means match-nothing.
+  if (
+    where.proposal === undefined &&
+    Array.isArray(where.proposal_in) &&
+    where.proposal_in.length === 1 &&
+    typeof where.proposal_in[0] === 'string'
+  ) {
+    where.proposal = where.proposal_in[0];
+    delete where.proposal_in;
+  }
+
   // Constrain space so a single-proposal filter can seek the composite index
   // (space, proposal, created, id) rather than scan votes ordered by created.
   if (
@@ -49,7 +61,11 @@ async function query(parent, args, context?, info?) {
       if (proposalRows.length === 0) return [];
       where.space = proposalRows[0].space;
     } catch (err: any) {
+      // Fail fast: a swallowed lookup error would leave space unset and fall
+      // through to the un-scoped, un-hinted scan this path exists to avoid.
       capture(err, { args, context, info });
+      log.error(`[graphql] votes, ${JSON.stringify(err)}`);
+      return Promise.reject(new Error('request failed'));
     }
   }
 
@@ -68,7 +84,18 @@ async function query(parent, args, context?, info?) {
 
   // Force the composite index; for large spaces the optimizer otherwise picks a
   // (space, created) index and scans millions of rows until the LIMIT is filled.
+  // Skip the hint when a more selective predicate is present (id is unique,
+  // voter is the primary-key prefix): forcing the index would turn those point
+  // lookups into a scan of the proposal's entire vote range.
+  const hasSelectiveFilter =
+    where.id !== undefined ||
+    where.id_in !== undefined ||
+    where.ipfs !== undefined ||
+    where.ipfs_in !== undefined ||
+    where.voter !== undefined ||
+    where.voter_in !== undefined;
   const forceProposalIndex =
+    !hasSelectiveFilter &&
     typeof where.proposal === 'string' &&
     typeof where.space === 'string' &&
     orderBy === 'v.created';
