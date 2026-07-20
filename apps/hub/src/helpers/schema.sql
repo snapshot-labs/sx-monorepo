@@ -6,6 +6,7 @@ CREATE TABLE spaces (
   deleted INT NOT NULL DEFAULT '0',
   flagged INT NOT NULL DEFAULT '0',
   hibernated INT NOT NULL DEFAULT '0',
+  turbo INT NOT NULL DEFAULT '0',
   turbo_expiration BIGINT NOT NULL DEFAULT '0',
   proposal_count INT NOT NULL DEFAULT '0',
   vote_count INT NOT NULL DEFAULT '0',
@@ -19,6 +20,7 @@ CREATE TABLE spaces (
   INDEX verified (verified),
   INDEX flagged (flagged),
   INDEX hibernated (hibernated),
+  INDEX turbo (turbo),
   INDEX proposal_count (proposal_count),
   INDEX vote_count (vote_count),
   INDEX follower_count (follower_count),
@@ -61,7 +63,7 @@ CREATE TABLE proposals (
   scores_state VARCHAR(24) NOT NULL DEFAULT '',
   scores_total DECIMAL(64,30) NOT NULL,
   scores_updated INT(11) NOT NULL,
-  scores_total_value DECIMAL(64,30) NOT NULL DEFAULT '0.000000000000000000000000000000',
+  scores_total_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   vp_value_by_strategy json NOT NULL,
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
@@ -69,10 +71,8 @@ CREATE TABLE proposals (
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),
-  INDEX created (created),
   INDEX updated (updated),
   INDEX network (network),
-  INDEX space (space),
   INDEX start (start),
   INDEX end (end),
   INDEX app (app),
@@ -80,7 +80,12 @@ CREATE TABLE proposals (
   INDEX scores_updated (scores_updated),
   INDEX votes (votes),
   INDEX flagged (flagged),
-  INDEX cb (cb)
+  INDEX cb (cb),
+  INDEX idx_proposals_on_created_desc_id_asc_space (created DESC, id, space),
+  INDEX idx_proposals_on_space_created_desc_id_asc (space, created DESC, id),
+  INDEX idx_proposals_on_created (created),
+  INDEX idx_proposals_on_end_desc_id (end DESC, id),
+  INDEX idx_proposals_on_scores_total_value (scores_total_value)
 );
 
 CREATE TABLE votes (
@@ -98,17 +103,21 @@ CREATE TABLE votes (
   vp_by_strategy JSON NOT NULL,
   vp_state VARCHAR(24) NOT NULL,
   cb INT(11) NOT NULL,
+  vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   PRIMARY KEY (voter, space, proposal),
-  UNIQUE KEY id (id),
+  INDEX id (id),
   INDEX ipfs (ipfs),
-  INDEX voter (voter),
-  INDEX created (created),
-  INDEX space (space),
-  INDEX proposal (proposal),
   INDEX app (app),
   INDEX vp (vp),
   INDEX vp_state (vp_state),
-  INDEX cb (cb)
+  INDEX cb (cb),
+  INDEX space_created_id (space, created, id),
+  INDEX idx_votes_on_space_proposal_created_id (space, proposal, created, id),
+  INDEX idx_votes_on_created_id (created, id),
+  INDEX idx_votes_on_proposal_vp_id (proposal, vp, id),
+  INDEX idx_votes_on_vp_value (vp_value),
+  INDEX idx_votes_on_space_created_desc_id (space, created DESC, id),
+  INDEX idx_votes_on_cb_proposal (cb, proposal)
 );
 
 CREATE TABLE follows (
@@ -132,7 +141,9 @@ CREATE TABLE aliases (
   alias VARCHAR(100) NOT NULL,
   created INT(11) NOT NULL,
   PRIMARY KEY (address, alias),
-  INDEX ipfs (ipfs)
+  UNIQUE KEY alias (alias),
+  INDEX ipfs (ipfs),
+  INDEX idx_aliases_on_id (id)
 );
 
 CREATE TABLE subscriptions (
@@ -185,11 +196,13 @@ CREATE TABLE leaderboard (
   vote_count SMALLINT UNSIGNED NOT NULL DEFAULT '0',
   proposal_count SMALLINT UNSIGNED NOT NULL DEFAULT '0',
   last_vote BIGINT,
+  vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   PRIMARY KEY user_space (user,space),
-  INDEX space (space),
   INDEX vote_count (vote_count),
   INDEX proposal_count (proposal_count),
-  INDEX last_vote (last_vote)
+  INDEX last_vote (last_vote),
+  INDEX idx_leaderboard_on_space_mixed (space, vote_count, proposal_count, last_vote, user),
+  INDEX vp_value (vp_value)
 );
 
 CREATE TABLE options (

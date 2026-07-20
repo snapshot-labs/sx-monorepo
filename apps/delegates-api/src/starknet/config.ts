@@ -11,7 +11,7 @@ type Source = {
 };
 
 const NETWORK_NODE_URLS: Record<NetworkID, string> = {
-  sn: 'https://rpc.snapshot.org/sn'
+  sn: 'https://rpc.brovider.xyz/sn?client=delegates-api'
 };
 
 const TOKEN_SOURCES: Record<NetworkID, Source[]> = {
