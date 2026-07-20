@@ -1,4 +1,5 @@
 import { evmNetworks } from '@snapshot-labs/sx';
+import { getRpcUrl } from '../config';
 import { createConfig as createGovernorBravoConfig } from './protocols/governor-bravo/config';
 import { createConfig as createOpenZeppelinConfig } from './protocols/openzeppelin/config';
 import { createConfig as createSnapshotXConfig } from './protocols/snapshot-x/config';
@@ -38,7 +39,7 @@ export function createConfig(indexerName: NetworkID): EVMConfig {
 
   return {
     indexerName,
-    network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
+    network_node_url: getRpcUrl(network.Meta.eip712ChainId),
     ...partialConfig,
     state_retention_blocks: 5000,
     snapshotXConfig: snapshotXConfig.protocolConfig,
