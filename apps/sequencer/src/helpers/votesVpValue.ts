@@ -16,7 +16,6 @@ type Datum = {
   voter: string;
   space: string;
   proposal: string;
-  created: number;
   vpState: string;
   vpByStrategy: number[];
   vpValueByStrategy: number[];
@@ -47,13 +46,12 @@ async function getPendingVotes(): Promise<
     voter: string;
     space: string;
     proposal: string;
-    created: number;
     vpState: string;
     vpByStrategy: number[];
   }[]
 > {
   const query = `
-    SELECT id, voter, space, proposal, created, vp_state, vp_by_strategy
+    SELECT id, voter, space, proposal, vp_state, vp_by_strategy
     FROM votes
     WHERE cb = ?
     LIMIT ?`;
@@ -67,7 +65,6 @@ async function getPendingVotes(): Promise<
     voter: r.voter,
     space: r.space,
     proposal: r.proposal,
-    created: r.created,
     vpState: r.vp_state,
     vpByStrategy: JSON.parse(r.vp_by_strategy)
   }));
@@ -144,8 +141,7 @@ async function refreshVotesVpValues(data: Datum[]) {
           user: validatedDatum.voter,
           action: 'proposal/vote',
           ref: datum.proposal,
-          amount: value,
-          actionDate: datum.created
+          amount: value
         });
       }
 
@@ -221,7 +217,6 @@ async function processBatch(
         voter: v.voter,
         space: v.space,
         proposal: v.proposal,
-        created: v.created,
         vpState: v.vpState,
         vpByStrategy: v.vpByStrategy,
         vpValueByStrategy: proposal.vpValueByStrategy,

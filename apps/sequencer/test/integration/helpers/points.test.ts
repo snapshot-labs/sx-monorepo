@@ -1,4 +1,3 @@
-import { POINTS_START_TIMESTAMP } from '../../../src/constants';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import { addPoints } from '../../../src/helpers/points';
 
@@ -10,7 +9,6 @@ const buildEntry = (overrides = {}) => ({
   action: 'proposal/vote',
   ref: '0xref-1',
   amount: 5,
-  actionDate: POINTS_START_TIMESTAMP,
   ...overrides
 });
 
@@ -42,6 +40,7 @@ describe('helpers/points', () => {
 
   describe('addPoints()', () => {
     it('awards a single entry', async () => {
+      const before = Math.floor(Date.now() / 1000);
       await addPoints([buildEntry()]);
 
       const ledger = await getLedger();
@@ -50,7 +49,10 @@ describe('helpers/points', () => {
       expect(ledger[0].action).toBe('proposal/vote');
       expect(ledger[0].ref).toBe('0xref-1');
       expect(Number(ledger[0].amount)).toBe(5);
-      expect(ledger[0].action_date).toBe(POINTS_START_TIMESTAMP);
+      expect(ledger[0].created).toBeGreaterThanOrEqual(before);
+      expect(ledger[0].created).toBeLessThanOrEqual(
+        Math.floor(Date.now() / 1000)
+      );
       expect(await getTotals()).toEqual({ [USER_1]: 5 });
     });
 
@@ -85,23 +87,8 @@ describe('helpers/points', () => {
       expect(await getTotals()).toEqual({ [USER_1]: 5, [USER_2]: 3 });
     });
 
-    it('skips entries with an actionDate before the cutoff', async () => {
-      await addPoints([
-        buildEntry(),
-        buildEntry({ user: USER_2, actionDate: POINTS_START_TIMESTAMP - 1 })
-      ]);
-
-      const ledger = await getLedger();
-      expect(ledger).toHaveLength(1);
-      expect(ledger[0].user).toBe(USER_1);
-      expect(await getTotals()).toEqual({ [USER_1]: 5 });
-    });
-
-    it('does nothing on an empty or fully filtered batch', async () => {
+    it('does nothing on an empty batch', async () => {
       await expect(addPoints([])).resolves.toBeUndefined();
-      await expect(
-        addPoints([buildEntry({ actionDate: POINTS_START_TIMESTAMP - 1 })])
-      ).resolves.toBeUndefined();
 
       expect(await getLedger()).toHaveLength(0);
       expect(await getTotals()).toEqual({});
@@ -113,7 +100,7 @@ describe('helpers/points', () => {
         action: 'space/create',
         ref: '0xspace-1',
         amount: 4,
-        action_date: POINTS_START_TIMESTAMP
+        created: Math.floor(Date.now() / 1000)
       });
 
       await addPoints([buildEntry()]);

@@ -7,8 +7,3 @@ export const CB = {
   INELIGIBLE: -10, // Payload format, can not compute
   ERROR_SYNC: -11 // Sync error from overlord, waiting for retry
 };
-
-// Points are only earned for actions performed at or after this timestamp
-export const POINTS_START_TIMESTAMP = parseInt(
-  process.env.POINTS_START_TIMESTAMP ?? '1785542400' // 2026-08-01 00:00:00 UTC
-);
