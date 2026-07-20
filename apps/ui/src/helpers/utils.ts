@@ -667,6 +667,10 @@ export function escapeHtml(text: string | null | undefined) {
     .replace(/'/g, '&#39;');
 }
 
+export function replaceNamePlaceholder(title: string, name: string) {
+  return title.replace('<b>_NAME_</b>', () => `<b>${escapeHtml(name)}</b>`);
+}
+
 export function autoLinkText(text: string) {
   if (!text) return text;
 

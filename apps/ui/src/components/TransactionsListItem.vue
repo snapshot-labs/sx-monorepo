@@ -2,7 +2,12 @@
 import { formatUnits } from '@ethersproject/units';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
-import { _n, escapeHtml, shorten } from '@/helpers/utils';
+import {
+  _n,
+  escapeHtml,
+  replaceNamePlaceholder,
+  shorten
+} from '@/helpers/utils';
 import { ChainId, Transaction } from '@/types';
 
 const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
@@ -141,15 +146,9 @@ const parsedTitle = computedAsync(
     const names = await getNames([recipient]);
     const name = names[recipient] || shorten(recipient);
 
-    return title.value.replace(
-      '<b>_NAME_</b>',
-      () => `<b>${escapeHtml(name)}</b>`
-    );
+    return replaceNamePlaceholder(title.value, name);
   },
-  title.value.replace(
-    '<b>_NAME_</b>',
-    () => `<b>${escapeHtml(shorten(props.tx._form.recipient))}</b>`
-  )
+  replaceNamePlaceholder(title.value, shorten(props.tx._form.recipient))
 );
 </script>
 
