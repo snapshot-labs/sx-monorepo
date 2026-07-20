@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import {
-  accountBalance,
-  accountSpend,
   fetchAccount,
+  fetchPayments,
   fetchUsage,
   createKey as sendCreateKey,
   revokeKey as sendRevokeKey,
@@ -57,16 +56,26 @@ export function useApiKeys() {
     enabled: () => !!address.value
   });
 
+  const {
+    data: paymentsData,
+    isPending: paymentsPending,
+    isError: isPaymentsError,
+    refetch: refetchPayments
+  } = useQuery({
+    queryKey: ['keycard', 'payments', address] as const,
+    queryFn: () => fetchPayments(address.value),
+    enabled: () => !!address.value
+  });
+
   const isLoading = computed(() => !!address.value && isPending.value);
   const keys = computed<ApiKey[]>(() => account.value?.keys ?? []);
-  const balance = computed(() =>
-    account.value ? accountBalance(account.value) : 0
-  );
-  const spend = computed(() =>
-    account.value ? accountSpend(account.value) : 0
-  );
+  const balance = computed(() => account.value?.balance ?? 0);
   const dailyUsage = computed(() => usageHistory.value?.daily ?? []);
   const monthlyUsage = computed(() => usageHistory.value?.monthly ?? []);
+  const payments = computed(() => paymentsData.value ?? []);
+  const isPaymentsPending = computed(
+    () => !!address.value && paymentsPending.value
+  );
 
   function cacheAccount(next: Account) {
     queryClient.setQueryData(accountQueryKey, next);
@@ -78,11 +87,21 @@ export function useApiKeys() {
   });
   const { mutateAsync: sendRevoke } = useMutation({
     mutationFn: (id: string) => sendRevokeKey(address.value, id),
-    onSuccess: cacheAccount
+    onSuccess: next => {
+      cacheAccount(next);
+      queryClient.invalidateQueries({
+        queryKey: ['keycard', 'usage', address]
+      });
+    }
   });
   const { mutateAsync: sendTop } = useMutation({
     mutationFn: (amount: number) => sendTopUp(address.value, amount),
-    onSuccess: cacheAccount
+    onSuccess: next => {
+      cacheAccount(next);
+      queryClient.invalidateQueries({
+        queryKey: ['keycard', 'payments', address]
+      });
+    }
   });
 
   async function createKey(name: string): Promise<string> {
@@ -112,6 +131,7 @@ export function useApiKeys() {
   function reload() {
     refetchAccount();
     refetchUsage();
+    refetchPayments();
   }
 
   return {
@@ -123,9 +143,11 @@ export function useApiKeys() {
     verify,
     keys,
     balance,
-    spend,
     dailyUsage,
     monthlyUsage,
+    payments,
+    isPaymentsPending,
+    isPaymentsError,
     createKey,
     revokeKey,
     topUp

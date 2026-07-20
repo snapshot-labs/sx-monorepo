@@ -1,13 +1,19 @@
 // Mock keycard client. Persists per-address state in localStorage so the
 // whole flow (create key, usage, top up) is explorable without keycard-api.
 import { sleep } from '@/helpers/utils';
+import { Payment } from '@/queries/payments';
 import { Account, ApiKey, Usage, UsageBucket, UsageHistory } from './types';
 
 export const STORAGE_PREFIX = 'keycard.demo';
 
 const DAY = 86_400_000;
 
-export const FREE_CREDIT = 50;
+// keycard-api stores timestamps as unix SECONDS; mirror that so a real client
+// can pass API values straight through without unit conversion.
+const nowSeconds = () => Math.floor(Date.now() / 1000);
+const secondsAgo = (days: number) => nowSeconds() - days * 86_400;
+
+const FREE_CREDIT = 50;
 
 export const MAX_KEYS = 10;
 
@@ -24,22 +30,27 @@ export function keyCost(key: ApiKey): number {
   );
 }
 
-export function accountUsage(account: Account): Usage {
-  return account.keys.reduce(
-    (total, key) => ({
-      hub: total.hub + (key.usage?.hub ?? 0),
-      score: total.score + (key.usage?.score ?? 0)
-    }),
-    { hub: 0, score: 0 }
+function hasUsage(account: Account): boolean {
+  return account.keys.some(
+    key => (key.usage?.hub ?? 0) + (key.usage?.score ?? 0) > 0
   );
 }
 
-export function accountSpend(account: Account): number {
+function accountSpend(account: Account): number {
   return account.keys.reduce((total, key) => total + keyCost(key), 0);
 }
 
-export function accountBalance(account: Account): number {
-  return FREE_CREDIT + account.topups - accountSpend(account);
+// Remaining USD credit. Mock-only: the real get_account returns this directly.
+function accountBalance(account: Account): number {
+  const credited = account.topups.reduce((sum, topup) => sum + topup.amount, 0);
+  return FREE_CREDIT + credited - accountSpend(account) - (account.spent ?? 0);
+}
+
+// What each seam function returns: the stored account plus the
+// server-authoritative balance the real get_account will supply. The UI reads
+// account.balance and never recomputes it.
+function present(account: Account): Account {
+  return { ...account, balance: accountBalance(account) };
 }
 
 // Deterministic pseudo-random so the demo chart doesn't reshuffle each render.
@@ -49,8 +60,7 @@ function seededUnit(seed: number): number {
 }
 
 function buildDailyUsage(account: Account, days = 30): UsageBucket[] {
-  const { hub, score } = accountUsage(account);
-  const active = hub + score > 0;
+  const active = hasUsage(account);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -74,8 +84,7 @@ function buildDailyUsage(account: Account, days = 30): UsageBucket[] {
 }
 
 function buildMonthlyUsage(account: Account, months = 12): UsageBucket[] {
-  const { hub, score } = accountUsage(account);
-  const active = hub + score > 0;
+  const active = hasUsage(account);
 
   const now = new Date();
   const buckets: UsageBucket[] = [];
@@ -104,20 +113,25 @@ function newKeySecret(): string {
 
 function seedAccount(): Account {
   return {
-    topups: 0,
+    topups: [
+      { id: `0x${randomHex(64)}`, amount: 50, created: secondsAgo(40) },
+      { id: `0x${randomHex(64)}`, amount: 25, created: secondsAgo(9) }
+    ],
     keys: [
       {
         id: crypto.randomUUID(),
         name: 'Production',
         key: newKeySecret(),
-        created: Date.now() - 34 * DAY,
+        created: secondsAgo(34),
+        updated: secondsAgo(2),
         usage: { hub: 98_410, score: 31_770 }
       },
       {
         id: crypto.randomUUID(),
         name: 'Staging',
         key: newKeySecret(),
-        created: Date.now() - 12 * DAY,
+        created: secondsAgo(12),
+        updated: secondsAgo(1),
         usage: { hub: 26_120, score: 13_440 }
       }
     ]
@@ -127,7 +141,11 @@ function seedAccount(): Account {
 function isValidAccount(value: any): value is Account {
   return (
     !!value &&
-    typeof value.topups === 'number' &&
+    Array.isArray(value.topups) &&
+    value.topups.every(
+      (topup: any) =>
+        typeof topup?.amount === 'number' && typeof topup?.created === 'number'
+    ) &&
     Array.isArray(value.keys) &&
     value.keys.every((key: any) => typeof key?.key === 'string')
   );
@@ -162,11 +180,12 @@ function save(address: string, account: Account) {
 
 // --- keycard-api calls (mock) ---
 // Each stands in for a keycard-api JSON-RPC method; swap the bodies for
-// network calls to go live.
+// network calls to go live. Timestamps are unix seconds (API-native), so a
+// real body can pass them straight through.
 
 export async function fetchAccount(address: string): Promise<Account> {
   await sleep(400);
-  return load(address);
+  return present(load(address));
 }
 
 // Maps to the reqs_daily / reqs_monthly aggregation on keycard-api.
@@ -177,6 +196,34 @@ export async function fetchUsage(address: string): Promise<UsageHistory> {
     daily: buildDailyUsage(account),
     monthly: buildMonthlyUsage(account)
   };
+}
+
+// Maps to credit top-up records (schnaps/Stripe payments) on keycard-api,
+// plus the one-time free credit shown as the oldest entry.
+export async function fetchPayments(address: string): Promise<Payment[]> {
+  await sleep(400);
+  const account = load(address);
+
+  const topupPayments: Payment[] = account.topups.map(topup => ({
+    id: topup.id,
+    space: '',
+    amount_decimal: String(topup.amount),
+    token_symbol: 'USDC',
+    timestamp: topup.created,
+    type: 'topup'
+  }));
+
+  const freeCredit: Payment = {
+    id: 'free-credit',
+    space: '',
+    amount_decimal: String(FREE_CREDIT),
+    token_symbol: 'USD',
+    type: 'free'
+  };
+
+  return [...topupPayments, freeCredit].sort(
+    (a, b) => (b.timestamp ?? 0) - (a.timestamp ?? 0)
+  );
 }
 
 export async function createKey(
@@ -204,30 +251,39 @@ export async function createKey(
     id: crypto.randomUUID(),
     name,
     key,
-    created: Date.now(),
+    created: nowSeconds(),
+    updated: nowSeconds(),
     usage: { hub: 0, score: 0 }
   });
   save(address, account);
 
-  return { account, key };
+  return { account: present(account), key };
 }
 
 export async function revokeKey(address: string, id: string): Promise<Account> {
   await sleep(400);
 
   const account = load(address);
+  const revoked = account.keys.find(key => key.id === id);
+  if (revoked) {
+    account.spent = (account.spent ?? 0) + keyCost(revoked);
+  }
   account.keys = account.keys.filter(key => key.id !== id);
   save(address, account);
 
-  return account;
+  return present(account);
 }
 
 export async function topUp(address: string, amount: number): Promise<Account> {
   await sleep(1400);
 
   const account = load(address);
-  account.topups += amount;
+  account.topups.push({
+    id: `0x${randomHex(64)}`,
+    amount,
+    created: nowSeconds()
+  });
   save(address, account);
 
-  return account;
+  return present(account);
 }

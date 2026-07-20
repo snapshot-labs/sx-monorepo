@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
 import { _n } from '@/helpers/utils';
 
@@ -69,6 +70,11 @@ const shownScore = computed(() =>
   hovered.value ? hovered.value.scoreValue : totals.value.score
 );
 
+const shownHubCost = computed(() => shownHub.value * PRICE_PER_REQUEST.hub);
+const shownScoreCost = computed(
+  () => shownScore.value * PRICE_PER_REQUEST.score
+);
+
 const periodTotal = computed(() => totals.value.hub + totals.value.score);
 </script>
 
@@ -79,12 +85,16 @@ const periodTotal = computed(() => totals.value.hub + totals.value.score);
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-link" />
           <span class="text-skin-text">Hub</span>
-          <span class="font-semibold text-skin-link">{{ _n(shownHub) }}</span>
+          <span class="font-semibold text-skin-link">
+            {{ _n(shownHub) }} (${{ shownHubCost.toFixed(2) }})
+          </span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-text" />
           <span class="text-skin-text">Score</span>
-          <span class="font-semibold text-skin-link">{{ _n(shownScore) }}</span>
+          <span class="font-semibold text-skin-link">
+            {{ _n(shownScore) }} (${{ shownScoreCost.toFixed(2) }})
+          </span>
         </div>
       </div>
       <span

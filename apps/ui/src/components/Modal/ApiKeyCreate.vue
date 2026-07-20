@@ -68,7 +68,7 @@ async function handleSubmit() {
 
   try {
     isCreating.value = true;
-    apiKey.value = await props.createKey(form.value.name.trim());
+    apiKey.value = await props.createKey(trimmedName.value);
     step.value = 'success';
   } catch (err) {
     console.error('Failed to create API key', err);

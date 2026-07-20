@@ -78,15 +78,9 @@ watch(
 <template>
   <UiModal :open="open" :closeable="step !== 'paying'" @close="emit('close')">
     <template #header>
-      <h3
-        v-text="step === 'success' ? 'Payment successful' : 'Top up credit'"
-      />
+      <h3 v-text="step === 'success' ? 'Payment successful' : 'Top up'" />
     </template>
     <div v-if="step === 'select'" class="s-box p-4 space-y-3">
-      <div class="text-sm leading-[18px]">
-        Add credit to your balance. Usage is billed per request and credit never
-        expires.
-      </div>
       <div class="grid grid-cols-3 gap-2.5">
         <button
           v-for="amount in AMOUNTS"

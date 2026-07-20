@@ -39,7 +39,7 @@ function maskKey(value: string): string {
         type="button"
         class="text-skin-text shrink-0 flex"
         aria-label="Copy API key"
-        @click="copy(props.value)"
+        @click="copy(value)"
       >
         <IH-duplicate v-if="!copied" class="size-[18px]" />
         <IH-check v-else class="size-[18px] text-skin-success" />

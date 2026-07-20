@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { FREE_CREDIT, keyCost, MAX_KEYS } from '@/helpers/keycard';
+import { keyCost, MAX_KEYS, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
 import { _t } from '@/helpers/utils';
 
 const DESCRIPTION =
   'Access the Snapshot APIs, billed per request from your credit balance.';
+
+const PERIOD_ITEMS = [
+  { key: 'day', label: 'Day' },
+  { key: 'month', label: 'Month' }
+] as const;
 
 useTitle('API keys');
 
@@ -19,9 +24,11 @@ const {
   verify,
   keys,
   balance,
-  spend,
   dailyUsage,
   monthlyUsage,
+  payments,
+  isPaymentsPending,
+  isPaymentsError,
   createKey,
   revokeKey,
   topUp
@@ -33,11 +40,6 @@ const keyToRevoke = ref<ApiKey | null>(null);
 
 const atKeyLimit = computed(() => keys.value.length >= MAX_KEYS);
 
-const PERIOD_ITEMS = [
-  { key: 'day', label: 'Day' },
-  { key: 'month', label: 'Month' }
-] as const;
-
 const usagePeriod = ref<'day' | 'month'>('day');
 const usageSeries = computed(() =>
   usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
@@ -46,21 +48,12 @@ const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
 );
 
-// Credit depletion: how much of the total credit (free + top-ups) is spent.
-const creditUsedRatio = computed(() => {
-  const total = balance.value + spend.value;
-  return total > 0 ? spend.value / total : 0;
-});
+const usageView = ref<'chart' | 'table'>('chart');
 
-const creditBarColor = computed(() => {
-  if (creditUsedRatio.value >= 0.95) return 'bg-rose-500';
-  if (creditUsedRatio.value >= 0.8) return 'bg-amber-500';
-  return 'bg-skin-link';
-});
-
-const creditBarWidth = computed(
-  () => `${Math.max(Math.min(creditUsedRatio.value, 1) * 100, 0.5)}%`
-);
+const pricing = [
+  { label: 'Hub API', per1k: (PRICE_PER_REQUEST.hub * 1000).toFixed(2) },
+  { label: 'Score API', per1k: (PRICE_PER_REQUEST.score * 1000).toFixed(2) }
+];
 
 async function handleVerify() {
   try {
@@ -139,12 +132,12 @@ async function handleVerify() {
         <div class="border rounded-xl p-4">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div class="flex-1">
-              <div class="text-lg font-semibold text-skin-heading">
+              <h5 class="text-lg font-semibold text-skin-heading">
                 ${{ balance.toFixed(2) }}
-              </div>
-              <div class="text-sm text-skin-text">
-                remaining · includes ${{ FREE_CREDIT }} free credit
-              </div>
+                <span class="text-sm font-normal text-skin-text"
+                  >remaining</span
+                >
+              </h5>
             </div>
             <UiButton
               primary
@@ -154,32 +147,75 @@ async function handleVerify() {
               Top up
             </UiButton>
           </div>
-          <div class="mt-3 h-[6px] rounded-full bg-skin-border overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              :class="creditBarColor"
-              :style="{ width: creditBarWidth }"
-            />
-          </div>
           <div class="border-t mt-4 pt-4">
-            <div class="flex items-center justify-between gap-2 mb-3">
-              <UiEyebrow class="font-medium">Usage</UiEyebrow>
-              <UiSelectDropdown
-                v-model="usagePeriod"
-                title="Period"
-                placement="end"
-                :items="PERIOD_ITEMS"
-              />
+            <div class="mb-2 text-sm font-medium text-skin-heading">
+              Pricing
             </div>
-            <ApiUsageChart
-              :series="usageSeries"
-              :range-label="usageRangeLabel"
-            />
+            <div class="space-y-2 text-sm">
+              <div
+                v-for="item in pricing"
+                :key="item.label"
+                class="flex items-center justify-between"
+              >
+                <span class="text-skin-text" v-text="item.label" />
+                <span class="text-skin-heading">
+                  ${{ item.per1k }} / 1k requests
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <UiSectionHeader class="mt-4" label="Keys" />
+      <div class="px-4 mt-4">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <UiEyebrow class="font-medium">Usage</UiEyebrow>
+          <div class="flex items-center gap-2">
+            <div
+              class="relative top-1 flex items-center rounded-full border p-1"
+            >
+              <button
+                type="button"
+                class="flex items-center justify-center rounded-full size-[32px] transition-colors"
+                :class="
+                  usageView === 'chart'
+                    ? 'bg-skin-border text-skin-link'
+                    : 'text-skin-text hover:text-skin-link'
+                "
+                aria-label="Chart view"
+                @click="usageView = 'chart'"
+              >
+                <IH-chart-square-bar class="size-[18px]" />
+              </button>
+              <button
+                type="button"
+                class="flex items-center justify-center rounded-full size-[32px] transition-colors"
+                :class="
+                  usageView === 'table'
+                    ? 'bg-skin-border text-skin-link'
+                    : 'text-skin-text hover:text-skin-link'
+                "
+                aria-label="Table view"
+                @click="usageView = 'table'"
+              >
+                <IH-table class="size-[18px]" />
+              </button>
+            </div>
+            <UiSelectDropdown
+              v-model="usagePeriod"
+              title="Period"
+              placement="end"
+              :items="PERIOD_ITEMS"
+            />
+          </div>
+        </div>
+        <div v-if="usageView === 'chart'" class="border rounded-xl p-4">
+          <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
+        </div>
+        <ApiSpendingTable v-else :series="usageSeries" />
+      </div>
+
+      <UiSectionHeader class="mt-4" label="Keys" sticky />
       <UiColumnHeader class="space-x-3">
         <div class="grow text-left">Name</div>
         <div class="hidden sm:flex w-[150px]">Created</div>
@@ -204,7 +240,7 @@ async function handleVerify() {
             <ApiKeyField :value="key.key" masked inline class="shrink-0" />
           </div>
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
-            {{ _t(key.created / 1000, 'MMM D, YYYY') }}
+            {{ _t(key.created, 'MMM D, YYYY') }}
           </div>
           <div class="w-[110px] shrink-0 flex items-center justify-end">
             ${{ keyCost(key).toFixed(2) }}
@@ -231,6 +267,13 @@ async function handleVerify() {
           </UiDropdown>
         </div>
       </div>
+
+      <PaymentHistory
+        :payments="payments"
+        :chain-id="1"
+        :is-pending="isPaymentsPending"
+        :is-error="isPaymentsError"
+      />
     </template>
   </div>
   <ModalApiKeyCreate

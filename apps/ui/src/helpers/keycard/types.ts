@@ -8,12 +8,24 @@ export type ApiKey = {
   name: string;
   key: string;
   created: number;
+  updated?: number;
   usage: Usage;
 };
 
+export type TopUp = {
+  id: string;
+  amount: number;
+  created: number;
+};
+
 export type Account = {
-  topups: number;
+  topups: TopUp[];
   keys: ApiKey[];
+  // Credit consumed by keys that have since been revoked (never refunded).
+  spent?: number;
+  // Server-authoritative remaining USD credit, filled in by the seam
+  // (get_account at go-live). Read this instead of recomputing client-side.
+  balance?: number;
 };
 
 export type UsageBucket = Usage & {
