@@ -12,7 +12,7 @@ function strategy(
 }
 
 describe('formatDelegateRegistryDelegations', () => {
-  it('emits one delegation per distinct network for direct multichain delegation', () => {
+  it('emits a single delegation spanning every network for a multichain registry', () => {
     const result = formatDelegateRegistryDelegations(
       {
         id: 'gnosis.eth',
@@ -22,22 +22,39 @@ describe('formatDelegateRegistryDelegations', () => {
       API_URL
     );
 
+    // The delegate-registry API returns the same delegate list for a given
+    // registry regardless of chain, so a registry that reads several chains
+    // must collapse into ONE tab (chainIds carries the chains to probe for the
+    // connected account's own delegation), not one duplicate tab per chain.
     expect(result).toEqual([
       {
         name: 'Delegate registry (Gnosis Chain)',
         apiType: 'delegate-registry',
         apiUrl: API_URL,
         contractAddress: 'gnosis.eth',
-        chainId: '100'
-      },
-      {
-        name: 'Delegate registry (Ethereum)',
-        apiType: 'delegate-registry',
-        apiUrl: API_URL,
-        contractAddress: 'gnosis.eth',
-        chainId: '1'
+        chainId: '100',
+        chainIds: ['100', '1']
       }
     ]);
+  });
+
+  it('does not duplicate a registry that appears on multiple networks', () => {
+    const result = formatDelegateRegistryDelegations(
+      {
+        id: 'multichain.eth',
+        network: '1',
+        strategies: [
+          strategy('delegation', '1', { delegationSpace: 'shared.eth' }),
+          strategy('delegation', '100', { delegationSpace: 'shared.eth' }),
+          strategy('delegation', '137', { delegationSpace: 'shared.eth' })
+        ]
+      },
+      API_URL
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].contractAddress).toBe('shared.eth');
+    expect(result[0].chainIds).toEqual(['1', '100', '137']);
   });
 
   it('uses delegationNetwork over the voting network', () => {
@@ -58,7 +75,8 @@ describe('formatDelegateRegistryDelegations', () => {
         apiType: 'delegate-registry',
         apiUrl: API_URL,
         contractAddress: 'giantkin.eth',
-        chainId: '42161'
+        chainId: '42161',
+        chainIds: ['42161']
       }
     ]);
   });
@@ -92,7 +110,8 @@ describe('formatDelegateRegistryDelegations', () => {
         apiType: 'delegate-registry',
         apiUrl: API_URL,
         contractAddress: 'stgdao.eth',
-        chainId: '1'
+        chainId: '1',
+        chainIds: ['1']
       }
     ]);
   });
@@ -115,7 +134,8 @@ describe('formatDelegateRegistryDelegations', () => {
         apiType: 'delegate-registry',
         apiUrl: API_URL,
         contractAddress: 'apecoin.eth',
-        chainId: '137'
+        chainId: '137',
+        chainIds: ['137']
       }
     ]);
   });

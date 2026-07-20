@@ -502,23 +502,36 @@ export function formatDelegateRegistryDelegations(
   for (const strategy of space.strategies) {
     if (!DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)) continue;
 
-    const chainId =
-      strategy.params?.delegationNetwork || strategy.network || space.network;
+    const chainId = String(
+      strategy.params?.delegationNetwork || strategy.network || space.network
+    );
     const contractAddress = strategy.params?.delegationSpace || space.id;
 
-    registries.set(`${chainId}:${contractAddress}`, {
+    const existing = registries.get(contractAddress);
+    if (existing) {
+      if (!existing.chainIds!.includes(chainId)) {
+        existing.chainIds!.push(chainId);
+      }
+      continue;
+    }
+
+    registries.set(contractAddress, {
       name: DELEGATION_TYPES_NAMES['delegate-registry'],
       apiType: 'delegate-registry',
       apiUrl,
       contractAddress,
-      chainId
+      chainId,
+      chainIds: [chainId]
     });
   }
 
   const delegations = [...registries.values()];
-  if (delegations.length < 2) return delegations;
+  const multipleRegistries = delegations.length > 1;
 
   return delegations.map(delegation => {
+    const spansMultipleChains = (delegation.chainIds?.length ?? 1) > 1;
+    if (!multipleRegistries && !spansMultipleChains) return delegation;
+
     const networkName = (
       networks as Record<string, { name: string } | undefined>
     )[delegation.chainId as string]?.name;
