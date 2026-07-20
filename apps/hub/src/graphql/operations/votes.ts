@@ -64,7 +64,7 @@ async function query(parent, args, context?, info?) {
       .filter((v, i, a) => a.indexOf(v) === i);
     const query = `
       SELECT * FROM spaces
-      WHERE id IN (?) AND settings IS NOT NULL AND deleted = 0
+      WHERE id IN (?) AND deleted = 0
     `;
     try {
       let spaces = await db.queryAsync(query, [spaceIds]);
@@ -106,7 +106,7 @@ async function query(parent, args, context?, info?) {
       FROM proposals p
       INNER JOIN spaces ON spaces.id = p.space
       LEFT JOIN skins ON spaces.id = skins.id
-      WHERE spaces.settings IS NOT NULL AND p.id IN (?)
+      WHERE p.id IN (?)
     `;
     try {
       let proposals = await db.queryAsync(query, [proposalIds]);

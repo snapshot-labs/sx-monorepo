@@ -1,7 +1,7 @@
 CREATE TABLE spaces (
   id VARCHAR(64) NOT NULL,
   name VARCHAR(64) NOT NULL,
-  settings JSON,
+  settings JSON NOT NULL,
   verified INT NOT NULL DEFAULT '0',
   deleted INT NOT NULL DEFAULT '0',
   flagged INT NOT NULL DEFAULT '0',
