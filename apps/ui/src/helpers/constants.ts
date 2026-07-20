@@ -189,7 +189,7 @@ export const VOTING_TYPES_INFO: Record<
 
 export const PRIVACY_TYPES_INFO: Record<
   SpacePrivacy,
-  { label: string; description?: string }
+  { label: string; description?: string; isAlpha?: boolean }
 > = {
   none: {
     label: 'No privacy'
@@ -202,7 +202,8 @@ export const PRIVACY_TYPES_INFO: Record<
   'shutter-elgamal': {
     label: 'Permanent private voting',
     description:
-      'Choices are encrypted and never decrypted: only the aggregate tally is ever revealed. Powered by threshold-ElGamal homomorphic tallying.'
+      'Choices are encrypted and never decrypted: only the aggregate tally is ever revealed. Powered by threshold-ElGamal homomorphic tallying.',
+    isAlpha: true
   },
   any: {
     label: 'Any',

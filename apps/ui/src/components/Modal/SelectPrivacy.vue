@@ -38,7 +38,17 @@ function handleSelect(type: SpacePrivacy) {
         @click="handleSelect(type)"
       >
         <div>
-          <h4 class="text-skin-link" v-text="PRIVACY_TYPES_INFO[type].label" />
+          <div class="flex items-center gap-2">
+            <h4
+              class="text-skin-link inline"
+              v-text="PRIVACY_TYPES_INFO[type].label"
+            />
+            <UiPill
+              v-if="PRIVACY_TYPES_INFO[type].isAlpha"
+              variant="secondary"
+              label="Alpha"
+            />
+          </div>
           <div
             v-if="PRIVACY_TYPES_INFO[type].description"
             v-text="PRIVACY_TYPES_INFO[type].description"

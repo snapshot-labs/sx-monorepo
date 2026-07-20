@@ -255,7 +255,14 @@ watchEffect(() => {
           class="s-input !flex flex-row justify-between items-center"
           @click="isSelectPrivacyModalOpen = true"
         >
-          <div>{{ PRIVACY_TYPES_INFO[privacy].label }}</div>
+          <div class="flex items-center gap-2">
+            <span>{{ PRIVACY_TYPES_INFO[privacy].label }}</span>
+            <UiPill
+              v-if="PRIVACY_TYPES_INFO[privacy].isAlpha"
+              variant="secondary"
+              label="Alpha"
+            />
+          </div>
           <IH-chevron-down />
         </button>
       </UiWrapperInput>

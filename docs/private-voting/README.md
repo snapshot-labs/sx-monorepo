@@ -1,5 +1,8 @@
 # Permanent private voting (`shutter-elgamal`)
 
+> **Alpha.** Permanent private voting is currently in alpha. The UI surfaces an "Alpha" tag on the
+> **Permanent private voting** privacy option.
+
 This is the single entry point for Snapshot's **permanent private voting** feature. It adds a new
 proposal privacy mode, `privacy: 'shutter-elgamal'`, in which every ballot is encrypted in the
 browser and **stays encrypted forever** — only the final tally is ever revealed, and not even the
