@@ -43,9 +43,45 @@ async function query(parent, args, context?, info?) {
     delete where.proposal_in;
   }
 
-  // Constrain space so a single-proposal filter can seek the composite index
-  // (space, proposal, created, id) rather than scan votes ordered by created.
+  // Likewise collapse a single-element space_in: it is the same filter as space,
+  // and leaving it as an IN() keeps proposal queries off the indexed path below.
   if (
+    where.space === undefined &&
+    Array.isArray(where.space_in) &&
+    where.space_in.length === 1 &&
+    typeof where.space_in[0] === 'string'
+  ) {
+    where.space = where.space_in[0];
+    delete where.space_in;
+  }
+
+  let orderBy = args.orderBy || 'created';
+  let orderDirection = args.orderDirection || 'desc';
+  if (!['created', 'vp'].includes(orderBy)) orderBy = 'created';
+  orderBy = `v.${orderBy}`;
+  orderDirection = orderDirection.toUpperCase();
+  if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
+
+  // A more selective predicate is present (id is unique, voter is the
+  // primary-key prefix): the composite-index hint and the space lookup below
+  // both only help the non-selective, created-ordered path.
+  const hasSelectiveFilter =
+    where.id !== undefined ||
+    where.id_in !== undefined ||
+    where.ipfs !== undefined ||
+    where.ipfs_in !== undefined ||
+    where.voter !== undefined ||
+    where.voter_in !== undefined;
+
+  // Constrain space so a single-proposal created query can seek the composite
+  // index (space, proposal, created, id). Gate the lookup on the same
+  // preconditions as the hint below: vp queries resolve via
+  // idx_votes_on_proposal_vp_id and id/ipfs/voter via their own indexes, where
+  // an injected space = ? is a wasted round-trip and, on the vp path, a
+  // competing index that reintroduces the optimizer drift this PR removes.
+  if (
+    !hasSelectiveFilter &&
+    orderBy === 'v.created' &&
     typeof where.proposal === 'string' &&
     where.space === undefined &&
     where.space_in === undefined
@@ -73,27 +109,10 @@ async function query(parent, args, context?, info?) {
   const queryStr = whereQuery.query;
   const params: any[] = whereQuery.params;
 
-  let orderBy = args.orderBy || 'created';
-  let orderDirection = args.orderDirection || 'desc';
-  if (!['created', 'vp'].includes(orderBy)) orderBy = 'created';
-  orderBy = `v.${orderBy}`;
-  orderDirection = orderDirection.toUpperCase();
-  if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
-
   let votes: any[] = [];
 
   // Force the composite index; for large spaces the optimizer otherwise picks a
   // (space, created) index and scans millions of rows until the LIMIT is filled.
-  // Skip the hint when a more selective predicate is present (id is unique,
-  // voter is the primary-key prefix): forcing the index would turn those point
-  // lookups into a scan of the proposal's entire vote range.
-  const hasSelectiveFilter =
-    where.id !== undefined ||
-    where.id_in !== undefined ||
-    where.ipfs !== undefined ||
-    where.ipfs_in !== undefined ||
-    where.voter !== undefined ||
-    where.voter_in !== undefined;
   const forceProposalIndex =
     !hasSelectiveFilter &&
     typeof where.proposal === 'string' &&

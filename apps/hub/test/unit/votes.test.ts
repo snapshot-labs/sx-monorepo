@@ -116,10 +116,8 @@ describe('votes resolver index usage', () => {
     );
   });
 
-  it('does not force the index for a proposal query ordered by vp', async () => {
-    queryAsync
-      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
-      .mockResolvedValueOnce([]);
+  it('does not force the index or look up space for a proposal query ordered by vp', async () => {
+    queryAsync.mockResolvedValueOnce([]);
 
     await fetchVotes(null, {
       first: 1000,
@@ -129,14 +127,19 @@ describe('votes resolver index usage', () => {
       where: { proposal: PROPOSAL }
     });
 
-    const [votesSql] = queryAsync.mock.calls[1];
+    // The space lookup only serves the created path; a vp-ordered query resolves
+    // via idx_votes_on_proposal_vp_id, so it skips the lookup and the hint.
+    expect(queryAsync).toHaveBeenCalledTimes(1);
+    expect(
+      queryAsync.mock.calls.some(([sql]) => sql.includes('FROM proposals'))
+    ).toBe(false);
+    const [votesSql] = queryAsync.mock.calls[0];
     expect(votesSql).not.toContain('FORCE INDEX');
+    expect(votesSql).not.toContain('v.space = ?');
   });
 
-  it('does not force the index when a selective filter accompanies the proposal', async () => {
-    queryAsync
-      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
-      .mockResolvedValueOnce([]);
+  it('does not force the index or look up space when a selective filter accompanies the proposal', async () => {
+    queryAsync.mockResolvedValueOnce([]);
 
     await fetchVotes(null, {
       first: 1000,
@@ -147,7 +150,13 @@ describe('votes resolver index usage', () => {
       }
     });
 
-    const [votesSql] = queryAsync.mock.calls[1];
+    // voter resolves via the primary key; the injected space is a wasted
+    // round-trip, so the lookup is skipped along with the hint.
+    expect(queryAsync).toHaveBeenCalledTimes(1);
+    expect(
+      queryAsync.mock.calls.some(([sql]) => sql.includes('FROM proposals'))
+    ).toBe(false);
+    const [votesSql] = queryAsync.mock.calls[0];
     expect(votesSql).not.toContain('FORCE INDEX');
   });
 
@@ -171,6 +180,27 @@ describe('votes resolver index usage', () => {
       'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     );
     expect(votesSql).toContain('v.proposal = ?');
+    expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
+  });
+
+  it('collapses a single-element space_in onto the indexed path', async () => {
+    queryAsync.mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: { proposal: PROPOSAL, space_in: ['magicappstore.eth'] }
+    });
+
+    // space_in already pins the space, so no lookup runs, but the hint still
+    // engages because the filter collapses to v.space = ?.
+    expect(queryAsync).toHaveBeenCalledTimes(1);
+    const [votesSql, votesParams] = queryAsync.mock.calls[0];
+    expect(votesSql).toContain(
+      'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
+    );
+    expect(votesSql).toContain('v.space = ?');
+    expect(votesSql).not.toContain('v.space IN');
     expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
   });
 
