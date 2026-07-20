@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import snapshot from '@snapshot-labs/snapshot.js';
+import { CB } from '../src/constants';
 import db from '../src/helpers/mysql';
 import { getProposal, getVotes, updateProposalScores } from '../src/scores';
 
@@ -36,8 +37,21 @@ async function main() {
     );
   }
 
+  if (proposal.scores_state !== 'final') {
+    throw new Error(
+      `Proposal scores_state is '${proposal.scores_state}'; this script only re-scores proposals already finalized by the normal scoring path`
+    );
+  }
+
   const votes = await getVotes(proposalId);
-  if (!votes) throw new Error(`No votes loaded for ${proposalId}`);
+  if (!votes.length) throw new Error(`No votes loaded for ${proposalId}`);
+
+  const encrypted = votes.filter(vote => typeof vote.choice === 'string');
+  if (encrypted.length > 0) {
+    throw new Error(
+      `${encrypted.length}/${votes.length} votes still have encrypted string choices; refusing to tally`
+    );
+  }
 
   const allFinal = votes.every(vote => vote.vp_state === 'final');
   if (!allFinal) {
@@ -46,11 +60,12 @@ async function main() {
     );
   }
 
-  const voting = new snapshot.utils.voting[proposal.type](
-    proposal,
-    votes,
-    proposal.strategies
-  );
+  const VotingClass = snapshot.utils.voting[proposal.type];
+  if (!VotingClass) {
+    throw new Error(`Unsupported proposal type: ${proposal.type}`);
+  }
+
+  const voting = new VotingClass(proposal, votes, proposal.strategies);
   const results = {
     scores_state: 'final',
     scores: voting.getScores(),
@@ -78,6 +93,11 @@ async function main() {
     return;
   }
 
+  // Re-enter the scores-value pipeline: proposalsScoresValue only picks up
+  // cb = PENDING_COMPUTE, so an already-FINAL proposal would otherwise keep a
+  // scores_total_value derived from the old scores_by_strategy.
+  if (proposal.cb === CB.FINAL) proposal.cb = CB.PENDING_COMPUTE;
+
   await updateProposalScores(proposal, results, votes.length);
   console.log(`\nApplied. Wrote final scores for ${proposal.id}.`);
 }
@@ -87,4 +107,9 @@ main()
     console.error(e);
     process.exitCode = 1;
   })
-  .finally(() => db.endAsync().then(() => process.exit()));
+  .finally(() =>
+    db
+      .endAsync()
+      .catch(() => {})
+      .then(() => process.exit())
+  );
