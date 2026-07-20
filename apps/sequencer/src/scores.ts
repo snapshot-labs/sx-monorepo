@@ -26,7 +26,7 @@ export async function getProposal(id: string): Promise<any | undefined> {
   return proposal;
 }
 
-export async function getVotes(proposalId: string): Promise<any[] | undefined> {
+export async function getVotes(proposalId: string): Promise<any[]> {
   const query =
     'SELECT id, choice, voter, vp, vp_by_strategy, vp_state, vp_value FROM votes WHERE proposal = ?';
   const votes = await db.queryAsync(query, [proposalId]);
