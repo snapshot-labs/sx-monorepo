@@ -1,6 +1,6 @@
 import db from './mysql';
 
-type LedgerEntry = {
+export type LedgerEntry = {
   user: string;
   action: string;
   ref: string;
@@ -28,6 +28,6 @@ export async function addPoints(entries: LedgerEntry[]) {
 
   await db.queryAsync(query, [
     entries.map(e => [e.user, e.action, e.ref, e.amount, created]),
-    [...new Set(entries.map(e => e.user))]
+    entries.map(e => e.user)
   ]);
 }

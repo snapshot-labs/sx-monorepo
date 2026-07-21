@@ -3,7 +3,7 @@ import snapshot from '@snapshot-labs/snapshot.js';
 import { z } from 'zod';
 import log from './log';
 import db from './mysql';
-import { addPoints } from './points';
+import { addPoints, LedgerEntry } from './points';
 import { CB } from '../constants';
 
 type ProposalVpValues = Map<
@@ -116,7 +116,7 @@ async function refreshVotesVpValues(data: Datum[]) {
   const vpValues: Map<string, number> = new Map();
   const cbValues: Map<string, number> = new Map();
   const leaderboardPairs: Set<string> = new Set();
-  const pointsEntries: Parameters<typeof addPoints>[0] = [];
+  const pointsEntries: LedgerEntry[] = [];
 
   for (const datum of data) {
     if (datum.proposalCb === CB.INELIGIBLE) {

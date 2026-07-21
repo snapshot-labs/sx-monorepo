@@ -44,7 +44,7 @@ export default async function (parent, args) {
     const users = await db.queryAsync(query, params);
     ids.forEach(element => {
       if (!users.find((u: any) => u.id === element)) {
-        users.push({ id: element, points: 0 });
+        users.push({ id: element });
       }
     });
     if (!users.length) return [];
@@ -71,15 +71,16 @@ export default async function (parent, args) {
           usersWithOutCreated
         ])
       ]);
+      const usersById = new Map<string, any>(users.map((u: any) => [u.id, u]));
       counts.forEach((count: any) => {
-        const user = users.find((u: any) => u.id === count.user);
+        const user = usersById.get(count.user);
         user.votesCount = count.votesCount;
         user.proposalsCount = count.proposalsCount;
         user.lastVote = count.lastVote;
       });
 
       points.forEach((point: any) => {
-        const user = users.find((u: any) => u.id === point.user);
+        const user = usersById.get(point.user);
         user.points = point.total;
       });
     }
