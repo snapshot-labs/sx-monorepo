@@ -44,7 +44,7 @@ export default async function (parent, args) {
     const users = await db.queryAsync(query, params);
     ids.forEach(element => {
       if (!users.find((u: any) => u.id === element)) {
-        users.push({ id: element });
+        users.push({ id: element, points: 0 });
       }
     });
     if (!users.length) return [];
@@ -76,7 +76,6 @@ export default async function (parent, args) {
         user.votesCount = count.votesCount;
         user.proposalsCount = count.proposalsCount;
         user.lastVote = count.lastVote;
-        user.points = 0;
       });
 
       points.forEach((point: any) => {
