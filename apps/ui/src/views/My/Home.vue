@@ -104,6 +104,9 @@ watch(
           ]"
         />
       </div>
+      <div class="p-4">
+        <DropdownMcp />
+      </div>
     </div>
     <ProposalsList
       title="Proposals"
