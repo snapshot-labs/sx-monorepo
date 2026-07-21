@@ -53,8 +53,9 @@ export default async function (parent, args) {
       .filter((u: any) => !u.created)
       .map((u: any) => u.id);
     if (usersWithOutCreated.length) {
-      const counts = await db.queryAsync(
-        `
+      const [counts, points] = await Promise.all([
+        db.queryAsync(
+          `
         SELECT
           user,
           COALESCE(SUM(vote_count), 0) as votesCount,
@@ -64,8 +65,12 @@ export default async function (parent, args) {
         WHERE user IN (?)
         GROUP BY user
       `,
-        [usersWithOutCreated]
-      );
+          [usersWithOutCreated]
+        ),
+        db.queryAsync('SELECT user, total FROM points WHERE user IN (?)', [
+          usersWithOutCreated
+        ])
+      ]);
       counts.forEach((count: any) => {
         const user = users.find((u: any) => u.id === count.user);
         user.votesCount = count.votesCount;
@@ -74,10 +79,6 @@ export default async function (parent, args) {
         user.points = 0;
       });
 
-      const points = await db.queryAsync(
-        'SELECT user, total FROM points WHERE user IN (?)',
-        [usersWithOutCreated]
-      );
       points.forEach((point: any) => {
         const user = users.find((u: any) => u.id === point.user);
         user.points = point.total;
