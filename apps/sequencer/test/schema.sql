@@ -208,8 +208,7 @@ CREATE TABLE points_ledger (
   ref VARCHAR(100) NOT NULL,
   amount DECIMAL(13,3) NOT NULL DEFAULT 0.000,
   created INT(11) NOT NULL,
-  PRIMARY KEY (user, action, ref),
-  INDEX ref (ref)
+  PRIMARY KEY (user, action, ref)
 );
 
 CREATE TABLE points (
