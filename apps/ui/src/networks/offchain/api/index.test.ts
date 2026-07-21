@@ -140,6 +140,31 @@ describe('formatDelegateRegistryDelegations', () => {
     ]);
   });
 
+  it('disambiguates two registries that render on the same chain', () => {
+    const result = formatDelegateRegistryDelegations(
+      {
+        id: 'pleasurecoin.eth',
+        network: '137',
+        strategies: [
+          strategy('delegation', '137', {
+            delegationSpace: '0x1111111111111111111111111111111111111111'
+          }),
+          strategy('delegation', '137', {
+            delegationSpace: '0x2222222222222222222222222222222222222222'
+          })
+        ]
+      },
+      API_URL
+    );
+
+    expect(result).toHaveLength(2);
+    // Same chain would otherwise produce identical labels; the registry
+    // namespace must make them distinguishable.
+    const names = result.map(d => d.name);
+    expect(new Set(names).size).toBe(2);
+    names.forEach(name => expect(name).toContain(' · 0x'));
+  });
+
   it('ignores non delegate-registry strategies', () => {
     const result = formatDelegateRegistryDelegations(
       {

@@ -13,7 +13,7 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses } from '@/helpers/utils';
+import { clone, compareAddresses, shorten } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -535,10 +535,24 @@ export function formatDelegateRegistryDelegations(
     const networkName = (
       networks as Record<string, { name: string } | undefined>
     )[delegation.chainId as string]?.name;
+    const chainLabel = networkName ?? `Chain ${delegation.chainId}`;
+
+    // Two registries can render on the same chain (distinct delegationSpace),
+    // which would produce identical tab labels; append the registry namespace
+    // to keep them distinguishable.
+    const sharesChainWithAnother = delegations.some(
+      other =>
+        other !== delegation &&
+        other.chainId === delegation.chainId &&
+        other.contractAddress !== delegation.contractAddress
+    );
+    const label = sharesChainWithAnother
+      ? `${chainLabel} · ${shorten(delegation.contractAddress!)}`
+      : chainLabel;
 
     return {
       ...delegation,
-      name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${networkName ?? `Chain ${delegation.chainId}`})`
+      name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${label})`
     };
   });
 }

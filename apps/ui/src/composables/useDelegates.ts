@@ -349,32 +349,41 @@ export function useDelegates(
         ? delegation.chainIds
         : [delegation.chainId];
 
-    for (const chainId of chainIds) {
-      const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
-      if (!delegationSubgraph) continue;
+    const results = await Promise.all(
+      chainIds.map(async chainId => {
+        const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
+        if (!delegationSubgraph) {
+          console.warn(
+            `No delegation subgraph for chain ${chainId} (registry ${delegation.contractAddress}); skipping.`
+          );
+          return null;
+        }
 
-      const client = new ApolloClient({
-        uri: delegationSubgraph,
-        cache: new InMemoryCache(),
-        defaultOptions: {
-          query: {
-            fetchPolicy: 'no-cache'
+        const client = new ApolloClient({
+          uri: delegationSubgraph,
+          cache: new InMemoryCache(),
+          defaultOptions: {
+            query: {
+              fetchPolicy: 'no-cache'
+            }
           }
-        }
-      });
+        });
 
-      const { data } = await client.query({
-        query,
-        variables: {
-          space: delegation.contractAddress,
-          delegator
-        }
-      });
+        const { data } = await client.query({
+          query,
+          variables: {
+            space: delegation.contractAddress,
+            delegator
+          }
+        });
 
-      if (data.delegations[0]) return data.delegations[0];
-    }
+        return data.delegations[0] ?? null;
+      })
+    );
 
-    return null;
+    // Preserve chainIds order so the primary chain wins when a delegation
+    // exists on more than one.
+    return results.find(Boolean) ?? null;
   }
 
   return {
