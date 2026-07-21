@@ -23,14 +23,16 @@ mock.module('../src/cdp.ts', () => ({
 }));
 
 mock.module('../src/hub.ts', () => ({
-  gql: async (q: string, v?: any) => gqlHandler(q, v),
+  hubGql: async (q: string, v?: any) => gqlHandler(q, v),
+  apiGql: async (q: string, v?: any) => gqlHandler(q, v),
   resolveUserFromAlias: async (alias: string) => {
     const result = (await gqlHandler('aliases', {
       where: { alias }
     })) as { aliases?: { address: string }[] };
     return (result?.aliases ?? [])[0]?.address;
   },
-  schemaCache: Promise.resolve({})
+  hubSchemaCache: Promise.resolve({}),
+  apiSchemaCache: Promise.resolve({})
 }));
 
 export function makeRes() {
