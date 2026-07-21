@@ -20,6 +20,7 @@ type Datum = {
   vpByStrategy: number[];
   vpValueByStrategy: number[];
   proposalCb: number;
+  isSpaceVerified: boolean;
 };
 
 const REFRESH_INTERVAL = 60 * 1000;
@@ -48,12 +49,14 @@ async function getPendingVotes(): Promise<
     proposal: string;
     vpState: string;
     vpByStrategy: number[];
+    isSpaceVerified: boolean;
   }[]
 > {
   const query = `
-    SELECT id, voter, space, proposal, vp_state, vp_by_strategy
-    FROM votes
-    WHERE cb = ?
+    SELECT v.id, v.voter, v.space, v.proposal, v.vp_state, v.vp_by_strategy, s.verified
+    FROM votes v
+    LEFT JOIN spaces s ON s.id = v.space
+    WHERE v.cb = ?
     LIMIT ?`;
   const results = await db.queryAsync(query, [
     CB.PENDING_COMPUTE,
@@ -66,7 +69,8 @@ async function getPendingVotes(): Promise<
     space: r.space,
     proposal: r.proposal,
     vpState: r.vp_state,
-    vpByStrategy: JSON.parse(r.vp_by_strategy)
+    vpByStrategy: JSON.parse(r.vp_by_strategy),
+    isSpaceVerified: r.verified === 1
   }));
 }
 
@@ -136,7 +140,7 @@ async function refreshVotesVpValues(data: Datum[]) {
         validatedDatum.vpState === 'final' ? CB.FINAL : CB.PENDING_FINAL
       );
 
-      if (validatedDatum.vpState === 'final') {
+      if (validatedDatum.vpState === 'final' && datum.isSpaceVerified) {
         pointsEntries.push({
           user: validatedDatum.voter,
           action: 'proposal/vote',
@@ -156,7 +160,8 @@ async function refreshVotesVpValues(data: Datum[]) {
 
   if (!ids.length) return;
 
-  // Before votes are marked FINAL, so a failure retries next cycle
+  // Must run before votes leave PENDING_COMPUTE: on failure the batch stays
+  // pending, so points are reprocessed (idempotently) after the loop restarts
   await addPoints(pointsEntries);
 
   const vpCases = ids.map(() => 'WHEN id = ? THEN ?').join(' ');
@@ -220,7 +225,8 @@ async function processBatch(
         vpState: v.vpState,
         vpByStrategy: v.vpByStrategy,
         vpValueByStrategy: proposal.vpValueByStrategy,
-        proposalCb: proposal.cb
+        proposalCb: proposal.cb,
+        isSpaceVerified: v.isSpaceVerified
       };
     });
 
