@@ -1,7 +1,7 @@
 import GeneralPurposeFactory from './abis/GeneralPurposeFactory';
 import Token from './abis/Token';
 
-export type NetworkID = 'eth' | 'arb1';
+export type NetworkID = 'eth';
 
 type Source = {
   name: string;
@@ -10,8 +10,8 @@ type Source = {
 };
 
 const NETWORK_NODE_URLS: Record<NetworkID, string> = {
-  eth: 'https://rpc.snapshot.org/1',
-  arb1: 'https://rpc.snapshot.org/42161'
+  eth: 'https://rpc.brovider.xyz/1?client=delegates-api'
+  // arb1: 'https://rpc.brovider.xyz/42161?client=delegates-api'
 };
 
 const TOKEN_SOURCES: Record<NetworkID, Source[]> = {
@@ -51,14 +51,14 @@ const TOKEN_SOURCES: Record<NetworkID, Source[]> = {
       contract: '0xfe4bce4b3949c35fb17691d8b03c3cadbe2e5e23',
       start: 22565398
     }
-  ],
-  arb1: [
-    {
-      name: 'ARB',
-      contract: '0x912ce59144191c1204e64559fe8253a0e49e6548',
-      start: 70398215
-    }
   ]
+  // arb1: [
+  //   {
+  //     name: 'ARB',
+  //     contract: '0x912ce59144191c1204e64559fe8253a0e49e6548',
+  //     start: 70398215
+  //   }
+  // ]
 };
 
 export default function createConfig(network: NetworkID) {

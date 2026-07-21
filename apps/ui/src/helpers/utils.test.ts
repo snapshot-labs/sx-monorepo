@@ -6,14 +6,71 @@ import {
   _vp,
   abiToDefinition,
   createErc1155Metadata,
+  escapeHtml,
   formatAddress,
   getSpaceController,
   getStampUrl,
   getUserFacingErrorMessage,
+  replaceNamePlaceholder,
   uniqBy
 } from './utils';
 
 describe('utils', () => {
+  describe('escapeHtml', () => {
+    it('should neutralize an img onerror XSS payload', () => {
+      expect(escapeHtml('<img src=x onerror=alert(1)>')).toBe(
+        '&lt;img src=x onerror=alert(1)&gt;'
+      );
+    });
+
+    it('should escape all HTML-sensitive characters', () => {
+      expect(escapeHtml(`<>&"'`)).toBe('&lt;&gt;&amp;&quot;&#39;');
+    });
+
+    it('should leave plain text untouched', () => {
+      expect(escapeHtml('USDC')).toBe('USDC');
+    });
+
+    it('should handle nullish input', () => {
+      expect(escapeHtml(undefined)).toBe('');
+      expect(escapeHtml(null)).toBe('');
+    });
+  });
+
+  describe('replaceNamePlaceholder', () => {
+    const title = 'Raw transaction to <b>_NAME_</b>';
+
+    it('should insert an escaped plain name', () => {
+      expect(replaceNamePlaceholder(title, 'usdcoin.eth')).toBe(
+        'Raw transaction to <b>usdcoin.eth</b>'
+      );
+    });
+
+    it('should not splice the marker when the name contains $&', () => {
+      expect(replaceNamePlaceholder(title, 'a$&b.eth')).toBe(
+        'Raw transaction to <b>a$&amp;b.eth</b>'
+      );
+    });
+
+    it('should not drop characters when the name contains $$', () => {
+      expect(replaceNamePlaceholder(title, 'usd$$coin.eth')).toBe(
+        'Raw transaction to <b>usd$$coin.eth</b>'
+      );
+    });
+
+    it("should not misinterpret $` and $' replacement patterns", () => {
+      expect(replaceNamePlaceholder(title, "a$`b$'c.eth")).toBe(
+        'Raw transaction to <b>a$`b$&#39;c.eth</b>'
+      );
+    });
+
+    it('should still escape HTML in the name', () => {
+      expect(
+        replaceNamePlaceholder(title, '<img src=x onerror=alert(1)>')
+      ).toBe('Raw transaction to <b>&lt;img src=x onerror=alert(1)&gt;</b>');
+    });
+  });
+
   describe('uniqBy', () => {
     it('should return unique values by key', () => {
       const arr = [

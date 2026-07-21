@@ -110,7 +110,7 @@ onMounted(() => {
     titleBar.classList.add('title-bar');
 
     const language = document.createElement('div');
-    language.innerHTML =
+    language.textContent =
       code.getAttribute('class')?.split('language-')[1] || '';
 
     titleBar.append(language);
