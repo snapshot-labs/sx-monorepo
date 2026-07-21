@@ -28,7 +28,7 @@ const CLIENTS: {
   {
     name: 'Cursor',
     icon: ICCursor,
-    link: 'cursor://anysphere.cursor-deeplink/mcp/install?name=snapshot&config=eyJ1cmwiOiJodHRwczovL21jcC5zbmFwc2hvdC5ib3gifQ=='
+    link: 'cursor://anysphere.cursor-deeplink/mcp/install?name=Snapshot&config=eyJ1cmwiOiJodHRwczovL21jcC5zbmFwc2hvdC5ib3gifQ=='
   }
 ];
 
@@ -62,7 +62,7 @@ Setup guide: https://docs.snapshot.box/tools/snapshot-mcp`);
     <template #button>
       <UiButton>
         <component :is="CLIENTS[iconIndex].icon" class="size-[18px]" />
-        Add Snapshot MCP
+        <span>Add <span class="hidden xs:inline">Snapshot </span>MCP</span>
       </UiButton>
     </template>
     <template #items>
