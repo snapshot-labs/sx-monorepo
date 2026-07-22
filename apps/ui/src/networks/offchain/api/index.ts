@@ -497,7 +497,10 @@ export function formatDelegateRegistryDelegations(
   space: Pick<ApiSpace, 'id' | 'network' | 'strategies'>,
   apiUrl: string
 ): SpaceMetadataDelegation[] {
-  const registries = new Map<string, SpaceMetadataDelegation>();
+  const registries = new Map<
+    string,
+    SpaceMetadataDelegation & { chainIds: string[] }
+  >();
 
   for (const strategy of space.strategies) {
     if (!DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)) continue;
@@ -509,8 +512,8 @@ export function formatDelegateRegistryDelegations(
 
     const existing = registries.get(contractAddress);
     if (existing) {
-      if (!existing.chainIds!.includes(chainId)) {
-        existing.chainIds!.push(chainId);
+      if (!existing.chainIds.includes(chainId)) {
+        existing.chainIds.push(chainId);
       }
       continue;
     }
@@ -529,7 +532,7 @@ export function formatDelegateRegistryDelegations(
   const multipleRegistries = delegations.length > 1;
 
   return delegations.map(delegation => {
-    const spansMultipleChains = (delegation.chainIds?.length ?? 1) > 1;
+    const spansMultipleChains = delegation.chainIds.length > 1;
     if (!multipleRegistries && !spansMultipleChains) return delegation;
 
     const networkName = (

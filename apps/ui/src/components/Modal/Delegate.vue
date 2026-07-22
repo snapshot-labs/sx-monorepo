@@ -3,6 +3,7 @@ import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import {
+  candidateChainIds,
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
@@ -127,7 +128,7 @@ const chainIds = computed(() => {
   // a user write on a chain the read path never queries, hiding the delegation.
   const delegation = selectedDelegation.value;
   if (delegation?.apiType === 'delegate-registry') {
-    const chainIds = (delegation.chainIds ?? [delegation.chainId])
+    const chainIds = candidateChainIds(delegation)
       .map(Number)
       .filter(chainId =>
         DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId)
@@ -136,6 +137,9 @@ const chainIds = computed(() => {
     if (chainIds.length) return Array.from(new Set(chainIds));
   }
 
+  // apechain-delegate-registry is always single-chain (sourced from a
+  // delegationPortal, which carries one delegationNetwork), so form.chainId
+  // already equals its sole chain here.
   return [form.chainId];
 });
 
