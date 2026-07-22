@@ -181,7 +181,8 @@ async function handleSubmit() {
     try {
       await redirectToCheckout({
         space: props.space,
-        plan: props.plan
+        plan: props.plan,
+        ref: props.barcodePayload.ref
       });
     } catch (err) {
       console.error('[stripe] checkout failed', err);
