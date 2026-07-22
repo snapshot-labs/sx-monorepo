@@ -165,6 +165,27 @@ describe('formatDelegateRegistryDelegations', () => {
     names.forEach(name => expect(name).toContain(' · 0x'));
   });
 
+  it('labels two registries on different chains by chain, without a namespace suffix', () => {
+    const result = formatDelegateRegistryDelegations(
+      {
+        id: 'multiregistry.eth',
+        network: '1',
+        strategies: [
+          strategy('delegation', '1', { delegationSpace: 'one.eth' }),
+          strategy('delegation', '137', { delegationSpace: 'two.eth' })
+        ]
+      },
+      API_URL
+    );
+
+    expect(result).toHaveLength(2);
+    // Distinct chains already disambiguate the tabs, so the registry namespace
+    // suffix (` · `) must not be appended.
+    const names = result.map(d => d.name);
+    names.forEach(name => expect(name).not.toContain(' · '));
+    expect(new Set(names).size).toBe(2);
+  });
+
   it('ignores non delegate-registry strategies', () => {
     const result = formatDelegateRegistryDelegations(
       {

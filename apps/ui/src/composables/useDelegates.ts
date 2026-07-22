@@ -4,6 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
+import { candidateChainIds } from '@/helpers/delegation';
 import { getNames } from '@/helpers/stamp';
 import { compareAddresses, formatAddress } from '@/helpers/utils';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
@@ -344,10 +345,7 @@ export function useDelegates(
       ? DELEGATIONS_RAW_QUERY
       : DELEGATIONS_QUERY;
 
-    const chainIds =
-      delegation.chainIds && delegation.chainIds.length
-        ? delegation.chainIds
-        : [delegation.chainId];
+    const chainIds = candidateChainIds(delegation);
 
     const results = await Promise.all(
       chainIds.map(async chainId => {
