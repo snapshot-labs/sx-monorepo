@@ -11,8 +11,6 @@ const FORM = {
   quantity: 1
 };
 
-const plan = defineModel<'monthly' | 'yearly'>('plan', { default: 'yearly' });
-
 const props = withDefaults(
   defineProps<{
     open: boolean;
@@ -22,11 +20,13 @@ const props = withDefaults(
     barcodePayload: BarcodePayload;
     space?: string;
     isAuthValidForCrypto?: boolean;
+    plan?: 'monthly' | 'yearly';
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
   }>(),
   {
     isAuthValidForCrypto: false,
+    plan: 'yearly',
     quantityLabel: 'Quantity',
     calculator: (unitPrice: number, quantity: number) => {
       return Number((unitPrice * quantity).toFixed(2));
@@ -183,7 +183,7 @@ async function handleSubmit() {
     try {
       await redirectToCheckout({
         space: props.space,
-        plan: plan.value
+        plan: props.plan
       });
     } catch (err) {
       isCardLoading.value = false;

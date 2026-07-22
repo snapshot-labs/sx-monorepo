@@ -444,7 +444,7 @@ onMounted(() => {
 
     <ModalPayment
       v-if="selectedSpace && modalPaymentOpen"
-      v-model:plan="subscriptionLength"
+      :plan="subscriptionLength"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :calculator="calculator"
