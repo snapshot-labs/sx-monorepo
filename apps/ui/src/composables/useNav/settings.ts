@@ -30,6 +30,10 @@ export default {
           name: 'Notifications',
           icon: IHAtSymbol,
           hidden: metadataNetwork !== 's' || isWhiteLabel
+        },
+        'api-keys': {
+          name: 'API keys',
+          icon: IHKey
         }
       }
     };
