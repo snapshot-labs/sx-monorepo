@@ -3,6 +3,7 @@ import { useDelegates } from './useDelegates';
 
 const queriedChains: string[] = [];
 const responses = new Map<string, string>();
+const rejectChains = new Set<string>();
 
 vi.mock('@apollo/client/core', () => {
   class ApolloClient {
@@ -15,6 +16,9 @@ vi.mock('@apollo/client/core', () => {
     async query() {
       const chainId = this.uri?.split('/').pop() ?? '';
       queriedChains.push(chainId);
+      if (rejectChains.has(chainId)) {
+        throw new Error(`subgraph ${chainId} down`);
+      }
       const delegate = responses.get(chainId);
       return {
         data: {
@@ -49,6 +53,7 @@ describe('useDelegates', () => {
   beforeEach(() => {
     queriedChains.length = 0;
     responses.clear();
+    rejectChains.clear();
   });
 
   afterEach(() => {
@@ -76,6 +81,18 @@ describe('useDelegates', () => {
       const { getDelegation } = setup(['1', '100']);
       const result = await getDelegation('0xdelegator');
 
+      expect(result).toEqual({ id: '100:d', delegate: '0xBBB' });
+    });
+
+    it('ignores a failing chain and returns a delegation on a healthy one', async () => {
+      rejectChains.add('1');
+      responses.set('100', '0xBBB');
+
+      const { getDelegation } = setup(['1', '100']);
+      const result = await getDelegation('0xdelegator');
+
+      // A single rejecting subgraph (Promise.all would throw) must not hide the
+      // delegation that lives on the healthy chain.
       expect(result).toEqual({ id: '100:d', delegate: '0xBBB' });
     });
 

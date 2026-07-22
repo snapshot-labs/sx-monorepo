@@ -347,7 +347,9 @@ export function useDelegates(
 
     const chainIds = candidateChainIds(delegation);
 
-    const results = await Promise.all(
+    // allSettled (not all): one unhealthy subgraph must not hide a delegation
+    // that lives on a healthy chain, which a single rejection would do here.
+    const results = await Promise.allSettled(
       chainIds.map(async chainId => {
         const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
         if (!delegationSubgraph) {
@@ -381,7 +383,11 @@ export function useDelegates(
 
     // Preserve chainIds order so the primary chain wins when a delegation
     // exists on more than one.
-    return results.find(Boolean) ?? null;
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value) return result.value;
+    }
+
+    return null;
   }
 
   return {

@@ -806,9 +806,12 @@ export function createActions(
             ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
             : APE_GAS_CONFIGS[currentChainId].registryContract;
 
+        // delegationContract carries the registry namespace the read path keys
+        // on (delegationSpace || space.id); writing under space.id would delegate
+        // to a different id than getDelegation reads, hiding the delegation.
         const delegationId =
           delegationType === 'delegate-registry'
-            ? formatBytes32String(space.id)
+            ? formatBytes32String(delegationContract)
             : delegationContract;
 
         if (delegatees[0]) {

@@ -529,12 +529,14 @@ export function formatDelegateRegistryDelegations(
   }
 
   const delegations = [...registries.values()];
-  const multipleRegistries = delegations.length > 1;
+
+  // A single registry is unambiguous on its own, so it keeps the plain
+  // "Delegate registry" label even when it reads several chains (the chain is
+  // an implementation detail of where the delegation lives, not a separate
+  // tab). Only multiple registries need a disambiguating suffix.
+  if (delegations.length <= 1) return delegations;
 
   return delegations.map(delegation => {
-    const spansMultipleChains = delegation.chainIds.length > 1;
-    if (!multipleRegistries && !spansMultipleChains) return delegation;
-
     const networkName = (
       networks as Record<string, { name: string } | undefined>
     )[delegation.chainId as string]?.name;
