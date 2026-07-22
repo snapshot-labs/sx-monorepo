@@ -31,7 +31,8 @@ export default async function (parent, args) {
       u.*,
       COALESCE(SUM(l.vote_count), 0)  as votesCount,
       COALESCE(SUM(l.proposal_count), 0) as proposalsCount,
-      MAX(l.last_vote) as lastVote
+      MAX(l.last_vote) as lastVote,
+      COALESCE((SELECT p.total FROM points p WHERE p.user = u.id), 0) as points
     FROM users u
     LEFT JOIN leaderboard l ON l.user = u.id
     WHERE 1=1 ${queryStr}
@@ -52,8 +53,9 @@ export default async function (parent, args) {
       .filter((u: any) => !u.created)
       .map((u: any) => u.id);
     if (usersWithOutCreated.length) {
-      const counts = await db.queryAsync(
-        `
+      const [counts, points] = await Promise.all([
+        db.queryAsync(
+          `
         SELECT
           user,
           COALESCE(SUM(vote_count), 0) as votesCount,
@@ -63,13 +65,23 @@ export default async function (parent, args) {
         WHERE user IN (?)
         GROUP BY user
       `,
-        [usersWithOutCreated]
-      );
+          [usersWithOutCreated]
+        ),
+        db.queryAsync('SELECT user, total FROM points WHERE user IN (?)', [
+          usersWithOutCreated
+        ])
+      ]);
+      const usersById = new Map<string, any>(users.map((u: any) => [u.id, u]));
       counts.forEach((count: any) => {
-        const user = users.find((u: any) => u.id === count.user);
+        const user = usersById.get(count.user);
         user.votesCount = count.votesCount;
         user.proposalsCount = count.proposalsCount;
         user.lastVote = count.lastVote;
+      });
+
+      points.forEach((point: any) => {
+        const user = usersById.get(point.user);
+        user.points = point.total;
       });
     }
     return users.map(formatUser);
