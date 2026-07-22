@@ -20,7 +20,7 @@ const {
   toRef(() => props.space.network)
 );
 
-const { getPortalUrl } = useStripeCheckout();
+const { getPortalUrl, isLoading } = useStripeCheckout();
 const uiStore = useUiStore();
 
 const portalPaymentId = ref<string | null>(null);
@@ -56,14 +56,13 @@ const statusText = computed(() => {
 });
 
 async function openPortal(paymentId: string) {
-  if (portalPaymentId.value) return;
+  if (isLoading.value) return;
 
   portalPaymentId.value = paymentId;
   try {
     const url = await getPortalUrl(props.space.network);
     window.location.href = url;
   } catch (err) {
-    portalPaymentId.value = null;
     console.error('[stripe] portal failed', err);
     uiStore.addNotification(
       'error',
@@ -71,10 +70,6 @@ async function openPortal(paymentId: string) {
     );
   }
 }
-
-useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
-  if (event.persisted) portalPaymentId.value = null;
-});
 </script>
 
 <template>
@@ -170,7 +165,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
         </div>
 
         <UiLoading
-          v-if="portalPaymentId === payment.id"
+          v-if="isLoading && portalPaymentId === payment.id"
           class="flex items-center"
         />
         <UiDropdown v-else>

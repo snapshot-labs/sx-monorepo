@@ -58,7 +58,7 @@ const { isPending, assetsMap } = useBalances({
   })
 });
 const { isWhiteLabel } = useWhiteLabel();
-const { redirectToCheckout } = useStripeCheckout();
+const { redirectToCheckout, isLoading } = useStripeCheckout();
 const uiStore = useUiStore();
 
 const paymentMethod = ref<PaymentMethod>('crypto');
@@ -67,7 +67,6 @@ const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
-const isCardLoading = ref(false);
 const form = ref(clone(FORM));
 
 const definition = computed(() => ({
@@ -123,7 +122,7 @@ const isLoginRequired = computed(
 
 const canSubmit = computed(() => {
   if (!isTermsAccepted.value) return false;
-  if (paymentMethod.value === 'card') return !isCardLoading.value;
+  if (paymentMethod.value === 'card') return !isLoading.value;
   return (
     formValid.value &&
     !isPending.value &&
@@ -179,14 +178,12 @@ async function handleSubmit() {
 
   if (paymentMethod.value === 'card') {
     if (!props.space) return;
-    isCardLoading.value = true;
     try {
       await redirectToCheckout({
         space: props.space,
         plan: props.plan
       });
     } catch (err) {
-      isCardLoading.value = false;
       console.error('[stripe] checkout failed', err);
       uiStore.addNotification(
         'error',
@@ -222,15 +219,10 @@ watch(
     isPickerShown.value = false;
     isHidden.value = false;
     selectedTokenAddress.value = '';
-    isCardLoading.value = false;
     paymentMethod.value = 'crypto';
     form.value = clone(FORM);
   }
 );
-
-useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
-  if (event.persisted) isCardLoading.value = false;
-});
 </script>
 
 <template>
@@ -238,7 +230,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
     :open="open"
     class="modal-payment"
     :class="{ hidden: isHidden }"
-    :closeable="!isCardLoading"
+    :closeable="!isLoading"
     @close="emit('close')"
   >
     <template #header>
@@ -372,9 +364,7 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
         primary
         :disabled="!isLoginRequired && !canSubmit"
         :loading="
-          paymentMethod === 'card'
-            ? isCardLoading
-            : !isLoginRequired && isPending
+          paymentMethod === 'card' ? isLoading : !isLoginRequired && isPending
         "
         @click="handleSubmit"
       >
