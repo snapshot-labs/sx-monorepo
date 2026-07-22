@@ -658,6 +658,19 @@ export function getChoiceText(availableChoices: string[], choice: Choice) {
     .join(', ');
 }
 
+export function escapeHtml(text: string | null | undefined) {
+  return (text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function replaceNamePlaceholder(title: string, name: string) {
+  return title.replace('<b>_NAME_</b>', () => `<b>${escapeHtml(name)}</b>`);
+}
+
 export function autoLinkText(text: string) {
   if (!text) return text;
 
