@@ -68,13 +68,19 @@ export function createConstants(
     [config.Strategies.ERC20Votes]: true,
     [config.Strategies.EVMSlotValue]: true,
     [config.Strategies.OZVotesStorageProof]: true,
-    [config.Strategies.OZVotesTrace208StorageProof]: true
+    [config.Strategies.OZVotesTrace208StorageProof]: true,
+    [config.Strategies.EVMSlotValueV2]: true,
+    [config.Strategies.OZVotesStorageProofV2]: true,
+    [config.Strategies.OZVotesTrace208StorageProofV2]: true
   };
 
-  const STORAGE_PROOF_STRATEGIES_TYPES = [
+  const STORAGE_PROOF_STRATEGIES_TYPES: string[] = [
     config.Strategies.EVMSlotValue,
     config.Strategies.OZVotesStorageProof,
-    config.Strategies.OZVotesTrace208StorageProof
+    config.Strategies.OZVotesTrace208StorageProof,
+    config.Strategies.EVMSlotValueV2,
+    config.Strategies.OZVotesStorageProofV2,
+    config.Strategies.OZVotesTrace208StorageProofV2
   ];
 
   const SUPPORTED_EXECUTORS = {
@@ -95,10 +101,15 @@ export function createConstants(
   const STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: 'Merkle whitelist',
     [config.Strategies.ERC20Votes]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.EVMSlotValue]: 'EVM slot value',
+    [config.Strategies.EVMSlotValue]: 'EVM slot value (deprecated)',
     [config.Strategies.OZVotesStorageProof]:
-      'OZ Votes storage proof (trace 224)',
+      'OZ Votes storage proof (trace 224, deprecated)',
     [config.Strategies.OZVotesTrace208StorageProof]:
+      'OZ Votes storage proof (trace 208, deprecated)',
+    [config.Strategies.EVMSlotValueV2]: 'EVM slot value',
+    [config.Strategies.OZVotesStorageProofV2]:
+      'OZ Votes storage proof (trace 224)',
+    [config.Strategies.OZVotesTrace208StorageProofV2]:
       'OZ Votes storage proof (trace 208)'
   };
 
@@ -111,12 +122,14 @@ export function createConstants(
     address: string,
     name: string,
     about: string,
-    link?: string
+    link?: string,
+    deprecated = false
   ): StrategyTemplate => ({
     address,
     name,
     about,
     link,
+    deprecated,
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
@@ -461,13 +474,18 @@ export function createConstants(
         }
       }
     },
+    // Deprecated legacy Herodotus storage-proof strategies (facts registry +
+    // timestamp remappers). Kept so existing spaces still render and remain
+    // editable, but hidden from the add-strategy picker via `deprecated: true`.
+    // Superseded by the Satellite versions below (sx-starknet#641).
     ...(config.Strategies.EVMSlotValue
       ? [
           createSlotValueStrategyConfig(
             config.Strategies.EVMSlotValue,
-            'EVM slot value',
+            'EVM slot value (deprecated)',
             'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.',
-            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#evm-slot-value`
+            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#evm-slot-value`,
+            true
           )
         ]
       : []),
@@ -475,9 +493,10 @@ export function createConstants(
       ? [
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesStorageProof,
-            'OZ Votes storage proof (trace 224)',
+            'OZ Votes storage proof (trace 224, deprecated)',
             'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 224 format).',
-            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#oz-votes-storage-proof`
+            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#oz-votes-storage-proof`,
+            true
           )
         ]
       : []),
@@ -485,6 +504,38 @@ export function createConstants(
       ? [
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesTrace208StorageProof,
+            'OZ Votes storage proof (trace 208, deprecated)',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).',
+            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#oz-votes-storage-proof`,
+            true
+          )
+        ]
+      : []),
+    // Herodotus Satellite storage-proof strategies (sx-starknet#641).
+    ...(config.Strategies.EVMSlotValueV2
+      ? [
+          createSlotValueStrategyConfig(
+            config.Strategies.EVMSlotValueV2,
+            'EVM slot value',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power.',
+            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#evm-slot-value`
+          )
+        ]
+      : []),
+    ...(config.Strategies.OZVotesStorageProofV2
+      ? [
+          createSlotValueStrategyConfig(
+            config.Strategies.OZVotesStorageProofV2,
+            'OZ Votes storage proof (trace 224)',
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 224 format).',
+            `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#oz-votes-storage-proof`
+          )
+        ]
+      : []),
+    ...(config.Strategies.OZVotesTrace208StorageProofV2
+      ? [
+          createSlotValueStrategyConfig(
+            config.Strategies.OZVotesTrace208StorageProofV2,
             'OZ Votes storage proof (trace 208)',
             'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).',
             `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#oz-votes-storage-proof`
@@ -495,14 +546,7 @@ export function createConstants(
 
   const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES =
     EDITOR_VOTING_STRATEGIES.filter(
-      strategy =>
-        !(
-          [
-            config.Strategies.EVMSlotValue,
-            config.Strategies.OZVotesStorageProof,
-            config.Strategies.OZVotesTrace208StorageProof
-          ] as string[]
-        ).includes(strategy.address)
+      strategy => !STORAGE_PROOF_STRATEGIES_TYPES.includes(strategy.address)
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [

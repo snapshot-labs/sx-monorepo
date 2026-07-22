@@ -256,6 +256,16 @@ export default function createOzVotesStorageProofStrategy({
           // can be removed after contracts include this
           // https://github.com/snapshot-labs/sx-starknet/pull/624
           if (err.message.includes('Slot is zero')) return 0n;
+
+          // Satellite already has the timestamp -> block mapping, but not the
+          // token account's storage root yet.
+          if (err.message.includes('SP_ACCOUNT_FIELD_NOT_SAVED')) {
+            throw new VotingPowerDetailsError(
+              'Storage root is not saved yet',
+              type,
+              'NOT_READY_YET'
+            );
+          }
         }
 
         throw err;
