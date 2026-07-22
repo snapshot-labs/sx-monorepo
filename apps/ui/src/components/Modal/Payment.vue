@@ -117,7 +117,7 @@ const isInsufficientBalance = computed(() => {
   );
 });
 
-const needsLogin = computed(
+const isLoginRequired = computed(
   () => paymentMethod.value === 'crypto' && !props.isAuthValidForCrypto
 );
 
@@ -170,7 +170,7 @@ async function moveToNextStep() {
 }
 
 async function handleSubmit() {
-  if (needsLogin.value) {
+  if (isLoginRequired.value) {
     emit('connectWallet');
     return;
   }
@@ -370,13 +370,15 @@ useEventListener(window, 'pageshow', (event: PageTransitionEvent) => {
       <UiButton
         class="w-full"
         primary
-        :disabled="!needsLogin && !canSubmit"
+        :disabled="!isLoginRequired && !canSubmit"
         :loading="
-          paymentMethod === 'card' ? isCardLoading : !needsLogin && isPending
+          paymentMethod === 'card'
+            ? isCardLoading
+            : !isLoginRequired && isPending
         "
         @click="handleSubmit"
       >
-        <template v-if="needsLogin">Log in</template>
+        <template v-if="isLoginRequired">Log in</template>
         <template v-else-if="paymentMethod === 'card'">Checkout</template>
         <template v-else-if="isInsufficientBalance">
           Insufficient {{ currentToken.symbol }}

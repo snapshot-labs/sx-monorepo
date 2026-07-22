@@ -227,16 +227,16 @@ async function handleStripeSuccess() {
     'Payment received! Your Pro subscription will be active shortly.'
   );
 
-  const spaceKey = route.query.space as string | undefined;
+  const stripeSpaceKey = route.query.space as string | undefined;
 
   const query = { ...route.query };
   delete query.stripe_success;
   delete query.space;
   router.replace({ query });
 
-  if (spaceKey) {
+  if (stripeSpaceKey) {
     await queryClient.invalidateQueries({
-      queryKey: ['spaces', 'detail', spaceKey]
+      queryKey: ['spaces', 'detail', stripeSpaceKey]
     });
   }
 }
