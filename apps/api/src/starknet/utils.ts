@@ -8,13 +8,13 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { createPublicClient, getAddress, http } from 'viem';
+import { Space } from '../../.checkpoint/models';
+import { handleVotingPowerValidationMetadata } from '../common/ipfs';
+import logger from '../logger';
 import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import L1AvatarExecutionStrategyAbi from './abis/l1/L1AvatarExectionStrategy';
 import { FullConfig } from './config';
-import { Space } from '../../.checkpoint/models';
-import { handleVotingPowerValidationMetadata } from '../common/ipfs';
-import logger from '../logger';
 
 type StrategyConfig = {
   address: BigNumberish;

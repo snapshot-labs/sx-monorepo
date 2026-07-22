@@ -1,0 +1,13 @@
+{
+  "name": "schnorr_basic",
+  "description": "Schnorr signature on a 32-byte message with fixed sk and nonce k.",
+  "version": 1,
+  "inputs": {
+    "vk": "a8239b5d476ff5aab33a4922a2fe646f5800f6a1e549b3168030a3639fffccb800b411fdda72c7a0b7fe28f1e2328c3a",
+    "message": "030a11181f262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dc",
+    "sig": "a3be1af5b71ab8a999d36afc614476e08bc14cce2bd88c3a3044d8695871311a026fed9f72adea55bf7ca40ecf69d7093c3a11880a51f50ab35ffb0e9cf9021fb4d051211f2e113105bf858f62bd5b1b"
+  },
+  "expected": {
+    "verify": true
+  }
+}

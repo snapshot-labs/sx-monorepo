@@ -17,6 +17,13 @@ export async function encryptChoices(
     return encryptShutterChoice(choice, proposalId);
   }
 
+  // For 'shutter-elgamal' the per-voter ballot envelope is built upstream
+  // (UI: buildTeBallotEnvelope) and serialised to JSON before reaching
+  // here, so the SDK ships it as-is — encryption already happened.
+  if (privacy === 'shutter-elgamal') {
+    return choice;
+  }
+
   throw new Error('Encryption type not supported');
 }
 

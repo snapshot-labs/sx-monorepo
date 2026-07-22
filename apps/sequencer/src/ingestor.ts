@@ -68,7 +68,7 @@ export default async function ingestor(req) {
     const underTs = (ts - under).toFixed();
     const { domain, message, types } = body.data;
 
-    if (JSON.stringify(body).length > 1e5)
+    if (JSON.stringify(body).length > 1e6)
       return Promise.reject('too large message');
 
     if (message.timestamp > overTs || message.timestamp < underTs)

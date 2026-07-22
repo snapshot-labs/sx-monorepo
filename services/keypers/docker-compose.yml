@@ -1,0 +1,53 @@
+# Local 3-keyper committee for permanent private voting (Variant A, t=1, n=3).
+#
+# Use:
+#   cd services/keypers
+#   docker compose up --build
+#
+# Each keyper exposes its REST API on the host at 5001 / 5002 / 5003. The
+# DKG coordinator (`src/dkg_coordinator.py`) is run separately, e.g.:
+#   python src/dkg_coordinator.py \
+#     --keypers http://localhost:5001,http://localhost:5002,http://localhost:5003 \
+#     --proposal-id 0xdeadbeef --n 3 --t 1
+#
+# Hub URL defaults to http://host.docker.internal:3000 so keypers can reach
+# the dev hub running on the host. Set KEYPER_HUB_URL to override.
+#
+# KEYPER_PRIVATE_KEY_{1,2,3} are dev defaults — derived deterministically
+# from "keyper-{id}" via SHA-256. The corresponding addresses are
+# documented in services/keypers/README.md and must match the proposal's
+# te_keyper_addresses allow-list.
+
+services:
+  keyper1:
+    build: .
+    command: ["python", "/app/src/keyper.py", "--id", "1", "--port", "5001", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: ${KEYPER_HUB_URL:-http://host.docker.internal:3000}
+      # DEV ONLY — publicly-known key; set KEYPER_PRIVATE_KEY_1 in .env for production.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_1:-0x4e057a764bb4fec72d8a09c7e04862cf293f87103459f216b41a885f36e27b6d}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  keyper2:
+    build: .
+    command: ["python", "/app/src/keyper.py", "--id", "2", "--port", "5002", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: ${KEYPER_HUB_URL:-http://host.docker.internal:3000}
+      # DEV ONLY — publicly-known key; set KEYPER_PRIVATE_KEY_2 in .env for production.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_2:-0x99f276d9a8045c01649f153f69b1c446a24aee8fd546a147fe5e29cc061edc88}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  keyper3:
+    build: .
+    command: ["python", "/app/src/keyper.py", "--id", "3", "--port", "5003", "--host", "0.0.0.0"]
+    environment:
+      KEYPER_HUB_URL: ${KEYPER_HUB_URL:-http://host.docker.internal:3000}
+      # DEV ONLY — publicly-known key; set KEYPER_PRIVATE_KEY_3 in .env for production.
+      KEYPER_PRIVATE_KEY: ${KEYPER_PRIVATE_KEY_3:-0xfdf5c2f83276e56c374b54aaef3c0a3f989ad11d3f6a1faf29373e5e528ea94c}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

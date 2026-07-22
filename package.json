@@ -20,6 +20,7 @@
     "lint": "TURBO_TELEMETRY_DISABLED=1 turbo run lint lint:scripts --filter=!auction",
     "lint:fix": "TURBO_TELEMETRY_DISABLED=1 turbo run lint:fix && bun run lint:scripts --fix",
     "lint:scripts": "eslint scripts/",
+    "parity": "node scripts/parity-gate.mjs",
     "lint:unused": "knip",
     "typecheck": "TURBO_TELEMETRY_DISABLED=1 turbo run typecheck --filter=!auction",
     "docs": "cd docs && bunx mintlify dev --port 3006",

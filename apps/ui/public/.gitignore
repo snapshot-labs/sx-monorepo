@@ -1,0 +1,4 @@
+# SDK-supplied BLST WASM artifacts copied at build time by
+# packages/private-vote-sdk/scripts/copy-wasm.mjs. Do not commit.
+blst.js
+blst.wasm

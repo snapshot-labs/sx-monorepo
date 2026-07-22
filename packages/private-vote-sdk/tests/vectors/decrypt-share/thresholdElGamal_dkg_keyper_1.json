@@ -1,0 +1,22 @@
+{
+  "name": "thresholdElGamal_dkg_keyper_1",
+  "description": "Cross-impl interop: thresholdElGamal Feldman VSS DKG (n=3, t=2); keyper 1 produces a partial decryption share on Enc(m=7) under the joint mpk. The DLEQ is generated with thresholdElGamal's msk_k but under the SDK's exact Fiat-Shamir transcript (Merlin-style length-prefixed appends, dual keccak256, mod-Q reduce), so the SDK's verifyDecryptionShare accepts the wire bytes directly.",
+  "version": 1,
+  "inputs": {
+    "ct_sum": {
+      "c1": "86d6cbe5ee0260786af60013310119d57db28130c799bac84084efbcbb1eb1499d38a2d5b088a8241f6b752eac444f3a014298382104e2edb4e1d356942091234199174b4050d32450d4ca3ad818443bc4362b28e6ebb45f3586b73fc5a5ff16",
+      "c2": "97408fe7dd823ddb9271fda71d8d8f9a68194634b5a14d60bcf75660a33c3aaa5a68c2e3c3590682c387c34407c9536d11e93479f143e4e6c05f93213c694b3af6f93e79490a2defe2563ac601d6a38b45665e5dfb39b1ea8c66a425041619a1"
+    },
+    "committee_pk": "8c67b7294a4febd9f1da6f8a9620baa5803e5e45fb779380f71ee5a60ee7412fbe91bf45226810d7c71e2fccf62cf55d1442f51d98203626cd7e6aa7a8e1b07172f8963a99eb36fea042050f244d9b7f089cb7a043be0b53039cefb5fe024abc",
+    "keyper_index": 1,
+    "transcript_label": "interop:thresholdElGamal:dkg:share:1",
+    "share": {
+      "keyper_index": 1,
+      "sigma": "93cdfa097babae5e210a1973972564047e2ae5b5250dd9b6b3f16e365a9581cee8982eabf20226c181860a344874e31e1210c01ce01651e714efe0e25a4a9755ae70acff5d7b6503e42c909bfee248381197fa1f0d6e4c5405aed74b592a15b4",
+      "dleq_proof": "606c9edaba38673ce886582d602b74e9d114b5e426041e1f5dc7d123adca606533886b57877274207216c79cc337f78c3b04160dceae711f6f98291f074944e1"
+    }
+  },
+  "expected": {
+    "verify": true
+  }
+}

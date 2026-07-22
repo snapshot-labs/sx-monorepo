@@ -34,7 +34,7 @@ jobs:
           path: ~/.cargo
           key: ${{ runner.os }}-cargo-${{ env.STARKNET_DEVNET_VERSION }}
       - name: Install Starknet Devnet
-        run: cargo install starknet-devnet@${{ env.STARKNET_DEVNET_VERSION }}
+        run: cargo install --locked starknet-devnet@${{ env.STARKNET_DEVNET_VERSION }}
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:

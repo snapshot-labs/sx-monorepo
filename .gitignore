@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+# this monorepo uses bun (bun.lock); keep stray npm lockfiles out
+package-lock.json
 
 # testing
 coverage
@@ -42,3 +44,13 @@ dist.cjs
 .browser
 
 /legacy-docs
+
+# Python bytecode (keyper service)
+services/keypers/**/__pycache__/
+services/keypers/**/*.pyc
+
+# Keyper DKG state — encrypted secrets, must never be committed
+keyper-state/
+
+# MySQL data directory — bind-mounted from the container, must never be committed
+mysql-data/

@@ -3,6 +3,7 @@ import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
+import { verifyTeBallot } from '../helpers/te';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
 import { updateProposalAndVotes } from '../scores';
 
@@ -48,6 +49,26 @@ export async function verify(body): Promise<any> {
       !msg.payload.choice.startsWith('0x')
     )
       return Promise.reject('invalid choice');
+  } else if (proposal.privacy === 'shutter-elgamal') {
+    if (msg.payload.reason)
+      return Promise.reject('reason not allowed with shutter-elgamal');
+    // The voter ships the encrypted ballot as a JSON object under
+    // ``choice`` (the same shape ``buildBallot`` produces in the SDK,
+    // serialised with all bytes as 0x-hex). Verify it now so we never
+    // persist a ciphertext the tally would later reject. See
+    // helpers/te.ts for the auth model.
+    if (typeof msg.payload.choice !== 'object' || msg.payload.choice === null) {
+      return Promise.reject('invalid choice: expected ballot object');
+    }
+    const choiceJson = JSON.stringify(msg.payload.choice);
+    const result = await verifyTeBallot(
+      proposal,
+      body.address.toLowerCase(),
+      choiceJson
+    );
+    if (!result.ok) {
+      return Promise.reject(`invalid private ballot: ${result.reason}`);
+    }
   } else {
     if (
       !snapshot.utils.voting[proposal.type].isValidChoice(

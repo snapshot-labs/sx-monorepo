@@ -46,6 +46,7 @@
     "@snapshot-labs/lock": "0.3.2",
     "@snapshot-labs/tune": "0.1.0",
     "@snapshot-labs/pineapple": "^1.2.1",
+    "@snapshot-labs/private-vote-sdk": "workspace:*",
     "@snapshot-labs/snapshot.js": "^0.14.26",
     "@snapshot-labs/sx": "^0.1.11",
     "@tanstack/vue-query": "^5.64.2",

@@ -3,11 +3,6 @@ import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/solidity';
 import randomBytes from 'randombytes';
-import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
-import ProxyFactoryAbi from './abis/ProxyFactory.json';
-import SpaceAbi from './abis/Space.json';
-import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
-import { getAuthenticator } from '../../../authenticators/evm';
 import { getStrategiesWithParams } from '../../../strategies/evm';
 import {
   AddressConfig,
@@ -18,6 +13,11 @@ import {
   UpdateProposal,
   Vote
 } from '../types';
+import AvatarExecutionStrategyAbi from './abis/AvatarExecutionStrategy.json';
+import ProxyFactoryAbi from './abis/ProxyFactory.json';
+import SpaceAbi from './abis/Space.json';
+import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
+import { getAuthenticator } from '../../../authenticators/evm';
 
 type SpaceParams = {
   controller: string;
