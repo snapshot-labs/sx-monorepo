@@ -9,6 +9,7 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
+import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
   captureError,
@@ -18,7 +19,6 @@ import {
 } from '../helpers/utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
-const broviderUrl = process.env.BROVIDER_URL || 'https://rpc.snapshot.org';
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -225,7 +225,7 @@ export async function verify(body): Promise<any> {
     return Promise.reject('proposal snapshot must be after network start');
 
   try {
-    const provider = snapshot.utils.getProvider(space.network, { broviderUrl });
+    const provider = getProvider(space.network);
     const block = await provider.getBlock(msg.payload.snapshot);
     if (!block) return Promise.reject('invalid snapshot block');
   } catch (err: any) {

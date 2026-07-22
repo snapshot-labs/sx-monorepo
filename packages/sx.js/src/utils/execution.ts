@@ -16,6 +16,10 @@ type CallInfo = {
   value: string;
 };
 
+const BROVIDER_URL = 'https://rpc.brovider.xyz';
+const getRpcUrl = (chainId: number) =>
+  `${BROVIDER_URL}/${chainId}?client=sx.js`;
+
 const ABI_CACHE = new Map<`${number}:0x${string}`, Abi>();
 const CUSTOM_PROXY_RESOLVERS = {
   // Compound Governor Bravo
@@ -60,10 +64,7 @@ export async function getAbi(
     const resolver =
       CUSTOM_PROXY_RESOLVERS[address as keyof typeof CUSTOM_PROXY_RESOLVERS];
 
-    const provider = new StaticJsonRpcProvider(
-      `https://rpc.snapshot.org/${chainId}`,
-      chainId
-    );
+    const provider = new StaticJsonRpcProvider(getRpcUrl(chainId), chainId);
 
     const implementationAddress = await resolver(address, provider);
 
@@ -127,10 +128,7 @@ export async function decodeExecution(
       functionFragment.inputs[1]?.type === 'uint256';
 
     if (isErc20Transfer) {
-      const provider = new StaticJsonRpcProvider(
-        `https://rpc.snapshot.org/${chainId}`,
-        chainId
-      );
+      const provider = new StaticJsonRpcProvider(getRpcUrl(chainId), chainId);
 
       const tokenContract = new Contract(target, abi, provider);
 

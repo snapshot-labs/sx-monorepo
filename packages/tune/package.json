@@ -40,8 +40,8 @@
   "devDependencies": {
     "@headlessui-float/vue": "^0.15.0",
     "@headlessui/vue": "^1.7.23",
-    "@iconify-json/heroicons-outline": "^1.1.7",
-    "@iconify-json/heroicons-solid": "^1.1.8",
+    "@iconify-json/heroicons-outline": "^1.2.1",
+    "@iconify-json/heroicons-solid": "^1.2.0",
     "@snapshot-labs/eslint-config-vue": "^0.1.0",
     "@storybook/addon-a11y": "^9.0.18",
     "@storybook/addon-docs": "^9.0.18",
