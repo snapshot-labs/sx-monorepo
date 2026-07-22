@@ -19,6 +19,7 @@ export function useStripeCheckout() {
     const base = `${origin}${pathname}${hash.split('?')[0]}`;
     const res = await fetch(`${baseUrl}/stripe/create`, {
       method: 'POST',
+      signal: AbortSignal.timeout(30_000),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         space,
