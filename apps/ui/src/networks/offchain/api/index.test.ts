@@ -25,10 +25,11 @@ describe('formatDelegateRegistryDelegations', () => {
     // The delegate-registry API returns the same delegate list for a given
     // registry regardless of chain, so a registry that reads several chains
     // must collapse into ONE tab (chainIds carries the chains to probe for the
-    // connected account's own delegation), not one duplicate tab per chain.
+    // connected account's own delegation), not one duplicate tab per chain. A
+    // lone registry keeps the plain label; the chain it lives on is not a tab.
     expect(result).toEqual([
       {
-        name: 'Delegate registry (Gnosis Chain)',
+        name: 'Delegate registry',
         apiType: 'delegate-registry',
         apiUrl: API_URL,
         contractAddress: 'gnosis.eth',
