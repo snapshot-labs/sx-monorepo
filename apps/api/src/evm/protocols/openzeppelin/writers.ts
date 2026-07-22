@@ -36,6 +36,7 @@ import {
   getParsedVP,
   getProposalLink,
   getSpaceLink,
+  updateProposalScores,
   updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, OpenZeppelinConfig } from '../../types';
@@ -415,6 +416,8 @@ export function createWriters(
     proposal.execution_strategy_details = executionStrategy.id;
     proposal.vp_decimals = strategyParsedMetadataDataItem.decimals;
     proposal.type = 'basic';
+    proposal.scores = ['0', '0', '0'];
+    proposal.scores_parsed = [0, 0, 0];
     proposal.quorum_type = getGovernanceInfo(spaceAddress).quorumType || null;
     proposal.created = Number(block?.timestamp ?? getCurrentTimestamp());
     proposal.tx = txId;
@@ -631,20 +634,7 @@ export function createWriters(
     vote.created = Number(block?.timestamp ?? getCurrentTimestamp());
     vote.tx = txId;
 
-    proposal.scores_total = (
-      BigInt(proposal.scores_total) + BigInt(vote.vp)
-    ).toString();
-    proposal.scores_total_parsed = getParsedVP(
-      proposal.scores_total,
-      proposal.vp_decimals
-    );
-    proposal[`scores_${choice}`] = (
-      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-    ).toString();
-    proposal[`scores_${choice}_parsed`] = getParsedVP(
-      proposal[`scores_${choice}`],
-      proposal.vp_decimals
-    );
+    updateProposalScores(proposal, choice, BigInt(vote.vp));
 
     let leaderboardItem = await Leaderboard.loadEntity(
       leaderboardId,

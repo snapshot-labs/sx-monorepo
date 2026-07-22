@@ -275,7 +275,11 @@ type Proposal {
   vp_decimals: Int!
   "Type of proposal (e.g., 'basic', 'single-choice')"
   type: String!
-  "Voting power for choice 1"
+  "Array of voting power totals per choice (index 0 = choice 1)"
+  scores: [BigDecimalVP!]!
+  "Array of parsed voting power totals per choice as floats"
+  scores_parsed: [Float!]!
+  "Voting power for choice 1 (deprecated: use scores)"
   scores_1: BigDecimalVP!
   "Parsed voting power for choice 1 as float"
   scores_1_parsed: Float!
@@ -385,7 +389,9 @@ type ScoresTick {
   proposal: Proposal!
   "Unix timestamp of when scores were recorded"
   timestamp: Int!
-  "Voting power for choice 1 at this timestamp"
+  "Array of voting power totals per choice at this timestamp (index 0 = choice 1)"
+  scores: [BigDecimalVP!]!
+  "Voting power for choice 1 at this timestamp (deprecated: use scores)"
   scores_1: BigDecimalVP!
   "Voting power for choice 2 at this timestamp"
   scores_2: BigDecimalVP!

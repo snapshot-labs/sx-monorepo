@@ -144,6 +144,39 @@ export function getParsedVP(value: string, decimals: number) {
   return parsedValue / 10 ** decimals;
 }
 
+export function updateProposalScores(
+  proposal: Proposal,
+  choice: number,
+  vp: bigint
+) {
+  const scores = [...proposal.scores];
+  const scoresParsed = [...proposal.scores_parsed];
+
+  while (scores.length < choice) {
+    scores.push('0');
+    scoresParsed.push(0);
+  }
+
+  const updatedScore = (BigInt(scores[choice - 1] ?? '0') + vp).toString();
+  const updatedScoreParsed = getParsedVP(updatedScore, proposal.vp_decimals);
+  scores[choice - 1] = updatedScore;
+  scoresParsed[choice - 1] = updatedScoreParsed;
+
+  proposal.scores = scores;
+  proposal.scores_parsed = scoresParsed;
+
+  if (choice === 1 || choice === 2 || choice === 3) {
+    proposal[`scores_${choice}`] = updatedScore;
+    proposal[`scores_${choice}_parsed`] = updatedScoreParsed;
+  }
+
+  proposal.scores_total = (BigInt(proposal.scores_total) + vp).toString();
+  proposal.scores_total_parsed = getParsedVP(
+    proposal.scores_total,
+    proposal.vp_decimals
+  );
+}
+
 export async function updateScoresTick(
   proposal: Proposal,
   timestamp: number,
@@ -160,6 +193,7 @@ export async function updateScoresTick(
   }
 
   tick.timestamp = hourTimestamp;
+  tick.scores = proposal.scores;
   tick.scores_1 = proposal.scores_1;
   tick.scores_2 = proposal.scores_2;
   tick.scores_3 = proposal.scores_3;
