@@ -23,11 +23,13 @@ const props = withDefaults(
     plan?: 'monthly' | 'yearly';
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
+    hideCard?: boolean;
   }>(),
   {
     isAuthValidForCrypto: false,
     plan: 'yearly',
     quantityLabel: 'Quantity',
+    hideCard: false,
     calculator: (unitPrice: number, quantity: number) => {
       return Number((unitPrice * quantity).toFixed(2));
     }
@@ -212,6 +214,13 @@ watch(
 );
 
 watch(
+  () => props.hideCard,
+  hidden => {
+    if (hidden) paymentMethod.value = 'crypto';
+  }
+);
+
+watch(
   () => props.open,
   open => {
     if (open) return;
@@ -256,7 +265,7 @@ watch(
       @pick="handleTokenPick"
     />
     <template v-else>
-      <div class="flex space-x-3 border-b px-4">
+      <div v-if="!hideCard" class="flex space-x-3 border-b px-4">
         <button
           type="button"
           class="flex items-center gap-2 py-2 mb-[-1px] text-sm uppercase tracking-[1px] hover:text-skin-link"

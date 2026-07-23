@@ -11,7 +11,16 @@ type SchnapsResponse = {
   error_description?: string;
 };
 
+export type SubscriptionStatus = {
+  stripeAvailable: boolean;
+  activeSubscription: boolean;
+  cancelAtPeriodEnd: boolean;
+  renewsAt: number | null;
+};
+
 export function useStripeCheckout() {
+  const uiStore = useUiStore();
+
   const isLoading = ref(false);
 
   // A Back navigation from Stripe restores the page from bfcache with isLoading
@@ -83,5 +92,57 @@ export function useStripeCheckout() {
     }
   }
 
-  return { redirectToCheckout, getPortalUrl, isLoading };
+  async function redirectToPortal(network: string) {
+    if (isLoading.value) return;
+
+    try {
+      window.location.href = await getPortalUrl(network);
+    } catch (err) {
+      console.error('[stripe] portal failed', err);
+      uiStore.addNotification(
+        'error',
+        err instanceof Error ? err.message : 'Failed to open the billing portal'
+      );
+    }
+  }
+
+  async function getSubscriptionStatus(
+    space: string
+  ): Promise<SubscriptionStatus> {
+    // Fails closed: on any error the card option is hidden, crypto still works
+    const fallback: SubscriptionStatus = {
+      stripeAvailable: false,
+      activeSubscription: false,
+      cancelAtPeriodEnd: false,
+      renewsAt: null
+    };
+    const [network] = space.split(':');
+    const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
+    try {
+      const res = await fetch(
+        `${baseUrl}/stripe/subscription?space=${encodeURIComponent(space)}`,
+        { signal: AbortSignal.timeout(10_000) }
+      );
+      if (!res.ok) return fallback;
+      const { result } = ((await res.json().catch(() => ({}))) ?? {}) as {
+        result?: Partial<SubscriptionStatus>;
+      };
+      return {
+        stripeAvailable: result?.stripeAvailable ?? false,
+        activeSubscription: result?.activeSubscription ?? false,
+        cancelAtPeriodEnd: result?.cancelAtPeriodEnd ?? false,
+        renewsAt: result?.renewsAt ?? null
+      };
+    } catch (err) {
+      console.error('[stripe] subscription status check failed', err);
+      return fallback;
+    }
+  }
+
+  return {
+    redirectToCheckout,
+    redirectToPortal,
+    getSubscriptionStatus,
+    isLoading
+  };
 }

@@ -20,8 +20,7 @@ const {
   toRef(() => props.space.network)
 );
 
-const { getPortalUrl, isLoading } = useStripeCheckout();
-const uiStore = useUiStore();
+const { redirectToPortal, isLoading } = useStripeCheckout();
 
 const portalPaymentId = ref<string | null>(null);
 
@@ -59,16 +58,7 @@ async function openPortal(paymentId: string) {
   if (isLoading.value) return;
 
   portalPaymentId.value = paymentId;
-  try {
-    const url = await getPortalUrl(props.space.network);
-    window.location.href = url;
-  } catch (err) {
-    console.error('[stripe] portal failed', err);
-    uiStore.addNotification(
-      'error',
-      err instanceof Error ? err.message : 'Failed to open the billing portal'
-    );
-  }
+  await redirectToPortal(props.space.network);
 }
 </script>
 
