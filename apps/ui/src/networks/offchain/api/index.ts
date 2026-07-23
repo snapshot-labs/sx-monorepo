@@ -3,7 +3,6 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
@@ -533,33 +532,14 @@ export function formatDelegateRegistryDelegations(
   // A single registry is unambiguous on its own, so it keeps the plain
   // "Delegate registry" label even when it reads several chains (the chain is
   // an implementation detail of where the delegation lives, not a separate
-  // tab). Only multiple registries need a disambiguating suffix.
+  // tab). Multiple registries are labelled by their namespace — the map key,
+  // which is guaranteed unique (chains are not: two registries can share one).
   if (delegations.length <= 1) return delegations;
 
-  return delegations.map(delegation => {
-    const networkName = (
-      networks as Record<string, { name: string } | undefined>
-    )[delegation.chainId as string]?.name;
-    const chainLabel = networkName ?? `Chain ${delegation.chainId}`;
-
-    // Two registries can render on the same chain (distinct delegationSpace),
-    // which would produce identical tab labels; append the registry namespace
-    // to keep them distinguishable.
-    const sharesChainWithAnother = delegations.some(
-      other =>
-        other !== delegation &&
-        other.chainId === delegation.chainId &&
-        other.contractAddress !== delegation.contractAddress
-    );
-    const label = sharesChainWithAnother
-      ? `${chainLabel} · ${shorten(delegation.contractAddress!)}`
-      : chainLabel;
-
-    return {
-      ...delegation,
-      name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${label})`
-    };
-  });
+  return delegations.map(delegation => ({
+    ...delegation,
+    name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${shorten(delegation.contractAddress!, 20)})`
+  }));
 }
 
 function formatDelegations(
