@@ -4,6 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
+import { candidateChainIds } from '@/helpers/delegation';
 import { getNames } from '@/helpers/stamp';
 import { compareAddresses, formatAddress } from '@/helpers/utils';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
@@ -337,21 +338,6 @@ export function useDelegates(
       throw new Error('getDelegation is only supported for delegate-registry');
     }
 
-    const delegationSubgraph = DELEGATION_SUBGRAPHS[delegation.chainId];
-    if (!delegationSubgraph) {
-      throw new Error('Delegation subgraph not found');
-    }
-
-    const client = new ApolloClient({
-      uri: delegationSubgraph,
-      cache: new InMemoryCache(),
-      defaultOptions: {
-        query: {
-          fetchPolicy: 'no-cache'
-        }
-      }
-    });
-
     const isApeChainDelegateRegistry =
       delegation.apiType === 'apechain-delegate-registry';
 
@@ -359,17 +345,49 @@ export function useDelegates(
       ? DELEGATIONS_RAW_QUERY
       : DELEGATIONS_QUERY;
 
-    const { data } = await client.query({
-      query,
-      variables: {
-        space: isApeChainDelegateRegistry
-          ? delegation.contractAddress
-          : space.id,
-        delegator
-      }
-    });
+    const chainIds = candidateChainIds(delegation);
 
-    return data.delegations[0] ?? null;
+    // allSettled (not all): one unhealthy subgraph must not hide a delegation
+    // that lives on a healthy chain, which a single rejection would do here.
+    const results = await Promise.allSettled(
+      chainIds.map(async chainId => {
+        const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
+        if (!delegationSubgraph) {
+          console.warn(
+            `No delegation subgraph for chain ${chainId} (registry ${delegation.contractAddress}); skipping.`
+          );
+          return null;
+        }
+
+        const client = new ApolloClient({
+          uri: delegationSubgraph,
+          cache: new InMemoryCache(),
+          defaultOptions: {
+            query: {
+              fetchPolicy: 'no-cache'
+            }
+          }
+        });
+
+        const { data } = await client.query({
+          query,
+          variables: {
+            space: delegation.contractAddress,
+            delegator
+          }
+        });
+
+        return data.delegations[0] ?? null;
+      })
+    );
+
+    // Preserve chainIds order so the primary chain wins when a delegation
+    // exists on more than one.
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value) return result.value;
+    }
+
+    return null;
   }
 
   return {

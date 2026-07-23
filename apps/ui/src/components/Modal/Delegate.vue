@@ -2,8 +2,8 @@
 import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
-import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import {
+  candidateChainIds,
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
@@ -122,30 +122,25 @@ const chainIds = computed(() => {
     return SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS;
   }
 
-  const delegateRegistryStrategies = props.space.strategies_params.filter(
-    (_, index) =>
-      DELEGATE_REGISTRY_STRATEGIES.includes(props.space.strategies[index])
-  );
+  // Mirror the read path (formatDelegateRegistryDelegations / getDelegation):
+  // the registry lives on the delegation's own chain(s), which already honor
+  // params.delegationNetwork. Offering strategy voting networks here would let
+  // a user write on a chain the read path never queries, hiding the delegation.
+  const delegation = selectedDelegation.value;
+  if (delegation?.apiType === 'delegate-registry') {
+    const chainIds = candidateChainIds(delegation)
+      .map(Number)
+      .filter(chainId =>
+        DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId)
+      );
 
-  if (!delegateRegistryStrategies.length) {
-    return [form.chainId];
+    if (chainIds.length) return Array.from(new Set(chainIds));
   }
 
-  const chainIds = delegateRegistryStrategies
-    .flatMap(params => {
-      return [
-        params.network,
-        ...(params.params?.strategies?.flatMap(p => [
-          p.network,
-          p.params?.network
-        ]) || [])
-      ];
-    })
-    .filter(Boolean)
-    .map(Number)
-    .filter(chainId => DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId));
-
-  return Array.from(new Set(chainIds));
+  // apechain-delegate-registry is always single-chain (sourced from a
+  // delegationPortal, which carries one delegationNetwork), so form.chainId
+  // already equals its sole chain here.
+  return [form.chainId];
 });
 
 function delegationConnectors(
