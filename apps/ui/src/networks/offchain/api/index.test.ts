@@ -159,14 +159,15 @@ describe('formatDelegateRegistryDelegations', () => {
     );
 
     expect(result).toHaveLength(2);
-    // Same chain would otherwise produce identical labels; the registry
-    // namespace must make them distinguishable.
-    const names = result.map(d => d.name);
-    expect(new Set(names).size).toBe(2);
-    names.forEach(name => expect(name).toContain(' · 0x'));
+    // Registries are labelled by namespace (the dedupe key), so even two
+    // registries on the same chain get distinct labels.
+    expect(result.map(d => d.name)).toEqual([
+      'Delegate registry (0x111111111111111111...)',
+      'Delegate registry (0x222222222222222222...)'
+    ]);
   });
 
-  it('labels two registries on different chains by chain, without a namespace suffix', () => {
+  it('labels multiple registries by their namespace', () => {
     const result = formatDelegateRegistryDelegations(
       {
         id: 'multiregistry.eth',
@@ -180,11 +181,13 @@ describe('formatDelegateRegistryDelegations', () => {
     );
 
     expect(result).toHaveLength(2);
-    // Distinct chains already disambiguate the tabs, so the registry namespace
-    // suffix (` · `) must not be appended.
-    const names = result.map(d => d.name);
-    names.forEach(name => expect(name).not.toContain(' · '));
-    expect(new Set(names).size).toBe(2);
+    // Short namespaces (e.g. ENS names) are kept whole — shorten() with a
+    // numeric limit must not run them through address formatting, which
+    // throws on non-address strings.
+    expect(result.map(d => d.name)).toEqual([
+      'Delegate registry (one.eth)',
+      'Delegate registry (two.eth)'
+    ]);
   });
 
   it('ignores non delegate-registry strategies', () => {
