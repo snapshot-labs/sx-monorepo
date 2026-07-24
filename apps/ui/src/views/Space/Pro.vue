@@ -361,7 +361,7 @@ onMounted(() => {
           </UiButton>
           <div class="text-sm text-skin-text">
             <template v-if="subscription.cancelAtPeriodEnd">
-              Won't renew — Pro until {{ subscriptionRenewalDate }}
+              Active until {{ subscriptionRenewalDate }}
             </template>
             <template v-else>
               Auto-renews on {{ subscriptionRenewalDate }}
