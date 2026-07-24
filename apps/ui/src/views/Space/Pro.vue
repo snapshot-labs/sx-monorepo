@@ -2,8 +2,9 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
+import { SubscriptionStatus } from '@/composables/useStripeCheckout';
 import { DOCS_URL } from '@/helpers/constants';
-import { _n } from '@/helpers/utils';
+import { _n, _t } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
 import { Space } from '@/types';
@@ -23,6 +24,8 @@ type Feature = {
 type SubscriptionLength = 'monthly' | 'yearly';
 
 const CALENDLY = 'https://calendly.com/snapshot-labs/pro-plan';
+
+const DATE_FORMAT = 'D MMM YYYY';
 
 const USERS = [
   'aave.eth',
@@ -97,6 +100,10 @@ const route = useRoute();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
+const uiStore = useUiStore();
+const { setTitle } = useTitle();
+const { getSubscriptionStatus, redirectToPortal, isLoading } =
+  useStripeCheckout();
 
 const referral: string = route.query.ref as string;
 
@@ -105,6 +112,19 @@ const selectedSpace = ref<Space | null>(props.space || null);
 const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
+const subscription = ref<SubscriptionStatus | null>(null);
+
+const nextRenewalDate = computed(() =>
+  dayjs()
+    .add(1, subscriptionLength.value === 'yearly' ? 'year' : 'month')
+    .format(DATE_FORMAT)
+);
+
+const subscriptionRenewalDate = computed(() =>
+  subscription.value?.renewsAt
+    ? _t(subscription.value.renewsAt, DATE_FORMAT)
+    : ''
+);
 
 const paymentNetwork = computed(() =>
   metadataNetwork === 's' ? '1' : '11155111'
@@ -182,11 +202,6 @@ async function handleConnectorPick(connector: Connector) {
   }
 }
 async function handleTurboClick() {
-  if (!auth.value || !isCurrentConnectorSupported.value) {
-    modalConnectorOpen.value = true;
-    return;
-  }
-
   if (!selectedSpace.value) {
     modalSpaceOpen.value = true;
     return;
@@ -194,6 +209,19 @@ async function handleTurboClick() {
 
   modalPaymentOpen.value = true;
 }
+
+watch(
+  spaceKey,
+  async key => {
+    subscription.value = null;
+    if (!key) return;
+
+    const status = await getSubscriptionStatus(key);
+    // Ignore stale responses if the space changed while fetching
+    if (key === spaceKey.value) subscription.value = status;
+  },
+  { immediate: true }
+);
 
 function handlePickSpace(space: Space) {
   selectedSpace.value = space;
@@ -218,7 +246,45 @@ function handleModalPaymentClose() {
   selectedSpace.value = props.space || null;
 }
 
+async function handleStripeSuccess() {
+  uiStore.addNotification(
+    'success',
+    'Payment received! Your Pro subscription will be active shortly.'
+  );
+
+  const stripeSpaceKey = route.query.space as string | undefined;
+
+  const query = { ...route.query };
+  delete query.stripe_success;
+  delete query.space;
+  router.replace({ query });
+
+  if (stripeSpaceKey) {
+    await queryClient.invalidateQueries({
+      queryKey: ['spaces', 'detail', stripeSpaceKey]
+    });
+
+    if (stripeSpaceKey === spaceKey.value) {
+      subscription.value = await getSubscriptionStatus(stripeSpaceKey);
+    }
+  }
+}
+
+watchEffect(() =>
+  setTitle(
+    selectedSpace.value
+      ? `Snapshot Pro - ${selectedSpace.value.name}`
+      : 'Snapshot Pro'
+  )
+);
+
 onMounted(() => {
+  if (route.query.stripe_success) {
+    handleStripeSuccess().catch(err =>
+      console.error('[stripe] post-checkout refresh failed', err)
+    );
+  }
+
   if (
     !selectedSpace.value ||
     offchainNetworks.includes(selectedSpace.value.network)
@@ -250,7 +316,10 @@ onMounted(() => {
     </div>
 
     <div class="mx-4 space-y-4 flex flex-col items-center">
-      <div class="max-w-[480px] w-full space-y-3">
+      <div
+        v-if="!subscription?.activeSubscription"
+        class="max-w-[480px] w-full space-y-3"
+      >
         <button
           v-for="plan in Object.keys(PRO_MONTHLY_PRICES)"
           :key="plan"
@@ -282,7 +351,25 @@ onMounted(() => {
         </button>
       </div>
       <div class="space-y-2.5 text-center">
+        <template v-if="subscription?.activeSubscription">
+          <UiButton
+            primary
+            :loading="isLoading"
+            @click="redirectToPortal(spaceKey.split(':')[0])"
+          >
+            Manage subscription
+          </UiButton>
+          <div class="text-sm text-skin-text">
+            <template v-if="subscription.cancelAtPeriodEnd">
+              Active until {{ subscriptionRenewalDate }}
+            </template>
+            <template v-else>
+              Auto-renews on {{ subscriptionRenewalDate }}
+            </template>
+          </div>
+        </template>
         <UiButton
+          v-else
           primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
@@ -292,7 +379,7 @@ onMounted(() => {
           {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
-        <div>
+        <div v-if="!subscription?.activeSubscription">
           <AppLink :to="CALENDLY">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
@@ -372,7 +459,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="text-center shapes py-8 bg-skin-border/20 px-4 space-y-4">
+    <div
+      v-if="!subscription?.activeSubscription"
+      class="text-center shapes py-8 bg-skin-border/20 px-4 space-y-4"
+    >
       <h2 class="text-[32px]">Get started today</h2>
       <div class="space-y-2.5 text-center">
         <UiButton
@@ -406,9 +496,8 @@ onMounted(() => {
     </div>
 
     <ModalPayment
-      v-if="
-        selectedSpace && auth && isCurrentConnectorSupported && modalPaymentOpen
-      "
+      v-if="selectedSpace && modalPaymentOpen"
+      :plan="subscriptionLength"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :calculator="calculator"
@@ -423,29 +512,42 @@ onMounted(() => {
         params: { space: spaceKey },
         ref: referral || undefined
       }"
+      :space="spaceKey"
+      :hide-card="!subscription?.stripeAvailable"
+      :is-auth-valid-for-crypto="!!isCurrentConnectorSupported"
+      @connect-wallet="modalConnectorOpen = true"
       @close="handleModalPaymentClose"
       @confirmed="handlePaymentConfirmed"
     >
-      <template #summary="{ quantity }">
+      <template #summary="{ quantity, paymentMethod }">
         <div class="flex justify-between">
-          <div>End date</div>
-          <div class="text-skin-heading">
-            {{
-              dayjs(
-                (selectedSpace.turbo_expiration || 0) * 1e3 > Date.now()
-                  ? selectedSpace.turbo_expiration * 1e3
-                  : new Date()
-              )
-                .add(
-                  quantity,
-                  subscriptionLength === 'yearly' ? 'year' : 'month'
+          <template v-if="paymentMethod === 'card'">
+            <div>Auto-renews</div>
+            <div class="text-skin-heading">
+              {{ nextRenewalDate }}
+              <span class="capitalize">({{ subscriptionLength }})</span>
+            </div>
+          </template>
+          <template v-else>
+            <div>End date</div>
+            <div class="text-skin-heading">
+              {{
+                dayjs(
+                  (selectedSpace.turbo_expiration || 0) * 1e3 > Date.now()
+                    ? selectedSpace.turbo_expiration * 1e3
+                    : new Date()
                 )
-                .format('D MMM YYYY')
-            }}
-            ({{ quantity }}
-            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
-            }}{{ quantity > 1 ? 's' : '' }})
-          </div>
+                  .add(
+                    quantity,
+                    subscriptionLength === 'yearly' ? 'year' : 'month'
+                  )
+                  .format(DATE_FORMAT)
+              }}
+              ({{ quantity }}
+              {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+              }}{{ quantity > 1 ? 's' : '' }})
+            </div>
+          </template>
         </div>
       </template>
       <template #transactionModalSuccessTitle>
