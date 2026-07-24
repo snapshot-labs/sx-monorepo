@@ -500,7 +500,7 @@ function formatDelegations(
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const basicDelegationStrategy = space.strategies.find(strategy =>
+  const delegateRegistryStrategies = space.strategies.filter(strategy =>
     DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
@@ -523,17 +523,28 @@ function formatDelegations(
     });
   }
 
-  if (basicDelegationStrategy) {
-    const chainId = space.network;
-
+  if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
+      // The registry can be used on any chain its strategies run on (e.g.
+      // gnosis.eth reads it on both Gnosis Chain and Ethereum); carry every
+      // candidate chain so getDelegation can find a delegation wherever it
+      // actually lives.
+      const chainIds = [
+        ...new Set(
+          delegateRegistryStrategies.map(strategy =>
+            String(strategy.network || space.network)
+          )
+        )
+      ];
+
       delegations.push({
         name: DELEGATION_TYPES_NAMES['delegate-registry'],
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
-        chainId
+        chainId: chainIds[0],
+        chainIds
       });
     }
   }
