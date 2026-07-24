@@ -9,7 +9,7 @@ export type BarcodePayload = {
   params: Record<string, any>;
 };
 
-type StepId = 'check_approval' | 'approve' | 'pay';
+type StepId = 'prepare' | 'approve' | 'pay';
 
 type Step = {
   messages: {
@@ -31,7 +31,7 @@ type Step = {
 
 const BARCODE_VERSION = '0.1';
 
-const FIRST_STEP: StepId = 'check_approval';
+const FIRST_STEP: StepId = 'prepare';
 
 async function getBarcode(contents: BarcodePayload): Promise<string> {
   const receipt = await pin({
@@ -45,27 +45,38 @@ async function getBarcode(contents: BarcodePayload): Promise<string> {
 export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
   const uiStore = useUiStore();
 
-  const { getIsApproved, approve, pay } = usePayment(network);
+  const {
+    getIsApproved,
+    getHasBatchSupport,
+    approve,
+    pay,
+    batchedApproveAndPay
+  } = usePayment(network);
   const currentStepId = ref<StepId>(FIRST_STEP);
-  const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
+  const isApproved = ref(false);
+  const isBatchSupported = ref(false);
 
   const STEPS = ref<Record<StepId, Step>>({
-    check_approval: {
+    prepare: {
       messages: {
-        approveTitle: 'Checking token allowance',
+        approveTitle: 'Preparing payment',
         approveSubtitle: 'Please wait...',
-        failTitle: 'Unable to check token allowance'
+        failTitle: 'Unable to prepare payment'
       },
       nextStep: () =>
-        stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
+        isBatchSupported.value || isApproved.value ? 'pay' : 'approve',
       execute: async (token, amount) => {
-        const result = await getIsApproved(token, amount);
+        const [approved, batchSupported] = await Promise.all([
+          getIsApproved(token, amount),
+          getHasBatchSupport()
+        ]);
 
-        if (result === undefined) {
+        if (approved === undefined) {
           throw new Error('wallet not found');
         }
 
-        stepExecuteResults.value.set('check_approval', result);
+        isApproved.value = approved;
+        isBatchSupported.value = batchSupported;
 
         return null;
       }
@@ -75,7 +86,7 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
         approveTitle: 'Setting token allowance',
         confirmingTitle: 'Waiting for token allowance'
       },
-      nextStep: () => 'check_approval',
+      nextStep: () => 'prepare',
       execute: async (token, amount) =>
         wrapPromise(approve(token, amount), toValue(network))
     },
@@ -91,19 +102,19 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
           throw new Error('barcode payload is missing');
         }
 
-        return wrapPromise(
-          pay(token, amount, await getBarcode(payload)),
-          toValue(network)
-        );
+        const barcode = await getBarcode(payload);
+        const promise = isBatchSupported.value
+          ? batchedApproveAndPay(token, amount, barcode, !isApproved.value)
+          : pay(token, amount, barcode);
+
+        return wrapPromise(promise, toValue(network));
       }
     }
   });
 
   const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
-  const isLastStep = computed<boolean>(() => {
-    return currentStepId.value === Object.keys(STEPS.value).pop();
-  });
+  const isLastStep = computed<boolean>(() => !currentStep.value.nextStep());
 
   function goToNextStep() {
     const nextStep = currentStep.value.nextStep();
@@ -125,7 +136,8 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
 
   function start() {
     currentStepId.value = FIRST_STEP;
-    stepExecuteResults.value.clear();
+    isApproved.value = false;
+    isBatchSupported.value = false;
   }
 
   return { start, goToNextStep, isLastStep, currentStep };
