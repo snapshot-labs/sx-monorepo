@@ -18,7 +18,6 @@ export type SubscriptionStatus = {
   renewsAt: number | null;
 };
 
-// Wire shape from schnaps /stripe/subscription (mapped to SubscriptionStatus)
 type SubscriptionResponse = {
   stripeAvailable?: boolean;
   activeSubscription?: boolean;
