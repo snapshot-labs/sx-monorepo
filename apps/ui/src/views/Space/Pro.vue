@@ -263,10 +263,6 @@ async function handleStripeSuccess() {
     await queryClient.invalidateQueries({
       queryKey: ['spaces', 'detail', stripeSpaceKey]
     });
-
-    if (stripeSpaceKey === spaceKey.value) {
-      subscription.value = await getSubscriptionStatus(stripeSpaceKey);
-    }
   }
 }
 
@@ -317,7 +313,7 @@ onMounted(() => {
 
     <div class="mx-4 space-y-4 flex flex-col items-center">
       <div
-        v-if="!subscription?.activeSubscription"
+        v-if="!subscription?.hasActiveSubscription"
         class="max-w-[480px] w-full space-y-3"
       >
         <button
@@ -351,7 +347,7 @@ onMounted(() => {
         </button>
       </div>
       <div class="space-y-2.5 text-center">
-        <template v-if="subscription?.activeSubscription">
+        <template v-if="subscription?.hasActiveSubscription">
           <UiButton
             primary
             :loading="isLoading"
@@ -360,7 +356,7 @@ onMounted(() => {
             Manage subscription
           </UiButton>
           <div class="text-sm text-skin-text">
-            <template v-if="subscription.cancelAtPeriodEnd">
+            <template v-if="subscription.willCancelAtPeriodEnd">
               Active until {{ subscriptionRenewalDate }}
             </template>
             <template v-else>
@@ -379,7 +375,7 @@ onMounted(() => {
           {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
-        <div v-if="!subscription?.activeSubscription">
+        <div v-if="!subscription?.hasActiveSubscription">
           <AppLink :to="CALENDLY">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
@@ -460,7 +456,7 @@ onMounted(() => {
     </div>
 
     <div
-      v-if="!subscription?.activeSubscription"
+      v-if="!subscription?.hasActiveSubscription"
       class="text-center shapes py-8 bg-skin-border/20 px-4 space-y-4"
     >
       <h2 class="text-[32px]">Get started today</h2>
@@ -513,7 +509,7 @@ onMounted(() => {
         ref: referral || undefined
       }"
       :space="spaceKey"
-      :hide-card="!subscription?.stripeAvailable"
+      :hide-card="!subscription?.isStripeAvailable"
       :is-auth-valid-for-crypto="!!isCurrentConnectorSupported"
       @connect-wallet="modalConnectorOpen = true"
       @close="handleModalPaymentClose"

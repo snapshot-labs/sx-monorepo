@@ -12,10 +12,18 @@ type SchnapsResponse = {
 };
 
 export type SubscriptionStatus = {
-  stripeAvailable: boolean;
-  activeSubscription: boolean;
-  cancelAtPeriodEnd: boolean;
+  isStripeAvailable: boolean;
+  hasActiveSubscription: boolean;
+  willCancelAtPeriodEnd: boolean;
   renewsAt: number | null;
+};
+
+// Wire shape from schnaps /stripe/subscription (mapped to SubscriptionStatus)
+type SubscriptionResponse = {
+  stripeAvailable?: boolean;
+  activeSubscription?: boolean;
+  cancelAtPeriodEnd?: boolean;
+  renewsAt?: number | null;
 };
 
 export function useStripeCheckout() {
@@ -111,9 +119,9 @@ export function useStripeCheckout() {
   ): Promise<SubscriptionStatus> {
     // Fails closed: on any error the card option is hidden, crypto still works
     const fallback: SubscriptionStatus = {
-      stripeAvailable: false,
-      activeSubscription: false,
-      cancelAtPeriodEnd: false,
+      isStripeAvailable: false,
+      hasActiveSubscription: false,
+      willCancelAtPeriodEnd: false,
       renewsAt: null
     };
     const [network] = space.split(':');
@@ -125,12 +133,12 @@ export function useStripeCheckout() {
       );
       if (!res.ok) return fallback;
       const { result } = ((await res.json().catch(() => ({}))) ?? {}) as {
-        result?: Partial<SubscriptionStatus>;
+        result?: SubscriptionResponse;
       };
       return {
-        stripeAvailable: result?.stripeAvailable ?? false,
-        activeSubscription: result?.activeSubscription ?? false,
-        cancelAtPeriodEnd: result?.cancelAtPeriodEnd ?? false,
+        isStripeAvailable: result?.stripeAvailable ?? false,
+        hasActiveSubscription: result?.activeSubscription ?? false,
+        willCancelAtPeriodEnd: result?.cancelAtPeriodEnd ?? false,
         renewsAt: result?.renewsAt ?? null
       };
     } catch (err) {
