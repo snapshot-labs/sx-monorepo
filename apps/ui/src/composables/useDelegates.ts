@@ -344,9 +344,6 @@ export function useDelegates(
       ? DELEGATIONS_RAW_QUERY
       : DELEGATIONS_QUERY;
 
-    // The registry can hold the delegation on any of the delegation's
-    // candidate chains (e.g. gnosis.eth delegations live on Gnosis Chain or
-    // Ethereum); probe each one and return the first hit.
     const chainIds = delegation.chainIds?.length
       ? delegation.chainIds
       : [delegation.chainId];
@@ -383,12 +380,13 @@ export function useDelegates(
 
         if (data.delegations[0]) return data.delegations[0];
       } catch (err) {
+        console.warn(`Failed to read delegation on chain ${chainId}`, err);
         lastError = err;
       }
     }
 
-    // Keep the previous failure surface: if no chain could be read at all,
-    // propagate instead of silently reporting "not delegating".
+    // If no chain could be read at all, surface the failure instead of
+    // reporting "not delegating".
     if (!probed) {
       throw lastError ?? new Error('Delegation subgraph not found');
     }

@@ -526,17 +526,17 @@ function formatDelegations(
   if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
-      // The registry can be used on any chain its strategies run on (e.g.
-      // gnosis.eth reads it on both Gnosis Chain and Ethereum); carry every
-      // candidate chain so getDelegation can find a delegation wherever it
-      // actually lives.
-      const chainIds = [
-        ...new Set(
-          delegateRegistryStrategies.map(strategy =>
+      // A delegation can live on any chain the registry strategies run on;
+      // space.network is always included so delegations made when it was the
+      // only chain read stay visible.
+      const chainIds = Array.from(
+        new Set([
+          ...delegateRegistryStrategies.map(strategy =>
             String(strategy.network || space.network)
-          )
-        )
-      ];
+          ),
+          space.network
+        ])
+      );
 
       delegations.push({
         name: DELEGATION_TYPES_NAMES['delegate-registry'],
