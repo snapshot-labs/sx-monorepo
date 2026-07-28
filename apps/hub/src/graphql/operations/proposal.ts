@@ -18,7 +18,7 @@ export default async function (parent, { id }) {
     FROM proposals p
     INNER JOIN spaces ON spaces.id = p.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE p.id = ? AND spaces.settings IS NOT NULL
+    WHERE p.id = ?
     LIMIT 1
   `;
   try {
