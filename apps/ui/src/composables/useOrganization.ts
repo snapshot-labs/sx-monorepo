@@ -30,8 +30,17 @@ function setup() {
 
       const loadedSpaces = await Promise.all(
         cfg.spaceIds.map(async ({ network: networkId, id }) => {
-          const network = getNetwork(networkId);
-          const space = await network.api.loadSpace(id);
+          // Isolate failures per space. `loadSpace` rejects (rather than
+          // resolving to null) when the API errors, e.g. an unknown space id
+          // or a space whose metadata is not indexed yet. Without this, a
+          // single failing space rejects the whole `Promise.all` and the
+          // organization never resolves, leaving the page blank.
+          let space: Space | null = null;
+          try {
+            space = await getNetwork(networkId).api.loadSpace(id);
+          } catch {
+            space = null;
+          }
 
           if (!space) {
             console.warn(
