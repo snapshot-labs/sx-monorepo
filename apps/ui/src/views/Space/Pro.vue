@@ -2,11 +2,14 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
-import { SubscriptionStatus } from '@/composables/useStripeCheckout';
 import { DOCS_URL } from '@/helpers/constants';
 import { _n, _t } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
+import {
+  SUBSCRIPTION_UNAVAILABLE,
+  useSubscriptionStatusQuery
+} from '@/queries/subscription';
 import { Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
 import ICFlag from '~icons/heroicons-outline/flag';
@@ -102,8 +105,7 @@ const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
 const uiStore = useUiStore();
 const { setTitle } = useTitle();
-const { getSubscriptionStatus, redirectToPortal, isLoading } =
-  useStripeCheckout();
+const { redirectToPortal, isLoading } = useStripeCheckout();
 
 const referral: string = route.query.ref as string;
 
@@ -112,7 +114,18 @@ const selectedSpace = ref<Space | null>(props.space || null);
 const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
-const subscription = ref<SubscriptionStatus | null>(null);
+
+const { data: subscriptionStatus, isError: isSubscriptionError } =
+  useSubscriptionStatusQuery(
+    toRef(() => selectedSpace.value?.id ?? ''),
+    toRef(() => selectedSpace.value?.network ?? '')
+  );
+
+const subscription = computed(
+  () =>
+    subscriptionStatus.value ??
+    (isSubscriptionError.value ? SUBSCRIPTION_UNAVAILABLE : null)
+);
 
 const nextRenewalDate = computed(() =>
   dayjs()
@@ -209,19 +222,6 @@ async function handleTurboClick() {
 
   modalPaymentOpen.value = true;
 }
-
-watch(
-  spaceKey,
-  async key => {
-    subscription.value = null;
-    if (!key) return;
-
-    const status = await getSubscriptionStatus(key);
-    // Ignore stale responses if the space changed while fetching
-    if (key === spaceKey.value) subscription.value = status;
-  },
-  { immediate: true }
-);
 
 function handlePickSpace(space: Space) {
   selectedSpace.value = space;
@@ -367,6 +367,7 @@ onMounted(() => {
         <UiButton
           v-else
           primary
+          :loading="!!selectedSpace && !subscription"
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -463,6 +464,7 @@ onMounted(() => {
       <div class="space-y-2.5 text-center">
         <UiButton
           primary
+          :loading="!!selectedSpace && !subscription"
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "

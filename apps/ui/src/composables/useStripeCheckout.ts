@@ -11,20 +11,6 @@ type SchnapsResponse = {
   error_description?: string;
 };
 
-export type SubscriptionStatus = {
-  isStripeAvailable: boolean;
-  hasActiveSubscription: boolean;
-  willCancelAtPeriodEnd: boolean;
-  renewsAt: number | null;
-};
-
-type SubscriptionResponse = {
-  stripeAvailable?: boolean;
-  activeSubscription?: boolean;
-  cancelAtPeriodEnd?: boolean;
-  renewsAt?: number | null;
-};
-
 export function useStripeCheckout() {
   const uiStore = useUiStore();
 
@@ -74,7 +60,9 @@ export function useStripeCheckout() {
     }
   }
 
-  async function getPortalUrl(network: string): Promise<string> {
+  async function redirectToPortal(network: string) {
+    if (isLoading.value) return;
+
     isLoading.value = true;
     try {
       const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
@@ -92,19 +80,9 @@ export function useStripeCheckout() {
         );
       }
 
-      return result.url;
+      window.location.href = result.url;
     } catch (err) {
       isLoading.value = false;
-      throw err;
-    }
-  }
-
-  async function redirectToPortal(network: string) {
-    if (isLoading.value) return;
-
-    try {
-      window.location.href = await getPortalUrl(network);
-    } catch (err) {
       console.error('[stripe] portal failed', err);
       uiStore.addNotification(
         'error',
@@ -113,43 +91,9 @@ export function useStripeCheckout() {
     }
   }
 
-  async function getSubscriptionStatus(
-    space: string
-  ): Promise<SubscriptionStatus> {
-    // Fails closed: on any error the card option is hidden, crypto still works
-    const fallback: SubscriptionStatus = {
-      isStripeAvailable: false,
-      hasActiveSubscription: false,
-      willCancelAtPeriodEnd: false,
-      renewsAt: null
-    };
-    const [network] = space.split(':');
-    const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
-    try {
-      const res = await fetch(
-        `${baseUrl}/stripe/subscription?space=${encodeURIComponent(space)}`,
-        { signal: AbortSignal.timeout(10_000) }
-      );
-      if (!res.ok) return fallback;
-      const { result } = ((await res.json().catch(() => ({}))) ?? {}) as {
-        result?: SubscriptionResponse;
-      };
-      return {
-        isStripeAvailable: result?.stripeAvailable ?? false,
-        hasActiveSubscription: result?.activeSubscription ?? false,
-        willCancelAtPeriodEnd: result?.cancelAtPeriodEnd ?? false,
-        renewsAt: result?.renewsAt ?? null
-      };
-    } catch (err) {
-      console.error('[stripe] subscription status check failed', err);
-      return fallback;
-    }
-  }
-
   return {
     redirectToCheckout,
     redirectToPortal,
-    getSubscriptionStatus,
     isLoading
   };
 }
