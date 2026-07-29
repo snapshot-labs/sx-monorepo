@@ -243,7 +243,6 @@ watch(
             I have read and agree to the
             <span @click.stop>
               <AppLink
-                is-external
                 :to="
                   isWhiteLabel
                     ? 'https://snapshot.box/#/terms-of-use'
