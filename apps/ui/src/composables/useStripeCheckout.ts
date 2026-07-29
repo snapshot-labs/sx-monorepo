@@ -66,7 +66,9 @@ export function useStripeCheckout() {
     isLoading.value = true;
     try {
       const baseUrl = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
-      const res = await fetch(`${baseUrl}/stripe/portal`);
+      const res = await fetch(`${baseUrl}/stripe/portal`, {
+        signal: AbortSignal.timeout(30_000)
+      });
 
       const { result, error_description } = ((await res
         .json()

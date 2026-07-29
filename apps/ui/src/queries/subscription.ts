@@ -36,6 +36,10 @@ async function fetchSubscriptionStatus(
   );
 
   if (!res.ok) {
+    console.error(
+      `[stripe] subscription status request failed (${res.status})`
+    );
+
     if (res.status < 500) return SUBSCRIPTION_UNAVAILABLE;
 
     throw new Error(`Failed to fetch subscription status (${res.status})`);
