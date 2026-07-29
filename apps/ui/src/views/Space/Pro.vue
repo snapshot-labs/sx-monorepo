@@ -511,7 +511,8 @@ onMounted(() => {
         ref: referral || undefined
       }"
       :space="spaceKey"
-      :hide-card="!subscription?.isStripeAvailable"
+      :hide-card="subscription?.isStripeAvailable === false"
+      :is-card-loading="!subscription"
       :is-auth-valid-for-crypto="!!isCurrentConnectorSupported"
       @connect-wallet="modalConnectorOpen = true"
       @close="handleModalPaymentClose"

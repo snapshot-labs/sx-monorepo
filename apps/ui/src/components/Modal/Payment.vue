@@ -24,12 +24,14 @@ const props = withDefaults(
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
     hideCard?: boolean;
+    isCardLoading?: boolean;
   }>(),
   {
     isAuthValidForCrypto: false,
     plan: 'yearly',
     quantityLabel: 'Quantity',
     hideCard: false,
+    isCardLoading: false,
     calculator: (unitPrice: number, quantity: number) => {
       return Number((unitPrice * quantity).toFixed(2));
     }
@@ -281,12 +283,13 @@ watch(
         </button>
         <button
           type="button"
-          class="flex items-center gap-2 py-2 mb-[-1px] text-sm uppercase tracking-[1px] hover:text-skin-link"
+          class="flex items-center gap-2 py-2 mb-[-1px] text-sm uppercase tracking-[1px] enabled:hover:text-skin-link disabled:cursor-not-allowed disabled:opacity-40"
           :class="
             paymentMethod === 'card'
               ? 'text-skin-link border-b border-skin-link'
               : 'text-skin-text'
           "
+          :disabled="isCardLoading"
           @click="paymentMethod = 'card'"
         >
           <IH-credit-card />
