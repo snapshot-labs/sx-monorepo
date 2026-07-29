@@ -7,11 +7,12 @@ const props = defineProps<{
 
 const { copy, copied } = useClipboard();
 
-const displayValue = computed(() =>
-  props.masked
-    ? `${props.value.slice(0, 3)}${'*'.repeat(8)}${props.value.slice(-3)}`
-    : props.value
-);
+const displayValue = computed(() => {
+  if (!props.masked) return props.value;
+  if (!props.value || props.value.length <= 6) return '*'.repeat(8);
+
+  return `${props.value.slice(0, 3)}${'*'.repeat(8)}${props.value.slice(-3)}`;
+});
 </script>
 
 <template>

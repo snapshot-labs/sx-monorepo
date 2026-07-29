@@ -35,7 +35,7 @@ export default {
         'api-keys': {
           name: 'API keys',
           icon: IHCode,
-          hidden: isWhiteLabel
+          hidden: metadataNetwork !== 's' || isWhiteLabel
         }
       }
     };

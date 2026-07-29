@@ -10,7 +10,7 @@ const DOMAIN = {
 
 const GetKeysSchema = {
   GetKeys: [
-    { name: 'from', type: 'string' },
+    { name: 'from', type: 'address' },
     { name: 'alias', type: 'address' },
     { name: 'timestamp', type: 'uint64' }
   ]
@@ -48,7 +48,10 @@ export async function fetchKeys(
   };
   const sig = await alias._signTypedData(DOMAIN, GetKeysSchema, message);
 
-  const { keys } = await rpcCall('get_keys_by_owner', { ...message, sig });
+  const { keys }: { keys: ApiKey[] } = await rpcCall('get_keys_by_owner', {
+    ...message,
+    sig
+  });
 
-  return keys;
+  return keys.filter(row => row.key);
 }

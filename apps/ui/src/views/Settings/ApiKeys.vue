@@ -46,7 +46,9 @@ const isStarknetAccount = computed(
             Verify your account once to manage your keys.
           </div>
         </div>
-        <UiAlert v-if="authError" type="error">{{ authError }}</UiAlert>
+        <UiAlert v-if="authError" type="error">
+          Your account could not be verified, please authenticate again.
+        </UiAlert>
         <UiButton primary :loading="isAuthenticating" @click="authenticate">
           Authenticate
         </UiButton>
