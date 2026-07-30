@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { isValidDelegation } from '@/helpers/delegation';
@@ -22,6 +23,7 @@ const delegateModalState = ref<{
   delegatees: []
 });
 const isUndelegating = ref(false);
+const undelegateChainId = ref(props.delegation.chainId);
 const undelegateFn = ref(undelegate);
 const sortBy = ref(
   'delegatedVotes-desc' as
@@ -100,7 +102,9 @@ function handleDelegateToggle(newDelegatee?: string) {
   }
 
   if (newDelegatee && getHasDelegatedTo(newDelegatee)) {
-    isUndelegating.value = true;
+    handleUndelegateClick(
+      delegatees.value?.find(d => compareAddresses(d.id, newDelegatee))?.chainId
+    );
     return;
   }
 
@@ -119,7 +123,7 @@ function handleUpdateDelegatesClick(newDelegatee?: string) {
 }
 
 async function undelegate() {
-  if (!isValidDelegation(props.delegation)) {
+  if (!isValidDelegation(props.delegation) || !undelegateChainId.value) {
     return null;
   }
 
@@ -128,7 +132,7 @@ async function undelegate() {
     props.delegation.apiType,
     [],
     props.delegation.contractAddress,
-    props.delegation.chainId
+    undelegateChainId.value
   );
 }
 
@@ -148,8 +152,13 @@ function handleUndelegateConfirmed() {
   isUndelegating.value = false;
 }
 
-function handleUndelegateClick() {
+function handleUndelegateClick(chainId?: string) {
+  undelegateChainId.value = chainId ?? props.delegation.chainId;
   isUndelegating.value = true;
+}
+
+function networkName(chainId: string) {
+  return (networks[chainId]?.name as string) ?? `Chain ${chainId}`;
 }
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
@@ -219,8 +228,17 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 :address="delegatee.id"
                 class="text-skin-text text-[17px]"
               />
+              <div
+                v-if="delegatee.chainId"
+                class="text-[15px] text-skin-text"
+                v-text="networkName(delegatee.chainId)"
+              />
             </div>
             <div
+              v-if="
+                delegatee.balance !== undefined &&
+                delegatee.delegatedVotePercentage !== undefined
+              "
               class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link truncate">
@@ -245,7 +263,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   @click="
                     isUpdatableDelegation
                       ? handleUpdateDelegatesClick()
-                      : handleUndelegateClick()
+                      : handleUndelegateClick(delegatee.chainId)
                   "
                 >
                   <template v-if="isUpdatableDelegation">
@@ -477,9 +495,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         @close="delegateModalOpen = false"
       />
       <ModalTransactionProgress
-        v-if="delegation.chainId"
+        v-if="undelegateChainId"
         :open="isUndelegating"
-        :chain-id="delegation.chainId"
+        :chain-id="undelegateChainId"
         :execute="undelegateFn"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"

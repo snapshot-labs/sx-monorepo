@@ -329,12 +329,14 @@ export function useDelegates(
     return getCompoundDelegationDelegates(filter);
   }
 
-  async function getDelegation(delegator: string) {
+  async function getAccountDelegations(delegator: string) {
     if (
       delegation.apiType !== 'delegate-registry' &&
       delegation.apiType !== 'apechain-delegate-registry'
     ) {
-      throw new Error('getDelegation is only supported for delegate-registry');
+      throw new Error(
+        'getAccountDelegations is only supported for delegate-registry'
+      );
     }
 
     const isApeChainDelegateRegistry =
@@ -348,6 +350,7 @@ export function useDelegates(
       ? delegation.chainIds
       : [delegation.chainId];
 
+    const found: { delegate: string; chainId: string }[] = [];
     let probed = false;
     let lastError: unknown;
 
@@ -378,7 +381,9 @@ export function useDelegates(
 
         probed = true;
 
-        if (data.delegations[0]) return data.delegations[0];
+        if (data.delegations[0]) {
+          found.push({ ...data.delegations[0], chainId: String(chainId) });
+        }
       } catch (err) {
         console.warn(`Failed to read delegation on chain ${chainId}`, err);
         lastError = err;
@@ -391,11 +396,11 @@ export function useDelegates(
       throw lastError ?? new Error('Delegation subgraph not found');
     }
 
-    return null;
+    return found;
   }
 
   return {
     getDelegates,
-    getDelegation
+    getAccountDelegations
   };
 }

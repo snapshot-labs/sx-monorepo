@@ -9,10 +9,11 @@ import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
 type Delegatee = {
   id: string;
-  balance: number;
-  delegatedVotePercentage: number;
+  balance?: number;
+  delegatedVotePercentage?: number;
   share: number;
   name?: string;
+  chainId?: string;
 };
 
 const PERCENT_DIVISOR = 10000;
@@ -88,12 +89,15 @@ async function fetchApeChainDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
-  const { getDelegates, getDelegation } = useDelegates(
+  const { getDelegates, getAccountDelegations } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
     space
   );
 
-  const accountDelegation = await getDelegation(account.toLowerCase());
+  // A delegation portal is bound to a single network, so there is at most one.
+  const [accountDelegation] = await getAccountDelegations(
+    account.toLowerCase()
+  );
   if (!accountDelegation) return [];
 
   const provider = getProvider(Number(delegation.chainId));
@@ -132,14 +136,30 @@ async function fetchDelegateRegistryDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
-  const { getDelegates, getDelegation } = useDelegates(
+  const { getDelegates, getAccountDelegations } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
     space
   );
 
-  const accountDelegation = await getDelegation(account);
+  const accountDelegations = await getAccountDelegations(account);
 
-  if (!accountDelegation) return [];
+  if (!accountDelegations.length) return [];
+
+  // Each chain holds its own delegation, and the voting power flowing through
+  // a single chain is not known here, so only the delegate and its chain are
+  // shown when there is more than one.
+  if (accountDelegations.length > 1) {
+    const names = await getNames(accountDelegations.map(d => d.delegate));
+
+    return accountDelegations.map(({ delegate, chainId }) => ({
+      id: formatAddress(delegate),
+      name: names[delegate],
+      share: 100,
+      chainId
+    }));
+  }
+
+  const [accountDelegation] = accountDelegations;
 
   const [names, votingPowers, [apiDelegate]] = await Promise.all([
     getNames([accountDelegation.delegate]),
@@ -179,7 +199,8 @@ async function fetchDelegateRegistryDelegatees(
         ? balance / Number(apiDelegate.delegatedVotes)
         : 1,
       name: names[accountDelegation.delegate],
-      share: 100
+      share: 100,
+      chainId: accountDelegation.chainId
     }
   ];
 }

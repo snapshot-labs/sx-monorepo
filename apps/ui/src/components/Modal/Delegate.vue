@@ -249,10 +249,17 @@ function prefillExistingDelegatees() {
 
   if (
     !isSelectedDelegationSupportingMultipleDelegates.value &&
-    form.delegatees[0].id
+    form.delegatees[0]?.id
   ) {
     return;
   }
+
+  // A single-delegate form can only edit one delegation; when the account
+  // holds delegations on several chains only the first one is prefilled.
+  const existingDelegatees =
+    isSelectedDelegationSupportingMultipleDelegates.value
+      ? delegatees.value
+      : delegatees.value.slice(0, 1);
 
   const remainingShares =
     100 - delegatees.value.reduce((a, b) => a + b.share, 0);
@@ -265,7 +272,7 @@ function prefillExistingDelegatees() {
       id: delegatee.id,
       share: remainingShares / formDelegatees.length
     })),
-    ...clone(delegatees.value)
+    ...clone(existingDelegatees)
   ]
     .filter(d => d.id)
     .map(delegatee => ({
