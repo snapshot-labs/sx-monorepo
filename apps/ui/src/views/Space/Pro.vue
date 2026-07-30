@@ -356,7 +356,10 @@ onMounted(() => {
             Manage subscription
           </UiButton>
           <div class="text-sm text-skin-text">
-            <template v-if="subscription.willCancelAtPeriodEnd">
+            <template v-if="subscription.isPastDue">
+              Payment failed, update your card to keep Pro
+            </template>
+            <template v-else-if="subscription.willCancelAtPeriodEnd">
               Active until {{ subscriptionRenewalDate }}
             </template>
             <template v-else>

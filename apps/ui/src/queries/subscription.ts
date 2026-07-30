@@ -5,6 +5,7 @@ import { SCHNAPS_URLS } from '@/helpers/constants';
 export type SubscriptionStatus = {
   isStripeAvailable: boolean;
   hasActiveSubscription: boolean;
+  isPastDue: boolean;
   willCancelAtPeriodEnd: boolean;
   renewsAt: number | null;
 };
@@ -12,6 +13,7 @@ export type SubscriptionStatus = {
 type SubscriptionResponse = {
   stripeAvailable?: boolean;
   activeSubscription?: boolean;
+  pastDue?: boolean;
   cancelAtPeriodEnd?: boolean;
   renewsAt?: number | null;
 };
@@ -19,6 +21,7 @@ type SubscriptionResponse = {
 export const SUBSCRIPTION_UNAVAILABLE: SubscriptionStatus = {
   isStripeAvailable: false,
   hasActiveSubscription: false,
+  isPastDue: false,
   willCancelAtPeriodEnd: false,
   renewsAt: null
 };
@@ -52,6 +55,7 @@ async function fetchSubscriptionStatus(
   return {
     isStripeAvailable: result?.stripeAvailable ?? false,
     hasActiveSubscription: result?.activeSubscription ?? false,
+    isPastDue: result?.pastDue ?? false,
     willCancelAtPeriodEnd: result?.cancelAtPeriodEnd ?? false,
     renewsAt: result?.renewsAt ?? null
   };
