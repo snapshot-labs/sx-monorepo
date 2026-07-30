@@ -13,7 +13,7 @@ const {
   isAuthenticated,
   isAuthenticating,
   authenticate,
-  authError,
+  isAuthError,
   keys
 } = useApiKeys();
 
@@ -46,7 +46,7 @@ const isStarknetAccount = computed(
             Verify your account once to manage your keys.
           </div>
         </div>
-        <UiAlert v-if="authError" type="error">
+        <UiAlert v-if="isAuthError" type="error">
           Your account could not be verified, please authenticate again.
         </UiAlert>
         <UiButton primary :loading="isAuthenticating" @click="authenticate">

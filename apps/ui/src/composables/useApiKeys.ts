@@ -34,11 +34,11 @@ export function useApiKeys() {
     retry: false
   });
 
-  const authError = computed(() =>
-    error.value?.cause === 401 ? error.value.message : ''
+  const isAuthError = computed(
+    () => error.value?.cause === 400 || error.value?.cause === 401
   );
   const isAuthenticated = computed(
-    () => !!aliasWallet.value && !authError.value
+    () => !!aliasWallet.value && !isAuthError.value
   );
   const keys = computed<ApiKey[]>(() => data.value ?? []);
   const isLoading = computed(() => isAuthenticated.value && isPending.value);
@@ -69,7 +69,7 @@ export function useApiKeys() {
     isAuthenticated,
     isAuthenticating,
     authenticate,
-    authError,
+    isAuthError,
     keys
   };
 }
