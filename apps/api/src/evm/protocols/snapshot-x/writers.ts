@@ -27,6 +27,7 @@ import {
   Leaderboard,
   Proposal,
   Space,
+  SpaceImplementation,
   SpaceMetadataItem,
   StarknetL1Execution,
   User,
@@ -66,6 +67,10 @@ const KNOWN_EXECUTION_STRATEGIES = [
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
+const INCO_MASTER_SPACE = getAddress(
+  '0x3F31D742D3158b07434A041e26B47e9EB94e010C'
+);
+
 export function createWriters(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
@@ -87,6 +92,14 @@ export function createWriters(
 
     switch (implementationAddress) {
       case getAddress(protocolConfig.masterSpace): {
+        const spaceImplementation = new SpaceImplementation(
+          proxyAddress,
+          config.indexerName
+        );
+
+        spaceImplementation.implementation = implementationAddress;
+        await spaceImplementation.save();
+
         await executeTemplate('Space', {
           contract: proxyAddress,
           start: blockNumber
@@ -208,8 +221,22 @@ export function createWriters(
     const id = getAddress(event.args.space);
     const { votingStrategies } = event.args.input;
 
+    const spaceImplementation = await SpaceImplementation.loadEntity(
+      id,
+      config.indexerName
+    );
+
+    if (!spaceImplementation) {
+      logger.warn('Space implementation not found, skipping space creation');
+      return;
+    }
+
     const space = new Space(id, config.indexerName);
-    space.protocol = 'snapshot-x';
+    space.protocol =
+      spaceImplementation.implementation === INCO_MASTER_SPACE
+        ? 'snapshot-x-inco'
+        : 'snapshot-x';
+
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -947,6 +974,66 @@ export function createWriters(
       }
     }
 
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+
+    if (space?.protocol === 'snapshot-x-inco') {
+      proposal.execution_settled = true;
+      proposal.completed = true;
+      proposal.execution_tx = txId;
+      proposal.executed_at = BigInt(now);
+      proposal.executed_at_block_number = BigInt(blockNumber);
+    }
+
+    await proposal.save();
+  };
+
+  // Public per-choice tally + verdict on reveal.
+  const handleProposalResultRevealed: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalResultRevealed'
+  > = async ({ rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    // contract 0/1/2 = Against/For/Abstain -> scores_2/1/3
+    const againstVotes = BigInt(event.args.againstVotes);
+    const forVotes = BigInt(event.args.forVotes);
+    const abstainVotes = BigInt(event.args.abstainVotes);
+    const totalVotes = againstVotes + forVotes + abstainVotes;
+
+    proposal.scores_1 = forVotes.toString();
+    proposal.scores_1_parsed = getParsedVP(
+      proposal.scores_1,
+      proposal.vp_decimals
+    );
+    proposal.scores_2 = againstVotes.toString();
+    proposal.scores_2_parsed = getParsedVP(
+      proposal.scores_2,
+      proposal.vp_decimals
+    );
+    proposal.scores_3 = abstainVotes.toString();
+    proposal.scores_3_parsed = getParsedVP(
+      proposal.scores_3,
+      proposal.vp_decimals
+    );
+    proposal.scores_total = totalVotes.toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
+    );
+
+    // quorum = For+Abstain; support = For>Against.
+    proposal.support_achieved = forVotes > againstVotes;
+    proposal.quorum_reached =
+      forVotes + abstainVotes >= BigInt(proposal.quorum);
+
+    // Completed at reveal, independent of execute step.
+    proposal.completed = true;
+
     await proposal.save();
   };
 
@@ -955,6 +1042,9 @@ export function createWriters(
     'VoteCast' | 'VoteCastWithMetadata'
   > = async ({ block, txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
+    // Confidential variant of `VoteCast` overloads the same event name with
+    // no `choice` arg. Skip — it's handled by `handleConfidentialVoteCast`.
+    if (!('choice' in event.args)) return;
 
     logger.info('Handle vote cast');
 
@@ -1060,6 +1150,110 @@ export function createWriters(
     );
 
     await updateScoresTick(proposal, created, config.indexerName);
+    await proposal.save();
+  };
+
+  // Confidential-voting variant. Inco Spaces emit `VoteCast(uint256,address,uint256)`
+  // (no plaintext `choice`), so per-choice score tallies are unknowable until the
+  // proposal is `tryExecute`d (and even then, only the pass/fail flags decrypt).
+  // We only touch the totals-side state; `vote.choice = 0` is a sentinel meaning
+  // "encrypted
+  const handleConfidentialVoteCast: evm.Writer<
+    typeof SpaceAbi,
+    'VoteCast' | 'VoteCastWithMetadata'
+  > = async ({ block, txId, rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+    // Legacy `VoteCast` (with `choice`) is dispatched here too because the
+    // names overload. Skip — handled by `handleVoteCast` above.
+    if ('choice' in event.args) return;
+
+    logger.info('Handle confidential vote cast');
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = event.args.proposalId;
+    const vp = event.args.votingPower;
+
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    const created = Number(block?.timestamp ?? getCurrentTimestamp());
+    const voter = getAddress(event.args.voter);
+
+    const vote = new Vote(
+      `${spaceId}/${proposalId}/${voter}`,
+      config.indexerName
+    );
+    vote.space = spaceId;
+    vote.proposal = proposalId.toString();
+    vote.voter = voter;
+    vote.choice = 0;
+    vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
+    vote.created = created;
+    vote.tx = txId;
+
+    if ('metadataUri' in event.args) {
+      try {
+        const metadataUri = event.args.metadataUri;
+        await handleVoteMetadata(metadataUri, config);
+        vote.metadata = dropIpfs(metadataUri);
+      } catch (err) {
+        logger.info({ err }, 'Failed to handle confidential vote metadata');
+      }
+    }
+
+    await vote.save();
+
+    const existingUser = await User.loadEntity(voter, config.indexerName);
+    if (existingUser) {
+      existingUser.vote_count += 1;
+      await existingUser.save();
+    } else {
+      const user = new User(voter, config.indexerName);
+      user.address_type = 1;
+      user.created = created;
+      await user.save();
+    }
+
+    let leaderboardItem = await Leaderboard.loadEntity(
+      `${spaceId}/${voter}`,
+      config.indexerName
+    );
+    if (!leaderboardItem) {
+      leaderboardItem = new Leaderboard(
+        `${spaceId}/${voter}`,
+        config.indexerName
+      );
+      leaderboardItem.space = spaceId;
+      leaderboardItem.user = voter;
+      leaderboardItem.vote_count = 0;
+      leaderboardItem.proposal_count = 0;
+    }
+    leaderboardItem.vote_count += 1;
+    await leaderboardItem.save();
+
+    await updateCounter(config.indexerName, 'vote_count', 1);
+
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (space) {
+      space.vote_count += 1;
+      if (leaderboardItem.vote_count === 1) space.voter_count += 1;
+      await space.save();
+    }
+
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
+    );
+    // Per-choice score buckets are intentionally NOT updated — they remain encrypted.
+
     await proposal.save();
   };
 
@@ -1197,7 +1391,9 @@ export function createWriters(
     handleProposalCancelled,
     handleProposalUpdated,
     handleProposalExecuted,
+    handleProposalResultRevealed,
     handleVoteCast,
+    handleConfidentialVoteCast,
     // SimpleQuorumTimelockExecutionStrategy
     handleTimelockProposalExecuted,
     handleTimelockProposalVetoed,

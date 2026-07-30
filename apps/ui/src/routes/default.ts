@@ -54,6 +54,12 @@ export default [
     component: CreateSpaceSnapshotX
   },
   {
+    path: '/create/snapshot-x-inco',
+    name: 'create-space-snapshot-x-inco',
+    component: CreateSpaceSnapshotX,
+    props: { spaceCreationNetworks: ['basesep'] }
+  },
+  {
     path: '/create/snapshot',
     name: 'create-space-snapshot',
     component: CreateSpaceSnapshot

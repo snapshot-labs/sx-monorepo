@@ -50,6 +50,62 @@ function createStandardConfig(
   };
 }
 
+/**
+ * Build a per-chain config for an Inco confidential-voting deployment. Mirrors
+ * `createStandardConfig` but takes explicit addresses (Inco doesn't share a global
+ * proxy/master deployment with the legacy SX networks). `EthSigV2` is intentionally
+ * absent — the Inco deployments use the v1 sig authenticator.
+ */
+function createIncoConfig(
+  eip712ChainId: number,
+  additionalProperties: AdditionalProperties & {
+    masterSpace: string;
+    proxyFactory: string;
+    authenticators: { EthSig: string; EthTx: string };
+    strategies: { Vanilla: string };
+    proposalValidations: { Vanilla: string };
+    executionStrategies: { Vanilla: string };
+  }
+) {
+  return {
+    Meta: {
+      eip712ChainId,
+      maxPriorityFeePerGas: additionalProperties.maxPriorityFeePerGas,
+      blockTime: additionalProperties.blockTime,
+      hasNonNativeBlockNumbers: additionalProperties.hasNonNativeBlockNumbers,
+      proxyFactory: additionalProperties.proxyFactory,
+      masterSpace: additionalProperties.masterSpace,
+      // Marker consumed by clients/UI to switch to encrypted-vote flow.
+      confidential: true
+    },
+    Authenticators: {
+      EthSig: additionalProperties.authenticators.EthSig,
+      // Match the shape of standard configs for backwards-compat in callers
+      // that key off `Authenticators.EthSigV2`. Inco doesn't have a v2 yet —
+      // alias it to v1 so legacy lookups don't crash.
+      EthSigV2: additionalProperties.authenticators.EthSig,
+      EthTx: additionalProperties.authenticators.EthTx
+    },
+    Strategies: {
+      Vanilla: additionalProperties.strategies.Vanilla,
+      // Sentinels avoid strategy type-registry collision.
+      Comp: '0x0000000000000000000000000000000000000c01',
+      OZVotes: '0x0000000000000000000000000000000000000c02',
+      Whitelist: '0x0000000000000000000000000000000000000c03',
+      ApeGas: undefined as string | undefined
+    },
+    ProposalValidations: {
+      VotingPower: additionalProperties.proposalValidations.Vanilla
+    },
+    ExecutionStrategies: {
+      SimpleQuorumAvatar: additionalProperties.executionStrategies.Vanilla,
+      SimpleQuorumTimelock: additionalProperties.executionStrategies.Vanilla,
+      Axiom: null,
+      Isokratia: null
+    }
+  };
+}
+
 function createEvmConfig(
   networkId: keyof typeof evmNetworks
 ): EvmNetworkConfig {
@@ -146,6 +202,25 @@ export const evmNetworks = {
     strategies: {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
+  }),
+  // Base Sepolia Inco confidential reference deployment.
+  basesep: createIncoConfig(84532, {
+    blockTime: 2,
+    proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+    masterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
+    authenticators: {
+      EthSig: '0x69A9c5626860f53f9b4fD5F2936d74eC93417677',
+      EthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
+    },
+    strategies: {
+      Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673'
+    },
+    proposalValidations: {
+      Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
+    },
+    executionStrategies: {
+      Vanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
+    }
   })
 } as const;
 
@@ -160,3 +235,4 @@ export const evmBnb = createEvmConfig('bnb');
 export const evmBnbt = createEvmConfig('bnbt');
 export const evmApe = createEvmConfig('ape');
 export const evmCurtis = createEvmConfig('curtis');
+export const evmBaseSepolia = createEvmConfig('basesep');

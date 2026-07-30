@@ -155,6 +155,29 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
+  // Revealed confidential proposal: 'passed' or 'rejected'.
+  if (
+    proposal.quorum_reached !== null &&
+    proposal.quorum_reached !== undefined &&
+    proposal.support_achieved !== null &&
+    proposal.support_achieved !== undefined
+  ) {
+    return proposal.quorum_reached && proposal.support_achieved
+      ? 'passed'
+      : 'rejected';
+  }
+
+  // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
+  if (proposal.space?.protocol === 'snapshot-x-inco') {
+    if (Number(proposal.start_block_number ?? proposal.start) > current) {
+      return 'pending';
+    }
+    if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
+      return 'closed';
+    }
+    return 'active';
+  }
+
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -418,8 +441,14 @@ function formatProposal(
     executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
     isInvalid:
       proposal.metadata === null ||
+      // Confidential (Inco) proposals always carry a non-zero execution
+      // strategy because `Space.vote()` calls `executionStrategy.getQuorum()`
+      // during accumulation. Pure-discussion proposals therefore have an
+      // execution strategy but no `metadata.execution`, which would otherwise
+      // trip this anti-spam heuristic.
       (proposal.metadata.execution === null &&
-        proposal.execution_strategy !== emptyAddress),
+        proposal.execution_strategy !== emptyAddress &&
+        proposal.space.protocol !== 'snapshot-x-inco'),
     space: {
       id: proposal.space.id,
       protocol: proposal.space.protocol,
@@ -458,6 +487,8 @@ function formatProposal(
       ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
       : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    quorum_reached: proposal.quorum_reached ?? null,
+    support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
     privacy: 'none',

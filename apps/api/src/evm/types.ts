@@ -11,7 +11,8 @@ export type NetworkID =
   | 'bnb'
   | 'bnbt'
   | 'ape'
-  | 'curtis';
+  | 'curtis'
+  | 'basesep';
 
 export type SnapshotXConfig = {
   chainId: number;

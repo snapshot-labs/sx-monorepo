@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
-import { getNetwork, spaceCreationNetworks } from '@/networks';
+import {
+  spaceCreationNetworks as defaultSpaceCreationNetworks,
+  getNetwork
+} from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
+
+const props = withDefaults(
+  defineProps<{ spaceCreationNetworks?: NetworkID[] }>(),
+  {
+    spaceCreationNetworks: () => defaultSpaceCreationNetworks
+  }
+);
 
 const STEPS: StepRecords = {
   profile: {
@@ -69,7 +79,7 @@ const metadataForm: SpaceMetadata = reactive(
     delegations: []
   })
 );
-const selectedNetworkId: Ref<NetworkID> = ref(spaceCreationNetworks[0]);
+const selectedNetworkId: Ref<NetworkID> = ref(props.spaceCreationNetworks[0]);
 const authenticators = ref([] as StrategyConfig[]);
 const validationStrategy: Ref<StrategyConfig | null> = ref(null);
 const votingStrategies = ref([] as StrategyConfig[]);
@@ -162,6 +172,7 @@ watch(selectedNetworkId, () => {
           v-else-if="currentStep === 'network'"
           v-model="selectedNetworkId"
           title="Space network"
+          :space-creation-networks="props.spaceCreationNetworks"
         />
         <FormStrategies
           v-else-if="currentStep === 'strategies'"
