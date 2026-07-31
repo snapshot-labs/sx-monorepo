@@ -158,7 +158,7 @@ function handleUndelegateClick(chainId?: string) {
 }
 
 function networkName(chainId: string) {
-  return (networks[chainId]?.name as string) ?? `Chain ${chainId}`;
+  return networks[chainId]?.name || `Chain ${chainId}`;
 }
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
@@ -205,7 +205,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <div v-else-if="delegatees?.length" class="w-full truncate px-4">
         <div
           v-for="delegatee in delegatees"
-          :key="delegatee.id"
+          :key="`${delegatee.id}:${delegatee.chainId}`"
           class="flex w-full space-x-3 truncate border-b py-3"
         >
           <AppLink
