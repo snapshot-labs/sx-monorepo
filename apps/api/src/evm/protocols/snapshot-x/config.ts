@@ -182,11 +182,12 @@ export function createConfig(networkId: NetworkID): Config {
       chainId: network.Meta.eip712ChainId,
       manaRpcUrl: `${MANA_URL}/eth_rpc/${network.Meta.eip712ChainId}`,
       masterSpace: network.Meta.masterSpace,
-      masterSimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
+      masterSimpleQuorumAvatar:
+        network.ExecutionStrategies.SimpleQuorumAvatar ?? null,
       masterSimpleQuorumTimelock:
-        network.ExecutionStrategies.SimpleQuorumTimelock,
+        network.ExecutionStrategies.SimpleQuorumTimelock ?? null,
       propositionPowerValidationStrategyAddress:
-        network.ProposalValidations.VotingPower,
+        network.ProposalValidations.VotingPower ?? null,
       apeGasStrategy: network.Strategies.ApeGas ?? null,
       apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     }

@@ -17,9 +17,9 @@ export type SnapshotXConfig = {
   chainId: number;
   manaRpcUrl: string;
   masterSpace: string;
-  masterSimpleQuorumAvatar: string;
-  masterSimpleQuorumTimelock: string;
-  propositionPowerValidationStrategyAddress: string;
+  masterSimpleQuorumAvatar: string | null;
+  masterSimpleQuorumTimelock: string | null;
+  propositionPowerValidationStrategyAddress: string | null;
   apeGasStrategy: string | null;
   apeGasStrategyDelay: number;
 };

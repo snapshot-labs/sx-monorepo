@@ -1,96 +1,10 @@
 import { validateAndParseAddress } from 'starknet';
+import { buildRegistry } from './registry';
 import { NetworkConfig } from './types';
 
 function createStarknetConfig(
-  networkId: keyof typeof starknetNetworks
+  network: (typeof starknetNetworks)[keyof typeof starknetNetworks]
 ): NetworkConfig {
-  const network = starknetNetworks[networkId];
-
-  const authenticators = {
-    [validateAndParseAddress(network.Authenticators.Vanilla)]: {
-      type: 'vanilla'
-    },
-    [validateAndParseAddress(network.Authenticators.EthSig)]: {
-      type: 'ethSig'
-    },
-    [validateAndParseAddress(network.Authenticators.EthTx)]: {
-      type: 'ethTx'
-    },
-    [validateAndParseAddress(network.Authenticators.StarkSig)]: {
-      type: 'starkSig'
-    },
-    [validateAndParseAddress(network.Authenticators.StarkTx)]: {
-      type: 'starkTx'
-    }
-  } as const;
-
-  const strategies = {
-    [validateAndParseAddress(network.Strategies.MerkleWhitelist)]: {
-      type: 'whitelist'
-    },
-    [validateAndParseAddress(network.Strategies.ERC20Votes)]: {
-      type: 'erc20Votes'
-    },
-    ...(network.Strategies.EVMSlotValue
-      ? ({
-          [validateAndParseAddress(network.Strategies.EVMSlotValue)]: {
-            type: 'evmSlotValue'
-          }
-        } as const)
-      : {}),
-    ...(network.Strategies.OZVotesStorageProof
-      ? ({
-          [validateAndParseAddress(network.Strategies.OZVotesStorageProof)]: {
-            type: 'ozVotesStorageProof',
-            params: {
-              trace: 224
-            }
-          }
-        } as const)
-      : {}),
-    ...(network.Strategies.OZVotesTrace208StorageProof
-      ? ({
-          [validateAndParseAddress(
-            network.Strategies.OZVotesTrace208StorageProof
-          )]: {
-            type: 'ozVotesStorageProof',
-            params: {
-              trace: 208
-            }
-          }
-        } as const)
-      : {}),
-    ...(network.Strategies.EVMSlotValueV2
-      ? ({
-          [validateAndParseAddress(network.Strategies.EVMSlotValueV2)]: {
-            type: 'evmSlotValueV2'
-          }
-        } as const)
-      : {}),
-    ...(network.Strategies.OZVotesStorageProofV2
-      ? ({
-          [validateAndParseAddress(network.Strategies.OZVotesStorageProofV2)]: {
-            type: 'ozVotesStorageProofV2',
-            params: {
-              trace: 224
-            }
-          }
-        } as const)
-      : {}),
-    ...(network.Strategies.OZVotesTrace208StorageProofV2
-      ? ({
-          [validateAndParseAddress(
-            network.Strategies.OZVotesTrace208StorageProofV2
-          )]: {
-            type: 'ozVotesStorageProofV2',
-            params: {
-              trace: 208
-            }
-          }
-        } as const)
-      : {})
-  } as const;
-
   return {
     eip712ChainId: network.Meta.eip712ChainId,
     herodotusAccumulatesChainId: network.Meta.herodotusAccumulatesChainId,
@@ -103,8 +17,41 @@ function createStarknetConfig(
     starknetCommit: network.Meta.starknetCommit,
     starknetCore: network.Meta.starknetCore,
     feeEstimateOverride: network.Meta.feeEstimateOverride,
-    authenticators,
-    strategies
+    authenticators: buildRegistry(
+      [
+        [network.Authenticators.Vanilla, { type: 'vanilla' }],
+        [network.Authenticators.EthSig, { type: 'ethSig' }],
+        [network.Authenticators.EthTx, { type: 'ethTx' }],
+        [network.Authenticators.StarkSig, { type: 'starkSig' }],
+        [network.Authenticators.StarkTx, { type: 'starkTx' }]
+      ],
+      validateAndParseAddress
+    ),
+    strategies: buildRegistry(
+      [
+        [network.Strategies.MerkleWhitelist, { type: 'whitelist' }],
+        [network.Strategies.ERC20Votes, { type: 'erc20Votes' }],
+        [network.Strategies.EVMSlotValue, { type: 'evmSlotValue' }],
+        [
+          network.Strategies.OZVotesStorageProof,
+          { type: 'ozVotesStorageProof', params: { trace: 224 } }
+        ],
+        [
+          network.Strategies.OZVotesTrace208StorageProof,
+          { type: 'ozVotesStorageProof', params: { trace: 208 } }
+        ],
+        [network.Strategies.EVMSlotValueV2, { type: 'evmSlotValueV2' }],
+        [
+          network.Strategies.OZVotesStorageProofV2,
+          { type: 'ozVotesStorageProofV2', params: { trace: 224 } }
+        ],
+        [
+          network.Strategies.OZVotesTrace208StorageProofV2,
+          { type: 'ozVotesStorageProofV2', params: { trace: 208 } }
+        ]
+      ],
+      validateAndParseAddress
+    )
   };
 }
 
@@ -231,5 +178,9 @@ export const starknetNetworks = {
   }
 } as const;
 
-export const starknetMainnet: NetworkConfig = createStarknetConfig('sn');
-export const starknetSepolia: NetworkConfig = createStarknetConfig('sn-sep');
+export const starknetMainnet: NetworkConfig = createStarknetConfig(
+  starknetNetworks.sn
+);
+export const starknetSepolia: NetworkConfig = createStarknetConfig(
+  starknetNetworks['sn-sep']
+);
