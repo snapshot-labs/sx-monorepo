@@ -278,9 +278,12 @@ export function createWriters(
       decimals
     });
 
+    const ozVotesStrategy = evmNetworks[config.indexerName].Strategies.OZVotes;
+    if (!ozVotesStrategy) throw new Error('OZVotes strategy is not configured');
+
     const governanceInfo = getGovernanceInfo(contractAddress);
     space.authenticators = governanceInfo.authenticators;
-    space.strategies = [evmNetworks[config.indexerName].Strategies.OZVotes];
+    space.strategies = [ozVotesStrategy];
     space.strategies_params = [token];
     space.strategies_indices = [0];
     space.voting_power_validation_strategy_strategies = space.strategies;

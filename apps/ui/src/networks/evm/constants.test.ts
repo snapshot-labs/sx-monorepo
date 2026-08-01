@@ -11,6 +11,13 @@ describe('EVM Constants', () => {
 ,
   `;
 
+  it('should include all editor entries for standard networks', () => {
+    expect(constants.EDITOR_AUTHENTICATORS).toHaveLength(3);
+    expect(constants.EDITOR_VOTING_STRATEGIES).toHaveLength(4);
+    expect(constants.EDITOR_PROPOSAL_VALIDATIONS).toHaveLength(1);
+    expect(constants.EDITOR_EXECUTION_STRATEGIES).toHaveLength(2);
+  });
+
   describe('EDITOR_VOTING_STRATEGIES', () => {
     describe('whitelist', () => {
       const strategy = constants.EDITOR_VOTING_STRATEGIES.find(

@@ -74,6 +74,13 @@ export function createWriters(
     transport: http(config.network_node_url)
   });
 
+  const masterSimpleQuorumTimelock = protocolConfig.masterSimpleQuorumTimelock
+    ? getAddress(protocolConfig.masterSimpleQuorumTimelock)
+    : null;
+  const masterSimpleQuorumAvatar = protocolConfig.masterSimpleQuorumAvatar
+    ? getAddress(protocolConfig.masterSimpleQuorumAvatar)
+    : null;
+
   const handleProxyDeployed: evm.Writer<
     typeof ProxyFactoryAbi,
     'ProxyDeployed'
@@ -93,7 +100,7 @@ export function createWriters(
         });
         break;
       }
-      case getAddress(protocolConfig.masterSimpleQuorumTimelock): {
+      case masterSimpleQuorumTimelock: {
         const [type, quorum, timelockVetoGuardian, timelockDelay] =
           await client.multicall({
             contracts: [
@@ -145,7 +152,7 @@ export function createWriters(
 
         break;
       }
-      case getAddress(protocolConfig.masterSimpleQuorumAvatar): {
+      case masterSimpleQuorumAvatar: {
         const [type, quorum, target] = await client.multicall({
           contracts: [
             {
