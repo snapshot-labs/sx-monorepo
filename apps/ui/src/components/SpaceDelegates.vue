@@ -142,11 +142,7 @@ function handleUndelegateConfirmed() {
   });
 
   queryClient.invalidateQueries({
-    queryKey: [
-      'delegatees',
-      props.delegation.contractAddress,
-      web3.value.account
-    ]
+    queryKey: ['delegatees', props.delegation, web3.value.account]
   });
 
   isUndelegating.value = false;
