@@ -231,10 +231,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
             <div
-              v-if="
-                delegatee.balance !== undefined &&
-                delegatee.delegatedVotePercentage !== undefined
-              "
               class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link truncate">

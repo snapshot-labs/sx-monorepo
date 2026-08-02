@@ -9,8 +9,8 @@ import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
 type Delegatee = {
   id: string;
-  balance?: number;
-  delegatedVotePercentage?: number;
+  balance: number;
+  delegatedVotePercentage: number;
   share: number;
   name?: string;
   chainId?: string;
@@ -145,18 +145,64 @@ async function fetchDelegateRegistryDelegatees(
 
   if (!accountDelegations.length) return [];
 
-  // Each chain holds its own delegation, and the voting power flowing through
-  // a single chain is not known here, so only the delegate and its chain are
-  // shown when there is more than one.
+  // Each chain holds its own delegation, so a row carries the voting power of
+  // the strategies reading that chain rather than the account's total. The
+  // same delegate can hold a delegation on several chains, so it is only
+  // looked up once.
   if (accountDelegations.length > 1) {
-    const names = await getNames(accountDelegations.map(d => d.delegate));
+    const delegateAddresses = [
+      ...new Set(accountDelegations.map(d => d.delegate))
+    ];
 
-    return accountDelegations.map(({ delegate, chainId }) => ({
-      id: formatAddress(delegate),
-      name: names[delegate],
-      share: 100,
-      chainId
-    }));
+    const [names, votingPowers, apiDelegates] = await Promise.all([
+      getNames(delegateAddresses),
+      getNetwork(space.network).actions.getVotingPower(
+        space.id,
+        space.strategies,
+        space.strategies_params,
+        space.strategies_parsed_metadata,
+        account,
+        {
+          at: null,
+          chainId: space.snapshot_chain_id
+        }
+      ),
+      Promise.all(
+        delegateAddresses.map(address =>
+          getDelegates({
+            first: 1,
+            skip: 0,
+            orderBy: 'delegatedVotes',
+            orderDirection: 'desc',
+            where: {
+              // NOTE: this is delegate registry, needs to be checksummed
+              user: getAddress(address)
+            }
+          }).then(([delegate]) => delegate)
+        )
+      )
+    ]);
+
+    return accountDelegations.map(({ delegate, chainId }) => {
+      const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
+      const balance = votingPowers
+        .filter(vp => String(vp.chainId ?? space.snapshot_chain_id) === chainId)
+        .reduce(
+          (acc, vp) => acc + Number(vp.value) / 10 ** vp.cumulativeDecimals,
+          0
+        );
+
+      return {
+        id: formatAddress(delegate),
+        name: names[delegate],
+        share: 100,
+        chainId,
+        balance,
+        delegatedVotePercentage: apiDelegate
+          ? balance / Number(apiDelegate.delegatedVotes)
+          : 1
+      };
+    });
   }
 
   const [accountDelegation] = accountDelegations;
