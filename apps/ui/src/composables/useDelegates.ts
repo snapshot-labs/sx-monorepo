@@ -350,25 +350,22 @@ export function useDelegates(
       ? delegation.chainIds
       : [delegation.chainId];
 
-    const found: { delegate: string; chainId: string }[] = [];
-    let probed = false;
-    let lastError: unknown;
+    const probedChainIds = chainIds.filter(
+      chainId => DELEGATION_SUBGRAPHS[chainId]
+    );
 
-    for (const chainId of chainIds) {
-      const delegationSubgraph = DELEGATION_SUBGRAPHS[chainId];
-      if (!delegationSubgraph) continue;
-
-      const client = new ApolloClient({
-        uri: delegationSubgraph,
-        cache: new InMemoryCache(),
-        defaultOptions: {
-          query: {
-            fetchPolicy: 'no-cache'
+    const results = await Promise.allSettled(
+      probedChainIds.map(async chainId => {
+        const client = new ApolloClient({
+          uri: DELEGATION_SUBGRAPHS[chainId],
+          cache: new InMemoryCache(),
+          defaultOptions: {
+            query: {
+              fetchPolicy: 'no-cache'
+            }
           }
-        }
-      });
+        });
 
-      try {
         const { data } = await client.query({
           query,
           variables: {
@@ -379,21 +376,24 @@ export function useDelegates(
           }
         });
 
-        probed = true;
+        return data.delegations[0]
+          ? { ...data.delegations[0], chainId: String(chainId) }
+          : null;
+      })
+    );
 
-        if (data.delegations[0]) {
-          found.push({ ...data.delegations[0], chainId: String(chainId) });
-        }
-      } catch (err) {
-        console.warn(`Failed to read delegation on chain ${chainId}`, err);
-        lastError = err;
-      }
-    }
+    const found = results
+      .map(result => (result.status === 'fulfilled' ? result.value : null))
+      .filter(Boolean);
+    const failed = results.filter(result => result.status === 'rejected');
 
-    // If no chain could be read at all, surface the failure instead of
-    // reporting "not delegating".
-    if (!probed) {
-      throw lastError ?? new Error('Delegation subgraph not found');
+    // An unread chain may hold a delegation, so only report having none when
+    // every chain answered.
+    if (!found.length && (failed.length || !probedChainIds.length)) {
+      throw (
+        (failed[0] as PromiseRejectedResult)?.reason ??
+        new Error('Delegation subgraph not found')
+      );
     }
 
     return found;

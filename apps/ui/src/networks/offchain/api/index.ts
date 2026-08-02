@@ -526,15 +526,15 @@ function formatDelegations(
   if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
-      // A delegation can live on any chain the registry strategies run on;
-      // space.network is always included so delegations made when it was the
-      // only chain read stay visible.
+      // A delegation can live on any chain the registry strategies run on.
+      // chainId stays space.network: it is the registry's default chain for
+      // explorer links and for writing, while chainIds is the set to read.
       const chainIds = Array.from(
         new Set([
+          space.network,
           ...delegateRegistryStrategies.map(strategy =>
             String(strategy.network || space.network)
-          ),
-          space.network
+          )
         ])
       );
 
@@ -543,7 +543,7 @@ function formatDelegations(
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
-        chainId: chainIds[0],
+        chainId: space.network,
         chainIds
       });
     }

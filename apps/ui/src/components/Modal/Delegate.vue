@@ -261,6 +261,12 @@ function prefillExistingDelegatees() {
       ? delegatees.value
       : delegatees.value.slice(0, 1);
 
+  // Submitting has to replace the prefilled delegation, so it must target the
+  // chain that one lives on rather than the registry's default.
+  if (existingDelegatees[0]?.chainId) {
+    form.chainId = existingDelegatees[0].chainId;
+  }
+
   const remainingShares =
     100 - delegatees.value.reduce((a, b) => a + b.share, 0);
   const formDelegatees = form.delegatees.filter(
