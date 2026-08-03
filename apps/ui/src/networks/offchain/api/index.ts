@@ -526,9 +526,8 @@ function formatDelegations(
   if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
-      // A delegation can live on any chain the registry strategies run on.
-      // chainId stays space.network: it is the registry's default chain for
-      // explorer links and for writing, while chainIds is the set to read.
+      // chainIds is the set to read, chainId the default chain to write to
+      // and to link to explorers with.
       const chainIds = Array.from(
         new Set([
           space.network,

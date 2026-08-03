@@ -254,15 +254,13 @@ function prefillExistingDelegatees() {
     return;
   }
 
-  // A single-delegate form can only edit one delegation; when the account
-  // holds delegations on several chains only the first one is prefilled.
   const existingDelegatees =
     isSelectedDelegationSupportingMultipleDelegates.value
       ? delegatees.value
       : delegatees.value.slice(0, 1);
 
-  // Submitting has to replace the prefilled delegation, so it must target the
-  // chain that one lives on rather than the registry's default.
+  // Without this the form would add a delegation on the registry's default
+  // chain instead of replacing the one it prefilled.
   if (existingDelegatees[0]?.chainId) {
     form.chainId = existingDelegatees[0].chainId;
   }

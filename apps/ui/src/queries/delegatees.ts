@@ -145,8 +145,6 @@ async function fetchDelegateRegistryDelegatees(
 
   if (!accountDelegations.length) return [];
 
-  // The same delegate can hold a delegation on several chains, so it is only
-  // looked up once.
   const delegateAddresses = [
     ...new Set(accountDelegations.map(d => d.delegate))
   ];
@@ -182,8 +180,7 @@ async function fetchDelegateRegistryDelegatees(
 
   return accountDelegations.map(({ delegate, chainId }) => {
     const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
-    // A delegation only carries the power of the strategies reading its chain,
-    // not the account's total.
+    // A delegation only carries the power of the strategies reading its chain.
     const balance = votingPowers
       .filter(vp => String(vp.chainId ?? space.snapshot_chain_id) === chainId)
       .reduce(
