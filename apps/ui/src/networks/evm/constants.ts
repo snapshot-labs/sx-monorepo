@@ -32,28 +32,34 @@ export function createConstants(
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {
-      [config.Authenticators.EthSigV2]: {
-        isSupported: true,
-        isContractSupported: true,
-        isReasonSupported: true,
-        relayerType: 'evm',
-        connectors: EVM_CONNECTORS
-      },
-      [config.Authenticators.EthSig]: {
-        priority: 1,
-        isSupported: true,
-        isContractSupported: false,
-        isReasonSupported: true,
-        relayerType: 'evm',
-        connectors: EVM_CONNECTORS
-      },
-      [config.Authenticators.EthTx]: {
-        priority: 2,
-        isSupported: true,
-        isContractSupported: true,
-        isReasonSupported: true,
-        connectors: EVM_CONNECTORS
-      },
+      ...(config.Authenticators.EthSigV2 && {
+        [config.Authenticators.EthSigV2]: {
+          isSupported: true,
+          isContractSupported: true,
+          isReasonSupported: true,
+          relayerType: 'evm',
+          connectors: EVM_CONNECTORS
+        }
+      }),
+      ...(config.Authenticators.EthSig && {
+        [config.Authenticators.EthSig]: {
+          priority: 1,
+          isSupported: true,
+          isContractSupported: false,
+          isReasonSupported: true,
+          relayerType: 'evm',
+          connectors: EVM_CONNECTORS
+        }
+      }),
+      ...(config.Authenticators.EthTx && {
+        [config.Authenticators.EthTx]: {
+          priority: 2,
+          isSupported: true,
+          isContractSupported: true,
+          isReasonSupported: true,
+          connectors: EVM_CONNECTORS
+        }
+      }),
       // Governor Bravo
       GovernorBravoAuthenticator: {
         priority: 1,
@@ -95,18 +101,30 @@ export function createConstants(
     };
 
   const SUPPORTED_STRATEGIES = {
-    [config.Strategies.Vanilla]: true,
-    [config.Strategies.Comp]: true,
-    [config.Strategies.OZVotes]: true,
-    [config.Strategies.Whitelist]: true,
+    ...(config.Strategies.Vanilla && {
+      [config.Strategies.Vanilla]: true
+    }),
+    ...(config.Strategies.Comp && {
+      [config.Strategies.Comp]: true
+    }),
+    ...(config.Strategies.OZVotes && {
+      [config.Strategies.OZVotes]: true
+    }),
+    ...(config.Strategies.Whitelist && {
+      [config.Strategies.Whitelist]: true
+    }),
     ...(config.Strategies.ApeGas && {
       [config.Strategies.ApeGas]: true
     })
   };
 
   const SUPPORTED_EXECUTORS = {
-    SimpleQuorumAvatar: true,
-    SimpleQuorumTimelock: true,
+    ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
+      SimpleQuorumAvatar: true
+    }),
+    ...(config.ExecutionStrategies.SimpleQuorumTimelock && {
+      SimpleQuorumTimelock: true
+    }),
     // Governor Bravo
     GovernorBravoTimelock: true,
     // OpenZeppelin
@@ -114,20 +132,36 @@ export function createConstants(
   };
 
   const AUTHS = {
-    [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
-    [config.Authenticators.EthSigV2]: 'Ethereum signature',
-    [config.Authenticators.EthTx]: 'Ethereum transaction'
+    ...(config.Authenticators.EthSig && {
+      [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)'
+    }),
+    ...(config.Authenticators.EthSigV2 && {
+      [config.Authenticators.EthSigV2]: 'Ethereum signature'
+    }),
+    ...(config.Authenticators.EthTx && {
+      [config.Authenticators.EthTx]: 'Ethereum transaction'
+    })
   };
 
   const PROPOSAL_VALIDATIONS = {
-    [config.ProposalValidations.VotingPower]: 'Voting power'
+    ...(config.ProposalValidations.VotingPower && {
+      [config.ProposalValidations.VotingPower]: 'Voting power'
+    })
   };
 
   const STRATEGIES = {
-    [config.Strategies.Vanilla]: 'Vanilla',
-    [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
-    [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.Whitelist]: 'Merkle whitelist',
+    ...(config.Strategies.Vanilla && {
+      [config.Strategies.Vanilla]: 'Vanilla'
+    }),
+    ...(config.Strategies.Comp && {
+      [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)'
+    }),
+    ...(config.Strategies.OZVotes && {
+      [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)'
+    }),
+    ...(config.Strategies.Whitelist && {
+      [config.Strategies.Whitelist]: 'Merkle whitelist'
+    }),
     ...(config.Strategies.ApeGas && {
       [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
     })
@@ -141,380 +175,417 @@ export function createConstants(
   };
 
   const EDITOR_AUTHENTICATORS = [
-    {
-      address: config.Authenticators.EthTx,
-      name: 'Ethereum transaction',
-      about:
-        'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
-      icon: IHCube,
-      paramsDefinition: null
-    },
-    {
-      // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
-      address: config.Authenticators.EthSig,
-      name: 'Ethereum signature (deprecated)',
-      deprecated: true,
-      about:
-        'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
-      icon: IHPencil,
-      paramsDefinition: null
-    },
-    {
-      address: config.Authenticators.EthSigV2,
-      name: 'Ethereum signature',
-      about:
-        'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
-      icon: IHPencil,
-      paramsDefinition: null
-    }
+    ...(config.Authenticators.EthTx
+      ? [
+          {
+            address: config.Authenticators.EthTx,
+            name: 'Ethereum transaction',
+            about:
+              'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
+            icon: IHCube,
+            paramsDefinition: null
+          }
+        ]
+      : []),
+    ...(config.Authenticators.EthSig
+      ? [
+          {
+            // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
+            address: config.Authenticators.EthSig,
+            name: 'Ethereum signature (deprecated)',
+            deprecated: true,
+            about:
+              'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
+            icon: IHPencil,
+            paramsDefinition: null
+          }
+        ]
+      : []),
+    ...(config.Authenticators.EthSigV2
+      ? [
+          {
+            address: config.Authenticators.EthSigV2,
+            name: 'Ethereum signature',
+            about:
+              'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
+            icon: IHPencil,
+            paramsDefinition: null
+          }
+        ]
+      : [])
   ];
 
   const EDITOR_PROPOSAL_VALIDATIONS = [
-    {
-      address: config.ProposalValidations.VotingPower,
-      type: 'VotingPower',
-      name: 'Voting power',
-      icon: IHLightningBolt,
-      validate: (params: Record<string, any>) => {
-        return params?.strategies?.length > 0;
-      },
-      generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
-      generateParams: async (params: Record<string, any>) => {
-        const abiCoder = new AbiCoder();
+    ...(config.ProposalValidations.VotingPower
+      ? [
+          {
+            address: config.ProposalValidations.VotingPower,
+            type: 'VotingPower',
+            name: 'Voting power',
+            icon: IHLightningBolt,
+            validate: (params: Record<string, any>) => {
+              return params?.strategies?.length > 0;
+            },
+            generateSummary: (params: Record<string, any>) =>
+              `(${params.threshold})`,
+            generateParams: async (params: Record<string, any>) => {
+              const abiCoder = new AbiCoder();
 
-        const strategies = await Promise.all(
-          params.strategies.map(async (strategy: StrategyConfig) => {
-            return {
-              addr: strategy.address,
-              params: strategy.generateParams
-                ? (await strategy.generateParams(strategy.params))[0]
-                : '0x00'
-            };
-          })
-        );
+              const strategies = await Promise.all(
+                params.strategies.map(async (strategy: StrategyConfig) => {
+                  return {
+                    addr: strategy.address,
+                    params: strategy.generateParams
+                      ? (await strategy.generateParams(strategy.params))[0]
+                      : '0x00'
+                  };
+                })
+              );
 
-        return [
-          abiCoder.encode(
-            ['uint256', 'tuple(address addr, bytes params)[]'],
-            [params.threshold, strategies]
-          )
-        ];
-      },
-      generateMetadata: async (params: Record<string, any>) => {
-        const strategiesMetadata = await Promise.all(
-          params.strategies.map(async (strategy: StrategyConfig) => {
-            if (!strategy.generateMetadata) return;
+              return [
+                abiCoder.encode(
+                  ['uint256', 'tuple(address addr, bytes params)[]'],
+                  [params.threshold, strategies]
+                )
+              ];
+            },
+            generateMetadata: async (params: Record<string, any>) => {
+              const strategiesMetadata = await Promise.all(
+                params.strategies.map(async (strategy: StrategyConfig) => {
+                  if (!strategy.generateMetadata) return;
 
-            const metadata = await strategy.generateMetadata(strategy.params);
-            const pinned = await pin(metadata);
+                  const metadata = await strategy.generateMetadata(
+                    strategy.params
+                  );
+                  const pinned = await pin(metadata);
 
-            return `ipfs://${pinned.cid}`;
-          })
-        );
+                  return `ipfs://${pinned.cid}`;
+                })
+              );
 
-        return {
-          strategies_metadata: strategiesMetadata
-        };
-      },
-      parseParams: async (params: string) => {
-        const abiCoder = new AbiCoder();
+              return {
+                strategies_metadata: strategiesMetadata
+              };
+            },
+            parseParams: async (params: string) => {
+              const abiCoder = new AbiCoder();
 
-        return {
-          threshold: abiCoder
-            .decode(
-              ['uint256', 'tuple(address addr, bytes params)[]'],
-              params
-            )[0]
-            .toString()
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['threshold'],
-        properties: {
-          threshold: {
-            type: 'string',
-            format: 'uint256',
-            title: 'Proposal threshold',
-            examples: ['1']
+              return {
+                threshold: abiCoder
+                  .decode(
+                    ['uint256', 'tuple(address addr, bytes params)[]'],
+                    params
+                  )[0]
+                  .toString()
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['threshold'],
+              properties: {
+                threshold: {
+                  type: 'string',
+                  format: 'uint256',
+                  title: 'Proposal threshold',
+                  examples: ['1']
+                }
+              }
+            }
           }
-        }
-      }
-    }
+        ]
+      : [])
   ];
 
   const EDITOR_VOTING_STRATEGIES = [
-    {
-      address: config.Strategies.Vanilla,
-      name: 'Vanilla',
-      about:
-        'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
-      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#vanilla`,
-      icon: IHBeaker,
-      generateMetadata: async (params: Record<string, any>) => ({
-        name: 'Vanilla',
-        properties: {
-          symbol: params.symbol,
-          decimals: 0
-        }
-      }),
-      parseParams: async (
-        params: string,
-        metadata: StrategyParsedMetadata | null
-      ) => {
-        if (!metadata) throw new Error('Missing metadata');
+    ...(config.Strategies.Vanilla
+      ? [
+          {
+            address: config.Strategies.Vanilla,
+            name: 'Vanilla',
+            about:
+              'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
+            link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#vanilla`,
+            icon: IHBeaker,
+            generateMetadata: async (params: Record<string, any>) => ({
+              name: 'Vanilla',
+              properties: {
+                symbol: params.symbol,
+                decimals: 0
+              }
+            }),
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
 
-        return {
-          symbol: metadata.symbol
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: [],
-        properties: {
-          symbol: {
-            type: 'string',
-            maxLength: MAX_SYMBOL_LENGTH,
-            title: 'Symbol',
-            examples: ['e.g. VP']
+              return {
+                symbol: metadata.symbol
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: [],
+              properties: {
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. VP']
+                }
+              }
+            }
           }
-        }
-      }
-    },
-    {
-      address: config.Strategies.Whitelist,
-      type: 'MerkleWhitelist',
-      name: 'Whitelist',
-      about:
-        'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
-      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#whitelist`,
-      generateSummary: (params: Record<string, any>) => {
-        const length =
-          params.whitelist.trim().length === 0
-            ? 0
-            : params.whitelist
+        ]
+      : []),
+    ...(config.Strategies.Whitelist
+      ? [
+          {
+            address: config.Strategies.Whitelist,
+            type: 'MerkleWhitelist',
+            name: 'Whitelist',
+            about:
+              'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
+            link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#whitelist`,
+            generateSummary: (params: Record<string, any>) => {
+              const length =
+                params.whitelist.trim().length === 0
+                  ? 0
+                  : params.whitelist
+                      .split(/[\n,]/)
+                      .filter((s: string) => s.trim().length).length;
+
+              return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
+            },
+            generateParams: async (params: Record<string, any>) => {
+              const entries = params.whitelist
                 .split(/[\n,]/)
-                .filter((s: string) => s.trim().length).length;
+                .map((s: string) => s.trim())
+                .filter((s: string) => s.length);
 
-        return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
-      },
-      generateParams: async (params: Record<string, any>) => {
-        const entries = params.whitelist
-          .split(/[\n,]/)
-          .map((s: string) => s.trim())
-          .filter((s: string) => s.length);
+              const requestId = await generateMerkleTree({
+                network: 'evm',
+                entries
+              });
 
-        const requestId = await generateMerkleTree({
-          network: 'evm',
-          entries
-        });
+              await sleep(500);
 
-        await sleep(500);
+              while (true) {
+                const root = await getMerkleRoot({
+                  requestId
+                });
 
-        while (true) {
-          const root = await getMerkleRoot({
-            requestId
-          });
+                if (root) {
+                  const abiCoder = new AbiCoder();
+                  return [abiCoder.encode(['bytes32'], [root])];
+                }
 
-          if (root) {
-            const abiCoder = new AbiCoder();
-            return [abiCoder.encode(['bytes32'], [root])];
+                await sleep(5000);
+              }
+            },
+            generateMetadata: async (params: Record<string, any>) => {
+              const tree = params.whitelist
+                .split(/[\n,]/)
+                .filter((s: string) => s.trim().length)
+                .map((item: string) => {
+                  const [address, votingPower] = item
+                    .split(':')
+                    .map(s => s.trim());
+
+                  return {
+                    address,
+                    votingPower: votingPower
+                  };
+                });
+
+              const pinned = await pin({ tree });
+
+              return {
+                name: 'Whitelist',
+                properties: {
+                  symbol: params.symbol,
+                  decimals: 0,
+                  payload: `ipfs://${pinned.cid}`
+                }
+              };
+            },
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
+
+              const getWhitelist = async (payload: string) => {
+                const metadataUrl = getUrl(payload);
+
+                if (!metadataUrl) return '';
+
+                const res = await fetch(metadataUrl);
+                const { tree } = await res.json();
+                return tree
+                  .map((item: any) => `${item.address}:${item.votingPower}`)
+                  .join('\n');
+              };
+
+              return {
+                symbol: metadata.symbol,
+                whitelist: metadata.payload
+                  ? await getWhitelist(metadata.payload)
+                  : ''
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['whitelist'],
+              properties: {
+                whitelist: {
+                  type: 'string',
+                  format: 'addresses-with-voting-power',
+                  title: 'Whitelist',
+                  examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: 6,
+                  title: 'Symbol',
+                  examples: ['e.g. VP']
+                }
+              }
+            }
           }
+        ]
+      : []),
+    ...(config.Strategies.OZVotes
+      ? [
+          {
+            address: config.Strategies.OZVotes,
+            name: 'ERC-20 Votes (EIP-5805)',
+            about:
+              'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+            link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#erc-20-votes-eip-5805`,
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.contractAddress)}, ${params.decimals})`,
+            generateParams: async (params: Record<string, any>) => [
+              params.contractAddress
+            ],
+            generateMetadata: async (params: Record<string, any>) => ({
+              name: 'ERC-20 Votes (EIP-5805)',
+              properties: {
+                symbol: params.symbol,
+                decimals: parseInt(params.decimals),
+                token: params.contractAddress
+              }
+            }),
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
 
-          await sleep(5000);
-        }
-      },
-      generateMetadata: async (params: Record<string, any>) => {
-        const tree = params.whitelist
-          .split(/[\n,]/)
-          .filter((s: string) => s.trim().length)
-          .map((item: string) => {
-            const [address, votingPower] = item.split(':').map(s => s.trim());
-
-            return {
-              address,
-              votingPower: votingPower
-            };
-          });
-
-        const pinned = await pin({ tree });
-
-        return {
-          name: 'Whitelist',
-          properties: {
-            symbol: params.symbol,
-            decimals: 0,
-            payload: `ipfs://${pinned.cid}`
+              return {
+                contractAddress: metadata.token,
+                decimals: metadata.decimals,
+                symbol: metadata.symbol
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['contractAddress', 'decimals'],
+              properties: {
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Token address',
+                  examples: ['0x0000…']
+                },
+                decimals: {
+                  type: 'integer',
+                  title: 'Decimals',
+                  examples: ['18']
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. UNI']
+                }
+              }
+            }
           }
-        };
-      },
-      parseParams: async (
-        params: string,
-        metadata: StrategyParsedMetadata | null
-      ) => {
-        if (!metadata) throw new Error('Missing metadata');
+        ]
+      : []),
+    ...(config.Strategies.Comp
+      ? [
+          {
+            address: config.Strategies.Comp,
+            name: 'ERC-20 Votes Comp (EIP-5805)',
+            about:
+              'A strategy that allows delegated balances of Compound style checkpoint tokens to be used as voting power.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.contractAddress)}, ${params.decimals})`,
+            generateParams: async (params: Record<string, any>) => [
+              params.contractAddress
+            ],
+            generateMetadata: async (params: Record<string, any>) => ({
+              name: 'ERC-20 Votes Comp (EIP-5805)',
+              properties: {
+                symbol: params.symbol,
+                decimals: parseInt(params.decimals),
+                token: params.contractAddress
+              }
+            }),
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
 
-        const getWhitelist = async (payload: string) => {
-          const metadataUrl = getUrl(payload);
-
-          if (!metadataUrl) return '';
-
-          const res = await fetch(metadataUrl);
-          const { tree } = await res.json();
-          return tree
-            .map((item: any) => `${item.address}:${item.votingPower}`)
-            .join('\n');
-        };
-
-        return {
-          symbol: metadata.symbol,
-          whitelist: metadata.payload
-            ? await getWhitelist(metadata.payload)
-            : ''
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['whitelist'],
-        properties: {
-          whitelist: {
-            type: 'string',
-            format: 'addresses-with-voting-power',
-            title: 'Whitelist',
-            examples: ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70:40']
-          },
-          symbol: {
-            type: 'string',
-            maxLength: 6,
-            title: 'Symbol',
-            examples: ['e.g. VP']
+              return {
+                contractAddress: metadata.token,
+                decimals: metadata.decimals,
+                symbol: metadata.symbol
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['contractAddress', 'decimals'],
+              properties: {
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Token address',
+                  examples: ['0x0000…']
+                },
+                decimals: {
+                  type: 'integer',
+                  title: 'Decimals',
+                  examples: ['18']
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. UNI']
+                }
+              }
+            }
           }
-        }
-      }
-    },
-    {
-      address: config.Strategies.OZVotes,
-      name: 'ERC-20 Votes (EIP-5805)',
-      about:
-        'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
-      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#erc-20-votes-eip-5805`,
-      icon: IHCode,
-      generateSummary: (params: Record<string, any>) =>
-        `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: async (params: Record<string, any>) => [
-        params.contractAddress
-      ],
-      generateMetadata: async (params: Record<string, any>) => ({
-        name: 'ERC-20 Votes (EIP-5805)',
-        properties: {
-          symbol: params.symbol,
-          decimals: parseInt(params.decimals),
-          token: params.contractAddress
-        }
-      }),
-      parseParams: async (
-        params: string,
-        metadata: StrategyParsedMetadata | null
-      ) => {
-        if (!metadata) throw new Error('Missing metadata');
-
-        return {
-          contractAddress: metadata.token,
-          decimals: metadata.decimals,
-          symbol: metadata.symbol
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['contractAddress', 'decimals'],
-        properties: {
-          contractAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Token address',
-            examples: ['0x0000…']
-          },
-          decimals: {
-            type: 'integer',
-            title: 'Decimals',
-            examples: ['18']
-          },
-          symbol: {
-            type: 'string',
-            maxLength: MAX_SYMBOL_LENGTH,
-            title: 'Symbol',
-            examples: ['e.g. UNI']
-          }
-        }
-      }
-    },
-    {
-      address: config.Strategies.Comp,
-      name: 'ERC-20 Votes Comp (EIP-5805)',
-      about:
-        'A strategy that allows delegated balances of Compound style checkpoint tokens to be used as voting power.',
-      icon: IHCode,
-      generateSummary: (params: Record<string, any>) =>
-        `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: async (params: Record<string, any>) => [
-        params.contractAddress
-      ],
-      generateMetadata: async (params: Record<string, any>) => ({
-        name: 'ERC-20 Votes Comp (EIP-5805)',
-        properties: {
-          symbol: params.symbol,
-          decimals: parseInt(params.decimals),
-          token: params.contractAddress
-        }
-      }),
-      parseParams: async (
-        params: string,
-        metadata: StrategyParsedMetadata | null
-      ) => {
-        if (!metadata) throw new Error('Missing metadata');
-
-        return {
-          contractAddress: metadata.token,
-          decimals: metadata.decimals,
-          symbol: metadata.symbol
-        };
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['contractAddress', 'decimals'],
-        properties: {
-          contractAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Token address',
-            examples: ['0x0000…']
-          },
-          decimals: {
-            type: 'integer',
-            title: 'Decimals',
-            examples: ['18']
-          },
-          symbol: {
-            type: 'string',
-            maxLength: MAX_SYMBOL_LENGTH,
-            title: 'Symbol',
-            examples: ['e.g. UNI']
-          }
-        }
-      }
-    },
+        ]
+      : []),
     ...(config.Strategies.ApeGas
       ? [
           {
@@ -619,122 +690,130 @@ export function createConstants(
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [
-    {
-      address: '',
-      type: 'SimpleQuorumAvatar',
-      name: EXECUTORS.SimpleQuorumAvatar,
-      about:
-        'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
-      icon: IHUserCircle,
-      generateSummary: (params: Record<string, any>) =>
-        `(${params.quorum}, ${shorten(params.contractAddress)})`,
-      deploy: async (
-        client: clients.EvmEthereumTx,
-        web3: Web3Provider,
-        controller: string,
-        spaceAddress: string,
-        params: Record<string, any>
-      ): Promise<{ address: string; txId: string }> => {
-        return client.deployAvatarExecution({
-          signer: web3.getSigner(),
-          params: {
-            controller: params.controller,
-            target: params.contractAddress,
-            spaces: [spaceAddress],
-            quorum: BigInt(params.quorum)
+    ...(config.ExecutionStrategies.SimpleQuorumAvatar
+      ? [
+          {
+            address: '',
+            type: 'SimpleQuorumAvatar',
+            name: EXECUTORS.SimpleQuorumAvatar,
+            about:
+              'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
+            icon: IHUserCircle,
+            generateSummary: (params: Record<string, any>) =>
+              `(${params.quorum}, ${shorten(params.contractAddress)})`,
+            deploy: async (
+              client: clients.EvmEthereumTx,
+              web3: Web3Provider,
+              controller: string,
+              spaceAddress: string,
+              params: Record<string, any>
+            ): Promise<{ address: string; txId: string }> => {
+              return client.deployAvatarExecution({
+                signer: web3.getSigner(),
+                params: {
+                  controller: params.controller,
+                  target: params.contractAddress,
+                  spaces: [spaceAddress],
+                  quorum: BigInt(params.quorum)
+                }
+              });
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['controller', 'quorum', 'contractAddress'],
+              properties: {
+                controller: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Controller address',
+                  examples: ['0x0000…']
+                },
+                quorum: {
+                  type: 'integer',
+                  title: 'Quorum',
+                  examples: ['1']
+                },
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Safe address',
+                  examples: ['0x0000…']
+                }
+              }
+            }
           }
-        });
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['controller', 'quorum', 'contractAddress'],
-        properties: {
-          controller: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Controller address',
-            examples: ['0x0000…']
-          },
-          quorum: {
-            type: 'integer',
-            title: 'Quorum',
-            examples: ['1']
-          },
-          contractAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Safe address',
-            examples: ['0x0000…']
+        ]
+      : []),
+    ...(config.ExecutionStrategies.SimpleQuorumTimelock
+      ? [
+          {
+            address: '',
+            type: 'SimpleQuorumTimelock',
+            name: EXECUTORS.SimpleQuorumTimelock,
+            about:
+              'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
+            icon: IHClock,
+            generateSummary: (params: Record<string, any>) =>
+              `(${params.quorum}, ${params.timelockDelay})`,
+            deploy: async (
+              client: clients.EvmEthereumTx,
+              web3: Web3Provider,
+              controller: string,
+              spaceAddress: string,
+              params: Record<string, any>
+            ): Promise<{ address: string; txId: string }> => {
+              return client.deployTimelockExecution({
+                signer: web3.getSigner(),
+                params: {
+                  controller: params.controller,
+                  vetoGuardian:
+                    params.vetoGuardian ||
+                    '0x0000000000000000000000000000000000000000',
+                  spaces: [spaceAddress],
+                  timelockDelay: BigInt(params.timelockDelay),
+                  quorum: BigInt(params.quorum)
+                }
+              });
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['controller', 'quorum', 'timelockDelay'],
+              properties: {
+                controller: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Controller address',
+                  examples: ['0x0000…']
+                },
+                quorum: {
+                  type: 'integer',
+                  title: 'Quorum',
+                  examples: ['1']
+                },
+                vetoGuardian: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Veto guardian address',
+                  examples: ['0x0000…']
+                },
+                timelockDelay: {
+                  type: 'integer',
+                  format: 'duration',
+                  title: 'Timelock delay'
+                }
+              }
+            }
           }
-        }
-      }
-    },
-    {
-      address: '',
-      type: 'SimpleQuorumTimelock',
-      name: EXECUTORS.SimpleQuorumTimelock,
-      about:
-        'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
-      icon: IHClock,
-      generateSummary: (params: Record<string, any>) =>
-        `(${params.quorum}, ${params.timelockDelay})`,
-      deploy: async (
-        client: clients.EvmEthereumTx,
-        web3: Web3Provider,
-        controller: string,
-        spaceAddress: string,
-        params: Record<string, any>
-      ): Promise<{ address: string; txId: string }> => {
-        return client.deployTimelockExecution({
-          signer: web3.getSigner(),
-          params: {
-            controller: params.controller,
-            vetoGuardian:
-              params.vetoGuardian ||
-              '0x0000000000000000000000000000000000000000',
-            spaces: [spaceAddress],
-            timelockDelay: BigInt(params.timelockDelay),
-            quorum: BigInt(params.quorum)
-          }
-        });
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['controller', 'quorum', 'timelockDelay'],
-        properties: {
-          controller: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Controller address',
-            examples: ['0x0000…']
-          },
-          quorum: {
-            type: 'integer',
-            title: 'Quorum',
-            examples: ['1']
-          },
-          vetoGuardian: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Veto guardian address',
-            examples: ['0x0000…']
-          },
-          timelockDelay: {
-            type: 'integer',
-            format: 'duration',
-            title: 'Timelock delay'
-          }
-        }
-      }
-    }
+        ]
+      : [])
   ];
 
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];

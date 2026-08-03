@@ -80,7 +80,10 @@ function handleStrategySave(value: Record<string, any>) {
         @delete-strategy="removeStrategy"
       />
     </div>
-    <div v-if="!model" class="flex flex-wrap gap-2">
+    <div v-if="!model && availableStrategies.length === 0">
+      No strategies available
+    </div>
+    <div v-else-if="!model" class="flex flex-wrap gap-2">
       <ButtonStrategy
         v-for="strategy in availableStrategies"
         :key="strategy.address"

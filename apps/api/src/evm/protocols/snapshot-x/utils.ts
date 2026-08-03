@@ -42,8 +42,9 @@ export async function updateProposalValidationStrategy(
   space.voting_power_validation_strategy_metadata = metadataUri;
 
   if (
+    protocolConfig.propositionPowerValidationStrategyAddress !== null &&
     strategyAddress ===
-    getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
+      getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
   ) {
     try {
       const [threshold, strategies] = decodeAbiParameters(
