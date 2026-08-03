@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { usePaymentsQuery } from '@/queries/payments';
 import { Space } from '@/types';
@@ -90,7 +88,8 @@ const statusText = computed(() => {
 
           <UiButton
             :to="{ name: 'space-pro' }"
-            class="primary w-full sm:w-auto"
+            primary
+            class="w-full sm:w-auto"
           >
             {{ props.space.turbo ? 'Extend plan' : 'Upgrade to Pro' }}
           </UiButton>
@@ -98,70 +97,13 @@ const statusText = computed(() => {
       </div>
     </UiContainerSettings>
 
-    <UiSectionHeader class="mt-4" label="Payment history" sticky />
-    <UiColumnHeader class="space-x-3">
-      <div class="w-[190px] grow sm:grow-0 text-left">Date</div>
-      <div class="hidden sm:flex grow">Type</div>
-      <div class="w-[150px] flex justify-end">Amount</div>
-      <div class="min-w-3.5" />
-    </UiColumnHeader>
-
-    <UiLoading v-if="isPending" class="px-4 py-3 block" />
-    <UiStateWarning v-else-if="isError" class="px-4 py-3">
-      Failed to load payment history.
-    </UiStateWarning>
-    <UiStateWarning
-      v-else-if="!payments || payments.length === 0"
-      class="px-4 py-3"
-    >
-      No payment history available.
-    </UiStateWarning>
-    <UiContainerInfiniteScroll
-      v-else
-      class="px-4"
+    <PaymentHistory
+      :payments="payments"
+      :is-pending="isPending"
+      :is-error="isError"
+      :chain-id="chainId"
       :loading-more="isFetchingNextPage"
       @end-reached="hasNextPage && fetchNextPage()"
-    >
-      <div
-        v-for="payment in payments"
-        :key="payment.id"
-        class="border-b flex space-x-3 py-3"
-      >
-        <div class="flex grow sm:grow-0 w-[190px] items-center">
-          {{ dayjs((payment.timestamp || 0) * 1000).format('MMM D, YYYY') }}
-        </div>
-        <div class="hidden sm:flex grow w-0 text-[17px] capitalize">
-          {{ payment.type === 'turbo' ? 'snapshot pro' : payment.type }}
-        </div>
-        <div
-          class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center"
-        >
-          <span class="text-skin-link font-semibold">
-            {{ _n(payment.amount_decimal) }}
-            {{ payment.token_symbol }}
-          </span>
-        </div>
-
-        <UiDropdown>
-          <template #button>
-            <div class="flex items-center h-full">
-              <button type="button" class="text-skin-link">
-                <IH-dots-horizontal />
-              </button>
-            </div>
-          </template>
-          <template #items>
-            <UiDropdownItem
-              :to="
-                getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
-              "
-            >
-              <IH-arrow-sm-right class="-rotate-45" :width="16" />
-              View transaction
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
-      </div>
-    </UiContainerInfiniteScroll>
+    />
   </div>
 </template>
