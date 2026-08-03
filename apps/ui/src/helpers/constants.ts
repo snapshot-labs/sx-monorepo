@@ -17,8 +17,7 @@ export const API_TESTNET_URL =
   import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
 export const SCHNAPS_URLS: Record<string, string> = {
-  // TODO: point `s` at prod schnaps before mainnet launch — sandbox for now
-  s: 'https://schnaps-api-sandbox-stripe-lgba3.ondigitalocean.app',
+  s: 'https://schnaps.snapshot.box',
   's-tn': 'https://testnet-schnaps.snapshot.box'
 };
 
