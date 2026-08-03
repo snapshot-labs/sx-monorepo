@@ -145,70 +145,14 @@ async function fetchDelegateRegistryDelegatees(
 
   if (!accountDelegations.length) return [];
 
-  // Each chain holds its own delegation, so a row carries the voting power of
-  // the strategies reading that chain rather than the account's total. The
-  // same delegate can hold a delegation on several chains, so it is only
+  // The same delegate can hold a delegation on several chains, so it is only
   // looked up once.
-  if (accountDelegations.length > 1) {
-    const delegateAddresses = [
-      ...new Set(accountDelegations.map(d => d.delegate))
-    ];
+  const delegateAddresses = [
+    ...new Set(accountDelegations.map(d => d.delegate))
+  ];
 
-    const [names, votingPowers, apiDelegates] = await Promise.all([
-      getNames(delegateAddresses),
-      getNetwork(space.network).actions.getVotingPower(
-        space.id,
-        space.strategies,
-        space.strategies_params,
-        space.strategies_parsed_metadata,
-        account,
-        {
-          at: null,
-          chainId: space.snapshot_chain_id
-        }
-      ),
-      Promise.all(
-        delegateAddresses.map(address =>
-          getDelegates({
-            first: 1,
-            skip: 0,
-            orderBy: 'delegatedVotes',
-            orderDirection: 'desc',
-            where: {
-              // NOTE: this is delegate registry, needs to be checksummed
-              user: getAddress(address)
-            }
-          }).then(([delegate]) => delegate)
-        )
-      )
-    ]);
-
-    return accountDelegations.map(({ delegate, chainId }) => {
-      const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
-      const balance = votingPowers
-        .filter(vp => String(vp.chainId ?? space.snapshot_chain_id) === chainId)
-        .reduce(
-          (acc, vp) => acc + Number(vp.value) / 10 ** vp.cumulativeDecimals,
-          0
-        );
-
-      return {
-        id: formatAddress(delegate),
-        name: names[delegate],
-        share: 100,
-        chainId,
-        balance,
-        delegatedVotePercentage: apiDelegate
-          ? balance / Number(apiDelegate.delegatedVotes)
-          : 1
-      };
-    });
-  }
-
-  const [accountDelegation] = accountDelegations;
-
-  const [names, votingPowers, [apiDelegate]] = await Promise.all([
-    getNames([accountDelegation.delegate]),
+  const [names, votingPowers, apiDelegates] = await Promise.all([
+    getNames(delegateAddresses),
     getNetwork(space.network).actions.getVotingPower(
       space.id,
       space.strategies,
@@ -220,35 +164,44 @@ async function fetchDelegateRegistryDelegatees(
         chainId: space.snapshot_chain_id
       }
     ),
-    getDelegates({
-      first: 1,
-      skip: 0,
-      orderBy: 'delegatedVotes',
-      orderDirection: 'desc',
-      where: {
-        // NOTE: this is delegate registry, needs to be checksummed
-        user: getAddress(accountDelegation.delegate)
-      }
-    })
+    Promise.all(
+      delegateAddresses.map(address =>
+        getDelegates({
+          first: 1,
+          skip: 0,
+          orderBy: 'delegatedVotes',
+          orderDirection: 'desc',
+          where: {
+            // NOTE: this is delegate registry, needs to be checksummed
+            user: getAddress(address)
+          }
+        }).then(([delegate]) => delegate)
+      )
+    )
   ]);
 
-  const balance = votingPowers.reduce(
-    (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
-    0
-  );
+  return accountDelegations.map(({ delegate, chainId }) => {
+    const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
+    // A delegation only carries the power of the strategies reading its chain,
+    // not the account's total.
+    const balance = votingPowers
+      .filter(vp => String(vp.chainId ?? space.snapshot_chain_id) === chainId)
+      .reduce(
+        (acc, vp) => acc + Number(vp.value) / 10 ** vp.cumulativeDecimals,
+        0
+      );
 
-  return [
-    {
-      id: formatAddress(accountDelegation.delegate),
+    return {
+      id: formatAddress(delegate),
       balance,
       delegatedVotePercentage: apiDelegate
         ? balance / Number(apiDelegate.delegatedVotes)
         : 1,
-      name: names[accountDelegation.delegate],
+      name: names[delegate],
       share: 100,
-      chainId: accountDelegation.chainId
-    }
-  ];
+      chainId
+    };
+  });
 }
 
 function getSplitDelegationStrategy(space: Space) {
