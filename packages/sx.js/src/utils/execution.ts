@@ -93,12 +93,13 @@ export async function getAbi(
 export async function createSendTokenTransaction(
   data: CallInfo,
   amount: string,
-  token: SendTokenTransaction['_form']['token']
+  token: SendTokenTransaction['_form']['token'],
+  recipient: string = data.target
 ): Promise<SendTokenTransaction> {
   return {
     _type: 'sendToken',
     _form: {
-      recipient: data.target,
+      recipient,
       token,
       amount
     },
@@ -139,12 +140,17 @@ export async function decodeExecution(
           tokenContract.decimals()
         ]);
 
-      return createSendTokenTransaction(data, decoded[1].toString(), {
-        name,
-        symbol,
-        decimals,
-        address: target
-      });
+      return createSendTokenTransaction(
+        data,
+        decoded[1].toString(),
+        {
+          name,
+          symbol,
+          decimals,
+          address: target
+        },
+        decoded[0]
+      );
     }
 
     return {
