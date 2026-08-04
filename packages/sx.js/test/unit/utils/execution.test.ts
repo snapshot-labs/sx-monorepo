@@ -28,6 +28,7 @@ describe('createSendTokenTransaction', () => {
         calldata: '0xa9059cbb',
         value: '0'
       },
+      '0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624',
       '10000000',
       {
         name: 'USD Coin',
@@ -65,14 +66,14 @@ describe('createSendTokenTransaction', () => {
         calldata: '0xa9059cbb',
         value: '0'
       },
+      '0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624',
       '10000000',
       {
         name: 'USD Coin',
         symbol: 'USDC',
         decimals: 6,
         address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
-      },
-      '0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624'
+      }
     );
 
     expect(result).toMatchInlineSnapshot(`
@@ -94,6 +95,12 @@ describe('createSendTokenTransaction', () => {
         "value": "0",
       }
     `);
+  });
+
+  it('should take recipient as a required argument', () => {
+    // Function.length stops counting at the first parameter with a default, so
+    // reintroducing `recipient = data.target` drops this from 4 to 1.
+    expect(createSendTokenTransaction.length).toBe(4);
   });
 });
 
