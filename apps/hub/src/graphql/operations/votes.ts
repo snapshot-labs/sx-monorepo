@@ -47,7 +47,7 @@ async function query(parent, args, context?, info?) {
     SELECT v.* FROM votes v
     WHERE v.space NOT IN (SELECT id FROM spaces WHERE deleted = 1)
       AND v.cb != -3 ${queryStr}
-    ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
+    ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
