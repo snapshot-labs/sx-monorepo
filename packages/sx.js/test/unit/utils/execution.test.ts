@@ -98,8 +98,6 @@ describe('createSendTokenTransaction', () => {
   });
 
   it('should take recipient as a required argument', () => {
-    // Function.length stops counting at the first parameter with a default, so
-    // reintroducing `recipient = data.target` drops this from 4 to 1.
     expect(createSendTokenTransaction.length).toBe(4);
   });
 });

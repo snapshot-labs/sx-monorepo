@@ -140,8 +140,6 @@ export async function decodeExecution(
           tokenContract.decimals()
         ]);
 
-      // `target` is the token contract; the recipient is the first argument
-      // of the `transfer` call.
       return createSendTokenTransaction(
         data,
         decoded[0],
@@ -186,8 +184,6 @@ export async function convertToTransaction(
   chainId: number
 ): Promise<Transaction> {
   if (data.calldata === '0x') {
-    // Native transfer: there is no calldata to decode, so `target` is the
-    // recipient rather than a token contract.
     return createSendTokenTransaction(data, data.target, data.value, {
       name: 'Ethereum',
       decimals: 18,
