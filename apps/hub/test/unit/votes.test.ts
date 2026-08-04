@@ -221,6 +221,72 @@ describe('votes resolver index usage', () => {
     ).toBe(false);
   });
 
+  it.each([
+    ['app', { app: 'boardroom' }],
+    ['vp_gt', { vp_gt: 1000 }],
+    ['vp_state', { vp_state: 'pending' }],
+    ['reason_not', { reason_not: 'spam' }]
+  ])(
+    'scopes by space but does not force the index when %s filters the proposal',
+    async (_label, filter) => {
+      queryAsync
+        .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+        .mockResolvedValueOnce([]);
+
+      await fetchVotes(null, {
+        first: 1000,
+        skip: 0,
+        where: { proposal: PROPOSAL, ...filter }
+      });
+
+      // The forced index cannot evaluate a filter it does not cover, so it
+      // would walk the whole proposal fetching rows; the space scope is still
+      // result-neutral and still the win, so it stays.
+      const [votesSql] = queryAsync.mock.calls[1];
+      expect(votesSql).not.toContain('FORCE INDEX');
+      expect(votesSql).toContain('v.space = ?');
+      expect(votesSql).toContain('v.proposal = ?');
+    }
+  );
+
+  it('still forces the index for a created range on the proposal', async () => {
+    queryAsync
+      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+      .mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: { proposal: PROPOSAL, created_gt: 1700000000 }
+    });
+
+    // created is inside the composite index, so it is a range the forced scan
+    // resolves from the index itself.
+    const [votesSql] = queryAsync.mock.calls[1];
+    expect(votesSql).toContain(
+      'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
+    );
+    expect(votesSql).toContain('v.created > ?');
+  });
+
+  it('does not let a collapsed proposal_in carry a non-covered filter onto the forced index', async () => {
+    queryAsync
+      .mockResolvedValueOnce([{ space: 'magicappstore.eth' }])
+      .mockResolvedValueOnce([]);
+
+    await fetchVotes(null, {
+      first: 1000,
+      skip: 0,
+      where: { proposal_in: [PROPOSAL], vp_gte: 1 }
+    });
+
+    const [votesSql, votesParams] = queryAsync.mock.calls[1];
+    expect(votesSql).not.toContain('FORCE INDEX');
+    expect(votesSql).toContain('v.space = ?');
+    expect(votesSql).toContain('v.proposal = ?');
+    expect(votesParams.slice(0, 2)).toEqual(['magicappstore.eth', PROPOSAL]);
+  });
+
   it('matches the id tie-break to an ascending sort direction', async () => {
     queryAsync.mockResolvedValueOnce([]);
 
