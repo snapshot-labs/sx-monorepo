@@ -11,17 +11,6 @@ import {
   formatVote
 } from '../helpers';
 
-// `where` keys that idx_votes_on_space_proposal_created_id (space, proposal,
-// created, id) can evaluate from the index itself. Forcing that index is only
-// safe when the whole filter is in this set: any other key becomes a residual
-// predicate the index cannot answer, so the forced scan walks the proposal in
-// created order fetching every row to test it, which on a 500k-vote proposal
-// takes minutes instead of the ~100ms the optimizer's own plan takes.
-//
-// This is an allow-list on purpose. The inverse (listing the keys that must
-// block the hint) fails open: every filter added to VoteWhere is silently
-// opted in to the forced path, which is exactly how vp*, app and vp_state
-// ended up there.
 const INDEX_COVERED_WHERE_KEYS = new Set([
   'space',
   'space_in',
@@ -55,8 +44,6 @@ async function query(parent, args, context?, info?) {
     vp_state: 'string'
   };
 
-  // A single-element proposal_in is the same filter as proposal; collapse it so
-  // it takes the indexed path below. An empty array still means match-nothing.
   if (
     where.proposal === undefined &&
     Array.isArray(where.proposal_in) &&
@@ -67,8 +54,6 @@ async function query(parent, args, context?, info?) {
     delete where.proposal_in;
   }
 
-  // Likewise collapse a single-element space_in: it is the same filter as space,
-  // and leaving it as an IN() keeps proposal queries off the indexed path below.
   if (
     where.space === undefined &&
     Array.isArray(where.space_in) &&
@@ -86,9 +71,6 @@ async function query(parent, args, context?, info?) {
   orderDirection = orderDirection.toUpperCase();
   if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
 
-  // A more selective predicate is present (id is unique, voter is the
-  // primary-key prefix): those resolve via their own indexes, where the space
-  // lookup below is a wasted round-trip.
   const hasSelectiveFilter =
     where.id !== undefined ||
     where.id_in !== undefined ||
@@ -97,13 +79,6 @@ async function query(parent, args, context?, info?) {
     where.voter !== undefined ||
     where.voter_in !== undefined;
 
-  // Constrain space so a single-proposal created query can seek the composite
-  // index (space, proposal, created, id). This half is result-neutral (a
-  // proposal belongs to exactly one space) and is where the win comes from, so
-  // it is not gated on the filter shape: vp_gt, app and the rest still get it.
-  // vp-ordered queries are excluded because they resolve via
-  // idx_votes_on_proposal_vp_id, where an injected space = ? is a competing
-  // index that reintroduces the optimizer drift this PR removes.
   if (
     !hasSelectiveFilter &&
     orderBy === 'v.created' &&
@@ -116,14 +91,9 @@ async function query(parent, args, context?, info?) {
         'SELECT space FROM proposals WHERE id = ? LIMIT 1',
         [where.proposal]
       );
-      // Proposal doesn't exist: no space to scope by and thus no votes to
-      // return. Skip the votes query entirely instead of falling through to the
-      // un-indexed slow path.
       if (proposalRows.length === 0) return [];
       where.space = proposalRows[0].space;
     } catch (err: any) {
-      // Fail fast: a swallowed lookup error would leave space unset and fall
-      // through to the un-scoped, un-hinted scan this path exists to avoid.
       capture(err, { args, context, info });
       log.error(`[graphql] votes, ${JSON.stringify(err)}`);
       return Promise.reject(new Error('request failed'));
@@ -136,12 +106,6 @@ async function query(parent, args, context?, info?) {
 
   let votes: any[] = [];
 
-  // Force the composite index; for large spaces the optimizer otherwise picks a
-  // (space, created) index and scans millions of rows until the LIMIT is filled.
-  // Taking the choice away from the optimizer is only safe while it has no
-  // residual filter to evaluate, so the hint needs the whole `where` to be
-  // index-covered; anything else keeps the injected space above but leaves the
-  // plan to the optimizer.
   const isIndexCoveredWhere = Object.keys(where).every(
     key => where[key] === undefined || INDEX_COVERED_WHERE_KEYS.has(key)
   );
@@ -154,11 +118,6 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
-  // Match the id tie-break to the primary sort direction. The second sort field
-  // only breaks ties between equal-value rows, so its direction has no effect on
-  // correctness. On the proposal-scoped path it also turns the composite
-  // (space, proposal, created, id) index into a pure (backward) scan instead of a
-  // filesort.
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.* FROM votes v ${indexHint}
