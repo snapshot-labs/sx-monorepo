@@ -17,7 +17,7 @@ const { open } = toRefs(props);
 const { modalOpen } = useModal();
 
 function handleKeyboardEvent(ev: KeyboardEvent) {
-  if (ev.code === 'Escape') emit('close');
+  if (ev.code === 'Escape' && props.open && props.closeable) emit('close');
 }
 
 onMounted(() => {

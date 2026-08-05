@@ -28,6 +28,7 @@ describe('createSendTokenTransaction', () => {
         calldata: '0xa9059cbb',
         value: '0'
       },
+      '0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624',
       '10000000',
       {
         name: 'USD Coin',
@@ -56,6 +57,48 @@ describe('createSendTokenTransaction', () => {
         "value": "0",
       }
     `);
+  });
+
+  it('should use explicit recipient while keeping target as transaction destination', async () => {
+    const result = await createSendTokenTransaction(
+      {
+        target: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        calldata: '0xa9059cbb',
+        value: '0'
+      },
+      '0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624',
+      '10000000',
+      {
+        name: 'USD Coin',
+        symbol: 'USDC',
+        decimals: 6,
+        address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+      }
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "_form": {
+          "amount": "10000000",
+          "recipient": "0x8bf6f9f91d70a9a3c2fce45df30ece735c54d624",
+          "token": {
+            "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            "decimals": 6,
+            "name": "USD Coin",
+            "symbol": "USDC",
+          },
+        },
+        "_type": "sendToken",
+        "data": "0xa9059cbb",
+        "salt": "0",
+        "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "value": "0",
+      }
+    `);
+  });
+
+  it('should take recipient as a required argument', () => {
+    expect(createSendTokenTransaction.length).toBe(4);
   });
 });
 
@@ -146,7 +189,7 @@ describe('convertToTransaction', () => {
       {
         target: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         calldata:
-          '0xa9059cbb0000000000000000000000008bf6f9f91d70a9a3c2fce45df30ece735c54d62400000000000000000000000000000000000000000000000000000000009896800',
+          '0xa9059cbb0000000000000000000000008bf6f9f91d70a9a3c2fce45df30ece735c54d6240000000000000000000000000000000000000000000000000000000000989680',
         value: '0'
       },
       1
@@ -155,12 +198,51 @@ describe('convertToTransaction', () => {
     expect(result).toMatchInlineSnapshot(`
       {
         "_form": {
-          "recipient": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "amount": "10000000",
+          "recipient": "0x8Bf6F9F91D70a9a3c2FCe45dF30EcE735C54D624",
+          "token": {
+            "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            "decimals": 6,
+            "name": "USD Coin",
+            "symbol": "USDC",
+          },
         },
-        "_type": "raw",
-        "data": "0xa9059cbb0000000000000000000000008bf6f9f91d70a9a3c2fce45df30ece735c54d62400000000000000000000000000000000000000000000000000000000009896800",
+        "_type": "sendToken",
+        "data": "0xa9059cbb0000000000000000000000008bf6f9f91d70a9a3c2fce45df30ece735c54d6240000000000000000000000000000000000000000000000000000000000989680",
         "salt": "0",
         "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "value": "0",
+      }
+    `);
+  });
+
+  it('should use transfer recipient for ERC20 transfer, not the token contract', async () => {
+    const result = await convertToTransaction(
+      {
+        target: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+        calldata:
+          '0xa9059cbb0000000000000000000000009c7db6b1085ec4d07f75c0bd91ad3fcd368fa19e00000000000000000000000000000000000000000000d3c21bcecceda1000000',
+        value: '0'
+      },
+      1
+    );
+
+    expect(result).toMatchInlineSnapshot(`
+      {
+        "_form": {
+          "amount": "1000000000000000000000000",
+          "recipient": "0x9C7dB6B1085ec4D07f75c0BD91AD3FcD368fA19E",
+          "token": {
+            "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+            "decimals": 18,
+            "name": "Ethereum Name Service",
+            "symbol": "ENS",
+          },
+        },
+        "_type": "sendToken",
+        "data": "0xa9059cbb0000000000000000000000009c7db6b1085ec4d07f75c0bd91ad3fcd368fa19e00000000000000000000000000000000000000000000d3c21bcecceda1000000",
+        "salt": "0",
+        "to": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
         "value": "0",
       }
     `);

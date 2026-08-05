@@ -45,9 +45,9 @@ async function query(parent, args, context?, info?) {
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.* FROM votes v
-    INNER JOIN spaces ON spaces.id = v.space
-    WHERE spaces.deleted = 0 AND v.cb != -3 ${queryStr}
-    ORDER BY ${orderBy} ${orderDirection}, v.id ASC LIMIT ?, ?
+    WHERE v.space NOT IN (SELECT id FROM spaces WHERE deleted = 1)
+      AND v.cb != -3 ${queryStr}
+    ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
