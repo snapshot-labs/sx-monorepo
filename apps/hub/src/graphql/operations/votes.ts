@@ -11,6 +11,9 @@ import {
   formatVote
 } from '../helpers';
 
+// `where` keys the forced index (space, proposal, created, id) can evaluate
+// itself. Any other key is a residual predicate the forced scan must walk the
+// whole proposal to test, so keep this an allow-list: a deny-list fails open.
 const INDEX_COVERED_WHERE_KEYS = new Set([
   'space',
   'space_in',
