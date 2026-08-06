@@ -1,11 +1,52 @@
 import * as sx from '@snapshot-labs/sx';
 import { describe, expect, it, vi } from 'vitest';
 import { getNetwork } from '../index';
+import { formatDelegations } from './api';
+import { ApiSpace } from './api/types';
 
 const network = getNetwork('s');
 const voter = '0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90';
 
 describe('offchain network', () => {
+  describe('formatDelegations', () => {
+    it('generates one Delegate Registry delegation per supported strategy chain', () => {
+      const space = {
+        id: 'visionfoundation.eth',
+        network: '1',
+        delegationPortal: null,
+        strategies: [
+          {
+            name: 'with-delegation',
+            network: '1',
+            params: {
+              strategies: [
+                { network: '1', params: {} },
+                { network: '42161', params: {} }
+              ]
+            }
+          }
+        ]
+      } as unknown as ApiSpace;
+
+      expect(formatDelegations(space, 's')).toEqual([
+        {
+          name: 'Delegate registry - Ethereum',
+          apiType: 'delegate-registry',
+          apiUrl: 'https://delegate-registry-api.snapshot.box',
+          contractAddress: 'visionfoundation.eth',
+          chainId: 1
+        },
+        {
+          name: 'Delegate registry - Arbitrum One',
+          apiType: 'delegate-registry',
+          apiUrl: 'https://delegate-registry-api.snapshot.box',
+          contractAddress: 'visionfoundation.eth',
+          chainId: 42161
+        }
+      ]);
+    });
+  });
+
   describe('getVotingPower', () => {
     describe('vote validation', () => {
       it.each([['invalid address', 'invalid-address']])(

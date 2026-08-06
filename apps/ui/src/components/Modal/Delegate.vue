@@ -2,8 +2,8 @@
 import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
-import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import {
+  getDelegateRegistryChainIds,
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
@@ -24,11 +24,6 @@ type Delegatee = {
 };
 
 const SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS = [1, 100];
-// chain ids from https://github.com/snapshot-labs/snapshot-subgraph
-const DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS = [
-  1, 42161, 8453, 84532, 81457, 56, 250, 100, 59144, 5000, 137, 10, 146,
-  11155111
-];
 
 const DEFAULT_FORM_STATE = {
   delegatees: [{ id: '', share: 100 }],
@@ -122,30 +117,16 @@ const chainIds = computed(() => {
     return SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS;
   }
 
-  const delegateRegistryStrategies = props.space.strategies_params.filter(
-    (_, index) =>
-      DELEGATE_REGISTRY_STRATEGIES.includes(props.space.strategies[index])
+  const chainIds = getDelegateRegistryChainIds(
+    props.space.strategies,
+    props.space.strategies_params
   );
 
-  if (!delegateRegistryStrategies.length) {
+  if (!chainIds.length) {
     return [form.chainId];
   }
 
-  const chainIds = delegateRegistryStrategies
-    .flatMap(params => {
-      return [
-        params.network,
-        ...(params.params?.strategies?.flatMap(p => [
-          p.network,
-          p.params?.network
-        ]) || [])
-      ];
-    })
-    .filter(Boolean)
-    .map(Number)
-    .filter(chainId => DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId));
-
-  return Array.from(new Set(chainIds));
+  return chainIds;
 });
 
 function delegationConnectors(
