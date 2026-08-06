@@ -29,8 +29,7 @@ const isOffchainSpace = computed(() =>
 const socials = computed(() => getSocialNetworksLink(props.space));
 
 const { data, isPending, isError } = useProposalsSummaryQuery(
-  toRef(() => props.space.network),
-  toRef(() => props.space.id),
+  toRef(props, 'space'),
   toRef(() => spaceType.value === 'proposalsSpace')
 );
 const {

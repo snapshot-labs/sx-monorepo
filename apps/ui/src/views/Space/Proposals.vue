@@ -53,8 +53,7 @@ const {
   isError,
   isFetchingNextPage
 } = useProposalsQuery(
-  toRef(() => props.space.network),
-  toRef(() => props.space.id),
+  toRef(props, 'space'),
   {
     state,
     labels
