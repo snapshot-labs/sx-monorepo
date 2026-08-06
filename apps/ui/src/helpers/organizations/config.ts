@@ -239,6 +239,20 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         link: { name: 'space-discussions', params: { space: 's:ens.eth' } }
       }
     }
+  },
+  shutterpen: {
+    id: 'shutterpen',
+    name: 'Shutter PEN',
+    spaceIds: [
+      {
+        network: 'eth',
+        id: '0xe44a9c5670Ce7C3675f389785E0C565e52730377'
+      },
+      {
+        network: 's',
+        id: 'shutterpen.eth'
+      }
+    ]
   }
 };
 
