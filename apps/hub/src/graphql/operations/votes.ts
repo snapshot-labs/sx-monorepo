@@ -128,7 +128,6 @@ async function query(parent, args, context?, info?) {
       AND v.cb != -3 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
-  `;
   params.push(skip, first);
   try {
     votes = await db.queryAsync(query, params);
