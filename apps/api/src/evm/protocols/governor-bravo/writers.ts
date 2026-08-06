@@ -235,11 +235,14 @@ export function createWriters(
 
     const { name, symbol, treasury, governanceToken } = spaceDataEntry;
 
+    const compStrategy = evmNetworks[config.indexerName].Strategies.Comp;
+    if (!compStrategy) throw new Error('Comp strategy is not configured');
+
     space.authenticators = [
       'GovernorBravoAuthenticator',
       'GovernorBravoAuthenticatorSignature'
     ];
-    space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
+    space.strategies = [compStrategy];
     space.strategies_params = [governanceToken];
     space.strategies_indices = [0];
     space.voting_power_validation_strategy_strategies = space.strategies;

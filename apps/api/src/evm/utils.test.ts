@@ -97,7 +97,7 @@ describe('applyConfig', () => {
 describe('getTimestampFromBlock', () => {
   it('should return real onchain timestamp for past blocks on native-block chains', async () => {
     const client = createPublicClient({
-      transport: http('https://rpc.snapshot.org/1')
+      transport: http('https://rpc.brovider.xyz/1')
     });
 
     const actual = await getTimestampFromBlock({
@@ -113,7 +113,7 @@ describe('getTimestampFromBlock', () => {
 
   it('should return real onchain timestamp for past blocks on non-native-block chains', async () => {
     const client = createPublicClient({
-      transport: http('https://rpc.snapshot.org/42161')
+      transport: http('https://rpc.brovider.xyz/42161')
     });
 
     const actual = await getTimestampFromBlock({

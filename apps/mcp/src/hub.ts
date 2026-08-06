@@ -7,7 +7,7 @@ const SNAPSHOT_BLOCK_OFFSET = 4;
 export async function getProposalSnapshotBlock(
   chainId: number
 ): Promise<number> {
-  const res = await fetch(`https://rpc.snapshot.org/${chainId}`, {
+  const res = await fetch(`https://rpc.brovider.xyz/${chainId}?client=mcp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber' })

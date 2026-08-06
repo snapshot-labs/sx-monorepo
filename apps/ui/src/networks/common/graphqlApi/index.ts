@@ -643,29 +643,29 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: ProposalsFilter = clone(filters || {});
+      const {
+        state: stateFilter,
+        labels,
+        ...restFilters
+      }: ProposalsFilter = filters || {};
 
       const metadataFilters: Record<string, any> = {};
       if (searchQuery) metadataFilters.title_contains_nocase = searchQuery;
 
-      const state = _filters.state;
+      const state = stateFilter;
 
       if (state === 'active') {
-        _filters.start_lte = current;
-        _filters.max_end_gte = current;
+        restFilters.start_lte = current;
+        restFilters.max_end_gte = current;
       } else if (state === 'pending') {
-        _filters.start_gt = current;
+        restFilters.start_gt = current;
       } else if (state === 'closed') {
-        _filters.max_end_lt = current;
+        restFilters.max_end_lt = current;
       }
 
-      delete _filters.state;
-
-      if (_filters.labels?.length) {
-        metadataFilters.labels_contains = _filters.labels;
+      if (labels?.length) {
+        metadataFilters.labels_contains = labels;
       }
-
-      delete _filters.labels;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -678,7 +678,7 @@ export function createApi(
             metadata_: Object.keys(metadataFilters).length
               ? metadataFilters
               : undefined,
-            ..._filters
+            ...restFilters
           }
         }
       });

@@ -1,0 +1,159 @@
+name: Deploy app (reusable)
+
+# Reusable blue-green deploy: builds the app image once, then deploys it to the
+# INACTIVE color (staging) of each environment. Called by deploy-api.yml and
+# deploy-delegates-api.yml.
+#
+# Required configuration:
+#   vars.DOKS_CLUSTER                  - DigitalOcean Kubernetes cluster name or id
+#   secrets.DIGITALOCEAN_ACCESS_TOKEN  - DOKS cluster access
+#   secrets.GHCR_PULL_TOKEN            - read:packages PAT for the ghcr pull secret
+#   GitHub environments: <app_key>_<environment> (hold POSTGRES_PASSWORD,
+#     HYPERSYNC_API_TOKEN, and the optional LOGTAIL_* secrets)
+#
+# Image is pushed to GHCR (ghcr.io/<owner>/<image_name>) via the built-in GITHUB_TOKEN.
+
+on:
+  workflow_call:
+    inputs:
+      app_key:
+        description: Key used for GitHub environments (<app_key>_<env>) and values files (values-<app_key>-<env>.yaml)
+        type: string
+        required: true
+      app_name:
+        description: Kubernetes app name (appName in the chart values; prefixes Deployments, Services and secrets)
+        type: string
+        required: true
+      image_name:
+        description: GHCR image name
+        type: string
+        required: true
+      dockerfile:
+        description: Path to the Dockerfile
+        type: string
+        required: true
+      environments:
+        description: JSON array of environments to deploy to
+        type: string
+        required: true
+      release_infix:
+        description: Inserted into Helm release names (<env>-<release_infix><color>), to keep releases of different apps in a shared namespace apart
+        type: string
+        default: ''
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push image
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          docker build -f "${{ inputs.dockerfile }}" -t "$IMAGE:$TAG" .
+          docker push "$IMAGE:$TAG"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(inputs.environments) }}
+    environment: ${{ inputs.app_key }}_${{ matrix.environment }}
+    concurrency:
+      group: deploy-${{ inputs.app_key }}-${{ matrix.environment }}
+    env:
+      ENVIRONMENT: ${{ matrix.environment }}
+      CHART: helm/checkpoint
+      APP_NAME: ${{ inputs.app_name }}
+      APP_KEY: ${{ inputs.app_key }}
+      RELEASE_INFIX: ${{ inputs.release_infix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Configure cluster access
+        run: doctl kubernetes cluster kubeconfig save "$DOKS_CLUSTER"
+        env:
+          DOKS_CLUSTER: ${{ vars.DOKS_CLUSTER }}
+
+      - name: Resolve image tag
+        id: tag
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Sync secrets into the namespace
+        run: |
+          NS="$ENVIRONMENT"
+          kubectl get namespace "$NS" >/dev/null 2>&1 || kubectl create namespace "$NS"
+          kubectl -n "$NS" create secret generic "$APP_NAME-secrets" \
+            --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            --from-literal=HYPERSYNC_API_TOKEN="$HYPERSYNC_API_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+          kubectl -n "$NS" create secret docker-registry ghcr \
+            --docker-server=ghcr.io \
+            --docker-username="$GITHUB_ACTOR" \
+            --docker-password="$GHCR_PULL_TOKEN" \
+            --dry-run=client -o yaml | kubectl apply -f -
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          HYPERSYNC_API_TOKEN: ${{ secrets.HYPERSYNC_API_TOKEN }}
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+
+      - name: Determine inactive (staging) color
+        id: color
+        run: |
+          NS="$ENVIRONMENT"
+          ACTIVE=$(kubectl -n "$NS" get svc "$APP_NAME" -o jsonpath='{.spec.selector.color}' 2>/dev/null || echo "")
+          if [ "$ACTIVE" = "blue" ]; then INACTIVE=green; else INACTIVE=blue; fi
+          echo "Active color for $APP_NAME in $NS is '${ACTIVE:-none}' -> deploying to '$INACTIVE'"
+          echo "inactive=$INACTIVE" >> "$GITHUB_OUTPUT"
+
+      - name: Sync logtail secret (per color)
+        env:
+          LOGTAIL_HOST_BLUE: ${{ secrets.LOGTAIL_HOST_BLUE }}
+          LOGTAIL_TOKEN_BLUE: ${{ secrets.LOGTAIL_TOKEN_BLUE }}
+          LOGTAIL_HOST_GREEN: ${{ secrets.LOGTAIL_HOST_GREEN }}
+          LOGTAIL_TOKEN_GREEN: ${{ secrets.LOGTAIL_TOKEN_GREEN }}
+        run: |
+          C="${{ steps.color.outputs.inactive }}"
+          HOST_VAR="LOGTAIL_HOST_${C^^}"
+          TOKEN_VAR="LOGTAIL_TOKEN_${C^^}"
+          kubectl -n "$ENVIRONMENT" create secret generic "$APP_NAME-logtail-$C" \
+            --from-literal=LOGTAIL_HOST="${!HOST_VAR}" \
+            --from-literal=LOGTAIL_TOKEN="${!TOKEN_VAR}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy inactive color with Helm
+        run: |
+          helm upgrade --install "${ENVIRONMENT}-${RELEASE_INFIX}${{ steps.color.outputs.inactive }}" "$CHART" \
+            --namespace "$ENVIRONMENT" --create-namespace \
+            --values "$CHART/values-$APP_KEY-$ENVIRONMENT.yaml" \
+            --set color="${{ steps.color.outputs.inactive }}" \
+            --set image.repository="$IMAGE" \
+            --set image.tag="${{ steps.tag.outputs.tag }}" \
+            --wait --timeout 10m
+
+      - name: Summary
+        run: |
+          echo "Deployed $IMAGE:${{ steps.tag.outputs.tag }} to $ENVIRONMENT / ${{ steps.color.outputs.inactive }} (staging)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Run the promote workflow for $ENVIRONMENT to cut over once it has caught up." >> "$GITHUB_STEP_SUMMARY"

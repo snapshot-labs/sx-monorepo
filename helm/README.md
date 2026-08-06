@@ -8,14 +8,23 @@ Blue-green deploy of Checkpoint apps (API + indexer + PostgreSQL) on DOKS.
 
 One chart (`checkpoint/`) serves every Checkpoint app; each app is a set of values files:
 
-| App             | image           | `appName`   | values prefix | layout                       |
-| --------------- | --------------- | ----------- | ------------- | ---------------------------- |
-| `api`           | `sx-api`        | `sx-api`    | `api`         | separate API + indexer pods  |
-| `delegates-api` | `delegates-api` | `delegates` | `delegates`   | single pod that also indexes |
+| App             | image           | `appName`   | values prefix |
+| --------------- | --------------- | ----------- | ------------- |
+| `api`           | `sx-api`        | `sx-api`    | `api`         |
+| `delegates-api` | `delegates-api` | `delegates` | `delegates`   |
+
+Each app runs separate API + indexer pods per color.
 
 Each env (testnet/mainnet) has two colors (blue/green) with their own DB. Deploy
 to the inactive color, then flip the public Service to it. Apps share a namespace
 and the gateway; resources are namespaced by `appName`.
+
+Deploys and promotions run via GitHub Actions: `Deploy API` / `Deploy Delegates API`
+build and deploy the inactive color on pushes to master, `Promote API` /
+`Promote Delegates API` cut traffic over on manual dispatch. The shared logic lives
+in `.github/workflows/_deploy-app.yml` and `_promote-app.yml` (which also sync the
+secrets below from GitHub environment secrets). The commands in this document are
+the manual equivalent.
 
 > Run commands from the repo root (chart paths are `helm/...`). Examples below use
 > `api` in `testnet` — swap the values prefix (`api` → `delegates`) and release
@@ -50,7 +59,7 @@ per app (`<appName>-secrets`); `delegates` bootstraps the same way with
 ## Deploy
 
 ```bash
-# logtail is optional and api-only
+# logtail is optional
 kubectl -n testnet create secret generic sx-api-logtail-blue \
   --from-literal=LOGTAIL_HOST=<host> --from-literal=LOGTAIL_TOKEN=<token>
 

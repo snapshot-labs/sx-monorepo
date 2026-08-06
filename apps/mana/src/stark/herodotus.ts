@@ -10,6 +10,8 @@ type HerodotusConfig = {
   FEE: string;
 };
 
+const TIMESTAMP_AVAILABILITY_BUFFER = 60;
+
 const HERODOTUS_API_KEY = process.env.HERODOTUS_API_KEY || '';
 const HERODOTUS_LEGACY_API_KEY = process.env.HERODOTUS_LEGACY_API_KEY || '';
 const HERODOTUS_MAPPING = new Map<string, HerodotusConfig>([
@@ -46,7 +48,16 @@ type DbProposal = {
   herodotusId: string | null;
 };
 
-function getApi(accumulatesChainId: string) {
+function getApi(accumulatesChainId: string, isSatellite: boolean) {
+  if (isSatellite) {
+    return {
+      apiUrl: 'https://mission-control.api.herodotus.cloud',
+      indexerUrl: null,
+      apiKey: HERODOTUS_API_KEY
+    };
+  }
+
+  // NOTE: Deprecated - can be removed once we migrate to V2 strategies.
   if (accumulatesChainId === '1') {
     return {
       apiUrl: 'https://snapshot.api.herodotus.cloud',
@@ -72,11 +83,6 @@ function getNetworkId(chainId: string): 'sn' | 'sn-sep' | null {
   return null;
 }
 
-// The Herodotus Satellite versions of the storage-proof voting strategies
-// (sx-starknet#641). The same batch query populates the Satellite contract with
-// the timestamp -> L1 block mapping and the storage root, which voters read
-// on-chain via `get_block_by_timestamp`. So, unlike the legacy strategies, these
-// need no on-chain `cache_timestamp` tx after the query completes.
 function isSatelliteStrategy(
   chainId: string,
   strategyAddress: string
@@ -95,8 +101,36 @@ function isSatelliteStrategy(
     .includes(validateAndParseAddress(strategyAddress));
 }
 
-async function getStatus(id: string, accumulatesChainId: string) {
-  const { apiUrl, apiKey } = getApi(accumulatesChainId);
+async function getStatus(
+  id: string,
+  accumulatesChainId: string,
+  isSatellite: boolean
+): Promise<{ queryStatus: string; info?: string[] }> {
+  const { apiUrl, apiKey } = getApi(accumulatesChainId, isSatellite);
+
+  if (isSatellite) {
+    const res = await fetch(`${apiUrl}/get_queries/${id}`, {
+      headers: {
+        accept: 'application/json',
+        'api-key': apiKey
+      }
+    });
+
+    const { queries, error } = await res.json();
+    if (error) throw new Error(error);
+
+    const statuses: string[] = queries.map(
+      (query: { status: string }) => query.status
+    );
+
+    const anyFailed = statuses.some(
+      status => status === 'FAILED' || status === 'REJECTED'
+    );
+    if (anyFailed) return { queryStatus: 'REJECTED', info: statuses };
+
+    const allCompleted = statuses.every(status => status === 'COMPLETED');
+    return { queryStatus: allCompleted ? 'DONE' : statuses.join(', ') };
+  }
 
   const res = await fetch(
     `${apiUrl}/batch-query-status?apiKey=${apiKey}&batchQueryId=${id}`,
@@ -107,36 +141,48 @@ async function getStatus(id: string, accumulatesChainId: string) {
     }
   );
 
-  const { queryStatus, error } = await res.json();
+  const { queryStatus, info, error } = await res.json();
   if (error) throw new Error(error);
 
-  return queryStatus;
+  return { queryStatus, info };
 }
 
-async function submitBatch(proposal: ApiProposal) {
+async function submitBatch(proposal: DbProposal) {
+  const [, l1TokenAddress] = proposal.id.split('-');
+  if (!l1TokenAddress) throw new Error('Invalid proposal id');
+
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
 
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID, FEE } = mapping;
 
-  const body: any = {
-    destinationChainId: DESTINATION_CHAIN_ID,
-    fee: FEE,
-    data: {
-      [ACCUMULATES_CHAIN_ID]: {
-        [`timestamp:${proposal.timestamp}`]: {
-          accounts: {
-            [proposal.l1TokenAddress]: {
-              props: ['STORAGE_ROOT']
-            }
+  const isSatellite = isSatelliteStrategy(
+    proposal.chainId,
+    proposal.strategyAddress
+  );
+
+  const data = {
+    [ACCUMULATES_CHAIN_ID]: {
+      [`timestamp:${proposal.timestamp}`]: {
+        accounts: {
+          [l1TokenAddress]: {
+            props: ['STORAGE_ROOT']
           }
         }
       }
     }
   };
 
-  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID);
-  const res = await fetch(`${apiUrl}/submit-batch-query?apiKey=${apiKey}`, {
+  const { apiUrl, apiKey } = getApi(ACCUMULATES_CHAIN_ID, isSatellite);
+
+  const url = isSatellite
+    ? `${apiUrl}/submit-request`
+    : `${apiUrl}/submit-batch-query?apiKey=${apiKey}`;
+  const body = isSatellite
+    ? { destination_chain_id: DESTINATION_CHAIN_ID, data }
+    : { destinationChainId: DESTINATION_CHAIN_ID, fee: FEE, data };
+
+  const res = await fetch(url, {
     method: 'post',
     headers: {
       'Content-Type': 'application/json',
@@ -153,14 +199,14 @@ async function submitBatch(proposal: ApiProposal) {
         { proposal },
         'Invalid account address or ENS in herodotus batch proposal'
       );
-      return db.markProposalProcessed(getId(proposal));
+      return db.markProposalProcessed(proposal.id);
     }
 
     throw new Error(result.error);
   }
 
-  await db.updateProposal(getId(proposal), {
-    herodotusId: result.internalId
+  await db.updateProposal(proposal.id, {
+    herodotusId: isSatellite ? result.request_id : result.internalId
   });
 }
 
@@ -178,34 +224,63 @@ export async function registerProposal(proposal: ApiProposal) {
     strategyAddress: proposal.strategyAddress,
     herodotusId: null
   });
-
-  try {
-    await submitBatch(proposal);
-  } catch (err) {
-    logger.error({ err, proposal }, 'Failed to submit herodotus batch');
-  }
 }
 
 export async function processProposal(proposal: DbProposal) {
-  if (!proposal.herodotusId) {
-    const [, l1TokenAddress] = proposal.id.split('-');
-    if (!l1TokenAddress) throw new Error('Invalid proposal id');
+  const isTimestampAvailable =
+    proposal.timestamp <=
+    Math.floor(Date.now() / 1000) - TIMESTAMP_AVAILABILITY_BUFFER;
+  if (!isTimestampAvailable) {
+    logger.info(
+      { proposalId: proposal.id, timestamp: proposal.timestamp },
+      'Proposal timestamp is not available on L1 yet'
+    );
+    return;
+  }
 
-    return submitBatch({
-      ...proposal,
-      l1TokenAddress
-    });
+  if (!proposal.herodotusId) {
+    return submitBatch(proposal);
   }
 
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
 
+  const isSatellite = isSatelliteStrategy(
+    proposal.chainId,
+    proposal.strategyAddress
+  );
+
   try {
-    const status = await getStatus(proposal.herodotusId, ACCUMULATES_CHAIN_ID);
-    if (status !== 'DONE') {
+    const { queryStatus, info } = await getStatus(
+      proposal.herodotusId,
+      ACCUMULATES_CHAIN_ID,
+      isSatellite
+    );
+
+    if (queryStatus === 'REJECTED') {
+      const isTimestampNotAvailableYet = Boolean(
+        info?.some((message: string) => message.startsWith('Too big:'))
+      );
+
+      if (isTimestampNotAvailableYet) {
+        logger.warn(
+          { proposalId: proposal.id, herodotusId: proposal.herodotusId, info },
+          'Query was rejected because timestamp was not available yet, submitting a new batch'
+        );
+        return submitBatch(proposal);
+      }
+
+      logger.error(
+        { proposalId: proposal.id, herodotusId: proposal.herodotusId, info },
+        'Query was rejected'
+      );
+      return;
+    }
+
+    if (queryStatus !== 'DONE') {
       logger.info(
-        { herodotusId: proposal.herodotusId, status },
+        { herodotusId: proposal.herodotusId, status: queryStatus },
         'Proposal is not ready yet'
       );
       return;
@@ -226,7 +301,7 @@ export async function processProposal(proposal: DbProposal) {
   // timestamp -> L1 block mapping and storage root into the Satellite contract,
   // which voters read on-chain via get_block_by_timestamp. No on-chain
   // cache_timestamp tx is required, so we are done.
-  if (isSatelliteStrategy(proposal.chainId, proposal.strategyAddress)) {
+  if (isSatellite) {
     logger.info({ proposalId: proposal.id }, 'Satellite proposal processed');
     return db.markProposalProcessed(proposal.id);
   }
@@ -236,7 +311,7 @@ export async function processProposal(proposal: DbProposal) {
   const { getAccount, herodotusController } = getClient(proposal.chainId);
   const { account, nonceManager, deployAccount } = getAccount('0x0');
 
-  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);
+  const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID, isSatellite);
 
   const res = await fetch(
     `${indexerUrl}/remappers/binsearch-path?timestamp=${proposal.timestamp}&deployed_on_chain=${DESTINATION_CHAIN_ID}&accumulates_chain=${ACCUMULATES_CHAIN_ID}`,

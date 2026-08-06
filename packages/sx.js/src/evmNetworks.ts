@@ -1,99 +1,122 @@
 import { BigNumberish } from '@ethersproject/bignumber';
+import { buildRegistry } from './registry';
 import { EvmNetworkConfig } from './types';
 
-type AdditionalProperties = {
+type AddressOverride = string | null;
+
+type Overrides = {
   blockTime: number;
   hasNonNativeBlockNumbers?: boolean;
   maxPriorityFeePerGas?: BigNumberish;
-  authenticators?: Record<string, string>;
+  proxyFactory?: string;
+  masterSpace?: string;
+  authenticators?: {
+    EthSig?: AddressOverride;
+    EthSigV2?: AddressOverride;
+    EthTx?: AddressOverride;
+  };
   strategies?: {
+    Vanilla?: AddressOverride;
+    Comp?: AddressOverride;
+    OZVotes?: AddressOverride;
+    Whitelist?: AddressOverride;
     ApeGas?: string;
+  };
+  proposalValidations?: {
+    VotingPower?: AddressOverride;
+  };
+  executionStrategies?: {
+    SimpleQuorumAvatar?: AddressOverride;
+    SimpleQuorumTimelock?: AddressOverride;
   };
 };
 
-function createStandardConfig(
+function resolveAddress(
+  override: AddressOverride | undefined,
+  defaultAddress: string
+): string | undefined {
+  if (override === null) return undefined;
+
+  return override ?? defaultAddress;
+}
+
+export function createStandardConfig(
   eip712ChainId: number,
-  additionalProperties: AdditionalProperties
+  overrides: Overrides
 ) {
-  const additionalAuthenticators = additionalProperties.authenticators || {};
-  const additionalStrategies = additionalProperties.strategies || {};
+  const {
+    authenticators = {},
+    strategies = {},
+    proposalValidations = {},
+    executionStrategies = {}
+  } = overrides;
 
   return {
     Meta: {
       eip712ChainId,
-      maxPriorityFeePerGas: additionalProperties.maxPriorityFeePerGas,
-      blockTime: additionalProperties.blockTime,
-      hasNonNativeBlockNumbers: additionalProperties.hasNonNativeBlockNumbers,
-      proxyFactory: '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
-      masterSpace: '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
+      maxPriorityFeePerGas: overrides.maxPriorityFeePerGas,
+      blockTime: overrides.blockTime,
+      hasNonNativeBlockNumbers: overrides.hasNonNativeBlockNumbers,
+      proxyFactory:
+        overrides.proxyFactory ?? '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
+      masterSpace:
+        overrides.masterSpace ?? '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
     },
     Authenticators: {
-      EthSig: '0x5f9B7D78c9a37a439D78f801E0E339C6E711e260',
-      EthSigV2: '0x95CF9B585fDb12DeB78002B5643dFF8fe67a496D',
-      EthTx: '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1',
-      ...additionalAuthenticators
+      EthSig: resolveAddress(
+        authenticators.EthSig,
+        '0x5f9B7D78c9a37a439D78f801E0E339C6E711e260'
+      ),
+      EthSigV2: resolveAddress(
+        authenticators.EthSigV2,
+        '0x95CF9B585fDb12DeB78002B5643dFF8fe67a496D'
+      ),
+      EthTx: resolveAddress(
+        authenticators.EthTx,
+        '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
+      )
     },
     Strategies: {
-      Vanilla: '0xC1245C5DCa7885C73E32294140F1e5d30688c202',
-      Comp: '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
-      OZVotes: '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
-      Whitelist: '0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829',
-      ...additionalStrategies
+      Vanilla: resolveAddress(
+        strategies.Vanilla,
+        '0xC1245C5DCa7885C73E32294140F1e5d30688c202'
+      ),
+      Comp: resolveAddress(
+        strategies.Comp,
+        '0x0c2De612982Efd102803161fc7C74CcA15Db932c'
+      ),
+      OZVotes: resolveAddress(
+        strategies.OZVotes,
+        '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
+      ),
+      Whitelist: resolveAddress(
+        strategies.Whitelist,
+        '0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829'
+      ),
+      ApeGas: strategies.ApeGas
     },
     ProposalValidations: {
-      VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+      VotingPower: resolveAddress(
+        proposalValidations.VotingPower,
+        '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+      )
     },
     ExecutionStrategies: {
-      SimpleQuorumAvatar: '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42',
-      SimpleQuorumTimelock: '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
+      SimpleQuorumAvatar: resolveAddress(
+        executionStrategies.SimpleQuorumAvatar,
+        '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42'
+      ),
+      SimpleQuorumTimelock: resolveAddress(
+        executionStrategies.SimpleQuorumTimelock,
+        '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
+      )
     }
   };
 }
 
-function createEvmConfig(
-  networkId: keyof typeof evmNetworks
+export function createEvmConfig(
+  network: ReturnType<typeof createStandardConfig>
 ): EvmNetworkConfig {
-  const network = evmNetworks[networkId];
-
-  const authenticators = {
-    [network.Authenticators.EthSig]: {
-      type: 'ethSig'
-    },
-    [network.Authenticators.EthSigV2]: {
-      type: 'ethSigV2'
-    },
-    [network.Authenticators.EthTx]: {
-      type: 'ethTx'
-    }
-  } as const;
-
-  const strategies = {
-    [network.Strategies.Vanilla]: {
-      type: 'vanilla'
-    },
-    [network.Strategies.Comp]: {
-      type: 'comp'
-    },
-    [network.Strategies.OZVotes]: {
-      type: 'ozVotes'
-    },
-    [network.Strategies.Whitelist]: {
-      type: 'whitelist'
-    },
-    ...(network.Strategies.ApeGas
-      ? {
-          [network.Strategies.ApeGas]: {
-            type: 'apeGas' as const
-          }
-        }
-      : {})
-  } as const;
-
-  const executionStrategiesImplementations = {
-    SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
-    SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock
-  } as const;
-
   return {
     eip712ChainId: network.Meta.eip712ChainId,
     maxPriorityFeePerGas: network.Meta.maxPriorityFeePerGas,
@@ -101,9 +124,22 @@ function createEvmConfig(
     hasNonNativeBlockNumbers: network.Meta.hasNonNativeBlockNumbers,
     proxyFactory: network.Meta.proxyFactory,
     masterSpace: network.Meta.masterSpace,
-    authenticators,
-    strategies,
-    executionStrategiesImplementations
+    authenticators: buildRegistry([
+      [network.Authenticators.EthSig, { type: 'ethSig' }],
+      [network.Authenticators.EthSigV2, { type: 'ethSigV2' }],
+      [network.Authenticators.EthTx, { type: 'ethTx' }]
+    ]),
+    strategies: buildRegistry([
+      [network.Strategies.Vanilla, { type: 'vanilla' }],
+      [network.Strategies.Comp, { type: 'comp' }],
+      [network.Strategies.OZVotes, { type: 'ozVotes' }],
+      [network.Strategies.Whitelist, { type: 'whitelist' }],
+      [network.Strategies.ApeGas, { type: 'apeGas' }]
+    ]),
+    executionStrategiesImplementations: {
+      SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
+      SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock
+    }
   };
 }
 
@@ -149,14 +185,14 @@ export const evmNetworks = {
   })
 } as const;
 
-export const evmMainnet = createEvmConfig('eth');
-export const evmSepolia = createEvmConfig('sep');
-export const evmOptimism = createEvmConfig('oeth');
-export const evmPolygon = createEvmConfig('matic');
-export const evmArbitrum = createEvmConfig('arb1');
-export const evmBase = createEvmConfig('base');
-export const evmMantle = createEvmConfig('mnt');
-export const evmBnb = createEvmConfig('bnb');
-export const evmBnbt = createEvmConfig('bnbt');
-export const evmApe = createEvmConfig('ape');
-export const evmCurtis = createEvmConfig('curtis');
+export const evmMainnet = createEvmConfig(evmNetworks.eth);
+export const evmSepolia = createEvmConfig(evmNetworks.sep);
+export const evmOptimism = createEvmConfig(evmNetworks.oeth);
+export const evmPolygon = createEvmConfig(evmNetworks.matic);
+export const evmArbitrum = createEvmConfig(evmNetworks.arb1);
+export const evmBase = createEvmConfig(evmNetworks.base);
+export const evmMantle = createEvmConfig(evmNetworks.mnt);
+export const evmBnb = createEvmConfig(evmNetworks.bnb);
+export const evmBnbt = createEvmConfig(evmNetworks.bnbt);
+export const evmApe = createEvmConfig(evmNetworks.ape);
+export const evmCurtis = createEvmConfig(evmNetworks.curtis);

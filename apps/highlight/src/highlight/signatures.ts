@@ -88,7 +88,7 @@ async function verifyEip1271SignatureWithAbi(
   let returnValue: string;
   try {
     const provider = new StaticJsonRpcProvider(
-      `https://rpc.snapshot.org/${chainId}`,
+      `https://rpc.brovider.xyz/${chainId}?client=highlight`,
       Number(chainId)
     );
 

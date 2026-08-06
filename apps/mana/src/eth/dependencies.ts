@@ -18,7 +18,7 @@ export function generateSpaceEvmWallet(
 export const createWalletProxy = (chainId: number) => {
   const signers = new Map<string, Wallet>();
   const provider = new StaticJsonRpcProvider(
-    `https://rpc.snapshot.org/${chainId}`,
+    `https://rpc.brovider.xyz/${chainId}?client=mana`,
     chainId
   );
 

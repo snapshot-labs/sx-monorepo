@@ -9,6 +9,7 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
+import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
   captureError,
@@ -18,7 +19,6 @@ import {
 } from '../helpers/utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
-const broviderUrl = process.env.BROVIDER_URL || 'https://rpc.snapshot.org';
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -124,8 +124,9 @@ export async function verify(body): Promise<any> {
     type: msg.payload.type,
     choices: msg.payload.choices
   });
-  if (!isChoicesValid)
+  if (!isChoicesValid) {
     return Promise.reject('wrong choices for basic type voting');
+  }
 
   // if (msg.payload.start < created) return Promise.reject('invalid start date');
 
@@ -141,8 +142,9 @@ export async function verify(body): Promise<any> {
   }
 
   if (space.voting?.type) {
-    if (msg.payload.type !== space.voting.type)
+    if (msg.payload.type !== space.voting.type) {
       return Promise.reject('invalid voting type');
+    }
   }
 
   const spacePrivacy = space.voting?.privacy ?? 'any';
@@ -164,8 +166,9 @@ export async function verify(body): Promise<any> {
     log.warn('[writer] Failed to check proposal content', err);
   }
 
-  if (flaggedAddresses.includes(addressLC))
+  if (flaggedAddresses.includes(addressLC)) {
     return Promise.reject('invalid proposal, please contact support');
+  }
 
   const onlyAuthors = space.filters?.onlyMembers;
   const members = [
@@ -175,8 +178,9 @@ export async function verify(body): Promise<any> {
   ].map(member => member.toLowerCase());
   const isAuthorized = members.includes(addressLC);
 
-  if (onlyAuthors && !isAuthorized)
+  if (onlyAuthors && !isAuthorized) {
     return Promise.reject('only space authors can propose');
+  }
   if (!isAuthorized) {
     try {
       const validationName = space.validation?.name || 'basic';
@@ -221,16 +225,18 @@ export async function verify(body): Promise<any> {
     }
   }
 
-  if (msg.payload.snapshot < networks[space.network].start)
+  if (msg.payload.snapshot < networks[space.network].start) {
     return Promise.reject('proposal snapshot must be after network start');
+  }
 
   try {
-    const provider = snapshot.utils.getProvider(space.network, { broviderUrl });
+    const provider = getProvider(space.network);
     const block = await provider.getBlock(msg.payload.snapshot);
     if (!block) return Promise.reject('invalid snapshot block');
   } catch (err: any) {
-    if (err.message?.includes('invalid block hash or block tag'))
+    if (err.message?.includes('invalid block hash or block tag')) {
       return Promise.reject('invalid snapshot block');
+    }
     return Promise.reject('unable to fetch block');
   }
 
@@ -243,15 +249,17 @@ export async function verify(body): Promise<any> {
     const monthLimit =
       limits[`space.${spaceTypeWithEcosystem}.proposal_limit_per_month`];
 
-    if (dayCount >= dayLimit || monthCount >= monthLimit)
+    if (dayCount >= dayLimit || monthCount >= monthLimit) {
       return Promise.reject('proposal limit reached');
+    }
     const activeProposalLimitPerAuthor =
       limits['space.active_proposal_limit_per_author'];
     if (
       !isAuthorized &&
       activeProposalsByAuthor >= activeProposalLimitPerAuthor
-    )
+    ) {
       return Promise.reject('active proposal limit reached for author');
+    }
   } catch (err) {
     capture(err);
     return Promise.reject('failed to check proposals limit');

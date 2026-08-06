@@ -2,7 +2,12 @@
 import { formatUnits } from '@ethersproject/units';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
-import { _n, shorten } from '@/helpers/utils';
+import {
+  _n,
+  escapeHtml,
+  replaceNamePlaceholder,
+  shorten
+} from '@/helpers/utils';
 import { ChainId, Transaction } from '@/types';
 
 const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
@@ -11,9 +16,9 @@ const expanded = ref(false);
 
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
-    return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals), 'standard', { formatDust: true })}</b> ${
+    return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals), 'standard', { formatDust: true })}</b> ${escapeHtml(
       props.tx._form.token.symbol
-    } to <b>_NAME_</b>`;
+    )} to <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'sendNft') {
@@ -25,7 +30,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return `<b>${props.tx._form.method.split('(')[0]}</b> on <b>_NAME_</b>`;
+    return `<b>${escapeHtml(props.tx._form.method.split('(')[0])}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -141,9 +146,9 @@ const parsedTitle = computedAsync(
     const names = await getNames([recipient]);
     const name = names[recipient] || shorten(recipient);
 
-    return title.value.replace('_NAME_', name);
+    return replaceNamePlaceholder(title.value, name);
   },
-  title.value.replace('_NAME_', shorten(props.tx._form.recipient))
+  replaceNamePlaceholder(title.value, shorten(props.tx._form.recipient))
 );
 </script>
 

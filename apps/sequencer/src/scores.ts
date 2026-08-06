@@ -200,8 +200,9 @@ export async function updateProposalAndVotes(
 
     // Check if voting power is final
     const withOverride = hasStrategyOverride(proposal.strategies);
-    if (vpState === 'final' && withOverride && proposal.state !== 'closed')
+    if (vpState === 'final' && withOverride && proposal.state !== 'closed') {
       vpState = 'pending';
+    }
 
     // Update votes voting power
     if (!isFinal) await updateVotesVp(votes, vpState, proposalId);

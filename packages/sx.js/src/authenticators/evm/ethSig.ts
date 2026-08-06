@@ -22,8 +22,9 @@ export default function createEthSigAuthenticator(
       const { signatureData, data } = envelope;
       const { space } = data;
 
-      if (!signatureData)
+      if (!signatureData) {
         throw new Error('signatureData is required for this authenticator');
+      }
 
       const { r, s, v } = getRSVFromSig(signatureData.signature);
 

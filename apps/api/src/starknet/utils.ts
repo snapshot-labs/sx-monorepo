@@ -104,8 +104,9 @@ export async function handleExecutionStrategy(
       quorum = await executionContract.quorum();
     } else if (executionStrategyType === 'EthRelayer') {
       const [l1Destination] = payload;
-      if (!l1Destination)
+      if (!l1Destination) {
         throw new Error('Invalid payload for EthRelayer execution strategy');
+      }
       destinationAddress = formatAddress('Ethereum', l1Destination);
 
       const client = createPublicClient({
