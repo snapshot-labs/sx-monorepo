@@ -43,12 +43,14 @@ export async function handleSpaceMetadata(
   if (metadata.name) spaceMetadataItem.name = metadata.name;
   if (metadata.description) spaceMetadataItem.about = metadata.description;
   if (metadata.avatar) spaceMetadataItem.avatar = metadata.avatar;
-  if (metadata.external_url)
+  if (metadata.external_url) {
     spaceMetadataItem.external_url = metadata.external_url;
+  }
 
   if (metadata.properties) {
-    if (metadata.properties.cover)
+    if (metadata.properties.cover) {
       spaceMetadataItem.cover = metadata.properties.cover;
+    }
 
     if (metadata.properties.treasuries) {
       spaceMetadataItem.treasuries = metadata.properties.treasuries.map(
@@ -65,16 +67,21 @@ export async function handleSpaceMetadata(
         (delegation: any) => JSON.stringify(delegation)
       );
     }
-    if (metadata.properties.github)
+    if (metadata.properties.github) {
       spaceMetadataItem.github = metadata.properties.github;
-    if (metadata.properties.twitter)
+    }
+    if (metadata.properties.twitter) {
       spaceMetadataItem.twitter = metadata.properties.twitter;
-    if (metadata.properties.discord)
+    }
+    if (metadata.properties.discord) {
       spaceMetadataItem.discord = metadata.properties.discord;
-    if (metadata.properties.farcaster)
+    }
+    if (metadata.properties.farcaster) {
       spaceMetadataItem.farcaster = metadata.properties.farcaster;
-    if (metadata.properties.clanker)
+    }
+    if (metadata.properties.clanker) {
       spaceMetadataItem.clanker = metadata.properties.clanker;
+    }
     if (metadata.properties.voting_power_symbol) {
       spaceMetadataItem.voting_power_symbol =
         metadata.properties.voting_power_symbol;

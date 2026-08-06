@@ -37,25 +37,29 @@ export async function verify(body): Promise<any> {
     proposal.start > msgTs ||
     tsInt > proposal.end ||
     proposal.start > tsInt
-  )
+  ) {
     return Promise.reject('not in voting window');
+  }
 
   if (proposal.privacy === 'shutter') {
-    if (msg.payload.reason)
+    if (msg.payload.reason) {
       return Promise.reject('reason not allowed with shutter');
+    }
     if (
       typeof msg.payload.choice !== 'string' ||
       !msg.payload.choice.startsWith('0x')
-    )
+    ) {
       return Promise.reject('invalid choice');
+    }
   } else {
     if (
       !snapshot.utils.voting[proposal.type].isValidChoice(
         msg.payload.choice,
         proposal.choices
       )
-    )
+    ) {
       return Promise.reject('invalid choice');
+    }
   }
 
   if (proposal.validation?.name && proposal.validation.name !== 'any') {
@@ -63,9 +67,10 @@ export async function verify(body): Promise<any> {
       const {
         validation: { name: validationName, params: validationParams }
       } = proposal;
-      if (validationName === 'basic')
+      if (validationName === 'basic') {
         validationParams.strategies =
           validationParams.strategies ?? proposal.strategies;
+      }
 
       const validate = await snapshot.utils.validate(
         validationName,
@@ -168,8 +173,9 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
       return Promise.reject('already voted at later time');
     } else if (votes[0].created === parseInt(msg.timestamp)) {
       const localCompare = id.localeCompare(votes[0].id);
-      if (localCompare <= 0)
+      if (localCompare <= 0) {
         return Promise.reject('already voted same time with lower index');
+      }
     }
     // Update previous vote
     log.info(`[writer] Update previous vote, ${voter}, ${proposalId}`);
@@ -216,8 +222,9 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
   // Update proposal scores and voters vp
   try {
     const result = await updateProposalAndVotes(proposalId);
-    if (!result)
+    if (!result) {
       log.warn(`[writer] updateProposalAndVotes() false, ${proposalId}`);
+    }
   } catch (err: any) {
     captureError(
       err,

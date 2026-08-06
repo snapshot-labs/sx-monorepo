@@ -57,8 +57,9 @@ export default function createWriters(indexerName: NetworkID) {
     if (
       event.args.previousBalance === BIGINT_ZERO &&
       event.args.newBalance > BIGINT_ZERO
-    )
+    ) {
       governance.currentDelegates += 1;
+    }
 
     if (event.args.newBalance === BIGINT_ZERO) governance.currentDelegates -= 1;
 
