@@ -12,7 +12,7 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses } from '@/helpers/utils';
+import { clone, compareAddresses, shorten } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -494,15 +494,61 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
+export function formatDelegateRegistryDelegations(
+  space: Pick<ApiSpace, 'id' | 'network' | 'strategies'>,
+  apiUrl: string
+): SpaceMetadataDelegation[] {
+  const registries = new Map<
+    string,
+    SpaceMetadataDelegation & { chainIds: string[] }
+  >();
+
+  for (const strategy of space.strategies) {
+    if (!DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)) continue;
+
+    const chainId = String(
+      strategy.params?.delegationNetwork || strategy.network || space.network
+    );
+    const contractAddress = strategy.params?.delegationSpace || space.id;
+
+    const existing = registries.get(contractAddress);
+    if (existing) {
+      if (!existing.chainIds.includes(chainId)) {
+        existing.chainIds.push(chainId);
+      }
+      continue;
+    }
+
+    registries.set(contractAddress, {
+      name: DELEGATION_TYPES_NAMES['delegate-registry'],
+      apiType: 'delegate-registry',
+      apiUrl,
+      contractAddress,
+      chainId,
+      chainIds: [chainId]
+    });
+  }
+
+  const delegations = [...registries.values()];
+
+  // A single registry is unambiguous on its own, so it keeps the plain
+  // "Delegate registry" label even when it reads several chains (the chain is
+  // an implementation detail of where the delegation lives, not a separate
+  // tab). Multiple registries are labelled by their namespace — the map key,
+  // which is guaranteed unique (chains are not: two registries can share one).
+  if (delegations.length <= 1) return delegations;
+
+  return delegations.map(delegation => ({
+    ...delegation,
+    name: `${DELEGATION_TYPES_NAMES['delegate-registry']} (${shorten(delegation.contractAddress!, 20)})`
+  }));
+}
+
 function formatDelegations(
   space: ApiSpace,
   networkId: NetworkID
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
-
-  const basicDelegationStrategy = space.strategies.find(strategy =>
-    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
-  );
 
   if (space.delegationPortal) {
     const apiType =
@@ -523,19 +569,11 @@ function formatDelegations(
     });
   }
 
-  if (basicDelegationStrategy) {
-    const chainId = space.network;
-
-    const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
-    if (apiUrl) {
-      delegations.push({
-        name: DELEGATION_TYPES_NAMES['delegate-registry'],
-        apiType: 'delegate-registry',
-        apiUrl,
-        contractAddress: space.id,
-        chainId
-      });
-    }
+  const delegateRegistryApiUrl = DELEGATE_REGISTRY_URLS[networkId];
+  if (delegateRegistryApiUrl) {
+    delegations.push(
+      ...formatDelegateRegistryDelegations(space, delegateRegistryApiUrl)
+    );
   }
 
   const splitDelegationStrategy = space.strategies.find(strategy =>

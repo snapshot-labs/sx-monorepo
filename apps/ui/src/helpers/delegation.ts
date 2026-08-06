@@ -36,3 +36,14 @@ export function isValidDelegation(
     delegation.contractAddress
   );
 }
+
+// Single source of truth for the chains a delegation must be probed/written on.
+// `chainIds` carries every candidate chain for a multichain registry; `chainId`
+// is the primary one and the only value present for single-chain delegations.
+export function candidateChainIds(
+  delegation: Pick<SpaceMetadataDelegation, 'chainId' | 'chainIds'>
+): string[] {
+  if (delegation.chainIds?.length) return delegation.chainIds;
+
+  return delegation.chainId ? [delegation.chainId] : [];
+}
