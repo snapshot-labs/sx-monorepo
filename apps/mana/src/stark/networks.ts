@@ -43,12 +43,14 @@ export function getClient(chainId: string) {
   const getAccount = createAccountProxy(chainId, provider);
 
   const ethUrl = ETH_NODE_URLS.get(chainId);
-  if (!ethUrl)
+  if (!ethUrl) {
     throw new Error(`Missing ethereum node url for chainId ${chainId}`);
+  }
 
   const networkConfig = NETWORKS.get(chainId);
-  if (!networkConfig)
+  if (!networkConfig) {
     throw new Error(`Missing network config for chainId ${chainId}`);
+  }
 
   const client = new clients.StarknetTx({
     starkProvider: provider,

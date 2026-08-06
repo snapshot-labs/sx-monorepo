@@ -24,8 +24,9 @@ export async function verify(body): Promise<any> {
     space,
     address: body.address
   });
-  if (!isAuthorizedToFlag)
+  if (!isAuthorizedToFlag) {
     return Promise.reject('not authorized to flag proposal');
+  }
 
   return Promise.resolve(proposal);
 }
