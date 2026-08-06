@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import db from '../src/helpers/mysql';
 
-// Usage: yarn ts-node scripts/refresh_leaderboard_vp_value.ts [--space SPACE-ID] [--from SPACE-ID] [--dry-run] [--concurrency N]
+// Usage: bunx ts-node scripts/refresh_leaderboard_vp_value.ts [--space SPACE-ID] [--from SPACE-ID] [--dry-run] [--concurrency N]
 
 const MIN_VOTES_PER_BATCH = 1000;
 const PAIRS_PER_UPDATE = 500;
