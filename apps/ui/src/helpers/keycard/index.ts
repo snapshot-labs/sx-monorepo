@@ -31,8 +31,9 @@ async function rpcCall(method: string, params: any) {
   });
 
   const { error, result } = await res.json();
-  if (error)
+  if (error) {
     throw new Error(error.data || error.message, { cause: error.code });
+  }
 
   return result;
 }
