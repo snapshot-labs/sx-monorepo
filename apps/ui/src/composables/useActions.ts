@@ -815,6 +815,7 @@ export function useActions() {
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
     updateUser: wrapWithErrors(updateUser),
-    updateStatement: wrapWithErrors(updateStatement)
+    updateStatement: wrapWithErrors(updateStatement),
+    getAliasSigner: wrapWithErrors(getAliasSigner)
   };
 }

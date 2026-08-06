@@ -22,6 +22,7 @@ export default [
       'import-x': importPlugin
     },
     rules: {
+      curly: ['error', 'multi-line', 'consistent'],
       'prefer-template': 'error',
       'lines-between-class-members': [
         'error',

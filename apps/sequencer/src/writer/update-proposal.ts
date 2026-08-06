@@ -37,8 +37,9 @@ export async function verify(body): Promise<any> {
   if (!proposal) return Promise.reject('unknown proposal');
 
   const timestampNow = Math.floor(Date.now() / 1e3);
-  if (proposal.start < timestampNow)
+  if (proposal.start < timestampNow) {
     return Promise.reject('proposal already started');
+  }
 
   const isChoicesValid = validateChoices({
     type: msg.payload.type,
@@ -50,8 +51,9 @@ export async function verify(body): Promise<any> {
     );
   }
 
-  if (proposal.author.toLowerCase() !== body.address.toLowerCase())
+  if (proposal.author.toLowerCase() !== body.address.toLowerCase()) {
     return Promise.reject('Not the author');
+  }
 
   const spacePrivacy = space.voting?.privacy ?? 'any';
   const proposalPrivacy = msg.payload.privacy;

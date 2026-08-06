@@ -45,13 +45,15 @@ router.post('/:chainId?', (req, res) => {
 
 router.get('/relayers/spaces/:space', async (req, res) => {
   const spaceArray = req.params.space.split(':');
-  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1])
+  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1]) {
     return rpcError(res, 400, 'Missing space parameter or invalid format', 0);
+  }
 
   const [networkId, spaceAddress] = spaceArray;
 
-  if (!validNetworkIds.includes(networkId))
+  if (!validNetworkIds.includes(networkId)) {
     return rpcError(res, 400, 'Invalid networkId', 0);
+  }
 
   const normalizedSpaceAddress = spaceAddress.toLowerCase();
   const wallet = generateSpaceEvmWallet(networkId, normalizedSpaceAddress);
