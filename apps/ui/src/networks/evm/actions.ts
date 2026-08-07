@@ -640,7 +640,7 @@ export function createActions(
         chainId
       };
 
-      if (relayerType === 'evm' && !isConfidential) {
+      if (relayerType === 'evm') {
         return ethSigClient.vote({
           signer,
           data
