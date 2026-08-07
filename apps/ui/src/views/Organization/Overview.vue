@@ -23,7 +23,7 @@ const proposalQueries = useQueries({
   queries: computed(() =>
     (organization.value?.spaces ?? []).map(s => ({
       queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
-      queryFn: proposalsSummaryQueryFn(queryClient, s.network, s.id)
+      queryFn: proposalsSummaryQueryFn(queryClient, s)
     }))
   )
 });

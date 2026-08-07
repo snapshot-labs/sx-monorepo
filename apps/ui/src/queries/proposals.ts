@@ -9,7 +9,7 @@ import { getNames } from '@/helpers/stamp';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { SCORES_TICKS_MAX_VOTES } from '@/networks/offchain/api';
 import { ProposalsFilter } from '@/networks/types';
-import { NetworkID, Proposal } from '@/types';
+import { NetworkID, Proposal, Space } from '@/types';
 
 type Filters = {
   state?: MaybeRefOrGetter<NonNullable<ProposalsFilter['state']>>;
@@ -72,6 +72,10 @@ export const PROPOSALS_KEYS = {
       'scoresTicks'
     ] as const
 };
+
+function getSpaceIdsWithSubSpaces(space: Space): string[] {
+  return [space.id, ...space.children.map(child => child.id)];
+}
 
 async function withAuthorNames(proposals: Proposal[]) {
   const names = await getNames(proposals.map(proposal => proposal.author.id));
@@ -182,15 +186,21 @@ export function useHomeProposalsQuery(
 }
 
 export function useProposalsQuery(
-  networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>,
+  space: MaybeRefOrGetter<Space>,
   filters: Filters,
   query?: MaybeRefOrGetter<string>
 ) {
+  const networkId = toRef(() => toValue(space).network);
+
   return getProposalsQuery(
-    PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
+    PROPOSALS_KEYS.spaceList(
+      networkId,
+      toRef(() => toValue(space).id),
+      filters,
+      query
+    ),
     networkId,
-    toRef(() => [toValue(spaceId)]),
+    toRef(() => getSpaceIdsWithSubSpaces(toValue(space))),
     filters,
     query
   );
@@ -198,35 +208,40 @@ export function useProposalsQuery(
 
 export function proposalsSummaryQueryFn(
   queryClient: QueryClient,
-  networkId: NetworkID,
-  spaceId: string
+  space: Space
 ) {
   return async () => {
-    const proposals = await getProposals([spaceId], networkId, {
-      skip: 0,
-      limit: PROPOSALS_SUMMARY_LIMIT
-    });
+    const proposals = await getProposals(
+      getSpaceIdsWithSubSpaces(space),
+      space.network,
+      {
+        skip: 0,
+        limit: PROPOSALS_SUMMARY_LIMIT
+      }
+    );
 
-    setProposalsDetails(queryClient, networkId, proposals);
+    setProposalsDetails(queryClient, space.network, proposals);
 
     return proposals;
   };
 }
 
 export function useProposalsSummaryQuery(
-  networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>,
+  space: MaybeRefOrGetter<Space>,
   enabled: MaybeRefOrGetter<boolean> = true
 ) {
   const queryClient = useQueryClient();
 
+  const queryFn = computed(() =>
+    proposalsSummaryQueryFn(queryClient, toValue(space))
+  );
+
   return useQuery({
-    queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
-    queryFn: proposalsSummaryQueryFn(
-      queryClient,
-      toValue(networkId),
-      toValue(spaceId)
+    queryKey: PROPOSALS_KEYS.spaceSummary(
+      toRef(() => toValue(space).network),
+      toRef(() => toValue(space).id)
     ),
+    queryFn,
     enabled: () => toValue(enabled)
   });
 }
