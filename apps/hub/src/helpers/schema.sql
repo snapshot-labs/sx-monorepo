@@ -102,6 +102,7 @@ CREATE TABLE votes (
   vp DECIMAL(64,30) NOT NULL,
   vp_by_strategy JSON NOT NULL,
   vp_state VARCHAR(24) NOT NULL,
+  vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   cb INT(11) NOT NULL,
   vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   PRIMARY KEY (voter, space, proposal),

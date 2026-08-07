@@ -117,6 +117,9 @@ type Query {
   "Calculates the voting power for a voter in a space, optionally for a specific proposal"
   vp(voter: String!, space: String!, proposal: String): Vp
 
+  "Returns the total monetary value of a voter's voting power, broken down by space"
+  vp_value(voter: String!): VpValue
+
   "Returns a list of signed messages (envelopes) with optional filtering, ordering, and pagination"
   messages(
     first: Int! = 20
@@ -919,6 +922,24 @@ type Vp {
   vp_by_strategy: [Float]
   "Voting power state (e.g. final, pending)"
   vp_state: String
+}
+
+"Total monetary value of a voter's voting power across spaces"
+type VpValue {
+  "Voter address"
+  user: String!
+  "Total monetary value of voting power across all spaces"
+  totalVpValue: Float!
+  "Per-space breakdown of voting power value"
+  spaces: [VpValueSpace]!
+}
+
+"Per-space monetary value of a voter's voting power"
+type VpValueSpace {
+  "Space ID"
+  id: String!
+  "Total monetary value of voting power in this space"
+  totalVpValue: Float!
 }
 
 "Leaderboard entry for a user in a space"
