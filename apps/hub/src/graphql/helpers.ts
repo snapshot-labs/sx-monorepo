@@ -4,7 +4,7 @@ import castArray from 'lodash/castArray';
 import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import db from '../helpers/mysql';
-import { spacesMetadata } from '../helpers/spaces';
+import { DEFAULT_COUNTS, spacesMetadata } from '../helpers/spaces';
 import { jsonParse } from '../helpers/utils';
 
 const network = process.env.NETWORK || 'testnet';
@@ -97,13 +97,21 @@ export function formatSpace({
   turboExpiration,
   flagged,
   hibernated,
-  skinSettings
+  skinSettings,
+  created
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
-  const space = { ...jsonParse(settings, {}), ...spaceMetadata.counts };
+  const space = {
+    ...jsonParse(settings, {}),
+    // counts default to 0 for spaces not yet in the metadata cache
+    ...DEFAULT_COUNTS,
+    ...spaceMetadata.counts
+  };
 
   space.id = id;
+  space.created = created;
   space.domain = domain || '';
+  space.name = space.name || id;
   space.private = space.private || false;
   space.avatar = space.avatar || '';
   space.about = space.about || '';
@@ -126,15 +134,17 @@ export function formatSpace({
   space.voting.aliased = space.voting.aliased || false;
   space.voting.hideAbstain = space.voting.hideAbstain || false;
   space.voteValidation = space.voteValidation || { name: 'any', params: {} };
+  space.voteValidation.params = space.voteValidation.params || {};
   space.delegationPortal = space.delegationPortal
     ? { delegationNetwork: '1', ...space.delegationPortal }
     : null;
   space.boost = space.boost || { enabled: true, bribeEnabled: false };
-  space.strategies = space.strategies?.map(strategy => ({
-    ...strategy,
-    // By default return space network if strategy network is not defined
-    network: strategy.network || space.network
-  }));
+  space.strategies =
+    space.strategies?.map(strategy => ({
+      ...strategy,
+      // By default return space network if strategy network is not defined
+      network: strategy.network || space.network
+    })) || [];
   if (!space.validation && space.filters.minScore) {
     space.validation = {
       name: 'basic',
@@ -142,14 +152,18 @@ export function formatSpace({
     };
   }
   space.validation = space.validation || { name: 'any', params: {} };
+  space.validation.params = space.validation.params || {};
   space.treasuries = space.treasuries || [];
-  space.labels = space.labels || [];
+  space.labels = (space.labels || []).map(label => ({
+    ...label,
+    description: label.description || ''
+  }));
   space.skinSettings = skinSettings;
 
-  space.verified = verified ?? null;
+  space.verified = verified;
   space.flagged = flagged > 0;
   space.flagCode = flagged;
-  space.hibernated = hibernated ?? null;
+  space.hibernated = hibernated;
   space.turbo = new Date((turboExpiration || 0) * 1000) > new Date();
   space.turboExpiration = turboExpiration ?? 0;
   space.rank = spaceMetadata?.rank ?? null;
@@ -387,17 +401,17 @@ function needsRelatedSpacesData(requestedFields): boolean {
 }
 
 function mapRelatedSpacesToSpaces(spaces, relatedSpaces) {
-  if (!relatedSpaces.length) return spaces;
-
+  const relatedSpacesById = new Map(relatedSpaces.map(s => [s.id, s]));
+  // drop parents/children that no longer resolve to an existing space,
+  // as their id-only skeleton would violate the non-null Space fields
   return spaces.map(space => {
     if (space.children) {
       space.children = space.children
-        .map(c => relatedSpaces.find(s => s.id === c.id) || c)
+        .map(c => relatedSpacesById.get(c.id))
         .filter(s => s);
     }
     if (space.parent) {
-      space.parent =
-        relatedSpaces.find(s => s.id === space.parent.id) || space.parent;
+      space.parent = relatedSpacesById.get(space.parent.id) || null;
     }
     return space;
   });
@@ -417,8 +431,15 @@ async function fetchRelatedSpaces(spaces) {
   });
 }
 
-export async function handleRelatedSpaces(info: any, spaces: any[]) {
-  const requestedFields = info ? graphqlFields(info) : {};
+export async function handleRelatedSpaces(
+  info: any,
+  spaces: any[],
+  fieldsPath?: string
+) {
+  let requestedFields = info ? graphqlFields(info) : {};
+  // when the spaces are nested in the response (e.g. ranking.items),
+  // look up parent/children in the wrapped selection
+  if (fieldsPath) requestedFields = requestedFields[fieldsPath] || {};
   if (needsRelatedSpacesData(requestedFields)) {
     checkRelatedSpacesNesting(requestedFields);
     const relatedSpaces = await fetchRelatedSpaces(spaces);
@@ -450,6 +471,7 @@ export function formatProposal(proposal) {
       params: {}
     };
   }
+  proposal.validation.params = proposal.validation.params || {};
   proposal.plugins = jsonParse(proposal.plugins, {});
   proposal.scores = jsonParse(proposal.scores, []);
   proposal.scores_by_strategy = jsonParse(proposal.scores_by_strategy, []);
@@ -467,7 +489,8 @@ export function formatProposal(proposal) {
     turboExpiration: proposal.spaceTurboExpiration,
     flagged: proposal.spaceFlagged,
     hibernated: proposal.spaceHibernated,
-    skinSettings: formatSkinSettings(proposal)
+    skinSettings: formatSkinSettings(proposal),
+    created: proposal.spaceCreated
   });
   const networkPrefix = network === 'testnet' ? 's-tn' : 's';
   proposal.link = `https://${domain}/#/${networkPrefix}:${proposal.space.id}/proposal/${proposal.id}`;
@@ -496,7 +519,8 @@ export function formatVote(vote) {
     turboExpiration: vote.spaceTurboExpiration,
     flagged: vote.spaceFlagged,
     hibernated: vote.spaceHibernated,
-    skinSettings: formatSkinSettings(vote)
+    skinSettings: formatSkinSettings(vote),
+    created: vote.spaceCreated
   });
   return vote;
 }
@@ -510,7 +534,8 @@ export function formatFollow(follow) {
     turboExpiration: follow.spaceTurboExpiration,
     flagged: follow.spaceFlagged,
     hibernated: follow.spaceHibernated,
-    skinSettings: formatSkinSettings(follow)
+    skinSettings: formatSkinSettings(follow),
+    created: follow.spaceCreated
   });
   return follow;
 }
@@ -524,7 +549,8 @@ export function formatSubscription(subscription) {
     turboExpiration: subscription.spaceTurboExpiration,
     flagged: subscription.spaceFlagged,
     hibernated: subscription.spaceHibernated,
-    skinSettings: formatSkinSettings(subscription)
+    skinSettings: formatSkinSettings(subscription),
+    created: subscription.spaceCreated
   });
   return subscription;
 }
