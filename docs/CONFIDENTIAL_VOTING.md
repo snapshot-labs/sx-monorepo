@@ -65,7 +65,7 @@ Inco's `e.allow(handle, account)` controls who can request decryption of a handl
 - During `vote()` / `propose()`: the encrypted tally buckets get `allowThis()` only — **no EOA can decrypt while voting is open**.
 - `requestReveal(id)` (only after `maxEndBlockNumber`) grants `msg.sender` decrypt access to the three now-frozen tally handles. Since voting has ended, this cannot leak a running result.
 
-Reveal is therefore permissionless and the final counts are meant to be public. The Mana relayer is still kept out of the confidential path (see [Decision O3](#decision-o3-mana-relayer)) — the UI reveals/executes with the user's signer directly.
+Reveal is therefore permissionless and the final counts are meant to be public. The Mana relayer is not involved in the confidential path (see [Decision O3](#decision-o3-mana-relayer)) — the UI reveals/executes with the user's signer directly.
 
 ## Indexer behavior
 
@@ -134,7 +134,7 @@ Small-anonymity-set caveat: revealing exact counts with 1–2 voters can expose 
 
 ### Decision O3: Mana relayer
 
-The confidential vote is payable and reveal is the user's own signed flow, so v1 keeps Mana out of the confidential path entirely — the UI votes/reveals/executes with the user's signer directly. Mana's `NETWORKS` map intentionally omits Base Sepolia; [`apps/mana/src/eth/rpc.ts`](../apps/mana/src/eth/rpc.ts) filters `NETWORK_IDS` to the chains in `NETWORKS` so the basesep entry in sx.js's `evmNetworks` doesn't crash Mana's startup with "Unsupported chainId".
+The confidential vote is payable and reveal is the user's own signed flow, so v1 keeps Mana out of the confidential path — the UI votes/reveals/executes with the user's signer directly. This needs no special-casing in Mana: Base Sepolia is registered like any other chain, but confidential spaces only expose the `EthTx` authenticator (no `EthSig`/`EthSigV2`), so the UI never routes their votes through the relayer.
 
 ### Resolved: reveal trigger
 

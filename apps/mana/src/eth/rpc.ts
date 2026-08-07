@@ -4,6 +4,7 @@ import {
   evmApe,
   evmArbitrum,
   evmBase,
+  evmBaseSepolia,
   evmBnb,
   evmBnbt,
   evmCurtis,
@@ -45,7 +46,8 @@ const NETWORKS = new Map<number, EvmNetworkConfig>([
   [1, evmMainnet],
   [33139, evmApe],
   [33111, evmCurtis],
-  [11155111, evmSepolia]
+  [11155111, evmSepolia],
+  [84532, evmBaseSepolia]
 ]);
 
 export const NETWORK_IDS = new Map<number, string>(
