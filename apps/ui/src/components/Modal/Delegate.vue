@@ -249,9 +249,20 @@ function prefillExistingDelegatees() {
 
   if (
     !isSelectedDelegationSupportingMultipleDelegates.value &&
-    form.delegatees[0].id
+    form.delegatees[0]?.id
   ) {
     return;
+  }
+
+  const existingDelegatees =
+    isSelectedDelegationSupportingMultipleDelegates.value
+      ? delegatees.value
+      : delegatees.value.slice(0, 1);
+
+  // Without this the form would add a delegation on the registry's default
+  // chain instead of replacing the one it prefilled.
+  if (existingDelegatees[0]?.chainId) {
+    form.chainId = existingDelegatees[0].chainId;
   }
 
   const remainingShares =
@@ -265,7 +276,7 @@ function prefillExistingDelegatees() {
       id: delegatee.id,
       share: remainingShares / formDelegatees.length
     })),
-    ...clone(delegatees.value)
+    ...clone(existingDelegatees)
   ]
     .filter(d => d.id)
     .map(delegatee => ({
