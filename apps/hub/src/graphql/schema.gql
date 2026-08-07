@@ -817,6 +817,8 @@ type User {
   proposalsCount: Int
   "Unix timestamp of the user's most recent vote"
   lastVote: Int
+  "Total points earned"
+  points: Float!
 }
 
 "A delegate statement"
