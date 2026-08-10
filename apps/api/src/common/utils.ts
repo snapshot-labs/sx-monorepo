@@ -85,19 +85,64 @@ export function getSpaceName(address: string) {
   return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
 }
 
+const FETCH_TIMEOUT = 15000;
+const FETCH_ATTEMPTS = 3;
+const BASE_RETRY_DELAY = 500;
+const MAX_RETRY_DELAY = 5000;
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function getRetryDelay(attempt: number) {
+  return Math.min(BASE_RETRY_DELAY * 2 ** attempt, MAX_RETRY_DELAY);
+}
+
+/**
+ * A gateway that rate limits us or fails on its own side will usually serve the
+ * same content a moment later. Any other status is an answer about the content
+ * itself and will read the same however many times we ask.
+ */
+function isRetriableStatus(status: number) {
+  return status === 408 || status === 429 || status >= 500;
+}
+
+/**
+ * A metadata fetch that fails here leaves the entity it belongs to with a null
+ * pointer, and nothing revisits it afterwards, so a gateway blip is permanent
+ * data loss. Transient failures are retried; a definite answer is not.
+ */
 export async function getJSON(uri: string) {
   const url = getUrl(uri);
   if (!url) throw new Error('Invalid URI');
 
-  const res = await fetch(url, {
-    signal: AbortSignal.timeout(15000)
-  });
+  for (let attempt = 0; ; attempt++) {
+    const lastAttempt = attempt === FETCH_ATTEMPTS - 1;
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch JSON from ${url}: ${res.statusText}`);
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT)
+      });
+    } catch (err) {
+      // The gateway was unreachable, or took longer than we waited.
+      if (lastAttempt) throw err;
+
+      await sleep(getRetryDelay(attempt));
+      continue;
+    }
+
+    if (!res.ok) {
+      if (lastAttempt || !isRetriableStatus(res.status)) {
+        throw new Error(`Failed to fetch JSON from ${url}: ${res.statusText}`);
+      }
+
+      await sleep(getRetryDelay(attempt));
+      continue;
+    }
+
+    return res.json();
   }
-
-  return res.json();
 }
 
 export function getExecutionHash({

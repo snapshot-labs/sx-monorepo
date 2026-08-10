@@ -268,7 +268,7 @@ export function createWriters(
 
       space.metadata = dropIpfs(metadataUri);
     } catch (err) {
-      logger.info({ err }, 'Failed to fetch space metadata');
+      logger.error({ err }, 'Failed to fetch space metadata');
     }
 
     if (spaceMetadataItem) {
@@ -332,7 +332,7 @@ export function createWriters(
 
       await space.save();
     } catch (err) {
-      logger.info({ err }, 'Failed to fetch space metadata');
+      logger.error({ err }, 'Failed to fetch space metadata');
     }
 
     if (spaceMetadataItem) {

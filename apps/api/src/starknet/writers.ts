@@ -131,7 +131,7 @@ export function createWriters(config: FullConfig) {
 
       space.metadata = dropIpfs(metadataUri);
     } catch (err) {
-      logger.warn({ err }, 'Failed to handle space metadata');
+      logger.error({ err }, 'Failed to handle space metadata');
     }
 
     try {
@@ -177,7 +177,7 @@ export function createWriters(config: FullConfig) {
 
       await space.save();
     } catch (err) {
-      logger.warn({ err }, 'Failed to handle space metadata');
+      logger.error({ err }, 'Failed to handle space metadata');
     }
   };
 
