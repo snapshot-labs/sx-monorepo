@@ -74,6 +74,9 @@ export const PROPOSALS_KEYS = {
 };
 
 function getSpaceIdsWithSubSpaces(space: Space): string[] {
+  const { isWhiteLabel } = useWhiteLabel();
+  if (isWhiteLabel.value) return [space.id];
+
   return [space.id, ...space.children.map(child => child.id)];
 }
 
