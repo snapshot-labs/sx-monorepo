@@ -92,19 +92,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 13378903
     },
-    Angle: {
-      name: 'Angle',
-      about:
-        'Angle is a capital-efficient, over-collateralized and liquid decentralized stablecoin protocol',
-      avatar:
-        'ipfs://bafkreicmrvaeueoenhptjailexxd7i2wkxd2vjobjnrrgorzqejl6aqnmi',
-      address: '0x59153e939c5b4721543251ff3049Ea04c755373B',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 13494336
-    },
     'Gas Dao': {
       name: 'Gas Dao',
       about:
@@ -299,17 +286,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 16490162
     },
-    'Electronic Dollar': {
-      name: 'Electronic Dollar',
-      about:
-        '1. Maintain $1 USD peg & be fully collateralized 2. Generate yield to eUSDRSR stakers who provide overcollateralization',
-      address: '0x7e880d8bD9c9612D6A9759F96aCD23df4A4650E6',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 16687914
-    },
     'Joseon Gov DAO': {
       name: 'Joseon Gov DAO',
       about: 'Joseon DAO for managing government assets',
@@ -417,64 +393,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 17687649
     },
-    Unlock: {
-      name: 'Unlock',
-      about:
-        'Unlock ownership of your community, across all your platforms. The Unlock Protocol DAO has moved to Base. Please submit proposals on https://www.tally.xyz/gov/unlock-protocol',
-      avatar:
-        'ipfs://bafkreigqolz6nxj57bu5txf65hcu3ngukhknbtsoiayhgmj2ai7lcm4i6a',
-      externalUrl: 'https://www.tally.xyz/gov/unlock-protocol',
-      twitter: 'unlockProtocol',
-      discord: 'https://discord.com/Ah6ZEJyTDp',
-      address: '0x440d9D4E66d39bb28FB58729Cb4D3ead2A595591',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17814193
-    },
-    'Diva Staking': {
-      name: 'Diva Staking',
-      about:
-        "Diva is an ETH Liquid Staking protocol powered by Distributed Validators that's both trustless and permissionless.",
-      avatar:
-        'ipfs://bafkreicqydwy2lmkregpkacmfoykkvemyjja527nhnxhfqaildv6jwwuty',
-      externalUrl: 'https://www.divastaking.net/',
-      twitter: 'divastaking',
-      discord: 'divastaking',
-      address: '0xFb6B7C11a55C57767643F1FF65c34C8693a11A70',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17859049
-    },
-    'High Yield USD': {
-      name: 'High Yield USD',
-      about:
-        'A decentralized flatcoin that provides convenient access to DeFi yields, enabling holders to earn passive income on their capital. Governance should aim to take low to moderate risk to return high DeFi yields in order to mitigate inflation.',
-      avatar:
-        'ipfs://bafkreiefdkli2sjj5vmpnd3fj6kaszueuo7dkmwdmmphakj7caq25psns4',
-      address: '0x22d7937438b4bBf02f6cA55E3831ABB94Bd0b6f1',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17874412
-    },
-    'ETH+': {
-      name: 'ETH+',
-      about:
-        '1: Maintain an Ethereum-aligned Liquid Staking Token basket. 2: Positively impact the Ethereum staking distribution. 3: Provide value to ETH+ holders through diversification.',
-      avatar:
-        'ipfs://bafkreidpjveknt7oyaakexmu33rdxioqtm4355ww65ba4hjype4uxqcpeq',
-      address: '0x239cDcBE174B4728c870A24F77540dAB3dC5F981',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17879540
-    },
     AMKT: {
       name: 'AMKT',
       about: 'AMKT Governance',
@@ -495,17 +413,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 18471475
     },
-    'USDC+': {
-      name: 'USDC+',
-      about:
-        'A community governed yield bearing USDC index optimized for yield to holders and overcollateralization protection. 1. Be fully collateralized. 2. Generate yield to USDC+ holders and stakers who provide overcollateralization.',
-      address: '0xc837C557071D604bCb1058c8c4891ddBe8FDD630',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 18728947
-    },
     Increment: {
       name: 'Increment',
       about: 'Increment Governor',
@@ -519,20 +426,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 19399472
-    },
-    BytomDAO: {
-      name: 'BytomDAO',
-      about: 'Build the bridge from Web3 to AGI',
-      avatar:
-        'ipfs://bafkreidq5qu6igoobz5jyk4p3m7j7saebdxey2uocm5k24ofyiqxckklaq',
-      externalUrl: 'https://bytomdao.org/',
-      twitter: 'BytomDAO',
-      address: '0x44214252CEdA1B087cF5D7D08d26a5913f31D40d',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 19447876
     },
     Fluence: {
       name: 'Fluence',
@@ -563,36 +456,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 19712370
     },
-    Anvil: {
-      name: 'Anvil',
-      about:
-        'Anvil is a system of Ethereum-based smart contracts that manages collateral and issues fully secured credit.',
-      avatar:
-        'ipfs://bafkreicqektvg6rst5trpipq5sxiqpxv46ahsjg3fjv3sn2d4p4juftvsq',
-      externalUrl: 'https://anvil.xyz',
-      twitter: 'anvil_xyz',
-      address: '0x00e83d0698FAf01BD080A4Dd2927e6aB7C4874c9',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 20735345
-    },
-    'Xypher Council': {
-      name: 'Xypher Council',
-      about:
-        'Pioneering the unseen paths of blockchain altruism. Where innovation meets anonymity to forge a future of decentralized good.',
-      avatar:
-        'ipfs://bafybeienl6ksonugs736ese2mzxgjmue7pqfiatl7bmyqkqokkefbeanbq',
-      externalUrl: 'https://www.xyphercouncil.com',
-      twitter: 'XypherCouncil',
-      address: '0xcDC6B1308B5C13B9c9077467711BF9Bc0C7B9C8e',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 20751377
-    },
     Zivoe: {
       name: 'Zivoe',
       about:
@@ -603,20 +466,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 20820581
-    },
-    'Lendefi DAO': {
-      name: 'Lendefi DAO',
-      about: 'Making DeFi Lending Great Again!',
-      avatar:
-        'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
-      externalUrl: 'https://lendefi.org',
-      twitter: 'LendefiDAO',
-      address: '0xB094C6ed74A83405A700d235496557bAFDEF2551',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 22654046
     },
     'DPCE DAO': {
       name: 'DPCE DAO',
@@ -637,37 +486,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
       startBlock: 23345757
-    },
-    'ZEUS CC8 Community Takeover': {
-      name: 'ZEUS CC8 Community Takeover',
-      about:
-        "ZEUS Pepes Dog Community Takeover is a DAO that governs the community's resources and decides on the initiatives that the Zeus Army carries out for the ZEUS project.",
-      avatar:
-        'ipfs://bafybeicyicuestfnitq36yp3vd4abmtje7omehb2yesokdff6drlvm5odq',
-      externalUrl: 'https://www.zeuscoin.vip/',
-      twitter: 'zeuscoineth_',
-      address: '0x9499DB1A80c7b8F9C6d87510116d93eD4999eA15',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 23676984
-    },
-    'Lightchain AI DAO': {
-      name: 'Lightchain AI DAO',
-      about:
-        'Lightchain AI DAO governs and scales Lightchain’s open network, enabling token holders to propose, discuss, and vote on upgrades, funding, and partnerships. To participate in governance or delegate voting power, visit https://ballots.lightchain.ai.',
-      avatar:
-        'ipfs://bafkreiferi5hnww3wvtbykvujcgyxacv5pfz4ej2hipyrxdtk2lt2k4pg4',
-      externalUrl: 'https://lightchain.ai/',
-      twitter: 'LightchainAI',
-      discord: 'https://discord.com/lightchain',
-      address: '0x6dfa413B5900a1a7947BC75E68AbBA093cB2492d',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 24353688
     },
     Flayer: {
       name: 'Flayer',
@@ -702,20 +520,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       verified: true,
       startBlock: 37959559
-    },
-    'Lendefi DAO': {
-      name: 'Lendefi DAO',
-      about: 'Making DeFi Lending Great Again!',
-      avatar:
-        'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
-      externalUrl: 'https://lendefi.org',
-      twitter: 'LendefiDAO',
-      address: '0xB094C6ed74A83405A700d235496557bAFDEF2551',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 56209954
     }
   },
   bnbt: {
@@ -787,30 +591,7 @@ export const GOVERNANCES: Partial<
       verified: true,
       startBlock: 204249812
     }
-    */ 'SWEEP Test Governance': {
-      name: 'SWEEP Test Governance',
-      about:
-        'SWEEP TEST helps to set SWEEP TEST parameters and manage the treasury',
-      address: '0x50091D36E8904a222dFa84a23812451a169A3b0f',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 65506023
-    },
-    'SWEEP TEST GOVERNANCE': {
-      name: 'SWEEP TEST GOVERNANCE',
-      about:
-        'SWEEP TEST helps to set SWEEP TEST parameters and manage the treasury.',
-      avatar:
-        'ipfs://bafkreih3mzjhl3zju4eq22hmnbynqwled6uika6bjwlxfaahavyx4iomjq',
-      address: '0xD013237b30e5Bcd8924b85aCA7b2254DF06D5B92',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 65745737
-    },
+    */
     'UXD Arbitrum One Council': {
       name: 'UXD Arbitrum One Council',
       about: 'UXD council governance on Arbitrum',
@@ -893,16 +674,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 97044177
     },
-    'Cora Protocol DAO': {
-      name: 'Cora Protocol DAO',
-      about: 'This is the wei !',
-      address: '0xE926F8c54b1401600D6A40aBb598b762f4904b6e',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 114748176
-    },
     'SWEEPR Governor': {
       name: 'SWEEPR Governor',
       about: 'Vote on changes to Sweep Protocol',
@@ -934,26 +705,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 171704991
     },
-    'Super ARB DAO': {
-      name: 'Super ARB DAO',
-      about: 'Test DAO on Arbitrum One',
-      address: '0xF1EF03e8B63BEaf68eDEAA3a72781BB2D3b2A571',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 185351067
-    },
-    'Credit Guild Onboard Governor': {
-      name: 'Credit Guild Onboard Governor',
-      about: 'This is a subsidiary Governor for onboarding new lending terms.',
-      address: '0x3424f7560562468Fd4F7cD268dF7998090B4Ab21',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 203544059
-    },
     'Open Dollar': {
       name: 'Open Dollar',
       about:
@@ -969,30 +720,6 @@ export const GOVERNANCES: Partial<
       ],
       quorumType: 'for_only',
       startBlock: 203643381
-    },
-    'Credit Guild': {
-      name: 'Credit Guild',
-      about:
-        'The Credit Guild is the first oracle free lending pool. This is the main Governor for the Arbitrum deployment.',
-      externalUrl: 'https://www.creditguild.org',
-      twitter: 'creditguild',
-      address: '0x5a2568b31532d9B6DB228570F75B4c83f2201951',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 203777168
-    },
-    'Credit Guild Params Governor': {
-      name: 'Credit Guild Params Governor',
-      about:
-        'This is a subsidiary Governor for updating parameters of lending terms.',
-      address: '0x45AF76adA2158B3914A2B6A901e2B85c44E0f27f',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 242130667
     },
     'BTCMobick DAO': {
       name: 'BTCMobick DAO',
@@ -1013,20 +740,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 337192915
-    },
-    'Lendefi DAO': {
-      name: 'Lendefi DAO',
-      about: 'Making DeFi Lending Great Again!',
-      avatar:
-        'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
-      externalUrl: 'https://lendefi.org',
-      twitter: 'LendefiDAO',
-      address: '0xB094C6ed74A83405A700d235496557bAFDEF2551',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 364277386
     }
   },
   sep: {
