@@ -13,6 +13,12 @@ import { NetworkID, Space } from '@/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
+export const SPACES_KEYS = {
+  all: ['spaces'] as const,
+  detail: (spaceId: MaybeRefOrGetter<string>) =>
+    [...SPACES_KEYS.all, 'detail', spaceId] as const
+};
+
 // NOTE: this is used for followed spaces
 export async function getSpaces(filter?: SpacesFilter) {
   const results = await Promise.all(
@@ -79,11 +85,9 @@ export function useFollowedSpacesQuery({
     return async (): Promise<Space[]> => {
       const [existingSpaces, unavailableIds] = ids.reduce(
         (acc, id) => {
-          const existingData = queryClient.getQueryData<Space>([
-            'spaces',
-            'detail',
-            id
-          ]);
+          const existingData = queryClient.getQueryData<Space>(
+            SPACES_KEYS.detail(id)
+          );
 
           if (existingData) {
             acc[0].push(existingData);
@@ -102,7 +106,7 @@ export function useFollowedSpacesQuery({
 
       for (const space of spaces) {
         queryClient.setQueryData<Space>(
-          ['spaces', 'detail', `${space.network}:${space.id}`],
+          SPACES_KEYS.detail(`${space.network}:${space.id}`),
           space
         );
       }
@@ -118,6 +122,16 @@ export function useFollowedSpacesQuery({
   });
 }
 
+export function spaceQueryFn(networkId: NetworkID, spaceId: string) {
+  return async (): Promise<Space | null> => {
+    const metaStore = useMetaStore();
+
+    await metaStore.fetchBlock(networkId);
+
+    return getNetwork(networkId).api.loadSpace(spaceId);
+  };
+}
+
 export function useSpaceQuery({
   networkId,
   spaceId
@@ -125,24 +139,17 @@ export function useSpaceQuery({
   networkId: MaybeRefOrGetter<NetworkID | null>;
   spaceId: MaybeRefOrGetter<string | null>;
 }) {
-  const metaStore = useMetaStore();
-
   return useQuery({
-    queryKey: [
-      'spaces',
-      'detail',
+    queryKey: SPACES_KEYS.detail(
       () => `${toValue(networkId)}:${toValue(spaceId)}`
-    ],
+    ),
     queryFn: async () => {
       const networkIdValue = toValue(networkId);
       const spaceIdValue = toValue(spaceId);
 
       if (!networkIdValue || !spaceIdValue) return null;
 
-      await metaStore.fetchBlock(networkIdValue);
-      const network = getNetwork(networkIdValue);
-
-      return network.api.loadSpace(spaceIdValue);
+      return spaceQueryFn(networkIdValue, spaceIdValue)();
     },
     enabled: () => toValue(networkId) !== null && toValue(spaceId) !== null
   });
@@ -195,7 +202,7 @@ export function useExploreSpacesQuery({
 
       for (const space of results) {
         queryClient.setQueryData(
-          ['spaces', 'detail', `${space.network}:${space.id}`],
+          SPACES_KEYS.detail(`${space.network}:${space.id}`),
           space
         );
       }

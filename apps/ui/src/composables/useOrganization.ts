@@ -1,18 +1,17 @@
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import { useQueries } from '@tanstack/vue-query';
 import {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
   Organization,
   OrganizationConfig
 } from '@/helpers/organizations';
-import { getNetwork } from '@/networks';
+import { spaceQueryFn, SPACES_KEYS } from '@/queries/spaces';
 import { Space } from '@/types';
 
 const domain = window.location.hostname;
 
 function setup() {
   const route = useRoute();
-  const queryClient = useQueryClient();
 
   const config = computed<OrganizationConfig | null>(() => {
     const byDomain = getOrganizationConfigByDomain(domain);
@@ -22,42 +21,43 @@ function setup() {
     return getOrganizationConfigById(route.params.org as string);
   });
 
-  const { data: spaces, isLoading } = useQuery({
-    queryKey: ['org', 'spaces', () => config.value?.id],
-    queryFn: async () => {
-      const cfg = config.value;
-      if (!cfg) return [];
+  // One query per space, sharing the space detail query, so that a space which
+  // fails to load (e.g. an API error on its metadata) only fails its own query
+  // instead of taking the rest of the organization down with it.
+  const spaceQueries = useQueries({
+    queries: computed(() =>
+      (config.value?.spaceIds ?? []).map(({ network: networkId, id }) => ({
+        queryKey: SPACES_KEYS.detail(`${networkId}:${id}`),
+        queryFn: spaceQueryFn(networkId, id)
+      }))
+    )
+  });
 
-      const loadedSpaces = await Promise.all(
-        cfg.spaceIds.map(async ({ network: networkId, id }) => {
-          const network = getNetwork(networkId);
-          const space = await network.api.loadSpace(id);
+  // The organization is exposed only once every space query settled, so that
+  // the primary space, and the nav derived from it, does not change while the
+  // remaining spaces are still loading. A space that already failed an attempt
+  // is not waited for: its retries keep running in the background and it joins
+  // the organization if one of them succeeds.
+  const isLoading = computed(() => {
+    const cfg = config.value;
+    if (!cfg) return false;
 
-          if (!space) {
-            console.warn(
-              `Failed to load space ${networkId}:${id} for organization ${cfg.id}`
-            );
-            return null;
-          }
-
-          queryClient.setQueryData(
-            ['spaces', 'detail', `${space.network}:${space.id}`],
-            space
-          );
-
-          return space;
-        })
-      );
-
-      return loadedSpaces.filter((s): s is Space => !!s);
-    },
-    enabled: () => config.value !== null
+    return (
+      spaceQueries.value.length !== cfg.spaceIds.length ||
+      spaceQueries.value.some(query => query.isLoading && !query.failureCount)
+    );
   });
 
   const organization = computed<Organization | null>(() => {
-    const org = config.value;
-    if (!org || !spaces.value) return null;
-    return { ...org, spaces: spaces.value };
+    const cfg = config.value;
+    if (!cfg || isLoading.value) return null;
+
+    return {
+      ...cfg,
+      spaces: spaceQueries.value
+        .map(query => query.data)
+        .filter((space): space is Space => !!space)
+    };
   });
 
   return {
