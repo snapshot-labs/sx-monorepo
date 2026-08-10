@@ -203,7 +203,11 @@ watchEffect(() => setTitle(props.space.name));
           params: { space: `${space.network}:${space.id}` },
           linkTitle: 'See more'
         }"
-      />
+      >
+        <template #item-meta="{ proposal }">
+          {{ space.children.length > 0 ? proposal.space.name : '' }}
+        </template>
+      </ProposalsList>
       <TownhallTopicsList
         v-else-if="spaceType === 'discussionsSpace'"
         title="Latest topics"

@@ -241,6 +241,10 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"
       @end-reached="handleEndReached"
-    />
+    >
+      <template #item-meta="{ proposal }">
+        {{ space.children.length > 0 ? proposal.space.name : '' }}
+      </template>
+    </ProposalsList>
   </div>
 </template>
