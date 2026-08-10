@@ -246,18 +246,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 15741138
     },
-    EthernaLotto: {
-      name: 'EthernaLotto',
-      about: 'An autonomous decentralized lottery game based on Ethereum!',
-      avatar:
-        'ipfs://bafkreigtlkxi6otq6xkb7lu3inm3a3n7wdifvk432abpngusjeofxd7yey',
-      address: '0x7F5CA8e9664D66Fc7c11d26C7D9B750988d5c8a7',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 16085285
-    },
     BIGCAP: {
       name: 'BIGCAP',
       about: 'The BIGCAP Community Decentralized Autonomous Organization',
