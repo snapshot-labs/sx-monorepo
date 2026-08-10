@@ -76,6 +76,19 @@ export function dropIpfs(metadataUri: string) {
   return metadataUri.replace('ipfs://', '');
 }
 
+/**
+ * Id of the `SpaceMetadataItem` a space resolves its metadata through, which is
+ * also the value stored in `space.metadata`.
+ *
+ * A space can be deployed with a blank `metadataURI`, and then there is nothing
+ * to point at. `dropIpfs('')` is `''`, which is not an id any metadata item
+ * should own and is shared by every space deployed without a URI on the same
+ * indexer, so an absent URI has to stay null.
+ */
+export function getSpaceMetadataId(metadataUri: string): string | null {
+  return metadataUri ? dropIpfs(metadataUri) : null;
+}
+
 export function getSpaceName(address: string) {
   const seed = parseInt(
     hash.getSelectorFromName(address).toString().slice(0, 12)

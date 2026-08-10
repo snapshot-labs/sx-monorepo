@@ -1,6 +1,10 @@
 import { getAddress } from 'viem';
 import { SpaceMetadataItem } from '../../../../.checkpoint/models';
-import { dropIpfs, getJSON, getSpaceName } from '../../../common/utils';
+import {
+  getJSON,
+  getSpaceMetadataId,
+  getSpaceName
+} from '../../../common/utils';
 import { NetworkID } from '../../types';
 
 export async function handleSpaceMetadata(
@@ -8,16 +12,13 @@ export async function handleSpaceMetadata(
   metadataUri: string,
   indexerName: NetworkID
 ) {
-  const exists = await SpaceMetadataItem.loadEntity(
-    dropIpfs(metadataUri),
-    indexerName
-  );
+  const id = getSpaceMetadataId(metadataUri);
+  if (id === null) return;
+
+  const exists = await SpaceMetadataItem.loadEntity(id, indexerName);
   if (exists) return;
 
-  const spaceMetadataItem = new SpaceMetadataItem(
-    dropIpfs(metadataUri),
-    indexerName
-  );
+  const spaceMetadataItem = new SpaceMetadataItem(id, indexerName);
   spaceMetadataItem.name = getSpaceName(space);
   spaceMetadataItem.about = '';
   spaceMetadataItem.avatar = '';
@@ -38,7 +39,7 @@ export async function handleSpaceMetadata(
   spaceMetadataItem.labels = [];
   spaceMetadataItem.delegations = [];
 
-  const metadata: any = metadataUri ? await getJSON(metadataUri) : {};
+  const metadata: any = await getJSON(metadataUri);
 
   if (metadata.name) spaceMetadataItem.name = metadata.name;
   if (metadata.description) spaceMetadataItem.about = metadata.description;

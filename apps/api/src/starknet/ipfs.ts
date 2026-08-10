@@ -3,23 +3,20 @@ import { createPublicClient, getAddress, http } from 'viem';
 import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy';
 import { FullConfig } from './config';
 import { ExecutionStrategy, SpaceMetadataItem } from '../../.checkpoint/models';
-import { dropIpfs, getJSON, getSpaceName } from '../common/utils';
+import { getJSON, getSpaceMetadataId, getSpaceName } from '../common/utils';
 
 export async function handleSpaceMetadata(
   space: string,
   metadataUri: string,
   config: FullConfig
 ) {
-  const exists = await SpaceMetadataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
+  const id = getSpaceMetadataId(metadataUri);
+  if (id === null) return;
+
+  const exists = await SpaceMetadataItem.loadEntity(id, config.indexerName);
   if (exists) return;
 
-  const spaceMetadataItem = new SpaceMetadataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
+  const spaceMetadataItem = new SpaceMetadataItem(id, config.indexerName);
   spaceMetadataItem.name = getSpaceName(space);
   spaceMetadataItem.about = '';
   spaceMetadataItem.avatar = '';
@@ -40,7 +37,7 @@ export async function handleSpaceMetadata(
   spaceMetadataItem.labels = [];
   spaceMetadataItem.delegations = [];
 
-  const metadata: any = metadataUri ? await getJSON(metadataUri) : {};
+  const metadata: any = await getJSON(metadataUri);
 
   if (metadata.name) spaceMetadataItem.name = metadata.name;
   if (metadata.description) spaceMetadataItem.about = metadata.description;
