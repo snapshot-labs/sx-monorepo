@@ -274,16 +274,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 16490162
     },
-    'Joseon Gov DAO': {
-      name: 'Joseon Gov DAO',
-      about: 'Joseon DAO for managing government assets',
-      address: '0xda1E0AC7629dF4A8c6ad9Afd43Bed5AB1d9ed303',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17011171
-    },
     'PEPE CASH': {
       name: 'PEPE CASH',
       about:
@@ -454,16 +444,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 20820581
-    },
-    'DPCE DAO': {
-      name: 'DPCE DAO',
-      about: 'DPCE DAO',
-      address: '0x49034c6AA7a0C42b28D4074C13298c711c2AfC2A',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 22952316
     },
     'PEACE COIN PROTOCOL DAO': {
       name: 'PEACE COIN PROTOCOL DAO',
