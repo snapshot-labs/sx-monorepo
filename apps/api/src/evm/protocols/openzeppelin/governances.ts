@@ -616,23 +616,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 129261207
     },
-    'Good Entry': {
-      name: 'Good Entry',
-      about:
-        'The mission of the governor is to promote more community driven consensus as the project matures on core topics that lead to growth',
-      avatar:
-        'ipfs://bafybeid7zje5zylyfcthij73aoj75pguzaonnqj2sj37phwclbctd2yxvq',
-      externalUrl: 'https://www.goodentry.io/',
-      twitter: 'goodentrylabs',
-      discord: 'https://discord.com/https://discord.com/invite/goodentry',
-      address: '0xDea8f5634970557DC7938d07a1944bC33a4528a3',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 171704991
-    },
     'Open Dollar': {
       name: 'Open Dollar',
       about:
@@ -658,16 +641,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 334081040
-    },
-    'BTCMobick DAO v1.0': {
-      name: 'BTCMobick DAO v1.0',
-      about: 'Released 2025-05-15',
-      address: '0xa2c5831fc99265A22E5Aaf5c562435732E3Ff591',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 337192915
     }
   },
   sep: {
