@@ -604,8 +604,8 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 20820581
     },
-    'Lendefi DAO [Base Mainnet]': {
-      name: 'Lendefi DAO [Base Mainnet]',
+    'Lendefi DAO': {
+      name: 'Lendefi DAO',
       about: 'Making DeFi Lending Great Again!',
       avatar:
         'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
@@ -703,40 +703,8 @@ export const GOVERNANCES: Partial<
       verified: true,
       startBlock: 37959559
     },
-    MyToken: {
-      name: 'MyToken',
-      about: 'Test MyToken',
-      address: '0x008D55C27E608A6F661Eca742507e33dC856123d',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 34141146
-    },
-    'local-test': {
-      name: 'local-test',
-      about: 'Just for local test',
-      address: '0x7a532af21D7AE926c3c163213374B7C0B874FdA2',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 34450804
-    },
-    DAOFranTest: {
-      name: 'DAOFranTest',
-      about: 'This is just a test',
-      address: '0x08fB5B209b2e25724378Ecf8d3f6686F248717C7',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 45130743
-    },
-    'Lendefi DAO [Base Mainnet]': {
-      name: 'Lendefi DAO [Base Mainnet]',
+    'Lendefi DAO': {
+      name: 'Lendefi DAO',
       about: 'Making DeFi Lending Great Again!',
       avatar:
         'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
@@ -748,17 +716,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
       startBlock: 56209954
-    },
-    testYesDAO: {
-      name: 'testYesDAO',
-      about:
-        '去中心化比特币矿场投资DAO，通过智能合约实现透明的资金管理和收益分配.测试环境',
-      address: '0xAF9a478F61EaF0eDC6EF8676da47A47d74CDAbAC',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 59038303
     }
   },
   bnbt: {
@@ -1057,8 +1014,8 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 337192915
     },
-    'Lendefi DAO [Base Mainnet]': {
-      name: 'Lendefi DAO [Base Mainnet]',
+    'Lendefi DAO': {
+      name: 'Lendefi DAO',
       about: 'Making DeFi Lending Great Again!',
       avatar:
         'ipfs://bafkreielxmsodfqif43crigddhqkvhtclah4vx4fakgpc6hqtftmr3nmca',
