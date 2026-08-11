@@ -144,7 +144,7 @@ const isEditable = computed(() => {
 
   <slot
     v-else-if="
-      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+      ['passed', 'rejected', 'closed', 'queued', 'vetoed', 'executed'].includes(
         proposal.state
       )
     "
