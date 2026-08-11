@@ -14,6 +14,27 @@ describe('getExecutionData', () => {
     });
   });
 
+  it('should create avatar-encoded execution data for vanilla with transactions', () => {
+    const address = '0xe03ED076c98095BDE288Cb78730365786e2Caab3';
+    const transactions = [
+      {
+        to: '0x2842c82E20ab600F443646e1BC8550B44a513D82',
+        value: '0x0',
+        data: '0x',
+        operation: 0,
+        salt: 1n
+      }
+    ];
+
+    const data = getExecutionData('SimpleQuorumVanilla', address, {
+      transactions
+    });
+
+    expect(data.executor).toEqual(address);
+    expect(data.executionParams).toHaveLength(1);
+    expect(data.executionParams[0]).toMatch(/^0x[0-9a-f]+$/);
+  });
+
   it('should create ethRelayer execution data', () => {
     const address =
       '0x21dda40770f4317582251cffd5a0202d6b223dc167e5c8db25dc887d11eba81';

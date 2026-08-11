@@ -31,9 +31,11 @@ describe('createStandardConfig', () => {
         ApeGas: undefined
       },
       ProposalValidations: {
+        Vanilla: undefined,
         VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
       },
       ExecutionStrategies: {
+        SimpleQuorumVanilla: undefined,
         SimpleQuorumAvatar: '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42',
         SimpleQuorumTimelock: '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
       }
@@ -56,9 +58,11 @@ describe('createStandardConfig', () => {
         Whitelist: null
       },
       proposalValidations: {
+        Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6',
         VotingPower: null
       },
       executionStrategies: {
+        SimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
         SimpleQuorumAvatar: null,
         SimpleQuorumTimelock: null
       }
@@ -83,7 +87,13 @@ describe('createStandardConfig', () => {
     expect(config.Strategies.Comp).toBeUndefined();
     expect(config.Strategies.OZVotes).toBeUndefined();
     expect(config.Strategies.Whitelist).toBeUndefined();
+    expect(config.ProposalValidations.Vanilla).toBe(
+      '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
+    );
     expect(config.ProposalValidations.VotingPower).toBeUndefined();
+    expect(config.ExecutionStrategies.SimpleQuorumVanilla).toBe(
+      '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
+    );
     expect(config.ExecutionStrategies.SimpleQuorumAvatar).toBeUndefined();
     expect(config.ExecutionStrategies.SimpleQuorumTimelock).toBeUndefined();
   });

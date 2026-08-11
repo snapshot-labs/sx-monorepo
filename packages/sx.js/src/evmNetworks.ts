@@ -23,9 +23,11 @@ type Overrides = {
     ApeGas?: string;
   };
   proposalValidations?: {
+    Vanilla?: string;
     VotingPower?: AddressOverride;
   };
   executionStrategies?: {
+    SimpleQuorumVanilla?: string;
     SimpleQuorumAvatar?: AddressOverride;
     SimpleQuorumTimelock?: AddressOverride;
   };
@@ -96,12 +98,14 @@ export function createStandardConfig(
       ApeGas: strategies.ApeGas
     },
     ProposalValidations: {
+      Vanilla: proposalValidations.Vanilla,
       VotingPower: resolveAddress(
         proposalValidations.VotingPower,
         '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
       )
     },
     ExecutionStrategies: {
+      SimpleQuorumVanilla: executionStrategies.SimpleQuorumVanilla,
       SimpleQuorumAvatar: resolveAddress(
         executionStrategies.SimpleQuorumAvatar,
         '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42'
@@ -200,10 +204,12 @@ export const evmNetworks = {
       Whitelist: null
     },
     proposalValidations: {
-      VotingPower: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
+      Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6',
+      VotingPower: null
     },
     executionStrategies: {
-      SimpleQuorumAvatar: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
+      SimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
+      SimpleQuorumAvatar: null,
       SimpleQuorumTimelock: null
     }
   })

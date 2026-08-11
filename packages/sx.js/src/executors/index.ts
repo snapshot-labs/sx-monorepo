@@ -8,7 +8,9 @@ export function getExecutionData(
   executorAddress: string,
   input?: ExecutionInput
 ) {
-  if (type === 'SimpleQuorumVanilla') {
+  // SimpleQuorumVanilla ignores the payload onchain, but when transactions are
+  // provided they are still avatar-encoded so the execution hash binds them.
+  if (type === 'SimpleQuorumVanilla' && !input?.transactions) {
     return createVanillaExecutor().getExecutionData(executorAddress);
   }
 

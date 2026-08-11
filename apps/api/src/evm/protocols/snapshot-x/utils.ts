@@ -1,6 +1,7 @@
 import {
   decodeAbiParameters,
   getAddress,
+  parseAbi,
   parseAbiParameters,
   PublicClient
 } from 'viem';
@@ -101,10 +102,21 @@ export async function handleCustomExecutionStrategy(
 
   if (executionStrategy) return;
 
+  let quorum = '0';
+  if (type.startsWith('SimpleQuorum')) {
+    const value = await client.readContract({
+      address: address as `0x${string}`,
+      abi: parseAbi(['function quorum() view returns (uint256)']),
+      functionName: 'quorum',
+      blockNumber: BigInt(blockNumber)
+    });
+    quorum = value.toString();
+  }
+
   executionStrategy = new ExecutionStrategy(address, config.indexerName);
   executionStrategy.address = address;
   executionStrategy.type = type;
-  executionStrategy.quorum = '0';
+  executionStrategy.quorum = quorum;
   executionStrategy.treasury_chain = protocolConfig.chainId;
   executionStrategy.treasury = getAddress(address);
   executionStrategy.timelock_delay = 0n;
