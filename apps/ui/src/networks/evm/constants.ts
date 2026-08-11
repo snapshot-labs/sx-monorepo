@@ -119,6 +119,9 @@ export function createConstants(
   };
 
   const SUPPORTED_EXECUTORS = {
+    ...(config.ExecutionStrategies.SimpleQuorumVanilla && {
+      SimpleQuorumVanilla: true
+    }),
     ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
       SimpleQuorumAvatar: true
     }),
@@ -144,6 +147,9 @@ export function createConstants(
   };
 
   const PROPOSAL_VALIDATIONS = {
+    ...(config.ProposalValidations.Vanilla && {
+      [config.ProposalValidations.Vanilla]: 'Vanilla'
+    }),
     ...(config.ProposalValidations.VotingPower && {
       [config.ProposalValidations.VotingPower]: 'Voting power'
     })
@@ -168,6 +174,7 @@ export function createConstants(
   };
 
   const EXECUTORS = {
+    SimpleQuorumVanilla: 'Vanilla',
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
     SimpleQuorumTimelock: 'Timelock',
     GovernorBravoTimelock: 'Timelock',
@@ -216,6 +223,19 @@ export function createConstants(
   ];
 
   const EDITOR_PROPOSAL_VALIDATIONS = [
+    ...(config.ProposalValidations.Vanilla
+      ? [
+          {
+            address: config.ProposalValidations.Vanilla,
+            type: 'Vanilla',
+            name: 'Vanilla',
+            about:
+              'A validation strategy that allows anyone to create proposals. It should only be used for testing purposes and not in production.',
+            icon: IHBeaker,
+            paramsDefinition: null
+          }
+        ]
+      : []),
     ...(config.ProposalValidations.VotingPower
       ? [
           {
@@ -690,6 +710,19 @@ export function createConstants(
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [
+    ...(config.ExecutionStrategies.SimpleQuorumVanilla
+      ? [
+          {
+            address: config.ExecutionStrategies.SimpleQuorumVanilla,
+            type: 'SimpleQuorumVanilla',
+            name: EXECUTORS.SimpleQuorumVanilla,
+            about:
+              'An execution strategy that verifies the proposal outcome but does not execute any transactions onchain. It should only be used for testing purposes and not in production.',
+            icon: IHBeaker,
+            paramsDefinition: null
+          }
+        ]
+      : []),
     ...(config.ExecutionStrategies.SimpleQuorumAvatar
       ? [
           {
