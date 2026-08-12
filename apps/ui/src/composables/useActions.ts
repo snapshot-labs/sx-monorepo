@@ -1,4 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { ProtocolID } from '@snapshot-labs/sx';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
@@ -194,6 +195,7 @@ export function useActions() {
 
   async function predictSpaceAddress(
     networkId: NetworkID,
+    protocol: ProtocolID,
     salt: string
   ): Promise<string | null> {
     if (!auth.value) {
@@ -202,11 +204,15 @@ export function useActions() {
     }
 
     const network = getReadWriteNetwork(networkId);
-    return network.actions.predictSpaceAddress(auth.value.provider, { salt });
+    return network.actions.predictSpaceAddress(auth.value.provider, {
+      protocol,
+      salt
+    });
   }
 
   async function deployDependency(
     networkId: NetworkID,
+    protocol: ProtocolID,
     controller: string,
     spaceAddress: string,
     dependencyConfig: StrategyConfig
@@ -221,6 +227,7 @@ export function useActions() {
       auth.value.provider,
       auth.value.connector.type,
       {
+        protocol,
         controller,
         spaceAddress,
         strategy: dependencyConfig
@@ -230,6 +237,7 @@ export function useActions() {
 
   async function createSpace(
     networkId: NetworkID,
+    protocol: ProtocolID,
     salt: string,
     metadata: SpaceMetadata,
     settings: SpaceSettings,
@@ -256,6 +264,7 @@ export function useActions() {
       auth.value.provider,
       salt,
       {
+        protocol,
         controller,
         votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
         minVotingDuration: getCurrentFromDuration(
