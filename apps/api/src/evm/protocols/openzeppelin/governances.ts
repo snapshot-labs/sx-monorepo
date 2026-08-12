@@ -79,19 +79,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 13248552
     },
-    'Babylon Finance': {
-      name: 'Babylon Finance',
-      about: 'Community-led Asset Management.',
-      avatar:
-        'ipfs://bafkreianvonos4zcp65rukbis6qi2yrubrmg4inwixuetcye63vcgseyoq',
-      address: '0xBEC3de5b14902C660Bd2C7EfD2F259998424cc24',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 13378903
-    },
     Angle: {
       name: 'Angle',
       about:
@@ -215,18 +202,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 14931927
     },
-    'Threshold Network': {
-      name: 'Threshold Network',
-      about: 'Threshold powers user sovereignty on the public blockchain.',
-      avatar:
-        'ipfs://bafkreihmy2zmac5b2wqqkf7c6fjldozpx5w4aqe5hmlmhcb2qhdjq7lnce',
-      address: '0xd101f2B25bCBF992BdF55dB67c104FE7646F5447',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 14979545
-    },
     Hop: {
       name: 'Hop',
       about:
@@ -339,20 +314,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 17246677
-    },
-    SoftDAO: {
-      name: 'SoftDAO',
-      about:
-        'The SoftDAO supports the development of high-integrity protocols. Rebel Reasonably. Trust Code. Build. Do It Right.',
-      avatar:
-        'ipfs://bafkreihgzwanr2wgdk4gvlttqsdekaxdhjesxioi4dzapiz567tx3vkvmi',
-      twitter: 'thesoftdao',
-      address: '0x0ADd6d42bBfe6c40e15B02A2C8A1b81B36a2B326',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 17630908
     },
     Inedible: {
       name: 'Inedible',
@@ -512,35 +473,6 @@ export const GOVERNANCES: Partial<
       ],
       startBlock: 19447876
     },
-    Fluence: {
-      name: 'Fluence',
-      about: 'Cloudless computing platform for the future of the web',
-      avatar:
-        'ipfs://bafkreihtn7n5jdymbao32s42zlxwwxmtc7vstmbbt733apekj2qhzm664i',
-      externalUrl: 'https://fluence.network',
-      twitter: 'fluence_project',
-      address: '0x674299Cc65CEFAac9057f7EB307f5f6bB861f8E0',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 19484536
-    },
-    Anvil: {
-      name: 'Anvil',
-      about:
-        'Anvil is a system of Ethereum-based smart contracts that manages collateral and issues fully secured credit.',
-      avatar:
-        'ipfs://bafkreicqektvg6rst5trpipq5sxiqpxv46ahsjg3fjv3sn2d4p4juftvsq',
-      externalUrl: 'https://anvil.xyz',
-      twitter: 'anvil_xyz',
-      address: '0x00e83d0698FAf01BD080A4Dd2927e6aB7C4874c9',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
-      ],
-      startBlock: 20735345
-    },
     'Xypher Council': {
       name: 'Xypher Council',
       about:
@@ -555,17 +487,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
       startBlock: 20751377
-    },
-    Zivoe: {
-      name: 'Zivoe',
-      about:
-        'Zivoe is a Real World Asset protocol built to disrupt the high-interest consumer lending market. We help victims of predatory, high-interest loans refinance their debts and improve their financial health.',
-      address: '0x94Ac60103B6b0df0cd828086B16EfF2A3e32a71e',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 20820581
     },
     'Lendefi DAO': {
       name: 'Lendefi DAO',
