@@ -485,7 +485,7 @@ function formatProposal(
     support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
-    privacy: 'none',
+    privacy: proposal.space.protocol === 'snapshot-x-inco' ? 'inco' : 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,
