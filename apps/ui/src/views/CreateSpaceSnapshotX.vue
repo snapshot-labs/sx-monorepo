@@ -1,16 +1,22 @@
 <script setup lang="ts">
+import { ProtocolID } from '@snapshot-labs/sx';
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
 import {
   spaceCreationNetworks as defaultSpaceCreationNetworks,
   getNetwork
 } from '@/networks';
+import { filterStrategiesByProtocol } from '@/networks/common/helpers';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 const props = withDefaults(
-  defineProps<{ spaceCreationNetworks?: NetworkID[] }>(),
+  defineProps<{
+    protocol?: ProtocolID;
+    spaceCreationNetworks?: NetworkID[];
+  }>(),
   {
+    protocol: 'snapshot-x',
     spaceCreationNetworks: () => defaultSpaceCreationNetworks
   }
 );
@@ -102,11 +108,24 @@ const stepsErrors = ref<Record<string, boolean>>({
 });
 
 const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
+const availableAuthenticators = computed(() =>
+  filterStrategiesByProtocol(
+    selectedNetwork.value.constants.EDITOR_AUTHENTICATORS,
+    props.protocol
+  )
+);
+const availableExecutionStrategies = computed(() =>
+  filterStrategiesByProtocol(
+    selectedNetwork.value.constants.EDITOR_EXECUTION_STRATEGIES,
+    props.protocol
+  )
+);
 
 async function handleSubmit() {
   salt.value = getSalt();
   predictedSpaceAddress.value = await predictSpaceAddress(
     selectedNetworkId.value,
+    props.protocol,
     salt.value
   );
   confirming.value = true;
@@ -138,6 +157,7 @@ watch(selectedNetworkId, () => {
     <CreateDeploymentProgress
       v-if="confirming && salt && predictedSpaceAddress && validationStrategy"
       :network-id="selectedNetworkId"
+      :protocol="protocol"
       :salt="salt"
       :predicted-space-address="predictedSpaceAddress"
       :metadata="metadataForm"
@@ -194,9 +214,7 @@ watch(selectedNetworkId, () => {
           :voting-power-symbol="metadataForm.votingPowerSymbol"
           unique
           :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_AUTHENTICATORS
-          "
+          :available-strategies="availableAuthenticators"
           title="Authenticators"
           description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
         />
@@ -222,9 +240,7 @@ watch(selectedNetworkId, () => {
           :space-id="''"
           :voting-power-symbol="metadataForm.votingPowerSymbol"
           :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
-          "
+          :available-strategies="availableExecutionStrategies"
           :default-params="{ controller }"
           title="Execution strategies"
           description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."

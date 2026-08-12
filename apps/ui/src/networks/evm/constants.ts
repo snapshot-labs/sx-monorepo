@@ -60,6 +60,15 @@ export function createConstants(
           connectors: EVM_CONNECTORS
         }
       }),
+      ...(config.Authenticators.IncoEthTx && {
+        [config.Authenticators.IncoEthTx]: {
+          priority: 2,
+          isSupported: true,
+          isContractSupported: true,
+          isReasonSupported: true,
+          connectors: EVM_CONNECTORS
+        }
+      }),
       // Governor Bravo
       GovernorBravoAuthenticator: {
         priority: 1,
@@ -119,7 +128,7 @@ export function createConstants(
   };
 
   const SUPPORTED_EXECUTORS = {
-    ...(config.ExecutionStrategies.SimpleQuorumVanilla && {
+    ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla && {
       SimpleQuorumVanilla: true
     }),
     ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
@@ -143,6 +152,9 @@ export function createConstants(
     }),
     ...(config.Authenticators.EthTx && {
       [config.Authenticators.EthTx]: 'Ethereum transaction'
+    }),
+    ...(config.Authenticators.IncoEthTx && {
+      [config.Authenticators.IncoEthTx]: 'Ethereum transaction'
     })
   };
 
@@ -186,6 +198,20 @@ export function createConstants(
       ? [
           {
             address: config.Authenticators.EthTx,
+            protocols: ['snapshot-x' as const],
+            name: 'Ethereum transaction',
+            about:
+              'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
+            icon: IHCube,
+            paramsDefinition: null
+          }
+        ]
+      : []),
+    ...(config.Authenticators.IncoEthTx
+      ? [
+          {
+            address: config.Authenticators.IncoEthTx,
+            protocols: ['snapshot-x-inco' as const],
             name: 'Ethereum transaction',
             about:
               'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
@@ -199,6 +225,7 @@ export function createConstants(
           {
             // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
             address: config.Authenticators.EthSig,
+            protocols: ['snapshot-x' as const],
             name: 'Ethereum signature (deprecated)',
             deprecated: true,
             about:
@@ -212,6 +239,7 @@ export function createConstants(
       ? [
           {
             address: config.Authenticators.EthSigV2,
+            protocols: ['snapshot-x' as const],
             name: 'Ethereum signature',
             about:
               'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -710,10 +738,11 @@ export function createConstants(
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [
-    ...(config.ExecutionStrategies.SimpleQuorumVanilla
+    ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla
       ? [
           {
-            address: config.ExecutionStrategies.SimpleQuorumVanilla,
+            address: config.ExecutionStrategies.IncoSimpleQuorumVanilla,
+            protocols: ['snapshot-x-inco' as const],
             type: 'SimpleQuorumVanilla',
             name: EXECUTORS.SimpleQuorumVanilla,
             about:
@@ -727,6 +756,7 @@ export function createConstants(
       ? [
           {
             address: '',
+            protocols: ['snapshot-x' as const],
             type: 'SimpleQuorumAvatar',
             name: EXECUTORS.SimpleQuorumAvatar,
             about:
@@ -785,6 +815,7 @@ export function createConstants(
       ? [
           {
             address: '',
+            protocols: ['snapshot-x' as const],
             type: 'SimpleQuorumTimelock',
             name: EXECUTORS.SimpleQuorumTimelock,
             about:
