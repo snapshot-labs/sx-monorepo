@@ -690,24 +690,12 @@ export function createActions(
           '@/helpers/inco'
         );
 
-        // Vanilla proposals: executionParams must match propose ('0x').
-        const executionParams =
-          proposal.executions && proposal.executions.length > 0
-            ? getExecutionData(
-                proposal.space,
-                proposal.execution_strategy,
-                proposal.execution_destination,
-                convertToMetaTransactions(proposal.executions[0].transactions)
-              ).executionParams[0]
-            : '0x';
-
-        const initial = await getRevealState({
+        const initialState = await getRevealState({
           space: proposal.space.id,
           proposal: proposalId
         });
-        let passed = initial.passed;
 
-        if (!initial.revealed) {
+        if (!initialState.revealed) {
           // requestReveal grants ACL; must mine before decrypt.
           const requestTx = await client.requestReveal({
             signer,
@@ -722,24 +710,30 @@ export function createActions(
             proposal: proposalId,
             account
           });
-          const finalizeTx = await client.finalizeReveal({
+
+          return client.finalizeReveal({
             signer,
             space: proposal.space.id,
             proposal: proposalId,
             tallies
           });
-          if (finalizeTx) await finalizeTx.wait();
-
-          passed = (
-            await getRevealState({
-              space: proposal.space.id,
-              proposal: proposalId
-            })
-          ).passed;
         }
 
-        // Execute only if passed; else execute() reverts.
-        if (!passed) return null;
+        // Execute is a separate step, offered once the reveal is indexed.
+        if (!initialState.passed) {
+          throw new Error('Proposal has not passed');
+        }
+
+        // Vanilla proposals: executionParams must match propose ('0x').
+        const executionParams =
+          proposal.executions && proposal.executions.length > 0
+            ? getExecutionData(
+                proposal.space,
+                proposal.execution_strategy,
+                proposal.execution_destination,
+                convertToMetaTransactions(proposal.executions[0].transactions)
+              ).executionParams[0]
+            : '0x';
 
         return client.execute({
           signer,
