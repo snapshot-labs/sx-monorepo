@@ -52,6 +52,14 @@ export function useExecutionActions(
   }, 1000);
 
   const network = computed(() => getNetwork(toValue(proposal).network));
+  const isPendingConfidentialReveal = computed(() => {
+    const proposalValue = toValue(proposal);
+
+    return (
+      proposalValue.space.protocol === 'snapshot-x-inco' &&
+      proposalValue.quorum_reached == null
+    );
+  });
   const hasExecuteQueued = computed(() => {
     const executionValue = toValue(execution);
     const proposalValue = toValue(proposal);
@@ -192,6 +200,7 @@ export function useExecutionActions(
 
   return {
     hasExecuteQueued,
+    isPendingConfidentialReveal,
     fetchingDetails,
     message,
     warningMessage,
