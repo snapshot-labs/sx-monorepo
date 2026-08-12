@@ -12,6 +12,7 @@ const props = defineProps<{
 const { web3 } = useWeb3();
 const {
   hasExecuteQueued,
+  isPendingConfidentialReveal,
   fetchingDetails,
   message,
   warningMessage,
@@ -64,6 +65,12 @@ const network = computed(() => getNetwork(props.proposal.network));
       </AppLink>
     </div>
     <div v-else class="space-y-2">
+      <div v-if="isPendingConfidentialReveal" class="text-skin-text">
+        Voting has ended. Reveal the final encrypted tallies: this requests
+        attested decryption of the vote counts from Inco's covalidator and posts
+        them onchain, making the result public. If the proposal passed,
+        execution becomes available afterwards. Up to three wallet prompts.
+      </div>
       <UiButton
         v-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
         class="w-full"
@@ -71,7 +78,8 @@ const network = computed(() => getNetwork(props.proposal.network));
         @click="executeProposal"
       >
         <IH-play />
-        Execute transactions
+        <template v-if="isPendingConfidentialReveal">Reveal results</template>
+        <template v-else>Execute transactions</template>
       </UiButton>
       <UiButton
         v-if="hasExecuteQueued"
