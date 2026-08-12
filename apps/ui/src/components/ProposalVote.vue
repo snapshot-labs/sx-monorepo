@@ -92,8 +92,9 @@ const isEditable = computed(() => {
     >
       <div
         v-if="
-          proposal.privacy !== 'none' &&
-          ['pending', 'active'].includes(proposal.state)
+          proposal.privacy === 'inco' ||
+          (proposal.privacy !== 'none' &&
+            ['pending', 'active'].includes(proposal.state))
         "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >

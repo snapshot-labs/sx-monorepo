@@ -192,6 +192,11 @@ export const PRIVACY_TYPES_INFO: Record<
     description:
       'Choices are encrypted and only visible once the voting period is over.'
   },
+  inco: {
+    label: 'Confidential voting',
+    description:
+      'Choices stay encrypted onchain; only final tallies are revealed once the voting period is over.'
+  },
   any: {
     label: 'Any',
     description: 'Author can choose between no privacy and shielded voting.'

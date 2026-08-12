@@ -45,21 +45,11 @@ const quorumAmount = computed(() => {
   return `${format(current)} / ${format(props.proposal.quorum)}`;
 });
 
-const isIncoProposal = computed(
-  () => props.proposal.space?.protocol === 'snapshot-x-inco'
+// Encrypted tallies (Shutter/Inco): show lock, not numbers. For Inco,
+// `completed` flips at reveal, so this clears once the counts are public.
+const isEncryptedTally = computed(
+  () => props.proposal.privacy !== 'none' && !props.proposal.completed
 );
-
-// Encrypted until reveal; then show real counts.
-const isConfidentialRevealed = computed(
-  () => isIncoProposal.value && props.proposal.quorum_reached != null
-);
-
-// Encrypted tallies (Shutter/Inco): show lock, not numbers.
-const isEncryptedTally = computed(() => {
-  if (props.proposal.privacy !== 'none') return true;
-  if (isIncoProposal.value) return !isConfidentialRevealed.value;
-  return false;
-});
 
 // Confidential decision flags. The indexer writes these from the
 // `ProposalResultRevealed` event emitted by `Space.finalizeReveal` (always —
@@ -73,13 +63,11 @@ const revealedSupportAchieved = computed(
   () => props.proposal.support_achieved ?? null
 );
 
-const showVerdict = computed(() => {
-  if (!isIncoProposal.value) return false;
-  return (
+const showVerdict = computed(
+  () =>
     revealedQuorumReached.value !== null &&
     revealedSupportAchieved.value !== null
-  );
-});
+);
 
 const placeholderResults = computed(() =>
   props.proposal.choices.map((_, i) => ({
@@ -183,17 +171,12 @@ onMounted(() => {
   <div
     v-else-if="
       isEncryptedTally &&
-      (props.proposal.state === 'active' || isIncoProposal) &&
+      (props.proposal.state === 'active' || proposal.privacy === 'inco') &&
       withDetails
     "
     class="space-y-1"
   >
-    <div v-if="isIncoProposal">
-      Per-choice tallies stay encrypted on-chain while voting is open. Once the
-      voting period ends, anyone can reveal the final counts, which are then
-      public and the proposal is settled.
-    </div>
-    <div v-else>
+    <div>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
@@ -281,10 +264,7 @@ onMounted(() => {
           class="grow"
         />
         <IH-lock-closed
-          v-if="
-            (proposal.privacy !== 'none' && !proposal.completed) ||
-            (isIncoProposal && !isConfidentialRevealed)
-          "
+          v-if="proposal.privacy !== 'none' && !proposal.completed"
           class="size-[16px] shrink-0"
         />
         <template v-else>
