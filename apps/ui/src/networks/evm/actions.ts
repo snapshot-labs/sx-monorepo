@@ -5,22 +5,12 @@ import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
-  evmApe,
-  evmArbitrum,
-  evmBase,
-  evmBaseSepolia,
-  evmBnb,
-  evmBnbt,
-  evmCurtis,
-  evmMainnet,
-  evmMantle,
-  EvmNetworkConfig,
-  evmOptimism,
-  evmPolygon,
-  evmSepolia,
+  createEvmConfig,
+  evmNetworks,
   getEvmStrategy,
   GovernorBravoAuthenticator,
-  OpenZeppelinAuthenticator
+  OpenZeppelinAuthenticator,
+  ProtocolID
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
@@ -71,32 +61,22 @@ import {
 } from '@/types';
 import { EDITOR_APP_NAME } from '../common/constants';
 
-const CONFIGS: Record<number, EvmNetworkConfig> = {
-  10: evmOptimism,
-  56: evmBnb,
-  97: evmBnbt,
-  137: evmPolygon,
-  5000: evmMantle,
-  8453: evmBase,
-  42161: evmArbitrum,
-  1: evmMainnet,
-  33139: evmApe,
-  33111: evmCurtis,
-  11155111: evmSepolia,
-  84532: evmBaseSepolia
-};
-
 export function createActions(
   provider: Provider,
   helpers: NetworkHelpers,
-  chainId: number
+  networkId: NetworkID
 ): NetworkActions {
-  const networkConfig = CONFIGS[chainId];
+  const networkConfig = createEvmConfig(
+    evmNetworks[networkId as keyof typeof evmNetworks]
+  );
+  const { incoProxyFactory, incoMasterSpace } =
+    evmNetworks[networkId as keyof typeof evmNetworks].Meta;
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     helpers
   });
 
+  const { eip712ChainId: chainId } = networkConfig;
   const clientOpts = {
     networkConfig,
     whitelistServerUrl: WHITELIST_SERVER_URL,
@@ -104,9 +84,29 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const incoDeployClient =
+    incoProxyFactory && incoMasterSpace
+      ? new clients.EvmEthereumTx({
+          ...clientOpts,
+          networkConfig: {
+            ...networkConfig,
+            proxyFactory: incoProxyFactory,
+            masterSpace: incoMasterSpace
+          }
+        })
+      : null;
+
+  function getDeployClient(protocol: ProtocolID) {
+    if (protocol !== 'snapshot-x-inco') return client;
+    if (!incoDeployClient) {
+      throw new Error(`snapshot-x-inco is not available on ${networkId}`);
+    }
+
+    return incoDeployClient;
+  }
   const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
   const openZeppelinSigClient = new clients.OpenZeppelinEthereumSig({
-    chainId
+    chainId: networkConfig.eip712ChainId
   });
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const governorBravoSigClient = new clients.GovernorBravoEthereumSig({
@@ -214,10 +214,10 @@ export function createActions(
   };
 
   return {
-    async predictSpaceAddress(web3: Web3Provider, { salt }) {
+    async predictSpaceAddress(web3: Web3Provider, { salt, protocol }) {
       await verifyNetwork(web3, chainId);
 
-      return client.predictSpaceAddress({
+      return getDeployClient(protocol).predictSpaceAddress({
         signer: getSigner(web3),
         saltNonce: salt
       });
@@ -226,6 +226,7 @@ export function createActions(
       web3: Web3Provider,
       connectorType: ConnectorType,
       params: {
+        protocol: ProtocolID;
         controller: string;
         spaceAddress: string;
         strategy: StrategyConfig;
@@ -238,7 +239,7 @@ export function createActions(
       }
 
       return params.strategy.deploy(
-        client,
+        getDeployClient(params.protocol),
         web3,
         params.controller,
         params.spaceAddress,
@@ -249,6 +250,7 @@ export function createActions(
       web3: Web3Provider,
       salt: string,
       params: {
+        protocol: ProtocolID;
         controller: string;
         votingDelay: number;
         minVotingDuration: number;
@@ -284,7 +286,7 @@ export function createActions(
         params.validationStrategy
       );
 
-      const response = await client.deploySpace({
+      const response = await getDeployClient(params.protocol).deploySpace({
         signer: getSigner(web3),
         saltNonce: salt,
         params: {

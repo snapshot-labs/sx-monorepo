@@ -120,7 +120,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, helpers, chainId),
+    actions: createActions(provider, helpers, networkId),
     api,
     constants,
     helpers
