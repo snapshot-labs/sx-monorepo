@@ -463,7 +463,7 @@ function formatProposal(
     support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
-    privacy: 'none',
+    privacy: proposal.space.protocol === 'snapshot-x-inco' ? 'inco' : 'none',
     // OZ Governor quorum becomes static at proposal time.
     // Compound Governor quorum is only set on deployment.
     // SX quorum is dynamic and quorum changes affect past proposals.
