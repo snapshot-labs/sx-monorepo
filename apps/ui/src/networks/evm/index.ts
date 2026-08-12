@@ -118,6 +118,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'basesep',
       'mnt',
       'bnb',
       'bnbt',
