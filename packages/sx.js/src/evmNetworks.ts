@@ -2,6 +2,8 @@ import { BigNumberish } from '@ethersproject/bignumber';
 import { buildRegistry } from './registry';
 import { EvmNetworkConfig } from './types';
 
+export type ProtocolID = 'snapshot-x' | 'snapshot-x-inco';
+
 type AddressOverride = string | null;
 
 type Overrides = {
@@ -10,10 +12,13 @@ type Overrides = {
   maxPriorityFeePerGas?: BigNumberish;
   proxyFactory?: string;
   masterSpace?: string;
+  incoProxyFactory?: string;
+  incoMasterSpace?: string;
   authenticators?: {
     EthSig?: AddressOverride;
     EthSigV2?: AddressOverride;
     EthTx?: AddressOverride;
+    IncoEthTx?: string;
   };
   strategies?: {
     Vanilla?: AddressOverride;
@@ -27,7 +32,7 @@ type Overrides = {
     VotingPower?: AddressOverride;
   };
   executionStrategies?: {
-    SimpleQuorumVanilla?: string;
+    IncoSimpleQuorumVanilla?: string;
     SimpleQuorumAvatar?: AddressOverride;
     SimpleQuorumTimelock?: AddressOverride;
   };
@@ -62,7 +67,9 @@ export function createStandardConfig(
       proxyFactory:
         overrides.proxyFactory ?? '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
       masterSpace:
-        overrides.masterSpace ?? '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
+        overrides.masterSpace ?? '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D',
+      incoProxyFactory: overrides.incoProxyFactory,
+      incoMasterSpace: overrides.incoMasterSpace
     },
     Authenticators: {
       EthSig: resolveAddress(
@@ -76,7 +83,8 @@ export function createStandardConfig(
       EthTx: resolveAddress(
         authenticators.EthTx,
         '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
-      )
+      ),
+      IncoEthTx: authenticators.IncoEthTx
     },
     Strategies: {
       Vanilla: resolveAddress(
@@ -105,7 +113,7 @@ export function createStandardConfig(
       )
     },
     ExecutionStrategies: {
-      SimpleQuorumVanilla: executionStrategies.SimpleQuorumVanilla,
+      IncoSimpleQuorumVanilla: executionStrategies.IncoSimpleQuorumVanilla,
       SimpleQuorumAvatar: resolveAddress(
         executionStrategies.SimpleQuorumAvatar,
         '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42'
@@ -131,7 +139,8 @@ export function createEvmConfig(
     authenticators: buildRegistry([
       [network.Authenticators.EthSig, { type: 'ethSig' }],
       [network.Authenticators.EthSigV2, { type: 'ethSigV2' }],
-      [network.Authenticators.EthTx, { type: 'ethTx' }]
+      [network.Authenticators.EthTx, { type: 'ethTx' }],
+      [network.Authenticators.IncoEthTx, { type: 'ethTx' }]
     ]),
     strategies: buildRegistry([
       [network.Strategies.Vanilla, { type: 'vanilla' }],
@@ -187,15 +196,17 @@ export const evmNetworks = {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
   }),
-  // Base Sepolia Inco confidential reference deployment.
+  // Canonical SX is not deployed on Base Sepolia yet — only the Inco
+  // confidential reference deployment (inco-prefixed slots) is live.
   basesep: createStandardConfig(84532, {
     blockTime: 2,
-    proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
-    masterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
+    incoProxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+    incoMasterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
     authenticators: {
       EthSig: null,
       EthSigV2: null,
-      EthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
+      EthTx: null,
+      IncoEthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
     },
     strategies: {
       Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673',
@@ -208,7 +219,7 @@ export const evmNetworks = {
       VotingPower: null
     },
     executionStrategies: {
-      SimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
+      IncoSimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
       SimpleQuorumAvatar: null,
       SimpleQuorumTimelock: null
     }

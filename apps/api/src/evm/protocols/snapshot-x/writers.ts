@@ -67,10 +67,6 @@ const KNOWN_EXECUTION_STRATEGIES = [
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
-const INCO_MASTER_SPACE = getAddress(
-  '0x3F31D742D3158b07434A041e26B47e9EB94e010C'
-);
-
 export function createWriters(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
@@ -79,6 +75,9 @@ export function createWriters(
     transport: http(config.network_node_url)
   });
 
+  const incoMasterSpace = protocolConfig.incoMasterSpace
+    ? getAddress(protocolConfig.incoMasterSpace)
+    : null;
   const masterSimpleQuorumTimelock = protocolConfig.masterSimpleQuorumTimelock
     ? getAddress(protocolConfig.masterSimpleQuorumTimelock)
     : null;
@@ -98,7 +97,8 @@ export function createWriters(
     const implementationAddress = getAddress(event.args.implementation);
 
     switch (implementationAddress) {
-      case getAddress(protocolConfig.masterSpace): {
+      case getAddress(protocolConfig.masterSpace):
+      case incoMasterSpace: {
         const spaceImplementation = new SpaceImplementation(
           proxyAddress,
           config.indexerName
@@ -240,7 +240,7 @@ export function createWriters(
 
     const space = new Space(id, config.indexerName);
     space.protocol =
-      spaceImplementation.implementation === INCO_MASTER_SPACE
+      getAddress(spaceImplementation.implementation) === incoMasterSpace
         ? 'snapshot-x-inco'
         : 'snapshot-x';
 

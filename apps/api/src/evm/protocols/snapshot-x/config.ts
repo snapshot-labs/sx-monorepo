@@ -45,6 +45,20 @@ export function createConfig(networkId: NetworkID): Config {
     }
   ];
 
+  if (network.Meta.incoProxyFactory) {
+    sources.push({
+      contract: network.Meta.incoProxyFactory,
+      start: START_BLOCKS[networkId],
+      abi: 'ProxyFactory',
+      events: [
+        {
+          name: 'ProxyDeployed(address,address)',
+          fn: 'handleProxyDeployed'
+        }
+      ]
+    });
+  }
+
   if (networkId === 'sep') {
     sources.push({
       contract: '0x27981a29ec87f2fbf873a2dcb0325405648ffce1',
@@ -199,6 +213,7 @@ export function createConfig(networkId: NetworkID): Config {
       chainId: network.Meta.eip712ChainId,
       manaRpcUrl: `${MANA_URL}/eth_rpc/${network.Meta.eip712ChainId}`,
       masterSpace: network.Meta.masterSpace,
+      incoMasterSpace: network.Meta.incoMasterSpace ?? null,
       masterSimpleQuorumAvatar:
         network.ExecutionStrategies.SimpleQuorumAvatar ?? null,
       masterSimpleQuorumTimelock:
