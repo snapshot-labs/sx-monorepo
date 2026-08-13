@@ -86,8 +86,9 @@ describe('inco wrapper', () => {
 
     expect(results).toHaveLength(3);
     const [against, forResult, abstain] = results;
-    if (!against || !forResult || !abstain)
+    if (!against || !forResult || !abstain) {
       throw new Error('decryptHandles returned <3 results');
+    }
 
     expect(against.handle).toBe(AGAINST_HANDLE);
     expect(against.value).toBe(2n);
