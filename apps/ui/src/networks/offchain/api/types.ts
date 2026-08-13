@@ -7,7 +7,10 @@ import {
   OffchainVoteFragmentFragment
 } from './gql/graphql';
 
-type Override<T, U> = Omit<T, keyof U> & U;
+type Override<
+  T,
+  U extends { [K in keyof U]: K extends keyof T ? unknown : never }
+> = Omit<T, keyof U> & U;
 
 type DelegationPortal = {
   delegationType: DelegationType | 'compound-governor';
