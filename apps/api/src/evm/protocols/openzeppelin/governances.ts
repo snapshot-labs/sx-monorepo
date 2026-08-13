@@ -330,16 +330,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 17525806
     },
-    'Olas (prev. Autonolas)': {
-      name: 'Olas (prev. Autonolas)',
-      address: '0x8E84B5055492901988B831817e4Ace5275A3b401',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 17527057
-    },
     Thurman: {
       name: 'Thurman',
       about:
