@@ -35,8 +35,9 @@ export async function handleProposalMetadata(
   const metadata: any = await getJSON(metadataUri);
   if (metadata.title) proposalMetadataItem.title = metadata.title;
   if (metadata.body) proposalMetadataItem.body = metadata.body;
-  if (metadata.discussion)
+  if (metadata.discussion) {
     proposalMetadataItem.discussion = metadata.discussion;
+  }
 
   if (metadata.execution) {
     const recoveredHash = getExecutionHash({
@@ -85,8 +86,9 @@ async function handleStrategiesParsedMetadata(
 
   const metadata: any = await getJSON(metadataUri);
   if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
-  if (metadata.description)
+  if (metadata.description) {
     strategiesParsedMetadataItem.description = metadata.description;
+  }
 
   if (metadata.properties) {
     if (metadata.properties.decimals) {
@@ -95,8 +97,9 @@ async function handleStrategiesParsedMetadata(
     if (metadata.properties.symbol) {
       strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
     }
-    if (metadata.properties.token)
+    if (metadata.properties.token) {
       strategiesParsedMetadataItem.token = metadata.properties.token;
+    }
     if (metadata.properties.payload) {
       strategiesParsedMetadataItem.payload = metadata.properties.payload;
     }

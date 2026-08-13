@@ -92,13 +92,14 @@ export async function getAbi(
 
 export async function createSendTokenTransaction(
   data: CallInfo,
+  recipient: string,
   amount: string,
   token: SendTokenTransaction['_form']['token']
 ): Promise<SendTokenTransaction> {
   return {
     _type: 'sendToken',
     _form: {
-      recipient: data.target,
+      recipient,
       token,
       amount
     },
@@ -139,12 +140,17 @@ export async function decodeExecution(
           tokenContract.decimals()
         ]);
 
-      return createSendTokenTransaction(data, decoded[1].toString(), {
-        name,
-        symbol,
-        decimals,
-        address: target
-      });
+      return createSendTokenTransaction(
+        data,
+        decoded[0],
+        decoded[1].toString(),
+        {
+          name,
+          symbol,
+          decimals,
+          address: target
+        }
+      );
     }
 
     return {
@@ -178,7 +184,7 @@ export async function convertToTransaction(
   chainId: number
 ): Promise<Transaction> {
   if (data.calldata === '0x') {
-    return createSendTokenTransaction(data, data.value, {
+    return createSendTokenTransaction(data, data.target, data.value, {
       name: 'Ethereum',
       decimals: 18,
       symbol: 'ETH',

@@ -150,8 +150,9 @@ export function hasStrategyOverride(strategies: any[]) {
     '"sonic-staked-balance"'
   ];
   const strategiesStr = JSON.stringify(strategies).toLowerCase();
-  if (keywords.some(keyword => strategiesStr.includes(`"name":${keyword}`)))
+  if (keywords.some(keyword => strategiesStr.includes(`"name":${keyword}`))) {
     return true;
+  }
   // Check for split-delegation with delegationOverride
   const splitDelegation = strategies.filter(
     strategy => strategy.name === 'split-delegation'
@@ -303,8 +304,9 @@ async function updateWalletConnectWhitelist(
     !domain ||
     !process.env.REOWN_SECRET ||
     !process.env.WALLETCONNECT_PROJECT_ID
-  )
+  ) {
     return false;
+  }
 
   try {
     await fetch(`https://cloud.reown.com/api/set-allowed-domains`, {

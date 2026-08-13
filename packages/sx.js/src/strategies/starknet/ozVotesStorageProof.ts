@@ -96,8 +96,9 @@ export default function createOzVotesStorageProofStrategy({
       clientConfig: ClientConfig
     ): Promise<string[]> {
       if (call === 'propose') throw new Error('Not supported for proposing');
-      if (signerAddress.length !== 42)
+      if (signerAddress.length !== 42) {
         throw new Error('Not supported for non-Ethereum addresses');
+      }
       if (!metadata) throw new Error('Invalid metadata');
 
       const { starkProvider, ethUrl, networkConfig } = clientConfig;
@@ -140,8 +141,9 @@ export default function createOzVotesStorageProofStrategy({
       );
 
       const [checkpointMptProof, exclusionMptProof] = proofs;
-      if (!checkpointMptProof || !exclusionMptProof)
+      if (!checkpointMptProof || !exclusionMptProof) {
         throw new Error('Invalid proofs');
+      }
 
       // This check is only needed to look for "Slot is zero" error
       // Current storage proof contracts will revert if we try to use them
@@ -237,8 +239,9 @@ export default function createOzVotesStorageProofStrategy({
       );
 
       const [checkpointMptProof, exclusionMptProof] = proofs;
-      if (!checkpointMptProof || !exclusionMptProof)
+      if (!checkpointMptProof || !exclusionMptProof) {
         throw new Error('Invalid proofs');
+      }
 
       try {
         return await contract.get_voting_power(

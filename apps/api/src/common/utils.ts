@@ -55,13 +55,16 @@ function getUrl(uri: string, gateway = 'pineapple.fyi') {
     !uri.startsWith('ipns://') &&
     !uri.startsWith('https://') &&
     !uri.startsWith('http://')
-  )
+  ) {
     return `${ipfsGateway}/ipfs/${uri}`;
+  }
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs')
+  if (uriScheme === 'ipfs') {
     return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns')
+  }
+  if (uriScheme === 'ipns') {
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  }
   return uri;
 }
 

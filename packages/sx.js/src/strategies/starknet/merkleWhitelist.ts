@@ -45,8 +45,9 @@ export default function createMerkleWhitelistStrategy(): Strategy {
       );
 
       const entry = tree[voterIndex];
-      if (voterIndex === -1 || !entry)
+      if (voterIndex === -1 || !entry) {
         throw new Error('Signer is not in whitelist');
+      }
 
       const votingPowerUint256 = uint256.bnToUint256(entry.votingPower);
 
