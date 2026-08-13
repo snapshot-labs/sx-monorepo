@@ -159,21 +159,6 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 14796328
     },
-    TrueFi: {
-      name: 'TrueFi',
-      about:
-        'TrueFi brings collateral-free lending on-chain, maximizing capital efficiency for borrowers and earning rates for lenders.',
-      avatar:
-        'ipfs://bafkreibwht4huglefxwb5ivoro3w2vr2ugln6v2q56gci74hgsnjkiswya',
-      twitter: 'TrueFiDAO',
-      discord: '3tMyMqyqDj',
-      address: '0x585CcA060422ef1779Fb0Dd710A49e7C49A823C9',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 14789712
-    },
     'Aggregated Finance': {
       name: 'Aggregated Finance',
       avatar:
@@ -216,36 +201,6 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 14923681
-    },
-    'Rari DAO (v1)': {
-      name: 'Rari DAO (v1)',
-      about:
-        'Rari DAO governs the $RARI ecosystem: Rarible protocol and RARI chain. We are on a mission to fuel NFT mass adoption by building decentralized infrastructure and powering innovative NFT use cases.',
-      avatar:
-        'ipfs://bafkreibsjnecjysvngttimbzjpobq2ajlwx7tc53xq63qjyg56e2ce3jm4',
-      externalUrl: 'https://rari.foundation/',
-      twitter: 'rarifoundation',
-      discord: 'rarifoundation',
-      address: '0x6552C8fb228f7776Fc0e4056AA217c139D4baDa1',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      quorumType: 'for_only',
-      startBlock: 15719153
-    },
-    BIGCAP: {
-      name: 'BIGCAP',
-      about: 'The BIGCAP Community Decentralized Autonomous Organization',
-      avatar:
-        'ipfs://bafkreigtu4cusaujffp62khx37rc5ab35o3h6gd5k6yju3j4j4ja2qdow4',
-      twitter: 'bigcapproject',
-      address: '0x442660DDf67dd90f9a75885b2e2312F991b3027B',
-      authenticators: [
-        'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV4'
-      ],
-      startBlock: 16083002
     },
     'Antfarm DAO': {
       name: 'Antfarm DAO',
