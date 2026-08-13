@@ -7,6 +7,18 @@ import db from './mysql';
 const RUN_INTERVAL = 120e3;
 const BATCH_SIZE = 40000;
 
+export const DEFAULT_COUNTS = {
+  activeProposals: 0,
+  proposalsCount: 0,
+  proposalsCount1d: 0,
+  proposalsCount7d: 0,
+  proposalsCount30d: 0,
+  followersCount: 0,
+  followersCount7d: 0,
+  votesCount: 0,
+  votesCount7d: 0
+};
+
 export let rankedSpaces: Metadata[] = [];
 
 export let networkSpaceCounts: Record<string, number> = {};
@@ -29,17 +41,7 @@ type Metadata = {
   validationName: string | null;
   categories: string[];
   networks: string[];
-  counts: {
-    activeProposals: number;
-    proposalsCount: number;
-    proposalsCount1d: number;
-    proposalsCount7d: number;
-    proposalsCount30d: number;
-    followersCount: number;
-    followersCount7d: number;
-    votesCount: number;
-    votesCount7d: number;
-  };
+  counts: typeof DEFAULT_COUNTS;
   strategyNames: string[];
   pluginNames: string[];
 };
