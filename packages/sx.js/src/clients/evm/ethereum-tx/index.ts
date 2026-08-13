@@ -545,24 +545,6 @@ export class EthereumTx {
     return [against, forHandle, abstain];
   }
 
-  // Fund Space's ETH to pay Inco fees.
-  async fundSpace(
-    {
-      signer,
-      space,
-      amount
-    }: { signer: Signer; space: string; amount: string },
-    opts: CallOptions = {}
-  ) {
-    const spaceContract = new Contract(space, SpaceIncoAbi, signer);
-    const promise = spaceContract.fund({
-      ...this.defaultTransactionOverrides,
-      value: amount
-    });
-
-    return opts.noWait ? null : promise;
-  }
-
   async executeQueuedProposal(
     {
       signer,
