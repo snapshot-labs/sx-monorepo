@@ -77,7 +77,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 13248552
+      startBlock: 13138295
     },
     Angle: {
       name: 'Angle',
@@ -90,7 +90,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 13494336
+      startBlock: 13473019
     },
     'Gas Dao': {
       name: 'Gas Dao',
@@ -103,7 +103,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 13980216
+      startBlock: 13897803
     },
     Silo: {
       name: 'Silo',
@@ -116,7 +116,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 14110193
+      startBlock: 13716352
     },
     Union: {
       name: 'Union',
@@ -130,7 +130,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 14345191
+      startBlock: 14098367
     },
     'Relevant DAO': {
       name: 'Relevant DAO',
@@ -142,7 +142,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 14592633
+      startBlock: 14580270
     },
     'Signata DAO': {
       name: 'Signata DAO',
@@ -157,7 +157,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 14817901
+      startBlock: 14796328
     },
     TrueFi: {
       name: 'TrueFi',
@@ -172,7 +172,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 14915723
+      startBlock: 14789712
     },
     'Aggregated Finance': {
       name: 'Aggregated Finance',
@@ -185,7 +185,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 14924507
+      startBlock: 14792511
     },
     'Femboy DAO': {
       name: 'Femboy DAO',
@@ -200,7 +200,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 14931927
+      startBlock: 14524400
     },
     Hop: {
       name: 'Hop',
@@ -215,7 +215,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 15670864
+      startBlock: 14923681
     },
     'Rari DAO (v1)': {
       name: 'Rari DAO (v1)',
@@ -232,7 +232,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 15741138
+      startBlock: 15719153
     },
     BIGCAP: {
       name: 'BIGCAP',
@@ -245,7 +245,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 16179548
+      startBlock: 16083002
     },
     'Antfarm DAO': {
       name: 'Antfarm DAO',
@@ -260,7 +260,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 16490162
+      startBlock: 16421539
     },
     'Electronic Dollar': {
       name: 'Electronic Dollar',
@@ -271,7 +271,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 16687914
+      startBlock: 16687659
     },
     'PEPE CASH': {
       name: 'PEPE CASH',
@@ -285,7 +285,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17128364
+      startBlock: 17103616
     },
     Pooh: {
       name: 'Pooh',
@@ -299,7 +299,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17149954
+      startBlock: 17126389
     },
     'Bambi Cash DAO': {
       name: 'Bambi Cash DAO',
@@ -313,7 +313,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17246677
+      startBlock: 17211797
     },
     Inedible: {
       name: 'Inedible',
@@ -328,7 +328,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 17679972
+      startBlock: 17525806
     },
     'Olas (prev. Autonolas)': {
       name: 'Olas (prev. Autonolas)',
@@ -338,7 +338,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 17684345
+      startBlock: 17527057
     },
     Thurman: {
       name: 'Thurman',
@@ -354,7 +354,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 17687649
+      startBlock: 16872857
     },
     Unlock: {
       name: 'Unlock',
@@ -370,7 +370,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17814193
+      startBlock: 17576625
     },
     'Diva Staking': {
       name: 'Diva Staking',
@@ -386,7 +386,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17859049
+      startBlock: 17572625
     },
     'High Yield USD': {
       name: 'High Yield USD',
@@ -399,7 +399,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17874412
+      startBlock: 17097041
     },
     'ETH+': {
       name: 'ETH+',
@@ -412,7 +412,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 17879540
+      startBlock: 17086220
     },
     AMKT: {
       name: 'AMKT',
@@ -422,7 +422,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 18471044
+      startBlock: 18460699
     },
     'Vesper DAO': {
       name: 'Vesper DAO',
@@ -432,7 +432,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 18471475
+      startBlock: 18470591
     },
     'USDC+': {
       name: 'USDC+',
@@ -443,7 +443,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 18728947
+      startBlock: 18171201
     },
     Increment: {
       name: 'Increment',
@@ -457,7 +457,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 19399472
+      startBlock: 16978923
     },
     BytomDAO: {
       name: 'BytomDAO',
@@ -471,7 +471,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 19447876
+      startBlock: 19432522
     },
     'Xypher Council': {
       name: 'Xypher Council',
@@ -486,7 +486,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 20751377
+      startBlock: 20744394
     },
     'Lendefi DAO': {
       name: 'Lendefi DAO',
@@ -500,7 +500,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 22654046
+      startBlock: 22184783
     },
     'PEACE COIN PROTOCOL DAO': {
       name: 'PEACE COIN PROTOCOL DAO',
@@ -510,7 +510,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 23345757
+      startBlock: 23302941
     },
     'ZEUS CC8 Community Takeover': {
       name: 'ZEUS CC8 Community Takeover',
@@ -525,7 +525,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 23676984
+      startBlock: 23618250
     },
     'Lightchain AI DAO': {
       name: 'Lightchain AI DAO',
@@ -541,7 +541,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 24353688
+      startBlock: 24350285
     },
     Flayer: {
       name: 'Flayer',
@@ -557,7 +557,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 24549378
+      startBlock: 21675197
     }
   },
   bnb: {
@@ -589,7 +589,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 56209954
+      startBlock: 53441556
     }
   },
   bnbt: {
@@ -670,7 +670,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 72362874
+      startBlock: 63981259
     },
     'Cora Protocol DAO': {
       name: 'Cora Protocol DAO',
@@ -680,7 +680,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 114748176
+      startBlock: 110809482
     },
     'SWEEPR Governor': {
       name: 'SWEEPR Governor',
@@ -694,7 +694,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 129261207
+      startBlock: 123624789
     },
     'Open Dollar': {
       name: 'Open Dollar',
@@ -710,7 +710,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
-      startBlock: 203643381
+      startBlock: 203368566
     },
     'BTCMobick DAO': {
       name: 'BTCMobick DAO',
@@ -720,7 +720,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 334081040
+      startBlock: 334063779
     },
     'Lendefi DAO': {
       name: 'Lendefi DAO',
@@ -734,7 +734,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV5'
       ],
-      startBlock: 364277386
+      startBlock: 355972367
     }
   },
   sep: {
