@@ -56,6 +56,9 @@
       ],
       "inputs": [
         "**/*.gql",
+        "../api/.checkpoint/schema.gql",
+        "../hub/src/graphql/schema.gql",
+        "../highlight/.checkpoint/schema.gql",
         "codegen.ts",
         "src/networks/common/graphqlApi/queries.ts",
         "src/networks/offchain/api/queries.ts",
