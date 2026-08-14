@@ -188,12 +188,14 @@ async function fetchDelegateRegistryDelegatees(
         0
       );
 
+    // A delegate missing from the API falls back to this delegation as their
+    // whole total, which reads as the account being their only delegator.
+    const delegatedVotes = Number(apiDelegate?.delegatedVotes ?? balance);
+
     return {
       id: formatAddress(delegate),
       balance,
-      delegatedVotePercentage: apiDelegate
-        ? balance / Number(apiDelegate.delegatedVotes)
-        : 1,
+      delegatedVotePercentage: delegatedVotes ? balance / delegatedVotes : 0,
       name: names[delegate],
       share: 100,
       chainId
