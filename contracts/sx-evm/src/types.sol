@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { Enum } from "./external/Enum.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 
 /// @dev Constants used to replace the `bool` type in mappings for gas efficiency.

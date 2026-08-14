@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { IAvatar } from "@zodiac/interfaces/IAvatar.sol";
+import { IAvatar } from "../external/IAvatar.sol";
 import { SimpleQuorumExecutionStrategy } from "./SimpleQuorumExecutionStrategy.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../types.sol";
 

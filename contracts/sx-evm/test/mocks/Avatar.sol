@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import { IAvatar } from "@zodiac/interfaces/IAvatar.sol";
+import { IAvatar } from "../../src/external/IAvatar.sol";
 
 contract Avatar {
     error NotAuthorized();

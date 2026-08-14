@@ -8,7 +8,7 @@ import { Space } from "../src/Space.sol";
 import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
 import { TimelockExecutionStrategy } from "../src/execution-strategies/timelocks/TimelockExecutionStrategy.sol";
 import { Strategy, IndexedStrategy, InitializeCalldata, Choice, MetaTransaction } from "../src/types.sol";
-import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { Enum } from "../src/external/Enum.sol";
 
 // Example script to deploy a space, create a proposal, vote on it, and execute it.
 contract Example is Script {

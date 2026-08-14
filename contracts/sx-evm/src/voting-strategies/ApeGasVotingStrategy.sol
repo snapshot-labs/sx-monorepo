@@ -3,8 +3,8 @@
 pragma solidity ^0.8.18;
 
 import { IVotingStrategy } from "../interfaces/IVotingStrategy.sol";
-import { ISatellite } from "@herodotus-evm-v2/interfaces/ISatellite.sol";
-import { IEvmFactRegistryModule } from "@herodotus-evm-v2/interfaces/modules/IEvmFactRegistryModule.sol";
+import { ISatellite } from "../external/herodotus/ISatellite.sol";
+import { IEvmFactRegistryModule } from "../external/herodotus/IEvmFactRegistryModule.sol";
 
 struct PackedTrieNode {
     uint256 data1;

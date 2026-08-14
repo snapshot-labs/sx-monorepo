@@ -1,7 +1,4 @@
 forge-std/=lib/forge-std/src/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts
-@zodiac/=lib/zodiac/contracts/
-@gnosis.pm/safe-contracts=lib/safe-contracts
 @murky/=lib/murky/src
-@herodotus-evm-v2/=lib/herodotus-evm-v2/src

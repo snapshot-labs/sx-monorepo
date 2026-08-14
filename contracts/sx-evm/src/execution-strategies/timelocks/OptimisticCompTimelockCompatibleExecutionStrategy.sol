@@ -6,7 +6,7 @@ import { ICompTimelock } from "../../interfaces/ICompTimelock.sol";
 import { OptimisticQuorumExecutionStrategy } from "../OptimisticQuorumExecutionStrategy.sol";
 import { SpaceManager } from "../../utils/SpaceManager.sol";
 import { MetaTransaction, Proposal, ProposalStatus } from "../../types.sol";
-import { Enum } from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
+import { Enum } from "../../external/Enum.sol";
 
 /// @title Optimistic Comp Timelock Execution Strategy
 /// @notice An optimstic execution strategy that provides compatibility with existing Comp Timelock contracts.
