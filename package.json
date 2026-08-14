@@ -13,7 +13,7 @@
     "dev:electron": "TURBO_TELEMETRY_DISABLED=1 turbo run dev:electron",
     "build": "TURBO_TELEMETRY_DISABLED=1 turbo run build --filter=!auction",
     "build:electron": "TURBO_TELEMETRY_DISABLED=1 ELECTRON=true turbo run build:electron",
-    "test": "TURBO_TELEMETRY_DISABLED=1 turbo run test --filter=!hub --filter=!sequencer",
+    "test": "TURBO_TELEMETRY_DISABLED=1 turbo run test --filter=!hub --filter=!sequencer --filter=!sx-evm",
     "test:integration": "TURBO_TELEMETRY_DISABLED=1 turbo run test:integration --filter=!hub --filter=!sequencer",
     "test:e2e": "playwright test --config=playwright.config.ts",
     "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
@@ -51,6 +51,7 @@
   "packageManager": "bun@1.3.9",
   "workspaces": [
     "apps/*",
+    "contracts/*",
     "packages/*"
   ]
 }
