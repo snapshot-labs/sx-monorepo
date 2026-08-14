@@ -252,7 +252,37 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         network: 's',
         id: 'shutterpen.eth'
       }
-    ]
+    ],
+    routes: [
+      {
+        path: 'onchain',
+        meta: { orgSpaceId: 'eth:0xC85cf8400ABB7056088279c122912E7e19634885' },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'offchain',
+        meta: { orgSpaceId: 's:shutterpen.eth' },
+        children: DEFAULT_SPACE_ROUTES
+      }
+    ],
+    navItems: {
+      proposals: {
+        name: 'Onchain'
+      },
+      offchain: {
+        name: 'Offchain',
+        icon: IHWifi,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:shutterpen.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: 's:shutterpen.eth' }
+        },
+        position: 2
+      }
+    }
   }
 };
 

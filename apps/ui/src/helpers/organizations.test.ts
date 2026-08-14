@@ -113,6 +113,32 @@ describe('getOrganizationConfigBySpace', () => {
   });
 });
 
+describe('shutterpen organization', () => {
+  const ONCHAIN = 'eth:0xC85cf8400ABB7056088279c122912E7e19634885';
+  const OFFCHAIN = 's:shutterpen.eth';
+
+  it('labels each space by where it votes', () => {
+    const organization = getOrganizationConfigBySpace(ONCHAIN) as any;
+
+    expect(organization.id).toBe('shutterpen');
+    expect(getOrganizationConfigBySpace(OFFCHAIN)).toBe(organization);
+    expect(getOrgProposalLabel(organization, ONCHAIN)).toBe('Onchain');
+    expect(getOrgProposalLabel(organization, OFFCHAIN)).toBe('Offchain');
+  });
+
+  it('gives every space a custom route', () => {
+    const organization = getOrganizationConfigBySpace(ONCHAIN)!;
+
+    expect(
+      organization.spaceIds.map(({ network, id }) => `${network}:${id}`)
+    ).toEqual([ONCHAIN, OFFCHAIN]);
+    expect(organization.routes?.map(route => route.meta.orgSpaceId)).toEqual([
+      ONCHAIN,
+      OFFCHAIN
+    ]);
+  });
+});
+
 describe('resolveSpaceItem', () => {
   it('routes to org overview when space belongs to an org', () => {
     const result = resolveSpaceItem({
