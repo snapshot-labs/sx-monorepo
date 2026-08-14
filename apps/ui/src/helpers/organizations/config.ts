@@ -271,7 +271,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       },
       offchain: {
         name: 'Offchain',
-        icon: IHWifi,
+        icon: IHNewspaper,
         link: {
           name: 'space-proposals',
           params: { space: 's:shutterpen.eth' }
