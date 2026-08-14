@@ -5,7 +5,7 @@ auto_detect_solc = false
 bytecode_hash = "none"
 fuzz = { runs = 256 }
 gas_reports = ["*"]
-libs = ["lib"]
+libs = []
 optimizer = true
 optimizer_runs = 10_000
 out = "out"

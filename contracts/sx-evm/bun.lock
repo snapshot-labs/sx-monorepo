@@ -4,6 +4,12 @@
   "workspaces": {
     "": {
       "name": "sx-evm",
+      "dependencies": {
+        "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#3d7a93876a2e5e1d7fe29b5a0e96e222afdc4cfa",
+        "@openzeppelin/contracts-upgradeable": "github:OpenZeppelin/openzeppelin-contracts-upgradeable#65420cb9c943c32eb7e8c9da60183a413d90067a",
+        "forge-std": "github:foundry-rs/forge-std#v1.9.7",
+        "murky": "github:dmfxyz/murky#991e371eb1dfa9f86701869eb08ec4e98c3cc0b0",
+      },
       "devDependencies": {
         "husky": "^8.0.3",
         "lint-staged": "^13.1.2",
@@ -19,6 +25,10 @@
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
     "@babel/helper-validator-identifier": ["@babel/helper-validator-identifier@7.29.7", "", {}, "sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg=="],
+
+    "@openzeppelin/contracts": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts#3d7a938", { "bin": { "openzeppelin-contracts-migrate-imports": "scripts/migrate-imports.js" } }, "OpenZeppelin-openzeppelin-contracts-3d7a938", "sha512-29sgM3qrfjZ4V5vy4bvZdh73oFWbYRpTBHCEqMedM3rs/Q49EZTgYiX6J4D/n8qFKKgn3G4fWerx4qP50pNhpA=="],
+
+    "@openzeppelin/contracts-upgradeable": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts-upgradeable#65420cb", { "bin": { "openzeppelin-contracts-migrate-imports": "scripts/migrate-imports.js" } }, "OpenZeppelin-openzeppelin-contracts-upgradeable-65420cb", "sha512-Ki1wWyRWDcU+OErG6J5C7rwmoLZ4QMMreOpkDLcsRnFOZq0IvWIpV/C5reGkxkATCLzoU3JkKr8mpWA3vTQ/aw=="],
 
     "@solidity-parser/parser": ["@solidity-parser/parser@0.15.0", "", { "dependencies": { "antlr4ts": "^0.5.0-alpha.4" } }, "sha512-5UFJJTzWi1hgFk6aGCZ5rxG2DJkCJOzJ74qg7UkWSNCDSigW+CJLoYUb5bLiKrtI34Nr9rpFSUNHfkqtlL+N/w=="],
 
@@ -92,6 +102,8 @@
 
     "fill-range": ["fill-range@7.1.1", "", { "dependencies": { "to-regex-range": "^5.0.1" } }, "sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg=="],
 
+    "forge-std": ["forge-std@github:foundry-rs/forge-std#77041d2", {}, "foundry-rs-forge-std-77041d2", "sha512-ZFTn8yWNakfTzXF7vU3OoS9JT4Wa+BLfPWvPH3bZZCmysBhB0mhsBpCjku+5ihcv2CW5Wf74DAZFNhCy0dxZRA=="],
+
     "fs.realpath": ["fs.realpath@1.0.0", "", {}, "sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw=="],
 
     "get-stream": ["get-stream@6.0.1", "", {}, "sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg=="],
@@ -155,6 +167,8 @@
     "minimatch": ["minimatch@3.1.5", "", { "dependencies": { "brace-expansion": "^1.1.7" } }, "sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w=="],
 
     "ms": ["ms@2.1.3", "", {}, "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="],
+
+    "murky": ["murky@github:dmfxyz/murky#991e371", {}, "dmfxyz-murky-991e371", "sha512-WtsTNu6zd+vmOI7TQmTQ0ihxgSekGm/IEsCCzzdIfUXwnd2C38Xk5Zp/QhxMNP//0mYRwxqrWtmufqc+5lbueQ=="],
 
     "normalize-path": ["normalize-path@3.0.0", "", {}, "sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA=="],
 
