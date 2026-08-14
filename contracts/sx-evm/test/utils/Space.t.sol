@@ -9,9 +9,7 @@ import { Space } from "../../src/Space.sol";
 import { VanillaAuthenticator } from "../../src/authenticators/VanillaAuthenticator.sol";
 import { VanillaVotingStrategy } from "../../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../../src/execution-strategies/VanillaExecutionStrategy.sol";
-import {
-    VanillaProposalValidationStrategy
-} from "../../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
+import { VanillaProposalValidationStrategy } from "../../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
 import { ISpaceEvents } from "../../src/interfaces/space/ISpaceEvents.sol";
 import { ISpaceErrors } from "../../src/interfaces/space/ISpaceErrors.sol";
 import { IExecutionStrategyErrors } from "../../src/interfaces/execution-strategies/IExecutionStrategyErrors.sol";

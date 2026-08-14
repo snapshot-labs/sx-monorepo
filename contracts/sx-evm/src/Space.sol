@@ -8,18 +8,7 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { IERC4824 } from "src/interfaces/IERC4824.sol";
 import { ISpace, ISpaceActions, ISpaceState, ISpaceOwnerActions } from "src/interfaces/ISpace.sol";
-import {
-    Choice,
-    FinalizationStatus,
-    IndexedStrategy,
-    Proposal,
-    ProposalStatus,
-    Strategy,
-    UpdateSettingsCalldata,
-    InitializeCalldata,
-    TRUE,
-    FALSE
-} from "src/types.sol";
+import { Choice, FinalizationStatus, IndexedStrategy, Proposal, ProposalStatus, Strategy, UpdateSettingsCalldata, InitializeCalldata, TRUE, FALSE } from "src/types.sol";
 import { IVotingStrategy } from "src/interfaces/IVotingStrategy.sol";
 import { IExecutionStrategy } from "src/interfaces/IExecutionStrategy.sol";
 import { IProposalValidationStrategy } from "src/interfaces/IProposalValidationStrategy.sol";

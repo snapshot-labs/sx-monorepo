@@ -11,15 +11,9 @@ import { Strategy, InitializeCalldata } from "../src/types.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
 import { AvatarExecutionStrategy } from "../src/execution-strategies/AvatarExecutionStrategy.sol";
 import { TimelockExecutionStrategy } from "../src/execution-strategies/timelocks/TimelockExecutionStrategy.sol";
-import {
-    OptimisticTimelockExecutionStrategy
-} from "../src/execution-strategies/timelocks/OptimisticTimelockExecutionStrategy.sol";
-import {
-    CompTimelockCompatibleExecutionStrategy
-} from "../src/execution-strategies/timelocks/CompTimelockCompatibleExecutionStrategy.sol";
-import {
-    OptimisticCompTimelockCompatibleExecutionStrategy
-} from "../src/execution-strategies/timelocks/OptimisticCompTimelockCompatibleExecutionStrategy.sol";
+import { OptimisticTimelockExecutionStrategy } from "../src/execution-strategies/timelocks/OptimisticTimelockExecutionStrategy.sol";
+import { CompTimelockCompatibleExecutionStrategy } from "../src/execution-strategies/timelocks/CompTimelockCompatibleExecutionStrategy.sol";
+import { OptimisticCompTimelockCompatibleExecutionStrategy } from "../src/execution-strategies/timelocks/OptimisticCompTimelockCompatibleExecutionStrategy.sol";
 
 import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
@@ -31,18 +25,10 @@ import { OZVotesVotingStrategy } from "../src/voting-strategies/OZVotesVotingStr
 import { WhitelistVotingStrategy } from "../src/voting-strategies/WhitelistVotingStrategy.sol";
 import { MerkleWhitelistVotingStrategy } from "../src/voting-strategies/MerkleWhitelistVotingStrategy.sol";
 
-import {
-    VanillaProposalValidationStrategy
-} from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
-import {
-    PropositionPowerProposalValidationStrategy
-} from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
-import {
-    ActiveProposalsLimiterProposalValidationStrategy
-} from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
-import {
-    PropositionPowerAndActiveProposalsLimiterValidationStrategy
-} from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
+import { VanillaProposalValidationStrategy } from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
+import { PropositionPowerProposalValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
+import { ActiveProposalsLimiterProposalValidationStrategy } from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
+import { PropositionPowerAndActiveProposalsLimiterValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
 
 interface SingletonFactory {
     function deploy(bytes memory _initCode, bytes32 salt) external returns (address payable);

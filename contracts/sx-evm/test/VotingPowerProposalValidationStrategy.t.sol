@@ -5,9 +5,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { Strategy, IndexedStrategy, UpdateSettingsCalldata } from "../src/types.sol";
 import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
-import {
-    PropositionPowerProposalValidationStrategy
-} from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
+import { PropositionPowerProposalValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
 import { CompToken } from "./mocks/CompToken.sol";
 
 contract PropositionPowerProposalValidationTest is SpaceTest {

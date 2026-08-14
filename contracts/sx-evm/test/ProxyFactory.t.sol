@@ -6,9 +6,7 @@ import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy
 import { VanillaAuthenticator } from "../src/authenticators/VanillaAuthenticator.sol";
 import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
 import { VanillaExecutionStrategy } from "../src/execution-strategies/VanillaExecutionStrategy.sol";
-import {
-    VanillaProposalValidationStrategy
-} from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
+import { VanillaProposalValidationStrategy } from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
 import { ProxyFactory } from "../src/ProxyFactory.sol";
 import { Space } from "../src/Space.sol";
 import { ISpaceEvents } from "../src/interfaces/space/ISpaceEvents.sol";

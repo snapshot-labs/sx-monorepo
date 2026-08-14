@@ -3,9 +3,7 @@ pragma solidity ^0.8.18;
 
 import { SpaceTest } from "./utils/Space.t.sol";
 import { Strategy, UpdateSettingsCalldata } from "../src/types.sol";
-import {
-    ActiveProposalsLimiterProposalValidationStrategy
-} from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
+import { ActiveProposalsLimiterProposalValidationStrategy } from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
 
 contract ActiveProposalsLimterTest is SpaceTest {
     ActiveProposalsLimiterProposalValidationStrategy internal activeProposalsLimiterProposalValidationStrategy;

@@ -10,6 +10,4 @@ import { ISpaceErrors } from "./space/ISpaceErrors.sol";
 
 /// @title Space Interface
 // solhint-disable-next-line no-empty-blocks
-interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents, ISpaceErrors {
-
-}
+interface ISpace is ISpaceState, ISpaceActions, ISpaceOwnerActions, ISpaceEvents, ISpaceErrors {}

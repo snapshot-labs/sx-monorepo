@@ -8,9 +8,7 @@ import { SpaceTest } from "./utils/Space.t.sol";
 import { SigUtils } from "./utils/SigUtils.sol";
 import { EthSigAuthenticator } from "../src/authenticators/EthSigAuthenticator.sol";
 import { EthTxAuthenticator } from "../src/authenticators/EthTxAuthenticator.sol";
-import {
-    PropositionPowerAndActiveProposalsLimiterValidationStrategy
-} from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
+import { PropositionPowerAndActiveProposalsLimiterValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
 import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../src/types.sol";
 
 // Similar to "GasSnapshots.t.sol" except this uses a forked network
