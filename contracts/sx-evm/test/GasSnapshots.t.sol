@@ -193,7 +193,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         );
         // We take the snapshot on the second proposal because the first proposal will write to new
         // storage making it not representative of average usage.
-        snapStart("ProposeSigComp");
+        vm.startSnapshotGas("ProposeSigComp");
         ethSigAuth.authenticate(
             v,
             r,
@@ -203,7 +203,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
             PROPOSE_SELECTOR,
             abi.encode(author, proposalMetadataURI, executionStrategy, abi.encode(userVotingStrategies))
         );
-        snapEnd();
+        vm.stopSnapshotGas();
 
         uint256 proposalId = 1;
 
@@ -236,7 +236,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
 
         // We take the snapshot on the second vote because the first vote will write to new
         // storage making it not representative of average usage.
-        snapStart("VoteSigComp");
+        vm.startSnapshotGas("VoteSigComp");
         ethSigAuth.authenticate(
             v,
             r,
@@ -246,7 +246,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
             VOTE_SELECTOR,
             abi.encode(voter2, proposalId, Choice.For, userVotingStrategies, "")
         );
-        snapEnd();
+        vm.stopSnapshotGas();
 
         (v, r, s) = vm.sign(
             key3,
@@ -262,7 +262,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         );
 
         // Adding metadata with the vote
-        snapStart("VoteSigCompMetadata");
+        vm.startSnapshotGas("VoteSigCompMetadata");
         ethSigAuth.authenticate(
             v,
             r,
@@ -278,7 +278,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
                 "bafkreibv2yjocyotgj2n6awe5z7vqxrzyo72t2ml2ijgj4fgktfpyukuv4"
             )
         );
-        snapEnd();
+        vm.stopSnapshotGas();
 
         vm.prank(voter4);
         ethTxAuth.authenticate(
@@ -288,16 +288,16 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
         );
 
         vm.prank(voter5);
-        snapStart("VoteTxComp");
+        vm.startSnapshotGas("VoteTxComp");
         ethTxAuth.authenticate(
             address(space),
             VOTE_SELECTOR,
             abi.encode(voter5, proposalId, Choice.For, userVotingStrategies, "")
         );
-        snapEnd();
+        vm.stopSnapshotGas();
 
         vm.prank(voter6);
-        snapStart("VoteTxCompMetadata");
+        vm.startSnapshotGas("VoteTxCompMetadata");
         ethTxAuth.authenticate(
             address(space),
             VOTE_SELECTOR,
@@ -309,6 +309,6 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
                 "bafkreibv2yjocyotgj2n6awe5z7vqxrzyo72t2ml2ijgj4fgktfpyukuv4"
             )
         );
-        snapEnd();
+        vm.stopSnapshotGas();
     }
 }

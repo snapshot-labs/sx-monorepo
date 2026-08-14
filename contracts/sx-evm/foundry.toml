@@ -14,8 +14,9 @@ src = "src"
 test = "test"
 via_ir = true
 ffi = true
-fs_permissions = [{ access = "read-write", path = ".forge-snapshots/"}, { access = "read-write", path = "./deployments/"}]
+fs_permissions = [{ access = "read-write", path = "./deployments/"}]
 
 [profile.ci]
 fuzz = { runs = 1_000 }
 verbosity = 4
+gas_snapshot_check = true

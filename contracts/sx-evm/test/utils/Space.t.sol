@@ -3,7 +3,6 @@
 pragma solidity ^0.8.18;
 
 import { Test } from "forge-std/Test.sol";
-import { GasSnapshot } from "forge-gas-snapshot/GasSnapshot.sol";
 import { ERC1967Proxy } from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 import { Space } from "../../src/Space.sol";
@@ -19,7 +18,7 @@ import { IExecutionStrategyErrors } from "../../src/interfaces/execution-strateg
 import { Choice, Strategy, IndexedStrategy, InitializeCalldata, TRUE, FALSE } from "../../src/types.sol";
 
 // solhint-disable-next-line max-states-count
-abstract contract SpaceTest is Test, GasSnapshot, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
+abstract contract SpaceTest is Test, ISpaceEvents, ISpaceErrors, IExecutionStrategyErrors {
     bytes4 internal constant PROPOSE_SELECTOR = bytes4(keccak256("propose(address,string,(address,bytes),bytes)"));
     bytes4 internal constant VOTE_SELECTOR = bytes4(keccak256("vote(address,uint256,uint8,(uint8,bytes)[],string)"));
     bytes4 internal constant UPDATE_PROPOSAL_SELECTOR =
