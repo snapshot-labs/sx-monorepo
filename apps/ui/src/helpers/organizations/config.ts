@@ -246,7 +246,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     spaceIds: [
       {
         network: 'eth',
-        id: '0xe44a9c5670Ce7C3675f389785E0C565e52730377'
+        id: '0xC85cf8400ABB7056088279c122912E7e19634885'
       },
       {
         network: 's',
