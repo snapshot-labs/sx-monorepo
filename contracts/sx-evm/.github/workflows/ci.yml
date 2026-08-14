@@ -18,28 +18,28 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
-        uses: "actions/checkout@v3"
-        with:
-          submodules: "recursive"
+        uses: "actions/checkout@v4"
 
       - name: "Install Node.js"
-        uses: "actions/setup-node@v3"
+        uses: "actions/setup-node@v4"
         with:
-          cache: "yarn"
-          node-version: "lts/*"
+          node-version: 22
+
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v2"
+        with:
+          bun-version: "1.3.9"
 
       - name: "Install the Node.js dependencies"
-        run: "yarn install --immutable"
+        run: "bun install --frozen-lockfile"
 
       - name: "Lint the code"
-        run: "yarn lint"
+        run: "bun run lint"
   test:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
-        uses: "actions/checkout@v3"
-        with:
-          submodules: "recursive"
+        uses: "actions/checkout@v4"
 
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
@@ -47,26 +47,28 @@ jobs:
           version: "v1.7.1"
 
       - name: "Install Node.js"
-        uses: "actions/setup-node@v3"
+        uses: "actions/setup-node@v4"
         with:
-          cache: "yarn"
-          node-version: "lts/*"
+          node-version: 22
+
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v2"
+        with:
+          bun-version: "1.3.9"
 
       - name: "Install the Node.js dependencies"
-        run: "yarn install --immutable"
+        run: "bun install --frozen-lockfile"
 
       - name: "Show the Foundry config"
         run: "forge config"
 
       - name: "Run the tests"
-        run: "yarn test"
+        run: "bun run test"
   coverage:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
-        uses: "actions/checkout@v3"
-        with:
-          submodules: "recursive"
+        uses: "actions/checkout@v4"
 
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
@@ -74,16 +76,20 @@ jobs:
           version: "v1.7.1"
 
       - name: "Install Node.js"
-        uses: "actions/setup-node@v3"
+        uses: "actions/setup-node@v4"
         with:
-          cache: "yarn"
-          node-version: "lts/*"
+          node-version: 22
+
+      - name: "Install Bun"
+        uses: "oven-sh/setup-bun@v2"
+        with:
+          bun-version: "1.3.9"
 
       - name: "Install the Node.js dependencies"
-        run: "yarn install --immutable"
+        run: "bun install --frozen-lockfile"
 
       - name: "Run coverage"
-        run: "yarn coverage"
+        run: "bun run coverage"
 
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v3
