@@ -20,3 +20,8 @@ fs_permissions = [{ access = "read-write", path = "./deployments/"}]
 fuzz = { runs = 1_000 }
 verbosity = 4
 gas_snapshot_check = true
+
+[profile.coverage]
+fuzz = { runs = 1_000 }
+gas_snapshot_check = false
+gas_snapshot_emit = false

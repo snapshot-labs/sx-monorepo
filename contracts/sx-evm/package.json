@@ -21,7 +21,7 @@
   },
   "scripts": {
     "clean": "rimraf cache out",
-    "coverage": "forge coverage --no-match-coverage testFork --ir-minimum --report lcov",
+    "coverage": "FOUNDRY_PROFILE=coverage forge coverage --no-match-coverage testFork --ir-minimum --report lcov",
     "lint": "bun run lint:sol && bun run prettier:check",
     "lint:sol": "solhint \"{src,test,script}/**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
