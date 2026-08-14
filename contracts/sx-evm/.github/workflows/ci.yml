@@ -44,7 +44,7 @@ jobs:
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
         with:
-          version: "nightly"
+          version: "v1.7.1"
 
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
@@ -71,7 +71,7 @@ jobs:
       - name: "Install Foundry"
         uses: "foundry-rs/foundry-toolchain@v1"
         with:
-          version: "nightly"
+          version: "v1.7.1"
 
       - name: "Install Node.js"
         uses: "actions/setup-node@v3"
