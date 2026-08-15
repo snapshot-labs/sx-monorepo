@@ -1,0 +1,17 @@
+bracketSpacing: true
+printWidth: 120
+proseWrap: "always"
+singleQuote: false
+tabWidth: 2
+trailingComma: "all"
+useTabs: false
+
+# Prettier 3 dropped automatic plugin discovery. Without this the Solidity
+# parser is never loaded and `prettier --check` silently passes every .sol file.
+plugins:
+  - "prettier-plugin-solidity"
+
+overrides:
+  - files: "*.sol"
+    options:
+      tabWidth: 4

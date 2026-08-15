@@ -69,6 +69,18 @@ const config: KnipConfig = {
         'util'
       ]
     },
+    // Solidity only: foundry resolves these through remappings.txt, which knip
+    // cannot follow, so every dependency looks unused to it.
+    'contracts/sx-evm': {
+      ignoreDependencies: [
+        '@openzeppelin/contracts',
+        '@openzeppelin/contracts-upgradeable',
+        'forge-std',
+        'murky',
+        'solhint-plugin-prettier'
+      ],
+      ignoreBinaries: ['forge']
+    },
     'packages/eslint-config': {},
     'packages/eslint-config-vue': {},
     'packages/lock': {
