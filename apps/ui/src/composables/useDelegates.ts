@@ -385,14 +385,25 @@ export function useDelegates(
     const found = results
       .map(result => (result.status === 'fulfilled' ? result.value : null))
       .filter(Boolean);
-    const failed = results.filter(result => result.status === 'rejected');
+    const failedChainIds = probedChainIds.filter(
+      (chainId, i) => results[i].status === 'rejected'
+    );
 
     // An unread chain may hold a delegation, so only report having none when
     // every chain answered.
-    if (!found.length && (failed.length || !probedChainIds.length)) {
+    if (!found.length && (failedChainIds.length || !probedChainIds.length)) {
       throw (
-        (failed[0] as PromiseRejectedResult)?.reason ??
-        new Error('Delegation subgraph not found')
+        (
+          results.find(
+            result => result.status === 'rejected'
+          ) as PromiseRejectedResult
+        )?.reason ?? new Error('Delegation subgraph not found')
+      );
+    }
+
+    if (failedChainIds.length) {
+      console.warn(
+        `Delegations could not be read on chains: ${failedChainIds.join(', ')}`
       );
     }
 

@@ -8,6 +8,7 @@ import {
   DELEGATE_REGISTRY_STRATEGIES,
   DELEGATION_TYPES_NAMES
 } from '@/helpers/constants';
+import { getDelegationReadChainId } from '@/helpers/delegation';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
@@ -532,7 +533,7 @@ function formatDelegations(
         new Set([
           space.network,
           ...delegateRegistryStrategies.map(strategy =>
-            String(strategy.network || space.network)
+            getDelegationReadChainId(strategy, space.network)
           )
         ])
       );

@@ -1,6 +1,7 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { getDelegationReadChainId } from '@/helpers/delegation';
 import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
 import { formatAddress } from '@/helpers/utils';
@@ -178,15 +179,27 @@ async function fetchDelegateRegistryDelegatees(
     )
   ]);
 
+  // For remote-vp strategies the entries map 1:1 to strategies_params, whose
+  // params decide which chain's registry a strategy reads.
+  const readChainIds = votingPowers.map((vp, i) =>
+    votingPowers.length === space.strategies_params.length
+      ? getDelegationReadChainId(
+          space.strategies_params[i],
+          space.snapshot_chain_id
+        )
+      : String(vp.chainId ?? space.snapshot_chain_id)
+  );
+
   return accountDelegations.map(({ delegate, chainId }) => {
     const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
     // A delegation only carries the power of the strategies reading its chain.
-    const balance = votingPowers
-      .filter(vp => String(vp.chainId ?? space.snapshot_chain_id) === chainId)
-      .reduce(
-        (acc, vp) => acc + Number(vp.value) / 10 ** vp.cumulativeDecimals,
-        0
-      );
+    const balance = votingPowers.reduce(
+      (acc, vp, i) =>
+        readChainIds[i] === chainId
+          ? acc + Number(vp.value) / 10 ** vp.cumulativeDecimals
+          : acc,
+      0
+    );
 
     // A delegate missing from the API falls back to this delegation as their
     // whole total, which reads as the account being their only delegator.
