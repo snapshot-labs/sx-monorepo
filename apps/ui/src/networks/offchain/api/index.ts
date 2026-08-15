@@ -984,7 +984,7 @@ export function createApi(
     ): Promise<Alias | null> => {
       const {
         data: { aliases }
-      }: { data: { aliases: Alias[] } } = await apollo.query({
+      } = await apollo.query({
         query: ALIASES_QUERY,
         variables: {
           address,
@@ -998,7 +998,7 @@ export function createApi(
     loadAliases: async (address: string): Promise<Alias[]> => {
       const {
         data: { aliases }
-      }: { data: { aliases: Alias[] } } = await apollo.query({
+      } = await apollo.query({
         query: ALIASES_BY_ADDRESS_QUERY,
         variables: { address }
       });
@@ -1070,7 +1070,7 @@ export function createApi(
       });
 
       return Object.fromEntries(
-        data.networks.map((network: any) => [
+        data.networks.map(network => [
           network.id,
           {
             spaces_count: network.spacesCount,
@@ -1082,7 +1082,7 @@ export function createApi(
     loadSettings: async (): Promise<Setting[]> => {
       const {
         data: { options }
-      }: { data: { options: Setting[] } } = await apollo.query({
+      } = await apollo.query({
         query: SETTINGS_QUERY
       });
 
