@@ -267,7 +267,14 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     ],
     navItems: {
       proposals: {
-        name: 'Onchain'
+        name: 'Onchain',
+        link: {
+          name: 'space-proposals',
+          params: { space: 'eth:0xC85cf8400ABB7056088279c122912E7e19634885' }
+        },
+        activeRoute: {
+          prefix: 'space-onchain'
+        }
       },
       offchain: {
         name: 'Offchain',
@@ -277,8 +284,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 's:shutterpen.eth' }
         },
         activeRoute: {
-          prefix: 'space-proposal',
-          params: { space: 's:shutterpen.eth' }
+          prefix: 'space-offchain'
         },
         position: 2
       }
