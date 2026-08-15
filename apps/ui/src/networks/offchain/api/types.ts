@@ -3,6 +3,7 @@ import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
   OffchainSpaceFragmentFragment,
+  OffchainStatementFragmentFragment,
   OffchainStrategyFragmentFragment,
   OffchainVoteFragmentFragment
 } from './gql/graphql';
@@ -49,6 +50,13 @@ export type ApiProposal = Override<
   }
 >;
 
-export type ApiVote = OffchainVoteFragmentFragment;
+export type ApiVote = Override<
+  OffchainVoteFragmentFragment,
+  {
+    choice: number | number[] | Record<string, number>;
+  }
+>;
 
 export type ApiStrategy = OffchainStrategyFragmentFragment;
+
+export type ApiStatement = OffchainStatementFragmentFragment;

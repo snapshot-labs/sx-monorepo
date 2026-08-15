@@ -201,6 +201,17 @@ gql(`
     schema
     disabled
   }
+
+  fragment offchainStatementFragment on Statement {
+    about
+    statement
+    space
+    delegate
+    network
+    discourse
+    status
+    source
+  }
 `);
 
 export const PROPOSAL_QUERY = gql(`
@@ -339,14 +350,7 @@ export const ALIASES_BY_ADDRESS_QUERY = gql(`
 export const STATEMENTS_QUERY = gql(`
   query Statements($where: StatementsWhere) {
     statements(where: $where) {
-      about
-      statement
-      space
-      delegate
-      network
-      discourse
-      status
-      source
+      ...offchainStatementFragment
     }
   }
 `);

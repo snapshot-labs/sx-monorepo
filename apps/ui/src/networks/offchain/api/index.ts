@@ -66,6 +66,7 @@ import {
   ApiProposal,
   ApiRelatedSpace,
   ApiSpace,
+  ApiStatement,
   ApiStrategy,
   ApiVote
 } from './types';
@@ -598,6 +599,25 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
   };
 }
 
+// The hub declares about/statement/discourse nullable and status/network as
+// plain String!, while the app's Statement requires non-null strings and
+// literal unions. Normalize here rather than asserting the shape.
+function formatStatement(
+  statement: ApiStatement,
+  networkId: NetworkID
+): Statement {
+  return {
+    space: statement.space,
+    network: networkId,
+    delegate: statement.delegate,
+    about: statement.about ?? '',
+    statement: statement.statement ?? '',
+    discourse: statement.discourse ?? '',
+    status: statement.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+    source: statement.source
+  };
+}
+
 export function createApi(
   uri: string,
   networkId: NetworkID,
@@ -897,7 +917,7 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
+          data.leaderboards.map(leaderboard => ({
             id: leaderboard.user,
             spaceId: `${networkId}:${leaderboard.space}`,
             vote_count: leaderboard.votesCount,
@@ -935,7 +955,7 @@ export function createApi(
           }
         })
         .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
+          data.leaderboards.map(leaderboard => ({
             id: leaderboard.user,
             spaceId: leaderboard.space,
             vote_count: leaderboard.votesCount,
@@ -1001,7 +1021,9 @@ export function createApi(
         }
       });
 
-      return (data.statements[0] as Statement | undefined) ?? null;
+      const statement = data.statements[0];
+
+      return statement ? formatStatement(statement, networkId) : null;
     },
     loadStatements: async (
       networkId: NetworkID,
@@ -1019,7 +1041,9 @@ export function createApi(
         }
       });
 
-      return data.statements as Statement[];
+      return data.statements.map(statement =>
+        formatStatement(statement, networkId)
+      );
     },
     loadStrategies: async () => {
       const { data } = await apollo.query({
