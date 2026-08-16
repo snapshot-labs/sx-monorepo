@@ -200,7 +200,7 @@ function formatSpace(
       border_color: skinSettings?.border_color || '',
       heading_color: skinSettings?.heading_color || '',
       primary_color: skinSettings?.primary_color || '',
-      theme: skinSettings?.theme === 'dark' ? 'dark' : 'light',
+      theme: skinSettings?.theme || 'light',
       // pass the hub's null through unchanged. clone() is a JSON round-trip,
       // which drops undefined keys but keeps null ones, and the settings page
       // objectHash-compares this object against its own clone to decide
@@ -242,10 +242,10 @@ function formatSpace(
     turbo_expiration: space.turboExpiration,
     controller: '',
     snapshot_chain_id: space.network,
-    name: space.name || '',
-    avatar: space.avatar || '',
+    name: space.name,
+    avatar: space.avatar,
     cover: space.cover || '',
-    about: space.about || '',
+    about: space.about,
     external_url: space.website || '',
     github: space.github || '',
     twitter: space.twitter || '',
@@ -604,9 +604,6 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
   };
 }
 
-// The hub declares about/statement/discourse nullable and status/network as
-// plain String!, while the app's Statement requires non-null strings and
-// literal unions. Normalize here rather than asserting the shape.
 function formatStatement(
   statement: ApiStatement,
   networkId: NetworkID
@@ -618,7 +615,7 @@ function formatStatement(
     about: statement.about ?? '',
     statement: statement.statement ?? '',
     discourse: statement.discourse ?? '',
-    status: statement.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+    status: statement.status,
     source: statement.source
   };
 }
@@ -1026,7 +1023,7 @@ export function createApi(
         }
       });
 
-      const statement = data.statements[0];
+      const statement = data.statements[0] as ApiStatement | undefined;
 
       return statement ? formatStatement(statement, networkId) : null;
     },
@@ -1046,7 +1043,7 @@ export function createApi(
         }
       });
 
-      return data.statements.map(statement =>
+      return (data.statements as ApiStatement[]).map(statement =>
         formatStatement(statement, networkId)
       );
     },

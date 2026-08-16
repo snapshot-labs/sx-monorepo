@@ -1,4 +1,4 @@
-import { DelegationType, VoteType } from '@/types';
+import { DelegationType, SpaceMetadataLabel, Theme, VoteType } from '@/types';
 import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
@@ -12,6 +12,10 @@ type Override<
   T,
   U extends { [K in keyof U]: K extends keyof T ? unknown : never }
 > = Omit<T, keyof U> & U;
+
+type Strategy = { name: string; params: Record<string, any>; network: string };
+
+type Validation = { name: string; params: Record<string, any> };
 
 type DelegationPortal = {
   delegationType: DelegationType | 'compound-governor';
@@ -34,7 +38,15 @@ export type ApiSpace = Override<
       }
     >;
     delegationPortal: DelegationPortal | null;
+    labels: SpaceMetadataLabel[];
+    strategies: Strategy[];
+    validation: Validation;
+    voteValidation: Validation;
     plugins: Record<string, any>;
+    skinSettings: Override<
+      NonNullable<OffchainSpaceFragmentFragment['skinSettings']>,
+      { theme: Theme | null }
+    > | null;
   }
 >;
 
@@ -46,6 +58,12 @@ export type ApiProposal = Override<
     scores_state: 'invalid' | 'pending' | 'final';
     privacy: 'shutter' | '';
     quorumType: 'default' | 'rejection';
+    space: Override<
+      OffchainProposalFragmentFragment['space'],
+      { labels: SpaceMetadataLabel[] }
+    >;
+    strategies: Strategy[];
+    validation: Validation;
     plugins: Record<string, any>;
   }
 >;
@@ -59,4 +77,7 @@ export type ApiVote = Override<
 
 export type ApiStrategy = OffchainStrategyFragmentFragment;
 
-export type ApiStatement = OffchainStatementFragmentFragment;
+export type ApiStatement = Override<
+  OffchainStatementFragmentFragment,
+  { status: 'ACTIVE' | 'INACTIVE' }
+>;
