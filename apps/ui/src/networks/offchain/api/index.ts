@@ -201,7 +201,12 @@ function formatSpace(
       heading_color: skinSettings?.heading_color || '',
       primary_color: skinSettings?.primary_color || '',
       theme: skinSettings?.theme === 'dark' ? 'dark' : 'light',
-      logo: skinSettings?.logo ?? undefined
+      // pass the hub's null through unchanged. clone() is a JSON round-trip,
+      // which drops undefined keys but keeps null ones, and the settings page
+      // objectHash-compares this object against its own clone to decide
+      // whether the form is modified. Coercing to undefined makes every space
+      // with no skins row look modified the moment the page loads.
+      logo: skinSettings?.logo as string | undefined
     };
   }
 
@@ -1050,9 +1055,7 @@ export function createApi(
         query: STRATEGIES_QUERY
       });
 
-      return data.strategies.map(strategy =>
-        formatStrategy(strategy as ApiStrategy)
-      );
+      return data.strategies.map(strategy => formatStrategy(strategy));
     },
     loadStrategy: async (id: string) => {
       const { data } = await apollo.query({
