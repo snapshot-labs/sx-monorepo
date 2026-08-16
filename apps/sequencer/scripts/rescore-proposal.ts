@@ -7,18 +7,6 @@ import { getProposal, getVotes, updateProposalScores } from '../src/scores';
 // Usage:
 //   bunx ts-node scripts/rescore-proposal.ts --proposal <id>            # dry run
 //   bunx ts-node scripts/rescore-proposal.ts --proposal <id> --apply    # write
-//
-// Recomputes a proposal's results with the currently bundled snapshot.js and,
-// with --apply, writes scores/scores_by_strategy/scores_total/scores_state,
-// scores_updated, votes and cb back to the proposals table.
-//
-// This reads the votes as already stored (for shutter proposals the choices
-// must already be decrypted) and re-tallies using each vote's existing voting
-// power. It does not re-fetch voting power and does not read or modify the
-// proposal's privacy field, so it is also safe on closed shutter proposals.
-// updateProposalAndVotes returns early on any proposal whose scores_state is
-// already final, before it reaches the force flag, so this script is the only
-// way to re-tally one.
 
 async function main() {
   const proposalArg = process.argv.indexOf('--proposal');
@@ -94,9 +82,7 @@ async function main() {
     return;
   }
 
-  // Re-enter the scores-value pipeline: proposalsScoresValue only picks up
-  // cb = PENDING_COMPUTE, so an already-FINAL proposal would otherwise keep a
-  // scores_total_value derived from the old scores_by_strategy.
+  // proposalsScoresValue only selects cb = PENDING_COMPUTE.
   if (proposal.cb === CB.FINAL) proposal.cb = CB.PENDING_COMPUTE;
 
   await updateProposalScores(proposal, results, votes.length);
