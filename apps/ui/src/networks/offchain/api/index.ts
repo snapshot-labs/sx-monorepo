@@ -206,7 +206,7 @@ function formatSpace(
       // objectHash-compares this object against its own clone to decide
       // whether the form is modified. Coercing to undefined makes every space
       // with no skins row look modified the moment the page loads.
-      logo: skinSettings?.logo as string | undefined
+      logo: skinSettings?.logo
     };
   }
 
