@@ -9,14 +9,16 @@ import { getProposal, getVotes, updateProposalScores } from '../src/scores';
 //   bunx ts-node scripts/rescore-proposal.ts --proposal <id> --apply    # write
 //
 // Recomputes a proposal's results with the currently bundled snapshot.js and,
-// with --apply, writes scores/scores_by_strategy/scores_total/scores_state +
-// scores_updated back to the proposals table.
+// with --apply, writes scores/scores_by_strategy/scores_total/scores_state,
+// scores_updated, votes and cb back to the proposals table.
 //
 // This reads the votes as already stored (for shutter proposals the choices
 // must already be decrypted) and re-tallies using each vote's existing voting
 // power. It does not re-fetch voting power and does not read or modify the
-// proposal's privacy field, so it is safe to run on closed shutter proposals
-// that the normal scoring path refuses to recompute.
+// proposal's privacy field, so it is also safe on closed shutter proposals.
+// updateProposalAndVotes returns early on any proposal whose scores_state is
+// already final, before it reaches the force flag, so this script is the only
+// way to re-tally one.
 
 async function main() {
   const proposalArg = process.argv.indexOf('--proposal');
@@ -77,7 +79,6 @@ async function main() {
   console.log(`Space:      ${proposal.space}`);
   console.log(`Type:       ${proposal.type}`);
   console.log(`Votes:      ${votes.length}`);
-  console.log(`snapshot.js voting: ${proposal.type}`);
   console.log('');
   console.log('Choice                                   stored -> recomputed');
   proposal.choices.forEach((choice: string, i: number) => {
