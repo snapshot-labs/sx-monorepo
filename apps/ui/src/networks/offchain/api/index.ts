@@ -23,7 +23,6 @@ import {
 } from '@/networks/types';
 import {
   Alias,
-  Follow,
   Member,
   NetworkID,
   OffchainAdditionalRawData,
@@ -965,7 +964,7 @@ export function createApi(
           }))
         );
     },
-    loadFollows: async (userId: string): Promise<Follow[]> => {
+    loadFollows: async (userId: string) => {
       const { data } = await apollo.query({
         query: USER_FOLLOWS_QUERY,
         variables: {
@@ -976,8 +975,8 @@ export function createApi(
 
       return data.follows.map(follow => ({
         ...follow,
-        space: { ...follow.space, network: follow.network }
-      })) as unknown as Follow[];
+        space: { ...follow.space, network: follow.network as NetworkID }
+      }));
     },
     loadAlias: async (
       address: string,
