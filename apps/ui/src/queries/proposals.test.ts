@@ -118,10 +118,9 @@ describe('useProposalsSummaryQuery', () => {
 
   it('should not fetch while disabled', async () => {
     const isEnabled = ref(false);
-    const spaceId = ref('space-a.eth');
 
     const { data, fetchStatus } = withSetup(() =>
-      useProposalsSummaryQuery(ref('s'), spaceId, isEnabled)
+      useProposalsSummaryQuery(ref('s'), ref('space-a.eth'), isEnabled)
     );
 
     await nextTick();
