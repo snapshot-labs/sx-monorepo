@@ -998,7 +998,7 @@ export function createWriters(
   const handleProposalResultRevealed: evm.Writer<
     typeof SpaceAbi,
     'ProposalResultRevealed'
-  > = async ({ rawEvent, event }) => {
+  > = async ({ blockNumber, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     const spaceId = getAddress(rawEvent.address);
@@ -1033,10 +1033,31 @@ export function createWriters(
       proposal.vp_decimals
     );
 
-    // quorum = For+Abstain; support = For>Against.
-    proposal.support_achieved = forVotes > againstVotes;
-    proposal.quorum_reached =
-      forVotes + abstainVotes >= BigInt(proposal.quorum);
+    // The event's `passed` flag is strategy-specific and the indexed quorum
+    // can diverge from what the contract used (setQuorum after propose,
+    // missing metadata), so read the verdicts the contract froze at reveal.
+    const [quorumReached, supportAchieved] = await client.multicall({
+      contracts: [
+        {
+          address: rawEvent.address as `0x${string}`,
+          abi: SpaceAbi,
+          functionName: 'isQuorumReached',
+          args: [event.args.proposalId]
+        },
+        {
+          address: rawEvent.address as `0x${string}`,
+          abi: SpaceAbi,
+          functionName: 'isSupportAchieved',
+          args: [event.args.proposalId]
+        }
+      ],
+      multicallAddress: MULTICALL3_ADDRESS,
+      allowFailure: false,
+      blockNumber: BigInt(blockNumber)
+    });
+
+    proposal.quorum_reached = quorumReached;
+    proposal.support_achieved = supportAchieved;
 
     // Completed at reveal, independent of execute step.
     proposal.completed = true;

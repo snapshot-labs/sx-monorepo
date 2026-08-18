@@ -190,6 +190,44 @@ export default [
   },
   {
     type: 'function',
+    name: 'isQuorumReached',
+    inputs: [
+      {
+        name: 'proposalId',
+        type: 'uint256',
+        internalType: 'uint256'
+      }
+    ],
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+        internalType: 'bool'
+      }
+    ],
+    stateMutability: 'view'
+  },
+  {
+    type: 'function',
+    name: 'isSupportAchieved',
+    inputs: [
+      {
+        name: 'proposalId',
+        type: 'uint256',
+        internalType: 'uint256'
+      }
+    ],
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+        internalType: 'bool'
+      }
+    ],
+    stateMutability: 'view'
+  },
+  {
+    type: 'function',
     name: 'maxVotingDuration',
     inputs: [],
     outputs: [
