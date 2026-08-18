@@ -28,7 +28,11 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, getChainIdKind } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  getChainIdKind,
+  getSalt
+} from '@/helpers/utils';
 import { verifyNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
@@ -58,6 +62,7 @@ import {
   SpaceMetadata,
   SpaceMetadataDelegation,
   StrategyParsedMetadata,
+  Transaction,
   VoteType
 } from '@/types';
 import { EDITOR_APP_NAME } from '../common/constants';
@@ -132,6 +137,75 @@ export function createActions(
     };
 
     return signer;
+  };
+
+  const buildUpdateSettingsInput = async (
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ) => {
+    const pinned = await helpers.pin(
+      createErc1155Metadata(metadata, {
+        execution_strategies: executionStrategies.map(config => config.address),
+        execution_strategies_types: executionStrategies.map(
+          config => config.type
+        ),
+        execution_destinations: executionStrategies.map(
+          (_, i) => space.executors_destinations[i] ?? ''
+        )
+      })
+    );
+
+    const metadataUris = await Promise.all(
+      votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
+    );
+
+    const proposalValidationStrategyMetadataUri = await buildMetadata(
+      helpers,
+      validationStrategy
+    );
+
+    return {
+      metadataUri: `ipfs://${pinned.cid}`,
+      authenticatorsToAdd: authenticatorsToAdd.map(config => config.address),
+      authenticatorsToRemove: space.authenticators.filter(
+        (authenticator, index) => authenticatorsToRemove.includes(index)
+      ),
+      votingStrategiesToAdd: await Promise.all(
+        votingStrategiesToAdd.map(async config => ({
+          addr: config.address,
+          params: config.generateParams
+            ? (await config.generateParams(config.params))[0]
+            : '0x'
+        }))
+      ),
+      votingStrategiesToRemove: votingStrategiesToRemove.map(
+        index => space.strategies_indices[index]
+      ),
+      votingStrategyMetadataUrisToAdd: metadataUris,
+      proposalValidationStrategy: {
+        addr: validationStrategy.address,
+        params: validationStrategy.generateParams
+          ? (
+              await validationStrategy.generateParams(validationStrategy.params)
+            )[0]
+          : '0x'
+      },
+      proposalValidationStrategyMetadataUri,
+      votingDelay: votingDelay !== null ? votingDelay : undefined,
+      minVotingDuration:
+        minVotingDuration !== null ? minVotingDuration : undefined,
+      maxVotingDuration:
+        maxVotingDuration !== null ? maxVotingDuration : undefined
+    };
   };
 
   return {
@@ -927,73 +1001,71 @@ export function createActions(
       const address = await web3.getSigner().getAddress();
       const isContract = await getIsContract(address, connectorType);
 
-      const pinned = await helpers.pin(
-        createErc1155Metadata(metadata, {
-          execution_strategies: executionStrategies.map(
-            config => config.address
-          ),
-          execution_strategies_types: executionStrategies.map(
-            config => config.type
-          ),
-          execution_destinations: executionStrategies.map(
-            (_, i) => space.executors_destinations[i] ?? ''
-          )
-        })
-      );
-
-      const metadataUris = await Promise.all(
-        votingStrategiesToAdd.map(config => buildMetadata(helpers, config))
-      );
-
-      const proposalValidationStrategyMetadataUri = await buildMetadata(
-        helpers,
-        validationStrategy
+      const settings = await buildUpdateSettingsInput(
+        space,
+        metadata,
+        authenticatorsToAdd,
+        authenticatorsToRemove,
+        votingStrategiesToAdd,
+        votingStrategiesToRemove,
+        validationStrategy,
+        executionStrategies,
+        votingDelay,
+        minVotingDuration,
+        maxVotingDuration
       );
 
       return client.updateSettings(
         {
           signer: getSigner(web3),
           space: space.id,
-          settings: {
-            metadataUri: `ipfs://${pinned.cid}`,
-            authenticatorsToAdd: authenticatorsToAdd.map(
-              config => config.address
-            ),
-            authenticatorsToRemove: space.authenticators.filter(
-              (authenticator, index) => authenticatorsToRemove.includes(index)
-            ),
-            votingStrategiesToAdd: await Promise.all(
-              votingStrategiesToAdd.map(async config => ({
-                addr: config.address,
-                params: config.generateParams
-                  ? (await config.generateParams(config.params))[0]
-                  : '0x'
-              }))
-            ),
-            votingStrategiesToRemove: votingStrategiesToRemove.map(
-              index => space.strategies_indices[index]
-            ),
-            votingStrategyMetadataUrisToAdd: metadataUris,
-            proposalValidationStrategy: {
-              addr: validationStrategy.address,
-              params: validationStrategy.generateParams
-                ? (
-                    await validationStrategy.generateParams(
-                      validationStrategy.params
-                    )
-                  )[0]
-                : '0x'
-            },
-            proposalValidationStrategyMetadataUri,
-            votingDelay: votingDelay !== null ? votingDelay : undefined,
-            minVotingDuration:
-              minVotingDuration !== null ? minVotingDuration : undefined,
-            maxVotingDuration:
-              maxVotingDuration !== null ? maxVotingDuration : undefined
-          }
+          settings
         },
         { noWait: isContract && connectorType !== 'sequence' }
       );
+    },
+    getUpdateSettingsTransaction: async (
+      space: Space,
+      metadata: SpaceMetadata,
+      authenticatorsToAdd: StrategyConfig[],
+      authenticatorsToRemove: number[],
+      votingStrategiesToAdd: StrategyConfig[],
+      votingStrategiesToRemove: number[],
+      validationStrategy: StrategyConfig,
+      executionStrategies: StrategyConfig[],
+      votingDelay: number | null,
+      minVotingDuration: number | null,
+      maxVotingDuration: number | null
+    ): Promise<Transaction> => {
+      const settings = await buildUpdateSettingsInput(
+        space,
+        metadata,
+        authenticatorsToAdd,
+        authenticatorsToRemove,
+        votingStrategiesToAdd,
+        votingStrategiesToRemove,
+        validationStrategy,
+        executionStrategies,
+        votingDelay,
+        minVotingDuration,
+        maxVotingDuration
+      );
+
+      const call = client.getUpdateSettingsCall({ settings });
+
+      return {
+        _type: 'contractCall',
+        to: space.id,
+        data: call.data,
+        value: '0',
+        salt: getSalt(),
+        _form: {
+          abi: call.abi,
+          recipient: space.id,
+          method: call.method,
+          args: call.args
+        }
+      };
     },
     updateSettingsRaw: () => {
       throw new Error('Not implemented');

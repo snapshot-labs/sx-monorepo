@@ -100,6 +100,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const { getDurationFromCurrent } = useMetaStore();
   const {
     updateSettings,
+    getUpdateSettingsTransaction,
     updateSettingsRaw,
     transferOwnership,
     deleteSpace: deleteSpaceAction
@@ -681,7 +682,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));
   }
 
-  async function saveOnchain() {
+  async function getOnchainSettingsChanges() {
     if (!validationStrategy.value) {
       throw new Error('Validation strategy is missing');
     }
@@ -700,14 +701,44 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.strategies_parsed_metadata
     );
 
-    return updateSettings(
-      space.value,
-      form.value,
+    return {
       authenticatorsToAdd,
       authenticatorsToRemove,
       strategiesToAdd,
       strategiesToRemove,
-      validationStrategy.value,
+      validationStrategy: validationStrategy.value
+    };
+  }
+
+  async function saveOnchain() {
+    const changes = await getOnchainSettingsChanges();
+
+    return updateSettings(
+      space.value,
+      form.value,
+      changes.authenticatorsToAdd,
+      changes.authenticatorsToRemove,
+      changes.strategiesToAdd,
+      changes.strategiesToRemove,
+      changes.validationStrategy,
+      executionStrategies.value,
+      votingDelay.value,
+      minVotingPeriod.value,
+      maxVotingPeriod.value
+    );
+  }
+
+  async function getSettingsUpdateTransaction() {
+    const changes = await getOnchainSettingsChanges();
+
+    return getUpdateSettingsTransaction(
+      space.value,
+      form.value,
+      changes.authenticatorsToAdd,
+      changes.authenticatorsToRemove,
+      changes.strategiesToAdd,
+      changes.strategiesToRemove,
+      changes.validationStrategy,
       executionStrategies.value,
       votingDelay.value,
       minVotingPeriod.value,
@@ -1091,6 +1122,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     isPrivate,
     skinSettings,
     save,
+    getSettingsUpdateTransaction,
     saveController,
     deleteSpace,
     reset
