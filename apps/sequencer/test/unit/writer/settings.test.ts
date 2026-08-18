@@ -142,6 +142,13 @@ describe('writer/settings', () => {
         return expect(verify(inputWithLongId)).rejects.toBe('id too long');
       });
 
+      it('rejects if the space controller cannot be resolved', async () => {
+        mockGetSpaceController.mockRejectedValueOnce(new Error('rpc down'));
+        return expect(verify(input)).rejects.toBe(
+          'unable to resolve space controller'
+        );
+      });
+
       const maxStrategiesForNormalSpace =
         LIMITS['space.default.strategies_limit'];
       const maxStrategiesForTurboSpace = LIMITS['space.turbo.strategies_limit'];

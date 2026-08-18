@@ -25,9 +25,15 @@ export default async function poke(id: string): Promise<Space> {
 }
 
 async function getSpaceENS(id: string): Promise<Space> {
-  const uri = await snapshot.utils.getSpaceUri(id, DEFAULT_NETWORK, {
-    broviderUrl: BROVIDER_URL
-  });
+  let uri: string | null;
+  try {
+    uri = await snapshot.utils.getSpaceUri(id, DEFAULT_NETWORK, {
+      broviderUrl: BROVIDER_URL
+    });
+  } catch (err: any) {
+    capture(err);
+    return Promise.reject('unable to resolve space uri');
+  }
 
   if (uri) {
     if (!isValidUri(uri)) {

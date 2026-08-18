@@ -329,7 +329,7 @@ async function updateWalletConnectWhitelist(
   return true;
 }
 
-export function getSpaceController(space: string, network = NETWORK) {
+export async function getSpaceController(space: string, network = NETWORK) {
   const tld = space.split('.').slice(-1)[0];
   const tldMapping = {
     shib: {
@@ -342,7 +342,12 @@ export function getSpaceController(space: string, network = NETWORK) {
   };
   const networkId = tldMapping[tld]?.[network] ?? DEFAULT_NETWORK;
 
-  return snapshot.utils.getSpaceController(space, networkId, {
-    broviderUrl: BROVIDER_URL
-  });
+  try {
+    return await snapshot.utils.getSpaceController(space, networkId, {
+      broviderUrl: BROVIDER_URL
+    });
+  } catch (err: any) {
+    capture(err);
+    return Promise.reject('unable to resolve space controller');
+  }
 }

@@ -34,6 +34,13 @@ describe('poke', () => {
       expect(mockGetSpaceUri).toHaveBeenCalledTimes(1);
     });
 
+    it('returns an error when the TXT record cannot be resolved', () => {
+      mockGetSpaceUri.mockRejectedValueOnce(new Error('rpc down'));
+
+      expect(poke('test.eth')).rejects.toMatch('unable to resolve space uri');
+      expect(mockGetSpaceUri).toHaveBeenCalledTimes(1);
+    });
+
     it('returns an error when the TXT record is not an url', () => {
       mockGetSpaceUri.mockResolvedValueOnce('test.eth');
 
