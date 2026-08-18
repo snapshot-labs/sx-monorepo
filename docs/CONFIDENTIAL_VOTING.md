@@ -2,7 +2,7 @@
 
 Snapshot X spaces deployed with the Inco-flavored `Space.sol` master keep individual voting choices encrypted on-chain. Per-choice tallies are also encrypted _while voting is open_. After the voting period ends, anyone can reveal the final per-choice counts (against/for/abstain), which are then public and used to settle the proposal on-chain.
 
-This document describes how that flow is wired across `packages/sx.js`, `apps/api`, `apps/ui`, and `apps/mana`. The contracts live in [Inco-fhevm/snapshotx](https://github.com/Inco-fhevm/snapshotx) (branch `feat/inco-reveal-execute-split`), built against `@inco/lightning` v1.
+This document describes how that flow is wired across `packages/sx.js`, `apps/api`, `apps/ui`, and `apps/mana`. The contracts live in [0xmihirsahu/sx-evm](https://github.com/0xmihirsahu/sx-evm/tree/feat/inco-confidential-voting-poc) (branch `feat/inco-confidential-voting-poc`), built against `@inco/lightning` v1.
 
 ## TL;DR
 
@@ -14,7 +14,7 @@ A confidential space is a regular Snapshot X space with a different `Space.sol` 
 - Owner `withdraw(to, amount)` reclaims the Space's Inco fee float.
 - Same `propose`, `cancel`, `updateProposal`, `initialize` ABIs.
 
-The `confidential: true` flag on each space (per [Decision D1](#decision-d1-protocol-identifier)) tells the SDK and UI to swap to the Inco-flavored ABI and EIP-712 type. Every existing SX space stays on the legacy code path.
+Spaces deployed from the Inco master are indexed with `protocol: 'snapshot-x-inco'` (per [Decision D1](#decision-d1-protocol-identifier)), which tells the UI to swap to the Inco-flavored ABI and EIP-712 type; the sx.js clients branch on the presence of `Vote.ciphertext` instead. Every existing SX space stays on the legacy code path.
 
 ## Vote flow
 
@@ -74,7 +74,7 @@ The Inco `VoteCast(uint256, address, uint256)` and the legacy `VoteCast(uint256,
 | Event topic-0                                                  | Handler                        | Behavior                                                                                                                                                                                   |
 | -------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `VoteCast(uint256,address,uint8,uint256)`                      | `handleVoteCast`               | Updates `proposal.scores_${choice}` (legacy plaintext flow)                                                                                                                                |
-| `VoteCast(uint256,address,uint256)`                            | `handleConfidentialVoteCast`   | Skips per-choice updates; sets `space.confidential = true`; `vote.choice = 0` (sentinel)                                                                                                   |
+| `VoteCast(uint256,address,uint256)`                            | `handleConfidentialVoteCast`   | Skips per-choice updates; `vote.choice = 0` (sentinel)                                                                                                                                     |
 | `ProposalResultRevealed(uint256,uint256,uint256,uint256,bool)` | `handleProposalResultRevealed` | Writes the now-public per-choice counts and the verdict (see below); marks the tally `completed`                                                                                           |
 | `ProposalExecuted(uint256)`                                    | `handleProposalExecuted`       | For confidential spaces, settles execution (`execution_settled`, `completed`, `executed_at`) — the Vanilla executor singleton has no `ExecutionStrategy` entity, so this is set explicitly |
 
@@ -82,9 +82,9 @@ The Inco `VoteCast(uint256, address, uint256)` and the legacy `VoteCast(uint256,
 
 The schema additions are nullable + additive:
 
-- `Space.confidential: Boolean` (null/false = legacy)
 - `Proposal.quorum_reached: Boolean` (null until revealed)
 - `Proposal.support_achieved: Boolean` (null until revealed)
+- `SpaceImplementation` entity — records each space proxy's implementation address at `ProxyDeployed`; `SpaceCreated` uses it to set the existing `Space.protocol` field to `snapshot-x-inco` (Inco master) or `snapshot-x`
 
 ## SDK shape
 
