@@ -74,6 +74,12 @@ export const createNetworkHandler = (chainId: number) => {
 
   async function send(id: number, params: any, res: Response) {
     try {
+      // Confidential (Inco) votes are payable and never relayed — a crafted
+      // envelope could otherwise drain the relayer wallet via msg.value.
+      if (params.envelope?.data?.ciphertext) {
+        throw new Error('Confidential votes cannot be relayed');
+      }
+
       const { signatureData } = params.envelope;
       const { types, domain } = signatureData;
       let receipt;
