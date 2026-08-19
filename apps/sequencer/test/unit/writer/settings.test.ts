@@ -3,6 +3,11 @@ jest.mock('../../../src/helpers/spaceValidation', () => ({
   validateSpaceSettings: jest.fn()
 }));
 
+jest.mock('@snapshot-labs/snapshot-sentry', () => ({
+  capture: jest.fn()
+}));
+
+import { capture as mockCapture } from '@snapshot-labs/snapshot-sentry';
 import { verify } from '../../../src/writer/settings';
 import { spacesGetSpaceFixtures } from '../../fixtures/space';
 import input from '../../fixtures/writer-payload/space.json';
@@ -143,10 +148,13 @@ describe('writer/settings', () => {
       });
 
       it('rejects if the space controller cannot be resolved', async () => {
-        mockGetSpaceController.mockRejectedValueOnce(new Error('rpc down'));
-        return expect(verify(input)).rejects.toBe(
+        const resolutionError = new Error('rpc down');
+        mockGetSpaceController.mockRejectedValueOnce(resolutionError);
+        // an Error, not a string, so sendError classifies it as a 500
+        await expect(verify(input)).rejects.toThrow(
           'unable to resolve space controller'
         );
+        expect(mockCapture).toHaveBeenCalledWith(resolutionError);
       });
 
       const maxStrategiesForNormalSpace =

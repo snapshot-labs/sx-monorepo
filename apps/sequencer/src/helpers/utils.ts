@@ -348,6 +348,8 @@ export async function getSpaceController(space: string, network = NETWORK) {
     });
   } catch (err: any) {
     capture(err);
-    return Promise.reject('unable to resolve space controller');
+    // an Error, not a string: infrastructure failures must classify as
+    // server_error (500) in sendError, with none of the raw error's payload
+    return Promise.reject(new Error('unable to resolve space controller'));
   }
 }

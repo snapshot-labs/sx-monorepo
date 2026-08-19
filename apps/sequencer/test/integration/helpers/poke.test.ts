@@ -1,3 +1,8 @@
+jest.mock('@snapshot-labs/snapshot-sentry', () => ({
+  capture: jest.fn()
+}));
+
+import { capture as mockCapture } from '@snapshot-labs/snapshot-sentry';
 import db from '../../../src/helpers/mysql';
 import poke from '../../../src/helpers/poke';
 import { spacesSqlFixtures } from '../../fixtures/space';
@@ -34,11 +39,15 @@ describe('poke', () => {
       expect(mockGetSpaceUri).toHaveBeenCalledTimes(1);
     });
 
-    it('returns an error when the TXT record cannot be resolved', () => {
-      mockGetSpaceUri.mockRejectedValueOnce(new Error('rpc down'));
+    it('returns an error when the TXT record cannot be resolved', async () => {
+      const resolutionError = new Error('rpc down');
+      mockGetSpaceUri.mockRejectedValueOnce(resolutionError);
 
-      expect(poke('test.eth')).rejects.toMatch('unable to resolve space uri');
+      await expect(poke('test.eth')).rejects.toMatch(
+        'unable to resolve space uri'
+      );
       expect(mockGetSpaceUri).toHaveBeenCalledTimes(1);
+      expect(mockCapture).toHaveBeenCalledWith(resolutionError);
     });
 
     it('returns an error when the TXT record is not an url', () => {
