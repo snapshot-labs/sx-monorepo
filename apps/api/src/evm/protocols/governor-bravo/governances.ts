@@ -1,7 +1,7 @@
 import { GovernorBravoAuthenticator } from '@snapshot-labs/sx';
 import { NetworkID } from '../../types';
 
-export type Treasury = {
+type Treasury = {
   name: string;
   address: string;
   chainId: number;
