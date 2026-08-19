@@ -101,7 +101,9 @@ const config: KnipConfig = {
     },
     'packages/prettier-config': {},
     'packages/sx.js': {
-      ignoreBinaries: ['anvil', 'starknet-devnet']
+      ignoreBinaries: ['anvil', 'starknet-devnet'],
+      // deliberate optional peer, lazy-loaded for confidential voting
+      ignoreDependencies: ['@inco/lightning-js']
     },
     'packages/tune': {
       entry: ['src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],

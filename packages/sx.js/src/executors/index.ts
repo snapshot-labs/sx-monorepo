@@ -8,7 +8,11 @@ export function getExecutionData(
   executorAddress: string,
   input?: ExecutionInput
 ) {
-  if (type === 'SimpleQuorumVanilla') {
+  // SimpleQuorumVanilla ignores the payload onchain, but when a transactions
+  // array is provided (even an empty one) it is still avatar-encoded so the
+  // execution hash binds it. Only omitting transactions entirely yields the
+  // empty vanilla payload.
+  if (type === 'SimpleQuorumVanilla' && !input?.transactions) {
     return createVanillaExecutor().getExecutionData(executorAddress);
   }
 

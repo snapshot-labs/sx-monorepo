@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "bun build --entrypoints src/index.ts --outdir dist --target node --external @shutter-network/shutter-crypto",
+    "build": "bun build --entrypoints src/index.ts --outdir dist --target node --external @shutter-network/shutter-crypto --external @inco/lightning-js",
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "stdio": "bun src/index.ts --stdio",

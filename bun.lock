@@ -556,6 +556,12 @@
         "typescript": "^5.8.3",
         "vitest": "^3.2.4",
       },
+      "peerDependencies": {
+        "@inco/lightning-js": "^1.0.0",
+      },
+      "optionalPeers": [
+        "@inco/lightning-js",
+      ],
     },
     "packages/tune": {
       "name": "@snapshot-labs/tune",

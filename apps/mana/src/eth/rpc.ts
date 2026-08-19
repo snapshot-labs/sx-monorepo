@@ -4,6 +4,7 @@ import {
   evmApe,
   evmArbitrum,
   evmBase,
+  evmBaseSepolia,
   evmBnb,
   evmBnbt,
   evmCurtis,
@@ -45,7 +46,8 @@ const NETWORKS = new Map<number, EvmNetworkConfig>([
   [1, evmMainnet],
   [33139, evmApe],
   [33111, evmCurtis],
-  [11155111, evmSepolia]
+  [11155111, evmSepolia],
+  [84532, evmBaseSepolia]
 ]);
 
 export const NETWORK_IDS = new Map<number, string>(
@@ -72,6 +74,12 @@ export const createNetworkHandler = (chainId: number) => {
 
   async function send(id: number, params: any, res: Response) {
     try {
+      // Confidential (Inco) votes are payable and never relayed — a crafted
+      // envelope could otherwise drain the relayer wallet via msg.value.
+      if (params.envelope?.data?.ciphertext) {
+        throw new Error('Confidential votes cannot be relayed');
+      }
+
       const { signatureData } = params.envelope;
       const { types, domain } = signatureData;
       let receipt;
