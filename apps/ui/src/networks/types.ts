@@ -10,7 +10,6 @@ import {
   ChainId,
   Choice,
   DelegationType,
-  Follow,
   NetworkID,
   Privacy,
   Proposal,
@@ -343,7 +342,9 @@ export type NetworkApi = {
       | 'proposal_count-asc',
     user?: string
   ): Promise<UserActivity[]>;
-  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
+  loadFollows(
+    userId: string
+  ): Promise<{ space: Pick<Space, 'id' | 'network'> }[]>;
   loadAlias(
     address: string,
     alias: string,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getUserFacingErrorMessage, imageUpload } from '@/helpers/utils';
 
-const model = defineModel<string>();
+const model = defineModel<string | null>();
 
 withDefaults(
   defineProps<{

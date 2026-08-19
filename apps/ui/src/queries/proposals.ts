@@ -198,16 +198,18 @@ export function useProposalsQuery(
 
 export function proposalsSummaryQueryFn(
   queryClient: QueryClient,
-  networkId: NetworkID,
-  spaceId: string
+  networkId: MaybeRefOrGetter<NetworkID>,
+  spaceId: MaybeRefOrGetter<string>
 ) {
   return async () => {
-    const proposals = await getProposals([spaceId], networkId, {
+    const networkIdValue = toValue(networkId);
+
+    const proposals = await getProposals([toValue(spaceId)], networkIdValue, {
       skip: 0,
       limit: PROPOSALS_SUMMARY_LIMIT
     });
 
-    setProposalsDetails(queryClient, networkId, proposals);
+    setProposalsDetails(queryClient, networkIdValue, proposals);
 
     return proposals;
   };
@@ -222,11 +224,7 @@ export function useProposalsSummaryQuery(
 
   return useQuery({
     queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
-    queryFn: proposalsSummaryQueryFn(
-      queryClient,
-      toValue(networkId),
-      toValue(spaceId)
-    ),
+    queryFn: proposalsSummaryQueryFn(queryClient, networkId, spaceId),
     enabled: () => toValue(enabled)
   });
 }
