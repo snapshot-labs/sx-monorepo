@@ -46,6 +46,12 @@ export function jsonParse(input, fallback?) {
   }
 }
 
+export class ServerError extends Error {
+  toJSON() {
+    return this.message;
+  }
+}
+
 export function sendError(res: Response, description: any, status?: number) {
   const statusCode = status ?? (typeof description === 'string' ? 400 : 500);
   return res.status(statusCode).json({
@@ -348,8 +354,8 @@ export async function getSpaceController(space: string, network = NETWORK) {
     });
   } catch (err: any) {
     capture(err);
-    // an Error, not a string: infrastructure failures must classify as
-    // server_error (500) in sendError, with none of the raw error's payload
-    return Promise.reject(new Error('unable to resolve space controller'));
+    return Promise.reject(
+      new ServerError('unable to resolve space controller')
+    );
   }
 }

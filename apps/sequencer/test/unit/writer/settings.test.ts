@@ -150,8 +150,12 @@ describe('writer/settings', () => {
       it('rejects if the space controller cannot be resolved', async () => {
         const resolutionError = new Error('rpc down');
         mockGetSpaceController.mockRejectedValueOnce(resolutionError);
-        // an Error, not a string, so sendError classifies it as a 500
-        await expect(verify(input)).rejects.toThrow(
+        const rejection = await verify(input).then(
+          () => Promise.reject(new Error('expected rejection')),
+          err => err
+        );
+        expect(rejection).toBeInstanceOf(Error);
+        expect(JSON.parse(JSON.stringify(rejection))).toBe(
           'unable to resolve space controller'
         );
         expect(mockCapture).toHaveBeenCalledWith(resolutionError);
