@@ -27,7 +27,10 @@ import { getSwapLink } from '@/helpers/link';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
-import { convertToMetaTransactions } from '@/helpers/transactions';
+import {
+  convertToMetaTransactions,
+  getContractCallFormArgs
+} from '@/helpers/transactions';
 import {
   createErc1155Metadata,
   getChainIdKind,
@@ -1063,7 +1066,7 @@ export function createActions(
           abi: call.abi,
           recipient: space.id,
           method: call.method,
-          args: call.args
+          args: getContractCallFormArgs(call)
         }
       };
     },
