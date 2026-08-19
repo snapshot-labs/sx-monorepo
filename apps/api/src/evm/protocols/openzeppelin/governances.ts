@@ -143,7 +143,7 @@ export const GOVERNANCES: Partial<
       address: '0x03e8f708e9C85EDCEaa6AD7Cd06824CeB82A7E68',
       authenticators: [
         'OpenZeppelinAuthenticator',
-        'OpenZeppelinAuthenticatorSignatureV5'
+        'OpenZeppelinAuthenticatorSignatureV4'
       ],
       quorumType: 'for_only',
       startBlock: 204249812
