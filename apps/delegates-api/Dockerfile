@@ -13,6 +13,8 @@ COPY apps/mana/package.json apps/mana/
 COPY apps/mcp/package.json apps/mcp/
 COPY apps/sequencer/package.json apps/sequencer/
 COPY apps/ui/package.json apps/ui/
+COPY contracts/sx-evm/package.json contracts/sx-evm/
+COPY contracts/sx-starknet/package.json contracts/sx-starknet/
 COPY packages/eslint-config/package.json packages/eslint-config/
 COPY packages/eslint-config-vue/package.json packages/eslint-config-vue/
 COPY packages/lock/package.json packages/lock/
