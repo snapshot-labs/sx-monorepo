@@ -22,7 +22,6 @@ import {
   SpacesFilter
 } from '@/networks/types';
 import {
-  Follow,
   NetworkID,
   Proposal,
   ProposalExecution,
@@ -916,7 +915,7 @@ export function createApi(
       }));
     },
     loadFollows: async () => {
-      return [] as Follow[];
+      return [];
     },
     loadAlias: async () => {
       return null;

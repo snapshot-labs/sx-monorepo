@@ -81,6 +81,18 @@ const config: KnipConfig = {
       ],
       ignoreBinaries: ['forge']
     },
+    // Same as sx-evm: these are resolved through foundry remappings. The
+    // scripts and tests are only ever run through the test:* shell scripts.
+    'contracts/sx-starknet': {
+      entry: ['scripts/**/*.ts', 'tests/**/*.ts'],
+      ignoreDependencies: [
+        '@gnosis.pm/safe-contracts',
+        '@gnosis.pm/zodiac',
+        '@openzeppelin/contracts',
+        '@openzeppelin/contracts-upgradeable',
+        'forge-std'
+      ]
+    },
     'packages/eslint-config': {},
     'packages/eslint-config-vue': {},
     'packages/lock': {
