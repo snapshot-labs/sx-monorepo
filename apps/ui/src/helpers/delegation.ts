@@ -1,7 +1,22 @@
 import { enabledNetworks, evmNetworks } from '@/networks';
 import { METADATA } from '@/networks/starknet/metadata';
 import { ChainId, NetworkID, SpaceMetadataDelegation } from '@/types';
+import { DELEGATE_REGISTRY_STRATEGIES } from './constants';
 import { getChainIdKind } from './utils';
+
+// Chain ids from https://github.com/snapshot-labs/snapshot-subgraph
+export const DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS = [
+  1, 42161, 8453, 84532, 81457, 56, 250, 100, 59144, 5000, 137, 10, 146,
+  11155111
+];
+
+type StrategyParams = {
+  network?: string | number | null;
+  params?: {
+    network?: string | number | null;
+    strategies?: StrategyParams[];
+  };
+};
 
 export function getDelegationNetwork(chainId: ChainId) {
   // NOTE: any EVM network can be used for delegation on EVMs (it will switch chainId as needed).
@@ -35,4 +50,30 @@ export function isValidDelegation(
     delegation.apiType &&
     delegation.contractAddress
   );
+}
+
+function getStrategyNetworkIds(params: StrategyParams | undefined) {
+  return [
+    params?.network,
+    ...(params?.params?.strategies?.flatMap(strategy => [
+      strategy.network,
+      strategy.params?.network
+    ]) || [])
+  ];
+}
+
+export function getDelegateRegistryChainIds(
+  strategies: string[],
+  strategiesParams: StrategyParams[]
+): number[] {
+  const chainIds = strategiesParams
+    .filter((_, index) =>
+      DELEGATE_REGISTRY_STRATEGIES.includes(strategies[index])
+    )
+    .flatMap(getStrategyNetworkIds)
+    .filter(Boolean)
+    .map(Number)
+    .filter(chainId => DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId));
+
+  return Array.from(new Set(chainIds));
 }
