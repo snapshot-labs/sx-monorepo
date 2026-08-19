@@ -58,6 +58,10 @@ export type Vote = {
   proposal: number;
   choice: Choice;
   metadataUri: string;
+  /** Confidential (Inco) encrypted vote; from encryptChoice. */
+  ciphertext?: string;
+  /** Confidential (Inco) per-vote fee forwarded as msg.value. */
+  fee?: string | bigint;
 };
 
 export type Call = {
@@ -125,11 +129,20 @@ export type EIP712UpdateProposalMessage = {
   salt: number;
 };
 
-export type EIP712VoteMessage = {
-  space: string;
-  voter: string;
-  proposalId: number;
-  choice: number;
-  userVotingStrategies: IndexedConfig[];
-  voteMetadataURI: string;
-};
+export type EIP712VoteMessage =
+  | {
+      space: string;
+      voter: string;
+      proposalId: number;
+      choice: number;
+      userVotingStrategies: IndexedConfig[];
+      voteMetadataURI: string;
+    }
+  | {
+      space: string;
+      voter: string;
+      proposalId: number;
+      ciphertext: string;
+      userVotingStrategies: IndexedConfig[];
+      voteMetadataURI: string;
+    };

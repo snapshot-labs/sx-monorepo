@@ -198,7 +198,7 @@ export function createWriters(
 
     space = new Space(contractAddress, config.indexerName);
     space.protocol = '@openzeppelin/governor';
-    space.verified = true;
+    space.verified = getGovernanceInfo(contractAddress).verified ?? false;
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: contractAddress

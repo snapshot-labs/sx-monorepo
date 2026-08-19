@@ -31,9 +31,11 @@ describe('createStandardConfig', () => {
         ApeGas: undefined
       },
       ProposalValidations: {
+        Vanilla: undefined,
         VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
       },
       ExecutionStrategies: {
+        IncoSimpleQuorumVanilla: undefined,
         SimpleQuorumAvatar: '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42',
         SimpleQuorumTimelock: '0xf2A1C2f2098161af98b2Cc7E382AB7F3ba86Ebc4'
       }
@@ -43,11 +45,12 @@ describe('createStandardConfig', () => {
   it('should apply overrides and disable nulled slots', () => {
     const config = createStandardConfig(84532, {
       blockTime: 2,
-      proxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
-      masterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
+      incoProxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+      incoMasterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
       authenticators: {
         EthSig: '0x69A9c5626860f53f9b4fD5F2936d74eC93417677',
-        EthSigV2: null
+        EthSigV2: null,
+        IncoEthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
       },
       strategies: {
         Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673',
@@ -56,18 +59,26 @@ describe('createStandardConfig', () => {
         Whitelist: null
       },
       proposalValidations: {
+        Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6',
         VotingPower: null
       },
       executionStrategies: {
+        IncoSimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
         SimpleQuorumAvatar: null,
         SimpleQuorumTimelock: null
       }
     });
 
     expect(config.Meta.proxyFactory).toBe(
-      '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494'
+      '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c'
     );
     expect(config.Meta.masterSpace).toBe(
+      '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
+    );
+    expect(config.Meta.incoProxyFactory).toBe(
+      '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494'
+    );
+    expect(config.Meta.incoMasterSpace).toBe(
       '0x3F31D742D3158b07434A041e26B47e9EB94e010C'
     );
     expect(config.Authenticators.EthSig).toBe(
@@ -77,13 +88,22 @@ describe('createStandardConfig', () => {
     expect(config.Authenticators.EthTx).toBe(
       '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
     );
+    expect(config.Authenticators.IncoEthTx).toBe(
+      '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
+    );
     expect(config.Strategies.Vanilla).toBe(
       '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673'
     );
     expect(config.Strategies.Comp).toBeUndefined();
     expect(config.Strategies.OZVotes).toBeUndefined();
     expect(config.Strategies.Whitelist).toBeUndefined();
+    expect(config.ProposalValidations.Vanilla).toBe(
+      '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
+    );
     expect(config.ProposalValidations.VotingPower).toBeUndefined();
+    expect(config.ExecutionStrategies.IncoSimpleQuorumVanilla).toBe(
+      '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
+    );
     expect(config.ExecutionStrategies.SimpleQuorumAvatar).toBeUndefined();
     expect(config.ExecutionStrategies.SimpleQuorumTimelock).toBeUndefined();
   });
