@@ -64,7 +64,7 @@
         "@headlessui/vue": "^1.7.23",
         "@snapshot-labs/lock": "0.3.2",
         "@snapshot-labs/pineapple": "^1.2.1",
-        "@snapshot-labs/snapshot.js": "^0.15.1",
+        "@snapshot-labs/snapshot.js": "^0.16.0",
         "@snapshot-labs/tune": "0.1.0",
         "@tanstack/vue-query": "^5.64.2",
         "@vueuse/core": "^10.4.1",
@@ -174,7 +174,7 @@
         "@snapshot-labs/keycard": "^0.5.1",
         "@snapshot-labs/snapshot-metrics": "^2.0.0",
         "@snapshot-labs/snapshot-sentry": "^3.1.0",
-        "@snapshot-labs/snapshot.js": "^0.15.1",
+        "@snapshot-labs/snapshot.js": "^0.16.0",
         "bluebird": "^3.7.2",
         "connection-string": "^1.0.1",
         "cors": "^2.8.5",
@@ -278,7 +278,7 @@
         "@snapshot-labs/pineapple": "^1.2.1",
         "@snapshot-labs/snapshot-metrics": "^2.0.0",
         "@snapshot-labs/snapshot-sentry": "^3.1.0",
-        "@snapshot-labs/snapshot.js": "^0.15.1",
+        "@snapshot-labs/snapshot.js": "^0.16.0",
         "ajv": "8.11.0",
         "bluebird": "^3.7.2",
         "connection-string": "^1.0.1",
@@ -333,7 +333,7 @@
         "@snapshot-labs/highlight": "^0.1.0-beta.2",
         "@snapshot-labs/lock": "0.3.2",
         "@snapshot-labs/pineapple": "^1.2.1",
-        "@snapshot-labs/snapshot.js": "^0.15.1",
+        "@snapshot-labs/snapshot.js": "^0.16.0",
         "@snapshot-labs/sx": "^0.1.11",
         "@snapshot-labs/tune": "0.1.0",
         "@tanstack/vue-query": "^5.64.2",
@@ -1896,7 +1896,7 @@
 
     "@snapshot-labs/snapshot-sentry": ["@snapshot-labs/snapshot-sentry@3.1.0", "", { "dependencies": { "@sentry/node": "^10.52.0" } }, "sha512-MIIQyW0GZisXa93JvDWFdMO0Ycu9JXBH0P3ca0qJ7HhbxfNrzqLOr1dzhKdhXT0e+sTWO7UCxdeQTGF3dV0l7w=="],
 
-    "@snapshot-labs/snapshot.js": ["@snapshot-labs/snapshot.js@0.15.1", "", { "dependencies": { "@ethersproject/abi": "^5.6.4", "@ethersproject/address": "^5.6.1", "@ethersproject/bignumber": "^5.7.0", "@ethersproject/bytes": "^5.6.1", "@ethersproject/contracts": "^5.6.2", "@ethersproject/hash": "^5.7.0", "@ethersproject/providers": "^5.6.8", "@ethersproject/units": "^5.7.0", "@ethersproject/wallet": "^5.6.2", "ajv": "8.11.0", "ajv-errors": "^3.0.0", "ajv-formats": "^2.1.1", "cross-fetch": "^3.1.6", "json-to-graphql-query": "^2.2.4", "lodash.set": "^4.3.2", "starknet": "^6.11.0", "viem": "^2.55.11" } }, "sha512-VICLBMgbz5w70w/81SOVEK+R8GbPAEQfWU3nyoquvRTyp6vQlaJ3+MijHJ5nFg40u8H21OltpBuIaE5H9q1gtw=="],
+    "@snapshot-labs/snapshot.js": ["@snapshot-labs/snapshot.js@0.16.0", "", { "dependencies": { "@ethersproject/abi": "^5.6.4", "@ethersproject/address": "^5.6.1", "@ethersproject/bignumber": "^5.7.0", "@ethersproject/bytes": "^5.6.1", "@ethersproject/contracts": "^5.6.2", "@ethersproject/hash": "^5.7.0", "@ethersproject/providers": "^5.6.8", "@ethersproject/units": "^5.7.0", "@ethersproject/wallet": "^5.6.2", "ajv": "8.11.0", "ajv-errors": "^3.0.0", "ajv-formats": "^2.1.1", "cross-fetch": "^3.1.6", "json-to-graphql-query": "^2.2.4", "lodash.set": "^4.3.2", "starknet": "^6.21.0", "viem": "^2.55.11" } }, "sha512-Ml2rMEQeYHADfK+rB1CcHB8OXpUBquQO8Ti7hPYBVaoI+AxlQIrS/0iQASY4LrR4xiu7nKL+OzU1WMWduc7DfA=="],
 
     "@snapshot-labs/sx": ["@snapshot-labs/sx@workspace:packages/sx.js"],
 
