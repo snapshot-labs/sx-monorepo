@@ -140,9 +140,9 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       limit: 18
     },
     // Confidential voting on Base Sepolia; off unless basesep enabled.
-    incoXsnapshotx: {
-      key: 'incoXsnapshotx',
-      label: 'Inco × Snapshot X',
+    'snapshot-x-inco': {
+      key: 'snapshot-x-inco',
+      label: 'Snapshot X × Inco',
       apiNetwork: 'basesep',
       networks: ['basesep'],
       limit: 18,
