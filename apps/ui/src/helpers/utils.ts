@@ -1,5 +1,5 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { FunctionFragment } from '@ethersproject/abi';
+import { FormatTypes, FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { namehash } from '@ethersproject/hash';
 import { upload as pin } from '@snapshot-labs/pineapple';
@@ -313,7 +313,11 @@ export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
         definition.properties[inputName].chainId = chainId;
       }
     }
-    if (input.type.endsWith('[]')) {
+    if (input.type.includes('tuple')) {
+      definition.properties[inputName].format = 'long';
+      definition.properties[inputName].abiType = input.format(FormatTypes.full);
+      definition.properties[inputName].examples = ['{ "key": "value" }'];
+    } else if (input.type.endsWith('[]')) {
       definition.properties[inputName].format = input.type;
       definition.properties[inputName].examples = ['0x0, 0x1'];
     }
