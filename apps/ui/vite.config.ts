@@ -83,7 +83,9 @@ export default defineConfig({
       stream: require.resolve('stream-browserify'),
       events: require.resolve('events'),
       util: require.resolve('util'),
-      buffer: require.resolve('buffer')
+      buffer: require.resolve('buffer'),
+      // Browser shim for Inco SDK's Node crypto.
+      crypto: require.resolve('crypto-browserify')
     },
     dedupe: ['@popperjs/core']
   }

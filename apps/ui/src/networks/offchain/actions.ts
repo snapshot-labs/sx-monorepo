@@ -270,6 +270,9 @@ export function createActions(
     ): Promise<any> {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
+      const privacy: 'shutter' | 'none' =
+        proposal.privacy === 'shutter' ? 'shutter' : 'none';
+
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
@@ -278,7 +281,7 @@ export function createActions(
         authenticator: '',
         strategies: [],
         metadataUri: '',
-        privacy: proposal.privacy,
+        privacy,
         reason,
         app: app || EDITOR_APP_NAME,
         from: account

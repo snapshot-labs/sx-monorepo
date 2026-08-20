@@ -154,6 +154,29 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
+  // Revealed confidential proposal: 'passed' or 'rejected'.
+  if (
+    proposal.quorum_reached !== null &&
+    proposal.quorum_reached !== undefined &&
+    proposal.support_achieved !== null &&
+    proposal.support_achieved !== undefined
+  ) {
+    return proposal.quorum_reached && proposal.support_achieved
+      ? 'passed'
+      : 'rejected';
+  }
+
+  // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
+  if (proposal.space?.protocol === 'snapshot-x-inco') {
+    if (Number(proposal.start_block_number ?? proposal.start) > current) {
+      return 'pending';
+    }
+    if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
+      return 'closed';
+    }
+    return 'active';
+  }
+
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -451,15 +474,18 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['EthRelayer'].includes(
-      proposal.execution_strategy_type
-    )
-      ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
-      : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
+    // Inco's requestReveal is gated on maxEndBlockNumber onchain.
+    has_execution_window_opened:
+      ['EthRelayer'].includes(proposal.execution_strategy_type) ||
+      proposal.space.protocol === 'snapshot-x-inco'
+        ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
+        : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    quorum_reached: proposal.quorum_reached ?? null,
+    support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
-    privacy: 'none',
+    privacy: proposal.space.protocol === 'snapshot-x-inco' ? 'inco' : 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,

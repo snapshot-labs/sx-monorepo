@@ -109,6 +109,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'basesep',
       'mnt',
       'bnb',
       'bnbt',
@@ -117,7 +118,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, helpers, chainId),
+    actions: createActions(provider, helpers, networkId),
     api,
     constants,
     helpers

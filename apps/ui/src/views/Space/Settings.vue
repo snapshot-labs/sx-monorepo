@@ -8,6 +8,7 @@ import {
 } from '@/helpers/constants';
 import { compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { filterStrategiesByProtocol } from '@/networks/common/helpers';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -175,6 +176,12 @@ const activeTab: Ref<Tab['id']> = computed(() => {
   return 'profile';
 });
 const network = computed(() => getNetwork(props.space.network));
+const availableAuthenticators = computed(() =>
+  filterStrategiesByProtocol(
+    network.value.constants.EDITOR_AUTHENTICATORS,
+    props.space.protocol
+  )
+);
 
 const selfGovernedExecution = computed(() => {
   if (!evmNetworks.includes(props.space.network)) return null;
@@ -555,7 +562,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-model="authenticators"
           unique
           :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+          :available-strategies="availableAuthenticators"
           title="Authenticators"
           description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
           :space-id="space.id"

@@ -645,7 +645,10 @@ export function useSpaceSettings(space: Ref<Space>) {
         type: voteType.value === 'any' ? '' : voteType.value,
         quorum: Number(quorum.value),
         quorumType: quorumType.value,
-        privacy: privacy.value === 'none' ? '' : privacy.value,
+        privacy:
+          privacy.value === 'none' || privacy.value === 'inco'
+            ? ''
+            : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
       validation:
