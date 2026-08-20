@@ -1,7 +1,12 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
-import { clone, compareAddresses, omit } from '@/helpers/utils';
+import {
+  clone,
+  compareAddresses,
+  getUserFacingErrorMessage,
+  omit
+} from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 import {
@@ -107,6 +112,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   } = useActions();
   const { isWhiteLabel } = useWhiteLabel();
   const { setSkin } = useSkin();
+  const uiStore = useUiStore();
 
   const loading = ref(true);
   const isModifiedEvaluating = ref(false);
@@ -683,31 +689,39 @@ export function useSpaceSettings(space: Ref<Space>) {
   }
 
   async function getOnchainSettingsChanges() {
-    if (!validationStrategy.value) {
-      throw new Error('Validation strategy is missing');
+    try {
+      if (!validationStrategy.value) {
+        throw new Error('Validation strategy is missing');
+      }
+
+      const [authenticatorsToAdd, authenticatorsToRemove] =
+        await processChanges(
+          authenticators.value,
+          space.value.authenticators,
+          [],
+          []
+        );
+
+      const [strategiesToAdd, strategiesToRemove] = await processChanges(
+        votingStrategies.value,
+        space.value.strategies,
+        space.value.strategies_params,
+        space.value.strategies_parsed_metadata
+      );
+
+      return {
+        authenticatorsToAdd,
+        authenticatorsToRemove,
+        strategiesToAdd,
+        strategiesToRemove,
+        validationStrategy: validationStrategy.value
+      };
+    } catch (err) {
+      console.error(err);
+      uiStore.addNotification('error', getUserFacingErrorMessage(err));
+
+      throw err;
     }
-
-    const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
-      authenticators.value,
-      space.value.authenticators,
-      [],
-      []
-    );
-
-    const [strategiesToAdd, strategiesToRemove] = await processChanges(
-      votingStrategies.value,
-      space.value.strategies,
-      space.value.strategies_params,
-      space.value.strategies_parsed_metadata
-    );
-
-    return {
-      authenticatorsToAdd,
-      authenticatorsToRemove,
-      strategiesToAdd,
-      strategiesToRemove,
-      validationStrategy: validationStrategy.value
-    };
   }
 
   async function saveOnchain() {
