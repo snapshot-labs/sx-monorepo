@@ -462,5 +462,29 @@ describe('utils', () => {
         type: 'object'
       });
     });
+
+    it('should use JSON input for tuples', () => {
+      const iface = new Interface([
+        'function swap((uint256 amountIn, address[] path) trade, uint256 deadline)'
+      ]);
+
+      const definition = abiToDefinition(iface.getFunction('swap'), 1);
+
+      expect(definition.properties).toEqual({
+        trade: {
+          abiType: 'tuple(uint256 amountIn, address[] path) trade',
+          examples: ['{ "key": "value" }'],
+          format: 'long',
+          title: 'trade (tuple)',
+          type: 'string'
+        },
+        deadline: {
+          examples: ['0'],
+          format: 'uint256',
+          title: 'deadline (uint256)',
+          type: 'string'
+        }
+      });
+    });
   });
 });

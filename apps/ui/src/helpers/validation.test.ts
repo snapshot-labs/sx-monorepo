@@ -184,3 +184,45 @@ describe('ens-or-address', () => {
     });
   });
 });
+
+describe('abiType', () => {
+  const schema = {
+    type: 'object',
+    properties: {
+      trade: {
+        type: 'string',
+        abiType: 'tuple(uint256 amountIn, address[] path) trade'
+      }
+    }
+  };
+  const validator = getValidator(schema);
+
+  it('should accept a JSON value matching the tuple', () => {
+    const result = validator.validate({
+      trade: JSON.stringify({
+        amountIn: '1',
+        path: ['0x395ed61716b48dc904140b515e9f682e33330154']
+      })
+    });
+
+    expect(result).toEqual({});
+  });
+
+  it('should reject a JSON value with missing components', () => {
+    const result = validator.validate({
+      trade: JSON.stringify({ amountIn: '1' })
+    });
+
+    expect(result).toEqual({
+      trade: 'Must be a JSON value matching the parameter type.'
+    });
+  });
+
+  it('should reject a value that is not JSON', () => {
+    const result = validator.validate({ trade: 'not-json' });
+
+    expect(result).toEqual({
+      trade: 'Must be a JSON value matching the parameter type.'
+    });
+  });
+});

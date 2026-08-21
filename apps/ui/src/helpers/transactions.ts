@@ -119,6 +119,32 @@ export async function createSendNftTransaction({
   };
 }
 
+export function getContractCallFormArgs({
+  abi,
+  method,
+  args
+}: {
+  abi: any[];
+  method: string;
+  args: Record<string, any>;
+}): Record<string, string> {
+  const methodAbi = new Interface(abi).getFunction(method);
+
+  return Object.fromEntries(
+    methodAbi.inputs.map(input => {
+      const value = args[input.name];
+
+      if (input.type.includes('tuple')) {
+        return [input.name, JSON.stringify(value, null, 2)];
+      }
+
+      if (input.type.endsWith('[]')) return [input.name, value.join(', ')];
+
+      return [input.name, String(value)];
+    })
+  );
+}
+
 export async function createContractCallTransaction({
   form
 }): Promise<ContractCallTransaction> {
@@ -140,7 +166,9 @@ export async function createContractCallTransaction({
 
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
-        if (input.type === 'address') {
+        if (input.type.includes('tuple')) {
+          args[i] = JSON.parse(args[i]);
+        } else if (input.type === 'address') {
           const resolved = await resolver.resolveName(args[i]);
           if (resolved?.address) args[i] = resolved.address;
         } else if (input.type.endsWith('[]')) {

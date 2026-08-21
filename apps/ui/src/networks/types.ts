@@ -283,6 +283,19 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     minVotingDuration: number | null,
     maxVotingDuration: number | null
   );
+  getUpdateSettingsTransaction(
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ): Promise<Transaction>;
   delegate(
     web3: Web3Provider,
     space: Space,
