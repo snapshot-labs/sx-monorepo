@@ -867,6 +867,9 @@ export function createActions(
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
     },
+    getUpdateSettingsTransaction: () => {
+      throw new Error('Not implemented');
+    },
     createSpaceRaw: () => {
       throw new Error('Not implemented');
     },

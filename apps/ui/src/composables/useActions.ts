@@ -611,6 +611,42 @@ export function useActions() {
     );
   }
 
+  async function getUpdateSettingsTransaction(
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ) {
+    const network = getReadWriteNetwork(space.network);
+
+    return network.actions.getUpdateSettingsTransaction(
+      space,
+      metadata,
+      authenticatorsToAdd,
+      authenticatorsToRemove,
+      votingStrategiesToAdd,
+      votingStrategiesToRemove,
+      validationStrategy,
+      executionStrategies,
+      votingDelay !== null
+        ? getCurrentFromDuration(space.network, votingDelay)
+        : null,
+      minVotingDuration !== null
+        ? getCurrentFromDuration(space.network, minVotingDuration)
+        : null,
+      maxVotingDuration !== null
+        ? getCurrentFromDuration(space.network, maxVotingDuration)
+        : null
+    );
+  }
+
   async function updateSettingsRaw(space: Space, settings: string) {
     if (!auth.value) {
       await forceLogin();
@@ -808,6 +844,7 @@ export function useActions() {
     vetoProposal: wrapWithErrors(vetoProposal),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
+    getUpdateSettingsTransaction: wrapWithErrors(getUpdateSettingsTransaction),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),

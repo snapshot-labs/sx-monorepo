@@ -1,4 +1,4 @@
-import { AbiCoder, Interface } from '@ethersproject/abi';
+import { AbiCoder, FormatTypes, Interface } from '@ethersproject/abi';
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/solidity';
@@ -625,6 +625,41 @@ export class EthereumTx {
     return spaceContract.getProposalStatus(proposal);
   }
 
+  getUpdateSettingsPayload(settings: UpdateSettingsInput) {
+    return {
+      minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
+      maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
+      votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
+      metadataURI: settings.metadataUri ?? NO_UPDATE_STRING,
+      daoURI: settings.daoUri ?? NO_UPDATE_STRING,
+      proposalValidationStrategy: settings.proposalValidationStrategy ?? {
+        addr: NO_UPDATE_ADDRESS,
+        params: '0x00'
+      },
+      proposalValidationStrategyMetadataURI:
+        settings.proposalValidationStrategyMetadataUri ?? '',
+      authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
+      authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
+      votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
+      votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
+      votingStrategyMetadataURIsToAdd:
+        settings.votingStrategyMetadataUrisToAdd ?? []
+    };
+  }
+
+  getUpdateSettingsCall({ settings }: { settings: UpdateSettingsInput }) {
+    const spaceInterface = new Interface(SpaceAbi);
+    const updateSettingsFunction = spaceInterface.getFunction('updateSettings');
+    const payload = this.getUpdateSettingsPayload(settings);
+
+    return {
+      abi: [JSON.parse(updateSettingsFunction.format(FormatTypes.json))],
+      method: updateSettingsFunction.format(),
+      args: { [updateSettingsFunction.inputs[0]?.name ?? 'input']: payload },
+      data: spaceInterface.encodeFunctionData(updateSettingsFunction, [payload])
+    };
+  }
+
   async updateSettings(
     {
       signer,
@@ -639,25 +674,7 @@ export class EthereumTx {
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
     const promise = spaceContract.updateSettings(
-      {
-        minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
-        maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
-        votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
-        metadataURI: settings.metadataUri ?? NO_UPDATE_STRING,
-        daoURI: settings.daoUri ?? NO_UPDATE_STRING,
-        proposalValidationStrategy: settings.proposalValidationStrategy ?? {
-          addr: NO_UPDATE_ADDRESS,
-          params: '0x00'
-        },
-        proposalValidationStrategyMetadataURI:
-          settings.proposalValidationStrategyMetadataUri ?? '',
-        authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
-        authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
-        votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
-        votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
-        votingStrategyMetadataURIsToAdd:
-          settings.votingStrategyMetadataUrisToAdd ?? []
-      },
+      this.getUpdateSettingsPayload(settings),
       this.defaultTransactionOverrides
     );
 
