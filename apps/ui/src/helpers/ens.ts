@@ -12,8 +12,6 @@ import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
 
-type DomainType = 'ens' | 'tld' | 'other-tld' | 'subdomain';
-
 type ENSContracts = {
   registry: string;
   registryAbi: string[];
@@ -57,14 +55,8 @@ const RESOLVER_ERROR = '0x95c0c752';
 const HTTP_ERROR = '0x01800152';
 const NOT_IMPLEMENTED = '0xd6234725';
 
-function getDomainType(domain: string): DomainType {
-  const isEns = domain.endsWith('.eth');
-  const tokens = domain.split('.');
-
-  if (tokens.length === 1) return 'tld';
-  else if (tokens.length === 2 && !isEns) return 'other-tld';
-  else if (tokens.length > 2) return 'subdomain';
-  return 'ens';
+function isDNSDomain(name: string): boolean {
+  return !name.endsWith('.eth') && name.split('.').length === 2;
 }
 
 // not @ethersproject/hash's dnsEncode: that rejects labels over 63 bytes,
@@ -88,9 +80,9 @@ function revertData(err: any): string | null {
 
 // reverts that mean "no record"; anything else (gateway 5xx, RPC failure)
 // must throw, since falling through to the name owner may show the wrong
-// controller. Scoped by name class: a resolver-level error is how DNS
-// domains answer any read, so for other-tld names it is a no-record answer
-function isNoRecordRevert(domainType: DomainType, err: any): boolean {
+// controller. A resolver-level error is how DNS domains answer any read,
+// so for those names it is a no-record answer
+function isNoRecordRevert(name: string, err: any): boolean {
   const data = revertData(err);
   if (!data) return false;
 
@@ -106,7 +98,7 @@ function isNoRecordRevert(domainType: DomainType, err: any): boolean {
 
   try {
     if (selector === RESOLVER_ERROR) {
-      if (domainType === 'other-tld') return true;
+      if (isDNSDomain(name)) return true;
 
       const [inner] = defaultAbiCoder.decode(['bytes'], `0x${data.slice(10)}`);
       return inner.slice(0, 10) === NOT_IMPLEMENTED;
@@ -184,7 +176,7 @@ async function urResolve(
 
     return RESOLVER_PROFILE.decodeFunctionResult(profile, result)[0];
   } catch (err: any) {
-    if (isNoRecordRevert(getDomainType(name), err)) return null;
+    if (isNoRecordRevert(name, err)) return null;
     throw err;
   }
 }
