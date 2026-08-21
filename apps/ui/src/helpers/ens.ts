@@ -40,12 +40,8 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
-// see https://docs.ens.domains/resolvers/universal — an upgradable proxy
-// owned by the ENS DAO, so the address is stable across the ENSv2 upgrade
-const UNIVERSAL_RESOLVERS: Record<ENSChainId, string> = {
-  1: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
-  11155111: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
-};
+// see https://docs.ens.domains/resolvers/universal
+const UNIVERSAL_RESOLVER = '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe';
 const UNIVERSAL_RESOLVER_ABI = [
   'function resolve(bytes name, bytes data) view returns (bytes, address)',
   'function findOwner(bytes name) view returns (address)'
@@ -57,7 +53,6 @@ const RESOLVER_NOT_CONTRACT = '0x1e9535f2';
 const UNSUPPORTED_RESOLVER_PROFILE = '0x7b1c461b';
 const RESOLVER_ERROR = '0x95c0c752';
 const HTTP_ERROR = '0x01800152';
-// how DNS resolvers answer an unsupported record profile
 const NOT_IMPLEMENTED = '0xd6234725';
 
 function getDomainType(domain: string): DomainType {
@@ -70,9 +65,8 @@ function getDomainType(domain: string): DomainType {
   return 'ens';
 }
 
-// DNS wire format, one raw length byte per label. Not @ethersproject/hash's
-// dnsEncode: that rejects labels over 63 bytes, which the Universal Resolver
-// itself accepts and some live space names need
+// not @ethersproject/hash's dnsEncode: that rejects labels over 63 bytes,
+// which the Universal Resolver accepts and some live space names need
 function dnsEncodeName(name: string): string {
   const labels = name.split('.').map(label => toUtf8Bytes(label));
 
@@ -90,12 +84,10 @@ function revertData(err: any): string | null {
   return typeof data === 'string' && data.startsWith('0x') ? data : null;
 }
 
-// reverts that mean "no record"; anything else (a gateway 5xx, an RPC
-// failure) is a failure and must throw, since a record read that falls
-// through to the name owner may show the wrong controller. The one class
-// scoped by name: resolver-level errors are how DNS domains answer a read —
-// their TLD resolvers revert NotImplemented(), bare, or UnreachableName() —
-// so for other-tld names any ResolverError is a no-record answer
+// reverts that mean "no record"; anything else (gateway 5xx, RPC failure)
+// must throw, since falling through to the name owner may show the wrong
+// controller. Scoped by name class: a resolver-level error is how DNS
+// domains answer any read, so for other-tld names it is a no-record answer
 function isNoRecordRevert(domainType: DomainType, err: any): boolean {
   const data = revertData(err);
   if (!data) return false;
@@ -161,23 +153,22 @@ async function getDNSOwner(domain: string): Promise<string> {
   );
 }
 
-// resolves through the Universal Resolver, so any resolver works: ENSv1,
-// ENSv2, and offchain (CCIP-read) resolvers alike
 async function urResolve(
   name: string,
   chainId: ENSChainId,
   profile: string,
   params: any[]
 ) {
-  const universalResolver = UNIVERSAL_RESOLVERS[chainId];
-  if (!universalResolver) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.nameWrappers[chainId]) {
+    throw new Error('Unsupported chainId');
+  }
 
   try {
     const [result] = await call(
       getProvider(chainId),
       UNIVERSAL_RESOLVER_ABI,
       [
-        universalResolver,
+        UNIVERSAL_RESOLVER,
         'resolve',
         [
           dnsEncodeName(name),
@@ -223,7 +214,6 @@ export async function getEnsTextRecord(
     record
   ]);
 
-  // a resolver with no value for the key answers with an empty string
   return value || null;
 }
 
@@ -234,7 +224,9 @@ export async function setEnsTextRecord(
   value: string,
   chainId: ENSChainId
 ) {
-  if (!UNIVERSAL_RESOLVERS[chainId]) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.nameWrappers[chainId]) {
+    throw new Error('Unsupported chainId');
+  }
 
   const ensHash = namehash(ensNormalize(ens));
 
@@ -259,10 +251,10 @@ export async function setEnsTextRecord(
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   // findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
   // absent from ENSv2 resolves the empty address successfully, so any revert
-  // is a genuine failure and must throw, never fall back to a stale v1 owner
+  // is a genuine failure and must throw, never resolve a stale v1 owner
   if (chainId === 11155111) {
     const owner = await call(getProvider(chainId), UNIVERSAL_RESOLVER_ABI, [
-      UNIVERSAL_RESOLVERS[chainId],
+      UNIVERSAL_RESOLVER,
       'findOwner',
       [dnsEncodeName(name)]
     ]);

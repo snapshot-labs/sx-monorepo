@@ -6,8 +6,7 @@ const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 describe('ens', () => {
   describe('getNameOwner', () => {
     describe('for names migrated to ENSv2', () => {
-      // ownership does not bridge v1 to v2, so the legacy registry returns the
-      // empty address here and only the Universal Resolver has the owner
+      // ownership does not bridge v1 to v2: the legacy registry has no owner
       it('should return the owner of a migrated name on testnet', async () => {
         const owner = await getNameOwner('test123.eth', 11155111);
         expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
@@ -90,8 +89,7 @@ describe('ens', () => {
       expect(record).toBe(null);
     }, 10000);
 
-    // un-imported DNS domains answer every read with a resolver-level revert,
-    // which stays a no-record answer rather than surfacing as a failure
+    // un-imported DNS domains answer every read with a resolver-level revert
     it('should return null for an un-imported DNS domain', async () => {
       const record = await getEnsTextRecord('facebook.com', 'snapshot', 1);
       expect(record).toBe(null);
