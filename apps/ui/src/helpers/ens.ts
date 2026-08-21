@@ -147,7 +147,7 @@ async function getDNSOwner(domain: string): Promise<string> {
   );
 }
 
-async function urResolve(
+async function resolveRecord(
   name: string,
   chainId: ENSChainId,
   profile: string,
@@ -157,9 +157,11 @@ async function urResolve(
     throw new Error('Unsupported chainId');
   }
 
+  const provider = getProvider(chainId);
+
   try {
     const [result] = await call(
-      getProvider(chainId),
+      provider,
       ENS_CONTRACTS.universalResolverAbi,
       [
         ENS_CONTRACTS.universalResolver,
@@ -183,7 +185,9 @@ async function urResolve(
 
 export async function resolveName(name: string, chainId: ENSChainId) {
   const node = namehash(name);
-  const address: string | null = await urResolve(name, chainId, 'addr', [node]);
+  const address: string | null = await resolveRecord(name, chainId, 'addr', [
+    node
+  ]);
 
   if (!address || address === EVM_EMPTY_ADDRESS) return null;
 
@@ -203,7 +207,7 @@ export async function getEnsTextRecord(
     return null;
   }
 
-  const value = await urResolve(normalized, chainId, 'text', [
+  const value = await resolveRecord(normalized, chainId, 'text', [
     namehash(normalized),
     record
   ]);
@@ -222,13 +226,14 @@ export async function setEnsTextRecord(
     throw new Error('Unsupported chainId');
   }
 
+  const provider = getProvider(chainId);
   const ensHash = namehash(ensNormalize(ens));
 
-  const resolverAddress = await call(
-    getProvider(chainId),
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
-  );
+  const resolverAddress = await call(provider, ENS_CONTRACTS.registryAbi, [
+    ENS_CONTRACTS.registry,
+    'resolver',
+    [ensHash]
+  ]);
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
     throw new Error('No resolver set for name');
@@ -250,13 +255,13 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   // absent from ENSv2 resolves the empty address successfully, so any revert
   // is a genuine failure and must throw, never resolve a stale v1 owner
   if (chainId === 11155111) {
-    const v2Owner = await call(provider, ENS_CONTRACTS.universalResolverAbi, [
-      ENS_CONTRACTS.universalResolver,
-      'findOwner',
-      [dnsEncodeName(name)]
-    ]);
+    const ensOwnerV2 = await call(
+      provider,
+      ENS_CONTRACTS.universalResolverAbi,
+      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
+    );
 
-    if (v2Owner && v2Owner !== EVM_EMPTY_ADDRESS) return v2Owner;
+    if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
   }
 
   let owner = await call(
