@@ -18,6 +18,8 @@ type ENSContracts = {
   registry: string;
   registryAbi: string[];
   resolverAbi: string[];
+  universalResolver: string;
+  universalResolverAbi: string[];
   nameWrappers: Record<ENSChainId, string>;
   nameWrapperAbi: string[];
 };
@@ -33,6 +35,12 @@ const ENS_CONTRACTS: ENSContracts = {
     'function text(bytes32 node, string key) view returns (string)',
     'function setText(bytes32 node, string key, string value)'
   ],
+  // see https://docs.ens.domains/resolvers/universal
+  universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
+  universalResolverAbi: [
+    'function resolve(bytes name, bytes data) view returns (bytes, address)',
+    'function findOwner(bytes name) view returns (address)'
+  ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   nameWrappers: {
     1: '0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401',
@@ -40,12 +48,6 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
-// see https://docs.ens.domains/resolvers/universal
-const UNIVERSAL_RESOLVER = '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe';
-const UNIVERSAL_RESOLVER_ABI = [
-  'function resolve(bytes name, bytes data) view returns (bytes, address)',
-  'function findOwner(bytes name) view returns (address)'
-];
 const RESOLVER_PROFILE = new Interface(ENS_CONTRACTS.resolverAbi);
 
 const RESOLVER_NOT_FOUND = '0x77209fe8';
@@ -166,9 +168,9 @@ async function urResolve(
   try {
     const [result] = await call(
       getProvider(chainId),
-      UNIVERSAL_RESOLVER_ABI,
+      ENS_CONTRACTS.universalResolverAbi,
       [
-        UNIVERSAL_RESOLVER,
+        ENS_CONTRACTS.universalResolver,
         'resolve',
         [
           dnsEncodeName(name),
@@ -253,11 +255,11 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   // absent from ENSv2 resolves the empty address successfully, so any revert
   // is a genuine failure and must throw, never resolve a stale v1 owner
   if (chainId === 11155111) {
-    const owner = await call(getProvider(chainId), UNIVERSAL_RESOLVER_ABI, [
-      UNIVERSAL_RESOLVER,
-      'findOwner',
-      [dnsEncodeName(name)]
-    ]);
+    const owner = await call(
+      getProvider(chainId),
+      ENS_CONTRACTS.universalResolverAbi,
+      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
+    );
 
     if (owner && owner !== EVM_EMPTY_ADDRESS) return owner;
   }
