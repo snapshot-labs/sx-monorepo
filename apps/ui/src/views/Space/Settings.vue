@@ -6,6 +6,7 @@ import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
+import { compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -50,11 +51,14 @@ const {
   isPrivate,
   skinSettings,
   save,
+  getSettingsUpdateTransaction,
   saveController,
   deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
 const { invalidateController } = useSpaceController(toRef(props, 'space'));
+const { strategiesWithTreasuries } = useTreasuries(props.space);
+const { createDraft } = useEditor();
 
 const uiStore = useUiStore();
 const queryClient = useQueryClient();
@@ -76,6 +80,7 @@ const hasAdvancedErrors = ref(false);
 
 const executeFn = ref(save);
 const saving = ref(false);
+const proposing = ref(false);
 const customStrategyModalOpen = ref(false);
 
 type Tab = {
@@ -171,6 +176,28 @@ const activeTab: Ref<Tab['id']> = computed(() => {
 });
 const network = computed(() => getNetwork(props.space.network));
 
+const selfGovernedExecution = computed(() => {
+  if (!evmNetworks.includes(props.space.network)) return null;
+
+  return (
+    strategiesWithTreasuries.value?.find(
+      strategy =>
+        strategy.type !== 'ReadOnlyExecution' &&
+        (compareAddresses(strategy.address, props.space.controller) ||
+          (String(strategy.treasury.chainId) ===
+            String(network.value.chainId) &&
+            compareAddresses(
+              strategy.treasury.address,
+              props.space.controller
+            )))
+    ) ?? null
+  );
+});
+
+const canProposeSettingsChanges = computed(
+  () => !canModifySettings.value && selfGovernedExecution.value !== null
+);
+
 const isTicketValid = computed(() => {
   return !(
     strategies.value.some(s => s.address === 'ticket') &&
@@ -228,10 +255,20 @@ const showToolbar = computed(() => {
   return (
     (isModified.value &&
       isAdvancedFormResolved.value &&
-      canModifySettings.value) ||
+      (canModifySettings.value || canProposeSettingsChanges.value)) ||
     error.value ||
     props.space.additionalRawData?.hibernated
   );
+});
+
+const saveLabel = computed(() => {
+  if (props.space.additionalRawData?.hibernated && !isModified.value) {
+    return 'Reactivate';
+  }
+
+  if (canProposeSettingsChanges.value) return 'Propose changes';
+
+  return 'Save';
 });
 
 // Live space with minimum properties for alerts
@@ -264,6 +301,32 @@ async function reloadSpaceAndReset() {
   await invalidateController();
 
   await reset({ force: true });
+}
+
+async function handleProposeSettingsChanges() {
+  if (!selfGovernedExecution.value) return;
+
+  proposing.value = true;
+
+  try {
+    const transaction = await getSettingsUpdateTransaction();
+
+    const spaceKey = `${props.space.network}:${props.space.id}`;
+    const draftId = await createDraft(spaceKey, {
+      title: 'Update space settings',
+      executions: {
+        [selfGovernedExecution.value.address]: [transaction]
+      }
+    });
+
+    router.push({
+      name: 'space-editor',
+      params: { space: spaceKey, key: draftId }
+    });
+  } catch {
+  } finally {
+    proposing.value = false;
+  }
 }
 
 async function handleSettingsSave() {
@@ -591,11 +654,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     ref="el"
     :error="error"
     :is-modified="!!isModified"
-    :saving="saving"
-    :save-label="
-      space.additionalRawData?.hibernated && !isModified ? 'Reactivate' : 'Save'
+    :saving="saving || proposing"
+    :save-label="saveLabel"
+    @save="
+      canProposeSettingsChanges
+        ? handleProposeSettingsChanges()
+        : handleSettingsSave()
     "
-    @save="handleSettingsSave"
     @reset="reset()"
   />
   <teleport to="#modal">
