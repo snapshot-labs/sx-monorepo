@@ -8,7 +8,6 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
-import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
 
@@ -273,13 +272,10 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
     }
   );
 
-  if (!name.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = (await getAddresses([name], chainId))[name];
-    const nameTokens = name.split('.');
-
-    if (nameTokens.length > 2) {
-      owner = resolvedAddress || EVM_EMPTY_ADDRESS;
-    } else if (nameTokens.length === 2 && resolvedAddress) {
+  if (owner === EVM_EMPTY_ADDRESS) {
+    if (name.split('.').length > 2) {
+      owner = (await resolveName(name, chainId)) || EVM_EMPTY_ADDRESS;
+    } else if (isDNSDomain(name) && (await resolveName(name, chainId))) {
       owner = await getDNSOwner(name);
     }
   }

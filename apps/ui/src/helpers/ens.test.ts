@@ -54,9 +54,10 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      it('should return an empty address for subdomains', async () => {
-        const owner = await getNameOwner('web3.wanki.moe', 1);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      // the DNS resolver answers subdomains with a revert the fail-closed
+      // classifier does not accept, matching snapshot.js
+      it('should reject for subdomains', async () => {
+        await expect(getNameOwner('web3.wanki.moe', 1)).rejects.toThrow();
       }, 10000);
     });
 
@@ -71,9 +72,10 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      it('should return an empty address when the domain does not exist', async () => {
-        const owner = await getNameOwner('lucemans-test-not-exist.cbars.id', 1);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      it('should reject when the domain does not exist', async () => {
+        await expect(
+          getNameOwner('lucemans-test-not-exist.cbars.id', 1)
+        ).rejects.toThrow();
       }, 10000);
     });
   });
