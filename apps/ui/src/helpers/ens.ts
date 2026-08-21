@@ -251,25 +251,21 @@ export async function setEnsTextRecord(
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
+  const provider = getProvider(chainId);
+  const ensHash = namehash(name);
+
   // findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
   // absent from ENSv2 resolves the empty address successfully, so any revert
   // is a genuine failure and must throw, never resolve a stale v1 owner
   if (chainId === 11155111) {
-    const owner = await call(
-      getProvider(chainId),
-      ENS_CONTRACTS.universalResolverAbi,
-      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
-    );
+    const v2Owner = await call(provider, ENS_CONTRACTS.universalResolverAbi, [
+      ENS_CONTRACTS.universalResolver,
+      'findOwner',
+      [dnsEncodeName(name)]
+    ]);
 
-    if (owner && owner !== EVM_EMPTY_ADDRESS) return owner;
+    if (v2Owner && v2Owner !== EVM_EMPTY_ADDRESS) return v2Owner;
   }
-
-  return getNameOwnerV1(name, chainId);
-}
-
-async function getNameOwnerV1(name: string, chainId: ENSChainId) {
-  const provider = getProvider(chainId);
-  const ensHash = namehash(name);
 
   let owner = await call(
     provider,
