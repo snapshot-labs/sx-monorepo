@@ -185,7 +185,11 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 14524400
+      // Not the deployment block (14524400): the governor launched with
+      // timelock() pointing at an activator contract with no getMinDelay, so
+      // initializeSpace reverts there. Starts right before the TimelockChange
+      // to the real TimelockController at 14631487; no proposals in between.
+      startBlock: 14631486
     },
     Hop: {
       name: 'Hop',
@@ -367,7 +371,10 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 18460699
+      // Not the deployment block (18460699): quorum() reverts until the AMKT
+      // token proxy gains vote checkpointing at 18470753, so initializeSpace
+      // reverts there. First proposal is at 18471044, after the upgrade.
+      startBlock: 18470752
     },
     'Vesper DAO': {
       name: 'Vesper DAO',
