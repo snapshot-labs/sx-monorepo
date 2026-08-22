@@ -32,7 +32,6 @@ Environment variables (see [`.env`](.env)):
 | `VITE_ATTESTATION_URL`    | Verification attestation service         |
 | `VITE_MANA_URL`           | Relayer for `sendAuctionPartner`         |
 | `VITE_IPFS_GATEWAY`       | IPFS gateway for token logos             |
-| `VITE_INFURA_API_KEY`     | EVM RPC fallback                         |
 | `VITE_ALCHEMY_API_KEY`    | EVM RPC fallback                         |
 | `VITE_ETHERSCAN_API_KEY`  | Explorer URL helpers                     |
 | `VITE_WC_PROJECT_ID`      | WalletConnect project ID                 |
