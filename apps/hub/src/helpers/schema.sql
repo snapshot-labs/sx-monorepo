@@ -205,6 +205,21 @@ CREATE TABLE leaderboard (
   INDEX vp_value (vp_value)
 );
 
+CREATE TABLE points_ledger (
+  user VARCHAR(100) NOT NULL,
+  action VARCHAR(24) NOT NULL,
+  ref VARCHAR(100) NOT NULL,
+  amount DECIMAL(13,3) NOT NULL DEFAULT 0.000,
+  created INT(11) NOT NULL,
+  PRIMARY KEY (user, action, ref)
+);
+
+CREATE TABLE points (
+  user VARCHAR(100) NOT NULL,
+  total DECIMAL(13,3) NOT NULL DEFAULT 0.000,
+  PRIMARY KEY (user)
+);
+
 CREATE TABLE options (
   name VARCHAR(100) NOT NULL,
   value VARCHAR(100) NOT NULL,

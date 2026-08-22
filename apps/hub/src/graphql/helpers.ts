@@ -453,7 +453,8 @@ export function formatUser(user) {
   delete user.profile;
   return {
     ...user,
-    ...profile
+    ...profile,
+    points: Number(user.points ?? 0)
   };
 }
 
