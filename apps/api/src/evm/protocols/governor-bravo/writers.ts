@@ -383,6 +383,7 @@ export function createWriters(
       Space.loadEntity(spaceAddress, config.indexerName)
     ]);
     if (!proposal || !space) return;
+    if (proposal.cancelled) return;
 
     proposal.cancelled = true;
     space.proposal_count -= 1;
