@@ -1,8 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { getNameOwner } from './ens';
+import { getNameOwner, getSpaceController } from './ens';
 
 describe('ens', () => {
   describe('getNameOwner', () => {
+    describe('for names migrated to ENSv2', () => {
+      // ownership does not bridge v1 to v2: the legacy registry has no owner
+      it('should return the owner of a migrated name on testnet', async () => {
+        const owner = await getNameOwner('test123.eth', 11155111);
+        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+
+      it('should resolve the same address as the space controller', async () => {
+        const controller = await getSpaceController('test123.eth', 11155111);
+        expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+    });
+
     describe('for names using the onchain resolver', () => {
       it('should return the owner of the name on mainnet', async () => {
         const owner = await getNameOwner('ens.eth', 1);

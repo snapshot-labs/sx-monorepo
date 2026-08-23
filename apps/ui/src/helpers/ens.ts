@@ -1,7 +1,9 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { getAddress, isAddress } from '@ethersproject/address';
+import { concat, hexlify } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
+import { toUtf8Bytes } from '@ethersproject/strings';
 import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
@@ -14,6 +16,8 @@ type ENSContracts = {
   registryAbi: string[];
   resolvers: Record<ENSChainId, string[]>;
   resolverAbi: string[];
+  universalResolver: string;
+  universalResolverAbi: string[];
   nameWrappers: Record<ENSChainId, string>;
   nameWrapperAbi: string[];
 };
@@ -28,6 +32,11 @@ const ENS_CONTRACTS: ENSContracts = {
     'function addr(bytes32 node) view returns (address r)',
     'function text(bytes32 node, string key) view returns (string)',
     'function setText(bytes32 node, string key, string value)'
+  ],
+  // see https://docs.ens.domains/resolvers/universal
+  universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
+  universalResolverAbi: [
+    'function findOwner(bytes name) view returns (address)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
@@ -46,6 +55,19 @@ const ENS_CONTRACTS: ENSContracts = {
     11155111: '0x0635513f179D50A207757E05759CbD106d7dFcE8'
   }
 };
+
+// not @ethersproject/hash's dnsEncode: that rejects labels over 63 bytes,
+// which the Universal Resolver accepts and some live space names need
+function dnsEncodeName(name: string): string {
+  const labels = name.split('.').map(label => toUtf8Bytes(label));
+
+  return hexlify(
+    concat([
+      ...labels.flatMap(label => [Uint8Array.of(label.length), label]),
+      Uint8Array.of(0)
+    ])
+  );
+}
 
 // see https://docs.ens.domains/registry/dns#gasless-import
 async function getDNSOwner(domain: string): Promise<string> {
@@ -174,6 +196,19 @@ export async function setEnsTextRecord(
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensHash = namehash(name);
+
+  // findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
+  // absent from ENSv2 resolves the empty address successfully, so any revert
+  // is a genuine failure and must throw, never resolve a stale v1 owner
+  if (chainId === 11155111) {
+    const ensOwnerV2 = await call(
+      provider,
+      ENS_CONTRACTS.universalResolverAbi,
+      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
+    );
+
+    if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
+  }
 
   let owner = await call(
     provider,
