@@ -33,7 +33,6 @@ const ENS_CONTRACTS: ENSContracts = {
     'function text(bytes32 node, string key) view returns (string)',
     'function setText(bytes32 node, string key, string value)'
   ],
-  // see https://docs.ens.domains/resolvers/universal
   universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
   universalResolverAbi: [
     'function findOwner(bytes name) view returns (address)'
@@ -56,8 +55,7 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
-// not @ethersproject/hash's dnsEncode: that rejects labels over 63 bytes,
-// which the Universal Resolver accepts and some live space names need
+// dnsEncode from @ethersproject/hash rejects labels over 63 bytes
 function dnsEncodeName(name: string): string {
   const labels = name.split('.').map(label => toUtf8Bytes(label));
 
@@ -197,9 +195,8 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensHash = namehash(name);
 
-  // findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
-  // absent from ENSv2 resolves the empty address successfully, so any revert
-  // is a genuine failure and must throw, never resolve a stale v1 owner
+  // findOwner is ENSv2-only; an unmigrated name returns the empty address,
+  // so a revert is a failure and must not fall back to a stale v1 owner
   if (chainId === 11155111) {
     const ensOwnerV2 = await call(
       provider,

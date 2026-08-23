@@ -4,7 +4,6 @@ import { getNameOwner, getSpaceController } from './ens';
 describe('ens', () => {
   describe('getNameOwner', () => {
     describe('for names migrated to ENSv2', () => {
-      // ownership does not bridge v1 to v2: the legacy registry has no owner
       it('should return the owner of a migrated name on testnet', async () => {
         const owner = await getNameOwner('test123.eth', 11155111);
         expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
@@ -13,6 +12,28 @@ describe('ens', () => {
       it('should resolve the same address as the space controller', async () => {
         const controller = await getSpaceController('test123.eth', 11155111);
         expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+    });
+
+    describe('for names not migrated to ENSv2 on testnet', () => {
+      it('should still resolve a DNS-imported domain through its DNS owner', async () => {
+        const owner = await getNameOwner('ethplay.org', 11155111);
+        expect(owner).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+      }, 10000);
+
+      it('should still resolve a subdomain through the registry', async () => {
+        const owner = await getNameOwner('vote.vptest2.eth', 11155111);
+        expect(owner).toBe('0x385517332F46b20B4F7340a80c011b2973ac622e');
+      }, 10000);
+
+      it('should encode a label longer than 63 bytes', async () => {
+        const owner = await getNameOwner(`${'a'.repeat(84)}.eth`, 11155111);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      }, 10000);
+
+      it('should encode a multi-byte emoji label', async () => {
+        const owner = await getNameOwner('🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth', 11155111);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
     });
 
