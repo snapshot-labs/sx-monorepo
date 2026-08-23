@@ -40,7 +40,9 @@ export function useApiKeys() {
   const isAuthenticated = computed(
     () => !!aliasWallet.value && !isAuthError.value
   );
-  const keys = computed<ApiKey[]>(() => data.value ?? []);
+  const keys = computed<ApiKey[]>(() => data.value?.keys ?? []);
+  const dailyUsage = computed(() => data.value?.usage.daily ?? []);
+  const monthlyUsage = computed(() => data.value?.usage.monthly ?? []);
   const isLoading = computed(() => isAuthenticated.value && isPending.value);
 
   async function authenticate() {
@@ -70,6 +72,8 @@ export function useApiKeys() {
     isAuthenticating,
     authenticate,
     isAuthError,
-    keys
+    keys,
+    dailyUsage,
+    monthlyUsage
   };
 }
