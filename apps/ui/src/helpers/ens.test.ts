@@ -1,8 +1,70 @@
 import { describe, expect, it } from 'vitest';
-import { getNameOwner } from './ens';
+import { dnsEncodeName, getNameOwner, getSpaceController } from './ens';
 
 describe('ens', () => {
+  describe('dnsEncodeName', () => {
+    it('should encode each label with a raw length byte', () => {
+      expect(dnsEncodeName('test123.eth')).toBe('0x07746573743132330365746800');
+      expect(dnsEncodeName(`${'a'.repeat(84)}.eth`)).toBe(
+        `0x54${'61'.repeat(84)}0365746800`
+      );
+    });
+
+    it('should encode a label longer than 255 bytes as its labelhash', () => {
+      expect(dnsEncodeName(`${'a'.repeat(256)}.eth`)).toBe(
+        `0x42${Buffer.from(
+          '[1daa7034adab66d9ec9e03e2c89201b83a7497e85dc5b971aa9dae2ccbb7a208]'
+        ).toString('hex')}0365746800`
+      );
+    });
+  });
+
   describe('getNameOwner', () => {
+    describe('for names migrated to ENSv2', () => {
+      it('should return the owner of a migrated name on testnet', async () => {
+        const owner = await getNameOwner('test123.eth', 11155111);
+        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+
+      it('should resolve a case variant to the same owner', async () => {
+        const owner = await getNameOwner('TEST123.eth', 11155111);
+        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+
+      it('should resolve the same address as the space controller', async () => {
+        const controller = await getSpaceController('test123.eth', 11155111);
+        expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+    });
+
+    describe('for names not migrated to ENSv2 on testnet', () => {
+      it('should still resolve a DNS-imported domain through its DNS owner', async () => {
+        const owner = await getNameOwner('ethplay.org', 11155111);
+        expect(owner).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+      }, 10000);
+
+      it('should still resolve a subdomain through the registry', async () => {
+        const owner = await getNameOwner('vote.vptest2.eth', 11155111);
+        expect(owner).toBe('0x385517332F46b20B4F7340a80c011b2973ac622e');
+      }, 10000);
+
+      it.each([
+        ['a label longer than 63 bytes', `${'a'.repeat(84)}.eth`],
+        [
+          'a label longer than 255 bytes as its labelhash',
+          `${'a'.repeat(256)}.eth`
+        ],
+        ['a multi-byte emoji label', '🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth']
+      ])(
+        'should encode %s',
+        async (label, name) => {
+          const owner = await getNameOwner(name, 11155111);
+          expect(owner).toBe('0x0000000000000000000000000000000000000000');
+        },
+        10000
+      );
+    });
+
     describe('for names using the onchain resolver', () => {
       it('should return the owner of the name on mainnet', async () => {
         const owner = await getNameOwner('ens.eth', 1);
