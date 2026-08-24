@@ -17,7 +17,7 @@ type ENSContracts = {
   registryAbi: string[];
   resolvers: Record<ENSChainId, string[]>;
   resolverAbi: string[];
-  universalResolver: string;
+  universalResolver: Partial<Record<ENSChainId, string>>;
   universalResolverAbi: string[];
   nameWrappers: Record<ENSChainId, string>;
   nameWrapperAbi: string[];
@@ -34,7 +34,9 @@ const ENS_CONTRACTS: ENSContracts = {
     'function text(bytes32 node, string key) view returns (string)',
     'function setText(bytes32 node, string key, string value)'
   ],
-  universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
+  universalResolver: {
+    11155111: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
+  },
   universalResolverAbi: [
     'function findOwner(bytes name) view returns (address)'
   ],
@@ -56,8 +58,6 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
-// dnsEncode from @ethersproject/hash rejects labels over 63 bytes; labels
-// over 255 bytes carry their labelhash instead, as viem encodes them
 export function dnsEncodeName(name: string): string {
   const value = name.replace(/^\.|\.$/g, '');
   const labels = (value ? value.split('.') : []).map(label => {
@@ -202,23 +202,21 @@ export async function setEnsTextRecord(
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const normalized = ensNormalize(name);
-  const ensHash = namehash(normalized);
 
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
   // findOwner is ENSv2-only; an unmigrated name returns the empty address,
   // so a revert is a failure and must not fall back to a stale v1 owner
-  if (chainId === 11155111) {
+  if (universalResolver) {
     const ensOwnerV2 = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
-      [
-        ENS_CONTRACTS.universalResolver,
-        'findOwner',
-        [dnsEncodeName(normalized)]
-      ]
+      [universalResolver, 'findOwner', [dnsEncodeName(normalized)]]
     );
 
     if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
   }
+
+  const ensHash = namehash(normalized);
 
   let owner = await call(
     provider,

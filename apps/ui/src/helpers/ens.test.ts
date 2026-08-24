@@ -48,20 +48,21 @@ describe('ens', () => {
         expect(owner).toBe('0x385517332F46b20B4F7340a80c011b2973ac622e');
       }, 10000);
 
-      it('should encode a label longer than 63 bytes', async () => {
-        const owner = await getNameOwner(`${'a'.repeat(84)}.eth`, 11155111);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
-      }, 10000);
-
-      it('should encode a label longer than 255 bytes as its labelhash', async () => {
-        const owner = await getNameOwner(`${'a'.repeat(256)}.eth`, 11155111);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
-      }, 10000);
-
-      it('should encode a multi-byte emoji label', async () => {
-        const owner = await getNameOwner('🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth', 11155111);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
-      }, 10000);
+      it.each([
+        ['a label longer than 63 bytes', `${'a'.repeat(84)}.eth`],
+        [
+          'a label longer than 255 bytes as its labelhash',
+          `${'a'.repeat(256)}.eth`
+        ],
+        ['a multi-byte emoji label', '🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth']
+      ])(
+        'should encode %s',
+        async (label, name) => {
+          const owner = await getNameOwner(name, 11155111);
+          expect(owner).toBe('0x0000000000000000000000000000000000000000');
+        },
+        10000
+      );
     });
 
     describe('for names using the onchain resolver', () => {
