@@ -746,6 +746,17 @@ export function getRandomHexColor(): string {
     .padStart(6, '0')}`.toUpperCase();
 }
 
+export function getDelegationReadChainId(
+  strategy: { network?: string; params?: Record<string, any> },
+  fallbackChainId: string | undefined
+): string {
+  // Mirrors how delegate-registry-api picks the registry chain a strategy
+  // reads: params.delegationNetwork ?? strategy.network ?? space.network.
+  return String(
+    strategy.params?.delegationNetwork || strategy.network || fallbackChainId
+  );
+}
+
 /**
  * Concat a list of strings with the connector if needed,
  * using the oxford comma rule.

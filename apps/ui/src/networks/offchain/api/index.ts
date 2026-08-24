@@ -8,12 +8,15 @@ import {
   DELEGATE_REGISTRY_STRATEGIES,
   DELEGATION_TYPES_NAMES
 } from '@/helpers/constants';
-import { getDelegationReadChainId } from '@/helpers/delegation';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses } from '@/helpers/utils';
+import {
+  clone,
+  compareAddresses,
+  getDelegationReadChainId
+} from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,

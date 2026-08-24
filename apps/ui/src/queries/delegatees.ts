@@ -1,10 +1,9 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { getDelegationReadChainId } from '@/helpers/delegation';
 import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
-import { formatAddress } from '@/helpers/utils';
+import { formatAddress, getDelegationReadChainId } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
