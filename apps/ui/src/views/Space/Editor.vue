@@ -52,7 +52,9 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { strategiesWithTreasuries } = useTreasuries(props.space);
+const { strategiesWithTreasuries, hasSafeSnapConfig } = useTreasuries(
+  props.space
+);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
 const { limits, lists } = useSettings();
@@ -260,6 +262,13 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
 );
 
 const canSubmit = computed(() => {
+  // Resolving a SafeSnap module to its Safe needs an on-chain call, and
+  // strategiesWithTreasuries stays null until it completes. Submitting then
+  // would send executions: [], publishing the proposal with no execution.
+  if (hasSafeSnapConfig.value && strategiesWithTreasuries.value === null) {
+    return false;
+  }
+
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
     !proposal.value?.originalProposal;
