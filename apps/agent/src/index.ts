@@ -1,6 +1,7 @@
 import { app } from './api';
+import { AGENT_SIGNER_ADDRESS } from './clients/sequencer';
 import {
-  AGENT_SIGNER_ADDRESS,
+  AGENT_PRIVATE_KEY,
   DRY_RUN,
   OPENROUTER_API_KEY,
   PORT,
@@ -11,10 +12,8 @@ import logger from './logger';
 import { createLoop } from './loop';
 import { tick } from './pipeline';
 
-if (!/^0x[0-9a-fA-F]{40}$/.test(AGENT_SIGNER_ADDRESS)) {
-  throw new Error(
-    'AGENT_SIGNER_ADDRESS must be set to the address users authorize as an alias'
-  );
+if (!AGENT_PRIVATE_KEY) {
+  throw new Error('AGENT_PRIVATE_KEY must be set to a hex private key');
 }
 
 if (!SPACE_IDS.length) {
@@ -25,15 +24,17 @@ if (!OPENROUTER_API_KEY) {
   throw new Error('OPENROUTER_API_KEY must be set to predict votes');
 }
 
-if (!DRY_RUN) {
-  throw new Error('casting is not implemented yet, DRY_RUN cannot be disabled');
-}
-
 const loop = createLoop(tick, TICK_INTERVAL);
 loop.start();
 
 logger.info(
-  { spaces: SPACE_IDS, interval: TICK_INTERVAL, port: PORT },
+  {
+    spaces: SPACE_IDS,
+    signer: AGENT_SIGNER_ADDRESS,
+    dryRun: DRY_RUN,
+    interval: TICK_INTERVAL,
+    port: PORT
+  },
   'agent started'
 );
 

@@ -13,6 +13,7 @@ export const jobStatus = pgEnum('job_status', [
   'pending',
   'predicting',
   'predicted',
+  'casting',
   'cast',
   'skipped',
   'failed'
@@ -35,6 +36,9 @@ export const jobs = pgTable(
     /** Earliest timestamp at which the vote may be cast. */
     notBefore: integer('not_before').notNull(),
     proposalEnd: integer('proposal_end').notNull().default(0),
+    proposalType: varchar('proposal_type', { length: 24 })
+      .notNull()
+      .default(''),
     lockedUntil: integer('locked_until'),
     /** Sequencer message id, the receipt that this job actually voted. */
     voteId: varchar('vote_id', { length: 66 }),

@@ -1,8 +1,8 @@
 # Agent
 
-Runner that casts votes on behalf of users who authorized the agent's signer as an
-alias. It watches the spaces listed in `SPACES`. Predictions are real model
-calls, casting is still a placeholder, so it runs in dry run only.
+Runner that casts votes on behalf of users who authorized the agent's signer as
+an alias. It watches the spaces listed in `SPACES` and sends real votes. Set
+`DRY_RUN=true` to work out what it would vote and send nothing.
 
 ## Pipeline
 
@@ -14,7 +14,7 @@ source of truth. Every tick runs the steps in order:
 | `reap`    | Frees jobs whose runner died mid prediction, and drops jobs whose proposal has closed                                                                                                     |
 | `plan`    | Reads active proposals in the watched spaces and the addresses that authorized `AGENT_SIGNER_ADDRESS` as an alias, drops voters who already voted, and inserts one job per remaining pair |
 | `predict` | Asks the model how each voter would vote, using their own history in that space                                                                                                           |
-| `cast`    | Logs what each predicted job would vote and marks it `skipped` with reason `dry_run`. This is where signing and submission to the sequencer go                                            |
+| `cast`    | Re-checks the job is still safe to send, signs the vote as the voter's alias and hands it to the sequencer. In dry run it logs and skips instead                                          |
 
 The next tick is scheduled once the previous one settles, so ticks never overlap
 and a failing tick does not stop the loop. Jobs are inserted with
@@ -32,17 +32,33 @@ calls the model. `reap` puts rows back to `pending` once their lease runs out.
 ### Job states
 
 ```
-pending -> predicting -> predicted -> skipped (dry_run)
-   ^            |
-   +-- reap ----+  lease ran out, attempts + 1
+pending -> predicting -> predicted -> casting -> cast
+   ^            |            ^           |
+   +-- reap ----+            +-- reap ---+   lease ran out, attempts + 1
 
-skipped: already_voted, thin_history, low_confidence, proposal_closed, dry_run
+skipped: dry_run, already_voted, thin_history, low_confidence, proposal_closed,
+         alias_expired, rejected, no_choice
 failed:  three attempts used up
 ```
+
+A stale `casting` job goes back to `predicted`, never to `pending`: the
+prediction is already paid for and must not be bought twice.
 
 A prediction is only kept when the model reports confidence of at least
 `medium`. Voters with fewer than three votes in the space are skipped before
 any call is made, since there is nothing to predict from.
+
+### Before a vote goes out
+
+`plan` checks whether the person already voted, but that is when the job is
+made, so `cast` checks again right before sending. It also re-checks that the
+proposal is still open and that the alias has not lapsed, since authorization
+runs out after 90 days. Votes leave `CAST_GAP` apart and no more than
+`CAST_BATCH` per tick, because the sequencer allows 100 requests a minute per IP.
+
+Each vote carries `app: snapshot-agent` and the model's reasoning as its public
+reason, so anyone reading the proposal can tell it was machine made and why.
+The sequencer's message id is stored in `vote_id`.
 
 Only `single-choice` and `basic` proposals are eligible: those are the types whose
 choice a single index can express. Encrypted (`shutter`) and flagged proposals are
@@ -73,9 +89,10 @@ and what the agent votes with.
 
 ## Configuration
 
-See `.env.example`. The runner refuses to start without a valid
-`AGENT_SIGNER_ADDRESS`, without `OPENROUTER_API_KEY`, without at least one space
-in `SPACES`, or with `DRY_RUN` disabled while casting is a placeholder.
+See `.env.example`. The runner refuses to start without `AGENT_PRIVATE_KEY`,
+without `OPENROUTER_API_KEY`, or without at least one space in `SPACES`. The
+signer address is derived from the key, so there is nothing to keep in step with
+it, and `GET /` publishes it for the UI.
 
 Set `LOGTAIL_HOST` and `LOGTAIL_TOKEN` to ship logs to Better Stack, otherwise
 logs are pretty printed outside production and JSON in it.

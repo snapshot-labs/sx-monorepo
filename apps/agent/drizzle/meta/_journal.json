@@ -15,6 +15,13 @@
       "when": 1787565109614,
       "tag": "0001_puzzling_lady_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787572246696,
+      "tag": "0002_huge_kitty_pryde",
+      "breakpoints": true
     }
   ]
 }

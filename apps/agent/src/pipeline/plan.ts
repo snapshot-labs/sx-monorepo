@@ -4,7 +4,8 @@ import {
   getVotersWhoVoted,
   Proposal
 } from '../clients/hub';
-import { AGENT_SIGNER_ADDRESS, CAST_WINDOW, SPACE_IDS } from '../config';
+import { AGENT_SIGNER_ADDRESS } from '../clients/sequencer';
+import { CAST_WINDOW, SPACE_IDS } from '../config';
 import { db, jobs } from '../db';
 
 export function isEligible(proposal: Proposal): boolean {
@@ -34,6 +35,7 @@ export async function plan(now: number): Promise<number> {
           voter,
           notBefore: proposal.end - CAST_WINDOW,
           proposalEnd: proposal.end,
+          proposalType: proposal.type,
           created: now,
           updated: now
         }))

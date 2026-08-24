@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { AGENT_SIGNER_ADDRESS, DRY_RUN, SPACE_IDS } from './config';
+import { AGENT_SIGNER_ADDRESS } from './clients/sequencer';
+import { DRY_RUN, SPACE_IDS } from './config';
 import { AGENT_CONTEXT } from './context';
 import pkg from '../package.json' with { type: 'json' };
 

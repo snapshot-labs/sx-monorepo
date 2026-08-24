@@ -18,7 +18,7 @@ export const SPACE_IDS: string[] = process.env.SPACES
       .filter(Boolean)
   : DEFAULT_SPACES;
 
-export const AGENT_SIGNER_ADDRESS = process.env.AGENT_SIGNER_ADDRESS ?? '';
+export const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY ?? '';
 
 export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY ?? '';
 export const MODEL = process.env.MODEL ?? 'anthropic/claude-sonnet-5';
@@ -28,6 +28,11 @@ export const MIN_CONFIDENCE = 'medium';
 
 export const TICK_INTERVAL = 60_000;
 export const CAST_WINDOW = 24 * 60 * 60;
+export const CAST_BATCH = 10;
+export const CAST_LEASE = 5 * 60;
+export const CAST_GAP = 3000;
+export const VOTE_APP = 'snapshot-agent';
+export const REASON_LIMIT = 500;
 export const MIN_HISTORY = 3;
 export const HISTORY_LIMIT = 40;
 export const BODY_LIMIT = 4000;
@@ -35,4 +40,4 @@ export const PREDICT_BATCH = 10;
 export const PREDICT_LEASE = 10 * 60;
 export const MAX_ATTEMPTS = 3;
 
-export const DRY_RUN = process.env.DRY_RUN !== 'false';
+export const DRY_RUN = process.env.DRY_RUN === 'true';
