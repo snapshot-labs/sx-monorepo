@@ -4,6 +4,7 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { concat, hexlify } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
+import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
@@ -59,10 +60,16 @@ function isDNSDomain(name: string): boolean {
   return !name.endsWith('.eth') && name.split('.').length === 2;
 }
 
-// not @ethersproject/hash's dnsEncode: that rejects labels over 63 bytes,
-// which the Universal Resolver accepts and some live space names need
-function dnsEncodeName(name: string): string {
-  const labels = name.split('.').map(label => toUtf8Bytes(label));
+// dnsEncode from @ethersproject/hash rejects labels over 63 bytes; labels
+// over 255 bytes carry their labelhash instead, as viem encodes them
+export function dnsEncodeName(name: string): string {
+  const value = name.replace(/^\.|\.$/g, '');
+  const labels = (value ? value.split('.') : []).map(label => {
+    const bytes = toUtf8Bytes(label);
+    return bytes.length > 255
+      ? toUtf8Bytes(`[${keccak256(bytes).slice(2)}]`)
+      : bytes;
+  });
 
   return hexlify(
     concat([
@@ -283,9 +290,10 @@ export async function getResolver(name: string, chainId: ENSChainId) {
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
-  const ensHash = namehash(name);
+  const normalized = ensNormalize(name);
+  const ensHash = namehash(normalized);
 
-  const ensOwnerV2 = await getEnsOwnerV2(name, chainId);
+  const ensOwnerV2 = await getEnsOwnerV2(normalized, chainId);
   if (ensOwnerV2) return ensOwnerV2;
 
   let owner = await call(
@@ -298,10 +306,13 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   );
 
   if (owner === EVM_EMPTY_ADDRESS) {
-    if (name.split('.').length > 2) {
-      owner = (await resolveName(name, chainId)) || EVM_EMPTY_ADDRESS;
-    } else if (isDNSDomain(name) && (await resolveName(name, chainId))) {
-      owner = await getDNSOwner(name);
+    if (normalized.split('.').length > 2) {
+      owner = (await resolveName(normalized, chainId)) || EVM_EMPTY_ADDRESS;
+    } else if (
+      isDNSDomain(normalized) &&
+      (await resolveName(normalized, chainId))
+    ) {
+      owner = await getDNSOwner(normalized);
     }
   }
 
