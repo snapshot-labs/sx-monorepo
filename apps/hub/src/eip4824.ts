@@ -1,4 +1,8 @@
 import express from 'express';
+import {
+  applyHistoricalCollectionBoundary,
+  getHistoricalAccessContext
+} from './helpers/historicalAccess';
 import db, { sequencerDB } from './helpers/mysql';
 import { getSpace } from './helpers/spaces';
 
@@ -72,9 +76,15 @@ router.get('/:space/proposals', async (req, res) => {
 
     if (!space.verified) return res.status(400).json({ error: 'INVALID' });
 
+    const args = applyHistoricalCollectionBoundary(
+      { where: {} },
+      getHistoricalAccessContext(req, res),
+      'eip4824_proposals'
+    );
+    const cutoff = args.where?.created_gte;
     proposals = await db.queryAsync(
-      'SELECT id, title, start, end, body, author, ipfs, discussion FROM proposals WHERE space = ? ORDER BY created DESC LIMIT 20',
-      [id]
+      `SELECT id, title, start, end, body, author, ipfs, discussion FROM proposals WHERE space = ?${cutoff ? ' AND created >= ?' : ''} ORDER BY created DESC LIMIT 20`,
+      cutoff ? [id, cutoff] : [id]
     );
   } catch {
     return res.status(404).json({ error: 'NOT_FOUND' });
@@ -115,9 +125,16 @@ router.get('/:space/activities', async (req, res) => {
 
     if (!space.verified) return res.status(400).json({ error: 'INVALID' });
 
+    const args = applyHistoricalCollectionBoundary(
+      { where: {} },
+      getHistoricalAccessContext(req, res),
+      'eip4824_activities',
+      'timestamp'
+    );
+    const cutoff = args.where?.timestamp_gte;
     messages = await sequencerDB.queryAsync(
-      'SELECT id, type, address FROM messages WHERE space = ? ORDER BY timestamp DESC LIMIT 20',
-      [id]
+      `SELECT id, type, address FROM messages WHERE space = ?${cutoff ? ' AND timestamp >= ?' : ''} ORDER BY timestamp DESC LIMIT 20`,
+      cutoff ? [id, cutoff] : [id]
     );
   } catch {
     return res.status(404).json({ error: 'NOT_FOUND' });
