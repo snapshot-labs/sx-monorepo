@@ -38,6 +38,12 @@ type SafeSnapTransferNFTTransaction = SafeSnapBaseTransaction & {
     name: string;
     tokenName: string;
   };
+  // sx-only extension (not part of v1's schema, ignored by v1 when present):
+  // preserves editor state that the base SafeSnap wire format has no field
+  // for. Absent on transactions authored elsewhere, hence optional.
+  sender?: string;
+  amount?: string;
+  nftType?: string;
 };
 
 type SafeSnapContractInteractionTransaction = SafeSnapBaseTransaction & {
@@ -88,10 +94,10 @@ function parseTransferNFT(
     _type: 'sendNft',
     _form: {
       recipient: tx.recipient,
-      sender: '',
-      amount: '1',
+      sender: tx.sender ?? '',
+      amount: tx.amount ?? '1',
       nft: {
-        type: '',
+        type: tx.nftType ?? '',
         address: tx.collectable.address,
         id: tx.collectable.id,
         name: tx.collectable.name,
@@ -191,6 +197,9 @@ export function serializeSafeSnapTransaction(
         ...base,
         type: 'transferNFT',
         recipient: tx._form.recipient,
+        sender: tx._form.sender,
+        amount: tx._form.amount,
+        nftType: tx._form.nft.type,
         collectable: {
           address: tx._form.nft.address,
           id: tx._form.nft.id,
@@ -200,6 +209,17 @@ export function serializeSafeSnapTransaction(
       };
     case 'contractCall':
       return { ...base, type: 'contractInteraction', abi: tx._form.abi };
+    case 'stakeToken':
+      // No dedicated SafeSnap wire type; serialize as the contract call it
+      // is (same ABI as createStakeTokenTransaction) instead of falling
+      // through to an untyped raw transaction.
+      return {
+        ...base,
+        type: 'contractInteraction',
+        abi: [
+          'function submit(address _referral) external payable returns (uint256)'
+        ]
+      };
     default:
       return base;
   }

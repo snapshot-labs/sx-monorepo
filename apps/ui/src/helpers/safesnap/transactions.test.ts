@@ -134,6 +134,31 @@ describe('serializeSafeSnapTransaction', () => {
 
     expect(serializeSafeSnapTransaction(tx).type).toBeUndefined();
   });
+
+  it('round-trips an ERC-1155 NFT transfer, including quantity > 1', () => {
+    const tx: Transaction = {
+      to: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
+      value: '0',
+      data: '0xf242432a',
+      salt: '',
+      _type: 'sendNft',
+      _form: {
+        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        sender: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
+        amount: '5',
+        nft: {
+          type: 'erc1155',
+          address: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
+          id: '1',
+          name: 'Test NFT',
+          collection: 'Test Collection'
+        }
+      }
+    };
+
+    const serialized = serializeSafeSnapTransaction(tx);
+    expect(parseSafeSnapTransaction(serialized)).toEqual(tx);
+  });
 });
 
 describe('createSafeSnapExecution', () => {
