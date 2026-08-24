@@ -33,6 +33,7 @@ export async function plan(now: number): Promise<number> {
           space: proposal.space.id,
           voter,
           notBefore: proposal.end - CAST_WINDOW,
+          proposalEnd: proposal.end,
           created: now,
           updated: now
         }))

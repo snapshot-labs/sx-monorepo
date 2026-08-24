@@ -6,6 +6,7 @@ const proposal = (overrides: Partial<Proposal> = {}): Proposal => ({
   id: '0x1',
   space: { id: 'robots.0cf5e.eth' },
   title: 'Test',
+  body: '',
   type: 'single-choice',
   privacy: '',
   choices: ['For', 'Against'],

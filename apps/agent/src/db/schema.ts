@@ -1,5 +1,6 @@
 import {
   integer,
+  numeric,
   pgEnum,
   pgTable,
   primaryKey,
@@ -10,6 +11,7 @@ import {
 
 export const jobStatus = pgEnum('job_status', [
   'pending',
+  'predicting',
   'predicted',
   'cast',
   'skipped',
@@ -26,10 +28,14 @@ export const jobs = pgTable(
     choice: integer('choice'),
     confidence: varchar('confidence', { length: 8 }),
     reasoning: text('reasoning'),
+    model: varchar('model', { length: 64 }),
+    cost: numeric('cost', { precision: 10, scale: 6 }),
     skipReason: varchar('skip_reason', { length: 64 }),
     attempts: smallint('attempts').notNull().default(0),
     /** Earliest timestamp at which the vote may be cast. */
     notBefore: integer('not_before').notNull(),
+    proposalEnd: integer('proposal_end').notNull().default(0),
+    lockedUntil: integer('locked_until'),
     /** Sequencer message id, the receipt that this job actually voted. */
     voteId: varchar('vote_id', { length: 66 }),
     created: integer('created').notNull(),

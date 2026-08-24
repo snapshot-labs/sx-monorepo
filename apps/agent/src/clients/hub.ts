@@ -4,16 +4,43 @@ export type Proposal = {
   id: string;
   space: { id: string };
   title: string;
+  body: string;
   type: string;
   privacy: string;
   choices: string[];
   end: number;
 };
 
+export type Vote = {
+  id: string;
+  voter: string;
+  space: { id: string };
+  proposal: { id: string };
+  choice: number;
+  reason: string;
+  created: number;
+};
+
 type GraphqlResponse<T> = {
   data: T | null;
   errors?: { message: string }[];
 };
+
+const PAGE_SIZE = 1000;
+const ID_CHUNK_SIZE = 50;
+
+const PROPOSAL_FIELDS = `
+  id
+  space {
+    id
+  }
+  title
+  body
+  type
+  privacy
+  choices
+  end
+`;
 
 /**
  * The hub answers 200 with a null field on partial errors, so anything in
@@ -53,15 +80,7 @@ export async function getActiveProposals(
         orderBy: "created"
         orderDirection: desc
       ) {
-        id
-        space {
-          id
-        }
-        title
-        type
-        privacy
-        choices
-        end
+        ${PROPOSAL_FIELDS}
       }
     }`,
     { spaces, types: SUPPORTED_TYPES }
@@ -101,4 +120,73 @@ export async function getVotersWhoVoted(
   );
 
   return votes.map(vote => vote.voter);
+}
+
+export async function getVoteHistory(
+  spaces: string[],
+  voters: string[]
+): Promise<Vote[]> {
+  if (!voters.length) return [];
+
+  const seen = new Set<string>();
+  const history: Vote[] = [];
+  let createdLt: number | undefined;
+
+  for (;;) {
+    const { votes } = await gql<{ votes: Vote[] }>(
+      `query VoteHistory($spaces: [String]!, $voters: [String]!, $createdLt: Int) {
+        votes(
+          first: ${PAGE_SIZE}
+          where: { space_in: $spaces, voter_in: $voters, created_lt: $createdLt }
+          orderBy: "created"
+          orderDirection: desc
+        ) {
+          id
+          voter
+          space {
+            id
+          }
+          proposal {
+            id
+          }
+          choice
+          reason
+          created
+        }
+      }`,
+      { spaces, voters, createdLt }
+    );
+
+    for (const vote of votes) {
+      if (seen.has(vote.id)) continue;
+
+      seen.add(vote.id);
+      history.push(vote);
+    }
+
+    const last = votes.at(-1);
+    if (votes.length < PAGE_SIZE || !last) return history;
+
+    createdLt = last.created + 1;
+  }
+}
+
+export async function getProposals(ids: string[]): Promise<Proposal[]> {
+  const proposals: Proposal[] = [];
+
+  for (let i = 0; i < ids.length; i += ID_CHUNK_SIZE) {
+    const chunk = ids.slice(i, i + ID_CHUNK_SIZE);
+    const { proposals: page } = await gql<{ proposals: Proposal[] }>(
+      `query Proposals($ids: [String]!) {
+        proposals(first: ${ID_CHUNK_SIZE}, where: { id_in: $ids }) {
+          ${PROPOSAL_FIELDS}
+        }
+      }`,
+      { ids: chunk }
+    );
+
+    proposals.push(...page);
+  }
+
+  return proposals;
 }
