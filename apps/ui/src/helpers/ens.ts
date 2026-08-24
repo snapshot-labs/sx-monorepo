@@ -36,7 +36,8 @@ const ENS_CONTRACTS: ENSContracts = {
   universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
   universalResolverAbi: [
     'function resolve(bytes name, bytes data) view returns (bytes, address)',
-    'function findOwner(bytes name) view returns (address)'
+    'function findOwner(bytes name) view returns (address)',
+    'function findResolver(bytes name) view returns (address, bytes32, uint256)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   nameWrappers: {
@@ -225,14 +226,9 @@ export async function setEnsTextRecord(
     throw new Error('Unsupported chainId');
   }
 
-  const provider = getProvider(chainId);
-  const ensHash = namehash(ensNormalize(ens));
-
-  const resolverAddress = await call(provider, ENS_CONTRACTS.registryAbi, [
-    ENS_CONTRACTS.registry,
-    'resolver',
-    [ensHash]
-  ]);
+  const normalized = ensNormalize(ens);
+  const ensHash = namehash(normalized);
+  const resolverAddress = await getResolver(normalized, chainId);
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
     throw new Error('No resolver set for name');
@@ -246,22 +242,51 @@ export async function setEnsTextRecord(
   return contract.setText(ensHash, record, value);
 }
 
+// findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
+// absent from ENSv2 resolves the empty address successfully, so any revert
+// is a genuine failure and must throw, never resolve a stale v1 owner
+async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
+  if (chainId !== 11155111) return null;
+
+  const owner = await call(
+    getProvider(chainId),
+    ENS_CONTRACTS.universalResolverAbi,
+    [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
+  );
+
+  return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
+}
+
+// the resolver a record write must go to: a name migrated to ENSv2 has its
+// resolver in the v2 registry, which the Universal Resolver finds; every
+// other name keeps the v1 registry's resolver. An offset means the resolver
+// belongs to a parent name, so this name has none of its own
+export async function getResolver(name: string, chainId: ENSChainId) {
+  const provider = getProvider(chainId);
+
+  if (await getEnsOwnerV2(name, chainId)) {
+    const [resolver, , offset] = await call(
+      provider,
+      ENS_CONTRACTS.universalResolverAbi,
+      [ENS_CONTRACTS.universalResolver, 'findResolver', [dnsEncodeName(name)]]
+    );
+
+    return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
+  }
+
+  return call(provider, ENS_CONTRACTS.registryAbi, [
+    ENS_CONTRACTS.registry,
+    'resolver',
+    [namehash(name)]
+  ]);
+}
+
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensHash = namehash(name);
 
-  // findOwner is ENSv2-only, live on Sepolia and not yet on mainnet. A name
-  // absent from ENSv2 resolves the empty address successfully, so any revert
-  // is a genuine failure and must throw, never resolve a stale v1 owner
-  if (chainId === 11155111) {
-    const ensOwnerV2 = await call(
-      provider,
-      ENS_CONTRACTS.universalResolverAbi,
-      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
-    );
-
-    if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
-  }
+  const ensOwnerV2 = await getEnsOwnerV2(name, chainId);
+  if (ensOwnerV2) return ensOwnerV2;
 
   let owner = await call(
     provider,
