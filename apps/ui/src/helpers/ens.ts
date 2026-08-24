@@ -58,7 +58,7 @@ const ENS_CONTRACTS: ENSContracts = {
 
 // dnsEncode from @ethersproject/hash rejects labels over 63 bytes; labels
 // over 255 bytes carry their labelhash instead, as viem encodes them
-function dnsEncodeName(name: string): string {
+export function dnsEncodeName(name: string): string {
   const value = name.replace(/^\.|\.$/g, '');
   const labels = (value ? value.split('.') : []).map(label => {
     const bytes = toUtf8Bytes(label);

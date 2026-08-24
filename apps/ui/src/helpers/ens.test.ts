@@ -1,7 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { getNameOwner, getSpaceController } from './ens';
+import { dnsEncodeName, getNameOwner, getSpaceController } from './ens';
 
 describe('ens', () => {
+  describe('dnsEncodeName', () => {
+    it('should encode each label with a raw length byte', () => {
+      expect(dnsEncodeName('test123.eth')).toBe('0x07746573743132330365746800');
+      expect(dnsEncodeName(`${'a'.repeat(84)}.eth`)).toBe(
+        `0x54${'61'.repeat(84)}0365746800`
+      );
+    });
+
+    it('should encode a label longer than 255 bytes as its labelhash', () => {
+      expect(dnsEncodeName(`${'a'.repeat(256)}.eth`)).toBe(
+        `0x42${Buffer.from(
+          '[1daa7034adab66d9ec9e03e2c89201b83a7497e85dc5b971aa9dae2ccbb7a208]'
+        ).toString('hex')}0365746800`
+      );
+    });
+  });
+
   describe('getNameOwner', () => {
     describe('for names migrated to ENSv2', () => {
       it('should return the owner of a migrated name on testnet', async () => {
