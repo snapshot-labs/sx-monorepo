@@ -11,6 +11,9 @@ const config: KnipConfig = {
       entry: ['scripts/*.ts'],
       ignore: ['docs/**']
     },
+    'apps/agent': {
+      ignoreDependencies: ['@logtail/pino', 'pino-pretty']
+    },
     'apps/api': {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty']
     },

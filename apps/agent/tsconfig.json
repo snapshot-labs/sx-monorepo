@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["bun"]
+  },
+  "include": ["src/**/*.ts", "testSetup.ts", "drizzle.config.ts"]
+}
