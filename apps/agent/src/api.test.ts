@@ -1,14 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 import { app } from './api';
-import { AGENT_CONTEXT } from './context';
 
 describe('GET /', () => {
-  test('publishes the signer and the shared context', async () => {
+  test('publishes the signer and the spaces it votes in', async () => {
     const res = await app.request('/');
     expect(res.status).toBe(200);
 
     const body = await res.json();
-    expect(body.context).toBe(AGENT_CONTEXT);
     expect(body).toHaveProperty('signer');
     expect(body.spaces).toEqual(['robots.0cf5e.eth']);
   });

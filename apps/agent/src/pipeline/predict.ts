@@ -1,25 +1,18 @@
-import { and, eq, lte, or } from 'drizzle-orm';
-import {
-  getProposals,
-  getVoteHistory,
-  getVotersWhoVoted,
-  Proposal,
-  Vote
-} from '../clients/hub';
+import { and, eq, inArray, lte, or } from 'drizzle-orm';
+import { getProposals, getVotersWhoVoted, Proposal } from '../clients/hub';
 import { predictVote } from '../clients/openrouter';
 import {
   CONFIDENCE_LEVELS,
   MAX_ATTEMPTS,
   MIN_CONFIDENCE,
-  MIN_HISTORY,
   MODEL,
   PREDICT_BATCH,
   PREDICT_LEASE
 } from '../config';
 import { SYSTEM_PROMPT } from '../context';
-import { db, Job, jobs } from '../db';
+import { contexts, db, Job, jobs } from '../db';
 import logger from '../logger';
-import { buildInstructions, buildProposals, buildVoterHistory } from './prompt';
+import { buildInstructions, buildProposal } from './prompt';
 
 export function meetsConfidence(confidence: string): boolean {
   const level = CONFIDENCE_LEVELS.indexOf(
@@ -33,17 +26,11 @@ function byId(proposals: Proposal[]): Map<string, Proposal> {
   return new Map(proposals.map(proposal => [proposal.id, proposal]));
 }
 
-function groupVotes(history: Vote[]): Map<string, Vote[]> {
-  const grouped = new Map<string, Vote[]>();
-
-  for (const vote of history) {
-    const key = `${vote.voter}:${vote.space.id}`;
-    grouped.set(key, [...(grouped.get(key) ?? []), vote]);
-  }
-
-  return grouped;
-}
-
+/**
+ * Marks a batch as ours and lets the transaction go, so nothing is held while
+ * the model runs. `SKIP LOCKED` keeps two runners off the same rows, and the
+ * lease lets the reaper free rows whose runner died.
+ */
 async function claim(now: number): Promise<Job[]> {
   return db.transaction(async tx => {
     const claimed = await tx
@@ -124,6 +111,26 @@ async function loadVotedByProposal(
   return byProposal;
 }
 
+async function loadContexts(claimed: Job[]): Promise<Map<string, string>> {
+  const rows = await db
+    .select()
+    .from(contexts)
+    .where(
+      and(
+        inArray(
+          contexts.address,
+          claimed.map(job => job.voter)
+        ),
+        inArray(
+          contexts.space,
+          claimed.map(job => job.space)
+        )
+      )
+    );
+
+  return new Map(rows.map(row => [`${row.address}:${row.space}`, row.context]));
+}
+
 export async function predict(now: number): Promise<number> {
   const claimed = await claim(now);
   if (!claimed.length) return 0;
@@ -131,17 +138,10 @@ export async function predict(now: number): Promise<number> {
   const targets = byId(
     await getProposals([...new Set(claimed.map(job => job.proposal))])
   );
-  const history = await getVoteHistory(
-    [...new Set(claimed.map(job => job.space))],
-    [...new Set(claimed.map(job => job.voter))]
-  );
-  const past = byId(
-    await getProposals([...new Set(history.map(vote => vote.proposal.id))])
-  );
-  const votesByVoter = groupVotes(history);
   const votedByProposal = await loadVotedByProposal(claimed);
+  const contextByVoterSpace = await loadContexts(claimed);
 
-  const proposalsText = new Map<string, string>();
+  const proposalText = new Map<string, string>();
   let spent = 0;
 
   for (const job of claimed) {
@@ -156,29 +156,23 @@ export async function predict(now: number): Promise<number> {
       continue;
     }
 
-    const votes = votesByVoter.get(`${job.voter}:${job.space}`) ?? [];
-    if (votes.length < MIN_HISTORY) {
-      await skip(job, 'thin_history', now);
+    const context = contextByVoterSpace.get(`${job.voter}:${job.space}`);
+    if (!context) {
+      await skip(job, 'no_context', now);
       continue;
     }
 
-    let text = proposalsText.get(job.proposal);
+    let text = proposalText.get(job.proposal);
     if (!text) {
-      const spacePast = [...past.values()].filter(
-        proposal =>
-          proposal.space.id === job.space && proposal.id !== job.proposal
-      );
-
-      text = buildProposals(target, spacePast);
-      proposalsText.set(job.proposal, text);
+      text = buildProposal(target);
+      proposalText.set(job.proposal, text);
     }
 
     try {
       const { prediction, cost } = await predictVote({
         system: SYSTEM_PROMPT,
-        proposals: text,
-        history: buildVoterHistory(job.voter, votes, past),
-        instructions: buildInstructions(),
+        proposal: text,
+        instructions: buildInstructions(context),
         choices: target.choices
       });
 

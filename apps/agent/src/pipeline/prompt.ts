@@ -1,6 +1,5 @@
-import { Proposal, Vote } from '../clients/hub';
-import { BODY_LIMIT, HISTORY_LIMIT } from '../config';
-import { AGENT_CONTEXT } from '../context';
+import { Proposal } from '../clients/hub';
+import { BODY_LIMIT } from '../config';
 
 function cut(text: string, limit: number): string {
   return text.length > limit ? `${text.slice(0, limit)}...` : text;
@@ -31,12 +30,9 @@ export function renderOptions(proposal: Proposal): string {
   return proposal.choices.map(choice => `- ${choice}`).join('\n');
 }
 
-export function renderChoice(proposal: Proposal, choice: number): string {
-  return proposal.choices[choice - 1] ?? `#${choice}`;
-}
-
-function renderProposal(proposal: Proposal): string {
+export function buildProposal(proposal: Proposal): string {
   return [
+    `<proposal space="${proposal.space.id}">`,
     `<title>${clean(proposal.title)}</title>`,
     `<ends>${day(proposal.end)}</ends>`,
     '<body>',
@@ -44,66 +40,15 @@ function renderProposal(proposal: Proposal): string {
     '</body>',
     '<options>',
     renderOptions(proposal),
-    '</options>'
+    '</options>',
+    '</proposal>'
   ].join('\n');
 }
 
-export function buildProposals(target: Proposal, past: Proposal[]): string {
-  const older = [...past]
-    .sort((a, b) => b.end - a.end)
-    .map(
-      (proposal, index) =>
-        `<proposal index="${index + 1}">\n${renderProposal(proposal)}\n</proposal>`
-    )
-    .join('\n');
-
+export function buildInstructions(context: string): string {
   return [
-    `<proposals space="${target.space.id}">`,
-    '<open_proposal>',
-    renderProposal(target),
-    '</open_proposal>',
-    '<past_proposals>',
-    older,
-    '</past_proposals>',
-    '</proposals>'
+    '<voter_instructions>',
+    escapeTags(context),
+    '</voter_instructions>'
   ].join('\n');
-}
-
-export function buildVoterHistory(
-  voter: string,
-  votes: Vote[],
-  proposals: Map<string, Proposal>
-): string {
-  const entries = votes
-    .slice(0, HISTORY_LIMIT)
-    .map(vote => {
-      const proposal = proposals.get(vote.proposal.id);
-      if (!proposal) return null;
-
-      const reason = vote.reason.trim();
-
-      return [
-        '<vote>',
-        `<date>${day(vote.created)}</date>`,
-        `<proposal>${clean(proposal.title)}</proposal>`,
-        `<choice>${renderChoice(proposal, vote.choice)}</choice>`,
-        reason ? `<reason>${cut(clean(reason), 500)}</reason>` : null,
-        '</vote>'
-      ]
-        .filter(line => line !== null)
-        .join('\n');
-    })
-    .filter(entry => entry !== null);
-
-  return [
-    `<voter_votes voter="${voter}">`,
-    entries.join('\n'),
-    '</voter_votes>'
-  ].join('\n');
-}
-
-export function buildInstructions(): string {
-  return ['<voter_instructions>', AGENT_CONTEXT, '</voter_instructions>'].join(
-    '\n'
-  );
 }

@@ -11,23 +11,14 @@ export type Proposal = {
   end: number;
 };
 
-export type Vote = {
-  id: string;
-  voter: string;
-  space: { id: string };
-  proposal: { id: string };
-  choice: number;
-  reason: string;
-  created: number;
-};
-
 type GraphqlResponse<T> = {
   data: T | null;
   errors?: { message: string }[];
 };
 
-const PAGE_SIZE = 1000;
 const ID_CHUNK_SIZE = 50;
+
+const ALIAS_PERIOD = 90 * 24 * 60 * 60;
 
 const PROPOSAL_FIELDS = `
   id
@@ -122,55 +113,6 @@ export async function getVotersWhoVoted(
   return votes.map(vote => vote.voter);
 }
 
-export async function getVoteHistory(
-  spaces: string[],
-  voters: string[]
-): Promise<Vote[]> {
-  if (!voters.length) return [];
-
-  const seen = new Set<string>();
-  const history: Vote[] = [];
-  let createdLt: number | undefined;
-
-  for (;;) {
-    const { votes } = await gql<{ votes: Vote[] }>(
-      `query VoteHistory($spaces: [String]!, $voters: [String]!, $createdLt: Int) {
-        votes(
-          first: ${PAGE_SIZE}
-          where: { space_in: $spaces, voter_in: $voters, created_lt: $createdLt }
-          orderBy: "created"
-          orderDirection: desc
-        ) {
-          id
-          voter
-          space {
-            id
-          }
-          proposal {
-            id
-          }
-          choice
-          reason
-          created
-        }
-      }`,
-      { spaces, voters, createdLt }
-    );
-
-    for (const vote of votes) {
-      if (seen.has(vote.id)) continue;
-
-      seen.add(vote.id);
-      history.push(vote);
-    }
-
-    const last = votes.at(-1);
-    if (votes.length < PAGE_SIZE || !last) return history;
-
-    createdLt = last.created + 1;
-  }
-}
-
 export async function getProposals(ids: string[]): Promise<Proposal[]> {
   const proposals: Proposal[] = [];
 
@@ -189,4 +131,21 @@ export async function getProposals(ids: string[]): Promise<Proposal[]> {
   }
 
   return proposals;
+}
+
+export async function getAliasOwner(
+  alias: string
+): Promise<string | undefined> {
+  const createdGt = Math.floor(Date.now() / 1000) - ALIAS_PERIOD;
+
+  const { aliases } = await gql<{ aliases: { address: string }[] }>(
+    `query AliasOwner($alias: String!, $createdGt: Int!) {
+      aliases(first: 1, where: { alias: $alias, created_gt: $createdGt }) {
+        address
+      }
+    }`,
+    { alias, createdGt }
+  );
+
+  return aliases[0]?.address;
 }

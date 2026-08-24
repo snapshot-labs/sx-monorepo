@@ -31,7 +31,11 @@ function responseFormat(choices: string[]) {
             description: 'the option this person would pick, word for word'
           },
           confidence: { type: 'string', enum: [...CONFIDENCE_LEVELS] },
-          reasoning: { type: 'string' }
+          reasoning: {
+            type: 'string',
+            description:
+              "why this option, in the voter's own words and first person"
+          }
         },
         required: ['choice', 'confidence', 'reasoning'],
         additionalProperties: false
@@ -43,20 +47,18 @@ function responseFormat(choices: string[]) {
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * `proposals` is the same text for every voter on a proposal, so it is sent as
- * its own leading block with a cache breakpoint. The other voters on that
- * proposal then read it from cache instead of paying for it again.
+ * The proposal reads the same for every voter on it, so it is sent as its own
+ * leading block with a cache breakpoint. The other voters on that proposal
+ * then read it from cache instead of paying for it again.
  */
 export async function predictVote({
   system,
-  proposals,
-  history,
+  proposal,
   instructions,
   choices
 }: {
   system: string;
-  proposals: string;
-  history: string;
+  proposal: string;
   instructions: string;
   choices: string[];
 }): Promise<{ prediction: Prediction; cost: number }> {
@@ -70,10 +72,9 @@ export async function predictVote({
         content: [
           {
             type: 'text',
-            text: proposals,
+            text: proposal,
             cache_control: { type: 'ephemeral' }
           },
-          { type: 'text', text: history },
           { type: 'text', text: instructions }
         ]
       }

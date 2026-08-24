@@ -48,5 +48,19 @@ export const jobs = pgTable(
   table => [primaryKey({ columns: [table.proposal, table.voter] })]
 );
 
+export const contexts = pgTable(
+  'contexts',
+  {
+    address: varchar('address', { length: 100 }).notNull(),
+    space: varchar('space', { length: 64 }).notNull(),
+    context: text('context').notNull(),
+    created: integer('created').notNull(),
+    updated: integer('updated').notNull()
+  },
+  table => [primaryKey({ columns: [table.address, table.space] })]
+);
+
+export type Context = typeof contexts.$inferSelect;
+
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
