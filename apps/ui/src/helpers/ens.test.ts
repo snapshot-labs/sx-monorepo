@@ -9,6 +9,11 @@ describe('ens', () => {
         expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
       }, 10000);
 
+      it('should resolve a case variant to the same owner', async () => {
+        const owner = await getNameOwner('TEST123.eth', 11155111);
+        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+      }, 10000);
+
       it('should resolve the same address as the space controller', async () => {
         const controller = await getSpaceController('test123.eth', 11155111);
         expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');

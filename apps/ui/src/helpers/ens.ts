@@ -193,7 +193,8 @@ export async function setEnsTextRecord(
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
-  const ensHash = namehash(name);
+  const normalized = ensNormalize(name);
+  const ensHash = namehash(normalized);
 
   // findOwner is ENSv2-only; an unmigrated name returns the empty address,
   // so a revert is a failure and must not fall back to a stale v1 owner
@@ -201,7 +202,11 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
     const ensOwnerV2 = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
-      [ENS_CONTRACTS.universalResolver, 'findOwner', [dnsEncodeName(name)]]
+      [
+        ENS_CONTRACTS.universalResolver,
+        'findOwner',
+        [dnsEncodeName(normalized)]
+      ]
     );
 
     if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
@@ -216,14 +221,16 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
     }
   );
 
-  if (!name.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = (await getAddresses([name], chainId))[name];
-    const nameTokens = name.split('.');
+  if (!normalized.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
+    const resolvedAddress = (await getAddresses([normalized], chainId))[
+      normalized
+    ];
+    const nameTokens = normalized.split('.');
 
     if (nameTokens.length > 2) {
       owner = resolvedAddress || EVM_EMPTY_ADDRESS;
     } else if (nameTokens.length === 2 && resolvedAddress) {
-      owner = await getDNSOwner(name);
+      owner = await getDNSOwner(normalized);
     }
   }
 
