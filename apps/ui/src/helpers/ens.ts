@@ -3,6 +3,7 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { concat, hexlify } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
+import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
@@ -55,9 +56,16 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
-// dnsEncode from @ethersproject/hash rejects labels over 63 bytes
+// dnsEncode from @ethersproject/hash rejects labels over 63 bytes; labels
+// over 255 bytes carry their labelhash instead, as viem encodes them
 function dnsEncodeName(name: string): string {
-  const labels = name.split('.').map(label => toUtf8Bytes(label));
+  const value = name.replace(/^\.|\.$/g, '');
+  const labels = (value ? value.split('.') : []).map(label => {
+    const bytes = toUtf8Bytes(label);
+    return bytes.length > 255
+      ? toUtf8Bytes(`[${keccak256(bytes).slice(2)}]`)
+      : bytes;
+  });
 
   return hexlify(
     concat([

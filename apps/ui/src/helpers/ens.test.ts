@@ -36,6 +36,11 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
+      it('should encode a label longer than 255 bytes as its labelhash', async () => {
+        const owner = await getNameOwner(`${'a'.repeat(256)}.eth`, 11155111);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      }, 10000);
+
       it('should encode a multi-byte emoji label', async () => {
         const owner = await getNameOwner('🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth', 11155111);
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
