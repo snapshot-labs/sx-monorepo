@@ -3,17 +3,13 @@ import { sha256 } from './utils';
 const DAY_IN_SECONDS = 24 * 60 * 60;
 const DEFAULT_CUTOFF_DAYS = 365;
 
-export type HistoricalAccessMode = 'off' | 'observe' | 'enforce';
-export type HistoricalAccessKeyState =
-  | 'anonymous'
-  | 'keyed'
-  | 'entitled'
-  | 'internal';
+type HistoricalAccessMode = 'off' | 'observe' | 'enforce';
+type HistoricalAccessKeyState = 'anonymous' | 'keyed' | 'entitled' | 'internal';
 export type HistoricalAccessRequestClass =
   | 'recent_bounded'
   | 'explicit_history'
   | 'unbounded';
-export type HistoricalAccessOutcome = 'allowed' | 'observed' | 'restricted';
+type HistoricalAccessOutcome = 'allowed' | 'observed' | 'restricted';
 
 export type HistoricalAccessConfig = {
   mode: HistoricalAccessMode;
@@ -40,7 +36,7 @@ export type HistoricalAccessContext = {
   onRestricted?: () => void;
 };
 
-export type HistoricalAccessMetric = {
+type HistoricalAccessMetric = {
   resource: string;
   key_state: HistoricalAccessKeyState;
   request_class: HistoricalAccessRequestClass;
