@@ -63,7 +63,7 @@ async function rpcCall(method: string, params: any) {
 
 // The API buckets usage by the legacy period strings DD-MM-YYYY (day) and
 // MM-YYYY (month), in UTC.
-function buildUsage(
+export function buildUsage(
   rows: { app: string; period: string; total: number }[],
   count: number,
   unit: 'day' | 'month'
