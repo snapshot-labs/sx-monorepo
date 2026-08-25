@@ -6,6 +6,8 @@ import {
   getSpaceController
 } from './ens';
 
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 describe('ens', () => {
   describe('dnsEncodeName', () => {
     it('should encode each label with a raw length byte', () => {
@@ -132,36 +134,85 @@ describe('ens', () => {
 
   describe('getEnsTextRecord', () => {
     it('should read a record through the Universal Resolver', async () => {
-      const record = await getEnsTextRecord('ens.eth', 'avatar', 1);
-      expect(record).toMatch(/^https?:\/\//);
+      const record = await getEnsTextRecord(
+        'boorger.eth',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
     }, 10000);
 
     it('should return null for an unset record', async () => {
-      const record = await getEnsTextRecord('vitalik.eth', 'snapshot', 1);
+      const record = await getEnsTextRecord(
+        'demodao.eth',
+        'snapshot',
+        11155111
+      );
       expect(record).toBe(null);
     }, 10000);
 
-    // un-imported DNS domains answer every read with a resolver-level revert
-    it('should return null for an un-imported DNS domain', async () => {
-      const record = await getEnsTextRecord('facebook.com', 'snapshot', 1);
+    it('should return null for a name without a resolver', async () => {
+      const record = await getEnsTextRecord(
+        'nonexistent-random-name.eth',
+        'snapshot',
+        11155111
+      );
       expect(record).toBe(null);
+    }, 10000);
+
+    it('should return null for an un-imported DNS domain', async () => {
+      const record = await getEnsTextRecord(
+        'facebook.com',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe(null);
+    }, 10000);
+
+    it('should reject when the resolver fails', async () => {
+      await expect(
+        getEnsTextRecord('my-dao-test.eth', 'snapshot', 11155111)
+      ).rejects.toThrow();
+    }, 10000);
+
+    it('should leave chains without a Universal Resolver on the v1 path', async () => {
+      const record = await getEnsTextRecord('stakedao.eth', 'snapshot', 1);
+      expect(record).toBe('0xB0552b6860CE5C0202976Db056b5e3Cc4f9CC765');
     }, 10000);
   });
 
   describe('getSpaceController', () => {
     it('should resolve a controller from the snapshot record', async () => {
-      const controller = await getSpaceController('stakedao.eth', 1);
-      expect(controller).toBe('0xB0552b6860CE5C0202976Db056b5e3Cc4f9CC765');
+      const controller = await getSpaceController('boorger.eth', 11155111);
+      expect(controller).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
     }, 10000);
 
     it('should resolve a DNS-imported space through its DNS owner', async () => {
-      const controller = await getSpaceController('defi.app', 1);
-      expect(controller).toBe('0x7aeB96261e9dC2C9f01BaE6A516Df80a5a98c7eB');
+      const controller = await getSpaceController('ethplay.org', 11155111);
+      expect(controller).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
     }, 10000);
 
     it('should return an empty address for an un-imported DNS domain', async () => {
-      const controller = await getSpaceController('facebook.com', 1);
-      expect(controller).toBe('0x0000000000000000000000000000000000000000');
+      const controller = await getSpaceController('facebook.com', 11155111);
+      expect(controller).toBe(EMPTY_ADDRESS);
     }, 10000);
+
+    // an expired wrapped name keeps a stale record in the v1 registry; the
+    // Universal Resolver reports no resolver, as the sequencer sees it
+    it('should not read the stale record of an expired name', async () => {
+      const controller = await getSpaceController(
+        'filecoin-test.eth',
+        11155111
+      );
+      expect(controller).toBe(EMPTY_ADDRESS);
+    }, 10000);
+
+    it.each(['my-dao-test.eth', 'poolgroup.eth'])(
+      'should reject instead of falling back to the owner when the resolver fails (%s)',
+      async name => {
+        await expect(getSpaceController(name, 11155111)).rejects.toThrow();
+      },
+      10000
+    );
   });
 });

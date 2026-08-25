@@ -91,9 +91,9 @@ function isDNSDomain(name: string): boolean {
 }
 
 function revertData(err: any): string | null {
-  const data = err?.data ?? err?.error?.data ?? err?.error?.error?.data;
-
-  return typeof data === 'string' && data.startsWith('0x') ? data : null;
+  return typeof err?.data === 'string' && err.data.startsWith('0x')
+    ? err.data
+    : null;
 }
 
 // reverts that mean "no record"; anything else (gateway 5xx, RPC failure)
@@ -119,7 +119,7 @@ function isNoRecordRevert(name: string, err: any): boolean {
       if (isDNSDomain(name)) return true;
 
       const [inner] = defaultAbiCoder.decode(['bytes'], `0x${data.slice(10)}`);
-      return inner.slice(0, 10) === NOT_IMPLEMENTED;
+      return inner === NOT_IMPLEMENTED;
     }
 
     if (selector === HTTP_ERROR) {
@@ -145,8 +145,10 @@ async function resolveRecord(
 ) {
   const provider = getProvider(chainId);
 
+  let result: string;
+
   try {
-    const [result] = await call(
+    [result] = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
       [
@@ -159,14 +161,14 @@ async function resolveRecord(
       ],
       { ccipReadEnabled: true }
     );
-
-    if (!result || result === '0x') return null;
-
-    return RESOLVER_PROFILE.decodeFunctionResult(profile, result)[0];
   } catch (err: any) {
     if (isNoRecordRevert(name, err)) return null;
     throw err;
   }
+
+  if (!result || result === '0x') return null;
+
+  return RESOLVER_PROFILE.decodeFunctionResult(profile, result)[0];
 }
 
 // see https://docs.ens.domains/registry/dns#gasless-import
