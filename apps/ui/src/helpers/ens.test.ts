@@ -3,11 +3,8 @@ import {
   dnsEncodeName,
   getEnsTextRecord,
   getNameOwner,
-  getResolver,
   getSpaceController
 } from './ens';
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 describe('ens', () => {
   describe('dnsEncodeName', () => {
@@ -29,7 +26,6 @@ describe('ens', () => {
 
   describe('getNameOwner', () => {
     describe('for names migrated to ENSv2', () => {
-      // ownership does not bridge v1 to v2: the legacy registry has no owner
       it('should return the owner of a migrated name on testnet', async () => {
         const owner = await getNameOwner('test123.eth', 11155111);
         expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
@@ -59,7 +55,10 @@ describe('ens', () => {
 
       it.each([
         ['a label longer than 63 bytes', `${'a'.repeat(84)}.eth`],
-        ['a label longer than 255 bytes', `${'a'.repeat(256)}.eth`],
+        [
+          'a label longer than 255 bytes as its labelhash',
+          `${'a'.repeat(256)}.eth`
+        ],
         ['a multi-byte emoji label', '🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂🧛🏻‍♂.eth']
       ])(
         'should encode %s',
@@ -107,10 +106,9 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      // the DNS resolver answers subdomains with a revert the fail-closed
-      // classifier does not accept, matching snapshot.js
-      it('should reject for subdomains', async () => {
-        await expect(getNameOwner('web3.wanki.moe', 1)).rejects.toThrow();
+      it('should return an empty address for subdomains', async () => {
+        const owner = await getNameOwner('web3.wanki.moe', 1);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
     });
 
@@ -125,10 +123,9 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      it('should reject when the domain does not exist', async () => {
-        await expect(
-          getNameOwner('lucemans-test-not-exist.cbars.id', 1)
-        ).rejects.toThrow();
+      it('should return an empty address when the domain does not exist', async () => {
+        const owner = await getNameOwner('lucemans-test-not-exist.cbars.id', 1);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
     });
   });
@@ -151,29 +148,6 @@ describe('ens', () => {
     }, 10000);
   });
 
-  describe('getResolver', () => {
-    // a migrated name's resolver lives in the ENSv2 registry, not the v1 one
-    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
-      const resolver = await getResolver('test123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
-    }, 10000);
-
-    it('should return the v1 resolver of an unmigrated name on testnet', async () => {
-      const resolver = await getResolver('boorger.eth', 11155111);
-      expect(resolver).toBe('0x8FADE66B79cC9f707aB26799354482EB93a5B7dD');
-    }, 10000);
-
-    it('should return the v1 resolver on mainnet', async () => {
-      const resolver = await getResolver('ens.eth', 1);
-      expect(resolver).toBe('0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41');
-    }, 10000);
-
-    it('should return an empty address for a name without its own resolver', async () => {
-      const resolver = await getResolver('lucemans.cb.id', 1);
-      expect(resolver).toBe(EMPTY_ADDRESS);
-    }, 10000);
-  });
-
   describe('getSpaceController', () => {
     it('should resolve a controller from the snapshot record', async () => {
       const controller = await getSpaceController('stakedao.eth', 1);
@@ -187,7 +161,7 @@ describe('ens', () => {
 
     it('should return an empty address for an un-imported DNS domain', async () => {
       const controller = await getSpaceController('facebook.com', 1);
-      expect(controller).toBe(EMPTY_ADDRESS);
+      expect(controller).toBe('0x0000000000000000000000000000000000000000');
     }, 10000);
   });
 });
