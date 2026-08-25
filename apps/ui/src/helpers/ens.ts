@@ -40,7 +40,8 @@ const ENS_CONTRACTS: ENSContracts = {
   },
   universalResolverAbi: [
     'function resolve(bytes name, bytes data) view returns (bytes, address)',
-    'function findOwner(bytes name) view returns (address)'
+    'function findOwner(bytes name) view returns (address)',
+    'function findResolver(bytes name) view returns (address, bytes32, uint256)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
@@ -283,13 +284,9 @@ export async function setEnsTextRecord(
 ) {
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  const ensHash = namehash(ensNormalize(ens));
-
-  const resolverAddress = await call(
-    getProvider(chainId),
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
-  );
+  const normalized = ensNormalize(ens);
+  const ensHash = namehash(normalized);
+  const resolverAddress = await getResolver(normalized, chainId);
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
     throw new Error('No resolver set for name');
@@ -303,22 +300,54 @@ export async function setEnsTextRecord(
   return contract.setText(ensHash, record, value);
 }
 
+// findOwner is ENSv2-only; an unmigrated name returns the empty address,
+// so a revert is a failure and must not fall back to a stale v1 owner
+async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
+
+  if (!universalResolver) return null;
+
+  const owner = await call(
+    getProvider(chainId),
+    ENS_CONTRACTS.universalResolverAbi,
+    [universalResolver, 'findOwner', [dnsEncodeName(name)]]
+  );
+
+  return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
+}
+
+// a non-zero offset means the resolver belongs to a parent name, so this
+// name has none of its own to write to
+export async function getResolver(name: string, chainId: ENSChainId) {
+  const provider = getProvider(chainId);
+
+  if (await getEnsOwnerV2(name, chainId)) {
+    const [resolver, , offset] = await call(
+      provider,
+      ENS_CONTRACTS.universalResolverAbi,
+      [
+        ENS_CONTRACTS.universalResolver[chainId],
+        'findResolver',
+        [dnsEncodeName(name)]
+      ]
+    );
+
+    return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
+  }
+
+  return call(provider, ENS_CONTRACTS.registryAbi, [
+    ENS_CONTRACTS.registry,
+    'resolver',
+    [namehash(name)]
+  ]);
+}
+
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const normalized = ensNormalize(name);
 
-  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
-  // findOwner is ENSv2-only; an unmigrated name returns the empty address,
-  // so a revert is a failure and must not fall back to a stale v1 owner
-  if (universalResolver) {
-    const ensOwnerV2 = await call(
-      provider,
-      ENS_CONTRACTS.universalResolverAbi,
-      [universalResolver, 'findOwner', [dnsEncodeName(normalized)]]
-    );
-
-    if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
-  }
+  const ensOwnerV2 = await getEnsOwnerV2(normalized, chainId);
+  if (ensOwnerV2) return ensOwnerV2;
 
   const ensHash = namehash(normalized);
 
