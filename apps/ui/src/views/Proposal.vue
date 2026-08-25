@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getBoostsCount } from '@/helpers/boost';
 import { DOCS_URL, FLAGS } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
@@ -26,7 +25,6 @@ const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
-const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
 
@@ -96,11 +94,10 @@ async function handleVoteSubmitted() {
 
 watch(
   [id, proposal, isPending],
-  async ([id, proposal, isPending]) => {
+  async ([, proposal, isPending]) => {
     modalOpenVote.value = false;
     editMode.value = false;
     discourseTopic.value = null;
-    boostCount.value = 0;
 
     if (!isPending && !proposal) {
       router.push({
@@ -115,15 +112,6 @@ watch(
     if (discussion.value) {
       loadSingleTopic(discussion.value).then(result => {
         discourseTopic.value = result;
-      });
-    }
-
-    if (props.space.additionalRawData?.boost?.enabled) {
-      const bribeEnabled =
-        props.space.additionalRawData.boost.bribeEnabled || false;
-      const proposalEnd = proposal.max_end || 0;
-      getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
-        boostCount.value = result;
       });
     }
   },
@@ -235,18 +223,6 @@ watchEffect(() => {
               <AppLink v-else :to="discussion" class="flex items-center">
                 <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </AppLink>
-            </template>
-            <template v-if="boostCount > 0">
-              <AppLink
-                :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
-                class="flex items-center"
-              >
-                <UiLabel
-                  :count="boostCount"
-                  text="Boost"
-                  class="inline-block"
-                />
               </AppLink>
             </template>
           </div>
