@@ -31,11 +31,10 @@ export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   score: 0.0002
 };
 
-type UsageRows = { app: string; period: string; total: number }[];
-
 type KeysResponse = {
   keys: ApiKey[];
-  usage: {
+  // Missing until the API ships get_keys_by_owner usage support
+  usage?: {
     daily: { app: string; day: string; total: number }[];
     monthly: { app: string; month: string; total: number }[];
   };
@@ -65,12 +64,12 @@ async function rpcCall(method: string, params: any) {
 // The API buckets usage by the legacy period strings DD-MM-YYYY (day) and
 // MM-YYYY (month), in UTC.
 function buildUsage(
-  rows: UsageRows,
+  rows: { app: string; period: string; total: number }[],
   count: number,
-  unit: 'day' | 'month',
-  periodFormat: string,
-  labelFormat: string
+  unit: 'day' | 'month'
 ): UsageBucket[] {
+  const [periodFormat, labelFormat] =
+    unit === 'day' ? ['DD-MM-YYYY', 'MMM D'] : ['MM-YYYY', 'MMM'];
   const totals = new Map<string, Usage>();
   for (const row of rows) {
     const field = APP_FIELD[row.app];
@@ -116,18 +115,14 @@ export async function fetchKeys(
     keys: keys.filter(row => row.key),
     usage: {
       daily: buildUsage(
-        usage.daily.map(row => ({ ...row, period: row.day })),
+        (usage?.daily ?? []).map(row => ({ ...row, period: row.day })),
         30,
-        'day',
-        'DD-MM-YYYY',
-        'MMM D'
+        'day'
       ),
       monthly: buildUsage(
-        usage.monthly.map(row => ({ ...row, period: row.month })),
+        (usage?.monthly ?? []).map(row => ({ ...row, period: row.month })),
         12,
-        'month',
-        'MM-YYYY',
-        'MMM'
+        'month'
       )
     }
   };

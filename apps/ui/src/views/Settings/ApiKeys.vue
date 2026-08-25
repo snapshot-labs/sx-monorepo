@@ -74,7 +74,7 @@ const usageView = ref<'chart' | 'table'>('chart');
         <span class="inline-block" v-text="DESCRIPTION" />
       </div>
 
-      <div class="px-4 mt-4">
+      <div v-if="!isError" class="px-4 mt-4">
         <div class="flex items-center justify-between gap-2 mb-3">
           <UiEyebrow class="font-medium">Usage</UiEyebrow>
           <div class="flex items-center gap-2">
