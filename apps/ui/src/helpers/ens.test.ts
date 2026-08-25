@@ -141,7 +141,6 @@ describe('ens', () => {
       expect(record).toBe(null);
     }, 10000);
 
-    // un-imported DNS domains answer every read with a resolver-level revert
     it('should return null for an un-imported DNS domain', async () => {
       const record = await getEnsTextRecord('facebook.com', 'snapshot', 1);
       expect(record).toBe(null);
