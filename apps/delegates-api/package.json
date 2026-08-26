@@ -15,7 +15,7 @@
     "@apollo/server": "^5.1.0",
     "@logtail/pino": "^0.5.5",
     "@snapshot-labs/checkpoint": "^0.1.0-beta.80",
-    "@types/node": "^22.6.0",
+    "@types/node": "^24",
     "dotenv": "^16.0.1",
     "pino": "^9.9.0",
     "pino-pretty": "^13.1.1",
