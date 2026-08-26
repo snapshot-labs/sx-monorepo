@@ -9,7 +9,6 @@ import {
   CAST_BATCH,
   CAST_GAP,
   CAST_LEASE,
-  DRY_RUN,
   MAX_ATTEMPTS,
   REASON_LIMIT
 } from '../config';
@@ -122,21 +121,6 @@ export async function cast(now: number): Promise<number> {
 
     if (!job.choice) {
       await skip(job, 'no_choice', now);
-      continue;
-    }
-
-    if (DRY_RUN) {
-      logger.info(
-        {
-          proposal: job.proposal,
-          voter: job.voter,
-          choice: job.choice,
-          confidence: job.confidence
-        },
-        'dry run, would cast vote'
-      );
-
-      await skip(job, 'dry_run', now);
       continue;
     }
 

@@ -14,7 +14,7 @@ source of truth. Every tick runs the steps in order:
 | `reap`    | Frees jobs whose runner died mid prediction, and drops jobs whose proposal has closed                                                                                                     |
 | `plan`    | Reads active proposals in the watched spaces and the addresses that authorized `AGENT_SIGNER_ADDRESS` as an alias, drops voters who already voted, and inserts one job per remaining pair |
 | `predict` | Asks the model how each voter would vote, from the proposal and the context that voter saved for that space                                                                               |
-| `cast`    | Re-checks the job is still safe to send, signs the vote as the voter's alias and hands it to the sequencer. In dry run it logs and skips instead                                          |
+| `cast`    | Re-checks the job is still safe to send, signs the vote as the voter's alias and hands it to the sequencer. In dry run it does not run at all                                             |
 
 The next tick is scheduled once the previous one settles, so ticks never overlap
 and a failing tick does not stop the loop. Jobs are inserted with
@@ -34,7 +34,7 @@ pending -> predicting -> predicted -> casting -> cast
    ^            |            ^           |
    +-- reap ----+            +-- reap ---+   lease ran out, attempts + 1
 
-skipped: dry_run, already_voted, no_context, low_confidence, proposal_closed,
+skipped: already_voted, no_context, low_confidence, proposal_closed,
          alias_expired, rejected, no_choice, unknown_choice, proposal_gone
 failed:  three attempts used up
 ```

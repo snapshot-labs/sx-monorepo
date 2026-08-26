@@ -1,3 +1,4 @@
+import { DRY_RUN } from '../config';
 import logger from '../logger';
 import { cast } from './cast';
 import { plan } from './plan';
@@ -10,7 +11,7 @@ export async function tick(): Promise<void> {
   const reaped = await reap(now);
   const planned = await plan(now);
   const predicted = await predict(now);
-  const casted = await cast(now);
+  const casted = DRY_RUN ? 0 : await cast(now);
 
   logger.info({ reaped, planned, predicted, cast: casted }, 'tick done');
 }

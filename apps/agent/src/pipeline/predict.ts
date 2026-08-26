@@ -198,6 +198,17 @@ export async function predict(now: number): Promise<number> {
           updated: now
         })
         .where(and(eq(jobs.proposal, job.proposal), eq(jobs.voter, job.voter)));
+
+      logger.info(
+        {
+          proposal: job.proposal,
+          voter: job.voter,
+          choice,
+          confidence: prediction.confidence,
+          passed
+        },
+        'vote predicted'
+      );
     } catch (err) {
       await fail(job, now, err);
     }
