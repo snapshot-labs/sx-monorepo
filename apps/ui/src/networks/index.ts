@@ -71,8 +71,9 @@ export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
 
 export const getNetwork = (id: NetworkID) => {
-  if (!enabledNetworks.includes(id))
+  if (!enabledNetworks.includes(id)) {
     throw new Error(`Network ${id} is not enabled`);
+  }
 
   if (id === 's') return snapshotNetwork;
   if (id === 's-tn') return snapshotTestnetNetwork;

@@ -285,8 +285,9 @@ const spaceType = computed(() => {
 });
 
 const spaceTypeForProposalLimit = computed(() => {
-  if (lists.value['space.ecosystem.list'].includes(props.space.id))
+  if (lists.value['space.ecosystem.list'].includes(props.space.id)) {
     return 'ecosystem';
+  }
   if (props.space.additionalRawData?.flagged) return 'flagged';
   return spaceType.value;
 });
@@ -461,8 +462,9 @@ function handleTransactionAccept() {
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
-  )
+  ) {
     return;
+  }
 
   const transactions =
     proposal.value.executions[

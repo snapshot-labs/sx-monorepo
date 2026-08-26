@@ -22,8 +22,9 @@ const previewLogoUrl = computed(() => {
     !isWhiteLabel.value ||
     !logo.value ||
     logo.value === skinSettings.value?.logo
-  )
+  ) {
     return;
+  }
   return getUrl(logo.value);
 });
 
@@ -32,8 +33,9 @@ const onchainLogoUrl = computed(() => {
     !space.value ||
     offchainNetworks.includes(space.value.network) ||
     !skinSettings.value?.logo
-  )
+  ) {
     return;
+  }
   return getUrl(skinSettings.value?.logo);
 });
 

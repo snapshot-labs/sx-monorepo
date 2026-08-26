@@ -17,8 +17,9 @@ export const useMetaStore = defineStore('meta', () => {
   }
 
   function getCurrent(networkId: NetworkID): number | undefined {
-    if (evmNetworks.includes(networkId))
+    if (evmNetworks.includes(networkId)) {
       return currentBlocks.value.get(networkId);
+    }
     return currentTs.value.get(networkId);
   }
 

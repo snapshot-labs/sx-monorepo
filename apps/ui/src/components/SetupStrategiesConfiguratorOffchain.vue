@@ -76,8 +76,9 @@ function handlePopularStrategyClick(id: string) {
 }
 
 function handleSaveStrategy(value: StrategyConfig['params'], chainId: ChainId) {
-  if (!editStrategyModalStrategy.value || !editStrategyModalStrategyId.value)
+  if (!editStrategyModalStrategy.value || !editStrategyModalStrategyId.value) {
     return;
+  }
 
   const strategy: StrategyConfig = {
     ...editStrategyModalStrategy.value,
