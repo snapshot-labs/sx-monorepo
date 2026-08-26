@@ -143,7 +143,12 @@ export async function getAliasOwner(
 ): Promise<string | undefined> {
   const { aliases } = await gql<{ aliases: { address: string }[] }>(
     `query AliasOwner($alias: String!, $createdGt: Int!) {
-      aliases(first: 1, where: { alias: $alias, created_gt: $createdGt }) {
+      aliases(
+        first: 1
+        where: { alias: $alias, created_gt: $createdGt }
+        orderBy: "created"
+        orderDirection: desc
+      ) {
         address
       }
     }`,
