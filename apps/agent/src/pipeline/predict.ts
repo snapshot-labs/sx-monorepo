@@ -115,7 +115,7 @@ async function loadContexts(claimed: Job[]): Promise<Map<string, string>> {
       and(
         inArray(
           contexts.address,
-          claimed.map(job => job.voter)
+          claimed.map(job => job.voter.toLowerCase())
         ),
         inArray(
           contexts.space,
@@ -152,7 +152,9 @@ export async function predict(now: number): Promise<number> {
       continue;
     }
 
-    const context = contextByVoterSpace.get(`${job.voter}:${job.space}`);
+    const context = contextByVoterSpace.get(
+      `${job.voter.toLowerCase()}:${job.space}`
+    );
     if (!context) {
       await skip(job, 'no_context', now);
       continue;

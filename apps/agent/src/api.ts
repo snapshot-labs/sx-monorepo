@@ -40,7 +40,7 @@ app.post('/context/get', async c => {
   const rows = await db
     .select({ space: contexts.space, context: contexts.context })
     .from(contexts)
-    .where(eq(contexts.address, body.from));
+    .where(eq(contexts.address, body.from.toLowerCase()));
 
   return c.json({ contexts: rows });
 });
@@ -60,7 +60,10 @@ app.post('/context/set', async c => {
     await db
       .delete(contexts)
       .where(
-        and(eq(contexts.address, body.from), eq(contexts.space, body.space))
+        and(
+          eq(contexts.address, body.from.toLowerCase()),
+          eq(contexts.space, body.space)
+        )
       );
 
     return c.json({ removed: true });
@@ -80,7 +83,7 @@ app.post('/context/set', async c => {
   await db
     .insert(contexts)
     .values({
-      address: body.from,
+      address: body.from.toLowerCase(),
       space: body.space,
       context: body.context,
       created: now,
