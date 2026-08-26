@@ -23,8 +23,8 @@ const {
 } = useAliasWallet();
 
 const { data: agent, isPending: isLoadingAgent, isError } = useAgentInfoQuery();
-const { data: contexts } = useAgentContextsQuery(() =>
-  isRegistered.value ? aliasWallet.value : null
+const { data: contexts, isError: isContextsError } = useAgentContextsQuery(
+  () => (isRegistered.value ? aliasWallet.value : null)
 );
 
 const { data: spaces } = useSpacesByIdsQuery({
@@ -154,7 +154,10 @@ function getSpaceStatus(space: Space): SpaceStatus | null {
         </UiAlert>
 
         <UiSectionHeader label="Spaces" />
-        <UiStateWarning v-if="!spaces?.length" class="px-4 py-3">
+        <UiStateWarning v-if="isContextsError && !contexts" class="px-4 py-3">
+          Your voting contexts could not be loaded, try again later.
+        </UiStateWarning>
+        <UiStateWarning v-else-if="!spaces?.length" class="px-4 py-3">
           Agentic Voting is not supported in any space yet.
         </UiStateWarning>
         <template v-else>

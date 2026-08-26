@@ -32,8 +32,12 @@ const { data: space, isLoading: isLoadingSpace } = useSpaceQuery({
   networkId: metadataNetwork,
   spaceId
 });
-const { data: contexts, isLoading: isLoadingContexts } = useAgentContextsQuery(
-  () => (isRegistered.value ? aliasWallet.value : null)
+const {
+  data: contexts,
+  isLoading: isLoadingContexts,
+  isError: isContextsError
+} = useAgentContextsQuery(() =>
+  isRegistered.value ? aliasWallet.value : null
 );
 const {
   mutate: saveContext,
@@ -181,6 +185,10 @@ function reset(): void {
             Authenticate
           </UiButton>
         </div>
+
+        <UiStateWarning v-else-if="isContextsError && !contexts">
+          Your voting context could not be loaded, try again later.
+        </UiStateWarning>
 
         <template v-else>
           <div class="s-box">
