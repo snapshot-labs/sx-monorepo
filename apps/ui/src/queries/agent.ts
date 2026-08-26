@@ -15,11 +15,8 @@ import {
 } from '@/helpers/agent';
 
 type AgentInfo = {
-  name: string;
-  version: string;
   spaces: string[];
   signer: string;
-  dryRun: boolean;
 };
 
 export function useAgentInfoQuery() {
