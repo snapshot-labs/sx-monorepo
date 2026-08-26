@@ -5,7 +5,7 @@ const URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MAX_RETRIES = 3;
 
 export type Prediction = {
-  choice: string;
+  choice: number;
   confidence: (typeof CONFIDENCE_LEVELS)[number];
   reasoning: string;
 };
@@ -16,7 +16,7 @@ type Completion = {
   error?: { message: string };
 };
 
-function responseFormat(choices: string[]) {
+function responseFormat(choiceCount: number) {
   return {
     type: 'json_schema',
     json_schema: {
@@ -26,9 +26,9 @@ function responseFormat(choices: string[]) {
         type: 'object',
         properties: {
           choice: {
-            type: 'string',
-            enum: choices,
-            description: 'the option this person would pick, word for word'
+            type: 'integer',
+            enum: Array.from({ length: choiceCount }, (_, index) => index + 1),
+            description: 'the number of the option this person would pick'
           },
           confidence: { type: 'string', enum: [...CONFIDENCE_LEVELS] },
           reasoning: {
@@ -55,16 +55,16 @@ export async function predictVote({
   system,
   proposal,
   instructions,
-  choices
+  choiceCount
 }: {
   system: string;
   proposal: string;
   instructions: string;
-  choices: string[];
+  choiceCount: number;
 }): Promise<{ prediction: Prediction; cost: number }> {
   const body = {
     model: MODEL,
-    response_format: responseFormat(choices),
+    response_format: responseFormat(choiceCount),
     messages: [
       { role: 'system', content: system },
       {

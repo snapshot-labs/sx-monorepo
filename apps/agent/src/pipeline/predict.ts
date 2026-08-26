@@ -168,13 +168,13 @@ export async function predict(now: number): Promise<number> {
         system: SYSTEM_PROMPT,
         proposal: text,
         instructions: buildInstructions(context),
-        choices: target.choices
+        choiceCount: target.choices.length
       });
 
       spent += cost;
 
-      const choice = target.choices.indexOf(prediction.choice) + 1;
-      if (choice === 0) {
+      const choice = prediction.choice;
+      if (choice < 1 || choice > target.choices.length) {
         await skip(job, 'unknown_choice', now);
         continue;
       }

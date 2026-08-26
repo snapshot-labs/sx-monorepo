@@ -22,7 +22,9 @@ function day(timestamp: number): string {
 }
 
 export function renderOptions(proposal: Proposal): string {
-  return proposal.choices.map(choice => `- ${choice}`).join('\n');
+  return proposal.choices
+    .map((choice, index) => `${index + 1}. ${clean(choice)}`)
+    .join('\n');
 }
 
 export function buildProposal(proposal: Proposal): string {
