@@ -18,7 +18,12 @@ type GraphqlResponse<T> = {
 
 const ID_CHUNK_SIZE = 50;
 
+// Must match the sequencer's DEFAULT_ALIAS_EXPIRY_DAYS (apps/sequencer/src/helpers/alias.ts).
 const ALIAS_PERIOD = 90 * 24 * 60 * 60;
+
+function aliasCutoff(): number {
+  return Math.floor(Date.now() / 1000) - ALIAS_PERIOD;
+}
 
 const PROPOSAL_FIELDS = `
   id
@@ -84,12 +89,12 @@ export async function getOptedInVoters(
   agentAddress: string
 ): Promise<string[]> {
   const { aliases } = await gql<{ aliases: { address: string }[] }>(
-    `query OptedInVoters($alias: String!) {
-      aliases(first: 1000, where: { alias: $alias }) {
+    `query OptedInVoters($alias: String!, $createdGt: Int!) {
+      aliases(first: 1000, where: { alias: $alias, created_gt: $createdGt }) {
         address
       }
     }`,
-    { alias: agentAddress }
+    { alias: agentAddress, createdGt: aliasCutoff() }
   );
 
   return aliases.map(alias => alias.address);
@@ -136,15 +141,13 @@ export async function getProposals(ids: string[]): Promise<Proposal[]> {
 export async function getAliasOwner(
   alias: string
 ): Promise<string | undefined> {
-  const createdGt = Math.floor(Date.now() / 1000) - ALIAS_PERIOD;
-
   const { aliases } = await gql<{ aliases: { address: string }[] }>(
     `query AliasOwner($alias: String!, $createdGt: Int!) {
       aliases(first: 1, where: { alias: $alias, created_gt: $createdGt }) {
         address
       }
     }`,
-    { alias, createdGt }
+    { alias, createdGt: aliasCutoff() }
   );
 
   return aliases[0]?.address;
