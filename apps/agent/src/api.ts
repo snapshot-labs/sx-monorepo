@@ -54,14 +54,6 @@ app.post('/context/set', async c => {
     return c.json({ error: (err as Error).message }, 401);
   }
 
-  if (!body.space) return c.json({ error: 'space is required' }, 400);
-  if (body.context.length > CONTEXT_LIMIT) {
-    return c.json(
-      { error: `context is over ${CONTEXT_LIMIT} characters` },
-      400
-    );
-  }
-
   const now = Math.floor(Date.now() / 1000);
 
   if (!body.context.trim()) {
@@ -72,6 +64,17 @@ app.post('/context/set', async c => {
       );
 
     return c.json({ removed: true });
+  }
+
+  if (!SPACE_IDS.includes(body.space)) {
+    return c.json({ error: 'space is not supported by this agent' }, 400);
+  }
+
+  if (body.context.length > CONTEXT_LIMIT) {
+    return c.json(
+      { error: `context is over ${CONTEXT_LIMIT} characters` },
+      400
+    );
   }
 
   await db
