@@ -46,17 +46,20 @@ const savedContext = computed(
 );
 
 const draft = ref('');
-const isTouched = ref(false);
+const isDirty = ref(false);
+
+watch(spaceId, () => {
+  isDirty.value = false;
+  draft.value = savedContext.value;
+});
 
 watch(
   savedContext,
   value => {
-    if (!isTouched.value) draft.value = value;
+    if (!isDirty.value) draft.value = value;
   },
   { immediate: true }
 );
-
-const isDirty = computed(() => draft.value !== savedContext.value);
 
 const isLoading = computed(
   () =>
@@ -75,12 +78,12 @@ const { height: toolbarHeight } = useElementSize(el);
 
 function save(): void {
   saveContext({ space: spaceId.value, context: draft.value });
-  isTouched.value = false;
+  isDirty.value = false;
 }
 
 function reset(): void {
   draft.value = savedContext.value;
-  isTouched.value = false;
+  isDirty.value = false;
 }
 </script>
 
@@ -187,7 +190,7 @@ function reset(): void {
               class="!min-h-[200px]"
               @update:model-value="
                 draft = $event ?? '';
-                isTouched = true;
+                isDirty = true;
               "
             />
           </div>
