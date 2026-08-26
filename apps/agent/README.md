@@ -20,14 +20,12 @@ The next tick is scheduled once the previous one settles, so ticks never overlap
 and a failing tick does not stop the loop. Jobs are inserted with
 `ON CONFLICT DO NOTHING`, so a crashed run is safe to repeat.
 
-Both `predict` and `cast` take their batch with `FOR UPDATE SKIP LOCKED`, so a
-second replica works on other rows instead of the same ones.
-
-They differ in how long they hold it. `cast` is fast and local, so it claims and
-finishes inside one transaction, and a crash rolls the batch back. `predict`
-calls a model, which is far too slow to hold a transaction open for, so it marks
-its batch `predicting` with a lease in `locked_until`, commits, and only then
-calls the model. `reap` puts rows back to `pending` once their lease runs out.
+Both `predict` and `cast` take their batch with `FOR UPDATE SKIP LOCKED`,
+closing soonest first, so a second replica works on other rows instead of the
+same ones. Neither holds the transaction while it works: the model and the
+sequencer are both far too slow for that. Each marks its batch `predicting` or
+`casting` with a lease in `locked_until`, commits, and only then makes the call.
+`reap` puts a row back once its lease runs out.
 
 ### Job states
 
@@ -57,10 +55,10 @@ the same shape keycard uses for api keys. `verifySigner` checks the signature
 belongs to the alias, that the message is minutes old at most, and asks the hub
 whether that alias still speaks for the address.
 
-| Route               | What it does                                                    |
-| ------------------- | --------------------------------------------------------------- |
-| `POST /context/get` | Returns every context that person saved, for all spaces         |
-| `POST /context/set` | Saves one space's context, or removes it when the text is empty |
+| Route               | What it does                                                                  |
+| ------------------- | ----------------------------------------------------------------------------- |
+| `POST /context/get` | Returns every context that person saved, for all spaces                       |
+| `POST /context/set` | Saves the context for one watched space, or removes it when the text is empty |
 
 ### Before a vote goes out
 
@@ -97,9 +95,9 @@ bun run dev
 | `bun run db:generate` | Generate a migration from `src/db/schema.ts`            |
 | `bun run db:migrate`  | Apply pending migrations, also run by `dev` and `start` |
 
-`GET /` reports the name, version, watched spaces, signer address, shared
-context and dry run state. The UI reads it to know which address to authorize
-and what the agent votes with.
+`GET /` reports the name, version, watched spaces, signer address and dry run
+state. The UI reads it to know which address to authorize and what the agent
+votes with.
 
 ## Configuration
 
