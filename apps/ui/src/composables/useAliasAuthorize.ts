@@ -1,9 +1,11 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { ALIAS_AVAILABILITY_PERIOD } from '@/composables/useAlias';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { useUiStore } from '@/stores/ui';
+import { Alias } from '@/types';
 
 const ALIAS_AUTHORIZE_KEYS = {
   check: (
@@ -27,23 +29,23 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const isSelfAlias = computed(() =>
     Boolean(
       web3Account.value &&
+        isAddress(web3Account.value) &&
         isValidAddress.value &&
         checksumAddress.value === getAddress(web3Account.value)
     )
   );
 
-  const { data: isAlreadyAuthorized, isPending: isCheckingAlias } = useQuery({
-    queryKey: ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
+  const { data: alias, isLoading: isCheckingAlias } = useQuery({
+    queryKey: ALIAS_AUTHORIZE_KEYS.check(web3Account, checksumAddress),
     queryFn: async () => {
       try {
-        const existing = await network.api.loadAlias(
+        return await network.api.loadAlias(
           toValue(web3Account),
           toValue(checksumAddress),
           0
         );
-        return !!existing;
       } catch {
-        return false;
+        return null;
       }
     },
     enabled: () =>
@@ -66,9 +68,13 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
     },
     onSuccess: () => {
       isJustAuthorized.value = true;
-      queryClient.setQueryData(
-        ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
-        true
+      queryClient.setQueryData<Alias | null>(
+        ALIAS_AUTHORIZE_KEYS.check(web3Account, checksumAddress),
+        {
+          address: web3Account.value,
+          alias: checksumAddress.value,
+          created: Math.floor(Date.now() / 1000)
+        }
       );
     }
   });
@@ -84,9 +90,9 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
       await network.actions.send(envelope);
     },
     onSuccess: () => {
-      queryClient.setQueryData(
-        ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
-        false
+      queryClient.setQueryData<Alias | null>(
+        ALIAS_AUTHORIZE_KEYS.check(web3Account, checksumAddress),
+        null
       );
       uiStore.addNotification('success', 'Alias revoked.');
     },
@@ -98,6 +104,15 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
       );
     }
   });
+
+  const now = useNow({ interval: 60_000 });
+
+  const expiresAt = computed(() =>
+    alias.value?.created ? alias.value.created + ALIAS_AVAILABILITY_PERIOD : 0
+  );
+  const isExpired = computed(
+    () => !!expiresAt.value && now.value.getTime() / 1000 >= expiresAt.value
+  );
 
   const error = computed(() => {
     if (!mutationError.value || isUserAbortError(mutationError.value)) {
@@ -111,7 +126,9 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
     isJustAuthorized,
     isRevoking,
     error,
-    isAlreadyAuthorized: computed(() => isAlreadyAuthorized.value ?? false),
+    isAlreadyAuthorized: computed(() => !!alias.value),
+    expiresAt,
+    isExpired,
     isCheckingAlias,
     isValidAddress,
     isSelfAlias,

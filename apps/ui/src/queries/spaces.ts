@@ -64,15 +64,15 @@ async function fetchSpaces(
   );
 }
 
-export function useFollowedSpacesQuery({
-  followedSpacesIds
+export function useSpacesByIdsQuery({
+  ids: spaceIds
 }: {
-  followedSpacesIds: MaybeRefOrGetter<string[] | undefined>;
+  ids: MaybeRefOrGetter<string[] | undefined>;
 }) {
   const queryClient = useQueryClient();
 
   const queryFn = computed(() => {
-    const ids = toValue(followedSpacesIds);
+    const ids = toValue(spaceIds);
 
     if (!ids) return skipToken;
 
@@ -112,7 +112,7 @@ export function useFollowedSpacesQuery({
   });
 
   return useQuery({
-    queryKey: ['spaces', 'followedSpaces', followedSpacesIds],
+    queryKey: ['spaces', 'byIds', spaceIds],
     queryFn,
     placeholderData: keepPreviousData
   });

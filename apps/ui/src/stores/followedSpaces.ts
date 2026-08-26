@@ -6,7 +6,7 @@ import {
   metadataNetwork,
   offchainNetworks
 } from '@/networks';
-import { useFollowedSpacesQuery } from '@/queries/spaces';
+import { useSpacesByIdsQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
@@ -48,8 +48,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       authInitiated.value && !isWhiteLabel.value && !!web3.value.account
   });
 
-  const { data: followedSpacesData } = useFollowedSpacesQuery({
-    followedSpacesIds
+  const { data: followedSpacesData } = useSpacesByIdsQuery({
+    ids: followedSpacesIds
   });
 
   const maxFollowLimit = computed(() => {
