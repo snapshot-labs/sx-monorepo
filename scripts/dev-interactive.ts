@@ -59,8 +59,8 @@ const SERVICES: Record<ServiceType, Service> = {
   },
   agent: {
     env: {
-      PORT: '3006',
-      VITE_AGENT_URL: 'http://localhost:3006'
+      PORT: '3007',
+      VITE_AGENT_URL: 'http://localhost:3007'
     }
   }
 };
