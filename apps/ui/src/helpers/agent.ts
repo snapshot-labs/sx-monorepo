@@ -46,10 +46,11 @@ async function send<T>(
     body: JSON.stringify({ ...message, sig })
   });
 
-  const result = await res.json();
-  if (!res.ok) throw new Error(result.error || 'Agent request failed');
+  if (!res.ok) {
+    throw new Error(`Agent request failed: ${res.status} ${res.statusText}`);
+  }
 
-  return result;
+  return res.json();
 }
 
 export async function fetchContexts(
