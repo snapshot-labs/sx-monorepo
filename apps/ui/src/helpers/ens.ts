@@ -159,8 +159,9 @@ export async function setEnsTextRecord(
     [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
   );
 
-  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
+  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) {
     throw new Error('No resolver set for name');
+  }
 
   const contract = new Contract(
     resolverAddress,

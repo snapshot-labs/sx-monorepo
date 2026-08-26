@@ -64,8 +64,9 @@ function handleSearchSubmit(event: Event) {
 
   if (!searchConfig.value) return;
 
-  if (!searchValue.value)
+  if (!searchValue.value) {
     return router.push({ name: searchConfig.value.defaultRoute });
+  }
 
   router.push({
     name: searchConfig.value.searchRoute,
