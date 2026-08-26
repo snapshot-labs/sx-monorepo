@@ -9,11 +9,6 @@ export function stripHidden(body: string): string {
   return body.replace(/<!--[\s\S]*?-->/g, '').trim();
 }
 
-/**
- * Keeps text written by strangers from closing one of our tags early and
- * passing itself off as another part of the prompt. Only tag-like `<` is
- * escaped, so `a < b` survives.
- */
 export function escapeTags(text: string): string {
   return text.replace(/<(?=\/?[a-zA-Z_])/g, '&lt;');
 }

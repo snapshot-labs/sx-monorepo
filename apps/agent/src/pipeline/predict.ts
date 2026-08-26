@@ -26,11 +26,6 @@ function byId(proposals: Proposal[]): Map<string, Proposal> {
   return new Map(proposals.map(proposal => [proposal.id, proposal]));
 }
 
-/**
- * Marks a batch as ours and lets the transaction go, so nothing is held while
- * the model runs. `SKIP LOCKED` keeps two runners off the same rows, and the
- * lease lets the reaper free rows whose runner died.
- */
 async function claim(now: number): Promise<Job[]> {
   return db.transaction(async tx => {
     const claimed = await tx
@@ -178,7 +173,6 @@ export async function predict(now: number): Promise<number> {
 
       spent += cost;
 
-      // Snapshot stores a vote as the option's position, counting from 1.
       const choice = target.choices.indexOf(prediction.choice) + 1;
       if (choice === 0) {
         await skip(job, 'unknown_choice', now);
