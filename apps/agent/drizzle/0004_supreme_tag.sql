@@ -1,0 +1,1 @@
+CREATE INDEX "jobs_status_proposal_end_idx" ON "jobs" USING btree ("status","proposal_end");

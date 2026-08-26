@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   numeric,
   pgEnum,
@@ -45,7 +46,10 @@ export const jobs = pgTable(
     created: integer('created').notNull(),
     updated: integer('updated').notNull()
   },
-  table => [primaryKey({ columns: [table.proposal, table.voter] })]
+  table => [
+    primaryKey({ columns: [table.proposal, table.voter] }),
+    index('jobs_status_proposal_end_idx').on(table.status, table.proposalEnd)
+  ]
 );
 
 export const contexts = pgTable(

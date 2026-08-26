@@ -1,4 +1,4 @@
-import { and, eq, or } from 'drizzle-orm';
+import { and, asc, eq, or } from 'drizzle-orm';
 import { getOptedInVoters, getVotersWhoVoted } from '../clients/hub';
 import {
   AGENT_SIGNER_ADDRESS,
@@ -24,6 +24,7 @@ async function claim(now: number): Promise<Job[]> {
       .select()
       .from(jobs)
       .where(eq(jobs.status, 'predicted'))
+      .orderBy(asc(jobs.proposalEnd))
       .limit(CAST_BATCH)
       .for('update', { skipLocked: true });
 

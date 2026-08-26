@@ -1,4 +1,4 @@
-import { and, eq, inArray, lte, or } from 'drizzle-orm';
+import { and, asc, eq, inArray, lte, or } from 'drizzle-orm';
 import { getProposals, getVotersWhoVoted, Proposal } from '../clients/hub';
 import { predictVote } from '../clients/openrouter';
 import {
@@ -32,6 +32,7 @@ async function claim(now: number): Promise<Job[]> {
       .select()
       .from(jobs)
       .where(and(eq(jobs.status, 'pending'), lte(jobs.notBefore, now)))
+      .orderBy(asc(jobs.proposalEnd))
       .limit(PREDICT_BATCH)
       .for('update', { skipLocked: true });
 
