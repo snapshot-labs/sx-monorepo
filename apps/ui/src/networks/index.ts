@@ -38,10 +38,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'ape',
       'curtis',
       'sep',
-      // basesep (Inco confidential demo) is intentionally opt-in. There's
-      // no hosted indexer yet, so production builds would render a network
-      // entry pointing at a localhost URL. Add via VITE_ENABLED_NETWORKS
-      // when running the Inco demo locally.
+      'basesep',
       'sn',
       'sn-sep'
     ];
@@ -72,7 +69,6 @@ export const governorNetworks: NetworkID[] = [
 // SX core contracts (proxyFactory/masterSpace) are not deployed on these
 // networks, so they support Governor spaces only (no SX space creation/explore).
 export const governorOnlyNetworks: NetworkID[] = ['bnb', 'bnbt'];
-export const incoOnlyNetworks: NetworkID[] = ['basesep'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
@@ -135,12 +131,10 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       networks: enabledNetworks.filter(
         network =>
           !offchainNetworks.includes(network) &&
-          !governorOnlyNetworks.includes(network) &&
-          !incoOnlyNetworks.includes(network)
+          !governorOnlyNetworks.includes(network)
       ),
       limit: 18
     },
-    // Confidential voting on Base Sepolia; off unless basesep enabled.
     'snapshot-x-inco': {
       key: 'snapshot-x-inco',
       label: 'Snapshot X × Inco',

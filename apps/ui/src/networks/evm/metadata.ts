@@ -86,7 +86,7 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
   },
   basesep: {
-    name: 'Base Sepolia (Inco)',
+    name: 'Base Sepolia',
     chainId: 84532,
     apiUrl: API_TESTNET_URL,
     avatar: 'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri'
