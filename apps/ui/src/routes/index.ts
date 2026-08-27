@@ -27,8 +27,9 @@ const router = createRouter({
       to.name === 'space-treasury' &&
       to.params.index === from.params.index &&
       to.params.tab !== from.params.tab
-    )
+    ) {
       return {};
+    }
     if (to.hash) {
       return { el: to.hash, behavior: 'smooth' };
     }

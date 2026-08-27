@@ -104,8 +104,9 @@ export async function loadTopics(url: string): Promise<Topic[]> {
       .map(poster => data.users.find(user => user.id === poster.user_id))
       .map(user => {
         user.avatar_template = user.avatar_template.replace('{size}', '64');
-        if (user.avatar_template.startsWith('/'))
+        if (user.avatar_template.startsWith('/')) {
           user.avatar_template = `${baseUrl}${user.avatar_template}`;
+        }
         return user;
       });
     return topic;
@@ -117,8 +118,9 @@ function formatPosts(posts: any[], baseUrl: string): Reply[] {
 
   return posts.map(post => {
     post.avatar_template = post.avatar_template.replace('{size}', '64');
-    if (post.avatar_template.startsWith('/'))
+    if (post.avatar_template.startsWith('/')) {
       post.avatar_template = `${baseUrl}${post.avatar_template}`;
+    }
 
     post.name = post.display_username || post.name || post.username;
     post.like_count = post.actions_summary.find(a => a.id === 2)?.count || 0;

@@ -115,10 +115,13 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       }),
     getExplorerUrl: (id, type) => {
       let dataType: 'tx' | 'contract' | 'token' | 'block' = 'tx';
-      if (type === 'token') dataType = 'token';
-      else if (type === 'block') dataType = 'block';
-      else if (['address', 'contract', 'strategy'].includes(type))
+      if (type === 'token') {
+        dataType = 'token';
+      } else if (type === 'block') {
+        dataType = 'block';
+      } else if (['address', 'contract', 'strategy'].includes(type)) {
         dataType = 'contract';
+      }
 
       if (dataType === 'contract') id = formatAddress(id);
 

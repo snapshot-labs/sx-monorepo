@@ -85,10 +85,13 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       }),
     getExplorerUrl: (id, type, chainIdOverride) => {
       let dataType: 'tx' | 'address' | 'token' | 'block' = 'tx';
-      if (type === 'token') dataType = 'token';
-      else if (type === 'block') dataType = 'block';
-      else if (['address', 'contract', 'strategy'].includes(type))
+      if (type === 'token') {
+        dataType = 'token';
+      } else if (type === 'block') {
+        dataType = 'block';
+      } else if (['address', 'contract', 'strategy'].includes(type)) {
         dataType = 'address';
+      }
 
       if (dataType === 'address') id = formatAddress(id);
 

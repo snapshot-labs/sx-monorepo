@@ -24,10 +24,11 @@ const topicId = computed(() => route.params.topic as string);
 
 const discussion = computed(() => {
   if (props.proposal) return sanitizeUrl(props.proposal.discussion);
-  if (props.space)
+  if (props.space) {
     return SPACES_DISCUSSIONS[
       `${props.space.network}:${props.space.id}`
     ]?.replace(/\/c\/[^\/]+\/\d+$/, `/t/${topicId.value}`);
+  }
   return '';
 });
 

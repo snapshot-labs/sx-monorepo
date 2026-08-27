@@ -37,8 +37,12 @@ watch(
   async (to, from) => {
     if (props.type !== 'vote') return;
 
-    if (props.open && (to as Vote).proposal.id !== (from as Vote)?.proposal.id)
+    if (
+      props.open &&
+      (to as Vote).proposal.id !== (from as Vote)?.proposal.id
+    ) {
       emit('close');
+    }
   },
   { immediate: true }
 );

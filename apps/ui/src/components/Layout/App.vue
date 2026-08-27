@@ -98,8 +98,9 @@ async function handleTransactionAccept() {
     !walletConnectSpaceKey.value ||
     !executionStrategy.value ||
     !transaction.value
-  )
+  ) {
     return;
+  }
 
   const executions = {} as Record<string, Transaction[]>;
   executions[executionStrategy.value.address] = [transaction.value];
@@ -141,8 +142,9 @@ watch(isSwiping, () => {
     !sidebarSwipeEnabled.value ||
     !isSwiping.value ||
     modalOpen.value
-  )
+  ) {
     return;
+  }
 
   if (
     (direction.value === 'right' && !uiStore.sideMenuOpen) ||
