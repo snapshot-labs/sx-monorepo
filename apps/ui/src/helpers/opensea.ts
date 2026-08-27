@@ -30,6 +30,7 @@ export const SUPPORTED_CHAIN_IDS = [
   '42170', // Arbitrum Nova
   '43114', // Avalanche
   '81457', // Blast
+  '84532', // Base Sepolia
   '11155111' // Sepolia
 ] as const;
 
@@ -46,6 +47,7 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
   '42170': { name: 'arbitrum_nova', isTestnet: false },
   '43114': { name: 'avalanche', isTestnet: false },
   '81457': { name: 'blast', isTestnet: false },
+  '84532': { name: 'base_sepolia', isTestnet: true },
   '11155111': { name: 'sepolia', isTestnet: true }
 };
 
