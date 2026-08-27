@@ -45,30 +45,6 @@ const quorumAmount = computed(() => {
   return `${format(current)} / ${format(props.proposal.quorum)}`;
 });
 
-// Encrypted tallies (Shutter/Inco): show lock, not numbers. For Inco,
-// `completed` flips at reveal, so this clears once the counts are public.
-const isEncryptedTally = computed(
-  () => props.proposal.privacy !== 'none' && !props.proposal.completed
-);
-
-// Confidential decision flags. The indexer writes these from the
-// `ProposalResultRevealed` event emitted by `Space.finalizeReveal` (always —
-// both the approved and rejected paths). They stay null until the proposal is
-// actually revealed, which is exactly the signal we want for showing the
-// verdict — no lifecycle gate needed, no on-chain fallback needed.
-const revealedQuorumReached = computed(
-  () => props.proposal.quorum_reached ?? null
-);
-const revealedSupportAchieved = computed(
-  () => props.proposal.support_achieved ?? null
-);
-
-const showVerdict = computed(
-  () =>
-    revealedQuorumReached.value !== null &&
-    revealedSupportAchieved.value !== null
-);
-
 const placeholderResults = computed(() =>
   props.proposal.choices.map((_, i) => ({
     choice: i + 1,
@@ -170,8 +146,9 @@ onMounted(() => {
   </div>
   <div
     v-else-if="
-      isEncryptedTally &&
-      (props.proposal.state === 'active' || proposal.privacy === 'inco') &&
+      props.proposal.privacy !== 'none' &&
+      (props.proposal.state === 'active' ||
+        (props.proposal.privacy === 'inco' && !props.proposal.completed)) &&
       withDetails
     "
     class="space-y-1"
@@ -179,37 +156,6 @@ onMounted(() => {
     <div>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
-    </div>
-    <!-- Confidential reveal verdict — read from the indexer (ProposalResultRevealed). -->
-    <div v-if="showVerdict" class="border rounded-lg p-3 mt-2 space-y-1">
-      <div class="flex items-center gap-2 text-skin-link font-medium">
-        <IH-eye />
-        <span>Revealed verdict</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <IH-check v-if="revealedQuorumReached" class="text-emerald-500" />
-        <IH-x v-else class="text-rose-500" />
-        <span>
-          Quorum {{ revealedQuorumReached ? 'reached' : 'NOT reached' }}
-        </span>
-      </div>
-      <div class="flex items-center gap-2">
-        <IH-check v-if="revealedSupportAchieved" class="text-emerald-500" />
-        <IH-x v-else class="text-rose-500" />
-        <span>
-          Support
-          {{ revealedSupportAchieved ? '(For > Against)' : '(For ≤ Against)' }}
-        </span>
-      </div>
-      <div class="pt-1 font-semibold">
-        Outcome:
-        <span
-          v-if="revealedQuorumReached && revealedSupportAchieved"
-          class="text-emerald-500"
-          >Approved</span
-        >
-        <span v-else class="text-rose-500">Rejected</span>
-      </div>
     </div>
     <div v-if="proposal.quorum" class="flex items-center justify-between">
       <span class="text-skin-link">
