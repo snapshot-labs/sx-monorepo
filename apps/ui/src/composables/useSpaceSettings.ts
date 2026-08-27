@@ -226,8 +226,9 @@ export function useSpaceSettings(space: Ref<Space>) {
 
       if (metadata.name) result.name = metadata.name;
       if (metadata.description) result.description = metadata.description;
-      if (metadata.payload !== null)
+      if (metadata.payload !== null) {
         result.properties.payload = metadata.payload;
+      }
       if (metadata.token !== null) result.properties.token = metadata.token;
 
       return result;
