@@ -4,8 +4,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "lint": "bun run lint:nofix --fix",
-    "lint:nofix": "eslint . --ext .ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "bun run lint --fix",
     "typecheck": "tsc --noEmit",
     "dev": "nodemon src/index.ts",
     "build": "tsc && copyfiles src/graphql/*.gql dist/",
