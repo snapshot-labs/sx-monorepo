@@ -36,7 +36,7 @@ FROM base AS prod-deps
 RUN bun install --frozen-lockfile --production --ignore-scripts --filter=delegates-api
 
 # Runtime
-FROM node:22-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 ENV NODE_ENV=production
 WORKDIR /app/apps/delegates-api

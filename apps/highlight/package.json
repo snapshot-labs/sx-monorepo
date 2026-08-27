@@ -40,9 +40,9 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.11",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@types/node": "^22.6.0"
+    "@types/node": "^24"
   },
   "engines": {
-    "node": ">= 22.6"
+    "node": ">=24"
   }
 }
