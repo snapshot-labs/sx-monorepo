@@ -302,11 +302,11 @@ export async function setEnsTextRecord(
 
 // findOwner is ENSv2-only; an unmigrated name returns the empty address,
 // so a revert is a failure and must not fall back to a stale v1 owner
-async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
-  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
-
-  if (!universalResolver) return null;
-
+async function getEnsOwnerV2(
+  name: string,
+  chainId: ENSChainId,
+  universalResolver: string
+) {
   const owner = await call(
     getProvider(chainId),
     ENS_CONTRACTS.universalResolverAbi,
@@ -320,16 +320,16 @@ async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
 // name has none of its own to write to
 export async function getResolver(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
-  if (await getEnsOwnerV2(name, chainId)) {
+  if (
+    universalResolver &&
+    (await getEnsOwnerV2(name, chainId, universalResolver))
+  ) {
     const [resolver, , offset] = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
-      [
-        ENS_CONTRACTS.universalResolver[chainId],
-        'findResolver',
-        [dnsEncodeName(name)]
-      ]
+      [universalResolver, 'findResolver', [dnsEncodeName(name)]]
     );
 
     return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
@@ -345,9 +345,16 @@ export async function getResolver(name: string, chainId: ENSChainId) {
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const normalized = ensNormalize(name);
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
-  const ensOwnerV2 = await getEnsOwnerV2(normalized, chainId);
-  if (ensOwnerV2) return ensOwnerV2;
+  if (universalResolver) {
+    const ensOwnerV2 = await getEnsOwnerV2(
+      normalized,
+      chainId,
+      universalResolver
+    );
+    if (ensOwnerV2) return ensOwnerV2;
+  }
 
   const ensHash = namehash(normalized);
 
