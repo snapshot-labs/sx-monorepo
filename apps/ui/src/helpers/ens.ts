@@ -333,7 +333,7 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   );
 
   if (!normalized.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = ENS_CONTRACTS.universalResolver[chainId]
+    const resolvedAddress = universalResolver
       ? await resolveName(normalized, chainId)
       : (await getAddresses([normalized], chainId))[normalized];
     const nameTokens = normalized.split('.');
