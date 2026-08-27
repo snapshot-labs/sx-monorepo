@@ -196,8 +196,9 @@ const features = computed<Feature[]>(() => {
 });
 
 function calculator(amount: number, quantity: number): number {
-  if (subscriptionLength.value === 'yearly')
+  if (subscriptionLength.value === 'yearly') {
     return Number((amount * quantity).toFixed(2));
+  }
 
   return Number(
     (
@@ -284,8 +285,9 @@ onMounted(() => {
   if (
     !selectedSpace.value ||
     offchainNetworks.includes(selectedSpace.value.network)
-  )
+  ) {
     return;
+  }
 
   router.push({
     name: 'space-overview',

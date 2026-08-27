@@ -303,8 +303,9 @@ async function handleAiSpeechClick() {
   try {
     await fetchAiSpeech();
 
-    if (aiSpeechState.value.errored || aiSpeechContent.value === null)
+    if (aiSpeechState.value.errored || aiSpeechContent.value === null) {
       throw new Error();
+    }
 
     await initAudio(aiSpeechContent.value);
     playAudio();

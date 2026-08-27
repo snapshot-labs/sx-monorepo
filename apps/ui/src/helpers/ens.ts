@@ -288,8 +288,9 @@ export async function setEnsTextRecord(
   const ensHash = namehash(normalized);
   const resolverAddress = await getResolver(normalized, chainId);
 
-  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS)
+  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) {
     throw new Error('No resolver set for name');
+  }
 
   const contract = new Contract(
     resolverAddress,

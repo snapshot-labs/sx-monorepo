@@ -962,8 +962,9 @@ export function createActions(
       delegator: string
     ) => {
       const { contractAddress } = delegation;
-      if (!contractAddress || !delegation.chainId || !isAddress(delegator))
+      if (!contractAddress || !delegation.chainId || !isAddress(delegator)) {
         return null;
+      }
 
       const multi = new Multicaller(
         delegation.chainId,
@@ -1095,7 +1096,7 @@ export function createActions(
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, networkConfig);
-          if (!strategy)
+          if (!strategy) {
             return {
               address,
               value: 0n,
@@ -1104,6 +1105,7 @@ export function createActions(
               token: null,
               symbol: ''
             };
+          }
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload

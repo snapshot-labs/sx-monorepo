@@ -75,10 +75,12 @@ export function getUrl(uri: string) {
   }
 
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs')
+  if (uriScheme === 'ipfs') {
     return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns')
+  }
+  if (uriScheme === 'ipns') {
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  }
   return uri;
 }
 
@@ -105,8 +107,9 @@ export function shorten(
   if (key === 'symbol') limit = MAX_SYMBOL_LENGTH;
   if (key === 'name') limit = 64;
   if (key === 'choice') limit = 12;
-  if (limit)
+  if (limit) {
     return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
+  }
   return shortenAddress(str);
 }
 
