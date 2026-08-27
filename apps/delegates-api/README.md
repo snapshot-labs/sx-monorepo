@@ -9,7 +9,7 @@ For more about how Checkpoint works, refer to its documentation here: https://do
 
 This API depends on:
 
-- Node.js (>= v22.6.0)
+- Node.js (>= v24)
 - PostgreSQL
 
 Make a copy of `.env.example` and rename it as `.env`, then update `DATABASE_URL`

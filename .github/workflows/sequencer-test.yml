@@ -19,7 +19,7 @@ jobs:
   test:
     strategy:
       matrix:
-        target: ['22.6']
+        target: ['24']
     uses: snapshot-labs/actions/.github/workflows/test.yml@main
     secrets: inherit
     with:
