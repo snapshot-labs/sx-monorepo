@@ -130,6 +130,11 @@ describe('ens', () => {
         const owner = await getNameOwner('lucemans-test-not-exist.cbars.id', 1);
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
+
+      it('should not answer a DNS domain on testnet from mainnet', async () => {
+        const owner = await getNameOwner('defi.app', 11155111);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      }, 10000);
     });
   });
 

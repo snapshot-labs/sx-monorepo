@@ -236,14 +236,15 @@ async function deepResolve(
 }
 
 export async function resolveName(name: string, chainId: ENSChainId) {
-  const resolver = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolver) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
   const node = namehash(name);
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
+  const address: string | null = universalResolver
+    ? await resolveRecord(name, chainId, universalResolver, 'addr', [node])
+    : await deepResolve(chainId, node, 'addr', [node]);
 
-  const address: string = await deepResolve(chainId, node, 'addr', [node]);
-
-  if (address === EVM_EMPTY_ADDRESS) return null;
+  if (!address || address === EVM_EMPTY_ADDRESS) return null;
 
   return address;
 }
@@ -369,9 +370,9 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   );
 
   if (!normalized.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = (await getAddresses([normalized], chainId))[
-      normalized
-    ];
+    const resolvedAddress = universalResolver
+      ? await resolveName(normalized, chainId)
+      : (await getAddresses([normalized], chainId))[normalized];
     const nameTokens = normalized.split('.');
 
     if (nameTokens.length > 2) {
