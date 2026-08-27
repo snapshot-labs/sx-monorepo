@@ -337,10 +337,15 @@ function formatSpace(
   space: ApiSpaceWithMetadata,
   constants: NetworkConstants
 ): Space {
+  const isConfidential = space.protocol === 'snapshot-x-inco';
+
   return {
     ...space,
     voting_delay: Number(space.voting_delay),
-    min_voting_period: Number(space.min_voting_period),
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_voting_period: Number(
+      isConfidential ? space.max_voting_period : space.min_voting_period
+    ),
     max_voting_period: Number(space.max_voting_period),
     turbo_expiration: 0,
     network: space._indexer as NetworkID,
@@ -400,6 +405,7 @@ function formatProposal(
   const state = getProposalState(networkId, proposal, current);
 
   const isStarknetNetwork = starknetNetworks.includes(networkId);
+  const isConfidential = proposal.space.protocol === 'snapshot-x-inco';
 
   const emptyAddress = isStarknetNetwork
     ? STARKNET_EMPTY_ADDRESS
@@ -409,8 +415,14 @@ function formatProposal(
     ...proposal,
     start: Number(proposal.start),
     start_block_number: Number(proposal.start_block_number) || null,
-    min_end: Number(proposal.min_end),
-    min_end_block_number: Number(proposal.min_end_block_number) || null,
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_end: Number(isConfidential ? proposal.max_end : proposal.min_end),
+    min_end_block_number:
+      Number(
+        isConfidential
+          ? proposal.max_end_block_number
+          : proposal.min_end_block_number
+      ) || null,
     max_end: Number(proposal.max_end),
     max_end_block_number: Number(proposal.max_end_block_number) || null,
     snapshot: Number(proposal.snapshot),
@@ -452,10 +464,9 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    // Inco's requestReveal is gated on maxEndBlockNumber onchain.
     has_execution_window_opened:
       ['EthRelayer'].includes(proposal.execution_strategy_type) ||
-      proposal.space.protocol === 'snapshot-x-inco'
+      isConfidential
         ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
         : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
