@@ -318,8 +318,6 @@ async function getEnsOwnerV2(
   return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
 }
 
-// a non-zero offset means the resolver belongs to a parent name, so this
-// name has none of its own to write to
 export async function getResolver(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
