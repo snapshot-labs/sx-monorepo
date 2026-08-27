@@ -2,18 +2,6 @@
 
 type Hex = `0x${string}`;
 
-export type DecryptionAttestation = {
-  handle: Hex;
-  value: Hex;
-};
-
-export type DecryptionResult = {
-  handle: Hex;
-  value: bigint | boolean;
-  attestation: DecryptionAttestation;
-  signatures: Hex[];
-};
-
 // Inline import() types keep SDKs lazy.
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 type CachedSdk = {
@@ -161,7 +149,7 @@ export async function decryptTallies({
   space: string;
   proposal: number | bigint;
   account: string;
-}): Promise<DecryptionResult[]> {
+}) {
   const { inco } = await loadSdk();
   const publicClient = await buildPublicClient();
   const zap = await inco.getZap();
