@@ -337,8 +337,6 @@ export function createActions(
       await verifyNetwork(web3, chainId);
       const signer = getSigner(web3);
 
-      // The editor may include strategies with no transactions (offchain needs
-      // them for clear-detection); the execution is the one that has any.
       const executionInfo = executions?.find(
         execution => execution.transactions.length > 0
       );
@@ -483,8 +481,6 @@ export function createActions(
     ) {
       await verifyNetwork(web3, chainId);
 
-      // The editor may include strategies with no transactions (offchain needs
-      // them for clear-detection); the execution is the one that has any.
       const executionInfo = executions?.find(
         execution => execution.transactions.length > 0
       );

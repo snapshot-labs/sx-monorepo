@@ -225,8 +225,6 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[] | null
     ) => {
-      // The editor may include strategies with no transactions (offchain needs
-      // them for clear-detection); the execution is the one that has any.
       const executionInfo = executions?.find(
         execution => execution.transactions.length > 0
       );
@@ -351,8 +349,6 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[] | null
     ) {
-      // The editor may include strategies with no transactions (offchain needs
-      // them for clear-detection); the execution is the one that has any.
       const executionInfo = executions?.find(
         execution => execution.transactions.length > 0
       );
