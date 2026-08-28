@@ -337,7 +337,11 @@ export function createActions(
       await verifyNetwork(web3, chainId);
       const signer = getSigner(web3);
 
-      const executionInfo = executions?.[0];
+      // The editor may include strategies with no transactions (offchain needs
+      // them for clear-detection); the execution is the one that has any.
+      const executionInfo = executions?.find(
+        execution => execution.transactions.length > 0
+      );
 
       if (space.protocol === 'governor-bravo') {
         return governorBravoClient.propose({
@@ -479,7 +483,11 @@ export function createActions(
     ) {
       await verifyNetwork(web3, chainId);
 
-      const executionInfo = executions?.[0];
+      // The editor may include strategies with no transactions (offchain needs
+      // them for clear-detection); the execution is the one that has any.
+      const executionInfo = executions?.find(
+        execution => execution.transactions.length > 0
+      );
       const pinned = await helpers.pin({
         title,
         body,

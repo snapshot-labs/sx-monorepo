@@ -367,8 +367,9 @@ async function handleProposeClick() {
   try {
     const choices = proposal.value.choices.filter(choice => !!choice);
     const executions = editorExecutions.value
-      // Strategies with no transactions are kept: getPlugins needs them to
-      // tell an execution the author cleared from one it cannot rebuild.
+      // Empty strategies are kept: offchain's getPlugins needs them to tell
+      // an execution the author cleared from one it cannot rebuild, and the
+      // other networks select the filled execution themselves.
       .filter(strategy => strategy.treasury.chainId)
       .map(strategy => ({
         strategyType: strategy.type,
