@@ -23,9 +23,11 @@ const {
 } = useAliasWallet();
 
 const { data: agent, isPending: isLoadingAgent, isError } = useAgentInfoQuery();
-const { data: account, isError: isAccountError } = useAgentAccountQuery(() =>
-  isRegistered.value ? aliasWallet.value : null
-);
+const {
+  data: account,
+  isLoading: isLoadingAccount,
+  isError: isAccountError
+} = useAgentAccountQuery(() => (isRegistered.value ? aliasWallet.value : null));
 
 const { data: spaces } = useSpacesByIdsQuery({
   ids: () => agent.value?.spaces.map(id => `${metadataNetwork}:${id}`)
@@ -47,8 +49,9 @@ const isLoading = computed(
   () =>
     web3.value.authLoading ||
     isLoadingAgent.value ||
-    isCheckingAlias.value ||
-    isCheckingAliasWallet.value
+    isCheckingAliasWallet.value ||
+    isLoadingAccount.value ||
+    isCheckingAlias.value
 );
 const isEnabled = computed(() => isAlreadyAuthorized.value && !isExpired.value);
 
