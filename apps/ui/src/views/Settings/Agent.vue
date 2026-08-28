@@ -3,7 +3,7 @@ import { ALIAS_AVAILABILITY_PERIOD } from '@/composables/useAlias';
 import { isAgentVotingAvailable } from '@/helpers/agent';
 import { _n } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
-import { useAgentContextsQuery, useAgentInfoQuery } from '@/queries/agent';
+import { useAgentAccountQuery, useAgentInfoQuery } from '@/queries/agent';
 import { useSpacesByIdsQuery } from '@/queries/spaces';
 import { Space } from '@/types';
 
@@ -23,8 +23,8 @@ const {
 } = useAliasWallet();
 
 const { data: agent, isPending: isLoadingAgent, isError } = useAgentInfoQuery();
-const { data: contexts, isError: isContextsError } = useAgentContextsQuery(
-  () => (isRegistered.value ? aliasWallet.value : null)
+const { data: account, isError: isAccountError } = useAgentAccountQuery(() =>
+  isRegistered.value ? aliasWallet.value : null
 );
 
 const { data: spaces } = useSpacesByIdsQuery({
@@ -41,7 +41,7 @@ const {
   isExpired,
   authorize,
   revoke
-} = useAliasAuthorize(() => agent.value?.signer ?? '');
+} = useAliasAuthorize(() => account.value?.signer ?? '');
 
 const isLoading = computed(
   () =>
@@ -53,9 +53,9 @@ const isLoading = computed(
 const isEnabled = computed(() => isAlreadyAuthorized.value && !isExpired.value);
 
 function getSpaceStatus(space: Space): SpaceStatus | null {
-  if (!contexts.value) return null;
+  if (!account.value) return null;
 
-  const hasContext = contexts.value.some(
+  const hasContext = account.value.contexts.some(
     row => row.space === space.id && row.context.trim()
   );
 
@@ -154,7 +154,7 @@ function getSpaceStatus(space: Space): SpaceStatus | null {
         </UiAlert>
 
         <UiSectionHeader label="Spaces" />
-        <UiStateWarning v-if="isContextsError && !contexts" class="px-4 py-3">
+        <UiStateWarning v-if="isAccountError && !account" class="px-4 py-3">
           Your voting contexts could not be loaded, try again later.
         </UiStateWarning>
         <UiStateWarning v-else-if="!spaces?.length" class="px-4 py-3">

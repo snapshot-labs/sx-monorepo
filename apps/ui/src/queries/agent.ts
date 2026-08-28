@@ -8,15 +8,14 @@ import {
 import { MaybeRefOrGetter } from 'vue';
 import {
   AGENT_URL,
-  fetchContexts,
+  AgentAccount,
+  fetchAccount,
   isAgentVotingAvailable,
-  saveContext,
-  SpaceContext
+  saveContext
 } from '@/helpers/agent';
 
 type AgentInfo = {
   spaces: string[];
-  signer: string;
 };
 
 export function useAgentInfoQuery() {
@@ -33,7 +32,7 @@ export function useAgentInfoQuery() {
   });
 }
 
-export function useAgentContextsQuery(alias: MaybeRefOrGetter<Wallet | null>) {
+export function useAgentAccountQuery(alias: MaybeRefOrGetter<Wallet | null>) {
   const { web3Account } = useWeb3();
 
   const queryFn = computed(() => {
@@ -42,12 +41,11 @@ export function useAgentContextsQuery(alias: MaybeRefOrGetter<Wallet | null>) {
       return skipToken;
     }
 
-    return async (): Promise<SpaceContext[]> =>
-      fetchContexts(wallet, web3Account.value);
+    return () => fetchAccount(wallet, web3Account.value);
   });
 
   return useQuery({
-    queryKey: ['agent', 'contexts', web3Account] as const,
+    queryKey: ['agent', 'account', web3Account] as const,
     queryFn
   });
 }
@@ -72,12 +70,17 @@ export function useSaveAgentContextMutation(
       return saveContext(wallet, web3Account.value, space, context);
     },
     onSuccess: (_result, { space, context }) => {
-      queryClient.setQueryData<SpaceContext[]>(
-        ['agent', 'contexts', web3Account],
+      queryClient.setQueryData<AgentAccount>(
+        ['agent', 'account', web3Account],
         previous => {
-          const rest = (previous ?? []).filter(row => row.space !== space);
+          if (!previous) return previous;
 
-          return context.trim() ? [...rest, { space, context }] : rest;
+          const rest = previous.contexts.filter(row => row.space !== space);
+
+          return {
+            ...previous,
+            contexts: context.trim() ? [...rest, { space, context }] : rest
+          };
         }
       );
     }

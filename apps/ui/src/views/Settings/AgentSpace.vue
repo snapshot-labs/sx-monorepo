@@ -2,7 +2,7 @@
 import { _n } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
 import {
-  useAgentContextsQuery,
+  useAgentAccountQuery,
   useSaveAgentContextMutation
 } from '@/queries/agent';
 import { useSpaceQuery } from '@/queries/spaces';
@@ -33,12 +33,10 @@ const { data: space, isLoading: isLoadingSpace } = useSpaceQuery({
   spaceId
 });
 const {
-  data: contexts,
-  isLoading: isLoadingContexts,
-  isError: isContextsError
-} = useAgentContextsQuery(() =>
-  isRegistered.value ? aliasWallet.value : null
-);
+  data: account,
+  isLoading: isLoadingAccount,
+  isError: isAccountError
+} = useAgentAccountQuery(() => (isRegistered.value ? aliasWallet.value : null));
 const {
   mutate: saveContext,
   isPending: isSaving,
@@ -46,7 +44,9 @@ const {
 } = useSaveAgentContextMutation(aliasWallet);
 
 const savedContext = computed(
-  () => contexts.value?.find(row => row.space === spaceId.value)?.context ?? ''
+  () =>
+    account.value?.contexts.find(row => row.space === spaceId.value)?.context ??
+    ''
 );
 
 const draft = ref('');
@@ -70,7 +70,7 @@ const isLoading = computed(
     web3.value.authLoading ||
     isLoadingSpace.value ||
     isCheckingAlias.value ||
-    isLoadingContexts.value
+    isLoadingAccount.value
 );
 
 watchEffect(() => {
@@ -186,7 +186,7 @@ function reset(): void {
           </UiButton>
         </div>
 
-        <UiStateWarning v-else-if="isContextsError && !contexts">
+        <UiStateWarning v-else-if="isAccountError && !account">
           Your voting context could not be loaded, try again later.
         </UiStateWarning>
 

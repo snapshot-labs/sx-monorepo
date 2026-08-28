@@ -27,6 +27,11 @@ const GET_CONTEXT_TYPES = {
   ]
 };
 
+export type AgentAccount = {
+  signer: string;
+  contexts: SpaceContext[];
+};
+
 export type SpaceContext = {
   space: string;
   context: string;
@@ -53,22 +58,15 @@ async function send<T>(
   return res.json();
 }
 
-export async function fetchContexts(
+export function fetchAccount(
   alias: Wallet,
   from: string
-): Promise<SpaceContext[]> {
-  const { contexts } = await send<{ contexts: SpaceContext[] }>(
-    '/context/get',
-    alias,
-    GET_CONTEXT_TYPES,
-    {
-      from,
-      alias: alias.address,
-      timestamp: Math.floor(Date.now() / 1000)
-    }
-  );
-
-  return contexts;
+): Promise<AgentAccount> {
+  return send('/context/get', alias, GET_CONTEXT_TYPES, {
+    from,
+    alias: alias.address,
+    timestamp: Math.floor(Date.now() / 1000)
+  });
 }
 
 export async function saveContext(
