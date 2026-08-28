@@ -1,6 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import { clients, offchainMainnet } from '@snapshot-labs/sx';
-import { AGENT_PRIVATE_KEY, VOTE_APP } from '../config';
+import { CdpSigner } from '../cdp';
+import { VOTE_APP } from '../config';
 
 const client = new clients.OffchainEthereumSig({
   networkConfig: offchainMainnet
@@ -29,19 +30,9 @@ export type VoteData = {
   reason: string;
 };
 
-const wallet = AGENT_PRIVATE_KEY ? new Wallet(AGENT_PRIVATE_KEY) : null;
-
-export const AGENT_SIGNER_ADDRESS = wallet?.address ?? '';
-
-function signer() {
-  if (!wallet) throw new Error('AGENT_PRIVATE_KEY is not set');
-
-  return wallet;
-}
-
-export async function signVote(vote: VoteData) {
+export async function signVote(vote: VoteData, signer: Wallet | CdpSigner) {
   return client.vote({
-    signer: signer(),
+    signer: signer as Wallet,
     data: {
       ...vote,
       privacy: 'none',
@@ -53,8 +44,12 @@ export async function signVote(vote: VoteData) {
   });
 }
 
-export async function castVote(vote: VoteData): Promise<string> {
-  const result = (await client.send(await signVote(vote))) as { id?: string };
+export async function castVote(
+  vote: VoteData,
+  signer: CdpSigner
+): Promise<string> {
+  const envelope = await signVote(vote, signer);
+  const result: { id?: string } = await client.send(envelope);
 
   return result.id ?? '';
 }

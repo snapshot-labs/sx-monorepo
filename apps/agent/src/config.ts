@@ -18,7 +18,9 @@ export const SPACE_IDS: string[] = process.env.SPACES
       .filter(Boolean)
   : DEFAULT_SPACES;
 
-export const AGENT_PRIVATE_KEY = process.env.AGENT_PRIVATE_KEY ?? '';
+export const CDP_API_KEY_ID = process.env.CDP_API_KEY_ID ?? '';
+export const CDP_API_KEY_SECRET = process.env.CDP_API_KEY_SECRET ?? '';
+export const CDP_WALLET_SECRET = process.env.CDP_WALLET_SECRET ?? '';
 
 export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY ?? '';
 export const MODEL = process.env.MODEL ?? 'anthropic/claude-sonnet-5';

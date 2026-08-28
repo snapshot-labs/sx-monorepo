@@ -1,10 +1,7 @@
-import { and, asc, eq, or } from 'drizzle-orm';
-import { getOptedInVoters, getVotersWhoVoted } from '../clients/hub';
-import {
-  AGENT_SIGNER_ADDRESS,
-  castVote,
-  isFinalError
-} from '../clients/sequencer';
+import { and, asc, eq, inArray, or } from 'drizzle-orm';
+import { getSigner } from '../cdp';
+import { getAuthorizedVoters, getVotersWhoVoted } from '../clients/hub';
+import { castVote, isFinalError } from '../clients/sequencer';
 import {
   CAST_BATCH,
   CAST_GAP,
@@ -12,7 +9,7 @@ import {
   MAX_ATTEMPTS,
   REASON_LIMIT
 } from '../config';
-import { db, Job, jobs } from '../db';
+import { db, Job, jobs, signers } from '../db';
 import logger from '../logger';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -99,7 +96,17 @@ export async function cast(now: number): Promise<number> {
   if (!claimed.length) return 0;
 
   const votedByProposal = await loadVotedByProposal(claimed);
-  const authorized = new Set(await getOptedInVoters(AGENT_SIGNER_ADDRESS));
+  const signerRows = await db
+    .select()
+    .from(signers)
+    .where(
+      inArray(
+        signers.address,
+        claimed.map(job => job.voter.toLowerCase())
+      )
+    );
+  const signerByVoter = new Map(signerRows.map(row => [row.address, row]));
+  const authorized = new Set(await getAuthorizedVoters(signerRows));
 
   let sent = 0;
 
@@ -114,7 +121,8 @@ export async function cast(now: number): Promise<number> {
       continue;
     }
 
-    if (!authorized.has(job.voter)) {
+    const signer = signerByVoter.get(job.voter.toLowerCase());
+    if (!signer || !authorized.has(job.voter)) {
       await skip(job, 'alias_expired', now);
       continue;
     }
@@ -127,14 +135,18 @@ export async function cast(now: number): Promise<number> {
     if (sent > 0) await sleep(CAST_GAP);
 
     try {
-      const voteId = await castVote({
-        from: job.voter,
-        space: job.space,
-        proposal: job.proposal,
-        type: job.proposalType,
-        choice: job.choice,
-        reason: (job.reasoning ?? '').slice(0, REASON_LIMIT)
-      });
+      const cdpSigner = await getSigner(signer.name);
+      const voteId = await castVote(
+        {
+          from: job.voter,
+          space: job.space,
+          proposal: job.proposal,
+          type: job.proposalType,
+          choice: job.choice,
+          reason: (job.reasoning ?? '').slice(0, REASON_LIMIT)
+        },
+        cdpSigner
+      );
 
       sent++;
 

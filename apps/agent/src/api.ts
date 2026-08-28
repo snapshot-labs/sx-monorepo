@@ -7,9 +7,9 @@ import {
   Signed,
   verifySigner
 } from './auth';
-import { AGENT_SIGNER_ADDRESS } from './clients/sequencer';
+import { createAccount } from './cdp';
 import { DRY_RUN, SPACE_IDS } from './config';
-import { contexts, db } from './db';
+import { contexts, db, signers } from './db';
 import pkg from '../package.json' with { type: 'json' };
 
 const CONTEXT_LIMIT = 5000;
@@ -23,10 +23,32 @@ app.get('/', c =>
     name: pkg.name,
     version: pkg.version,
     spaces: SPACE_IDS,
-    signer: AGENT_SIGNER_ADDRESS,
     dryRun: DRY_RUN
   })
 );
+
+async function getOrCreateSigner(address: string): Promise<string> {
+  const [existing] = await db
+    .select({ signer: signers.signer })
+    .from(signers)
+    .where(eq(signers.address, address));
+  if (existing) return existing.signer;
+
+  const account = await createAccount();
+
+  const [row] = await db
+    .insert(signers)
+    .values({
+      address,
+      name: account.name,
+      signer: account.address,
+      created: Math.floor(Date.now() / 1000)
+    })
+    .onConflictDoNothing()
+    .returning({ signer: signers.signer });
+
+  return row?.signer ?? getOrCreateSigner(address);
+}
 
 app.post('/context/get', async c => {
   const body = await c.req.json<Signed<object>>();
@@ -37,12 +59,16 @@ app.post('/context/get', async c => {
     return c.json({ error: (err as Error).message }, 401);
   }
 
-  const rows = await db
-    .select({ space: contexts.space, context: contexts.context })
-    .from(contexts)
-    .where(eq(contexts.address, body.from.toLowerCase()));
+  const address = body.from.toLowerCase();
+  const [signer, rows] = await Promise.all([
+    getOrCreateSigner(address),
+    db
+      .select({ space: contexts.space, context: contexts.context })
+      .from(contexts)
+      .where(eq(contexts.address, address))
+  ]);
 
-  return c.json({ contexts: rows });
+  return c.json({ signer, contexts: rows });
 });
 
 app.post('/context/set', async c => {

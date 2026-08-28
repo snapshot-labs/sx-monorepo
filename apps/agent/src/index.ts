@@ -1,7 +1,8 @@
 import { app } from './api';
-import { AGENT_SIGNER_ADDRESS } from './clients/sequencer';
 import {
-  AGENT_PRIVATE_KEY,
+  CDP_API_KEY_ID,
+  CDP_API_KEY_SECRET,
+  CDP_WALLET_SECRET,
   DRY_RUN,
   OPENROUTER_API_KEY,
   PORT,
@@ -12,8 +13,10 @@ import logger from './logger';
 import { createLoop } from './loop';
 import { tick } from './pipeline';
 
-if (!AGENT_PRIVATE_KEY) {
-  throw new Error('AGENT_PRIVATE_KEY must be set to a hex private key');
+if (!CDP_API_KEY_ID || !CDP_API_KEY_SECRET || !CDP_WALLET_SECRET) {
+  throw new Error(
+    'CDP_API_KEY_ID, CDP_API_KEY_SECRET and CDP_WALLET_SECRET must be set to sign votes'
+  );
 }
 
 if (!SPACE_IDS.length) {
@@ -30,7 +33,6 @@ loop.start();
 logger.info(
   {
     spaces: SPACE_IDS,
-    signer: AGENT_SIGNER_ADDRESS,
     dryRun: DRY_RUN,
     interval: TICK_INTERVAL,
     port: PORT

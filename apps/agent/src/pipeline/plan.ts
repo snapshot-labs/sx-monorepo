@@ -1,12 +1,12 @@
+import { eq } from 'drizzle-orm';
 import {
   getActiveProposals,
-  getOptedInVoters,
+  getAuthorizedVoters,
   getVotersWhoVoted,
   Proposal
 } from '../clients/hub';
-import { AGENT_SIGNER_ADDRESS } from '../clients/sequencer';
 import { CAST_WINDOW, SPACE_IDS } from '../config';
-import { db, jobs } from '../db';
+import { contexts, db, jobs, signers } from '../db';
 
 export function isEligible(proposal: Proposal): boolean {
   return proposal.privacy !== 'shutter';
@@ -16,7 +16,11 @@ export async function plan(now: number): Promise<number> {
   const proposals = (await getActiveProposals(SPACE_IDS)).filter(isEligible);
   if (!proposals.length) return 0;
 
-  const voters = await getOptedInVoters(AGENT_SIGNER_ADDRESS);
+  const pairs = await db
+    .selectDistinct({ address: signers.address, signer: signers.signer })
+    .from(signers)
+    .innerJoin(contexts, eq(contexts.address, signers.address));
+  const voters = await getAuthorizedVoters(pairs);
   if (!voters.length) return 0;
 
   let created = 0;

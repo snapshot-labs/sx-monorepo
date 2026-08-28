@@ -2,12 +2,11 @@ import { describe, expect, test } from 'bun:test';
 import { app } from './api';
 
 describe('GET /', () => {
-  test('publishes the signer and the spaces it votes in', async () => {
+  test('publishes the spaces it votes in', async () => {
     const res = await app.request('/');
     expect(res.status).toBe(200);
 
     const body = await res.json();
-    expect(body).toHaveProperty('signer');
     expect(body.spaces).toEqual(['robots.0cf5e.eth']);
   });
 

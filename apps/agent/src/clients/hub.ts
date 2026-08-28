@@ -85,19 +85,39 @@ export async function getActiveProposals(
   return proposals;
 }
 
-export async function getOptedInVoters(
-  agentAddress: string
+export async function getAuthorizedVoters(
+  signers: { address: string; signer: string }[]
 ): Promise<string[]> {
-  const { aliases } = await gql<{ aliases: { address: string }[] }>(
-    `query OptedInVoters($alias: String!, $createdGt: Int!) {
-      aliases(first: 1000, where: { alias: $alias, created_gt: $createdGt }) {
-        address
-      }
-    }`,
-    { alias: agentAddress, createdGt: aliasCutoff() }
+  const pairs = new Set(
+    signers.map(row => `${row.address}:${row.signer}`.toLowerCase())
   );
+  const voters: string[] = [];
 
-  return aliases.map(alias => alias.address);
+  for (let i = 0; i < signers.length; i += ID_CHUNK_SIZE) {
+    const chunk = signers.slice(i, i + ID_CHUNK_SIZE);
+    const { aliases } = await gql<{
+      aliases: { address: string; alias: string }[];
+    }>(
+      `query AuthorizedVoters($signers: [String]!, $createdGt: Int!) {
+        aliases(
+          first: ${ID_CHUNK_SIZE}
+          where: { alias_in: $signers, created_gt: $createdGt }
+        ) {
+          address
+          alias
+        }
+      }`,
+      { signers: chunk.map(row => row.signer), createdGt: aliasCutoff() }
+    );
+
+    voters.push(
+      ...aliases
+        .filter(row => pairs.has(`${row.address}:${row.alias}`.toLowerCase()))
+        .map(row => row.address)
+    );
+  }
+
+  return voters;
 }
 
 export async function getVotersWhoVoted(

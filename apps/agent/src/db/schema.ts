@@ -64,7 +64,15 @@ export const contexts = pgTable(
   table => [primaryKey({ columns: [table.address, table.space] })]
 );
 
+export const signers = pgTable('signers', {
+  address: varchar('address', { length: 100 }).primaryKey(),
+  name: varchar('name', { length: 36 }).notNull(),
+  signer: varchar('signer', { length: 42 }).notNull(),
+  created: integer('created').notNull()
+});
+
 export type Context = typeof contexts.$inferSelect;
+export type Signer = typeof signers.$inferSelect;
 
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
