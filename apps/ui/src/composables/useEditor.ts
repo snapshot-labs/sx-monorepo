@@ -73,6 +73,9 @@ export function useEditor() {
       const allowedPrivacies = spacePrivacies.get(spaceId);
 
       const hasFormValues = Object.values(rest).some(val => !!val);
+      const hasExecutions = Object.values(executions).some(
+        txs => !!txs?.length
+      );
       const hasChangedVotingType = type !== allowedTypes?.[0];
       const hasChangedPrivacy = privacy !== allowedPrivacies?.[0];
       const hasChangedBody = body !== spaceTemplate.get(spaceId);
@@ -80,7 +83,7 @@ export function useEditor() {
         type !== 'basic' && (choices || []).some(val => !!val);
 
       if (
-        Object.keys(executions).length === 0 &&
+        !hasExecutions &&
         labels.length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&
