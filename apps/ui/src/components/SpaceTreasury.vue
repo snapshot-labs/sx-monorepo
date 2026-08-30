@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { getExecutionKey } from '@/helpers/ui';
-import { _c, _n, lsGet, lsSet, sanitizeUrl, shorten } from '@/helpers/utils';
+import {
+  _c,
+  _n,
+  compareAddresses,
+  lsGet,
+  lsSet,
+  sanitizeUrl,
+  shorten
+} from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -60,14 +68,18 @@ const modalOpen = ref({
 });
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-const executionStrategy = computed(
-  () =>
+const executionStrategy = computed(() => {
+  const wallet = treasury.value?.wallet;
+
+  return (
     strategiesWithTreasuries.value?.find(
       strategy =>
-        strategy.treasury.address === treasury.value?.wallet &&
+        !!wallet &&
+        compareAddresses(strategy.treasury.address, wallet) &&
         strategy.treasury.chainId === treasury.value?.network
     ) ?? null
-);
+  );
+});
 const isReadOnly = computed(
   () =>
     executionStrategy.value === null ||
