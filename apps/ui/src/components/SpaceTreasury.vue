@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ETH_CONTRACT } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { _c, _n, lsGet, lsSet, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
@@ -62,7 +63,9 @@ const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 const executionStrategy = computed(
   () =>
     strategiesWithTreasuries.value?.find(
-      strategy => strategy.treasury.address === treasury.value?.wallet
+      strategy =>
+        strategy.treasury.address === treasury.value?.wallet &&
+        strategy.treasury.chainId === treasury.value?.network
     ) ?? null
 );
 const isReadOnly = computed(
@@ -128,7 +131,12 @@ function openModal(type: 'tokens' | 'nfts' | 'stake') {
 async function addTx(tx: Transaction) {
   const executions = {} as Record<string, Transaction[]>;
   if (executionStrategy.value) {
-    executions[executionStrategy.value.address] = [tx];
+    executions[
+      getExecutionKey(
+        executionStrategy.value.treasury.chainId,
+        executionStrategy.value.address
+      )
+    ] = [tx];
   }
 
   const draftId = await createDraft(spaceKey.value, {
