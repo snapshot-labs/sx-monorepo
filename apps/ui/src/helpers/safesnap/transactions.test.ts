@@ -191,4 +191,25 @@ describe('createSafeSnapExecution', () => {
       raw('2')
     ]);
   });
+
+  it('blanks umaAddress so the space config cannot reroute it to UMA', () => {
+    const execution = createSafeSnapExecution(
+      1,
+      '0x0d70332CEB7F3C94b061cda48327891E3449A9E1',
+      [raw('1')]
+    );
+
+    // snapshot-v1 renders a proposal safe as `{ ...config.safes[i], ...safe }`
+    // and then routes to UMA whenever the merged `umaAddress` is a live module.
+    const merged = {
+      ...{
+        network: '1',
+        umaAddress: '0x8aC054dC93Cd512e1f79F1B3cd732662980C2810',
+        realityAddress: '0x0d70332CEB7F3C94b061cda48327891E3449A9E1'
+      },
+      ...execution
+    };
+
+    expect(merged.umaAddress).toBeNull();
+  });
 });

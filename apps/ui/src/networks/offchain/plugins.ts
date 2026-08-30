@@ -40,11 +40,7 @@ type OffchainPlugins = {
 const SUPPORTED_PLUGINS = ['readOnlyExecution', 'safeSnap'];
 
 function getSafeAddress(safe: SafeSnapPlugin['safes'][number]) {
-  return (
-    safe.realityAddress ||
-    ('umaAddress' in safe ? safe.umaAddress : undefined) ||
-    ''
-  );
+  return safe.realityAddress || safe.umaAddress || '';
 }
 
 // A module address is not unique on its own: the same Zodiac module can be
@@ -81,16 +77,20 @@ export function getPlugins(
     originalSafeSnap?.safes ??
     (originalSafeSnap?.txs ? [{ txs: originalSafeSnap.txs }] : []);
 
+  function findOriginalExecution(chainId: number, address: string) {
+    return originalProposal?.executions.find(
+      execution =>
+        execution.strategyType === 'safeSnap' &&
+        Number(execution.chainId) === chainId &&
+        compareAddresses(execution.safeAddress, address)
+    );
+  }
+
   // Rebuilding an execution collapses its batches into one and forces every
   // transaction to a call, so a safe the author did not touch keeps its
   // original entry instead of being re-serialized.
   function getUnchangedSafe(info: ExecutionInfo) {
-    const original = originalProposal?.executions.find(
-      execution =>
-        execution.strategyType === 'safeSnap' &&
-        Number(execution.chainId) === info.chainId &&
-        compareAddresses(execution.safeAddress, info.strategyAddress)
-    );
+    const original = findOriginalExecution(info.chainId, info.strategyAddress);
 
     if (
       !original ||
@@ -107,6 +107,17 @@ export function getPlugins(
           compareAddresses(getSafeAddress(safe), info.strategyAddress)
       ) ?? null
     );
+  }
+
+  // The read path exposes at most one execution type per proposal (see
+  // offchain/api/index.ts): a safeSnap module coexisting with an oSnap
+  // plugin never reaches `originalProposal.executions`, so the editor can
+  // offer it without ever seeding its real transactions. An empty
+  // `info.transactions` for such a module means "unknown", not "the author
+  // cleared it" — only a module the read path actually exposed can be
+  // treated as deliberately emptied.
+  function wasExposedOnRead(chainId: number, address: string) {
+    return !!findOriginalExecution(chainId, address);
   }
 
   const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
@@ -172,7 +183,8 @@ export function getPlugins(
         offered =>
           offered.chainId === chainId &&
           compareAddresses(offered.address, address)
-      );
+      ) &&
+      wasExposedOnRead(chainId, address);
     if (!clearedInEditor) safes.push(safe);
   }
   safes.push(...pendingSafes);

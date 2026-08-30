@@ -203,4 +203,22 @@ describe('getPlugins — update', () => {
     expect(plugins.safeSnap!.safes).toHaveLength(2);
     expect(plugins.safeSnap!.safes).toContain(onChain137);
   });
+
+  it('preserves a safe the read path never exposed (e.g. an oSnap-plugin proposal)', () => {
+    const stored = { network: '1', realityAddress: MODULE_A, txs: [[{}]] };
+    // The read path parses at most one execution type per proposal, so a
+    // safeSnap module coexisting with an oSnap plugin never reaches
+    // `executions` even though `plugins.safeSnap` still holds its data.
+    const original = {
+      plugins: { safeSnap: { safes: [stored], valid: true } },
+      executions: []
+    } as any;
+
+    // Editor still offers the module (space config drives that, not the
+    // read path), but never saw its real transactions, so it renders empty.
+    const plugins = getPlugins([execution(MODULE_A, 1, [])], original);
+
+    expect(plugins.safeSnap!.safes).toHaveLength(1);
+    expect(plugins.safeSnap!.safes[0]).toBe(stored);
+  });
 });

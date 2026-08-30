@@ -52,9 +52,8 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { strategiesWithTreasuries, hasSafeSnapConfig } = useTreasuries(
-  props.space
-);
+const { strategiesWithTreasuries, hasSafeSnapConfig, isResolvingTreasuries } =
+  useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
 const { limits, lists } = useSettings();
@@ -246,6 +245,7 @@ const formErrors = computed(() => {
   );
 });
 const isSubmitButtonLoading = computed(() => {
+  if (isResolvingTreasuries.value) return true;
   if (web3.value.authLoading) return true;
   if (!web3.value.account) return false;
 
@@ -261,11 +261,16 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
       ?.isUsingOnlySigAuthenticators ?? false
 );
 
+// Resolving a SafeSnap module to its Safe needs an on-chain call, and
+// strategiesWithTreasuries stays null until it completes.
+const isSafeSnapResolving = computed(
+  () => hasSafeSnapConfig.value && strategiesWithTreasuries.value === null
+);
+
 const canSubmit = computed(() => {
-  // Resolving a SafeSnap module to its Safe needs an on-chain call, and
-  // strategiesWithTreasuries stays null until it completes. Submitting then
-  // would send executions: [], publishing the proposal with no execution.
-  if (hasSafeSnapConfig.value && strategiesWithTreasuries.value === null) {
+  // Submitting while unresolved would send executions: [], publishing the
+  // proposal with no execution.
+  if (isSafeSnapResolving.value) {
     return false;
   }
 
@@ -290,6 +295,9 @@ const canSubmit = computed(() => {
     ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
+const submitButtonTooltip = computed(() =>
+  isSafeSnapResolving.value ? 'Resolving Safe module…' : ''
+);
 const spaceType = computed(() => {
   if (props.space.turbo) return 'turbo';
   if (props.space.verified) return 'verified';
@@ -562,19 +570,21 @@ watchEffect(() => {
             <IH-collection />
           </UiButton>
         </UiTooltip>
-        <UiButton
-          class="min-w-[46px] !px-0 md:!px-3"
-          primary
-          :loading="isSubmitButtonLoading"
-          :disabled="!canSubmit"
-          @click="handleProposeClick"
-        >
-          <span
-            class="hidden md:inline-block"
-            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
-          />
-          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-        </UiButton>
+        <UiTooltip :title="submitButtonTooltip">
+          <UiButton
+            class="min-w-[46px] !px-0 md:!px-3"
+            primary
+            :loading="isSubmitButtonLoading"
+            :disabled="!canSubmit"
+            @click="handleProposeClick"
+          >
+            <span
+              class="hidden md:inline-block"
+              v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
+            />
+            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+          </UiButton>
+        </UiTooltip>
       </div>
     </UiTopnav>
     <div

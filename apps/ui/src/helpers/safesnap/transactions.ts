@@ -232,12 +232,21 @@ export type SafeSnapExecutionData = {
   network: string;
   realityAddress: string;
   multiSendAddress: string;
+  umaAddress: null;
   txs: SafeSnapTransaction[][];
 };
 
 // Build a single-batch SafeSnap (Reality) execution for plugins.safeSnap.safes.
 // The batch is stored as a raw transaction array; SafeSnap recomputes the
 // MultiSend bundle and execution hash from it when the proposal is executed.
+//
+// `umaAddress` is written explicitly because snapshot-v1 renders a proposal
+// safe as `{ ...spaceConfig.safes[index], ...safe }`: every key this entry
+// omits is back-filled from the space config, and a back-filled `umaAddress`
+// makes v1 route both the display and the execution to the UMA module (its
+// `validateUmaModule` branches solely on `isAddress(umaAddress)` plus a live
+// `rules()` call, never on `realityAddress`). `null` fails `isAddress`, so the
+// entry stays on Reality whatever the space config holds at that index.
 export function createSafeSnapExecution(
   chainId: number,
   realityAddress: string,
@@ -247,6 +256,7 @@ export function createSafeSnapExecution(
     network: String(chainId),
     realityAddress,
     multiSendAddress: MULTI_SEND_ADDRESS,
+    umaAddress: null,
     txs: [transactions.map(serializeSafeSnapTransaction)]
   };
 }
