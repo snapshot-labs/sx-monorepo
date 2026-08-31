@@ -178,7 +178,7 @@ describe('ens', () => {
 
     it('should reject when the resolver fails', async () => {
       await expect(
-        getEnsTextRecord('my-dao-test.eth', 'snapshot', 11155111)
+        getEnsTextRecord('dblog.eth', 'snapshot', 11155111)
       ).rejects.toThrow();
     }, 10000);
 
@@ -248,7 +248,8 @@ describe('ens', () => {
       expect(controller).toBe(EMPTY_ADDRESS);
     }, 10000);
 
-    it.each(['my-dao-test.eth', 'poolgroup.eth'])(
+    // dblog.eth reverts onchain, poolgroup.eth through a dead CCIP gateway
+    it.each(['dblog.eth', 'poolgroup.eth'])(
       'should reject instead of falling back to the owner when the resolver fails (%s)',
       async name => {
         await expect(getSpaceController(name, 11155111)).rejects.toThrow();
