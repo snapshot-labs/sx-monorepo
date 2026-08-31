@@ -21,9 +21,7 @@ const { votes } = useAccount();
 
 const modalOpenTimeline = ref(false);
 
-const { proposal } = useGovernorQuorum(() => props.proposal);
-
-const totalProgress = computed(() => quorumProgress(proposal.value));
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const hasVoted = computed(
   () =>

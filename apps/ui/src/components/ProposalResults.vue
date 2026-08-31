@@ -34,17 +34,15 @@ const queryClient = useQueryClient();
 
 const displayAllChoices = ref(false);
 
-const { proposal } = useGovernorQuorum(() => props.proposal);
-
-const totalProgress = computed(() => quorumProgress(proposal.value));
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const quorumAmount = computed(() => {
   const current = getProposalCurrentQuorum(
-    proposal.value.network,
-    proposal.value
+    props.proposal.network,
+    props.proposal
   );
   const format = (n: number) => _vp(n / 10 ** props.decimals);
-  return `${format(current)} / ${format(proposal.value.quorum)}`;
+  return `${format(current)} / ${format(props.proposal.quorum)}`;
 });
 
 const placeholderResults = computed(() =>
