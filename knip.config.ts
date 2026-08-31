@@ -59,8 +59,6 @@ const config: KnipConfig = {
       vite: false,
       ignore: ['src/assets/styles/highlightjs/**'],
       ignoreDependencies: [
-        '@vue/cli-plugin-babel',
-        '@babel/core',
         '@iconify-json/heroicons-solid',
         '@electron-forge/maker-dmg',
         '@electron-forge/maker-zip',
