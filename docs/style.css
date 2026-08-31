@@ -57,6 +57,11 @@ a.nav-anchor[href*="status"] svg {
   mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/signal.svg) !important;
 }
 
+a[href="https://t.me/snapshotbox"] svg[class*="bg-primary"] {
+  -webkit-mask-image: url(/logo/telegram.svg) !important;
+  mask-image: url(/logo/telegram.svg) !important;
+}
+
 /* Hide only the first sidebar group header per tab
    ("Getting started" / "Build with Snapshot" are homepages, not categories). */
 #navigation-items .mt-6.lg\:mt-8 > .sidebar-group-header {
