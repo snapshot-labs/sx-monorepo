@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   dnsEncodeName,
-  resolveName,
   getEnsTextRecord,
   getNameOwner,
   getResolver,
-  getSpaceController
+  getSpaceController,
+  resolveName
 } from './ens';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';

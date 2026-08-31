@@ -242,7 +242,9 @@ export async function resolveName(name: string, chainId: ENSChainId) {
   const node = namehash(normalized);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
   const address: string | null = universalResolver
-    ? await resolveRecord(normalized, chainId, universalResolver, 'addr', [node])
+    ? await resolveRecord(normalized, chainId, universalResolver, 'addr', [
+        node
+      ])
     : await deepResolve(chainId, node, 'addr', [node]);
 
   if (!address || address === EVM_EMPTY_ADDRESS) return null;
