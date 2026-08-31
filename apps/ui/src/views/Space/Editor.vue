@@ -52,7 +52,7 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { strategiesWithTreasuries, hasSafeSnapConfig, isResolvingTreasuries } =
+const { strategiesWithTreasuries, isSafeSnapResolving, isResolvingTreasuries } =
   useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
@@ -259,12 +259,6 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
   () =>
     alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
       ?.isUsingOnlySigAuthenticators ?? false
-);
-
-// Resolving a SafeSnap module to its Safe needs an on-chain call, and
-// strategiesWithTreasuries stays null until it completes.
-const isSafeSnapResolving = computed(
-  () => hasSafeSnapConfig.value && strategiesWithTreasuries.value === null
 );
 
 const canSubmit = computed(() => {

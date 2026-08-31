@@ -86,17 +86,22 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
   );
 
   // Only a space with a SafeSnap config waits on an on-chain call before
-  // strategiesWithTreasuries resolves; everything else settles on the next
-  // tick, so callers should not gate on the pending state for those.
-  const hasSafeSnapConfig = computed(() => {
+  // strategiesWithTreasuries resolves (it stays null until then); everything
+  // else settles on the next tick, so callers should not gate submit on the
+  // pending state for those.
+  const isSafeSnapResolving = computed(() => {
     const space = unref(spaceRef);
 
-    return !!space && !!getSafeSnapConfig(space);
+    return (
+      !!space &&
+      !!getSafeSnapConfig(space) &&
+      strategiesWithTreasuries.value === null
+    );
   });
 
   return {
     strategiesWithTreasuries,
-    hasSafeSnapConfig,
+    isSafeSnapResolving,
     isResolvingTreasuries
   };
 }
