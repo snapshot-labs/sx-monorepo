@@ -133,7 +133,7 @@
           {
             "group": "Getting started",
             "pages": [
-              "developers/index"
+              "developers"
             ]
           },
           {
@@ -197,10 +197,6 @@
     {
       "source": "/snapshot-x/services/sx.js",
       "destination": "/snapshot-x/services/sx-js"
-    },
-    {
-      "source": "/developers",
-      "destination": "/developers/index"
     }
   ],
   "contextual": {
