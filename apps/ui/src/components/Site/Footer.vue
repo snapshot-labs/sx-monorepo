@@ -3,6 +3,7 @@ import { DOCS_URL } from '@/helpers/constants';
 import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICTelegram from '~icons/c/telegram';
 import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
@@ -18,6 +19,10 @@ const SOCIALS = [
   {
     href: 'https://discord.snapshot.org',
     icon: ICDiscord
+  },
+  {
+    href: 'https://t.me/snapshotbox',
+    icon: ICTelegram
   },
   {
     href: 'https://github.com/snapshot-labs',
