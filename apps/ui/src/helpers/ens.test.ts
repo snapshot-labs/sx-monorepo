@@ -248,8 +248,8 @@ describe('ens', () => {
       expect(controller).toBe(EMPTY_ADDRESS);
     }, 10000);
 
-    // dblog.eth reverts onchain, poolgroup.eth through a dead CCIP gateway
-    it.each(['dblog.eth', 'poolgroup.eth'])(
+    // dblog.eth reverts onchain, opdisputegame.eth after its CCIP callback
+    it.each(['dblog.eth', 'opdisputegame.eth'])(
       'should reject instead of falling back to the owner when the resolver fails (%s)',
       async name => {
         await expect(getSpaceController(name, 11155111)).rejects.toThrow();
