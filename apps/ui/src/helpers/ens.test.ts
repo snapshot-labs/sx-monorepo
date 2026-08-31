@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dnsEncodeName,
+  resolveName,
   getEnsTextRecord,
   getNameOwner,
   getResolver,
@@ -187,9 +188,21 @@ describe('ens', () => {
     }, 10000);
   });
 
+  describe('resolveName', () => {
+    it('should normalize the name before resolving', async () => {
+      const address = await resolveName('BOORGER.eth', 11155111);
+      expect(address).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
+    }, 10000);
+  });
+
   describe('getResolver', () => {
     it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
       const resolver = await getResolver('test123.eth', 11155111);
+      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    }, 10000);
+
+    it('should normalize the name before resolving', async () => {
+      const resolver = await getResolver('TEST123.eth', 11155111);
       expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
     }, 10000);
 

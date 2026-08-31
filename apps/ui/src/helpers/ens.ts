@@ -238,10 +238,11 @@ async function deepResolve(
 export async function resolveName(name: string, chainId: ENSChainId) {
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  const node = namehash(name);
+  const normalized = ensNormalize(name);
+  const node = namehash(normalized);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
   const address: string | null = universalResolver
-    ? await resolveRecord(name, chainId, universalResolver, 'addr', [node])
+    ? await resolveRecord(normalized, chainId, universalResolver, 'addr', [node])
     : await deepResolve(chainId, node, 'addr', [node]);
 
   if (!address || address === EVM_EMPTY_ADDRESS) return null;
@@ -320,16 +321,17 @@ async function getEnsOwnerV2(
 
 export async function getResolver(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
+  const normalized = ensNormalize(name);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
   if (
     universalResolver &&
-    (await getEnsOwnerV2(name, chainId, universalResolver))
+    (await getEnsOwnerV2(normalized, chainId, universalResolver))
   ) {
     const [resolver, , offset] = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
-      [universalResolver, 'findResolver', [dnsEncodeName(name)]]
+      [universalResolver, 'findResolver', [dnsEncodeName(normalized)]]
     );
 
     return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
@@ -338,7 +340,7 @@ export async function getResolver(name: string, chainId: ENSChainId) {
   return call(provider, ENS_CONTRACTS.registryAbi, [
     ENS_CONTRACTS.registry,
     'resolver',
-    [namehash(name)]
+    [namehash(normalized)]
   ]);
 }
 
