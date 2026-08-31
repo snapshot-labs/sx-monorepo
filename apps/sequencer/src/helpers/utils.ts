@@ -7,7 +7,7 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { Response } from 'express';
 import fetch from 'node-fetch';
-import { BROVIDER_URL, getProvider } from './provider';
+import { getProvider, PROVIDER_OPTIONS } from './provider';
 
 const MAINNET_NETWORK_ID_WHITELIST = [
   's',
@@ -349,9 +349,11 @@ export async function getSpaceController(space: string, network = NETWORK) {
   const networkId = tldMapping[tld]?.[network] ?? DEFAULT_NETWORK;
 
   try {
-    return await snapshot.utils.getSpaceController(space, networkId, {
-      broviderUrl: BROVIDER_URL
-    });
+    return await snapshot.utils.getSpaceController(
+      space,
+      networkId,
+      PROVIDER_OPTIONS
+    );
   } catch (err: any) {
     capture(err);
     return Promise.reject(

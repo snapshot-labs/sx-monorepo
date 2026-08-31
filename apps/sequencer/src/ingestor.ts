@@ -11,7 +11,7 @@ import { doesMessageExist, storeMsg } from './helpers/highlight';
 import log from './helpers/log';
 import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
-import { BROVIDER_URL } from './helpers/provider';
+import { PROVIDER_OPTIONS } from './helpers/provider';
 import relayer, { issueReceipt } from './helpers/relayer';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
@@ -20,13 +20,11 @@ const NETWORK_METADATA = {
   evm: {
     name: 'snapshot',
     version: '0.1.4',
-    broviderUrl: BROVIDER_URL,
     defaultNetwork: process.env.DEFAULT_NETWORK ?? '1'
   },
   starknet: {
     name: 'sx-starknet',
     version: '0.1.0',
-    broviderUrl: BROVIDER_URL,
     defaultNetwork:
       process.env.NETWORK === 'testnet'
         ? '0x534e5f5345504f4c4941'
@@ -137,9 +135,7 @@ export default async function ingestor(req) {
         body.sig,
         body.data,
         network,
-        {
-          broviderUrl: networkMetadata.broviderUrl
-        }
+        PROVIDER_OPTIONS
       );
       if (!isValidSig) throw new Error('invalid signature');
     } catch (err: any) {

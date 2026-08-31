@@ -1,39 +1,16 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import snapshot from '@snapshot-labs/snapshot.js';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 
-export const BROVIDER_URL =
-  process.env.BROVIDER_URL ?? 'https://rpc.brovider.xyz';
-const providers = new Map<string, StaticJsonRpcProvider>();
+const BROVIDER_URL = process.env.BROVIDER_URL ?? 'https://rpc.brovider.xyz';
+
+// Shared by every snapshot.js call that ends up talking to brovider, so the
+// requests are attributed to `client=sequencer` instead of `client=none`.
+export const PROVIDER_OPTIONS = {
+  broviderUrl: BROVIDER_URL,
+  clientName: 'sequencer'
+};
 
 // Loose `any` return type matches snapshot.js: starknet networks return a
 // starknet RpcProvider, not a StaticJsonRpcProvider.
 export function getProvider(network: string | number): any {
-  const key = String(network);
-  const config = (
-    networks as Record<string, { starknet?: boolean } | undefined>
-  )[key];
-  if (!config) {
-    throw new Error(`Network '${key}' is not supported`);
-  }
-  // snapshot.js builds the RPC URL without a query string, so EVM providers are
-  // created locally to append ?client=sequencer. Starknet networks need
-  // snapshot.js (RpcProvider + broviderId mapping) and keep going through it.
-  if (config.starknet) {
-    return snapshot.utils.getProvider(network, { broviderUrl: BROVIDER_URL });
-  }
-
-  let provider = providers.get(key);
-  if (!provider) {
-    provider = new StaticJsonRpcProvider(
-      {
-        url: `${BROVIDER_URL}/${key}?client=sequencer`,
-        timeout: 25000,
-        allowGzip: true
-      },
-      Number(network)
-    );
-    providers.set(key, provider);
-  }
-  return provider;
+  return snapshot.utils.getProvider(network, PROVIDER_OPTIONS);
 }
