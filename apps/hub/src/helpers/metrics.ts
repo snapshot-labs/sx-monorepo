@@ -43,7 +43,8 @@ export default function initMetrics(app: Express) {
       ['^/graphql.*$', '/graphql']
     ],
     whitelistedPath,
-    errorHandler: (e: any) => capture(e)
+    errorHandler: (e: any) => capture(e),
+    db
   });
 
   app.use(instrumentRateLimitedRequests);
