@@ -121,7 +121,8 @@
           {
             "group": "FAQ",
             "pages": [
-              "faq"
+              "faq",
+              "contact-us"
             ]
           }
         ]
