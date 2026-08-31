@@ -29,7 +29,7 @@
         },
         {
           "anchor": "Contact us",
-          "href": "/#intercom",
+          "href": "/contact-us",
           "icon": "headset",
           "iconType": "regular"
         },
@@ -207,11 +207,6 @@
       "cursor",
       "vscode"
     ]
-  },
-  "integrations": {
-    "intercom": {
-      "appId": "n9dmxtcs"
-    }
   },
   "externalLinks": [
     {
