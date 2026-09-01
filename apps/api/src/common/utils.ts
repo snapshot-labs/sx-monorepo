@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { getExecutionData, utils } from '@snapshot-labs/sx';
-import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { keccak256 } from 'viem';
 import { Network, Proposal, ScoresTick } from '../../.checkpoint/models';
@@ -132,7 +131,7 @@ export function getExecutionHash({
     return keccak256(data.executionParams[0] as `0x${string}`);
   }
 
-  return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
+  return hash.computePoseidonHashOnElements(data.executionParams);
 }
 
 export function getSpaceDecimals(decimals: number[]) {
