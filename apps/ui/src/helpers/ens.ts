@@ -40,7 +40,8 @@ const ENS_CONTRACTS: ENSContracts = {
   },
   universalResolverAbi: [
     'function resolve(bytes name, bytes data) view returns (bytes, address)',
-    'function findOwner(bytes name) view returns (address)'
+    'function findOwner(bytes name) view returns (address)',
+    'function findResolver(bytes name) view returns (address, bytes32, uint256)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
@@ -237,10 +238,13 @@ async function deepResolve(
 export async function resolveName(name: string, chainId: ENSChainId) {
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  const node = namehash(name);
+  const normalized = ensNormalize(name);
+  const node = namehash(normalized);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
   const address: string | null = universalResolver
-    ? await resolveRecord(name, chainId, universalResolver, 'addr', [node])
+    ? await resolveRecord(normalized, chainId, universalResolver, 'addr', [
+        node
+      ])
     : await deepResolve(chainId, node, 'addr', [node]);
 
   if (!address || address === EVM_EMPTY_ADDRESS) return null;
@@ -284,13 +288,9 @@ export async function setEnsTextRecord(
 ) {
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
-  const ensHash = namehash(ensNormalize(ens));
-
-  const resolverAddress = await call(
-    getProvider(chainId),
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
-  );
+  const normalized = ensNormalize(ens);
+  const ensHash = namehash(normalized);
+  const resolverAddress = await getResolver(normalized, chainId);
 
   if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) {
     throw new Error('No resolver set for name');
@@ -305,21 +305,59 @@ export async function setEnsTextRecord(
   return contract.setText(ensHash, record, value);
 }
 
+// findOwner is ENSv2-only; an unmigrated name returns the empty address,
+// so a revert is a failure and must not fall back to a stale v1 owner
+async function getEnsOwnerV2(
+  name: string,
+  chainId: ENSChainId,
+  universalResolver: string
+) {
+  const owner = await call(
+    getProvider(chainId),
+    ENS_CONTRACTS.universalResolverAbi,
+    [universalResolver, 'findOwner', [dnsEncodeName(name)]]
+  );
+
+  return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
+}
+
+export async function getResolver(name: string, chainId: ENSChainId) {
+  const provider = getProvider(chainId);
+  const normalized = ensNormalize(name);
+  const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
+
+  if (
+    universalResolver &&
+    (await getEnsOwnerV2(normalized, chainId, universalResolver))
+  ) {
+    const [resolver, , offset] = await call(
+      provider,
+      ENS_CONTRACTS.universalResolverAbi,
+      [universalResolver, 'findResolver', [dnsEncodeName(normalized)]]
+    );
+
+    return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
+  }
+
+  return call(provider, ENS_CONTRACTS.registryAbi, [
+    ENS_CONTRACTS.registry,
+    'resolver',
+    [namehash(normalized)]
+  ]);
+}
+
 export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const normalized = ensNormalize(name);
-
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
-  // findOwner is ENSv2-only; an unmigrated name returns the empty address,
-  // so a revert is a failure and must not fall back to a stale v1 owner
-  if (universalResolver) {
-    const ensOwnerV2 = await call(
-      provider,
-      ENS_CONTRACTS.universalResolverAbi,
-      [universalResolver, 'findOwner', [dnsEncodeName(normalized)]]
-    );
 
-    if (ensOwnerV2 && ensOwnerV2 !== EVM_EMPTY_ADDRESS) return ensOwnerV2;
+  if (universalResolver) {
+    const ensOwnerV2 = await getEnsOwnerV2(
+      normalized,
+      chainId,
+      universalResolver
+    );
+    if (ensOwnerV2) return ensOwnerV2;
   }
 
   const ensHash = namehash(normalized);
