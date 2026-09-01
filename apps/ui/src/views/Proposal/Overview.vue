@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import { EVM_EMPTY_ADDRESS } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import {
   _n,
   compareAddresses,
@@ -166,7 +167,10 @@ async function handleEditClick() {
         ? execution.safeAddress
         : props.proposal.execution_strategy;
 
-      return [address, execution.transactions];
+      return [
+        getExecutionKey(execution.chainId, address),
+        execution.transactions
+      ];
     })
   );
 
@@ -206,7 +210,10 @@ async function handleDuplicateClick() {
         ? execution.safeAddress
         : props.proposal.execution_strategy;
 
-      return [address, execution.transactions];
+      return [
+        getExecutionKey(execution.chainId, address),
+        execution.transactions
+      ];
     })
   );
 

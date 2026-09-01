@@ -11,18 +11,15 @@ const processedProposals = Object.fromEntries(
   Object.entries(storedProposals).map(([k, v]) => {
     const processed = v as any;
 
-    // convert single treasury to multiple treasuries format
-    if ('execution' in processed && 'executionStrategy' in processed) {
-      processed.executions =
-        processed.executionStrategy && processed.execution
-          ? {
-              [processed.executionStrategy.address]: processed.execution
-            }
-          : {};
+    delete processed.execution;
+    delete processed.executionStrategy;
 
-      delete processed.execution;
-      delete processed.executionStrategy;
-    }
+    // drop executions stored before keys were scoped by chain (address only)
+    processed.executions = Object.fromEntries(
+      Object.entries(processed.executions ?? {}).filter(([key]) =>
+        key.includes(':')
+      )
+    );
 
     return [k, v];
   })
@@ -73,6 +70,9 @@ export function useEditor() {
       const allowedPrivacies = spacePrivacies.get(spaceId);
 
       const hasFormValues = Object.values(rest).some(val => !!val);
+      const hasExecutions = Object.values(executions).some(
+        txs => !!txs?.length
+      );
       const hasChangedVotingType = type !== allowedTypes?.[0];
       const hasChangedPrivacy = privacy !== allowedPrivacies?.[0];
       const hasChangedBody = body !== spaceTemplate.get(spaceId);
@@ -80,7 +80,7 @@ export function useEditor() {
         type !== 'basic' && (choices || []).some(val => !!val);
 
       if (
-        Object.keys(executions).length === 0 &&
+        !hasExecutions &&
         labels.length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&

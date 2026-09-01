@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
@@ -103,7 +104,8 @@ async function handleTransactionAccept() {
   }
 
   const executions = {} as Record<string, Transaction[]>;
-  executions[executionStrategy.value.address] = [transaction.value];
+  executions[getExecutionKey(network.value, executionStrategy.value.address)] =
+    [transaction.value];
 
   const spaceKey = walletConnectSpaceKey.value;
   const draftId = await createDraft(spaceKey, {
