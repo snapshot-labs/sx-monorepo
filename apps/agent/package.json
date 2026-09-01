@@ -1,0 +1,38 @@
+{
+  "name": "agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autovote agent runner",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "predev": "bun run db:migrate",
+    "dev": "bun --watch src/index.ts",
+    "prestart": "bun run db:migrate",
+    "start": "bun src/index.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --rule 'no-console: error'",
+    "lint:fix": "bun run lint --fix",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@coinbase/cdp-sdk": "^1.45.0",
+    "@ethersproject/wallet": "^5.8.0",
+    "@logtail/pino": "^0.5.5",
+    "@snapshot-labs/sx": "^0.1.10",
+    "dotenv": "^16.0.2",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.13.3",
+    "pg": "^8.23.0",
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.0",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.9.0"
+  }
+}

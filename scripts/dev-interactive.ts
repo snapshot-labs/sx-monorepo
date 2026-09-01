@@ -10,7 +10,8 @@ type ServiceType =
   | 'highlight'
   | 'hub'
   | 'sequencer'
-  | 'mcp';
+  | 'mcp'
+  | 'agent';
 type Service = {
   env: Record<string, string>;
 };
@@ -54,6 +55,12 @@ const SERVICES: Record<ServiceType, Service> = {
   mcp: {
     env: {
       PORT: '3005'
+    }
+  },
+  agent: {
+    env: {
+      PORT: '3007',
+      VITE_AGENT_URL: 'http://localhost:3007'
     }
   }
 };
@@ -107,7 +114,8 @@ async function run() {
         { name: 'Highlight', value: 'highlight' as const },
         { name: 'Hub', value: 'hub' as const },
         { name: 'Sequencer', value: 'sequencer' as const },
-        { name: 'MCP', value: 'mcp' as const }
+        { name: 'MCP', value: 'mcp' as const },
+        { name: 'Agent', value: 'agent' as const }
       ]
     });
 
@@ -116,7 +124,8 @@ async function run() {
       answer.includes('mana') ||
       answer.includes('highlight') ||
       answer.includes('hub') ||
-      answer.includes('sequencer')
+      answer.includes('sequencer') ||
+      answer.includes('agent')
     ) {
       console.log('Starting Docker for backend services...');
       execSync(DOCKER_CMD);
