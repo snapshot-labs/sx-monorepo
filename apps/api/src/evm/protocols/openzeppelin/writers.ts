@@ -198,7 +198,7 @@ export function createWriters(
 
     space = new Space(contractAddress, config.indexerName);
     space.protocol = '@openzeppelin/governor';
-    space.verified = true;
+    space.verified = getGovernanceInfo(contractAddress).verified ?? false;
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: contractAddress
@@ -207,7 +207,14 @@ export function createWriters(
     space.created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     // Strategies & authentication
-    const [quorum, timelock, token, proposalThreshold] = await Promise.all([
+    const [
+      quorum,
+      timelock,
+      token,
+      proposalThreshold,
+      votingDelay,
+      votingPeriod
+    ] = await Promise.all([
       getQuorum({
         address: contractAddress,
         blockNumber
@@ -228,6 +235,18 @@ export function createWriters(
         address: contractAddress,
         abi: IGovernorAbi,
         functionName: 'proposalThreshold',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: IGovernorAbi,
+        functionName: 'votingDelay',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: IGovernorAbi,
+        functionName: 'votingPeriod',
         blockNumber: BigInt(blockNumber)
       })
     ]);
@@ -293,6 +312,9 @@ export function createWriters(
       votingPowerStrategyParsedMetadata.id
     ];
     space.proposal_threshold = proposalThreshold.toString();
+    space.voting_delay = votingDelay;
+    space.min_voting_period = votingPeriod;
+    space.max_voting_period = votingPeriod;
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = governanceInfo.name;

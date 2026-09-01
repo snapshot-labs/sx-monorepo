@@ -1,0 +1,49 @@
+{
+  "name": "sx-starknet",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snapshot-labs/sx-monorepo.git",
+    "directory": "contracts/sx-starknet"
+  },
+  "scripts": {
+    "test:stark-sig-auth": "bash './scripts/stark-sig-auth-test.sh'",
+    "test:eth-sig-auth": "bash './scripts/eth-sig-auth-test.sh'",
+    "test:eth-tx-auth": "bash './scripts/eth-tx-auth-test.sh'",
+    "test:l1-execution": "bash './scripts/l1-avatar-execution-test.sh'",
+    "test-ts": "bun run test:stark-sig-auth && bun run test:eth-sig-auth && bun run test:eth-tx-auth && bun run test:l1-execution",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "starknet-devnet": "^0.4.2"
+  },
+  "devDependencies": {
+    "@gnosis.pm/safe-contracts": "github:safe-global/safe-contracts#v1.4.0",
+    "@gnosis.pm/zodiac": "^4.0.3",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.6",
+    "@nomicfoundation/hardhat-foundry": "^1.1.1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.11",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#05f218fb6617932e56bf5388c3b389c3028a7b73",
+    "@openzeppelin/contracts-upgradeable": "github:OpenZeppelin/openzeppelin-contracts-upgradeable#56118009a30763d6b635676bed7968874036bb53",
+    "@openzeppelin/hardhat-upgrades": "^3.2.0",
+    "@snapshot-labs/sx": "^0.1.11",
+    "@types/chai": "^4.2.0",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^24",
+    "axios": "1.7.3",
+    "chai": "4",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.13.2",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.1",
+    "hardhat": "^2.17.2",
+    "micro-starknet": "^0.2.3",
+    "starknet": "7.6.4",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.6"
+  }
+}

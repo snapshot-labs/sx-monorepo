@@ -525,8 +525,9 @@ export function useActions() {
   async function vetoProposal(proposal: Proposal) {
     if (!auth.value) return await forceLogin();
 
-    if (auth.value.connector.type === 'argentx')
+    if (auth.value.connector.type === 'argentx') {
       throw new Error('ArgentX is not supported');
+    }
 
     const network = getReadWriteNetwork(proposal.network);
 
@@ -608,6 +609,42 @@ export function useActions() {
           ? getCurrentFromDuration(space.network, maxVotingDuration)
           : null
       )
+    );
+  }
+
+  async function getUpdateSettingsTransaction(
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ) {
+    const network = getReadWriteNetwork(space.network);
+
+    return network.actions.getUpdateSettingsTransaction(
+      space,
+      metadata,
+      authenticatorsToAdd,
+      authenticatorsToRemove,
+      votingStrategiesToAdd,
+      votingStrategiesToRemove,
+      validationStrategy,
+      executionStrategies,
+      votingDelay !== null
+        ? getCurrentFromDuration(space.network, votingDelay)
+        : null,
+      minVotingDuration !== null
+        ? getCurrentFromDuration(space.network, minVotingDuration)
+        : null,
+      maxVotingDuration !== null
+        ? getCurrentFromDuration(space.network, maxVotingDuration)
+        : null
     );
   }
 
@@ -808,6 +845,7 @@ export function useActions() {
     vetoProposal: wrapWithErrors(vetoProposal),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
+    getUpdateSettingsTransaction: wrapWithErrors(getUpdateSettingsTransaction),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),

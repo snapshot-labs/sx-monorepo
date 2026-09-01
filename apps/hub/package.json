@@ -4,8 +4,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "lint": "bun run lint:nofix --fix",
-    "lint:nofix": "eslint . --ext .ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "bun run lint --fix",
     "typecheck": "tsc --noEmit",
     "dev": "nodemon src/index.ts",
     "build": "tsc && copyfiles src/graphql/*.gql dist/",
@@ -21,7 +21,7 @@
     "@snapshot-labs/keycard": "^0.5.1",
     "@snapshot-labs/snapshot-metrics": "^2.0.0",
     "@snapshot-labs/snapshot-sentry": "^3.1.0",
-    "@snapshot-labs/snapshot.js": "^0.15.1",
+    "@snapshot-labs/snapshot.js": "^0.17.0",
     "bluebird": "^3.7.2",
     "connection-string": "^1.0.1",
     "cors": "^2.8.5",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",
-    "@types/node": "^22.6.0",
+    "@types/node": "^24",
     "copyfiles": "^2.4.1",
     "dotenv-cli": "^7.2.1",
     "jest": "^29.6.1",

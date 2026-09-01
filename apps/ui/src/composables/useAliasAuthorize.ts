@@ -100,8 +100,9 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   });
 
   const error = computed(() => {
-    if (!mutationError.value || isUserAbortError(mutationError.value))
+    if (!mutationError.value || isUserAbortError(mutationError.value)) {
       return null;
+    }
     return (mutationError.value as Error).message || 'Authorization failed';
   });
 

@@ -59,8 +59,6 @@ const config: KnipConfig = {
       vite: false,
       ignore: ['src/assets/styles/highlightjs/**'],
       ignoreDependencies: [
-        '@vue/cli-plugin-babel',
-        '@babel/core',
         '@iconify-json/heroicons-solid',
         '@electron-forge/maker-dmg',
         '@electron-forge/maker-zip',
@@ -81,6 +79,18 @@ const config: KnipConfig = {
       ],
       ignoreBinaries: ['forge']
     },
+    // Same as sx-evm: these are resolved through foundry remappings. The
+    // scripts and tests are only ever run through the test:* shell scripts.
+    'contracts/sx-starknet': {
+      entry: ['scripts/**/*.ts', 'tests/**/*.ts'],
+      ignoreDependencies: [
+        '@gnosis.pm/safe-contracts',
+        '@gnosis.pm/zodiac',
+        '@openzeppelin/contracts',
+        '@openzeppelin/contracts-upgradeable',
+        'forge-std'
+      ]
+    },
     'packages/eslint-config': {},
     'packages/eslint-config-vue': {},
     'packages/lock': {
@@ -89,7 +99,9 @@ const config: KnipConfig = {
     },
     'packages/prettier-config': {},
     'packages/sx.js': {
-      ignoreBinaries: ['anvil', 'starknet-devnet']
+      ignoreBinaries: ['anvil', 'starknet-devnet'],
+      // deliberate optional peer, lazy-loaded for confidential voting
+      ignoreDependencies: ['@inco/lightning-js']
     },
     'packages/tune': {
       entry: ['src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],

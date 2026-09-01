@@ -43,9 +43,7 @@ const isTestnet = computed(() => {
 });
 
 const ensUrl = computed(() =>
-  isTestnet.value
-    ? 'https://sepolia.app.ens.domains'
-    : 'https://app.ens.domains'
+  isTestnet.value ? 'https://app.ens.dev' : 'https://app.ens.domains'
 );
 
 function handleAttachEnsName(name: string) {

@@ -573,8 +573,9 @@ export function createActions(
       });
     },
     executeQueuedProposal: async (web3: any, proposal: Proposal) => {
-      if (!proposal.execution_destination)
+      if (!proposal.execution_destination) {
         throw new Error('Execution destination is missing');
+      }
 
       const activeVotingStrategies = proposal.strategies_indices.reduce(
         (acc, index) => {
@@ -821,7 +822,7 @@ export function createActions(
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, networkConfig);
-          if (!strategy)
+          if (!strategy) {
             return {
               address,
               value: 0n,
@@ -830,6 +831,7 @@ export function createActions(
               token: null,
               symbol: ''
             };
+          }
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -865,6 +867,9 @@ export function createActions(
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
+    getUpdateSettingsTransaction: () => {
       throw new Error('Not implemented');
     },
     createSpaceRaw: () => {

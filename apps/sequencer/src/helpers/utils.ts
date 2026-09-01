@@ -7,7 +7,10 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { Response } from 'express';
 import fetch from 'node-fetch';
-import { BROVIDER_URL, getProvider } from './provider';
+import {
+  getProvider,
+  getSpaceController as getSnapshotSpaceController
+} from './provider';
 
 const MAINNET_NETWORK_ID_WHITELIST = [
   's',
@@ -43,6 +46,12 @@ export function jsonParse(input, fallback?) {
     return JSON.parse(input);
   } catch {
     return fallback || {};
+  }
+}
+
+export class ServerError extends Error {
+  toJSON() {
+    return this.message;
   }
 }
 
@@ -329,7 +338,7 @@ async function updateWalletConnectWhitelist(
   return true;
 }
 
-export function getSpaceController(space: string, network = NETWORK) {
+export async function getSpaceController(space: string, network = NETWORK) {
   const tld = space.split('.').slice(-1)[0];
   const tldMapping = {
     shib: {
@@ -342,7 +351,12 @@ export function getSpaceController(space: string, network = NETWORK) {
   };
   const networkId = tldMapping[tld]?.[network] ?? DEFAULT_NETWORK;
 
-  return snapshot.utils.getSpaceController(space, networkId, {
-    broviderUrl: BROVIDER_URL
-  });
+  try {
+    return await getSnapshotSpaceController(space, networkId);
+  } catch (err: any) {
+    capture(err);
+    return Promise.reject(
+      new ServerError('unable to resolve space controller')
+    );
+  }
 }
