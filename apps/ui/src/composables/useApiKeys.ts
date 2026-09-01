@@ -1,31 +1,15 @@
-import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useQuery } from '@tanstack/vue-query';
 import { fetchKeys } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
-import pkg from '../../package.json';
 
 export function useApiKeys() {
-  const { web3Account: address, auth } = useWeb3();
-  const { getAliasSigner } = useActions();
-  const { modalAccountOpen } = useModal();
-
-  const storedKeys = useStorage(
-    `${pkg.name}.aliases`,
-    {} as Record<string, string>
-  );
-  const isAuthenticating = ref(false);
-
-  const aliasWallet = computed(() => {
-    const pk = address.value && storedKeys.value[address.value];
-    if (!pk || !isHexString(pk)) return null;
-
-    try {
-      return new Wallet(pk);
-    } catch {
-      return null;
-    }
-  });
+  const { web3Account: address } = useWeb3();
+  const {
+    wallet: aliasWallet,
+    isAuthenticating,
+    authenticate: createAlias
+  } = useAliasWallet();
 
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ['keycard', 'keys', address] as const,
@@ -44,20 +28,9 @@ export function useApiKeys() {
   const isLoading = computed(() => isAuthenticated.value && isPending.value);
 
   async function authenticate() {
-    if (!auth.value) {
-      modalAccountOpen.value = true;
-      return false;
-    }
+    if (!(await createAlias())) return false;
 
-    try {
-      isAuthenticating.value = true;
-      await getAliasSigner(auth.value);
-      await refetch();
-    } catch {
-      return false;
-    } finally {
-      isAuthenticating.value = false;
-    }
+    await refetch();
 
     return true;
   }

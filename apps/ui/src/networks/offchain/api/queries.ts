@@ -328,6 +328,7 @@ export const ALIASES_QUERY = gql(`
     ) {
       address
       alias
+      created
     }
   }
 `);

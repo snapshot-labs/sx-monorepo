@@ -9,6 +9,8 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
+import Agent from '@/views/Settings/Agent.vue';
+import AgentSpace from '@/views/Settings/AgentSpace.vue';
 import Aliases from '@/views/Settings/Aliases.vue';
 import ApiKeys from '@/views/Settings/ApiKeys.vue';
 import Authorize from '@/views/Settings/Authorize.vue';
@@ -67,6 +69,12 @@ export default [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
       { path: 'contacts', name: 'settings-contacts', component: Contacts },
       { path: 'aliases', name: 'settings-aliases', component: Aliases },
+      { path: 'agent', name: 'settings-agent', component: Agent },
+      {
+        path: 'agent/:space',
+        name: 'settings-agent-space',
+        component: AgentSpace
+      },
       {
         path: 'notifications',
         name: 'settings-notifications',
