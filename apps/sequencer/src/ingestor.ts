@@ -11,7 +11,7 @@ import { doesMessageExist, storeMsg } from './helpers/highlight';
 import log from './helpers/log';
 import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
-import { PROVIDER_OPTIONS } from './helpers/provider';
+import { verify } from './helpers/provider';
 import relayer, { issueReceipt } from './helpers/relayer';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
@@ -130,12 +130,11 @@ export default async function ingestor(req) {
 
     // Check if signature is valid
     try {
-      const isValidSig = await snapshot.utils.verify(
+      const isValidSig = await verify(
         body.address,
         body.sig,
         body.data,
-        network,
-        PROVIDER_OPTIONS
+        network
       );
       if (!isValidSig) throw new Error('invalid signature');
     } catch (err: any) {
