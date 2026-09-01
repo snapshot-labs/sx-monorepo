@@ -58,7 +58,7 @@ const SOCIALS = [
           <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`">
+              <AppLink :to="`${DOCS_URL}/contact-us`">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
             </div>
@@ -108,9 +108,7 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`"
-              >Contact us</AppLink
-            >
+            <AppLink :to="`${DOCS_URL}/contact-us`">Contact us</AppLink>
           </div>
         </div>
       </div>
