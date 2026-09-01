@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { dnsEncodeName, getNameOwner, getSpaceController } from './ens';
+import {
+  dnsEncodeName,
+  getEnsTextRecord,
+  getNameOwner,
+  getResolver,
+  getSpaceController,
+  resolveName
+} from './ens';
+
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 describe('ens', () => {
   describe('dnsEncodeName', () => {
@@ -122,6 +131,130 @@ describe('ens', () => {
         const owner = await getNameOwner('lucemans-test-not-exist.cbars.id', 1);
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
+
+      it('should not answer a DNS domain on testnet from mainnet', async () => {
+        const owner = await getNameOwner('defi.app', 11155111);
+        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      }, 10000);
     });
+  });
+
+  describe('getEnsTextRecord', () => {
+    it('should read a record through the Universal Resolver', async () => {
+      const record = await getEnsTextRecord(
+        'boorger.eth',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
+    }, 10000);
+
+    it('should return null for an unset record', async () => {
+      const record = await getEnsTextRecord(
+        'demodao.eth',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe(null);
+    }, 10000);
+
+    it('should return null for a name without a resolver', async () => {
+      const record = await getEnsTextRecord(
+        'nonexistent-random-name.eth',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe(null);
+    }, 10000);
+
+    it('should return null for an un-imported DNS domain', async () => {
+      const record = await getEnsTextRecord(
+        'facebook.com',
+        'snapshot',
+        11155111
+      );
+      expect(record).toBe(null);
+    }, 10000);
+
+    it('should reject when the resolver fails', async () => {
+      await expect(
+        getEnsTextRecord('dblog.eth', 'snapshot', 11155111)
+      ).rejects.toThrow();
+    }, 10000);
+
+    it('should leave chains without a Universal Resolver on the v1 path', async () => {
+      const record = await getEnsTextRecord('stakedao.eth', 'snapshot', 1);
+      expect(record).toBe('0xB0552b6860CE5C0202976Db056b5e3Cc4f9CC765');
+    }, 10000);
+  });
+
+  describe('resolveName', () => {
+    it('should normalize the name before resolving', async () => {
+      const address = await resolveName('BOORGER.eth', 11155111);
+      expect(address).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
+    }, 10000);
+  });
+
+  describe('getResolver', () => {
+    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
+      const resolver = await getResolver('test123.eth', 11155111);
+      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    }, 10000);
+
+    it('should normalize the name before resolving', async () => {
+      const resolver = await getResolver('TEST123.eth', 11155111);
+      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    }, 10000);
+
+    it('should return the v1 resolver of an unmigrated name on testnet', async () => {
+      const resolver = await getResolver('boorger.eth', 11155111);
+      expect(resolver).toBe('0x8FADE66B79cC9f707aB26799354482EB93a5B7dD');
+    }, 10000);
+
+    it('should return the v1 resolver on mainnet', async () => {
+      const resolver = await getResolver('ens.eth', 1);
+      expect(resolver).toBe('0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41');
+    }, 10000);
+
+    it('should return an empty address for a name without its own resolver', async () => {
+      const resolver = await getResolver('lucemans.cb.id', 1);
+      expect(resolver).toBe('0x0000000000000000000000000000000000000000');
+    }, 10000);
+  });
+
+  describe('getSpaceController', () => {
+    it('should resolve a controller from the snapshot record', async () => {
+      const controller = await getSpaceController('boorger.eth', 11155111);
+      expect(controller).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
+    }, 10000);
+
+    it('should resolve a DNS-imported space through its DNS owner', async () => {
+      const controller = await getSpaceController('ethplay.org', 11155111);
+      expect(controller).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+    }, 10000);
+
+    it('should return an empty address for an un-imported DNS domain', async () => {
+      const controller = await getSpaceController('facebook.com', 11155111);
+      expect(controller).toBe(EMPTY_ADDRESS);
+    }, 10000);
+
+    // an expired wrapped name keeps a stale record in the v1 registry; the
+    // Universal Resolver reports no resolver, as the sequencer sees it
+    it('should not read the stale record of an expired name', async () => {
+      const controller = await getSpaceController(
+        'filecoin-test.eth',
+        11155111
+      );
+      expect(controller).toBe(EMPTY_ADDRESS);
+    }, 10000);
+
+    // dblog.eth reverts onchain, opdisputegame.eth after its CCIP callback
+    it.each(['dblog.eth', 'opdisputegame.eth'])(
+      'should reject instead of falling back to the owner when the resolver fails (%s)',
+      async name => {
+        await expect(getSpaceController(name, 11155111)).rejects.toThrow();
+      },
+      10000
+    );
   });
 });

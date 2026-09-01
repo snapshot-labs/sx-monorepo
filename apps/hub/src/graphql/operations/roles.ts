@@ -31,8 +31,9 @@ export default async function (parent, args) {
       );
 
       if (admins.includes(address.toLowerCase())) permissions.push('admin');
-      if (moderators.includes(address.toLowerCase()))
+      if (moderators.includes(address.toLowerCase())) {
         permissions.push('moderator');
+      }
       if (members.includes(address.toLowerCase())) permissions.push('author');
 
       return { space: space.id, permissions };

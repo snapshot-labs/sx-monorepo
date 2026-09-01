@@ -131,12 +131,15 @@ function getAuthorRole(
     members: string[];
   }
 ): Member['role'] | null {
-  if (admins.some(address => compareAddresses(address, authorAddress)))
+  if (admins.some(address => compareAddresses(address, authorAddress))) {
     return 'admin';
-  if (moderators.some(address => compareAddresses(address, authorAddress)))
+  }
+  if (moderators.some(address => compareAddresses(address, authorAddress))) {
     return 'moderator';
-  if (members.some(address => compareAddresses(address, authorAddress)))
+  }
+  if (members.some(address => compareAddresses(address, authorAddress))) {
     return 'author';
+  }
 
   return null;
 }

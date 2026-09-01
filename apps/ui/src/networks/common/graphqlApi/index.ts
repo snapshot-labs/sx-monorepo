@@ -35,7 +35,6 @@ import {
   UserActivity,
   Vote
 } from '@/types';
-import { fetchBlockTimestamps } from './blockTimestamps';
 import {
   PROPOSAL_QUERY as HIGHLIGHT_PROPOSAL_QUERY,
   PROPOSALS_QUERY as HIGHLIGHT_PROPOSALS_QUERY,
@@ -109,27 +108,6 @@ function isProposalWithSpaceMetadata(
   return (
     !!proposal.space.metadata && !!proposal.space.strategies_parsed_metadata
   );
-}
-
-function applyBlockTimestamps(
-  proposal: Proposal,
-  blockTimestamps: Record<number, number>
-): Proposal {
-  return {
-    ...proposal,
-    start:
-      (proposal.start_block_number &&
-        blockTimestamps[proposal.start_block_number]) ||
-      proposal.start,
-    min_end:
-      (proposal.min_end_block_number &&
-        blockTimestamps[proposal.min_end_block_number]) ||
-      proposal.min_end,
-    max_end:
-      (proposal.max_end_block_number &&
-        blockTimestamps[proposal.max_end_block_number]) ||
-      proposal.max_end
-  };
 }
 
 function getProposalState(
@@ -697,23 +675,11 @@ export function createApi(
         });
       }
 
-      const proposals = data.proposals
+      return data.proposals
         .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
-
-      const blockTimestamps = await fetchBlockTimestamps(
-        networkId,
-        proposals.flatMap(p => [
-          p.start_block_number,
-          p.min_end_block_number,
-          p.max_end_block_number
-        ]),
-        current
-      );
-
-      return proposals.map(p => applyBlockTimestamps(p, blockTimestamps));
     },
     loadProposal: async (
       spaceId: string,
@@ -741,25 +707,12 @@ export function createApi(
       );
 
       if (!isProposalWithSpaceMetadata(data.proposal)) return null;
-
-      const proposal = formatProposal(
+      return formatProposal(
         data.proposal,
         networkId,
         current,
         opts.baseNetworkId
       );
-
-      const blockTimestamps = await fetchBlockTimestamps(
-        networkId,
-        [
-          proposal.start_block_number,
-          proposal.min_end_block_number,
-          proposal.max_end_block_number
-        ],
-        current
-      );
-
-      return applyBlockTimestamps(proposal, blockTimestamps);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,

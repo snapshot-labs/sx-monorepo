@@ -525,8 +525,9 @@ export function useActions() {
   async function vetoProposal(proposal: Proposal) {
     if (!auth.value) return await forceLogin();
 
-    if (auth.value.connector.type === 'argentx')
+    if (auth.value.connector.type === 'argentx') {
       throw new Error('ArgentX is not supported');
+    }
 
     const network = getReadWriteNetwork(proposal.network);
 
