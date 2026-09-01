@@ -3,6 +3,7 @@ import { DOCS_URL } from '@/helpers/constants';
 import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
+import ICTelegram from '~icons/c/telegram';
 import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
@@ -18,6 +19,10 @@ const SOCIALS = [
   {
     href: 'https://discord.snapshot.org',
     icon: ICDiscord
+  },
+  {
+    href: 'https://t.me/snapshotbox',
+    icon: ICTelegram
   },
   {
     href: 'https://github.com/snapshot-labs',
@@ -53,7 +58,7 @@ const SOCIALS = [
           <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`">
+              <AppLink :to="`${DOCS_URL}/contact-us`">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
             </div>
@@ -103,9 +108,7 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`"
-              >Contact us</AppLink
-            >
+            <AppLink :to="`${DOCS_URL}/contact-us`">Contact us</AppLink>
           </div>
         </div>
       </div>
