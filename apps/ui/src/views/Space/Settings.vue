@@ -6,6 +6,7 @@ import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
@@ -315,7 +316,10 @@ async function handleProposeSettingsChanges() {
     const draftId = await createDraft(spaceKey, {
       title: 'Update space settings',
       executions: {
-        [selfGovernedExecution.value.address]: [transaction]
+        [getExecutionKey(
+          selfGovernedExecution.value.treasury.chainId,
+          selfGovernedExecution.value.address
+        )]: [transaction]
       }
     });
 
