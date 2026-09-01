@@ -60,6 +60,17 @@ export type SafeSnapTransaction =
   | SafeSnapContractInteractionTransaction
   | SafeSnapRawTransaction;
 
+export type SafeSnapExecutionData = {
+  network: string;
+  realityAddress: string;
+  multiSendAddress: string;
+  umaAddress: null;
+  txs: SafeSnapTransaction[][];
+};
+
+// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
+
 function parseTransferFunds(
   tx: SafeSnapTransferFundsTransaction
 ): SendTokenTransaction {
@@ -220,17 +231,6 @@ export function serializeSafeSnapTransaction(
       return base;
   }
 }
-
-// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
-const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
-
-export type SafeSnapExecutionData = {
-  network: string;
-  realityAddress: string;
-  multiSendAddress: string;
-  umaAddress: null;
-  txs: SafeSnapTransaction[][];
-};
 
 // `umaAddress` is explicit because v1 renders a proposal safe as
 // `{ ...spaceConfig.safes[index], ...safe }`: an omitted key is back-filled

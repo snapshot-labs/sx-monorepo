@@ -15,7 +15,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
   const isResolvingTreasuries = ref(false);
   const strategiesWithTreasuries = computedAsync(
     async () => {
-      const space = unref(spaceRef);
+      const space = toValue(spaceRef);
 
       if (!space) return null;
 
@@ -86,7 +86,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
   // Gate only spaces with a SafeSnap config: everything else settles on the
   // next tick, so `null` there is not worth blocking submit on.
   const isSafeSnapResolving = computed(() => {
-    const space = unref(spaceRef);
+    const space = toValue(spaceRef);
 
     return (
       !!space &&
