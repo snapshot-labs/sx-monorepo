@@ -272,9 +272,19 @@ export function useWalletConnect(
       }
     };
 
-    const onSessionDelete = () => {
+    const onSessionDelete = (payload: WalletKitTypes.SessionDelete) => {
+      if (payload.topic !== session.value?.topic) return;
+
       loading.value = false;
       logged.value = false;
+      session.value = null;
+      proposal.value = null;
+
+      if (activeKey === key.value) {
+        activeCleanup?.();
+        activeCleanup = null;
+        activeKey = null;
+      }
     };
 
     connector.on('session_proposal', onSessionProposal);

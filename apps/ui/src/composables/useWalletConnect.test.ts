@@ -186,4 +186,42 @@ describe('useWalletConnect', () => {
       expect(connector.respondSessionRequest).toHaveBeenCalled()
     );
   });
+
+  it('ignores a session_delete whose topic is not the active session', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    connector.emit('session_delete', { id: 1, topic: 'some-other-topic' });
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(spaceA.logged.value).toBe(true);
+  });
+
+  it('clears the stored proposal state on a session_delete for its own topic', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    expect(spaceA.proposal.value).not.toBe(null);
+
+    connector.emit('session_delete', { id: 1, topic: 'topic-1' });
+    await vi.waitFor(() => expect(spaceA.logged.value).toBe(false));
+
+    expect(spaceA.proposal.value).toBe(null);
+  });
+
+  it('clears the deleted session on session_delete so pairing a different treasury does not try to disconnect the removed session', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const spaceB = useWalletConnect('eth', 1, '0xBBB', 'space-b', null);
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    connector.emit('session_delete', { id: 1, topic: 'topic-1' });
+    await vi.waitFor(() => expect(spaceA.logged.value).toBe(false));
+
+    connector.disconnectSession.mockClear();
+    await connectAndApprove(spaceB, 'uri-b', 2);
+
+    expect(connector.disconnectSession).not.toHaveBeenCalled();
+    expect(spaceB.logged.value).toBe(true);
+  });
 });
