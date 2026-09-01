@@ -22,6 +22,7 @@ const {
   isModified,
   isController,
   isOwner,
+  isOwnerEvaluating,
   isAdmin,
   canModifySettings,
   form,
@@ -638,7 +639,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           the name's owner
         </UiMessage>
         <UiMessage
-          v-else-if="isOffchainNetwork && isController && !isOwner"
+          v-else-if="
+            isOffchainNetwork && isController && !isOwner && !isOwnerEvaluating
+          "
           type="danger"
           class="mb-3"
         >

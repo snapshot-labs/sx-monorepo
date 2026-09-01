@@ -116,6 +116,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   const loading = ref(true);
   const isModifiedEvaluating = ref(false);
+  const isOwnerEvaluating = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
 
@@ -136,7 +137,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       return compareAddresses(owner, account);
     },
     false,
-    { lazy: true }
+    { lazy: true, evaluating: isOwnerEvaluating }
   );
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
@@ -1106,6 +1107,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     ),
     isController,
     isOwner,
+    isOwnerEvaluating,
     isAdmin,
     canModifySettings,
     form,
