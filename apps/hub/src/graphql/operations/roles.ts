@@ -8,9 +8,11 @@ export default async function (parent, args) {
 
   const query = `
     SELECT * FROM spaces
-    WHERE JSON_CONTAINS(LOWER(settings->'$.admins'), LOWER(JSON_QUOTE(?)))
+    WHERE deleted = 0 AND (
+      JSON_CONTAINS(LOWER(settings->'$.admins'), LOWER(JSON_QUOTE(?)))
       OR JSON_CONTAINS(LOWER(settings->'$.members'), LOWER(JSON_QUOTE(?)))
-      OR JSON_CONTAINS(LOWER(settings->'$.moderators'), LOWER(JSON_QUOTE(?)));
+      OR JSON_CONTAINS(LOWER(settings->'$.moderators'), LOWER(JSON_QUOTE(?)))
+    );
   `;
 
   try {
@@ -29,8 +31,9 @@ export default async function (parent, args) {
       );
 
       if (admins.includes(address.toLowerCase())) permissions.push('admin');
-      if (moderators.includes(address.toLowerCase()))
+      if (moderators.includes(address.toLowerCase())) {
         permissions.push('moderator');
+      }
       if (members.includes(address.toLowerCase())) permissions.push('author');
 
       return { space: space.id, permissions };

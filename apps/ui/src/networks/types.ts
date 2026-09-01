@@ -10,7 +10,6 @@ import {
   ChainId,
   Choice,
   DelegationType,
-  Follow,
   NetworkID,
   Privacy,
   Proposal,
@@ -284,6 +283,19 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     minVotingDuration: number | null,
     maxVotingDuration: number | null
   );
+  getUpdateSettingsTransaction(
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ): Promise<Transaction>;
   delegate(
     web3: Web3Provider,
     space: Space,
@@ -343,7 +355,9 @@ export type NetworkApi = {
       | 'proposal_count-asc',
     user?: string
   ): Promise<UserActivity[]>;
-  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
+  loadFollows(
+    userId: string
+  ): Promise<{ space: Pick<Space, 'id' | 'network'> }[]>;
   loadAlias(
     address: string,
     alias: string,

@@ -97,6 +97,7 @@ export default async function (parent, args) {
       p.id AS id,
       spaces.settings,
       spaces.domain as spaceDomain,
+      spaces.created as spaceCreated,
       spaces.flagged as spaceFlagged,
       spaces.verified as spaceVerified,
       spaces.turbo_expiration as spaceTurboExpiration,
@@ -104,7 +105,7 @@ export default async function (parent, args) {
     FROM proposals p
     INNER JOIN spaces ON spaces.id = p.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE 1=1 ${queryStr} ${searchSql}
+    WHERE p.space NOT IN (SELECT id FROM spaces WHERE deleted = 1) ${queryStr} ${searchSql}
     ORDER BY ${orderBy} ${orderDirection}, p.id ASC LIMIT ?, ?
   `;
   params.push(skip, first);

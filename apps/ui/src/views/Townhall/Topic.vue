@@ -73,11 +73,13 @@ const results: ComputedRef<Post[]> = computed(() =>
   clone(topic.value?.posts ?? [])
     .filter(s => !s.hidden && getPostVoteCount(s.post_id) > 0)
     .sort((a, b) => {
-      if (sortBy.value === 'agree')
+      if (sortBy.value === 'agree') {
         return b.scores_1 / b.vote_count - a.scores_1 / a.vote_count;
+      }
 
-      if (sortBy.value === 'disagree')
+      if (sortBy.value === 'disagree') {
         return b.scores_2 / b.vote_count - a.scores_2 / a.vote_count;
+      }
 
       if (sortBy.value === 'recent') return b.created - a.created;
 

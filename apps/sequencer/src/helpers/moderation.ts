@@ -66,16 +66,19 @@ export function containsFlaggedLinks(body: string): boolean {
 }
 
 export function flagEntity({ type, action, value }) {
-  if (!type || !action || !value)
+  if (!type || !action || !value) {
     throw new Error(`missing params. 'type', 'action' and 'value' required`);
+  }
   if (!['proposal', 'space'].includes(type)) throw new Error('invalid type');
-  if (type === 'proposal' && !['flag', 'unflag'].includes(action))
+  if (type === 'proposal' && !['flag', 'unflag'].includes(action)) {
     throw new Error('invalid action');
+  }
   if (
     type === 'space' &&
     !['flag', 'unflag', 'verify', 'hibernate', 'reactivate'].includes(action)
-  )
+  ) {
     throw new Error('invalid action');
+  }
 
   let query;
   switch (`${type}-${action}`) {

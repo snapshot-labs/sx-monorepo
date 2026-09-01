@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
@@ -98,11 +99,13 @@ async function handleTransactionAccept() {
     !walletConnectSpaceKey.value ||
     !executionStrategy.value ||
     !transaction.value
-  )
+  ) {
     return;
+  }
 
   const executions = {} as Record<string, Transaction[]>;
-  executions[executionStrategy.value.address] = [transaction.value];
+  executions[getExecutionKey(network.value, executionStrategy.value.address)] =
+    [transaction.value];
 
   const spaceKey = walletConnectSpaceKey.value;
   const draftId = await createDraft(spaceKey, {
@@ -141,8 +144,9 @@ watch(isSwiping, () => {
     !sidebarSwipeEnabled.value ||
     !isSwiping.value ||
     modalOpen.value
-  )
+  ) {
     return;
+  }
 
   if (
     (direction.value === 'right' && !uiStore.sideMenuOpen) ||

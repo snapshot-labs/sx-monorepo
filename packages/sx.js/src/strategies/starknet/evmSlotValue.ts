@@ -72,8 +72,9 @@ export default function createEvmSlotValueStrategy({
       clientConfig: ClientConfig
     ): Promise<string[]> {
       if (call === 'propose') throw new Error('Not supported for proposing');
-      if (signerAddress.length !== 42)
+      if (signerAddress.length !== 42) {
         throw new Error('Not supported for non-Ethereum addresses');
+      }
       if (!metadata) throw new Error('Invalid metadata');
 
       const voteEnvelope = envelope as Envelope<Vote>;

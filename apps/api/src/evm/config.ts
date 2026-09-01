@@ -6,6 +6,11 @@ import { createConfig as createSnapshotXConfig } from './protocols/snapshot-x/co
 import { EVMConfig, NetworkID, PartialConfig } from './types';
 import { applyConfig } from './utils';
 
+// The Edge RPC node we use for Base caps eth_getLogs at 1000 blocks
+const MAX_BLOCKS_PER_REQUEST: Partial<Record<NetworkID, number>> = {
+  base: 1000
+};
+
 export function createConfig(indexerName: NetworkID): EVMConfig {
   const network = evmNetworks[indexerName];
 
@@ -42,6 +47,7 @@ export function createConfig(indexerName: NetworkID): EVMConfig {
     network_node_url: getRpcUrl(network.Meta.eip712ChainId),
     ...partialConfig,
     state_retention_blocks: 5000,
+    max_blocks_per_request: MAX_BLOCKS_PER_REQUEST[indexerName],
     snapshotXConfig: snapshotXConfig.protocolConfig,
     governorBravoConfig: governorBravoConfig?.protocolConfig,
     openZeppelinConfig: openZeppelinConfig?.protocolConfig

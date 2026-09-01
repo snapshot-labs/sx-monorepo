@@ -165,6 +165,7 @@ export type Validation = {
 
 export type OffchainAdditionalRawData = {
   type: 'offchain';
+  skinSettings: SkinSettings;
 } & Pick<
   OffchainApiSpace,
   | 'private'
@@ -173,7 +174,6 @@ export type OffchainAdditionalRawData = {
   | 'hibernated'
   | 'domain'
   | 'skin'
-  | 'skinSettings'
   | 'strategies'
   | 'categories'
   | 'admins'
@@ -470,7 +470,7 @@ export type SkinSettings = {
   heading_color: string;
   primary_color: string;
   theme: Theme;
-  logo?: string;
+  logo?: string | null;
 };
 
 export type Drafts = Record<string, Draft>;

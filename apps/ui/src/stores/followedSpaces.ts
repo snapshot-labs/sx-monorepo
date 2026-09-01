@@ -12,7 +12,7 @@ import pkg from '../../package.json';
 
 const network = getNetwork(metadataNetwork);
 
-function getCompositeSpaceId(space: Space) {
+function getCompositeSpaceId(space: Pick<Space, 'id' | 'network'>) {
   return `${space.network}:${space.id}`;
 }
 

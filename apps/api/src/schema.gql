@@ -13,6 +13,17 @@ enum ProposalState {
 }
 
 """
+SpaceImplementation stores first implementation address for a space.
+This is used to detect Space protocol at SpaceCreated.
+"""
+type SpaceImplementation {
+  "Unique identifier for the space"
+  id: String!
+  "Implementation address"
+  implementation: String!
+}
+
+"""
 Space represents a DAO or governance organization on Snapshot X
 """
 type Space {
@@ -313,6 +324,10 @@ type Proposal {
   state: ProposalState! @computed
   "Whether proposal has been executed"
   executed: Boolean!
+  "Confidential-voting decryption: did the encrypted For+Abstain tally reach quorum? Populated from `Space.isQuorumReached(proposalId)` on `ProposalResultRevealed`. Null for non-confidential spaces or unrevealed proposals."
+  quorum_reached: Boolean
+  "Confidential-voting decryption: did encrypted For exceed encrypted Against? Populated from `Space.isSupportAchieved(proposalId)` on `ProposalResultRevealed`. Null for non-confidential spaces or unrevealed proposals."
+  support_achieved: Boolean
   "Whether proposal has been vetoed"
   vetoed: Boolean!
   "Whether proposal execution has been settled"

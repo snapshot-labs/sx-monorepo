@@ -47,7 +47,7 @@ a.nav-anchor[href*="blog"] svg {
   mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/newspaper.svg) !important;
 }
 
-a.nav-anchor[href*="intercom"] svg {
+a.nav-anchor[href*="contact-us"] svg {
   -webkit-mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/headset.svg) !important;
   mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/headset.svg) !important;
 }
@@ -55,6 +55,11 @@ a.nav-anchor[href*="intercom"] svg {
 a.nav-anchor[href*="status"] svg {
   -webkit-mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/signal.svg) !important;
   mask-image: url(https://d3gk2c5xim1je2.cloudfront.net/v7.1.0/solid/signal.svg) !important;
+}
+
+a[href="https://t.me/snapshotbox"] svg[class*="bg-primary"] {
+  -webkit-mask-image: url(/logo/telegram.svg) !important;
+  mask-image: url(/logo/telegram.svg) !important;
 }
 
 /* Hide only the first sidebar group header per tab

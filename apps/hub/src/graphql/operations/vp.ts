@@ -9,7 +9,12 @@ export default async function (_parent, { voter, space, proposal }) {
   }
 
   if (proposal) {
-    const query = `SELECT * FROM proposals WHERE id = ? LIMIT 1`;
+    const query = `
+      SELECT p.* FROM proposals p
+      INNER JOIN spaces s ON s.id = p.space
+      WHERE p.id = ? AND s.deleted = 0
+      LIMIT 1
+    `;
     const [p] = await db.queryAsync(query, [proposal]);
 
     if (!p) {

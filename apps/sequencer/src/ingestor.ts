@@ -11,7 +11,7 @@ import { doesMessageExist, storeMsg } from './helpers/highlight';
 import log from './helpers/log';
 import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
-import { BROVIDER_URL } from './helpers/provider';
+import { verify } from './helpers/provider';
 import relayer, { issueReceipt } from './helpers/relayer';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
@@ -20,13 +20,11 @@ const NETWORK_METADATA = {
   evm: {
     name: 'snapshot',
     version: '0.1.4',
-    broviderUrl: BROVIDER_URL,
     defaultNetwork: process.env.DEFAULT_NETWORK ?? '1'
   },
   starknet: {
     name: 'sx-starknet',
     version: '0.1.0',
-    broviderUrl: BROVIDER_URL,
     defaultNetwork:
       process.env.NETWORK === 'testnet'
         ? '0x534e5f5345504f4c4941'
@@ -68,14 +66,17 @@ export default async function ingestor(req) {
     const underTs = (ts - under).toFixed();
     const { domain, message, types } = body.data;
 
-    if (JSON.stringify(body).length > 1e5)
+    if (JSON.stringify(body).length > 1e5) {
       return Promise.reject('too large message');
+    }
 
-    if (message.timestamp > overTs || message.timestamp < underTs)
+    if (message.timestamp > overTs || message.timestamp < underTs) {
       return Promise.reject('wrong timestamp');
+    }
 
-    if (message.proposal && message.proposal.includes(' '))
+    if (message.proposal && message.proposal.includes(' ')) {
       return Promise.reject('proposal cannot contain whitespace');
+    }
 
     if (
       domain.name !== networkMetadata.name ||
@@ -88,8 +89,9 @@ export default async function ingestor(req) {
     delete types.EIP712Domain;
 
     const hash = sha256(JSON.stringify(types));
-    if (!Object.keys(hashTypes).includes(hash))
+    if (!Object.keys(hashTypes).includes(hash)) {
       return Promise.reject('wrong types');
+    }
     type = hashTypes[hash];
 
     try {
@@ -97,8 +99,9 @@ export default async function ingestor(req) {
         message.space &&
         (message.space.startsWith('s:') || !message.space.includes(':')) &&
         ensNormalize(message.space) !== message.space.toLowerCase()
-      )
+      ) {
         throw new Error('');
+      }
     } catch {
       return Promise.reject('Invalid space id');
     }
@@ -127,14 +130,11 @@ export default async function ingestor(req) {
 
     // Check if signature is valid
     try {
-      const isValidSig = await snapshot.utils.verify(
+      const isValidSig = await verify(
         body.address,
         body.sig,
         body.data,
-        network,
-        {
-          broviderUrl: networkMetadata.broviderUrl
-        }
+        network
       );
       if (!isValidSig) throw new Error('invalid signature');
     } catch (err: any) {
@@ -151,7 +151,7 @@ export default async function ingestor(req) {
 
     if (type === 'settings') payload = JSON.parse(message.settings);
 
-    if (type === 'proposal')
+    if (type === 'proposal') {
       payload = {
         name: message.title,
         body: message.body,
@@ -168,9 +168,10 @@ export default async function ingestor(req) {
         type: message.type,
         app: message.app || ''
       };
+    }
     if (type === 'alias') payload = { alias: message.alias };
     if (type === 'revoke-alias') payload = { alias: message.alias };
-    if (type === 'statement')
+    if (type === 'statement') {
       payload = {
         about: message.about,
         statement: message.statement,
@@ -178,6 +179,7 @@ export default async function ingestor(req) {
         status: message.status,
         network: message.network
       };
+    }
     if (type === 'delete-proposal') payload = { proposal: message.proposal };
     if (type === 'update-proposal') {
       payload = {
@@ -197,8 +199,9 @@ export default async function ingestor(req) {
     if (type === 'flag-proposal') payload = { proposal: message.proposal };
 
     if (['vote', 'vote-array', 'vote-string'].includes(type)) {
-      if (message.metadata && message.metadata.length > 2000)
+      if (message.metadata && message.metadata.length > 2000) {
         return Promise.reject('too large metadata');
+      }
 
       let choice = message.choice;
       if (type === 'vote-string') {

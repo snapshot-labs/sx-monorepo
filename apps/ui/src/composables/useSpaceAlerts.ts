@@ -81,8 +81,9 @@ export function useSpaceAlerts(
       !space.value.snapshot_chain_id ||
       !networksLoaded.value ||
       space.value.turbo
-    )
+    ) {
       return [];
+    }
 
     const ids = new Set<string>([
       space.value.snapshot_chain_id,

@@ -20,7 +20,7 @@
     "@ethersproject/hash": "^5.8.0",
     "@ethersproject/providers": "^5.8.0",
     "@ethersproject/wallet": "^5.8.0",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.74",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.80",
     "@snapshot-labs/sx": "^0.1.7",
     "async-lock": "^1.4.0",
     "change-case": "^4.1.2",
@@ -40,9 +40,9 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.11",
     "@types/lodash.kebabcase": "^4.1.9",
-    "@types/node": "^22.6.0"
+    "@types/node": "^24"
   },
   "engines": {
-    "node": ">= 22.6"
+    "node": ">=24"
   }
 }

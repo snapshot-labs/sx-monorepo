@@ -10,6 +10,7 @@ import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
 import Aliases from '@/views/Settings/Aliases.vue';
+import ApiKeys from '@/views/Settings/ApiKeys.vue';
 import Authorize from '@/views/Settings/Authorize.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsNotifications from '@/views/Settings/Notifications.vue';
@@ -71,6 +72,7 @@ export default [
         name: 'settings-notifications',
         component: SettingsNotifications
       },
+      { path: 'api-keys', name: 'settings-api-keys', component: ApiKeys },
       {
         path: 'alias/authorize/:address',
         name: 'settings-alias-authorize',
