@@ -262,8 +262,6 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
 );
 
 const canSubmit = computed(() => {
-  // Submitting while unresolved would send executions: [], publishing the
-  // proposal with no execution.
   if (isSafeSnapResolving.value) {
     return false;
   }
@@ -369,9 +367,8 @@ async function handleProposeClick() {
   try {
     const choices = proposal.value.choices.filter(choice => !!choice);
     const executions = editorExecutions.value
-      // Empty strategies are kept: offchain's getPlugins needs them to tell
-      // an execution the author cleared from one it cannot rebuild, and the
-      // other networks select the filled execution themselves.
+      // Empty strategies are kept: getPlugins needs them to tell a cleared
+      // execution from one it cannot rebuild.
       .filter(strategy => strategy.treasury.chainId)
       .map(strategy => ({
         strategyType: strategy.type,

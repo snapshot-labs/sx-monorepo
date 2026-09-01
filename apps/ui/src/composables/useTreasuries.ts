@@ -48,10 +48,8 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
       });
 
       // computedAsync's default onError is a noop, so an unhandled rejection
-      // here would leave strategiesWithTreasuries pinned at null forever, which
-      // Editor.vue's canSubmit gate reads as "still resolving" and blocks on —
-      // making the space unable to publish anything at all. Degrade to no
-      // SafeSnap strategies instead; null stays reserved for "not resolved yet".
+      // would pin strategiesWithTreasuries at null — which the submit gate
+      // reads as "still resolving", blocking every proposal on the space.
       let safeSnapStrategies: StrategyWithTreasury[] = [];
       try {
         safeSnapStrategies = await getSafeSnapStrategies(space);
@@ -85,10 +83,8 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
     isResolvingTreasuries
   );
 
-  // Only a space with a SafeSnap config waits on an on-chain call before
-  // strategiesWithTreasuries resolves (it stays null until then); everything
-  // else settles on the next tick, so callers should not gate submit on the
-  // pending state for those.
+  // Gate only spaces with a SafeSnap config: everything else settles on the
+  // next tick, so `null` there is not worth blocking submit on.
   const isSafeSnapResolving = computed(() => {
     const space = unref(spaceRef);
 

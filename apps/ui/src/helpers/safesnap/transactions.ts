@@ -38,9 +38,8 @@ type SafeSnapTransferNFTTransaction = SafeSnapBaseTransaction & {
     name: string;
     tokenName: string;
   };
-  // sx-only extension (not part of v1's schema, ignored by v1 when present):
-  // preserves editor state that the base SafeSnap wire format has no field
-  // for. Absent on transactions authored elsewhere, hence optional.
+  // sx-only extension: v1's schema has no field for these, so they are absent
+  // on transactions authored elsewhere.
   sender?: string;
   amount?: string;
   nftType?: string;
@@ -162,8 +161,6 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   }
 }
 
-// Inverse of parseSafeSnapTransaction: turn an editor transaction into a
-// SafeSnap module transaction (operation/nonce default to a single batch).
 export function serializeSafeSnapTransaction(
   tx: Transaction
 ): SafeSnapTransaction {
@@ -210,9 +207,8 @@ export function serializeSafeSnapTransaction(
     case 'contractCall':
       return { ...base, type: 'contractInteraction', abi: tx._form.abi };
     case 'stakeToken':
-      // No dedicated SafeSnap wire type; serialize as the contract call it
-      // is (same ABI as createStakeTokenTransaction) instead of falling
-      // through to an untyped raw transaction.
+      // No SafeSnap wire type for staking; serialize as the contract call it
+      // is instead of falling through to an untyped raw transaction.
       return {
         ...base,
         type: 'contractInteraction',
@@ -236,17 +232,11 @@ export type SafeSnapExecutionData = {
   txs: SafeSnapTransaction[][];
 };
 
-// Build a single-batch SafeSnap (Reality) execution for plugins.safeSnap.safes.
-// The batch is stored as a raw transaction array; SafeSnap recomputes the
-// MultiSend bundle and execution hash from it when the proposal is executed.
-//
-// `umaAddress` is written explicitly because snapshot-v1 renders a proposal
-// safe as `{ ...spaceConfig.safes[index], ...safe }`: every key this entry
-// omits is back-filled from the space config, and a back-filled `umaAddress`
-// makes v1 route both the display and the execution to the UMA module (its
-// `validateUmaModule` branches solely on `isAddress(umaAddress)` plus a live
-// `rules()` call, never on `realityAddress`). `null` fails `isAddress`, so the
-// entry stays on Reality whatever the space config holds at that index.
+// `umaAddress` is explicit because v1 renders a proposal safe as
+// `{ ...spaceConfig.safes[index], ...safe }`: an omitted key is back-filled
+// from the space config, and a back-filled `umaAddress` routes v1's display
+// and execution to UMA — `validateUmaModule` branches on it alone, never on
+// `realityAddress`. `null` fails its `isAddress` check.
 export function createSafeSnapExecution(
   chainId: number,
   realityAddress: string,

@@ -343,9 +343,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
         ...executions,
         ...safes
           .map(safe => {
-            // A safe omitting its network runs on the space's own chain, not
-            // mainnet — matching how the module is resolved on the write path
-            // (helpers/safesnap/strategies.ts).
+            // No network means the space's own chain, not mainnet — as on the
+            // write path (helpers/safesnap/strategies.ts).
             const chainId = Number(safe.network || proposal.space.network || 1);
             const batches: any[] = safe.txs || [];
 

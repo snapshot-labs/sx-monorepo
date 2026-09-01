@@ -17,9 +17,8 @@ type ReadOnlyExecutionPlugin = {
   safes: ReadOnlyExecutionSafe[];
 };
 
-// Entry of an existing proposal's plugins.safeSnap. It can hold shapes the
-// editor never produces: UMA modules, multiple batches, or a legacy top-level
-// transaction list with no module address at all.
+// Can hold shapes the editor never produces: UMA modules, multiple batches, or
+// a legacy top-level transaction list with no module address at all.
 type SafeSnapOriginalSafe = {
   network?: string;
   realityAddress?: string;
@@ -43,11 +42,9 @@ function getSafeAddress(safe: SafeSnapPlugin['safes'][number]) {
   return safe.realityAddress || safe.umaAddress || '';
 }
 
-// A module address is not unique on its own: the same Zodiac module can be
-// deployed at the same address on several chains, so every comparison below
-// pairs it with the chain. A safe omitting its network runs on the space's own
-// chain, matching how the module is resolved on the write path
-// (helpers/safesnap/strategies.ts).
+// Every comparison below pairs the chain with the address: the same module can
+// be deployed at the same address on several chains. A safe with no network
+// runs on the space's chain, matching helpers/safesnap/strategies.ts.
 function getSafeChainId(
   safe: SafeSnapPlugin['safes'][number],
   spaceChainId?: string
@@ -55,10 +52,6 @@ function getSafeChainId(
   return Number(safe.network || spaceChainId || 1);
 }
 
-// Rebuild the proposal's plugins from the editor's executions on create and
-// update. The tricky part is update: the original proposal already carries a
-// plugins.safeSnap the editor can only partially reconstruct, so it must be
-// merged rather than overwritten.
 export function getPlugins(
   executions: ExecutionInfo[] | null,
   originalProposal: Proposal | null
@@ -92,9 +85,8 @@ export function getPlugins(
     );
   }
 
-  // Rebuilding an execution collapses its batches into one and forces every
-  // transaction to a call, so a safe the author did not touch keeps its
-  // original entry instead of being re-serialized.
+  // Rebuilding collapses batches into one and forces every transaction to a
+  // call, so an untouched safe keeps its original entry.
   function getUnchangedSafe(info: ExecutionInfo) {
     const original = findOriginalExecution(info.chainId, info.strategyAddress);
 
@@ -115,22 +107,17 @@ export function getPlugins(
     );
   }
 
-  // The read path exposes at most one execution type per proposal (see
-  // offchain/api/index.ts): a safeSnap module coexisting with an oSnap
-  // plugin never reaches `originalProposal.executions`, so the editor can
-  // offer it without ever seeding its real transactions. An empty
-  // `info.transactions` for such a module means "unknown", not "the author
-  // cleared it" — only a module the read path actually exposed can be
-  // treated as deliberately emptied.
+  // The read path exposes at most one execution type per proposal, so a
+  // safeSnap module on an oSnap proposal never reaches `executions`. Empty
+  // transactions there mean "unknown", not "cleared by the author".
   function wasExposedOnRead(chainId: number, address: string) {
     return !!findOriginalExecution(chainId, address);
   }
 
   const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
   const rebuiltSafes = [] as SafeSnapPlugin['safes'];
-  // Modules the editor offered, whether or not the author left any
-  // transactions on them. An emptied one must not be carried over below,
-  // or clearing an execution would leave the original in place.
+  // Includes modules left empty — an emptied one must not be carried over
+  // below, or clearing an execution would leave the original in place.
   const editorSafeSnapModules = [] as { chainId: number; address: string }[];
   for (const info of executions) {
     if (info.strategyType === 'ReadOnlyExecution') {
@@ -160,11 +147,10 @@ export function getPlugins(
     }
   }
 
-  // Safes the editor cannot rebuild (UMA modules, legacy top-level `txs`,
-  // modules dropped from the space config) never reach `executions`, so
-  // without this an unrelated edit would delete them from the proposal.
-  // Rebuilt safes take their original slot back, so editing one does not
-  // reorder the array either.
+  // Safes the editor cannot rebuild (UMA, legacy `txs`, modules dropped from
+  // the config) never reach `executions`; without this an unrelated edit
+  // deletes them. Rebuilt safes reclaim their slot, so editing does not
+  // reorder.
   const pendingSafes = [...rebuiltSafes];
   const safes = [] as SafeSnapPlugin['safes'];
   for (const safe of originalSafes) {
