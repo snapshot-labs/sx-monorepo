@@ -3,7 +3,9 @@ import {
   dnsEncodeName,
   getEnsTextRecord,
   getNameOwner,
-  getSpaceController
+  getResolver,
+  getSpaceController,
+  resolveName
 } from './ens';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
@@ -176,13 +178,47 @@ describe('ens', () => {
 
     it('should reject when the resolver fails', async () => {
       await expect(
-        getEnsTextRecord('my-dao-test.eth', 'snapshot', 11155111)
+        getEnsTextRecord('dblog.eth', 'snapshot', 11155111)
       ).rejects.toThrow();
     }, 10000);
 
     it('should leave chains without a Universal Resolver on the v1 path', async () => {
       const record = await getEnsTextRecord('stakedao.eth', 'snapshot', 1);
       expect(record).toBe('0xB0552b6860CE5C0202976Db056b5e3Cc4f9CC765');
+    }, 10000);
+  });
+
+  describe('resolveName', () => {
+    it('should normalize the name before resolving', async () => {
+      const address = await resolveName('BOORGER.eth', 11155111);
+      expect(address).toBe('0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6');
+    }, 10000);
+  });
+
+  describe('getResolver', () => {
+    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
+      const resolver = await getResolver('test123.eth', 11155111);
+      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    }, 10000);
+
+    it('should normalize the name before resolving', async () => {
+      const resolver = await getResolver('TEST123.eth', 11155111);
+      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    }, 10000);
+
+    it('should return the v1 resolver of an unmigrated name on testnet', async () => {
+      const resolver = await getResolver('boorger.eth', 11155111);
+      expect(resolver).toBe('0x8FADE66B79cC9f707aB26799354482EB93a5B7dD');
+    }, 10000);
+
+    it('should return the v1 resolver on mainnet', async () => {
+      const resolver = await getResolver('ens.eth', 1);
+      expect(resolver).toBe('0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41');
+    }, 10000);
+
+    it('should return an empty address for a name without its own resolver', async () => {
+      const resolver = await getResolver('lucemans.cb.id', 1);
+      expect(resolver).toBe('0x0000000000000000000000000000000000000000');
     }, 10000);
   });
 
@@ -212,7 +248,8 @@ describe('ens', () => {
       expect(controller).toBe(EMPTY_ADDRESS);
     }, 10000);
 
-    it.each(['my-dao-test.eth', 'poolgroup.eth'])(
+    // dblog.eth reverts onchain, opdisputegame.eth after its CCIP callback
+    it.each(['dblog.eth', 'opdisputegame.eth'])(
       'should reject instead of falling back to the owner when the resolver fails (%s)',
       async name => {
         await expect(getSpaceController(name, 11155111)).rejects.toThrow();
