@@ -68,8 +68,6 @@ describe('useDelegates', () => {
       const { getDelegation } = setup(['1', '100']);
       const result = await getDelegation('0xdelegator');
 
-      // Promise.all probes all chains (a serial short-circuit would stop after
-      // the first hit); results.find keeps chainIds order, so chain 1 wins.
       expect(queriedChains).toContain('1');
       expect(queriedChains).toContain('100');
       expect(result).toEqual({ id: '1:d', delegate: '0xAAA' });
@@ -91,8 +89,6 @@ describe('useDelegates', () => {
       const { getDelegation } = setup(['1', '100']);
       const result = await getDelegation('0xdelegator');
 
-      // A single rejecting subgraph (Promise.all would throw) must not hide the
-      // delegation that lives on the healthy chain.
       expect(result).toEqual({ id: '100:d', delegate: '0xBBB' });
     });
 

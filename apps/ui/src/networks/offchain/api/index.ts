@@ -541,11 +541,6 @@ export function formatDelegateRegistryDelegations(
 
   const delegations = [...registries.values()];
 
-  // A single registry is unambiguous on its own, so it keeps the plain
-  // "Delegate registry" label even when it reads several chains (the chain is
-  // an implementation detail of where the delegation lives, not a separate
-  // tab). Multiple registries are labelled by their namespace — the map key,
-  // which is guaranteed unique (chains are not: two registries can share one).
   if (delegations.length <= 1) return delegations;
 
   return delegations.map(delegation => ({

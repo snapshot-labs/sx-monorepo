@@ -122,10 +122,6 @@ const chainIds = computed(() => {
     return SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS;
   }
 
-  // Mirror the read path (formatDelegateRegistryDelegations / getDelegation):
-  // the registry lives on the delegation's own chain(s), which already honor
-  // params.delegationNetwork. Offering strategy voting networks here would let
-  // a user write on a chain the read path never queries, hiding the delegation.
   const delegation = selectedDelegation.value;
   if (delegation?.apiType === 'delegate-registry') {
     const chainIds = candidateChainIds(delegation)
@@ -137,9 +133,6 @@ const chainIds = computed(() => {
     if (chainIds.length) return Array.from(new Set(chainIds));
   }
 
-  // apechain-delegate-registry is always single-chain (sourced from a
-  // delegationPortal, which carries one delegationNetwork), so form.chainId
-  // already equals its sole chain here.
   return [form.chainId];
 });
 

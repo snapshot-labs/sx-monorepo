@@ -22,11 +22,6 @@ describe('formatDelegateRegistryDelegations', () => {
       API_URL
     );
 
-    // The delegate-registry API returns the same delegate list for a given
-    // registry regardless of chain, so a registry that reads several chains
-    // must collapse into ONE tab (chainIds carries the chains to probe for the
-    // connected account's own delegation), not one duplicate tab per chain. A
-    // lone registry keeps the plain label; the chain it lives on is not a tab.
     expect(result).toEqual([
       {
         name: 'Delegate registry',
@@ -159,8 +154,6 @@ describe('formatDelegateRegistryDelegations', () => {
     );
 
     expect(result).toHaveLength(2);
-    // Registries are labelled by namespace (the dedupe key), so even two
-    // registries on the same chain get distinct labels.
     expect(result.map(d => d.name)).toEqual([
       'Delegate registry (0x111111111111111111...)',
       'Delegate registry (0x222222222222222222...)'
@@ -181,9 +174,6 @@ describe('formatDelegateRegistryDelegations', () => {
     );
 
     expect(result).toHaveLength(2);
-    // Short namespaces (e.g. ENS names) are kept whole — shorten() with a
-    // numeric limit must not run them through address formatting, which
-    // throws on non-address strings.
     expect(result.map(d => d.name)).toEqual([
       'Delegate registry (one.eth)',
       'Delegate registry (two.eth)'

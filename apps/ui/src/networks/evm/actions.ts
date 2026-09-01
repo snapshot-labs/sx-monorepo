@@ -883,13 +883,9 @@ export function createActions(
             ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
             : APE_GAS_CONFIGS[currentChainId].registryContract;
 
-        // delegationContract carries the registry namespace the read path keys
-        // on (delegationSpace || space.id); writing under space.id would delegate
-        // to a different id than getDelegation reads, hiding the delegation.
-        // NOTE: formatBytes32String throws for namespaces over 31 bytes (e.g. a
-        // 0x…40 address used as delegationSpace), so those fail before sending
-        // any transaction. Encoding them as raw bytes needs to match the
-        // delegation subgraph's id decoding — left to a follow-up.
+        // delegationContract is the namespace getDelegation reads
+        // (delegationSpace || space.id); space.id here would write under an
+        // id nothing ever queries.
         const delegationId =
           delegationType === 'delegate-registry'
             ? formatBytes32String(delegationContract)
