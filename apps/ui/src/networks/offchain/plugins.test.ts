@@ -36,8 +36,9 @@ function execution(
 // A proposal carrying an existing plugins.safeSnap, plus the parsed
 // executions the editor seeds from it (keyed the way the read path exposes
 // them: safeAddress = module address).
-function proposal(safes: any[], executions: any[] = []) {
+function proposal(safes: any[], executions: any[] = [], snapshotChainId = '1') {
   return {
+    space: { snapshot_chain_id: snapshotChainId },
     plugins: { safeSnap: { safes, valid: true } },
     executions: executions.map(e => ({
       strategyType: 'safeSnap',
@@ -68,6 +69,7 @@ describe('getPlugins — create', () => {
 
   it('preserves unsupported plugins from the original proposal', () => {
     const original = {
+      space: { snapshot_chain_id: '1' },
       plugins: { safeSnap: { safes: [] }, poll: { id: 42 } },
       executions: []
     } as any;
@@ -152,6 +154,7 @@ describe('getPlugins — update', () => {
 
   it('preserves a legacy top-level txs payload', () => {
     const original = {
+      space: { snapshot_chain_id: '1' },
       plugins: { safeSnap: { txs: [[{ nonce: '0' }]] } },
       executions: []
     } as any;
@@ -204,12 +207,30 @@ describe('getPlugins — update', () => {
     expect(plugins.safeSnap!.safes).toContain(onChain137);
   });
 
+  it('resolves a safe that omits its network on the space chain, not chain 1', () => {
+    const stored = { realityAddress: MODULE_A, txs: [[{ nonce: '0' }]] };
+    const original = proposal(
+      [stored],
+      [{ address: MODULE_A, chainId: 137, transactions: [tx('1')] }],
+      '137'
+    );
+
+    const plugins = getPlugins([execution(MODULE_A, 137, [tx('1')])], original);
+
+    // Defaulting to chain 1 would not match the editor's execution, so the
+    // untouched safe would be re-serialized with network '137' and appended
+    // alongside the original, duplicating the module.
+    expect(plugins.safeSnap!.safes).toHaveLength(1);
+    expect(plugins.safeSnap!.safes[0]).toBe(stored);
+  });
+
   it('preserves a safe the read path never exposed (e.g. an oSnap-plugin proposal)', () => {
     const stored = { network: '1', realityAddress: MODULE_A, txs: [[{}]] };
     // The read path parses at most one execution type per proposal, so a
     // safeSnap module coexisting with an oSnap plugin never reaches
     // `executions` even though `plugins.safeSnap` still holds its data.
     const original = {
+      space: { snapshot_chain_id: '1' },
       plugins: { safeSnap: { safes: [stored], valid: true } },
       executions: []
     } as any;

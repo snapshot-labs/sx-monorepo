@@ -45,9 +45,14 @@ function getSafeAddress(safe: SafeSnapPlugin['safes'][number]) {
 
 // A module address is not unique on its own: the same Zodiac module can be
 // deployed at the same address on several chains, so every comparison below
-// pairs it with the chain.
-function getSafeChainId(safe: SafeSnapPlugin['safes'][number]) {
-  return Number(safe.network || 1);
+// pairs it with the chain. A safe omitting its network runs on the space's own
+// chain, matching how the module is resolved on the write path
+// (helpers/safesnap/strategies.ts).
+function getSafeChainId(
+  safe: SafeSnapPlugin['safes'][number],
+  spaceChainId?: string
+) {
+  return Number(safe.network || spaceChainId || 1);
 }
 
 // Rebuild the proposal's plugins from the editor's executions on create and
@@ -76,6 +81,7 @@ export function getPlugins(
   const originalSafes: SafeSnapOriginalSafe[] =
     originalSafeSnap?.safes ??
     (originalSafeSnap?.txs ? [{ txs: originalSafeSnap.txs }] : []);
+  const spaceChainId = originalProposal?.space.snapshot_chain_id;
 
   function findOriginalExecution(chainId: number, address: string) {
     return originalProposal?.executions.find(
@@ -103,7 +109,7 @@ export function getPlugins(
     return (
       originalSafes.find(
         safe =>
-          getSafeChainId(safe) === info.chainId &&
+          getSafeChainId(safe, spaceChainId) === info.chainId &&
           compareAddresses(getSafeAddress(safe), info.strategyAddress)
       ) ?? null
     );
@@ -163,11 +169,11 @@ export function getPlugins(
   const safes = [] as SafeSnapPlugin['safes'];
   for (const safe of originalSafes) {
     const address = getSafeAddress(safe);
-    const chainId = getSafeChainId(safe);
+    const chainId = getSafeChainId(safe, spaceChainId);
     const index = address
       ? pendingSafes.findIndex(
           rebuilt =>
-            getSafeChainId(rebuilt) === chainId &&
+            getSafeChainId(rebuilt, spaceChainId) === chainId &&
             compareAddresses(getSafeAddress(rebuilt), address)
         )
       : -1;
