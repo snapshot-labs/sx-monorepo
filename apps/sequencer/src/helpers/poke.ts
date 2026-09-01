@@ -1,7 +1,7 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { addOrUpdateSpace } from './actions';
-import { BROVIDER_URL } from './provider';
+import { getSpaceUri } from './provider';
 
 type Space = Record<string, any>;
 
@@ -27,9 +27,7 @@ export default async function poke(id: string): Promise<Space> {
 async function getSpaceENS(id: string): Promise<Space> {
   let uri: string | null;
   try {
-    uri = await snapshot.utils.getSpaceUri(id, DEFAULT_NETWORK, {
-      broviderUrl: BROVIDER_URL
-    });
+    uri = await getSpaceUri(id, DEFAULT_NETWORK);
   } catch (err: any) {
     capture(err);
     return Promise.reject('unable to resolve space uri');
