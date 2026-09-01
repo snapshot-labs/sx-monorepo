@@ -23,19 +23,18 @@ const {
   monthlyUsage
 } = useApiKeys();
 
+const usagePeriod = ref<'day' | 'month'>('day');
+const usageView = ref<'chart' | 'table'>('chart');
+
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
 );
-
-const usagePeriod = ref<'day' | 'month'>('day');
 const usageSeries = computed(() =>
   usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
 );
 const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
 );
-
-const usageView = ref<'chart' | 'table'>('chart');
 </script>
 
 <template>
@@ -74,8 +73,8 @@ const usageView = ref<'chart' | 'table'>('chart');
         <span class="inline-block" v-text="DESCRIPTION" />
       </div>
 
-      <div v-if="!isError" class="px-4 mt-4">
-        <div class="flex items-center justify-between gap-2 mb-3">
+      <div v-if="!isError" class="mt-4">
+        <div class="flex items-center justify-between gap-2 mb-3 px-4">
           <UiEyebrow class="font-medium">Usage</UiEyebrow>
           <div class="flex items-center gap-2">
             <div
@@ -116,7 +115,7 @@ const usageView = ref<'chart' | 'table'>('chart');
             />
           </div>
         </div>
-        <div v-if="usageView === 'chart'" class="border rounded-xl p-4">
+        <div v-if="usageView === 'chart'" class="border rounded-xl p-4 mx-4">
           <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
         </div>
         <ApiSpendingTable v-else :series="usageSeries" />

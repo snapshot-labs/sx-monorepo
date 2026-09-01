@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PRICE_PER_REQUEST } from '@/helpers/keycard';
+import { formatUsd, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
 import { _n } from '@/helpers/utils';
 
@@ -80,20 +80,20 @@ const periodTotal = computed(() => totals.value.hub + totals.value.score);
 
 <template>
   <div v-if="series.length">
-    <div class="flex items-center justify-between gap-2 mb-3 text-sm">
-      <div class="flex items-center gap-4">
+    <div class="flex items-start justify-between gap-2 mb-3 text-sm">
+      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-link" />
           <span class="text-skin-text">Hub</span>
           <span class="font-semibold text-skin-link">
-            {{ _n(shownHub) }} (${{ shownHubCost.toFixed(2) }})
+            {{ _n(shownHub) }} ({{ formatUsd(shownHubCost) }})
           </span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-text" />
           <span class="text-skin-text">Score</span>
           <span class="font-semibold text-skin-link">
-            {{ _n(shownScore) }} (${{ shownScoreCost.toFixed(2) }})
+            {{ _n(shownScore) }} ({{ formatUsd(shownScoreCost) }})
           </span>
         </div>
       </div>

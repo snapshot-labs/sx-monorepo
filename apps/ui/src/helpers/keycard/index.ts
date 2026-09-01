@@ -25,6 +25,13 @@ const APP_FIELD: Record<string, keyof Usage> = {
   'score-api': 'score'
 };
 
+export function formatUsd(value: number): string {
+  return `$${value.toLocaleString('en', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
 // Price per request in USD, per API.
 export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   hub: 0.0001,
@@ -33,8 +40,7 @@ export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
 
 type KeysResponse = {
   keys: ApiKey[];
-  // Missing until the API ships get_keys_by_owner usage support
-  usage?: {
+  usage: {
     daily: { app: string; day: string; total: number }[];
     monthly: { app: string; month: string; total: number }[];
   };
@@ -55,8 +61,9 @@ async function rpcCall(method: string, params: any) {
   });
 
   const { error, result } = await res.json();
-  if (error)
+  if (error) {
     throw new Error(error.data || error.message, { cause: error.code });
+  }
 
   return result;
 }
@@ -115,12 +122,12 @@ export async function fetchKeys(
     keys: keys.filter(row => row.key),
     usage: {
       daily: buildUsage(
-        (usage?.daily ?? []).map(row => ({ ...row, period: row.day })),
+        usage.daily.map(row => ({ ...row, period: row.day })),
         30,
         'day'
       ),
       monthly: buildUsage(
-        (usage?.monthly ?? []).map(row => ({ ...row, period: row.month })),
+        usage.monthly.map(row => ({ ...row, period: row.month })),
         12,
         'month'
       )

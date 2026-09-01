@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PRICE_PER_REQUEST } from '@/helpers/keycard';
+import { formatUsd, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
 
 const PAGE_SIZE = 10;
@@ -9,6 +9,10 @@ const props = defineProps<{
 }>();
 
 const visibleCount = ref(PAGE_SIZE);
+
+const hasActivity = computed(() =>
+  props.series.some(bucket => bucket.hub + bucket.score > 0)
+);
 
 const rows = computed(() =>
   [...props.series].reverse().map(bucket => {
@@ -42,29 +46,30 @@ watch(
 
 <template>
   <div>
-    <div
-      class="flex items-center space-x-3 px-4 py-2.5 text-[13px] uppercase text-skin-text"
-    >
+    <UiColumnHeader :sticky="false" class="space-x-3">
       <div class="grow text-left">Period</div>
-      <div class="w-[100px] flex justify-end">Hub</div>
-      <div class="w-[100px] flex justify-end">Score</div>
+      <div class="hidden sm:flex w-[100px] justify-end">Hub</div>
+      <div class="hidden sm:flex w-[100px] justify-end">Score</div>
       <div class="w-[100px] flex justify-end">Total</div>
-    </div>
-    <div class="px-4">
+    </UiColumnHeader>
+    <UiStateWarning v-if="!hasActivity" class="px-4 py-3">
+      No requests in this period yet.
+    </UiStateWarning>
+    <div v-else class="px-4">
       <div
         v-for="row in visibleRows"
         :key="row.ts"
         class="border-b flex space-x-3 py-2.5 items-center"
       >
         <div class="grow text-skin-link truncate" v-text="row.label" />
-        <div class="w-[100px] shrink-0 flex justify-end">
-          ${{ row.hub.toFixed(2) }}
+        <div class="hidden sm:flex w-[100px] shrink-0 justify-end">
+          {{ formatUsd(row.hub) }}
         </div>
-        <div class="w-[100px] shrink-0 flex justify-end">
-          ${{ row.score.toFixed(2) }}
+        <div class="hidden sm:flex w-[100px] shrink-0 justify-end">
+          {{ formatUsd(row.score) }}
         </div>
         <div class="w-[100px] shrink-0 flex justify-end text-skin-heading">
-          ${{ row.total.toFixed(2) }}
+          {{ formatUsd(row.total) }}
         </div>
       </div>
       <button

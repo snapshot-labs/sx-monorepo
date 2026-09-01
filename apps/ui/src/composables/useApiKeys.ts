@@ -2,7 +2,6 @@ import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
 import { useQuery } from '@tanstack/vue-query';
 import { fetchKeys } from '@/helpers/keycard';
-import { ApiKey } from '@/helpers/keycard/types';
 import pkg from '../../package.json';
 
 export function useApiKeys() {
@@ -40,7 +39,7 @@ export function useApiKeys() {
   const isAuthenticated = computed(
     () => !!aliasWallet.value && !isAuthError.value
   );
-  const keys = computed<ApiKey[]>(() => data.value?.keys ?? []);
+  const keys = computed(() => data.value?.keys ?? []);
   const dailyUsage = computed(() => data.value?.usage.daily ?? []);
   const monthlyUsage = computed(() => data.value?.usage.monthly ?? []);
   const isLoading = computed(() => isAuthenticated.value && isPending.value);
