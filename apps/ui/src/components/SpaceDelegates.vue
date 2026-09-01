@@ -4,7 +4,10 @@ import removeMarkdown from 'remove-markdown';
 import { isValidDelegation } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
-import { useDelegateesQuery } from '@/queries/delegatees';
+import {
+  getDelegateesQueryKey,
+  useDelegateesQuery
+} from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
@@ -138,11 +141,11 @@ function handleUndelegateConfirmed() {
   });
 
   queryClient.invalidateQueries({
-    queryKey: [
-      'delegatees',
-      props.delegation.contractAddress,
-      web3.value.account
-    ]
+    queryKey: getDelegateesQueryKey(
+      web3.value.account,
+      props.space,
+      props.delegation
+    )
   });
 
   isUndelegating.value = false;
