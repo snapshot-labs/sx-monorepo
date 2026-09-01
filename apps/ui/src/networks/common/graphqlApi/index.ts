@@ -438,7 +438,14 @@ function formatProposal(
     state,
     network: networkId,
     privacy: 'none',
-    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
+    // OZ Governor quorum becomes static at proposal time.
+    // Compound Governor quorum is only set on deployment.
+    // SX quorum is dynamic and quorum changes affect past proposals.
+    quorum: ['@openzeppelin/governor', 'governor-bravo'].includes(
+      proposal.space.protocol
+    )
+      ? Number(proposal.quorum || 0)
+      : Number(proposal.execution_strategy_details?.quorum || 0),
     quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,
     flag_code: 0,
