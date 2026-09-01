@@ -2,6 +2,7 @@ import init, { client } from '@snapshot-labs/snapshot-metrics';
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import { Express, Request, Response } from 'express';
 import { GraphQLError, parse } from 'graphql';
+import { setHistoricalAccessRecorder } from './historicalAccess';
 import db from './mysql';
 import { networkSpaceCounts, spacesMetadata } from './spaces';
 import { strategies } from './strategies';
@@ -21,6 +22,12 @@ const rateLimitedRequestsCount = new client.Counter({
   labelNames: ['rate_limited']
 });
 
+const historicalDataAccessOperationsCount = new client.Counter({
+  name: 'historical_data_access_operations_count',
+  help: 'Gated resource access decisions by historical-data classification',
+  labelNames: ['resource', 'key_state', 'request_class', 'mode', 'outcome']
+});
+
 function instrumentRateLimitedRequests(req, res, next) {
   res.on('finish', () => {
     if (whitelistedPath.some(path => path.test(req.path))) {
@@ -35,6 +42,10 @@ function instrumentRateLimitedRequests(req, res, next) {
 
 export default function initMetrics(app: Express) {
   const GRAPHQL_TYPES = Object.keys(operations);
+
+  setHistoricalAccessRecorder(metric => {
+    historicalDataAccessOperationsCount.inc(metric);
+  });
 
   const { stop } = init(app, {
     normalizedPath: [
