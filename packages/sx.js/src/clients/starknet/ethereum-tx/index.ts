@@ -1,7 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
-import { poseidonHashMany } from 'micro-starknet';
-import { CallData, shortString } from 'starknet';
+import { CallData, hash, shortString } from 'starknet';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
 import { getChoiceEnum } from '../../../utils/starknet-enums';
 import { getStrategiesWithParams } from '../../../utils/strategies';
@@ -272,7 +271,7 @@ export class EthereumTx {
       })
     ]);
 
-    return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
+    return hash.computePoseidonHashOnElements(compiled);
   }
 
   async getVoteHash(address: string, data: Vote) {
@@ -295,7 +294,7 @@ export class EthereumTx {
       shortString.splitLongString(data.metadataUri)
     ]);
 
-    return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
+    return hash.computePoseidonHashOnElements(compiled);
   }
 
   async getUpdateProposalHash(address: string, data: UpdateProposal) {
@@ -312,7 +311,7 @@ export class EthereumTx {
       shortString.splitLongString(data.metadataUri)
     ]);
 
-    return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
+    return hash.computePoseidonHashOnElements(compiled);
   }
 
   async initializePropose(

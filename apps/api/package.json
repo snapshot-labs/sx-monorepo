@@ -25,7 +25,6 @@
     "dotenv": "^16.0.1",
     "express": "^4.21.2",
     "graphql": "^16.11.0",
-    "micro-starknet": "^0.2.3",
     "pino": "^9.9.0",
     "pino-pretty": "^13.1.1",
     "starknet": "7.6.4",
