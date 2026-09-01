@@ -10,16 +10,11 @@ export type StarknetProvider = ReturnType<
 
 const BROVIDER_URL = process.env.BROVIDER_URL ?? 'https://rpc.brovider.xyz';
 
-// Shared by every snapshot.js call that ends up talking to brovider, so the
-// requests are attributed to `client=sequencer` instead of `client=none`.
 export const PROVIDER_OPTIONS = {
   broviderUrl: BROVIDER_URL,
   clientName: 'sequencer'
 };
 
-// Starknet spaces reach this too (proposal creation resolves the snapshot
-// block through it), so the return type stays the honest union; callers that
-// need an EVM-only API narrow it themselves.
 export function getProvider(
   network: string | number
 ): EvmProvider | StarknetProvider {
@@ -37,4 +32,8 @@ export function verify(
 
 export function getSpaceUri(id: string, network: string) {
   return snapshot.utils.getSpaceUri(id, network, PROVIDER_OPTIONS);
+}
+
+export function getSpaceController(space: string, network: string) {
+  return snapshot.utils.getSpaceController(space, network, PROVIDER_OPTIONS);
 }
