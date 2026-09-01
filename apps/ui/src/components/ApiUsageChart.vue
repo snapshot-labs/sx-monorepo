@@ -11,6 +11,8 @@ const props = defineProps<{
 const HEIGHT = 150;
 const PADDING = { top: 8, bottom: 22, left: 4, right: 4 };
 const GAP_RATIO = 0.35;
+const LABEL_CHAR_WIDTH = 7;
+const LABEL_SPACING = 10;
 const CHART_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
 const ZERO_Y = PADDING.top + CHART_HEIGHT;
 
@@ -49,9 +51,21 @@ const bars = computed(() =>
   })
 );
 
-const labelStep = computed(() =>
-  Math.max(1, Math.ceil(props.series.length / 6))
-);
+const labelWidth = computed(() => {
+  const longest = props.series.reduce(
+    (max, bucket) => Math.max(max, bucket.label.length),
+    0
+  );
+  return longest * LABEL_CHAR_WIDTH + LABEL_SPACING;
+});
+
+const labelStep = computed(() => {
+  const fit = Math.min(
+    6,
+    Math.max(2, Math.floor(drawingWidth.value / labelWidth.value))
+  );
+  return Math.max(1, Math.ceil(props.series.length / fit));
+});
 
 const totals = computed(() => ({
   hub: props.series.reduce((sum, bucket) => sum + bucket.hub, 0),
@@ -158,9 +172,9 @@ const periodTotal = computed(() => totals.value.hub + totals.value.score);
           v-for="bar in bars"
           v-show="bar.index % labelStep === 0"
           :key="`label-${bar.index}`"
-          :x="bar.x + barWidth / 2"
+          :x="bar.index === 0 ? bar.x : bar.x + barWidth / 2"
           :y="HEIGHT - 6"
-          text-anchor="middle"
+          :text-anchor="bar.index === 0 ? 'start' : 'middle'"
           class="fill-skin-text text-[13px]"
           v-text="bar.label"
         />
