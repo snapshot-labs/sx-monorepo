@@ -9,8 +9,8 @@ export const PROVIDER_OPTIONS = {
   clientName: 'sequencer'
 };
 
-// Loose `any` return type matches snapshot.js: starknet networks return a
-// starknet RpcProvider, not a StaticJsonRpcProvider.
-export function getProvider(network: string | number): any {
+// Generic so snapshot.js can resolve the return type per network: starknet
+// ones give an RpcProvider, everything else a StaticJsonRpcProvider.
+export function getProvider<T extends string | number>(network: T) {
   return snapshot.utils.getProvider(network, PROVIDER_OPTIONS);
 }
