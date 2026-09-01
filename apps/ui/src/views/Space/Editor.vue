@@ -52,7 +52,7 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { strategiesWithTreasuries, isSafeSnapResolving, isResolvingTreasuries } =
+const { isResolvingTreasuries, isSafeSnapResolving, strategiesWithTreasuries } =
   useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });

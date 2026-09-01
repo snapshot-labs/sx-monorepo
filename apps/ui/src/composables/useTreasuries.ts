@@ -96,8 +96,8 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
   });
 
   return {
-    strategiesWithTreasuries,
+    isResolvingTreasuries,
     isSafeSnapResolving,
-    isResolvingTreasuries
+    strategiesWithTreasuries
   };
 }
