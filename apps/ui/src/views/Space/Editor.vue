@@ -905,7 +905,11 @@ watchEffect(() => {
         @close="modalOpen = false"
       />
       <ModalTransaction
-        v-if="transaction && walletConnectNetwork"
+        v-if="
+          transaction &&
+          walletConnectNetwork &&
+          walletConnectSpaceKey === spaceKey
+        "
         :open="!!transaction"
         :network="walletConnectNetwork"
         :initial-state="transaction._form"
