@@ -18,7 +18,7 @@ const FAQ = [
   }
 ];
 
-const LINK = 'https://calendly.com/snapshot-labs/network-plan';
+const LINK = 'https://calendly.com/snapshotlabs/30min';
 
 const currentQuestion = ref();
 
