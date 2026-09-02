@@ -38,6 +38,7 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
+const importingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
@@ -69,11 +70,41 @@ function openModal(
   modalOpen.value[type] = true;
 }
 
+// Messages parseSafeImportFile writes for the user; shown verbatim. Anything
+// else it throws (JSON syntax errors, ethers argument errors) is too technical.
+const IMPORT_ERRORS = [
+  /^No transactions found in file$/,
+  /^This file is for chain /,
+  /^This file does not specify a chain/,
+  /^This file has an invalid checksum/,
+  /^Transaction \d+ has an invalid recipient address$/
+];
+
+function getImportErrorMessage(err: unknown): string {
+  if (!(err instanceof Error)) return 'Failed to import Safe file';
+
+  if (IMPORT_ERRORS.some(pattern => pattern.test(err.message))) {
+    return err.message;
+  }
+
+  // A per-transaction failure carries an ethers message too technical to show;
+  // keep the index, which is the part the user can act on.
+  const failedIndex = err.message.match(/^Transaction #(\d+):/)?.[1];
+
+  console.error(err);
+
+  return failedIndex
+    ? `Transaction ${failedIndex} in this file could not be imported`
+    : 'Failed to import Safe file';
+}
+
 async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
   if (!file) return;
+
+  importingFile.value = true;
 
   try {
     const transactions = await parseSafeImportFile(
@@ -87,10 +118,9 @@ async function handleImportFile(event: Event) {
       `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
     );
   } catch (err) {
-    uiStore.addNotification(
-      'error',
-      err instanceof Error ? err.message : 'Failed to import Safe file'
-    );
+    uiStore.addNotification('error', getImportErrorMessage(err));
+  } finally {
+    importingFile.value = false;
   }
 }
 
@@ -203,7 +233,12 @@ watch(
           </UiTooltip>
           <UiTooltip title="Import Safe file">
             <UiButton
-              :disabled="!treasury || disabled"
+              :disabled="
+                !treasury ||
+                disabled ||
+                importingFile ||
+                getChainIdKind(treasury.network) !== 'evm'
+              "
               uniform
               @click="fileInput?.click()"
             >
