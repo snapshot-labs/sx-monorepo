@@ -31,7 +31,9 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const api = createApi(hubUrl, networkId, constants);
 
   const isExecutorSupported = (executorType: string) => {
-    if (executorType === 'ReadOnlyExecution') return true;
+    if (executorType === 'ReadOnlyExecution' || executorType === 'safeSnap') {
+      return true;
+    }
     return false;
   };
 
