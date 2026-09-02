@@ -496,6 +496,22 @@ export function useActions() {
     return true;
   }
 
+  async function revealResults(proposal: Proposal) {
+    if (!auth.value) return await forceLogin();
+
+    const network = getReadWriteNetwork(proposal.network);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+
+    await wrapPromise(
+      proposal.network,
+      network.actions.revealResults(auth.value.provider, proposal)
+    );
+  }
+
   async function executeTransactions(proposal: Proposal) {
     if (!auth.value) return await forceLogin();
 
@@ -849,6 +865,7 @@ export function useActions() {
     updateProposal: wrapWithErrors(updateProposal),
     flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
+    revealResults: wrapWithErrors(revealResults),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),

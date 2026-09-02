@@ -293,6 +293,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       metadata: SpaceMetadata;
     }
   ): Promise<any>;
+  revealResults(web3: Web3Provider, proposal: Proposal): Promise<any>;
   executeTransactions(web3: Web3Provider, proposal: Proposal): Promise<any>;
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;
   vetoProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;

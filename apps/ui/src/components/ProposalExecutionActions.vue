@@ -18,10 +18,12 @@ const {
   warningMessage,
   executionTx,
   executionTxUrl,
+  revealResultsSending,
   executeProposalSending,
   executeQueuedProposalSending,
   vetoProposalSending,
   executionCountdown,
+  revealResults,
   executeProposal,
   executeQueuedProposal,
   vetoProposal
@@ -72,14 +74,22 @@ const network = computed(() => getNetwork(props.proposal.network));
         execution becomes available afterwards. Up to three wallet prompts.
       </div>
       <UiButton
-        v-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
+        v-if="isPendingConfidentialReveal"
+        class="w-full"
+        :loading="revealResultsSending"
+        @click="revealResults"
+      >
+        <IH-play />
+        Reveal results
+      </UiButton>
+      <UiButton
+        v-else-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
         class="w-full"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
         <IH-play />
-        <template v-if="isPendingConfidentialReveal">Reveal results</template>
-        <template v-else>Execute transactions</template>
+        Execute transactions
       </UiButton>
       <UiButton
         v-if="hasExecuteQueued"
