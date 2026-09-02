@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatUsd, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
+import { _n } from '@/helpers/utils';
 
 const PAGE_SIZE = 10;
 
@@ -21,9 +22,9 @@ const rows = computed(() =>
     return {
       ts: bucket.ts,
       label: bucket.label,
-      hub,
-      score,
-      total: hub + score
+      hub: { count: bucket.hub, cost: hub },
+      score: { count: bucket.score, cost: score },
+      total: { count: bucket.hub + bucket.score, cost: hub + score }
     };
   })
 );
@@ -62,14 +63,26 @@ watch(
         class="border-b flex space-x-3 py-2.5 items-center"
       >
         <div class="grow text-skin-link truncate" v-text="row.label" />
-        <div class="hidden sm:flex w-[100px] shrink-0 justify-end">
-          {{ formatUsd(row.hub) }}
+        <div
+          class="hidden sm:flex w-[100px] shrink-0 flex-col items-end leading-tight"
+        >
+          <span v-text="_n(row.hub.count)" />
+          <span class="text-[13px]" v-text="formatUsd(row.hub.cost)" />
         </div>
-        <div class="hidden sm:flex w-[100px] shrink-0 justify-end">
-          {{ formatUsd(row.score) }}
+        <div
+          class="hidden sm:flex w-[100px] shrink-0 flex-col items-end leading-tight"
+        >
+          <span v-text="_n(row.score.count)" />
+          <span class="text-[13px]" v-text="formatUsd(row.score.cost)" />
         </div>
-        <div class="w-[100px] shrink-0 flex justify-end text-skin-heading">
-          {{ formatUsd(row.total) }}
+        <div
+          class="w-[100px] shrink-0 flex flex-col items-end leading-tight text-skin-heading"
+        >
+          <span v-text="_n(row.total.count)" />
+          <span
+            class="text-[13px] text-skin-text"
+            v-text="formatUsd(row.total.cost)"
+          />
         </div>
       </div>
       <button
