@@ -541,6 +541,7 @@ export function createActions(
         data
       });
     },
+    revealResults: () => null,
     executeTransactions: async (web3: any, proposal: Proposal) => {
       const executionData = getExecutionData(
         proposal.space,

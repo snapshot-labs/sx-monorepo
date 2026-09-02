@@ -736,6 +736,43 @@ export function createActions(
         { noWait: isContract && connectorType !== 'sequence' }
       );
     },
+    revealResults: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, chainId);
+
+      const signer = getSigner(web3);
+      const account = await signer.getAddress();
+      const proposalId = Number(proposal.proposal_id);
+      const { decryptTallies, getRevealState } = await import('@/helpers/inco');
+
+      const state = await getRevealState({
+        space: proposal.space.id,
+        proposal: proposalId
+      });
+      if (state.revealed) {
+        throw new Error('Results have already been revealed');
+      }
+
+      // requestReveal grants ACL; must mine before decrypt.
+      const requestTx = await client.requestReveal({
+        signer,
+        space: proposal.space.id,
+        proposal: proposalId
+      });
+      if (requestTx) await requestTx.wait();
+
+      const tallies = await decryptTallies({
+        space: proposal.space.id,
+        proposal: proposalId,
+        account
+      });
+
+      return client.finalizeReveal({
+        signer,
+        space: proposal.space.id,
+        proposal: proposalId,
+        tallies
+      });
+    },
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
@@ -758,46 +795,18 @@ export function createActions(
         });
       }
 
-      // Reveal/execute split, gated to after voting ends.
       if (proposal.space.protocol === 'snapshot-x-inco') {
-        const signer = getSigner(web3);
-        const account = await signer.getAddress();
         const proposalId = Number(proposal.proposal_id);
-        const { decryptTallies, getRevealState } = await import(
-          '@/helpers/inco'
-        );
-
-        const initialState = await getRevealState({
+        const { getRevealState } = await import('@/helpers/inco');
+        const state = await getRevealState({
           space: proposal.space.id,
           proposal: proposalId
         });
 
-        if (!initialState.revealed) {
-          // requestReveal grants ACL; must mine before decrypt.
-          const requestTx = await client.requestReveal({
-            signer,
-            space: proposal.space.id,
-            proposal: proposalId
-          });
-          if (requestTx) await requestTx.wait();
-
-          // Decrypt frozen tallies, then finalizeReveal.
-          const tallies = await decryptTallies({
-            space: proposal.space.id,
-            proposal: proposalId,
-            account
-          });
-
-          return client.finalizeReveal({
-            signer,
-            space: proposal.space.id,
-            proposal: proposalId,
-            tallies
-          });
+        if (!state.revealed) {
+          throw new Error('Results have not been revealed yet');
         }
-
-        // Execute is a separate step, offered once the reveal is indexed.
-        if (!initialState.passed) {
+        if (!state.passed) {
           throw new Error('Proposal has not passed');
         }
 
@@ -813,7 +822,7 @@ export function createActions(
             : '0x';
 
         return client.execute({
-          signer,
+          signer: getSigner(web3),
           space: proposal.space.id,
           proposal: proposalId,
           executionParams

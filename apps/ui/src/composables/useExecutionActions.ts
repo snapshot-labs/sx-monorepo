@@ -34,6 +34,7 @@ export function useExecutionActions(
   const message: Ref<string | null> = ref(null);
   const warningMessage: Ref<string | null> = ref(null);
   const executionNetwork = ref<Network>(getNetwork(toValue(proposal).network));
+  const revealResultsSending = ref(false);
   const executeProposalSending = ref(false);
   const executeQueuedProposalSending = ref(false);
   const vetoProposalSending = ref(false);
@@ -139,6 +140,16 @@ export function useExecutionActions(
     }
   }
 
+  async function revealResults() {
+    revealResultsSending.value = true;
+
+    try {
+      await actions.revealResults(toValue(proposal));
+    } finally {
+      revealResultsSending.value = false;
+    }
+  }
+
   async function executeProposal() {
     executeProposalSending.value = true;
 
@@ -206,10 +217,12 @@ export function useExecutionActions(
     warningMessage,
     executionTx,
     executionTxUrl,
+    revealResultsSending,
     executeProposalSending,
     executeQueuedProposalSending,
     vetoProposalSending,
     executionCountdown,
+    revealResults,
     executeProposal,
     executeQueuedProposal,
     vetoProposal
