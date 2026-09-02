@@ -38,13 +38,22 @@ const bars = computed(() =>
     const hubHeight = (bucket.hub / maxTotal.value) * CHART_HEIGHT;
     const scoreHeight = (bucket.score / maxTotal.value) * CHART_HEIGHT;
     const slotX = PADDING.left + index * slot.value;
+    const x = slotX + (slot.value - barWidth.value) / 2;
+    const isFirst = index === 0;
+    const isLast = index === props.series.length - 1;
     return {
       index,
       label: bucket.label,
       hubValue: bucket.hub,
       scoreValue: bucket.score,
       slotX,
-      x: slotX + (slot.value - barWidth.value) / 2,
+      x,
+      labelX: isFirst
+        ? x
+        : isLast
+          ? x + barWidth.value
+          : x + barWidth.value / 2,
+      labelAnchor: isFirst ? 'start' : isLast ? 'end' : 'middle',
       hub: { y: ZERO_Y - hubHeight, height: hubHeight },
       score: { y: ZERO_Y - hubHeight - scoreHeight, height: scoreHeight }
     };
@@ -126,7 +135,7 @@ const periodTotal = computed(() => totals.value.hub + totals.value.score);
     <div
       v-else
       ref="containerRef"
-      class="w-full"
+      class="w-full overflow-hidden"
       :style="{ height: `${HEIGHT}px` }"
     >
       <svg
@@ -170,11 +179,11 @@ const periodTotal = computed(() => totals.value.hub + totals.value.score);
         </g>
         <text
           v-for="bar in bars"
-          v-show="bar.index % labelStep === 0"
+          v-show="(bars.length - 1 - bar.index) % labelStep === 0"
           :key="`label-${bar.index}`"
-          :x="bar.index === 0 ? bar.x : bar.x + barWidth / 2"
+          :x="bar.labelX"
           :y="HEIGHT - 6"
-          :text-anchor="bar.index === 0 ? 'start' : 'middle'"
+          :text-anchor="bar.labelAnchor"
           class="fill-skin-text text-[13px]"
           v-text="bar.label"
         />
