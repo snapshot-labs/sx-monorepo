@@ -25,16 +25,6 @@ const APP_FIELD: Record<string, keyof Usage> = {
   'score-api': 'score'
 };
 
-export function formatUsd(value: number): string {
-  if (value > 0 && value < 0.01) return '~$0.00';
-
-  const formatter = new Intl.NumberFormat('en', {
-    style: 'currency',
-    currency: 'USD'
-  });
-  return formatter.format(value);
-}
-
 export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   hub: 0.0001,
   score: 0.0002
@@ -47,6 +37,16 @@ type KeysResponse = {
     monthly: { app: string; month: string; total: number }[];
   };
 };
+
+export function formatUsd(value: number): string {
+  if (value > 0 && value < 0.01) return '~$0.00';
+
+  const formatter = new Intl.NumberFormat('en', {
+    style: 'currency',
+    currency: 'USD'
+  });
+  return formatter.format(value);
+}
 
 async function rpcCall(method: string, params: any) {
   const res = await fetch(KEYCARD_URL, {

@@ -30,6 +30,7 @@ export function useApiKeys() {
     queryKey: ['keycard', 'keys', address] as const,
     queryFn: () => fetchKeys(aliasWallet.value as Wallet, address.value),
     enabled: () => !!aliasWallet.value,
+    staleTime: 5 * 60 * 1000,
     retry: false
   });
 

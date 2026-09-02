@@ -98,6 +98,13 @@ const shownScoreCost = computed(
 );
 
 const periodTotal = computed(() => totals.value.hub + totals.value.score);
+
+watch(
+  () => props.series[0]?.ts,
+  () => {
+    hoveredIndex.value = null;
+  }
+);
 </script>
 
 <template>

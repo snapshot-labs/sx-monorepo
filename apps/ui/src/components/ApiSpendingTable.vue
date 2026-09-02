@@ -37,7 +37,7 @@ function showMore() {
 }
 
 watch(
-  () => props.series,
+  () => props.series[0]?.ts,
   () => {
     visibleCount.value = PAGE_SIZE;
   }
