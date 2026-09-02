@@ -26,6 +26,8 @@ const APP_FIELD: Record<string, keyof Usage> = {
 };
 
 export function formatUsd(value: number): string {
+  if (value > 0 && value < 0.01) return '~$0.00';
+
   return `$${value.toLocaleString('en', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
