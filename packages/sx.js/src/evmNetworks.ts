@@ -196,8 +196,6 @@ export const evmNetworks = {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
   }),
-  // Canonical SX is not deployed on Base Sepolia yet — only the Inco
-  // confidential reference deployment (inco-prefixed slots) is live.
   basesep: createStandardConfig(84532, {
     blockTime: 2,
     incoProxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
