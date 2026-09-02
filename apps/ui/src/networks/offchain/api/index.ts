@@ -343,7 +343,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
         ...executions,
         ...safes
           .map(safe => {
-            const chainId = Number(safe.network || 1);
+            // No network means the space's own chain, not mainnet — as on the
+            // write path (helpers/safesnap/strategies.ts).
+            const chainId = Number(safe.network || proposal.space.network || 1);
             const batches: any[] = safe.txs || [];
 
             const transactions = batches.flatMap(batch => {

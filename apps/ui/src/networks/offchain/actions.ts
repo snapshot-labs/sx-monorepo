@@ -23,7 +23,6 @@ import {
   Space,
   Statement,
   StrategyParsedMetadata,
-  Transaction,
   User,
   UserProfile,
   VoteType
@@ -33,6 +32,7 @@ import {
   getSdkChoice,
   isStarknetChainId
 } from './helpers';
+import { getPlugins } from './plugins';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   ConnectorType,
@@ -43,17 +43,6 @@ import {
   SnapshotInfo,
   VotingPower
 } from '../types';
-
-type ReadOnlyExecutionSafe = {
-  safeName: string;
-  safeAddress: string;
-  chainId: number;
-  transactions: Transaction[];
-};
-
-type ReadOnlyExecutionPlugin = {
-  safes: ReadOnlyExecutionSafe[];
-};
 
 const CONFIGS: Record<number, OffchainNetworkEthereumConfig> = {
   1: offchainMainnet,
@@ -101,47 +90,6 @@ export function createActions(
     }
   }
 
-  async function getPlugins(
-    executions: ExecutionInfo[] | null,
-    originalProposal: Proposal | null
-  ) {
-    const supportedPlugins = ['readOnlyExecution'];
-
-    const plugins = {} as {
-      readOnlyExecution?: ReadOnlyExecutionPlugin;
-    };
-
-    if (originalProposal) {
-      for (const [name, plugin] of Object.entries(originalProposal.plugins)) {
-        if (!supportedPlugins.includes(name)) {
-          plugins[name] = plugin;
-        }
-      }
-    }
-
-    if (!executions) return plugins;
-
-    const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
-    for (const info of executions) {
-      if (!info.transactions.length) continue;
-
-      if (info.strategyType === 'ReadOnlyExecution') {
-        readOnlyExecutionSafes.push({
-          safeName: info.treasuryName,
-          safeAddress: info.strategyAddress,
-          chainId: info.chainId,
-          transactions: info.transactions
-        });
-      }
-    }
-
-    if (readOnlyExecutionSafes.length > 0) {
-      plugins.readOnlyExecution = { safes: readOnlyExecutionSafes };
-    }
-
-    return plugins;
-  }
-
   return {
     async propose(
       web3: Web3Provider | Wallet,
@@ -164,7 +112,7 @@ export function createActions(
     ) {
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions, null);
+      const plugins = getPlugins(executions, null);
       const data = {
         space: space.id,
         title,
@@ -205,7 +153,7 @@ export function createActions(
     ) {
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions, proposal);
+      const plugins = getPlugins(executions, proposal);
 
       const data = {
         proposal: proposal.proposal_id as string,
