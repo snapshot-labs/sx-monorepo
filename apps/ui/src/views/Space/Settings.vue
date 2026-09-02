@@ -6,6 +6,7 @@ import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { compareAddresses } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
@@ -21,6 +22,7 @@ const {
   isModified,
   isController,
   isOwner,
+  isOwnerEvaluating,
   isAdmin,
   canModifySettings,
   form,
@@ -315,7 +317,10 @@ async function handleProposeSettingsChanges() {
     const draftId = await createDraft(spaceKey, {
       title: 'Update space settings',
       executions: {
-        [selfGovernedExecution.value.address]: [transaction]
+        [getExecutionKey(
+          selfGovernedExecution.value.treasury.chainId,
+          selfGovernedExecution.value.address
+        )]: [transaction]
       }
     });
 
@@ -634,7 +639,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           the name's owner
         </UiMessage>
         <UiMessage
-          v-else-if="isOffchainNetwork && isController && !isOwner"
+          v-else-if="
+            isOffchainNetwork && isController && !isOwner && !isOwnerEvaluating
+          "
           type="danger"
           class="mb-3"
         >

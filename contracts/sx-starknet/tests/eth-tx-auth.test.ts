@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 import { Contract as EthContract } from 'ethers';
 import { config, ethers } from 'hardhat';
 import { HttpNetworkConfig } from 'hardhat/types';
-import { poseidonHashMany } from 'micro-starknet';
 import {
   CairoCustomEnum,
   CallData,
+  hash,
   selector,
   Account as StarknetAccount,
   Contract as StarknetContract,
@@ -228,9 +228,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
     console.log('Proposal commit: ', proposalCommit);
 
     console.log('Committing proposal on L1...');
@@ -274,9 +274,8 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const updateCommit = `0x${poseidonHashMany(
-      updateCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const updateCommit =
+      hash.computePoseidonHashOnElements(updateCommitPreImage);
 
     console.log('Update commit: ', updateCommit);
 
@@ -319,9 +318,7 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const voteCommit = `0x${poseidonHashMany(
-      voteCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const voteCommit = hash.computePoseidonHashOnElements(voteCommitPreImage);
 
     console.log('Vote commit: ', voteCommit);
 
@@ -373,9 +370,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
 
     console.log('Proposal commit: ', proposalCommit);
 
@@ -438,9 +435,8 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const updateCommit = `0x${poseidonHashMany(
-      updateCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const updateCommit =
+      hash.computePoseidonHashOnElements(updateCommitPreImage);
 
     console.log('Update commit: ', updateCommit);
 
@@ -501,9 +497,7 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const voteCommit = `0x${poseidonHashMany(
-      voteCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const voteCommit = hash.computePoseidonHashOnElements(voteCommitPreImage);
 
     console.log('Vote commit: ', voteCommit);
 
@@ -575,9 +569,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
     console.log('Proposal commit: ', proposalCommit);
 
     console.log('Committing proposal on L1...');
@@ -637,9 +631,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
     console.log('Proposal commit: ', proposalCommit);
 
     console.log('Committing proposal on L1 from another signer...');
@@ -705,9 +699,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
     console.log('Proposal commit: ', proposalCommit);
 
     console.log('Committing proposal on L1...');
@@ -775,9 +769,9 @@ describe('Ethereum Transaction Authenticator', function () {
     });
 
     // Commit hash of payload to the Starknet Commit L1 contract
-    const proposalCommit = `0x${poseidonHashMany(
-      proposeCommitPreImage.map(v => BigInt(v))
-    ).toString(16)}`;
+    const proposalCommit = hash.computePoseidonHashOnElements(
+      proposeCommitPreImage
+    );
     console.log('Proposal commit: ', proposalCommit);
 
     console.log('Committing proposal on L1 from the correct signer...');

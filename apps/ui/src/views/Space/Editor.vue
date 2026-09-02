@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
+import { getExecutionKey } from '@/helpers/ui';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
@@ -137,15 +138,17 @@ const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
   const executions = [] as (StrategyWithTreasury & {
+    key: string;
     transactions: Transaction[];
   })[];
 
   for (const strategy of strategiesWithTreasuries.value) {
-    const transactions = proposal.value.executions[strategy.address] ?? [];
+    const key = getExecutionKey(strategy.treasury.chainId, strategy.address);
 
     executions.push({
       ...strategy,
-      transactions
+      key,
+      transactions: proposal.value.executions[key] ?? []
     });
   }
 
@@ -448,12 +451,12 @@ function handleAcceptTerms() {
 }
 
 function handleExecutionUpdated(
-  strategyAddress: string,
+  executionKey: string,
   transactions: Transaction[]
 ) {
   if (!proposal.value) return;
 
-  proposal.value.executions[strategyAddress] = transactions;
+  proposal.value.executions[executionKey] = transactions;
 }
 
 function handleTransactionAccept() {
@@ -466,14 +469,13 @@ function handleTransactionAccept() {
     return;
   }
 
-  const transactions =
-    proposal.value.executions[
-      walletConnectTransactionExecutionStrategy.value.address
-    ] ?? [];
-
-  proposal.value.executions[
+  const key = getExecutionKey(
+    walletConnectNetwork.value,
     walletConnectTransactionExecutionStrategy.value.address
-  ] = [...transactions, transaction.value];
+  );
+  const transactions = proposal.value.executions[key] ?? [];
+
+  proposal.value.executions[key] = [...transactions, transaction.value];
 
   reset();
 }
@@ -789,7 +791,7 @@ watchEffect(() => {
             <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
-              :key="execution.address"
+              :key="execution.key"
               :model-value="execution.transactions"
               :disabled="
                 !supportsMultipleTreasuries &&
@@ -801,7 +803,7 @@ watchEffect(() => {
               :extra-contacts="extraContacts"
               class="mb-3"
               @update:model-value="
-                value => handleExecutionUpdated(execution.address, value)
+                value => handleExecutionUpdated(execution.key, value)
               "
             />
           </div>
@@ -905,7 +907,11 @@ watchEffect(() => {
         @close="modalOpen = false"
       />
       <ModalTransaction
-        v-if="transaction && walletConnectNetwork"
+        v-if="
+          transaction &&
+          walletConnectNetwork &&
+          walletConnectSpaceKey === spaceKey
+        "
         :open="!!transaction"
         :network="walletConnectNetwork"
         :initial-state="transaction._form"

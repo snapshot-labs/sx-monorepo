@@ -2,7 +2,7 @@
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
-import { getExecutionName } from '@/helpers/ui';
+import { getExecutionKey, getExecutionName } from '@/helpers/ui';
 import { shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID, Proposal, ProposalExecution } from '@/types';
@@ -38,7 +38,7 @@ function downloadExecution(execution: ProposalExecution) {
 <template>
   <div
     v-for="execution in executions"
-    :key="`${execution.chainId}:${execution.safeAddress}`"
+    :key="getExecutionKey(execution.chainId, execution.safeAddress)"
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
     <AppLink
