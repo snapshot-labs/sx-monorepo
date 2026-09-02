@@ -12,6 +12,9 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
+  // Set when writing a proposal (creation), ignored when reading.
+  operation?: string;
+  nonce?: string;
 };
 
 type SafeSnapTransferFundsTransaction = SafeSnapBaseTransaction & {
@@ -35,6 +38,11 @@ type SafeSnapTransferNFTTransaction = SafeSnapBaseTransaction & {
     name: string;
     tokenName: string;
   };
+  // sx-only extension: v1's schema has no field for these, so they are absent
+  // on transactions authored elsewhere.
+  sender?: string;
+  amount?: string;
+  nftType?: string;
 };
 
 type SafeSnapContractInteractionTransaction = SafeSnapBaseTransaction & {
@@ -51,6 +59,17 @@ export type SafeSnapTransaction =
   | SafeSnapTransferNFTTransaction
   | SafeSnapContractInteractionTransaction
   | SafeSnapRawTransaction;
+
+export type SafeSnapExecutionData = {
+  network: string;
+  realityAddress: string;
+  multiSendAddress: string;
+  umaAddress: null;
+  txs: SafeSnapTransaction[][];
+};
+
+// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 function parseTransferFunds(
   tx: SafeSnapTransferFundsTransaction
@@ -85,10 +104,10 @@ function parseTransferNFT(
     _type: 'sendNft',
     _form: {
       recipient: tx.recipient,
-      sender: '',
-      amount: '1',
+      sender: tx.sender ?? '',
+      amount: tx.amount ?? '1',
       nft: {
-        type: '',
+        type: tx.nftType ?? '',
         address: tx.collectable.address,
         id: tx.collectable.id,
         name: tx.collectable.name,
@@ -151,4 +170,83 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
     default:
       return parseRaw(tx);
   }
+}
+
+export function serializeSafeSnapTransaction(
+  tx: Transaction
+): SafeSnapTransaction {
+  const base = {
+    to: tx.to,
+    data: tx.data || '0x',
+    value: tx.value || '0',
+    operation: '0',
+    nonce: '0'
+  };
+
+  switch (tx._type) {
+    case 'sendToken':
+      return {
+        ...base,
+        type: 'transferFunds',
+        recipient: tx._form.recipient,
+        amount: tx._form.amount,
+        token: {
+          name: tx._form.token.name,
+          decimals: tx._form.token.decimals,
+          symbol: tx._form.token.symbol,
+          address:
+            tx._form.token.address === ETH_CONTRACT
+              ? 'main'
+              : tx._form.token.address
+        }
+      };
+    case 'sendNft':
+      return {
+        ...base,
+        type: 'transferNFT',
+        recipient: tx._form.recipient,
+        sender: tx._form.sender,
+        amount: tx._form.amount,
+        nftType: tx._form.nft.type,
+        collectable: {
+          address: tx._form.nft.address,
+          id: tx._form.nft.id,
+          name: tx._form.nft.name,
+          tokenName: tx._form.nft.collection || ''
+        }
+      };
+    case 'contractCall':
+      return { ...base, type: 'contractInteraction', abi: tx._form.abi };
+    case 'stakeToken':
+      // No SafeSnap wire type for staking; serialize as the contract call it
+      // is instead of falling through to an untyped raw transaction.
+      return {
+        ...base,
+        type: 'contractInteraction',
+        abi: [
+          'function submit(address _referral) external payable returns (uint256)'
+        ]
+      };
+    default:
+      return base;
+  }
+}
+
+// `umaAddress` is explicit because v1 renders a proposal safe as
+// `{ ...spaceConfig.safes[index], ...safe }`: an omitted key is back-filled
+// from the space config, and a back-filled `umaAddress` routes v1's display
+// and execution to UMA — `validateUmaModule` branches on it alone, never on
+// `realityAddress`. `null` fails its `isAddress` check.
+export function createSafeSnapExecution(
+  chainId: number,
+  realityAddress: string,
+  transactions: Transaction[]
+): SafeSnapExecutionData {
+  return {
+    network: String(chainId),
+    realityAddress,
+    multiSendAddress: MULTI_SEND_ADDRESS,
+    umaAddress: null,
+    txs: [transactions.map(serializeSafeSnapTransaction)]
+  };
 }
