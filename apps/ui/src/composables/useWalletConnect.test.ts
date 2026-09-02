@@ -224,4 +224,76 @@ describe('useWalletConnect', () => {
     expect(connector.disconnectSession).not.toHaveBeenCalled();
     expect(spaceB.logged.value).toBe(true);
   });
+
+  it('logs out and clears its listeners even when disconnectSession rejects', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    connector.disconnectSession.mockRejectedValueOnce(
+      new Error('socket hang up')
+    );
+
+    await spaceA.logout();
+
+    expect(spaceA.logged.value).toBe(false);
+    expect(connector.listenerCount('session_proposal')).toBe(0);
+    expect(connector.listenerCount('session_request')).toBe(0);
+    expect(connector.listenerCount('session_delete')).toBe(0);
+  });
+
+  it('keeps its listeners attached until the disconnect settles on logout', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    let resolveDisconnect: () => void;
+    connector.disconnectSession.mockImplementationOnce(
+      () =>
+        new Promise<void>(resolve => {
+          resolveDisconnect = resolve;
+        })
+    );
+
+    const logoutPromise = spaceA.logout();
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(connector.listenerCount('session_delete')).toBe(1);
+
+    resolveDisconnect!();
+    await logoutPromise;
+
+    expect(connector.listenerCount('session_delete')).toBe(0);
+  });
+
+  it('resets loading and detaches its listeners when pairing a treasury fails', async () => {
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+    const spaceB = useWalletConnect('eth', 1, '0xBBB', 'space-b', null);
+
+    const connector = await connectAndApprove(spaceA, 'uri-a', 1);
+
+    connector.core.pairing.pair.mockRejectedValueOnce(
+      new Error('expired pairing code')
+    );
+
+    await expect(spaceB.connect('uri-b', async () => true)).rejects.toThrow(
+      'expired pairing code'
+    );
+
+    expect(spaceB.loading.value).toBe(false);
+    expect(connector.listenerCount('session_proposal')).toBe(0);
+  });
+
+  it('resets loading when the connector setup fails before pairing', async () => {
+    const { WalletKit } = await import('@reown/walletkit');
+    vi.mocked(WalletKit.init).mockRejectedValueOnce(
+      new Error('relay unreachable')
+    );
+
+    const spaceA = useWalletConnect('eth', 1, '0xAAA', 'space-a', null);
+
+    await expect(spaceA.connect('uri-a', async () => true)).rejects.toThrow(
+      'relay unreachable'
+    );
+
+    expect(spaceA.loading.value).toBe(false);
+  });
 });

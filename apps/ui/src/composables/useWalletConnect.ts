@@ -47,10 +47,15 @@ async function disconnectConnection(key: string) {
   if (!data?.session) return;
 
   const connector = await getConnector();
-  await connector.disconnectSession({
-    topic: data.session.topic,
-    reason: getSdkError('USER_DISCONNECTED')
-  });
+
+  try {
+    await connector.disconnectSession({
+      topic: data.session.topic,
+      reason: getSdkError('USER_DISCONNECTED')
+    });
+  } catch (err) {
+    console.error(err);
+  }
 
   connections.value[key] = {
     ...data,
@@ -155,13 +160,13 @@ export function useWalletConnect(
   });
 
   async function logout() {
+    await disconnectConnection(key.value);
+
     if (activeKey === key.value) {
       activeCleanup?.();
       activeCleanup = null;
       activeKey = null;
     }
-
-    await disconnectConnection(key.value);
   }
 
   function getApprovedNamespaces(
@@ -193,19 +198,24 @@ export function useWalletConnect(
   async function connect(uri: string, approveCallback: ApproveCallback) {
     loading.value = true;
 
-    activeCleanup?.();
-    activeCleanup = null;
+    let connector: Awaited<ReturnType<typeof getConnector>>;
+    try {
+      activeCleanup?.();
+      activeCleanup = null;
 
-    if (activeKey && activeKey !== key.value) {
-      await disconnectConnection(activeKey);
-    } else if (logged.value) {
-      await disconnectConnection(key.value);
+      if (activeKey && activeKey !== key.value) {
+        await disconnectConnection(activeKey);
+      } else if (logged.value) {
+        await disconnectConnection(key.value);
+      }
+
+      activeKey = key.value;
+
+      connector = await getConnector();
+    } catch (err) {
+      loading.value = false;
+      throw err;
     }
-
-    activeKey = key.value;
-
-    const connector = await getConnector();
-    await connector.core.pairing.pair({ uri });
 
     const onSessionProposal = async ({
       id,
@@ -296,6 +306,16 @@ export function useWalletConnect(
       connector.off('session_request', onSessionRequest);
       connector.off('session_delete', onSessionDelete);
     };
+
+    try {
+      await connector.core.pairing.pair({ uri });
+    } catch (err) {
+      activeCleanup?.();
+      activeCleanup = null;
+      loading.value = false;
+
+      throw err;
+    }
   }
 
   return {
