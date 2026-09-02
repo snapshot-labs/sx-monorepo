@@ -36,7 +36,6 @@ function showMore() {
   visibleCount.value += PAGE_SIZE;
 }
 
-// Reset paging when the series changes (Day <-> Month).
 watch(
   () => props.series,
   () => {

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { buildUsage } from './index';
+import { buildUsage, formatUsd } from './index';
 
 describe('buildUsage', () => {
   beforeAll(() => {
@@ -67,5 +67,18 @@ describe('buildUsage', () => {
 
     expect(daily[0]).toMatchObject({ label: 'Jul 27', hub: 4 });
     expect(monthly[0]).toMatchObject({ label: 'Sep', score: 9 });
+  });
+});
+
+describe('formatUsd', () => {
+  it('should format amounts with two decimals and grouping', () => {
+    expect(formatUsd(0)).toBe('$0.00');
+    expect(formatUsd(0.01)).toBe('$0.01');
+    expect(formatUsd(1234.5)).toBe('$1,234.50');
+  });
+
+  it('should mark sub-cent amounts with a tilde', () => {
+    expect(formatUsd(0.0019)).toBe('~$0.00');
+    expect(formatUsd(0.0099)).toBe('~$0.00');
   });
 });

@@ -85,7 +85,6 @@ const hovered = computed(() =>
   hoveredIndex.value === null ? null : bars.value[hoveredIndex.value]
 );
 
-// Legend numbers track the hovered bucket, or the whole period at rest.
 const shownHub = computed(() =>
   hovered.value ? hovered.value.hubValue : totals.value.hub
 );

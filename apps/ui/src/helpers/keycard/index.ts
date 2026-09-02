@@ -28,13 +28,13 @@ const APP_FIELD: Record<string, keyof Usage> = {
 export function formatUsd(value: number): string {
   if (value > 0 && value < 0.01) return '~$0.00';
 
-  return `$${value.toLocaleString('en', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}`;
+  const formatter = new Intl.NumberFormat('en', {
+    style: 'currency',
+    currency: 'USD'
+  });
+  return formatter.format(value);
 }
 
-// Price per request in USD, per API.
 export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
   hub: 0.0001,
   score: 0.0002
