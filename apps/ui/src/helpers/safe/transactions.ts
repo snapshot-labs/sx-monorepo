@@ -1,5 +1,7 @@
 import { Interface, JsonFragment } from '@ethersproject/abi';
+import { isAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
+import { formatUnits } from '@ethersproject/units';
 import {
   ContractCallTransaction,
   RawTransaction,
@@ -7,7 +9,9 @@ import {
 } from '@snapshot-labs/sx';
 import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
+import { getContractCallFormArgs } from '@/helpers/transactions';
 import { getSalt } from '@/helpers/utils';
+import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
 function parseValue(value?: string | null): string {
@@ -51,13 +55,19 @@ function decodeWithAbi(
         abi,
         recipient: tx.to,
         method: parsed.signature,
-        args: Object.fromEntries(
-          parsed.functionFragment.inputs.map((input, i) => [
-            input.name,
-            String(parsed.args[i])
-          ])
-        ),
-        amount: ''
+        args: getContractCallFormArgs({
+          abi,
+          method: parsed.signature,
+          args: Object.fromEntries(
+            parsed.functionFragment.inputs.map((input, i) => [
+              input.name,
+              parsed.args[i]
+            ])
+          )
+        }),
+        amount: parsed.functionFragment.payable
+          ? formatUnits(parseValue(tx.value), 18)
+          : ''
       }
     };
   } catch {
@@ -86,7 +96,7 @@ function fromContractMethod(
     tx.data && tx.data !== '0x'
       ? tx.data
       : new Interface(abi).encodeFunctionData(
-          `${method.name}(${inputs.map(input => input.type).join(',')})`,
+          method.name,
           inputs.map(input =>
             parseArg(input.type, (tx.contractInputsValues ?? {})[input.name])
           )
@@ -141,11 +151,46 @@ export async function parseSafeImportFile(
     throw new Error('No transactions found in file');
   }
 
-  if (chainId && file.chainId && String(file.chainId) !== chainId) {
-    throw new Error(`This file is for chain ${file.chainId}, not ${chainId}`);
+  if (chainId) {
+    // Safe writes chainId: chainInfo?.chainId || '' — an empty/missing value
+    // must not be treated as a match, or a file with no chain info would
+    // import into any treasury regardless of network.
+    const fileChainId = file.chainId ? String(file.chainId) : null;
+    if (fileChainId !== chainId) {
+      throw new Error(
+        fileChainId
+          ? `This file is for chain ${fileChainId}, not ${chainId}`
+          : `This file does not specify a chain; refusing to import into chain ${chainId}`
+      );
+    }
   }
 
+  const expectedChecksum = file.meta?.checksum;
+  if (
+    expectedChecksum &&
+    // validateChecksum deletes meta.checksum off a shallow copy, which
+    // mutates the shared meta object; pass a clone so `file` is untouched.
+    !validateChecksum(
+      JSON.parse(JSON.stringify(file)) as BatchFile,
+      expectedChecksum
+    )
+  ) {
+    throw new Error('This file has an invalid checksum and may be corrupted');
+  }
+
+  file.transactions.forEach((tx, i) => {
+    if (!isAddress(tx.to)) {
+      throw new Error(`Transaction ${i + 1} has an invalid recipient address`);
+    }
+  });
+
   return Promise.all(
-    file.transactions.map(tx => parseSafeTransaction(tx, chainId))
+    file.transactions.map((tx, i) =>
+      parseSafeTransaction(tx, chainId).catch(err => {
+        const reason = err instanceof Error ? err.message : String(err);
+
+        throw new Error(`Transaction #${i + 1}: ${reason}`);
+      })
+    )
   );
 }
