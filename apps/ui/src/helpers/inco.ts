@@ -1,4 +1,11 @@
 // Bridges ethers UI to viem-based Inco SDK; lazy-loaded.
+import {
+  Signer,
+  TypedDataDomain,
+  TypedDataField,
+  TypedDataSigner
+} from '@ethersproject/abstract-signer';
+import { getRpcUrl } from '@/helpers/provider';
 
 type Hex = `0x${string}`;
 
@@ -28,25 +35,40 @@ async function buildPublicClient() {
   const { viem, baseSepolia } = await loadSdk();
   return viem.createPublicClient({
     chain: baseSepolia,
-    transport: viem.http('https://rpc.snapshot.org/84532')
+    transport: viem.http(getRpcUrl(baseSepolia.id))
   });
 }
 
-// Wallet client over injected provider; decrypt needs a signature.
-async function buildWalletClient(account: `0x${string}`) {
+// Wallet client signing through the ethers signer; decrypt needs a typed-data signature.
+async function buildWalletClient(signer: Signer & TypedDataSigner) {
   const { viem, baseSepolia } = await loadSdk();
-  const eth = (globalThis as { ethereum?: unknown }).ethereum;
-  if (!eth) {
-    throw new Error(
-      'Inco decryption requires an injected EIP-1193 provider (window.ethereum).'
-    );
-  }
+  const { toAccount } = await import('viem/accounts');
+
+  const account = toAccount({
+    address: (await signer.getAddress()) as Hex,
+    signTypedData: async ({ domain, types, message }) => {
+      // ethers rejects EIP712Domain in types.
+      const signedTypes = { ...types } as Record<string, TypedDataField[]>;
+      delete signedTypes.EIP712Domain;
+
+      return signer._signTypedData(
+        domain as TypedDataDomain,
+        signedTypes,
+        message as Record<string, unknown>
+      ) as Promise<Hex>;
+    },
+    signMessage: async () => {
+      throw new Error('Not supported');
+    },
+    signTransaction: async () => {
+      throw new Error('Not supported');
+    }
+  });
+
   return viem.createWalletClient({
     account,
     chain: baseSepolia,
-    transport: viem.custom(
-      eth as { request: (args: unknown) => Promise<unknown> }
-    )
+    transport: viem.http(getRpcUrl(baseSepolia.id))
   });
 }
 
@@ -140,15 +162,15 @@ export async function getRevealState({
   };
 }
 
-// Decrypt 3 tally handles; account must hold decrypt ACL.
+// Decrypt 3 tally handles; signer must hold decrypt ACL.
 export async function decryptTallies({
   space,
   proposal,
-  account
+  signer
 }: {
   space: string;
   proposal: number | bigint;
-  account: string;
+  signer: Signer & TypedDataSigner;
 }) {
   const { inco } = await loadSdk();
   const publicClient = await buildPublicClient();
@@ -173,7 +195,7 @@ export async function decryptTallies({
     args: [BigInt(proposal)]
   })) as [Hex, Hex, Hex];
 
-  const walletClient = await buildWalletClient(account as Hex);
+  const walletClient = await buildWalletClient(signer);
   const results = await inco.decryptHandles({
     zap,
     walletClient,

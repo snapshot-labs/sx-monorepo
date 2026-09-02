@@ -740,7 +740,6 @@ export function createActions(
       await verifyNetwork(web3, chainId);
 
       const signer = getSigner(web3);
-      const account = await signer.getAddress();
       const proposalId = Number(proposal.proposal_id);
       const { decryptTallies, getRevealState } = await import('@/helpers/inco');
 
@@ -763,7 +762,7 @@ export function createActions(
       const tallies = await decryptTallies({
         space: proposal.space.id,
         proposal: proposalId,
-        account
+        signer
       });
 
       return client.finalizeReveal({
