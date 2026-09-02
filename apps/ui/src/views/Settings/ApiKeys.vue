@@ -115,7 +115,11 @@ const usageRangeLabel = computed(() =>
             />
           </div>
         </div>
-        <div v-if="usageView === 'chart'" class="border rounded-xl p-4 mx-4">
+        <UiLoading v-if="isLoading" class="px-4 py-3 block" />
+        <div
+          v-else-if="usageView === 'chart'"
+          class="border rounded-xl p-4 mx-4"
+        >
           <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
         </div>
         <ApiSpendingTable v-else :series="usageSeries" />
