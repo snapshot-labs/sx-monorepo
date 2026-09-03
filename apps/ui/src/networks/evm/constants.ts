@@ -60,6 +60,15 @@ export function createConstants(
           connectors: EVM_CONNECTORS
         }
       }),
+      ...(config.Authenticators.IncoEthTx && {
+        [config.Authenticators.IncoEthTx]: {
+          priority: 2,
+          isSupported: true,
+          isContractSupported: true,
+          isReasonSupported: true,
+          connectors: EVM_CONNECTORS
+        }
+      }),
       // Governor Bravo
       GovernorBravoAuthenticator: {
         priority: 1,
@@ -119,6 +128,9 @@ export function createConstants(
   };
 
   const SUPPORTED_EXECUTORS = {
+    ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla && {
+      SimpleQuorumVanilla: true
+    }),
     ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
       SimpleQuorumAvatar: true
     }),
@@ -140,10 +152,16 @@ export function createConstants(
     }),
     ...(config.Authenticators.EthTx && {
       [config.Authenticators.EthTx]: 'Ethereum transaction'
+    }),
+    ...(config.Authenticators.IncoEthTx && {
+      [config.Authenticators.IncoEthTx]: 'Ethereum transaction'
     })
   };
 
   const PROPOSAL_VALIDATIONS = {
+    ...(config.ProposalValidations.Vanilla && {
+      [config.ProposalValidations.Vanilla]: 'Vanilla'
+    }),
     ...(config.ProposalValidations.VotingPower && {
       [config.ProposalValidations.VotingPower]: 'Voting power'
     })
@@ -168,6 +186,7 @@ export function createConstants(
   };
 
   const EXECUTORS = {
+    SimpleQuorumVanilla: 'Vanilla',
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
     SimpleQuorumTimelock: 'Timelock',
     GovernorBravoTimelock: 'Timelock',
@@ -179,6 +198,20 @@ export function createConstants(
       ? [
           {
             address: config.Authenticators.EthTx,
+            protocols: ['snapshot-x' as const],
+            name: 'Ethereum transaction',
+            about:
+              'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
+            icon: IHCube,
+            paramsDefinition: null
+          }
+        ]
+      : []),
+    ...(config.Authenticators.IncoEthTx
+      ? [
+          {
+            address: config.Authenticators.IncoEthTx,
+            protocols: ['snapshot-x-inco' as const],
             name: 'Ethereum transaction',
             about:
               'Will authenticate a user by checking if the caller address corresponds to the author or voter address.',
@@ -192,6 +225,7 @@ export function createConstants(
           {
             // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
             address: config.Authenticators.EthSig,
+            protocols: ['snapshot-x' as const],
             name: 'Ethereum signature (deprecated)',
             deprecated: true,
             about:
@@ -205,6 +239,7 @@ export function createConstants(
       ? [
           {
             address: config.Authenticators.EthSigV2,
+            protocols: ['snapshot-x' as const],
             name: 'Ethereum signature',
             about:
               'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -216,6 +251,19 @@ export function createConstants(
   ];
 
   const EDITOR_PROPOSAL_VALIDATIONS = [
+    ...(config.ProposalValidations.Vanilla
+      ? [
+          {
+            address: config.ProposalValidations.Vanilla,
+            type: 'Vanilla',
+            name: 'Vanilla',
+            about:
+              'A validation strategy that allows anyone to create proposals. It should only be used for testing purposes and not in production.',
+            icon: IHBeaker,
+            paramsDefinition: null
+          }
+        ]
+      : []),
     ...(config.ProposalValidations.VotingPower
       ? [
           {
@@ -690,10 +738,25 @@ export function createConstants(
     );
 
   const EDITOR_EXECUTION_STRATEGIES = [
+    ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla
+      ? [
+          {
+            address: config.ExecutionStrategies.IncoSimpleQuorumVanilla,
+            protocols: ['snapshot-x-inco' as const],
+            type: 'SimpleQuorumVanilla',
+            name: EXECUTORS.SimpleQuorumVanilla,
+            about:
+              'An execution strategy that verifies the proposal outcome but does not execute any transactions onchain. It should only be used for testing purposes and not in production.',
+            icon: IHBeaker,
+            paramsDefinition: null
+          }
+        ]
+      : []),
     ...(config.ExecutionStrategies.SimpleQuorumAvatar
       ? [
           {
             address: '',
+            protocols: ['snapshot-x' as const],
             type: 'SimpleQuorumAvatar',
             name: EXECUTORS.SimpleQuorumAvatar,
             about:
@@ -752,6 +815,7 @@ export function createConstants(
       ? [
           {
             address: '',
+            protocols: ['snapshot-x' as const],
             type: 'SimpleQuorumTimelock',
             name: EXECUTORS.SimpleQuorumTimelock,
             about:

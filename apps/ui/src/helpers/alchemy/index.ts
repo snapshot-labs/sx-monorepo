@@ -21,6 +21,7 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   '42161', // Arbitrum
   '42170', // Arbitrum Nova
   '42220', // Celo
+  '84532', // Base Sepolia
   '11155111' // Sepolia
 ] as const;
 
@@ -50,6 +51,7 @@ const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   '42161': 'arb-mainnet',
   '42170': 'arbnova-mainnet',
   '42220': 'celo-mainnet',
+  '84532': 'base-sepolia',
   '11155111': 'eth-sepolia'
 };
 

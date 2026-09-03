@@ -44,6 +44,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   ape: 33139,
   curtis: 33111,
   sep: 11155111,
+  basesep: 84532,
   // Starknet
   sn: '0x534e5f4d41494e',
   'sn-sep': '0x534e5f5345504f4c4941'
@@ -189,6 +190,11 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  },
+  inco: {
+    label: 'Confidential voting',
+    description:
+      'Choices stay encrypted onchain; only final tallies are revealed once the voting period is over.'
   },
   any: {
     label: 'Any',

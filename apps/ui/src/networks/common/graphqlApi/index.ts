@@ -132,6 +132,29 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
+  // Revealed confidential proposal: 'passed' or 'rejected'.
+  if (
+    proposal.quorum_reached !== null &&
+    proposal.quorum_reached !== undefined &&
+    proposal.support_achieved !== null &&
+    proposal.support_achieved !== undefined
+  ) {
+    return proposal.quorum_reached && proposal.support_achieved
+      ? 'passed'
+      : 'rejected';
+  }
+
+  // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
+  if (proposal.space?.protocol === 'snapshot-x-inco') {
+    if (Number(proposal.start_block_number ?? proposal.start) > current) {
+      return 'pending';
+    }
+    if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
+      return 'closed';
+    }
+    return 'active';
+  }
+
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -314,10 +337,15 @@ function formatSpace(
   space: ApiSpaceWithMetadata,
   constants: NetworkConstants
 ): Space {
+  const isConfidential = space.protocol === 'snapshot-x-inco';
+
   return {
     ...space,
     voting_delay: Number(space.voting_delay),
-    min_voting_period: Number(space.min_voting_period),
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_voting_period: Number(
+      isConfidential ? space.max_voting_period : space.min_voting_period
+    ),
     max_voting_period: Number(space.max_voting_period),
     turbo_expiration: 0,
     network: space._indexer as NetworkID,
@@ -377,6 +405,7 @@ function formatProposal(
   const state = getProposalState(networkId, proposal, current);
 
   const isStarknetNetwork = starknetNetworks.includes(networkId);
+  const isConfidential = proposal.space.protocol === 'snapshot-x-inco';
 
   const emptyAddress = isStarknetNetwork
     ? STARKNET_EMPTY_ADDRESS
@@ -386,8 +415,14 @@ function formatProposal(
     ...proposal,
     start: Number(proposal.start),
     start_block_number: Number(proposal.start_block_number) || null,
-    min_end: Number(proposal.min_end),
-    min_end_block_number: Number(proposal.min_end_block_number) || null,
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_end: Number(isConfidential ? proposal.max_end : proposal.min_end),
+    min_end_block_number:
+      Number(
+        isConfidential
+          ? proposal.max_end_block_number
+          : proposal.min_end_block_number
+      ) || null,
     max_end: Number(proposal.max_end),
     max_end_block_number: Number(proposal.max_end_block_number) || null,
     snapshot: Number(proposal.snapshot),
@@ -429,15 +464,17 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['EthRelayer'].includes(
-      proposal.execution_strategy_type
-    )
-      ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
-      : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
+    has_execution_window_opened:
+      ['EthRelayer'].includes(proposal.execution_strategy_type) ||
+      isConfidential
+        ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
+        : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    quorum_reached: proposal.quorum_reached ?? null,
+    support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
-    privacy: 'none',
+    privacy: proposal.space.protocol === 'snapshot-x-inco' ? 'inco' : 'none',
     // OZ Governor quorum becomes static at proposal time.
     // Compound Governor quorum is only set on deployment.
     // SX quorum is dynamic and quorum changes affect past proposals.

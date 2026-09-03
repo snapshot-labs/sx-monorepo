@@ -4,6 +4,7 @@ import {
   Connector as LockConnector,
   ConnectorType as LockConnectorType
 } from '@snapshot-labs/lock';
+import { ProtocolID } from '@snapshot-labs/sx';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -62,6 +63,11 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Protocols this contract is built for, on networks hosting more than one
+   * (e.g. snapshot-x and snapshot-x-inco). Absent means protocol-agnostic.
+   */
+  protocols?: ProtocolID[];
   /**
    * Deprecated strategy can still be used but can't be added to new spaces.
    */
@@ -238,12 +244,13 @@ export type ReadOnlyNetworkActions = {
 export type NetworkActions = ReadOnlyNetworkActions & {
   predictSpaceAddress(
     web3: Web3Provider,
-    params: { salt: string }
+    params: { protocol: ProtocolID; salt: string }
   ): Promise<string | null>;
   deployDependency(
     web3: Web3Provider,
     connectorType: ConnectorType,
     params: {
+      protocol: ProtocolID;
       controller: string;
       spaceAddress: string;
       strategy: StrategyConfig;
@@ -253,6 +260,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     web3: Web3Provider,
     salt: string,
     params: {
+      protocol: ProtocolID;
       controller: string;
       votingDelay: number;
       minVotingDuration: number;
@@ -265,6 +273,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       metadata: SpaceMetadata;
     }
   );
+  revealResults(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
@@ -489,7 +498,11 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
+export type ExplorePageProtocol =
+  | 'snapshot'
+  | 'snapshot-x'
+  | 'snapshot-x-inco'
+  | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;

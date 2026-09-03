@@ -5,21 +5,12 @@ import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
-  evmApe,
-  evmArbitrum,
-  evmBase,
-  evmBnb,
-  evmBnbt,
-  evmCurtis,
-  evmMainnet,
-  evmMantle,
-  EvmNetworkConfig,
-  evmOptimism,
-  evmPolygon,
-  evmSepolia,
+  createEvmConfig,
+  evmNetworks,
   getEvmStrategy,
   GovernorBravoAuthenticator,
-  OpenZeppelinAuthenticator
+  OpenZeppelinAuthenticator,
+  ProtocolID
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
@@ -70,31 +61,22 @@ import {
 } from '@/types';
 import { EDITOR_APP_NAME } from '../common/constants';
 
-const CONFIGS: Record<number, EvmNetworkConfig> = {
-  10: evmOptimism,
-  56: evmBnb,
-  97: evmBnbt,
-  137: evmPolygon,
-  5000: evmMantle,
-  8453: evmBase,
-  42161: evmArbitrum,
-  1: evmMainnet,
-  33139: evmApe,
-  33111: evmCurtis,
-  11155111: evmSepolia
-};
-
 export function createActions(
   provider: Provider,
   helpers: NetworkHelpers,
-  chainId: number
+  networkId: NetworkID
 ): NetworkActions {
-  const networkConfig = CONFIGS[chainId];
+  const networkConfig = createEvmConfig(
+    evmNetworks[networkId as keyof typeof evmNetworks]
+  );
+  const { incoProxyFactory, incoMasterSpace } =
+    evmNetworks[networkId as keyof typeof evmNetworks].Meta;
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     helpers
   });
 
+  const { eip712ChainId: chainId } = networkConfig;
   const clientOpts = {
     networkConfig,
     whitelistServerUrl: WHITELIST_SERVER_URL,
@@ -102,9 +84,29 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const incoDeployClient =
+    incoProxyFactory && incoMasterSpace
+      ? new clients.EvmEthereumTx({
+          ...clientOpts,
+          networkConfig: {
+            ...networkConfig,
+            proxyFactory: incoProxyFactory,
+            masterSpace: incoMasterSpace
+          }
+        })
+      : null;
+
+  function getDeployClient(protocol: ProtocolID) {
+    if (protocol !== 'snapshot-x-inco') return client;
+    if (!incoDeployClient) {
+      throw new Error(`snapshot-x-inco is not available on ${networkId}`);
+    }
+
+    return incoDeployClient;
+  }
   const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
   const openZeppelinSigClient = new clients.OpenZeppelinEthereumSig({
-    chainId
+    chainId: networkConfig.eip712ChainId
   });
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const governorBravoSigClient = new clients.GovernorBravoEthereumSig({
@@ -212,10 +214,10 @@ export function createActions(
   };
 
   return {
-    async predictSpaceAddress(web3: Web3Provider, { salt }) {
+    async predictSpaceAddress(web3: Web3Provider, { salt, protocol }) {
       await verifyNetwork(web3, chainId);
 
-      return client.predictSpaceAddress({
+      return getDeployClient(protocol).predictSpaceAddress({
         signer: getSigner(web3),
         saltNonce: salt
       });
@@ -224,6 +226,7 @@ export function createActions(
       web3: Web3Provider,
       connectorType: ConnectorType,
       params: {
+        protocol: ProtocolID;
         controller: string;
         spaceAddress: string;
         strategy: StrategyConfig;
@@ -236,7 +239,7 @@ export function createActions(
       }
 
       return params.strategy.deploy(
-        client,
+        getDeployClient(params.protocol),
         web3,
         params.controller,
         params.spaceAddress,
@@ -247,6 +250,7 @@ export function createActions(
       web3: Web3Provider,
       salt: string,
       params: {
+        protocol: ProtocolID;
         controller: string;
         votingDelay: number;
         minVotingDuration: number;
@@ -282,7 +286,7 @@ export function createActions(
         params.validationStrategy
       );
 
-      const response = await client.deploySpace({
+      const response = await getDeployClient(params.protocol).deploySpace({
         signer: getSigner(web3),
         saltNonce: salt,
         params: {
@@ -687,12 +691,34 @@ export function createActions(
       let pinned: { cid: string; provider: string } | null = null;
       if (reason) pinned = await helpers.pin({ reason });
 
+      const sdkChoice = getSdkChoice(choice);
+
+      // Bind ciphertext to signer address, not web3 store.
+      const isConfidential = proposal.space.protocol === 'snapshot-x-inco';
+      let ciphertext: string | undefined;
+      let fee: string | undefined;
+      if (isConfidential) {
+        const { encryptChoice, getVoteFee } = await import('@/helpers/inco');
+        const voterAddress = await signer.getAddress();
+        // vote() is payable; voter forwards per-vote Inco fee.
+        [ciphertext, fee] = await Promise.all([
+          encryptChoice({
+            space: proposal.space.id,
+            voter: voterAddress,
+            choice: sdkChoice
+          }),
+          getVoteFee().then(f => f.toString())
+        ]);
+      }
+
       const data = {
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
         proposal: Number(proposal.proposal_id),
-        choice: getSdkChoice(choice),
+        choice: sdkChoice,
+        ...(ciphertext ? { ciphertext } : {}),
+        ...(fee !== undefined ? { fee } : {}),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
@@ -714,6 +740,42 @@ export function createActions(
         { noWait: isContract && connectorType !== 'sequence' }
       );
     },
+    revealResults: async (web3: Web3Provider, proposal: Proposal) => {
+      await verifyNetwork(web3, chainId);
+
+      const signer = getSigner(web3);
+      const proposalId = Number(proposal.proposal_id);
+      const { decryptTallies, getRevealState } = await import('@/helpers/inco');
+
+      const state = await getRevealState({
+        space: proposal.space.id,
+        proposal: proposalId
+      });
+      if (state.revealed) {
+        throw new Error('Results have already been revealed');
+      }
+
+      // requestReveal grants ACL; must mine before decrypt.
+      const requestTx = await client.requestReveal({
+        signer,
+        space: proposal.space.id,
+        proposal: proposalId
+      });
+      if (requestTx) await requestTx.wait();
+
+      const tallies = await decryptTallies({
+        space: proposal.space.id,
+        proposal: proposalId,
+        signer
+      });
+
+      return client.finalizeReveal({
+        signer,
+        space: proposal.space.id,
+        proposal: proposalId,
+        tallies
+      });
+    },
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
@@ -733,6 +795,40 @@ export function createActions(
           transactions: convertToMetaTransactions(
             proposal.executions[0].transactions
           )
+        });
+      }
+
+      if (proposal.space.protocol === 'snapshot-x-inco') {
+        const proposalId = Number(proposal.proposal_id);
+        const { getRevealState } = await import('@/helpers/inco');
+        const state = await getRevealState({
+          space: proposal.space.id,
+          proposal: proposalId
+        });
+
+        if (!state.revealed) {
+          throw new Error('Results have not been revealed yet');
+        }
+        if (!state.passed) {
+          throw new Error('Proposal has not passed');
+        }
+
+        // Vanilla proposals: executionParams must match propose ('0x').
+        const executionParams =
+          proposal.executions && proposal.executions.length > 0
+            ? getExecutionData(
+                proposal.space,
+                proposal.execution_strategy,
+                proposal.execution_destination,
+                convertToMetaTransactions(proposal.executions[0].transactions)
+              ).executionParams[0]
+            : '0x';
+
+        return client.execute({
+          signer: getSigner(web3),
+          space: proposal.space.id,
+          proposal: proposalId,
+          executionParams
         });
       }
 
