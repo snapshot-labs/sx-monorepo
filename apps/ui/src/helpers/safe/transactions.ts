@@ -14,7 +14,10 @@ import {
 } from '@snapshot-labs/sx';
 import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
-import { getContractCallFormArgs } from '@/helpers/transactions';
+import {
+  createRawTransaction,
+  getContractCallFormArgs
+} from '@/helpers/transactions';
 import { getSalt } from '@/helpers/utils';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
@@ -93,14 +96,11 @@ function parseArg(type: string, value: string): any {
 }
 
 function toRaw(tx: BatchTransaction): RawTransaction {
-  return {
-    _type: 'raw',
+  return createRawTransaction({
     to: tx.to,
     data: tx.data || '0x',
-    value: parseValue(tx.value),
-    salt: getSalt(),
-    _form: { recipient: tx.to }
-  };
+    value: parseValue(tx.value)
+  });
 }
 
 function decodeWithAbi(

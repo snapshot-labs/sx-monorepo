@@ -1,6 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import {
   ContractCallTransaction,
+  RawTransaction,
   SendNftTransaction,
   SendTokenTransaction,
   StakeTokenTransaction,
@@ -231,6 +232,20 @@ export async function createStakeTokenTransaction({
       amount: form.amount
     }
   };
+}
+
+export function createRawTransaction({
+  to,
+  data,
+  value,
+  salt = getSalt()
+}: {
+  to: string;
+  data: string;
+  value: string;
+  salt?: string;
+}): RawTransaction {
+  return { _type: 'raw', to, data, value, salt, _form: { recipient: to } };
 }
 
 export function convertToMetaTransactions(
