@@ -6,7 +6,7 @@ import {
 } from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
 import { useRelayerInfoQuery } from '@/queries/relayerInfo';
-import { Space } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
@@ -92,7 +92,9 @@ export function useSpaceAlerts(
       ),
       ...space.value.strategies_params.flatMap(strategy =>
         Array.isArray(strategy.params?.strategies)
-          ? strategy.params.strategies.map(param => String(param.network))
+          ? strategy.params.strategies.map((param: { network: unknown }) =>
+              String(param.network)
+            )
           : []
       )
     ]);
@@ -129,9 +131,11 @@ export function useSpaceAlerts(
   });
 
   const sigAuthenticatorAddresses = computed(() => {
-    const authenticators: Record<string, string | undefined> =
-      { ...evmNetworks, ...starknetNetworks }[space.value.network]
-        ?.Authenticators || {};
+    const networksConfig: Partial<
+      Record<NetworkID, { Authenticators: Record<string, string | undefined> }>
+    > = { ...evmNetworks, ...starknetNetworks };
+    const authenticators =
+      networksConfig[space.value.network]?.Authenticators || {};
 
     return [
       authenticators.EthSig,

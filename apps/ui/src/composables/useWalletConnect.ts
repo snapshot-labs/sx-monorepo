@@ -39,7 +39,10 @@ async function getConnector() {
 
 const connections: Ref<Record<string, ConnectionData | undefined>> = ref({});
 
-async function parseCall(chainId: number, call) {
+async function parseCall(
+  chainId: number,
+  call: { params: [{ to: string; data: string; value?: string }] }
+) {
   const params = call.params[0];
 
   const abi = await getABI(chainId, params.to);

@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import networksJson from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   LAST_USED_CONNECTOR_CACHE_KEY,
   RECENT_CONNECTOR
@@ -19,7 +19,12 @@ type Web3providerWithSafe = Web3Provider & {
   };
 };
 
-const defaultNetwork: any =
+const networks: Record<
+  string,
+  { chainId: ChainId; name: string; unknown?: boolean }
+> = networksJson;
+
+const defaultNetwork: string =
   import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
 
 const state = reactive({
@@ -106,7 +111,8 @@ export function useWeb3() {
 
     try {
       attachConnectorEvents(connector);
-      let network, accounts;
+      let network: { chainId: ChainId } | undefined;
+      let accounts: string[] = [];
       try {
         if (connector.id === 'gnosis' && web3.provider.safe) {
           const { chainId: safeChainId, safeAddress } = web3.provider.safe;
@@ -131,7 +137,7 @@ export function useWeb3() {
       }
       const acc = accounts.length > 0 ? accounts[0] : null;
 
-      if (acc) {
+      if (acc && network) {
         handleChainChanged(network.chainId);
         const usersStore = useUsersStore();
         try {
@@ -167,7 +173,7 @@ export function useWeb3() {
 
     if (!connector.provider.on) return;
 
-    connector.provider.on('accountsChanged', async accounts => {
+    connector.provider.on('accountsChanged', async (accounts: string[]) => {
       if (!accounts?.length) {
         logout(connector);
         return;
@@ -178,7 +184,7 @@ export function useWeb3() {
     });
 
     if (!STARKNET_CONNECTORS.includes(connector.type)) {
-      connector.provider.on('chainChanged', async chainId => {
+      connector.provider.on('chainChanged', async (chainId: string) => {
         handleChainChanged(parseInt(formatUnits(chainId, 0)));
       });
     }

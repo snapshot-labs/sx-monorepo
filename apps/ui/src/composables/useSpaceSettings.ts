@@ -319,7 +319,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   async function hasStrategyChanged(
     strategy: StrategyConfig,
-    previousParams: any,
+    previousParams: string[] | null,
     previousMetadata: any = {}
   ) {
     const metadata = strategy.generateMetadata
@@ -660,7 +660,9 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
     Object.entries(prunedSaveData).forEach(([key, value]) => {
-      if (value === null || value === '') delete prunedSaveData[key];
+      if (value === null || value === '') {
+        delete prunedSaveData[key as keyof OffchainSpaceSettings];
+      }
     });
     if (
       prunedSaveData.delegationPortal &&
@@ -681,7 +683,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       } else {
         Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
           if (value === null || value === '') {
-            delete prunedSaveData.skinSettings?.[key];
+            delete prunedSaveData.skinSettings?.[key as keyof SkinSettings];
           }
         });
       }

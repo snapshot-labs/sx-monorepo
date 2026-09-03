@@ -52,7 +52,10 @@ export function useBalances({
         asset.contractAddress === ETH_CONTRACT
     );
 
-    const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[chainId];
+    const coingeckoAssetPlatform =
+      COINGECKO_ASSET_PLATFORMS[
+        Number(chainId) as keyof typeof COINGECKO_ASSET_PLATFORMS
+      ];
 
     const coins = coingeckoAssetPlatform
       ? await getTokenPrices(
