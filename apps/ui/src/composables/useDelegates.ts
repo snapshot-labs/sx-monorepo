@@ -18,7 +18,7 @@ type ApiDelegate = {
   id: string;
   user: string;
   delegatedVotes: string;
-  delegatedVotesRaw: string;
+  delegatedVotesRaw?: string;
   tokenHoldersRepresentedAmount: number;
 };
 
@@ -44,7 +44,7 @@ type DelegatesQueryFilter = {
   };
 };
 
-const DELEGATION_SUBGRAPHS = {
+const DELEGATION_SUBGRAPHS: Record<string, string> = {
   '1': 'https://subgrapher.snapshot.org/delegation/1',
   '10': 'https://subgrapher.snapshot.org/delegation/10',
   '56': 'https://subgrapher.snapshot.org/delegation/56',
@@ -251,7 +251,15 @@ export function useDelegates(
       throw new Error('Failed to fetch split delegation delegates');
     }
 
-    const body = await response.json();
+    const body: {
+      delegates: {
+        address: string;
+        votingPower: number;
+        delegatorCount: number;
+        percentOfDelegators: number;
+        percentOfVotingPower: number;
+      }[];
+    } = await response.json();
 
     return formatDelegates({
       delegates: body.delegates
@@ -296,7 +304,7 @@ export function useDelegates(
   async function getApeChainDelegationDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
-    const CUSTOM_GOVERNANCES = {
+    const CUSTOM_GOVERNANCES: Record<string, string> = {
       33139: 'apechain',
       33111: 'curtis'
     };
