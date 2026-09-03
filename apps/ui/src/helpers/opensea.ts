@@ -52,7 +52,7 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
 const SUPPORTED_ABIS = ['erc721', 'erc1155'];
 
 export async function getNfts(address: string, chainId: string) {
-  const network = NETWORKS[chainId];
+  const network = NETWORKS[chainId as keyof typeof NETWORKS];
   if (!network) throw new Error('Unsupported chain for OpenSea NFTs');
   const { name, isTestnet } = network;
 

@@ -42,9 +42,10 @@ export function getGenericExplorerUrl(
       mappedType = 'token';
     }
 
-    if (!networks[chainId]) return null;
+    const network = networks[chainId as keyof typeof networks];
+    if (!network) return null;
 
-    return `${networks[chainId].explorer.url}/${mappedType}/${address}`;
+    return `${network.explorer.url}/${mappedType}/${address}`;
   }
 
   try {

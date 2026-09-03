@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { DOCS_URL, FLAGS } from '@/helpers/constants';
-import { loadSingleTopic, Topic } from '@/helpers/discourse';
+import { loadSingleTopic, TopicWithPosts } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -24,7 +24,7 @@ const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
-const discourseTopic: Ref<Topic | null> = ref(null);
+const discourseTopic: Ref<TopicWithPosts | null> = ref(null);
 
 const id = computed(() => route.params.proposal as string);
 

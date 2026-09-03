@@ -1,7 +1,11 @@
+import { JsonFragment } from '@ethersproject/abi';
 import { call } from './call';
 import { getProvider } from './provider';
 
-export async function getABI(chainId: number, address: string) {
+export async function getABI(
+  chainId: number,
+  address: string
+): Promise<JsonFragment[]> {
   const apiHost = `https://api.etherscan.io/v2/api`;
 
   const params = new URLSearchParams({
@@ -14,7 +18,7 @@ export async function getABI(chainId: number, address: string) {
 
   const res = await fetch(`${apiHost}?${params}`);
   const { result } = await res.json();
-  const abi = JSON.parse(result);
+  const abi: JsonFragment[] = JSON.parse(result);
 
   // if there is a `implementation` method, get the ABI for that instead
   if (abi.find(({ name }) => name === 'implementation')) {
