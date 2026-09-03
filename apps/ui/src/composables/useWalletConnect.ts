@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
-import { WalletKit } from '@reown/walletkit';
+import { WalletKit, WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
@@ -38,6 +38,32 @@ async function getConnector() {
 }
 
 const connections: Ref<Record<string, ConnectionData | undefined>> = ref({});
+
+let activeKey: string | null = null;
+let activeCleanup: (() => void) | null = null;
+
+async function disconnectConnection(key: string) {
+  const data = connections.value[key];
+  if (!data?.session) return;
+
+  const connector = await getConnector();
+
+  try {
+    await connector.disconnectSession({
+      topic: data.session.topic,
+      reason: getSdkError('USER_DISCONNECTED')
+    });
+  } catch (err) {
+    console.error(err);
+  }
+
+  connections.value[key] = {
+    ...data,
+    proposal: null,
+    session: null,
+    logged: false
+  };
+}
 
 async function parseCall(chainId: number, call) {
   const params = call.params[0];
@@ -134,17 +160,13 @@ export function useWalletConnect(
   });
 
   async function logout() {
-    if (!session.value) return;
+    await disconnectConnection(key.value);
 
-    const connector = await getConnector();
-    await connector.disconnectSession({
-      topic: session.value.topic,
-      reason: getSdkError('USER_DISCONNECTED')
-    });
-
-    proposal.value = null;
-    session.value = null;
-    logged.value = false;
+    if (activeKey === key.value) {
+      activeCleanup?.();
+      activeCleanup = null;
+      activeKey = null;
+    }
   }
 
   function getApprovedNamespaces(
@@ -176,11 +198,29 @@ export function useWalletConnect(
   async function connect(uri: string, approveCallback: ApproveCallback) {
     loading.value = true;
 
-    if (logged.value) await logout();
-    const connector = await getConnector();
-    await connector.core.pairing.pair({ uri });
+    let connector: Awaited<ReturnType<typeof getConnector>>;
+    try {
+      activeCleanup?.();
+      activeCleanup = null;
 
-    connector.on('session_proposal', async ({ id, params }) => {
+      if (activeKey && activeKey !== key.value) {
+        await disconnectConnection(activeKey);
+      } else if (logged.value) {
+        await disconnectConnection(key.value);
+      }
+
+      activeKey = key.value;
+
+      connector = await getConnector();
+    } catch (err) {
+      loading.value = false;
+      throw err;
+    }
+
+    const onSessionProposal = async ({
+      id,
+      params
+    }: WalletKitTypes.SessionProposal) => {
       proposal.value = params;
 
       const approved = await approveCallback();
@@ -211,9 +251,11 @@ export function useWalletConnect(
 
       logged.value = true;
       loading.value = false;
-    });
+    };
 
-    connector.on('session_request', async payload => {
+    const onSessionRequest = async (payload: WalletKitTypes.SessionRequest) => {
+      if (payload.topic !== session.value?.topic) return;
+
       const { request } = payload.params;
       if (request.method !== 'eth_sendTransaction') return;
 
@@ -238,12 +280,42 @@ export function useWalletConnect(
       } catch (err) {
         console.error(err);
       }
-    });
+    };
 
-    connector.on('session_delete', () => {
+    const onSessionDelete = (payload: WalletKitTypes.SessionDelete) => {
+      if (payload.topic !== session.value?.topic) return;
+
       loading.value = false;
       logged.value = false;
-    });
+      session.value = null;
+      proposal.value = null;
+
+      if (activeKey === key.value) {
+        activeCleanup?.();
+        activeCleanup = null;
+        activeKey = null;
+      }
+    };
+
+    connector.on('session_proposal', onSessionProposal);
+    connector.on('session_request', onSessionRequest);
+    connector.on('session_delete', onSessionDelete);
+
+    activeCleanup = () => {
+      connector.off('session_proposal', onSessionProposal);
+      connector.off('session_request', onSessionRequest);
+      connector.off('session_delete', onSessionDelete);
+    };
+
+    try {
+      await connector.core.pairing.pair({ uri });
+    } catch (err) {
+      activeCleanup?.();
+      activeCleanup = null;
+      loading.value = false;
+
+      throw err;
+    }
   }
 
   return {
