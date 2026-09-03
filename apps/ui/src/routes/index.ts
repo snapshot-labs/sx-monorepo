@@ -54,7 +54,7 @@ router.beforeEach((to, _from, next) => {
   // Redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
   if (to.matched[0]?.name === 'space') {
     // if space has alias, change url to it
-    spaceName = aliases[spaceName] || spaceName;
+    spaceName = aliases[spaceName as keyof typeof aliases] || spaceName;
     const restPath = rest.length ? `/${rest.join('/')}` : '';
     redirectPath = `/${metadataNetwork}:${spaceName}${restPath}`;
   }

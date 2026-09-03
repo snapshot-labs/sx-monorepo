@@ -12,9 +12,7 @@ export const useContactsStore = defineStore('contacts', {
         contact => contact.address === payload.address
       );
       if (contact) {
-        Object.entries(payload).map(([key, value]) => {
-          contact[key] = value;
-        });
+        Object.assign(contact, payload);
       } else {
         this.contacts.unshift(payload);
       }
