@@ -69,6 +69,7 @@ function openModal(
 
 function editTx(index: number) {
   const tx = model.value[index];
+  if (tx._type === 'raw') return;
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;

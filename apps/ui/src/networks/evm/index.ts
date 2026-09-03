@@ -1,5 +1,5 @@
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getRelayerInfo } from '@/helpers/mana';
+import { networks } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress } from '@/helpers/utils';
@@ -99,8 +99,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
       if (dataType === 'address') id = formatAddress(id);
 
-      const network =
-        networks[(chainIdOverride ?? chainId) as keyof typeof networks];
+      const network = networks[chainIdOverride ?? chainId];
 
       return `${network.explorer.url}/${dataType}/${id}`;
     }

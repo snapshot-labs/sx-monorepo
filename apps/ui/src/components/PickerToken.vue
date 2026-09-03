@@ -54,7 +54,7 @@ function handlePick(token: Token) {
   emit('pick', token.contractAddress);
 }
 
-async function fetchCustomToken(address) {
+async function fetchCustomToken(address: string) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
   if (getChainIdKind(props.network) !== 'evm') {

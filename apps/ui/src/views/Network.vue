@@ -22,7 +22,7 @@ const LINK = 'https://calendly.com/snapshotlabs/30min';
 
 const currentQuestion = ref();
 
-function toggleQuestion(id) {
+function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? '' : id;
 }
 </script>

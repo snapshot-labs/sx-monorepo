@@ -58,7 +58,7 @@ const connectorModalOpen = ref(false);
 const connectorModalConnectors = ref([] as ConnectorType[]);
 const connectorCallbackFn: Ref<((value: Connector | false) => void) | null> =
   ref(null);
-const txIds = ref({});
+const txIds = ref<Record<string, string>>({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
 const executionStrategiesDestinations = ref([] as string[]);
 

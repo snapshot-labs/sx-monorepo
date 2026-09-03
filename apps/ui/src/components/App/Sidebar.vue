@@ -19,7 +19,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
-      :item-key="i => i"
+      item-key="id"
       v-bind="{ animation: 200 }"
       class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >

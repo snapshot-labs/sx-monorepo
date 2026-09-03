@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
+import { networks } from '@/helpers/networks';
 import { getExecutionKey } from '@/helpers/ui';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';

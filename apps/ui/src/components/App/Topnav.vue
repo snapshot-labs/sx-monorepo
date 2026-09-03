@@ -15,7 +15,15 @@ const { logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
 
-const SEARCH_CONFIG = {
+const SEARCH_CONFIG: Record<
+  string,
+  {
+    defaultRoute: string;
+    searchRoute: string;
+    placeholder: string;
+    exclude?: string[];
+  }
+> = {
   space: {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-proposals',
@@ -48,8 +56,8 @@ const user = computed(
 const cb = computed(() => getCacheHash(user.value.avatar));
 
 const searchConfig = computed(() => {
-  const rootName = route.matched[0]?.name || '';
-  const subRootName = route.matched[1]?.name || '';
+  const rootName = String(route.matched[0]?.name || '');
+  const subRootName = String(route.matched[1]?.name || '');
   const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
 
   if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {

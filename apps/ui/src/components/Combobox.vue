@@ -115,8 +115,8 @@ function getDisplayValue(value: T | null) {
               :placeholder="definition.examples?.[0]"
               :display-value="item => getDisplayValue(item as T)"
               @keydown.enter="() => (query = '')"
-              @change="e => (query = e.target.value)"
-              @focus="event => handleFocus(event, open)"
+              @change="event => (query = event.target.value)"
+              @focus="(event: FocusEvent) => handleFocus(event, open)"
             />
           </ComboboxButton>
           <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">
