@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'endReached');
+  (e: 'endReached'): void;
 }>();
 
 const currentLimit = computed(() => {

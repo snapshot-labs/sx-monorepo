@@ -239,7 +239,12 @@ watchEffect(() => {
           class="s-input !flex flex-row justify-between items-center"
           @click="isSelectVotingTypeModalOpen = true"
         >
-          <div>{{ VOTING_TYPES_INFO[votingType].label }}</div>
+          <div>
+            {{
+              VOTING_TYPES_INFO[votingType as keyof typeof VOTING_TYPES_INFO]
+                .label
+            }}
+          </div>
           <IH-chevron-down />
         </button>
       </UiWrapperInput>
@@ -274,9 +279,9 @@ watchEffect(() => {
           <div>
             {{
               VALIDATION_TYPES_INFO[
-                voteValidation.name === 'any'
+                (voteValidation.name === 'any'
                   ? 'any-voting'
-                  : voteValidation.name
+                  : voteValidation.name) as keyof typeof VALIDATION_TYPES_INFO
               ].label
             }}
           </div>

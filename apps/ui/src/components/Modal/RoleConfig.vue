@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', config: RoleConfig);
+  (e: 'add', config: RoleConfig): void;
   (e: 'close'): void;
 }>();
 

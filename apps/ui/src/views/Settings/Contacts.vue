@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { shorten } from '@/helpers/utils';
+import { Contact } from '@/types';
 
 useTitle('Contacts');
 const contactsStore = useContactsStore();
@@ -16,7 +17,7 @@ function openModal(type: 'editContact') {
   modalState.value[type] = null;
 }
 
-function handleContactEdit(contact) {
+function handleContactEdit(contact: Contact) {
   modalState.value.editContact = contact;
   modalOpen.value.editContact = true;
 }

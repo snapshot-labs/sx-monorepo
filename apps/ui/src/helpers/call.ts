@@ -1,7 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { CallOverrides, Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { networks } from '@/helpers/networks';
 
 export type CallOptions = CallOverrides & { limit?: number };
 
@@ -35,7 +35,7 @@ export async function multicall(
   options?: CallOptions
 ) {
   const multi = new Contract(
-    networks[network as keyof typeof networks].multicall,
+    networks[network].multicall,
     MULTICALL_ABI,
     provider
   );

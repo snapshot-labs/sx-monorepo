@@ -14,7 +14,7 @@ const DEFAULT_FORM_STATE = {
   to: '',
   abi: [] as JsonFragment[],
   method: '',
-  args: {},
+  args: {} as Record<string, string>,
   amount: ''
 };
 
@@ -129,8 +129,7 @@ function handlePickerSelect(value: string) {
 
   if (!pickerField.value) return;
 
-  const isTopLevel = pickerField.value === 'to';
-  if (isTopLevel) form[pickerField.value] = value;
+  if (pickerField.value === 'to') form.to = value;
   else form.args[pickerField.value] = value;
 }
 

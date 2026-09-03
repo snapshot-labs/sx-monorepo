@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import {
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
+import { networks } from '@/helpers/networks';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
@@ -135,10 +135,12 @@ const chainIds = computed(() => {
     .flatMap(params => {
       return [
         params.network,
-        ...(params.params?.strategies?.flatMap(p => [
-          p.network,
-          p.params?.network
-        ]) || [])
+        ...(params.params?.strategies?.flatMap(
+          (p: { network?: unknown; params?: { network?: unknown } }) => [
+            p.network,
+            p.params?.network
+          ]
+        ) || [])
       ];
     })
     .filter(Boolean)

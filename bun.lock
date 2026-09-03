@@ -396,6 +396,7 @@
         "@types/object-hash": "^3.0.6",
         "@types/qrcode": "^1.5.6",
         "@types/remarkable": "^2.0.4",
+        "@types/remove-markdown": "^0.3.4",
         "@types/turndown": "^5.0.6",
         "@vitejs/plugin-vue": "^6.0.0",
         "@vue/test-utils": "^2.4.5",
@@ -2273,6 +2274,8 @@
     "@types/react": ["@types/react@19.2.14", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w=="],
 
     "@types/remarkable": ["@types/remarkable@2.0.8", "", {}, "sha512-eKXqPZfpQl1kOADjdKchHrp2gwn9qMnGXhH/AtZe0UrklzhGJkawJo/Y/D0AlWcdWoWamFNIum8+/nkAISQVGg=="],
+
+    "@types/remove-markdown": ["@types/remove-markdown@0.3.4", "", {}, "sha512-i753EH/p02bw7bLlpfS/4CV1rdikbGiLabWyVsAvsFid3cA5RNU1frG7JycgY+NSnFwtoGlElvZVceCytecTDA=="],
 
     "@types/responselike": ["@types/responselike@1.0.3", "", { "dependencies": { "@types/node": "*" } }, "sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw=="],
 

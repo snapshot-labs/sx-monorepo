@@ -1,4 +1,4 @@
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { networks } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress, getSpaceController } from '@/helpers/utils';
@@ -77,7 +77,7 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
       chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
-      const network = networks[chainId.toString() as keyof typeof networks];
+      const network = networks[chainId.toString()];
       const isStarknet = 'starknet' in network;
 
       switch (type) {
