@@ -19,20 +19,15 @@ import { getSalt } from '@/helpers/utils';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
-// Marks a message safe to show the user verbatim; anything else
-// parseSafeImportFile throws (JSON syntax errors, ethers argument errors) is
-// too technical to surface.
+// Only these messages reach the user; any other error gets a generic toast.
 export class SafeImportError extends Error {}
 
 function parseValue(value?: string | null): string {
   return value ? BigNumber.from(value).toString() : '0';
 }
 
-// Split a bracketed or bare comma-separated list into top-level elements,
-// stripping wrapping quotes per element. Covers a JSON array, the Safe
-// Transaction Builder's own bracketed-but-unquoted list
-// (`[0xabc, 0xdef]`), and the bare comma-joined string this app exports
-// (getContractCallFormArgs's `value.join(', ')`).
+// Accepts a JSON array, Safe's bracketed-but-unquoted list (`[0xabc, 0xdef]`)
+// and the bare `a, b` this app exports (getContractCallFormArgs' join).
 function splitArrayValue(value: string): string[] {
   const trimmed = value.trim();
   const body =
@@ -61,10 +56,8 @@ function splitArrayValue(value: string): string[] {
   return parts.map(part => part.trim().replace(/^['"]|['"]$/g, ''));
 }
 
-// Spellings accepted by the Safe Transaction Builder's own parseBooleanValue
-// (safe-global/safe-react-apps apps/tx-builder/src/utils.ts, MIT, commit
-// 118f25df89f781631386e6b279d812dfc837204a); anything else is rejected there
-// too, so it never reaches an exported file.
+// Same spellings as the Safe Transaction Builder's parseBooleanValue
+// (safe-global/safe-react-apps apps/tx-builder/src/utils.ts, MIT, 118f25df).
 function parseBooleanValue(value: string): boolean {
   const normalized = value.trim().toLowerCase();
 
@@ -76,25 +69,20 @@ function parseBooleanValue(value: string): boolean {
   throw new Error('Invalid Boolean value');
 }
 
-// Safe stores every input value as a string; coerce the ones ethers can't,
-// following the same rules as the Transaction Builder's parseInputValue.
 function parseArg(type: string, value: string): any {
   if (type.startsWith('tuple')) return JSON.parse(value);
   if (type.endsWith(']')) {
-    // Strings may contain commas, so Safe writes string arrays as JSON; this
-    // app's own export still writes the bare comma-joined form.
+    // Safe writes string arrays as JSON (elements may contain commas).
     if (type.startsWith('string') && value.trim().startsWith('[')) {
       return JSON.parse(value);
     }
 
-    // Numbers are kept as strings so ethers can parse big ints (JSON.parse
-    // would round a uint256 above 2^53 to a lossy float).
+    // Keep numbers as strings: JSON.parse would round a uint256 above 2^53.
     const elementType = type.replace(/\[\d*\]$/, '');
     return splitArrayValue(value).map(v => parseArg(elementType, v));
   }
   if (type === 'bool') return parseBooleanValue(value);
   if (/^u?int\d*$/.test(type)) {
-    // Safe accepts quoted and padded integers; strip like its parseIntValue.
     const trimmed = value.replace(/["']/g, '').trim();
     if (!trimmed) throw new Error('Invalid empty integer value');
 
@@ -115,8 +103,6 @@ function toRaw(tx: BatchTransaction): RawTransaction {
   };
 }
 
-// The single builder for every contract call: decode the calldata with an ABI,
-// or return null when it doesn't match.
 function decodeWithAbi(
   tx: BatchTransaction,
   abi: any[]
@@ -129,11 +115,8 @@ function decodeWithAbi(
     return null;
   }
 
-  // Unnamed (ethers normalises name: '' to null) or duplicate-named
-  // inputs collapse to one key once args are indexed by name below, and
-  // by getContractCallFormArgs/createContractCallTransaction on edit+save
-  // — bail out to the raw fallback instead of showing/re-encoding wrong
-  // args.
+  // Unnamed (ethers: null) or duplicate names collapse into one key below and
+  // in createContractCallTransaction on edit+save; keep such calls raw.
   const names = parsed.functionFragment.inputs.map(input => input.name);
   if (names.some(name => !name) || new Set(names).size !== names.length) {
     return null;
@@ -166,16 +149,12 @@ function decodeWithAbi(
   };
 }
 
-// A Safe Transaction Builder transaction carries the method and inputs; build
-// its ABI, encode the calldata when the file omits it, then decode uniformly.
 function fromContractMethod(
   tx: BatchTransaction,
   method: ContractMethod
 ): ContractCallTransaction | RawTransaction {
-  // Safe lists payable receive/fallback as selectable methods, but its own
-  // encoder refuses to build calldata for them (they take no arguments and
-  // must be called with empty data); import as a plain transfer so we don't
-  // invent a selector that reverts on-chain. See NON_VALID_CONTRACT_METHODS in
+  // Safe's own encoder refuses these (NON_VALID_CONTRACT_METHODS); they must be
+  // called with empty calldata, so import as a plain transfer.
   // https://github.com/safe-global/safe-react-apps/blob/118f25df89f781631386e6b279d812dfc837204a/apps/tx-builder/src/utils.ts#L206
   if (method.name === 'receive' || method.name === 'fallback') return toRaw(tx);
 
@@ -200,16 +179,13 @@ function fromContractMethod(
           )
         );
 
-  // decodeWithAbi can reject this freshly-built abi (e.g. unnamed/duplicate
-  // inputs); fall back to raw with the data computed above so the
-  // calldata (never present on tx itself when the file omits it) isn't
-  // lost to the data-less fallback in parseSafeTransaction.
-  return decodeWithAbi({ ...tx, data }, abi) || toRaw({ ...tx, data });
+  const txWithData = { ...tx, data };
+
+  // Fall back with the calldata computed above: parseSafeTransaction's own
+  // toRaw(tx) would drop it when the file omitted data.
+  return decodeWithAbi(txWithData, abi) || toRaw(txWithData);
 }
 
-// Decode raw calldata by fetching the contract ABI (Etherscan, with proxy
-// resolution), then standard token ABIs (covers proxies like USDC whose
-// implementation can't be resolved).
 async function decode(
   tx: BatchTransaction,
   chainId?: string
@@ -220,7 +196,8 @@ async function decode(
   try {
     candidates.unshift(await getABI(Number(chainId), tx.to));
   } catch {
-    // No verified ABI; standard token ABIs still cover common calls.
+    // No verified ABI (or an unresolved proxy like USDC); the standard token
+    // ABIs below still cover common calls.
   }
 
   for (const abi of candidates) {
@@ -242,7 +219,6 @@ async function parseSafeTransaction(
   );
 }
 
-// Parse a Safe Transaction Builder export into editor transactions.
 export async function parseSafeImportFile(
   content: string,
   chainId?: string
@@ -260,9 +236,8 @@ export async function parseSafeImportFile(
   }
 
   if (chainId) {
-    // Safe writes chainId: chainInfo?.chainId || '' — an empty/missing value
-    // must not be treated as a match, or a file with no chain info would
-    // import into any treasury regardless of network.
+    // Safe writes chainId '' when unknown; that must not match any treasury,
+    // so this stays strict rather than `file.chainId && ...`.
     const fileChainId = file.chainId ? String(file.chainId) : null;
     if (fileChainId !== chainId) {
       throw new SafeImportError(
@@ -278,9 +253,7 @@ export async function parseSafeImportFile(
     expectedChecksum &&
     !validateChecksum(file as BatchFile, expectedChecksum)
   ) {
-    // Same as Safe's own importer: warn, but still import, since the
-    // checksum only detects edits made after export (and anyone editing the
-    // file can recompute it).
+    // Safe's own importer only warns on a checksum mismatch.
     warnings.push(
       'This file was modified after it was exported (checksum mismatch)'
     );
@@ -292,8 +265,8 @@ export async function parseSafeImportFile(
         `Transaction ${i + 1} has an invalid recipient address`
       );
     }
-    // Only absent (null/undefined) or empty fields may fall back to defaults;
-    // any other non-string (false, 0) is a malformed file, not a transfer.
+    // Absent or '' falls back to defaults; other non-strings (false, 0) are
+    // malformed, not transfers.
     const data = tx.data ?? '';
     if (typeof data !== 'string' || (data !== '' && !isBytesLike(data))) {
       throw new SafeImportError(`Transaction ${i + 1} has invalid calldata`);
