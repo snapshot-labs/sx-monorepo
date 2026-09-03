@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { parseSafeImportFile } from '@/helpers/safe/transactions';
+import {
+  parseSafeImportFile,
+  SafeImportError
+} from '@/helpers/safe/transactions';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
 import { getChainIdKind, shorten } from '@/helpers/utils';
@@ -70,34 +73,6 @@ function openModal(
   modalOpen.value[type] = true;
 }
 
-// Messages parseSafeImportFile writes for the user; shown verbatim. Anything
-// else it throws (JSON syntax errors, ethers argument errors) is too technical.
-const IMPORT_ERRORS = [
-  /^No transactions found in file$/,
-  /^This file is for chain /,
-  /^This file does not specify a chain/,
-  /^This file has an invalid checksum/,
-  /^Transaction \d+ has an invalid recipient address$/
-];
-
-function getImportErrorMessage(err: unknown): string {
-  if (!(err instanceof Error)) return 'Failed to import Safe file';
-
-  if (IMPORT_ERRORS.some(pattern => pattern.test(err.message))) {
-    return err.message;
-  }
-
-  // A per-transaction failure carries an ethers message too technical to show;
-  // keep the index, which is the part the user can act on.
-  const failedIndex = err.message.match(/^Transaction #(\d+):/)?.[1];
-
-  console.error(err);
-
-  return failedIndex
-    ? `Transaction ${failedIndex} in this file could not be imported`
-    : 'Failed to import Safe file';
-}
-
 async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
@@ -107,7 +82,7 @@ async function handleImportFile(event: Event) {
   importingFile.value = true;
 
   try {
-    const transactions = await parseSafeImportFile(
+    const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
       treasury.value?.network
     );
@@ -117,8 +92,16 @@ async function handleImportFile(event: Event) {
       'success',
       `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
     );
+    warnings.forEach(warning => uiStore.addNotification('warning', warning));
   } catch (err) {
-    uiStore.addNotification('error', getImportErrorMessage(err));
+    if (!(err instanceof SafeImportError)) console.error(err);
+
+    uiStore.addNotification(
+      'error',
+      err instanceof SafeImportError
+        ? err.message
+        : 'Failed to import Safe file'
+    );
   } finally {
     importingFile.value = false;
   }
@@ -242,7 +225,8 @@ watch(
               uniform
               @click="fileInput?.click()"
             >
-              <IH-upload />
+              <UiLoading v-if="importingFile" />
+              <IH-upload v-else />
             </UiButton>
           </UiTooltip>
         </div>
