@@ -52,7 +52,7 @@ export function validateChecksum(
   batchFile: BatchFile,
   expectedChecksum?: string
 ): boolean {
-  const targetObj = { ...batchFile };
+  const targetObj = { ...batchFile, meta: { ...batchFile.meta } };
   delete targetObj.meta.checksum;
 
   return (
