@@ -7,8 +7,7 @@ import { parseSafeImportFile } from './transactions';
 // Decoding fetches the contract ABI; stub it so the test stays offline.
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 
-// Tests queue getABI results with mock*Once; reset between tests and fail
-// loudly on an unexpected call instead of leaking into the next test.
+// Fail loudly on an unmocked getABI call instead of leaking a queued mock.
 beforeEach(() => {
   vi.mocked(getABI).mockReset().mockRejectedValue(new Error('unmocked getABI'));
 });
@@ -313,22 +312,19 @@ describe('array arguments', () => {
 
   const RECIPIENT_1 = '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70';
   const RECIPIENT_2 = '0x111111125421cA6dc452d289314280a0f8842A65';
-  // Above Number.MAX_SAFE_INTEGER (2^53); JSON.parse would round this to a
-  // lossy float and ethers would then reject it as an overflow.
+  // Above 2^53: JSON.parse would round it to a lossy float.
   const BIG_AMOUNT = '10000000000000000000';
 
-  it('parses the Safe Transaction Builder unquoted bracketed form', async () => {
-    const expected = new Interface(RECIPIENTS_ABI).encodeFunctionData(
-      'batchTransfer',
-      [
-        [RECIPIENT_1, RECIPIENT_2],
-        [BIG_AMOUNT, '2']
-      ]
-    );
+  const expected = new Interface(RECIPIENTS_ABI).encodeFunctionData(
+    'batchTransfer',
+    [
+      [RECIPIENT_1, RECIPIENT_2],
+      [BIG_AMOUNT, '2']
+    ]
+  );
 
-    const {
-      transactions: [tx]
-    } = await parseSafeImportFile(
+  const importBatchTransfer = (values: Record<string, string>) =>
+    parseSafeImportFile(
       file([
         {
           to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
@@ -342,85 +338,40 @@ describe('array arguments', () => {
               { name: 'amounts', type: 'uint256[]' }
             ]
           },
-          contractInputsValues: {
-            recipients: `[${RECIPIENT_1}, ${RECIPIENT_2}]`,
-            amounts: `[${BIG_AMOUNT}, 2]`
-          }
+          contractInputsValues: values
         }
       ])
     );
+
+  it('parses the Safe Transaction Builder unquoted bracketed form', async () => {
+    const {
+      transactions: [tx]
+    } = await importBatchTransfer({
+      recipients: `[${RECIPIENT_1}, ${RECIPIENT_2}]`,
+      amounts: `[${BIG_AMOUNT}, 2]`
+    });
 
     expect(tx.data).toBe(expected);
   });
 
   it("parses this app's own bare comma-joined export form", async () => {
-    const expected = new Interface(RECIPIENTS_ABI).encodeFunctionData(
-      'batchTransfer',
-      [
-        [RECIPIENT_1, RECIPIENT_2],
-        [BIG_AMOUNT, '2']
-      ]
-    );
-
     const {
       transactions: [tx]
-    } = await parseSafeImportFile(
-      file([
-        {
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          value: '0',
-          data: null,
-          contractMethod: {
-            name: 'batchTransfer',
-            payable: false,
-            inputs: [
-              { name: 'recipients', type: 'address[]' },
-              { name: 'amounts', type: 'uint256[]' }
-            ]
-          },
-          contractInputsValues: {
-            recipients: `${RECIPIENT_1}, ${RECIPIENT_2}`,
-            amounts: `${BIG_AMOUNT}, 2`
-          }
-        }
-      ])
-    );
+    } = await importBatchTransfer({
+      recipients: `${RECIPIENT_1}, ${RECIPIENT_2}`,
+      amounts: `${BIG_AMOUNT}, 2`
+    });
 
     expect(tx.data).toBe(expected);
   });
 
   it('still parses a JSON array (quoted elements)', async () => {
-    const expected = new Interface(RECIPIENTS_ABI).encodeFunctionData(
-      'batchTransfer',
-      [
-        [RECIPIENT_1, RECIPIENT_2],
-        [BIG_AMOUNT, '2']
-      ]
-    );
-
     const {
       transactions: [tx]
-    } = await parseSafeImportFile(
-      file([
-        {
-          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-          value: '0',
-          data: null,
-          contractMethod: {
-            name: 'batchTransfer',
-            payable: false,
-            inputs: [
-              { name: 'recipients', type: 'address[]' },
-              { name: 'amounts', type: 'uint256[]' }
-            ]
-          },
-          contractInputsValues: {
-            recipients: JSON.stringify([RECIPIENT_1, RECIPIENT_2]),
-            amounts: JSON.stringify([BIG_AMOUNT, '2'])
-          }
-        }
-      ])
-    );
+    } = await importBatchTransfer({
+      recipients: JSON.stringify([RECIPIENT_1, RECIPIENT_2]),
+      amounts: JSON.stringify([BIG_AMOUNT, '2'])
+    });
 
     expect(tx.data).toBe(expected);
   });
@@ -435,7 +386,6 @@ describe('decoding imported transactions', () => {
       '100'
     ]);
 
-    // No contractMethod in the file; a chainId enables the ABI lookup.
     const {
       transactions: [tx]
     } = await parseSafeImportFile(
@@ -451,7 +401,6 @@ describe('decoding imported transactions', () => {
       to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
       value: '100'
     });
-    // Original calldata is preserved (we never re-encode).
     expect(tx.data).toBe(data);
   });
 
@@ -496,9 +445,6 @@ describe('decoding imported transactions', () => {
       '1'
     );
 
-    // Unnamed inputs would collapse to a single "null" key if kept as a
-    // contractCall (both _form.args display and re-encoding on save would
-    // be wrong); raw keeps the exact original calldata instead.
     expect(tx._type).toBe('raw');
     expect(tx.data).toBe(data);
   });
@@ -542,16 +488,12 @@ describe('decoding imported transactions', () => {
               { name: '', type: 'uint256' }
             ]
           },
-          // Safe keys inputs by name; both unnamed inputs share the '' key,
-          // same limitation as the Safe Transaction Builder's own form.
+          // Unnamed inputs share the '' key, as in Safe's own form.
           contractInputsValues: { '': '1' }
         }
       ])
     );
 
-    // The calldata that was actually computed from contractMethod must not
-    // be lost: without it, the transaction would silently become a no-op
-    // raw call (data: '0x') instead of encoding f(1, 1).
     expect(tx._type).toBe('raw');
     expect(tx.data).not.toBe('0x');
     expect(tx.data).toBe(
