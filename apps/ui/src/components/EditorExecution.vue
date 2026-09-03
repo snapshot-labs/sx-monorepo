@@ -179,7 +179,11 @@ watch(
       <template v-if="model.length > 0 && treasury">
         <UiSectionHeader label="Transactions" class="border-t" />
         <div>
-          <Draggable v-model="model" handle=".handle" :item-key="tx => tx">
+          <Draggable
+            v-model="model"
+            handle=".handle"
+            :item-key="(tx: TransactionType) => tx"
+          >
             <template #item="{ element: tx, index: i }">
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
                 <template v-if="model.length > 1" #left>
