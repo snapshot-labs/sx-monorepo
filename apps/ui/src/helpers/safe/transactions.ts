@@ -174,8 +174,12 @@ function fromContractMethod(
       ? tx.data
       : new Interface(abi).encodeFunctionData(
           method.name,
-          inputs.map(input =>
-            parseArg(input.type, (tx.contractInputsValues ?? {})[input.name])
+          // Safe keys unnamed inputs by index (SolidityForm: name || index).
+          inputs.map((input, i) =>
+            parseArg(
+              input.type,
+              (tx.contractInputsValues ?? {})[input.name || i]
+            )
           )
         );
 
