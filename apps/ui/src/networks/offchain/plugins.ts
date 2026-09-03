@@ -3,19 +3,9 @@ import {
   SafeSnapExecutionData
 } from '@/helpers/safesnap/transactions';
 import { compareAddresses } from '@/helpers/utils';
-import { Proposal, Transaction } from '@/types';
+import { Proposal } from '@/types';
 import { ExecutionInfo } from '../types';
-
-type ReadOnlyExecutionSafe = {
-  safeName: string;
-  safeAddress: string;
-  chainId: number;
-  transactions: Transaction[];
-};
-
-type ReadOnlyExecutionPlugin = {
-  safes: ReadOnlyExecutionSafe[];
-};
+import { ReadOnlyExecutionPlugin } from './api/types';
 
 // Can hold shapes the editor never produces: UMA modules, multiple batches, or
 // a legacy top-level transaction list with no module address at all.

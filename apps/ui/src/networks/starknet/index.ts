@@ -2,7 +2,7 @@ import { LibraryError } from 'starknet';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pin } from '@/helpers/pin';
 import { formatAddress } from '@/helpers/utils';
-import { Network } from '@/networks/types';
+import { ExplorerUrlType, Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
@@ -45,10 +45,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_EXECUTORS[executor],
     pin,
     getSpaceController: async (space: Space) => space.controller,
-    getTransaction: txId => provider.getTransactionReceipt(txId),
+    getTransaction: (txId: string) => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
-    waitForTransaction: txId => {
+    waitForTransaction: (txId: string) => {
       let retries = 0;
 
       return new Promise((resolve, reject) => {
@@ -113,7 +113,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
           }
         }, interval);
       }),
-    getExplorerUrl: (id, type) => {
+    getExplorerUrl: (id: string, type: ExplorerUrlType) => {
       let dataType: 'tx' | 'contract' | 'token' | 'block' = 'tx';
       if (type === 'token') {
         dataType = 'token';
