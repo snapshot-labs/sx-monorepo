@@ -194,9 +194,22 @@ watch(
                 </template>
                 <template #right>
                   <div class="flex gap-3">
-                    <button type="button" @click="editTx(i)">
-                      <IH-pencil />
-                    </button>
+                    <UiTooltip
+                      :title="
+                        tx._type === 'raw'
+                          ? 'Editing raw transactions is not supported'
+                          : ''
+                      "
+                    >
+                      <button
+                        type="button"
+                        :disabled="tx._type === 'raw'"
+                        class="flex disabled:cursor-not-allowed disabled:opacity-40"
+                        @click="editTx(i)"
+                      >
+                        <IH-pencil />
+                      </button>
+                    </UiTooltip>
                     <button type="button" @click="removeTx(i)">
                       <IH-trash />
                     </button>

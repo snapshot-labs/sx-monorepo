@@ -278,11 +278,15 @@ async function fetchSplitDelegationDelegatees(
     throw new Error('Failed to fetch delegatees');
   }
 
-  const body = await response.json();
+  const body: {
+    delegateTree: {
+      delegate: string;
+      delegatedPower: number;
+      weight: number;
+    }[];
+  } = await response.json();
 
-  const delegateesAddresses: string[] = body.delegateTree.map(
-    ({ delegate }) => delegate
-  );
+  const delegateesAddresses = body.delegateTree.map(({ delegate }) => delegate);
 
   const [names, ...delegatees] = await Promise.all([
     getNames(delegateesAddresses),

@@ -1,4 +1,5 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
+import { Receipt } from '@snapshot-labs/sx';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { Category, Post, Vote } from '@/helpers/townhall/types';
 import { gql } from './gql';
@@ -309,6 +310,13 @@ export async function getResultsByRole(
     ...r,
     vote_count: Number(r.vote_count)
   }));
+}
+
+export function getEventData(receipt: Receipt, key: string) {
+  const event = receipt.result.events.find(event => event.key === key);
+  if (!event) throw new Error(`Event ${key} not found`);
+
+  return event.data;
 }
 
 export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
