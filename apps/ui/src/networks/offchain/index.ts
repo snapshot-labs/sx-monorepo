@@ -77,7 +77,8 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
       chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
-      const network = networks[chainId.toString()];
+      const network = networks[chainId.toString() as keyof typeof networks];
+      const isStarknet = 'starknet' in network;
 
       switch (type) {
         case 'transaction':
@@ -85,7 +86,7 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
             return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
-          if (network.starknet) return '';
+          if (isStarknet) return '';
 
           return `https://signator.io/ipfs/${id}`;
         case 'strategy':
@@ -93,7 +94,7 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
         case 'contract':
         case 'address':
           return network
-            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
+            ? `${network.explorer.url}/${isStarknet ? 'contract' : 'address'}/${formatAddress(id)}`
             : '';
         case 'block':
           return network ? `${network.explorer.url}/block/${id}` : '';

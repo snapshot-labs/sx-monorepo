@@ -1,4 +1,11 @@
-import { DelegationType, SpaceMetadataLabel, Theme, VoteType } from '@/types';
+import { OSnapTransaction } from '@/helpers/osnap/transactions';
+import {
+  DelegationType,
+  SpaceMetadataLabel,
+  Theme,
+  Transaction,
+  VoteType
+} from '@/types';
 import {
   OffchainProposalFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
@@ -7,6 +14,24 @@ import {
   OffchainStrategyFragmentFragment,
   OffchainVoteFragmentFragment
 } from './gql/graphql';
+
+export type OSnapPlugin = {
+  safes: {
+    network: string;
+    safeName: string;
+    safeAddress: string;
+    transactions: OSnapTransaction[];
+  }[];
+};
+
+export type ReadOnlyExecutionPlugin = {
+  safes: {
+    safeName: string;
+    safeAddress: string;
+    chainId: number;
+    transactions: Transaction[];
+  }[];
+};
 
 type Override<
   T,

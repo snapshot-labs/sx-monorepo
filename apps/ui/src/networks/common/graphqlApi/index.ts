@@ -165,7 +165,7 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: String(CHAIN_IDS[network])
+      chainId: String(CHAIN_IDS[network as keyof typeof CHAIN_IDS])
     };
   }
 
@@ -196,7 +196,7 @@ function formatDelegation(delegation: string): SpaceMetadataDelegation {
       apiType: api_type,
       apiUrl: api_url,
       contractAddress: address === 'null' ? null : address,
-      chainId: String(CHAIN_IDS[network])
+      chainId: String(CHAIN_IDS[network as keyof typeof CHAIN_IDS])
     };
   }
 
@@ -228,7 +228,7 @@ function formatDelegations(
       apiType: 'governor-subgraph',
       apiUrl,
       contractAddress,
-      chainId: String(CHAIN_IDS[space._indexer])
+      chainId: String(CHAIN_IDS[space._indexer as keyof typeof CHAIN_IDS])
     }
   ];
 }
