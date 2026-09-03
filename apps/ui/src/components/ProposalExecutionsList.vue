@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
-import { buildBatchFile } from '@/helpers/safe/ build';
+import { buildBatchFile } from '@/helpers/safe/build';
 import { getExecutionKey, getExecutionName } from '@/helpers/ui';
 import { shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
