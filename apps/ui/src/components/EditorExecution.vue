@@ -179,11 +179,7 @@ watch(
       <template v-if="model.length > 0 && treasury">
         <UiSectionHeader label="Transactions" class="border-t" />
         <div>
-          <Draggable
-            v-model="model"
-            handle=".handle"
-            :item-key="() => undefined"
-          >
+          <Draggable v-model="model" handle=".handle" :item-key="tx => tx">
             <template #item="{ element: tx, index: i }">
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
                 <template v-if="model.length > 1" #left>
@@ -206,12 +202,12 @@ watch(
                         type="button"
                         :disabled="tx._type === 'raw'"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
-                        @click="editTx(i)"
+                        @click.stop="editTx(i)"
                       >
                         <IH-pencil />
                       </button>
                     </UiTooltip>
-                    <button type="button" @click="removeTx(i)">
+                    <button type="button" @click.stop="removeTx(i)">
                       <IH-trash />
                     </button>
                   </div>
