@@ -225,7 +225,9 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[] | null
     ) => {
-      const executionInfo = executions?.[0];
+      const executionInfo = executions?.find(
+        execution => execution.transactions.length > 0
+      );
       const pinned = await helpers.pin({
         title,
         body,
@@ -347,7 +349,9 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[] | null
     ) {
-      const executionInfo = executions?.[0];
+      const executionInfo = executions?.find(
+        execution => execution.transactions.length > 0
+      );
       const pinned = await helpers.pin({
         title,
         body,
