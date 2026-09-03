@@ -1,6 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
+import { createContractCallTransaction } from '@/helpers/transactions';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile } from './transactions';
 
@@ -488,8 +489,8 @@ describe('decoding imported transactions', () => {
               { name: '', type: 'uint256' }
             ]
           },
-          // Unnamed inputs share the '' key, as in Safe's own form.
-          contractInputsValues: { '': '1' }
+          // Safe keys unnamed inputs by index.
+          contractInputsValues: { '0': '1', '1': '1' }
         }
       ])
     );
@@ -587,5 +588,49 @@ describe('file validation', () => {
         ])
       )
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
+  });
+});
+
+describe('tuple arguments', () => {
+  const ABI = [
+    {
+      name: 'setPair',
+      type: 'function',
+      stateMutability: 'nonpayable',
+      inputs: [
+        {
+          name: 'pair',
+          type: 'tuple',
+          components: [
+            { name: 'token', type: 'address' },
+            { name: 'amount', type: 'uint256' }
+          ]
+        }
+      ],
+      outputs: []
+    }
+  ];
+
+  const data = new Interface(ABI).encodeFunctionData('setPair', [
+    ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '7']
+  ]);
+
+  it('survives an edit and re-save in the contract-call form', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce(ABI);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+    const resaved = await createContractCallTransaction({
+      form: { ...(tx._form as any), to: tx.to }
+    });
+
+    expect(tx._type).toBe('contractCall');
+    expect(resaved.data).toBe(data);
   });
 });
