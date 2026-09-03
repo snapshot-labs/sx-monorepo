@@ -18,6 +18,7 @@ import {
   Envelope,
   HidePost,
   PinPost,
+  Receipt,
   RevokeRole,
   SetAlias,
   UnpinPost,
@@ -62,7 +63,7 @@ export class HighlightEthereumSigClient {
     return signer._signTypedData(domain, types, message);
   }
 
-  public async send(envelope: Envelope) {
+  public async send(envelope: Envelope): Promise<Receipt> {
     const { domain, message, primaryType, signer, signature } = envelope;
 
     const payload = {

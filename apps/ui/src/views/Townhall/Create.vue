@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getTopic } from '@/helpers/townhall/api';
+import { getEventData, getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { getUserFacingErrorMessage, sleep } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
@@ -99,9 +99,7 @@ async function handleSubmit() {
     );
     if (!res) return;
 
-    const [spaceId, topicId] = res.result.events.find(
-      event => event.key === 'new_topic'
-    ).data;
+    const [spaceId, topicId] = getEventData(res, 'new_topic');
 
     while (true) {
       try {

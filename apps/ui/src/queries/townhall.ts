@@ -12,6 +12,7 @@ import { SpaceType } from '@/composables/useTownhallSpace';
 import {
   getCategories,
   getCategory,
+  getEventData,
   getResultsByRole,
   getRoles,
   getSpace,
@@ -363,9 +364,7 @@ export function useCreateSpaceMutation() {
     onSuccess: data => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_space'
-      );
+      const eventData = getEventData(data, 'new_space');
 
       const [spaceId]: [number] = eventData;
 
@@ -424,9 +423,7 @@ export function useCreateCategoryMutation({
     onSuccess: (data, variables) => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_category'
-      );
+      const eventData = getEventData(data, 'new_category');
 
       const category = {
         ...newCategoryEventToEntry(eventData),
@@ -484,9 +481,7 @@ export function useEditCategoryMutation({
     onSuccess: (data, variables) => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'edit_category'
-      );
+      const eventData = getEventData(data, 'edit_category');
 
       const category = {
         ...newCategoryEventToEntry(eventData),
@@ -603,9 +598,7 @@ export function useCreatePostMutation({
     onSuccess: async (data, body) => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_post'
-      );
+      const eventData = getEventData(data, 'new_post');
 
       const post = { ...newPostEventToEntry(eventData), body };
 
@@ -729,9 +722,7 @@ export function useVoteMutation({
     onSuccess: async data => {
       if (!data) return;
 
-      const { data: event } = data.result.events.find(
-        event => event.key === 'new_vote'
-      );
+      const event = getEventData(data, 'new_vote');
 
       const vote = newVoteEventToEntry(event);
 
