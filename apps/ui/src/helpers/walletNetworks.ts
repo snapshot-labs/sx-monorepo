@@ -2,7 +2,15 @@ import { Web3Provider } from '@ethersproject/providers';
 import { constants as starknetConstants } from 'starknet';
 import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm/metadata';
 
-const ADDABLE_NETWORKS = {
+const ADDABLE_NETWORKS: Record<
+  number,
+  {
+    chainName: string;
+    nativeCurrency: { name: string; symbol: string; decimals: number };
+    rpcUrls: string[];
+    blockExplorerUrls: string[];
+  }
+> = {
   //   12345: {
   //     chainName: 'My network name',
   //     nativeCurrency: {

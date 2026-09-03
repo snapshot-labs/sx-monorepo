@@ -22,7 +22,7 @@ const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   's-tn': 11155111
 };
 
-export function createOffchainNetwork(networkId: NetworkID): Network {
+export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
   const l1ChainId = CHAIN_IDS[networkId];
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);

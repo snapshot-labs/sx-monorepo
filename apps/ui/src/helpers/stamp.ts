@@ -21,7 +21,7 @@ export async function getAddresses(
     const unresolvedNames = Object.values(inputMapping).filter(
       name => !resolvedNamesKeys.includes(name)
     );
-    let data: string[] = [];
+    let data: Record<string, string | null> = {};
 
     if (unresolvedNames.length > 0) {
       const res = await fetch(STAMP_URL, {
@@ -64,7 +64,7 @@ export async function getNames(
     const unresolvedAddresses = Object.values(inputMapping).filter(
       address => !resolvedAddressesKeys.includes(address)
     );
-    let data: string[] = [];
+    let data: Record<string, string | null> = {};
 
     if (unresolvedAddresses.length > 0) {
       const res = await fetch(STAMP_URL, {

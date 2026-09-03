@@ -54,7 +54,7 @@ const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
 };
 
 function getApiUrl(chainId: ChainId) {
-  const network = NETWORKS[chainId];
+  const network = NETWORKS[chainId as keyof typeof NETWORKS];
   if (!network) throw new Error('Unsupported chain for Alchemy API');
 
   return `https://${network}.g.alchemy.com/v2/${apiKey}`;
@@ -92,7 +92,7 @@ export async function batchRequest(
     )
   });
 
-  const response = await res.json();
+  const response: { result: any }[] = await res.json();
 
   return response.map(entry => entry.result);
 }

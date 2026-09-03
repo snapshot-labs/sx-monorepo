@@ -3,7 +3,7 @@ import {
   loadSingleTopic,
   Reply,
   SPACES_DISCUSSIONS,
-  Topic
+  TopicWithPosts
 } from '@/helpers/discourse';
 import turndownService from '@/helpers/turndownService';
 import { sanitizeUrl } from '@/helpers/utils';
@@ -15,7 +15,7 @@ const { setTitle } = useTitle();
 const route = useRoute();
 
 const replies = ref<Reply[]>([]);
-const topic = ref<Topic | null>(null);
+const topic = ref<TopicWithPosts | null>(null);
 const failed = ref(false);
 const loading = ref(false);
 const loaded = ref(false);

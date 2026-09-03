@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
+import { Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { getIsContract } from '@/helpers/contracts';
 import { getABI } from '@/helpers/etherscan';
@@ -12,7 +12,7 @@ import { ChainId, Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
-  abi: [] as (Fragment & JsonFragment)[],
+  abi: [] as JsonFragment[],
   method: '',
   args: {},
   amount: ''
