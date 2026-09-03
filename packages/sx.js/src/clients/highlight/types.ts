@@ -4,6 +4,12 @@ import { TOWNHALL_PERMISSIONS } from '../../highlightConstants';
 type PermissionLevel =
   (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
 
+export type Receipt = {
+  result: {
+    events: { key: string; data: any }[];
+  };
+};
+
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
   domain: Required<TypedDataDomain>;
