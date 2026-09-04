@@ -71,7 +71,9 @@ import {
   ApiSpace,
   ApiStatement,
   ApiStrategy,
-  ApiVote
+  ApiVote,
+  OSnapPlugin,
+  ReadOnlyExecutionPlugin
 } from './types';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
@@ -314,9 +316,11 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
 
   if (proposal.plugins.oSnap) {
     try {
+      const oSnap: OSnapPlugin = proposal.plugins.oSnap;
+
       executions = [
         ...executions,
-        ...proposal.plugins.oSnap.safes.map(safe => {
+        ...oSnap.safes.map(safe => {
           const chainId = Number(safe.network);
 
           return {
@@ -378,9 +382,12 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   }
 
   if (proposal.plugins.readOnlyExecution) {
+    const readOnlyExecution: ReadOnlyExecutionPlugin =
+      proposal.plugins.readOnlyExecution;
+
     executions = [
       ...executions,
-      ...proposal.plugins.readOnlyExecution.safes.map(safe => {
+      ...readOnlyExecution.safes.map(safe => {
         return {
           strategyType: 'ReadOnlyExecution',
           safeName: safe.safeName,
@@ -855,7 +862,8 @@ export function createApi(
         filter.hasOwnProperty('category') ||
         filter.hasOwnProperty('network')
       ) {
-        const where = {};
+        const where: { search?: string; category?: string; network?: string } =
+          {};
         if (filter?.searchQuery) where['search'] = filter.searchQuery;
         if (filter?.category) where['category'] = filter.category;
         if (filter?.network && filter.network !== 'all') {

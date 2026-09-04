@@ -63,7 +63,7 @@ export function createConstants(
       }
     };
 
-  const SUPPORTED_STRATEGIES = {
+  const SUPPORTED_STRATEGIES: Record<string, boolean> = {
     [config.Strategies.MerkleWhitelist]: true,
     [config.Strategies.ERC20Votes]: true,
     [config.Strategies.EVMSlotValue]: true,
@@ -83,7 +83,7 @@ export function createConstants(
     config.Strategies.OZVotesTrace208StorageProofV2
   ];
 
-  const SUPPORTED_EXECUTORS = {
+  const SUPPORTED_EXECUTORS: Record<string, boolean> = {
     EthRelayer: true
   };
 

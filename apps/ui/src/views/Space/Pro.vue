@@ -319,13 +319,15 @@ onMounted(() => {
         class="max-w-[480px] w-full space-y-3"
       >
         <button
-          v-for="plan in Object.keys(PRO_MONTHLY_PRICES)"
+          v-for="plan in Object.keys(
+            PRO_MONTHLY_PRICES
+          ) as SubscriptionLength[]"
           :key="plan"
           :class="[
             'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
             { 'border-skin-link': subscriptionLength === plan }
           ]"
-          @click="subscriptionLength = plan as SubscriptionLength"
+          @click="subscriptionLength = plan"
         >
           <div class="flex flex-1 items-center gap-x-2 flex-wrap">
             <h3 class="text-start">Pay {{ plan }}</h3>

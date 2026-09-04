@@ -147,6 +147,8 @@ export function getContractCallFormArgs({
 
 export async function createContractCallTransaction({
   form
+}: {
+  form: any;
 }): Promise<ContractCallTransaction> {
   let args: any[] = Object.values(form.args);
 
@@ -172,7 +174,7 @@ export async function createContractCallTransaction({
           const resolved = await resolver.resolveName(args[i]);
           if (resolved?.address) args[i] = resolved.address;
         } else if (input.type.endsWith('[]')) {
-          args[i] = args[i].split(',').map(value => value.trim());
+          args[i] = args[i].split(',').map((value: string) => value.trim());
         }
       })
     );
@@ -200,6 +202,8 @@ export async function createContractCallTransaction({
 
 export async function createStakeTokenTransaction({
   form
+}: {
+  form: any;
 }): Promise<StakeTokenTransaction> {
   let contractAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);

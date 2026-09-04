@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { networks } from '@/helpers/networks';
 import { getUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ChainId, NetworkID } from '@/types';

@@ -86,7 +86,11 @@ watchEffect(() => {
         @click="isSelectValidationModalOpen = true"
       >
         <div>
-          {{ VALIDATION_TYPES_INFO[proposalValidation.name].label }}
+          {{
+            VALIDATION_TYPES_INFO[
+              proposalValidation.name as keyof typeof VALIDATION_TYPES_INFO
+            ].label
+          }}
         </div>
         <IH-chevron-down />
       </button>

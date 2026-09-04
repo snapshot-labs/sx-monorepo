@@ -28,6 +28,14 @@ import {
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
+export type ExplorerUrlType =
+  | 'transaction'
+  | 'address'
+  | 'contract'
+  | 'strategy'
+  | 'token'
+  | 'block';
+
 export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
@@ -186,13 +194,13 @@ export type ReadOnlyNetworkActions = {
     web3: Web3Provider | Wallet,
     account: string,
     proposal: Proposal
-  );
+  ): Promise<any>;
   cancelProposal(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal
-  );
+  ): Promise<any>;
   vote(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
@@ -208,30 +216,42 @@ export type ReadOnlyNetworkActions = {
     networkId: NetworkID,
     spaceId: string,
     from?: string
-  );
+  ): Promise<any>;
   unfollowSpace(
     web3: Web3Provider | Wallet,
     networkId: NetworkID,
     spaceId: string,
     from?: string
-  );
-  setAlias(web3: Web3Provider, alias: string);
-  revokeAlias(web3: Web3Provider | Wallet, alias: string);
-  updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
+  ): Promise<any>;
+  setAlias(web3: Web3Provider, alias: string): Promise<any>;
+  revokeAlias(web3: Web3Provider | Wallet, alias: string): Promise<any>;
+  updateUser(
+    web3: Web3Provider | Wallet,
+    user: User,
+    from?: string
+  ): Promise<any>;
   updateStatement(
     web3: Web3Provider | Wallet,
     statement: Statement,
     from?: string
-  );
+  ): Promise<any>;
   transferOwnership(
     web3: Web3Provider,
     connectorType: ConnectorType,
     space: Space,
     owner: string
-  );
-  updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
-  createSpaceRaw(web3: Web3Provider, id: string, settings: string);
-  deleteSpace(web3: Web3Provider, space: Space);
+  ): Promise<any>;
+  updateSettingsRaw(
+    web3: Web3Provider,
+    space: Space,
+    settings: string
+  ): Promise<any>;
+  createSpaceRaw(
+    web3: Web3Provider,
+    id: string,
+    settings: string
+  ): Promise<any>;
+  deleteSpace(web3: Web3Provider, space: Space): Promise<any>;
   send(envelope: any): Promise<any>;
 };
 
@@ -264,10 +284,10 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       executionDestinations: string[];
       metadata: SpaceMetadata;
     }
-  );
-  executeTransactions(web3: Web3Provider, proposal: Proposal);
-  executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
-  vetoProposal(web3: Web3Provider, proposal: Proposal);
+  ): Promise<any>;
+  executeTransactions(web3: Web3Provider, proposal: Proposal): Promise<any>;
+  executeQueuedProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;
+  vetoProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;
   updateSettings(
     web3: Web3Provider,
     connectorType: ConnectorType,
@@ -282,7 +302,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
-  );
+  ): Promise<any>;
   getUpdateSettingsTransaction(
     space: Space,
     metadata: SpaceMetadata,
@@ -305,7 +325,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     delegationContract: string,
     chainIdOverride?: ChainId,
     delegateesMetadata?: Record<string, any>
-  );
+  ): Promise<any>;
   getDelegatee(
     delegation: SpaceMetadataDelegation,
     delegator: string
@@ -451,17 +471,7 @@ export type NetworkHelpers = {
   waitForTransaction(txId: string): Promise<any>;
   waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
-  getExplorerUrl(
-    id: string,
-    type:
-      | 'transaction'
-      | 'address'
-      | 'contract'
-      | 'strategy'
-      | 'token'
-      | 'block',
-    chainId?: ChainId
-  ): string;
+  getExplorerUrl(id: string, type: ExplorerUrlType, chainId?: ChainId): string;
 };
 
 type BaseNetwork = {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
+import { Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import { getIsContract } from '@/helpers/contracts';
 import { getABI } from '@/helpers/etherscan';
@@ -12,9 +12,9 @@ import { ChainId, Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
-  abi: [] as (Fragment & JsonFragment)[],
+  abi: [] as JsonFragment[],
   method: '',
-  args: {},
+  args: {} as Record<string, string>,
   amount: ''
 };
 
@@ -129,8 +129,7 @@ function handlePickerSelect(value: string) {
 
   if (!pickerField.value) return;
 
-  const isTopLevel = pickerField.value === 'to';
-  if (isTopLevel) form[pickerField.value] = value;
+  if (pickerField.value === 'to') form.to = value;
   else form.args[pickerField.value] = value;
 }
 

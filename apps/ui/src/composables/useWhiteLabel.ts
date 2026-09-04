@@ -10,7 +10,7 @@ type WhiteLabelConfig = {
 
 // List of global paths, that should not be nested inside space scope
 // when redirecting from whitelabel to main app
-const GLOBAL_PATHS = { contacts: 'settings/contacts' };
+const GLOBAL_PATHS: Record<string, string> = { contacts: 'settings/contacts' };
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;

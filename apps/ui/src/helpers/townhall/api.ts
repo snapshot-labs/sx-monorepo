@@ -303,7 +303,13 @@ export async function getResultsByRole(
     `${HIGHLIGHT_URL}/townhall/spaces/${spaceId}/topics/${topicId}/results_by_role/${roleId}`
   );
 
-  const { error, result } = await res.json();
+  const {
+    error,
+    result
+  }: {
+    error?: string;
+    result: (Omit<Result, 'vote_count'> & { vote_count: string })[];
+  } = await res.json();
   if (error) throw new Error('RPC call failed');
 
   return result.map(r => ({

@@ -163,7 +163,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
 
 export default {
   routeName: 'space',
-  isVisible: ({ route }) =>
+  isVisible: ({ route }: NavContext) =>
     !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name)),
   getConfig(context: NavContext): NavConfig | null {
     if (!context.space) return null;

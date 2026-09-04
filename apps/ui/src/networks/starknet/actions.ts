@@ -640,7 +640,7 @@ export function createActions(
         }))
       });
     },
-    vetoProposal: () => null,
+    vetoProposal: async () => null,
     transferOwnership: async (
       web3: any,
       connectorType: ConnectorType,
@@ -864,12 +864,12 @@ export function createActions(
         })
       );
     },
-    followSpace: () => {},
-    unfollowSpace: () => {},
+    followSpace: async () => {},
+    unfollowSpace: async () => {},
     setAlias: async () => {},
     revokeAlias: async () => {},
-    updateUser: () => {},
-    updateStatement: () => {},
+    updateUser: async () => {},
+    updateStatement: async () => {},
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
     },

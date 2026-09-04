@@ -135,7 +135,7 @@ watch(
   ],
   ([searchQueryValue, protocolQuery, categoryQuery, networkQuery]) => {
     const _protocol = (
-      explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
+      protocolQuery in explorePageProtocols ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
 
     protocol.value = _protocol;

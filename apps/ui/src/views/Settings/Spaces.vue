@@ -37,7 +37,7 @@ watch(
   [() => route.query.p as string],
   ([protocolQuery]) => {
     protocol.value = (
-      explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
+      protocolQuery in explorePageProtocols ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
   },
   {

@@ -13,7 +13,7 @@ export function useMarkdownEditor(
   editorContainerRef: Ref<HTMLDivElement | null>,
   handler: ChangeHandler
 ) {
-  const shortcuts = {
+  const shortcuts: Record<string, () => void> = {
     b: bold,
     i: italic,
     k: link

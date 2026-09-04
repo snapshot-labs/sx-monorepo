@@ -1,4 +1,4 @@
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { networks } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress, getSpaceController } from '@/helpers/utils';
@@ -22,7 +22,7 @@ const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   's-tn': 11155111
 };
 
-export function createOffchainNetwork(networkId: NetworkID): Network {
+export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
   const l1ChainId = CHAIN_IDS[networkId];
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
@@ -78,6 +78,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     ) => {
       chainId = chainId || l1ChainId;
       const network = networks[chainId.toString()];
+      const isStarknet = 'starknet' in network;
 
       switch (type) {
         case 'transaction':
@@ -85,7 +86,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
-          if (network.starknet) return '';
+          if (isStarknet) return '';
 
           return `https://signator.io/ipfs/${id}`;
         case 'strategy':
@@ -93,7 +94,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         case 'contract':
         case 'address':
           return network
-            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
+            ? `${network.explorer.url}/${isStarknet ? 'contract' : 'address'}/${formatAddress(id)}`
             : '';
         case 'block':
           return network ? `${network.explorer.url}/block/${id}` : '';

@@ -69,6 +69,7 @@ function openModal(
 
 function editTx(index: number) {
   const tx = model.value[index];
+  if (tx._type === 'raw') return;
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -181,7 +182,7 @@ watch(
           <Draggable
             v-model="model"
             handle=".handle"
-            :item-key="() => undefined"
+            :item-key="(tx: TransactionType) => tx"
           >
             <template #item="{ element: tx, index: i }">
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
@@ -205,12 +206,12 @@ watch(
                         type="button"
                         :disabled="tx._type === 'raw'"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
-                        @click="editTx(i)"
+                        @click.stop="editTx(i)"
                       >
                         <IH-pencil />
                       </button>
                     </UiTooltip>
-                    <button type="button" @click="removeTx(i)">
+                    <button type="button" @click.stop="removeTx(i)">
                       <IH-trash />
                     </button>
                   </div>

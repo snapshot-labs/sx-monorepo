@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import QRCode from 'qrcode';
 import { getGenericExplorerUrl } from '@/helpers/generic';
+import { networks } from '@/helpers/networks';
 import { formatAddress, getUrl } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const { copy, copied } = useClipboard();

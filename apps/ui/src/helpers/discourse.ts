@@ -25,14 +25,15 @@ export interface Topic {
   pinned: boolean;
   closed: boolean;
   posts_count: number;
-  posts: Reply[];
   url: string;
   user_url: string;
   users: User[];
-  author_id: string;
-  author: User;
-  latest_poster_id: string;
   latest_poster: User;
+}
+
+export interface TopicWithPosts
+  extends Pick<Topic, 'id' | 'title' | 'posts_count'> {
+  posts: Reply[];
 }
 
 export interface User {
@@ -43,7 +44,27 @@ export interface User {
   moderator: boolean;
 }
 
-export const SPACES_DISCUSSIONS = {
+type DiscourseTopic = Pick<
+  Topic,
+  'id' | 'title' | 'reply_count' | 'views' | 'pinned' | 'closed' | 'posts_count'
+> & {
+  created_at: string;
+  last_posted_at: string;
+  last_poster_username: string;
+  posters: { user_id: number }[];
+};
+
+type DiscoursePost = Pick<
+  Reply,
+  'username' | 'name' | 'avatar_template' | 'cooked' | 'reply_count' | 'reads'
+> & {
+  display_username: string;
+  created_at: string;
+  post_number: number;
+  actions_summary: { id: number; count: number }[];
+};
+
+export const SPACES_DISCUSSIONS: Record<string, string> = {
   's:ens.eth': 'https://discuss.ens.domains/c/meta-governance/28',
   's:safe.eth': 'https://forum.safe.global/c/proposals/21',
   's:balancer.eth': 'https://forum.balancer.fi/c/governance/7',
@@ -71,67 +92,80 @@ export const SPACES_DISCUSSIONS = {
   's:odos.eth': 'https://forum.odos.xyz/c/governance/5'
 };
 
+function formatAvatarTemplate(avatarTemplate: string, baseUrl: string) {
+  const avatar = avatarTemplate.replace('{size}', '64');
+
+  return avatar.startsWith('/') ? `${baseUrl}${avatar}` : avatar;
+}
+
+function formatUser(user: User, baseUrl: string): User {
+  return {
+    ...user,
+    avatar_template: formatAvatarTemplate(user.avatar_template, baseUrl)
+  };
+}
+
+function formatTopic(
+  topic: DiscourseTopic,
+  users: User[],
+  baseUrl: string
+): Topic {
+  const posterUsers = topic.posters.flatMap(poster => {
+    const user = users.find(user => user.id === poster.user_id);
+
+    return user ? [formatUser(user, baseUrl)] : [];
+  });
+
+  const latestPoster = posterUsers.find(
+    user => user.username === topic.last_poster_username
+  );
+  if (!latestPoster) throw new Error('Latest poster not found');
+
+  return {
+    id: topic.id,
+    title: topic.title,
+    username: topic.last_poster_username,
+    created: Date.parse(topic.created_at) / 1000,
+    updated: Date.parse(topic.last_posted_at) / 1000,
+    reply_count: topic.reply_count,
+    views: topic.views,
+    pinned: topic.pinned,
+    closed: topic.closed,
+    posts_count: topic.posts_count - 1,
+    url: `${baseUrl}/t/${topic.id}`,
+    user_url: `${baseUrl}/u/${topic.last_poster_username}`,
+    users: posterUsers,
+    latest_poster: latestPoster
+  };
+}
+
+function formatPost(post: DiscoursePost, baseUrl: string): Reply {
+  return {
+    username: post.username,
+    name: post.display_username || post.name || post.username,
+    created_at: Date.parse(post.created_at) / 1000,
+    avatar_template: formatAvatarTemplate(post.avatar_template, baseUrl),
+    cooked: post.cooked,
+    like_count: post.actions_summary.find(a => a.id === 2)?.count || 0,
+    reply_count: post.reply_count,
+    reads: post.reads,
+    user_url: `${baseUrl}/u/${post.username}`
+  };
+}
+
 export async function loadTopics(url: string): Promise<Topic[]> {
   const baseUrl = new URL(url).origin;
 
   const res = await fetch(`${PROXY_URL}/${encodeURIComponent(`${url}.json`)}`);
-  const data = await res.json();
+  const data: { topic_list: { topics: DiscourseTopic[] }; users: User[] } =
+    await res.json();
 
-  return data.topic_list.topics.map(topic => {
-    topic.posts_count--;
-    topic.url = `${baseUrl}/t/${topic.id}`;
-    topic.username = topic.last_poster_username;
-    topic.user_url = `${baseUrl}/u/${topic.username}`;
-    topic.created = Date.parse(topic.created_at) / 1000;
-    topic.updated = Date.parse(topic.last_posted_at) / 1000;
-
-    topic.author_id = topic.posters.find(poster =>
-      poster.description.includes('Original Poster')
-    ).user_id;
-    topic.author = data.users.find(user => user.id === topic.author_id);
-
-    topic.latest_poster_id = topic.posters.find(poster =>
-      poster.description.includes('Most Recent Poster')
-    ).user_id;
-    topic.latest_poster = data.users.find(
-      user => user.id === topic.latest_poster_id
-    );
-
-    topic.users = topic.posters.map(poster =>
-      data.users.find(user => user.id === poster.user_id)
-    );
-    topic.users = topic.posters
-      .map(poster => data.users.find(user => user.id === poster.user_id))
-      .map(user => {
-        user.avatar_template = user.avatar_template.replace('{size}', '64');
-        if (user.avatar_template.startsWith('/')) {
-          user.avatar_template = `${baseUrl}${user.avatar_template}`;
-        }
-        return user;
-      });
-    return topic;
-  });
+  return data.topic_list.topics.map(topic =>
+    formatTopic(topic, data.users, baseUrl)
+  );
 }
 
-function formatPosts(posts: any[], baseUrl: string): Reply[] {
-  if (!posts?.length) return [];
-
-  return posts.map(post => {
-    post.avatar_template = post.avatar_template.replace('{size}', '64');
-    if (post.avatar_template.startsWith('/')) {
-      post.avatar_template = `${baseUrl}${post.avatar_template}`;
-    }
-
-    post.name = post.display_username || post.name || post.username;
-    post.like_count = post.actions_summary.find(a => a.id === 2)?.count || 0;
-    post.created_at = Date.parse(post.created_at) / 1000;
-    post.user_url = `${baseUrl}/u/${post.username}`;
-
-    return post;
-  });
-}
-
-export async function loadSingleTopic(url: string): Promise<Topic> {
+export async function loadSingleTopic(url: string): Promise<TopicWithPosts> {
   const baseUrl = new URL(url).origin;
   const params = new URL(url).pathname.split('/').filter(Boolean);
   const lastParam = params[params.length - 1];
@@ -146,33 +180,24 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   const res = await fetch(
     `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicPath}.json`)}`
   );
-  const topic = await res.json();
+  const topic: Pick<Topic, 'id' | 'title' | 'posts_count'> & {
+    errors?: string[];
+    error_type?: string;
+    post_stream?: { posts: DiscoursePost[] };
+  } = await res.json();
 
   if (topic.errors) {
     throw new Error(topic.error_type);
   }
 
-  topic.posts_count--;
-  topic.posts = formatPosts(topic.post_stream?.posts, baseUrl);
-
-  if (hasPostNumber) {
-    topic.posts = topic.posts.filter(
-      post => post.post_number >= Number(lastParam)
-    );
-  }
-
-  return topic;
-}
-
-export async function loadReplies(url: string): Promise<Reply[]> {
-  const baseUrl = new URL(url).origin;
-  const params = new URL(url).pathname.split('/');
-  const topicId = params[params.length - 1];
-
-  const res = await fetch(
-    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}/posts.json`)}`
+  const posts = (topic.post_stream?.posts ?? []).filter(
+    post => !hasPostNumber || post.post_number >= Number(lastParam)
   );
-  const data = await res.json();
 
-  return formatPosts(data?.post_stream?.posts, baseUrl);
+  return {
+    id: topic.id,
+    title: topic.title,
+    posts_count: topic.posts_count - 1,
+    posts: posts.map(post => formatPost(post, baseUrl))
+  };
 }

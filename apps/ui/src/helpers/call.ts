@@ -1,6 +1,9 @@
 import { Interface } from '@ethersproject/abi';
-import { Contract } from '@ethersproject/contracts';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { CallOverrides, Contract } from '@ethersproject/contracts';
+import { Provider } from '@ethersproject/providers';
+import { networks } from '@/helpers/networks';
+
+export type CallOptions = CallOverrides & { limit?: number };
 
 const MULTICALL3_ADDRESSES = '0xcA11bde05977b3631167028862bE2a173976CA11';
 
@@ -9,7 +12,12 @@ export const MULTICALL_ABI = [
   'function aggregate3(tuple(address target, bool allowFailure, bytes callData)[] calls) view returns (tuple(bool success, bytes returnData)[] returnData)'
 ];
 
-export async function call(provider, abi: any[], call: any[], options?) {
+export async function call(
+  provider: Provider,
+  abi: any[],
+  call: any[],
+  options?: CallOptions
+) {
   const contract = new Contract(call[0], abi, provider);
   try {
     const params = call[2] || [];
@@ -21,10 +29,10 @@ export async function call(provider, abi: any[], call: any[], options?) {
 
 export async function multicall(
   network: string,
-  provider,
+  provider: Provider,
   abi: any[],
   calls: any[],
-  options?
+  options?: CallOptions
 ) {
   const multi = new Contract(
     networks[network].multicall,
@@ -50,7 +58,7 @@ export async function multicall(
     });
     let results: any = await Promise.all(promises);
     results = results.reduce((prev: any, [, res]: any) => prev.concat(res), []);
-    return results.map((call, i) =>
+    return results.map((call: string, i: number) =>
       itf.decodeFunctionResult(calls[i][1], call)
     );
   } catch (err) {
@@ -59,11 +67,11 @@ export async function multicall(
 }
 
 export async function multicall3(
-  provider,
+  provider: Provider,
   abi: any[],
   calls: [string, string, any[]?][],
   allowFailure: boolean,
-  options?
+  options?: CallOptions
 ) {
   const multi = new Contract(MULTICALL3_ADDRESSES, MULTICALL_ABI, provider);
 

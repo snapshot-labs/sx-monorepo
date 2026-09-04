@@ -100,7 +100,7 @@ export function createConstants(
       }
     };
 
-  const SUPPORTED_STRATEGIES = {
+  const SUPPORTED_STRATEGIES: Record<string, boolean> = {
     ...(config.Strategies.Vanilla && {
       [config.Strategies.Vanilla]: true
     }),
@@ -118,7 +118,7 @@ export function createConstants(
     })
   };
 
-  const SUPPORTED_EXECUTORS = {
+  const SUPPORTED_EXECUTORS: Record<string, boolean> = {
     ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
       SimpleQuorumAvatar: true
     }),

@@ -1139,11 +1139,11 @@ export function createActions(
         })
       );
     },
-    followSpace: () => {},
-    unfollowSpace: () => {},
-    updateUser: () => {},
-    updateStatement: () => {},
-    setAlias: () => {},
-    revokeAlias: () => {}
+    followSpace: async () => {},
+    unfollowSpace: async () => {},
+    updateUser: async () => {},
+    updateStatement: async () => {},
+    setAlias: async () => {},
+    revokeAlias: async () => {}
   };
 }

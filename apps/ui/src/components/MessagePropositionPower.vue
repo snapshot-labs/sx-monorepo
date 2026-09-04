@@ -25,7 +25,8 @@ const offchainErrors = computed(() => ({
   basic: (strategy: Strategy) =>
     `You need at least ${_n(strategy.params.minScore, 'compact')} ${prettySymbolsList(
       strategy.params.strategies.map(
-        s => s.params.symbol || props.propositionPower.symbol
+        (s: { params: { symbol?: string } }) =>
+          s.params.symbol || props.propositionPower.symbol
       )
     )} to ${actionName.value}.`,
   'passport-gated': (strategy: Strategy) =>
@@ -34,22 +35,31 @@ const offchainErrors = computed(() => ({
     `You need to be attested by Karma EAS to ${actionName.value}.`
 }));
 
-const LINKS = {
+type OffchainValidationName = keyof typeof offchainErrors.value;
+
+const LINKS: Partial<
+  Record<OffchainValidationName, { label: string; url: string }>
+> = {
   'passport-gated': {
     label: 'Gitcoin Passport',
     url: 'https://passport.gitcoin.co/#/dashboard'
   }
-} as const;
+};
 
 const offchainStrategy = computed(() => {
-  const name = props.propositionPower.strategies[0].name;
+  const strategy = props.propositionPower.strategies[0];
+  const name = strategy.name as OffchainValidationName;
 
   if (offchainErrors.value[name]) {
-    return props.propositionPower.strategies[0];
+    return { ...strategy, name };
   }
 
   return null;
 });
+
+const offchainLink = computed(() =>
+  offchainStrategy.value ? LINKS[offchainStrategy.value.name] : undefined
+);
 
 function prettySymbolsList(symbols: string[]): string {
   return prettyConcat(Array.from(new Set(symbols)));
@@ -60,11 +70,8 @@ function prettySymbolsList(symbols: string[]): string {
   <UiAlert type="error" v-bind="$attrs">
     <template v-if="offchainStrategy">
       {{ offchainErrors[offchainStrategy.name](offchainStrategy) }}
-      <AppLink
-        v-if="LINKS[offchainStrategy.name]"
-        :to="LINKS[offchainStrategy.name].url"
-      >
-        {{ LINKS[offchainStrategy.name].label }}
+      <AppLink v-if="offchainLink" :to="offchainLink.url">
+        {{ offchainLink.label }}
         <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
     </template>

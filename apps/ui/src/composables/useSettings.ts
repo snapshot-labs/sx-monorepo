@@ -70,9 +70,9 @@ export function useSettings() {
 
       result.forEach(({ name, value }) => {
         if (DEFAULT_LISTS_SETTINGS.hasOwnProperty(name)) {
-          lists.value[name] = value as string[];
+          lists.value[name as LISTS] = value as string[];
         } else if (DEFAULT_LIMITS_SETTINGS.hasOwnProperty(name)) {
-          limits.value[name] = Number(value);
+          limits.value[name as LIMITS] = Number(value);
         }
       });
 

@@ -10,7 +10,7 @@ type ENSNames = Record<ENSName['name'], ENSName>;
 
 const MAX_ENS_NAME_LENGTH = 64;
 const DEFAULT_STATUS = 'AVAILABLE';
-const LOOKUP_CHAIN_IDS = {
+const LOOKUP_CHAIN_IDS: Partial<Record<NetworkID, string[]>> = {
   s: ['1', '109', '146'],
   's-tn': ['11155111', '157']
 };
@@ -105,7 +105,7 @@ export function useWalletEns(networkId: NetworkID) {
     const records: ENSNames = values.reduce((acc, name) => {
       acc[name] = { name, status: DEFAULT_STATUS };
       return acc;
-    }, {});
+    }, {} as ENSNames);
 
     validateNameLength(records);
     await validateUsedNames(records);
@@ -120,7 +120,7 @@ export function useWalletEns(networkId: NetworkID) {
 
     try {
       const records = await validateNames(
-        await getENSNames(web3.value.account, LOOKUP_CHAIN_IDS[networkId])
+        await getENSNames(web3.value.account, LOOKUP_CHAIN_IDS[networkId] ?? [])
       );
       ensNames.value.set(web3.value.account, records);
       hasError.value = false;
