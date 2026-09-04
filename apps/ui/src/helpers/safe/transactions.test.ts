@@ -4,7 +4,7 @@ import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
-import { parseSafeImportFile } from './transactions';
+import { parseSafeImportFile, SafeImportError } from './transactions';
 
 // Decoding fetches the contract ABI; stub it so the test stays offline.
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
@@ -148,7 +148,9 @@ describe('parseSafeImportFile', () => {
 
   it('throws on an empty or invalid file', async () => {
     await expect(parseSafeImportFile(file([]))).rejects.toThrow();
-    await expect(parseSafeImportFile('not json')).rejects.toThrow();
+    await expect(parseSafeImportFile('not json')).rejects.toThrow(
+      new SafeImportError('This file is not valid JSON')
+    );
   });
 
   it('throws when the chain does not match', async () => {
@@ -473,6 +475,98 @@ describe('decoding imported transactions', () => {
     expect(tx.data).toBe(data);
   });
 
+  it('falls back to raw when a decoded string[] element contains a comma (lossy on edit+save)', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setNames(string[] names)'
+    ] as any);
+
+    const data = new Interface([
+      'function setNames(string[] names)'
+    ]).encodeFunctionData('setNames', [['a,b', 'c']]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
+  it('still decodes as an editable contractCall when a string[] has no commas', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setNames(string[] names)'
+    ] as any);
+
+    const data = new Interface([
+      'function setNames(string[] names)'
+    ]).encodeFunctionData('setNames', [['a', 'b']]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('contractCall');
+  });
+
+  it('falls back to raw for a fixed-size array (always throws on re-save)', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setPair(uint256[2] pair)'
+    ] as any);
+
+    const data = new Interface([
+      'function setPair(uint256[2] pair)'
+    ]).encodeFunctionData('setPair', [['1', '2']]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
+  it('falls back to raw for a nested array (always throws on re-save)', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setMatrix(address[][] matrix)'
+    ] as any);
+
+    const data = new Interface([
+      'function setMatrix(address[][] matrix)'
+    ]).encodeFunctionData('setMatrix', [
+      [
+        ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'],
+        ['0x111111125421cA6dc452d289314280a0f8842A65']
+      ]
+    ]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
   it('falls back to raw with the freshly encoded calldata when contractMethod inputs are unnamed and the file omits data', async () => {
     const {
       transactions: [tx]
@@ -558,6 +652,12 @@ describe('calldata and value validation', () => {
 });
 
 describe('file validation', () => {
+  it('rejects a malformed (non-object) transaction entry', async () => {
+    await expect(parseSafeImportFile(file([null]))).rejects.toThrow(
+      /Transaction 1 is malformed/
+    );
+  });
+
   it('rejects a transaction with an invalid recipient address', async () => {
     await expect(
       parseSafeImportFile(
@@ -634,6 +734,47 @@ describe('tuple arguments', () => {
     expect(tx._type).toBe('contractCall');
     expect(resaved.data).toBe(data);
   });
+
+  it('stores plain values, not the raw ethers Result (BigNumber JSON)', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce(ABI);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect((tx._form as any).args.pair).toBe(
+      JSON.stringify(
+        ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '7'],
+        null,
+        2
+      )
+    );
+  });
+
+  it('exports plain values in contractInputsValues', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce(ABI);
+
+    const { transactions } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+    const exported = buildBatchFile(1, transactions as any);
+
+    expect(exported.transactions[0].contractInputsValues?.pair).toBe(
+      JSON.stringify(
+        ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '7'],
+        null,
+        2
+      )
+    );
+  });
 });
 
 describe('export round-trip', () => {
@@ -673,5 +814,109 @@ describe('export round-trip', () => {
       exported.transactions[0].contractMethod?.inputs.map(i => i.name)
     ).toEqual(['from', 'to', 'tokenId', 'data']);
     expect(reimported.transactions[0].data).toBe(data);
+  });
+
+  it('brackets array args so the Safe Transaction Builder can parse them', async () => {
+    const ARRAY_ABI = [
+      'function batchNotify(address[] recipients, string[] names)'
+    ];
+    vi.mocked(getABI).mockResolvedValueOnce(
+      new Interface(ARRAY_ABI).fragments.map(fragment =>
+        JSON.parse(fragment.format('json'))
+      )
+    );
+    const data = new Interface(ARRAY_ABI).encodeFunctionData('batchNotify', [
+      [
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
+      ],
+      ['alice', 'bob']
+    ]);
+
+    const { transactions } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+    const exported = buildBatchFile(1, transactions as any);
+
+    // Bracketed, unquoted: what Safe's own parseArrayOfValues requires.
+    expect(exported.transactions[0].contractInputsValues?.recipients).toBe(
+      '[0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70]'
+    );
+    // string[] must additionally be valid JSON (Safe's isArrayOfStringsFieldType).
+    expect(exported.transactions[0].contractInputsValues?.names).toBe(
+      JSON.stringify(['alice', 'bob'])
+    );
+
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+    expect(reimported.transactions[0].data).toBe(data);
+  });
+
+  it('keeps quote characters that are part of a string[] element on export', async () => {
+    const ARRAY_ABI = ['function setNames(string[] names)'];
+    vi.mocked(getABI).mockResolvedValueOnce(
+      new Interface(ARRAY_ABI).fragments.map(fragment =>
+        JSON.parse(fragment.format('json'))
+      )
+    );
+    const data = new Interface(ARRAY_ABI).encodeFunctionData('setNames', [
+      ['"alice"', 'bob']
+    ]);
+
+    const { transactions } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+    const exported = buildBatchFile(1, transactions as any);
+
+    expect(exported.transactions[0].contractInputsValues?.names).toBe(
+      JSON.stringify(['"alice"', 'bob'])
+    );
+
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+    expect(reimported.transactions[0].data).toBe(data);
+  });
+
+  it('falls back to raw calldata for a bare method name ambiguous on an overloaded ABI', () => {
+    // e.g. an oSnap-parsed call, which stores the bare name rather than the
+    // full signature.
+    const data = new Interface(ABI).encodeFunctionData(
+      'safeTransferFrom(address,address,uint256)',
+      [
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '1'
+      ]
+    );
+
+    const tx = {
+      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      data,
+      value: '0',
+      salt: '',
+      _type: 'contractCall',
+      _form: {
+        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        method: 'safeTransferFrom',
+        args: {
+          from: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+          tokenId: '1'
+        },
+        abi: ABI
+      }
+    } as any;
+
+    let exported: ReturnType<typeof buildBatchFile>;
+    expect(() => {
+      exported = buildBatchFile(1, [tx]);
+    }).not.toThrow();
+
+    expect(exported!.transactions[0].data).toBe(data);
+    expect(exported!.transactions[0].contractMethod).toBeUndefined();
   });
 });
