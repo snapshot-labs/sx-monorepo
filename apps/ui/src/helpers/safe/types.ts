@@ -32,9 +32,8 @@ export interface ContractMethod {
 }
 
 export interface ContractInput {
-  // buildBatchFile's contractCall export (ParamType.format(FormatTypes.json))
-  // doesn't produce this; only the hand-written sendToken/sendNft/stakeToken
-  // exports do.
+  // buildBatchFile's contractCall export doesn't produce this; only the
+  // hand-written sendToken/sendNft/stakeToken exports do.
   internalType?: string;
   name: string;
   type: string;
