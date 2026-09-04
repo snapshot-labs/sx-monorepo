@@ -94,14 +94,12 @@ async function handleImportFile(event: Event) {
     );
     warnings.forEach(warning => uiStore.addNotification('warning', warning));
   } catch (err) {
-    if (!(err instanceof SafeImportError)) console.error(err);
-
-    uiStore.addNotification(
-      'error',
-      err instanceof SafeImportError
-        ? err.message
-        : 'Failed to import Safe file'
-    );
+    if (err instanceof SafeImportError) {
+      uiStore.addNotification('error', err.message);
+    } else {
+      console.error(err);
+      uiStore.addNotification('error', 'Failed to import Safe file');
+    }
   } finally {
     importingFile.value = false;
   }
