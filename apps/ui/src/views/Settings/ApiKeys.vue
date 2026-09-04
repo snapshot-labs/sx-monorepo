@@ -3,6 +3,11 @@ import { _t } from '@/helpers/utils';
 
 const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
 
+const PERIOD_ITEMS = [
+  { key: 'day', label: 'Day' },
+  { key: 'month', label: 'Month' }
+] as const;
+
 useTitle('API keys');
 
 const { web3, web3Account } = useWeb3();
@@ -13,11 +18,22 @@ const {
   isAuthenticated,
   isAuthenticating,
   authenticate,
-  keys
+  keys,
+  dailyUsage,
+  monthlyUsage
 } = useApiKeys();
+
+const usagePeriod = ref<'day' | 'month'>('day');
+const usageView = ref<'chart' | 'table'>('chart');
 
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
+);
+const usageSeries = computed(() =>
+  usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
+);
+const usageRangeLabel = computed(() =>
+  usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
 );
 </script>
 
@@ -55,6 +71,58 @@ const isStarknetAccount = computed(
       <div class="px-4 pt-4 max-w-[592px]">
         <h3>API keys</h3>
         <span class="inline-block" v-text="DESCRIPTION" />
+      </div>
+
+      <div v-if="!isError" class="mt-4">
+        <div class="flex items-center justify-between gap-2 mb-3 px-4">
+          <UiEyebrow class="font-medium">Usage</UiEyebrow>
+          <div class="flex items-center gap-2">
+            <div
+              class="relative top-1 flex items-center rounded-full border p-1"
+            >
+              <button
+                type="button"
+                class="flex items-center justify-center rounded-full size-[32px] transition-colors"
+                :class="
+                  usageView === 'chart'
+                    ? 'bg-skin-border text-skin-link'
+                    : 'text-skin-text hover:text-skin-link'
+                "
+                aria-label="Chart view"
+                @click="usageView = 'chart'"
+              >
+                <IH-chart-square-bar class="size-[18px]" />
+              </button>
+              <button
+                type="button"
+                class="flex items-center justify-center rounded-full size-[32px] transition-colors"
+                :class="
+                  usageView === 'table'
+                    ? 'bg-skin-border text-skin-link'
+                    : 'text-skin-text hover:text-skin-link'
+                "
+                aria-label="Table view"
+                @click="usageView = 'table'"
+              >
+                <IH-table class="size-[18px]" />
+              </button>
+            </div>
+            <UiSelectDropdown
+              v-model="usagePeriod"
+              title="Period"
+              placement="end"
+              :items="PERIOD_ITEMS"
+            />
+          </div>
+        </div>
+        <UiLoading v-if="isLoading" class="px-4 py-3 block" />
+        <div
+          v-else-if="usageView === 'chart'"
+          class="border rounded-xl p-4 mx-4"
+        >
+          <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
+        </div>
+        <ApiSpendingTable v-else :series="usageSeries" />
       </div>
 
       <UiSectionHeader class="mt-4" label="Keys" sticky />
