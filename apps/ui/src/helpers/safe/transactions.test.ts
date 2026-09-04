@@ -6,7 +6,6 @@ import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile, SafeImportError } from './transactions';
 
-// Decoding fetches the contract ABI; stub it so the test stays offline.
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 
 // Fail loudly on an unmocked getABI call instead of leaking a queued mock.
@@ -59,7 +58,8 @@ describe('parseSafeImportFile', () => {
             value: '100'
           }
         }
-      ])
+      ]),
+      '1'
     );
 
     expect(tx._type).toBe('contractCall');
@@ -99,7 +99,8 @@ describe('parseSafeImportFile', () => {
             value: '100'
           }
         }
-      ])
+      ]),
+      '1'
     );
 
     expect(tx.data).toBe(expected);
@@ -117,7 +118,8 @@ describe('parseSafeImportFile', () => {
           contractMethod: { name: 'receive', payable: true, inputs: [] },
           contractInputsValues: null
         }
-      ])
+      ]),
+      '1'
     );
 
     expect(tx._type).toBe('raw');
@@ -137,7 +139,8 @@ describe('parseSafeImportFile', () => {
           contractMethod: null,
           contractInputsValues: null
         }
-      ])
+      ]),
+      '1'
     );
 
     expect(tx._type).toBe('raw');
@@ -147,8 +150,8 @@ describe('parseSafeImportFile', () => {
   });
 
   it('throws on an empty or invalid file', async () => {
-    await expect(parseSafeImportFile(file([]))).rejects.toThrow();
-    await expect(parseSafeImportFile('not json')).rejects.toThrow(
+    await expect(parseSafeImportFile(file([]), '1')).rejects.toThrow();
+    await expect(parseSafeImportFile('not json', '1')).rejects.toThrow(
       new SafeImportError('This file is not valid JSON')
     );
   });
@@ -181,7 +184,8 @@ describe('checksum', () => {
 
   it('imports an unmodified export without warnings', async () => {
     const { transactions, warnings } = await parseSafeImportFile(
-      JSON.stringify(exported())
+      JSON.stringify(exported()),
+      '1'
     );
 
     expect(transactions).toHaveLength(1);
@@ -193,7 +197,8 @@ describe('checksum', () => {
     edited.transactions[0].value = '2';
 
     const { transactions, warnings } = await parseSafeImportFile(
-      JSON.stringify(edited)
+      JSON.stringify(edited),
+      '1'
     );
 
     expect(transactions).toHaveLength(1);
@@ -239,7 +244,8 @@ describe('scalar arguments', () => {
           },
           contractInputsValues: values
         }
-      ])
+      ]),
+      '1'
     );
 
   it.each([
@@ -344,7 +350,8 @@ describe('array arguments', () => {
           },
           contractInputsValues: values
         }
-      ])
+      ]),
+      '1'
     );
 
   it('parses the Safe Transaction Builder unquoted bracketed form', async () => {
@@ -518,6 +525,77 @@ describe('decoding imported transactions', () => {
     expect(tx._type).toBe('contractCall');
   });
 
+  it('falls back to raw for a decoded empty array, preserving calldata across export/re-import', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setNames(string[] names)'
+    ] as any);
+
+    const data = new Interface([
+      'function setNames(string[] names)'
+    ]).encodeFunctionData('setNames', [[]]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+
+    const exported = buildBatchFile(1, [tx] as any);
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+
+    expect(reimported.transactions[0].data).toBe(data);
+  });
+
+  it('falls back to raw for a decoded empty array of a non-string element type', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setAmounts(uint256[] amounts)'
+    ] as any);
+
+    const data = new Interface([
+      'function setAmounts(uint256[] amounts)'
+    ]).encodeFunctionData('setAmounts', [[]]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
+  it('falls back to raw for a decoded bool[] (the bare form cannot carry booleans)', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce([
+      'function setFlags(bool[] flags)'
+    ] as any);
+
+    const data = new Interface([
+      'function setFlags(bool[] flags)'
+    ]).encodeFunctionData('setFlags', [[false, true]]);
+
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
   it('falls back to raw for a fixed-size array (always throws on re-save)', async () => {
     vi.mocked(getABI).mockResolvedValueOnce([
       'function setPair(uint256[2] pair)'
@@ -587,7 +665,8 @@ describe('decoding imported transactions', () => {
           // Safe keys unnamed inputs by index.
           contractInputsValues: { '0': '1', '1': '1' }
         }
-      ])
+      ]),
+      '1'
     );
 
     expect(tx._type).toBe('raw');
@@ -599,6 +678,60 @@ describe('decoding imported transactions', () => {
       ])
     );
   });
+});
+
+describe('decoded bool scalar arguments', () => {
+  it.each([false, true])(
+    'keeps a decoded bool argument (%s) as a real boolean via the ABI-decode path',
+    async flag => {
+      vi.mocked(getABI).mockResolvedValueOnce([
+        'function setFlag(bool flag)'
+      ] as any);
+
+      const data = new Interface([
+        'function setFlag(bool flag)'
+      ]).encodeFunctionData('setFlag', [flag]);
+
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('contractCall');
+      expect((tx._form as any).args).toEqual({ flag });
+    }
+  );
+
+  it.each(['false', 'true'])(
+    'keeps a bool argument (%s) from a Safe file contractMethod entry as a real boolean',
+    async spelling => {
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: '0',
+            data: null,
+            contractMethod: {
+              name: 'setFlag',
+              payable: false,
+              inputs: [{ name: 'flag', type: 'bool' }]
+            },
+            contractInputsValues: { flag: spelling }
+          }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('contractCall');
+      expect((tx._form as any).args).toEqual({ flag: spelling === 'true' });
+    }
+  );
 });
 
 describe('calldata and value validation', () => {
@@ -613,7 +746,8 @@ describe('calldata and value validation', () => {
           contractInputsValues: null,
           ...tx
         }
-      ])
+      ]),
+      '1'
     );
 
   it('rejects numeric data (hashes silently as a single byte downstream)', async () => {
@@ -653,7 +787,7 @@ describe('calldata and value validation', () => {
 
 describe('file validation', () => {
   it('rejects a malformed (non-object) transaction entry', async () => {
-    await expect(parseSafeImportFile(file([null]))).rejects.toThrow(
+    await expect(parseSafeImportFile(file([null]), '1')).rejects.toThrow(
       /Transaction 1 is malformed/
     );
   });
@@ -661,7 +795,8 @@ describe('file validation', () => {
   it('rejects a transaction with an invalid recipient address', async () => {
     await expect(
       parseSafeImportFile(
-        file([{ to: 'not-an-address', value: '0', data: '0x' }])
+        file([{ to: 'not-an-address', value: '0', data: '0x' }]),
+        '1'
       )
     ).rejects.toThrow(/Transaction 1 has an invalid recipient address/);
   });
@@ -686,7 +821,8 @@ describe('file validation', () => {
               to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
             }
           }
-        ])
+        ]),
+        '1'
       )
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
   });
@@ -882,8 +1018,6 @@ describe('export round-trip', () => {
   });
 
   it('falls back to raw calldata for a bare method name ambiguous on an overloaded ABI', () => {
-    // e.g. an oSnap-parsed call, which stores the bare name rather than the
-    // full signature.
     const data = new Interface(ABI).encodeFunctionData(
       'safeTransferFrom(address,address,uint256)',
       [
@@ -919,4 +1053,34 @@ describe('export round-trip', () => {
     expect(exported!.transactions[0].data).toBe(data);
     expect(exported!.transactions[0].contractMethod).toBeUndefined();
   });
+});
+
+describe('bool argument export', () => {
+  const ABI = ['function setFlag(bool flag)'];
+
+  it.each([false, true])(
+    'stringifies a form-built bool arg (%s) so the re-import round-trips the calldata',
+    async flag => {
+      const tx = await createContractCallTransaction({
+        form: {
+          to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+          abi: ABI,
+          method: 'setFlag(bool)',
+          args: { flag },
+          amount: '0'
+        }
+      });
+
+      const exported = buildBatchFile(1, [tx as any]);
+      expect(exported.transactions[0].contractInputsValues?.flag).toBe(
+        String(flag)
+      );
+
+      const reimported = await parseSafeImportFile(
+        JSON.stringify(exported),
+        '1'
+      );
+      expect(reimported.transactions[0].data).toBe(tx.data);
+    }
+  );
 });

@@ -77,14 +77,14 @@ async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file) return;
+  if (!file || !treasury.value) return;
 
   importingFile.value = true;
 
   try {
     const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
-      treasury.value?.network
+      treasury.value.network
     );
 
     model.value = [...model.value, ...transactions];
