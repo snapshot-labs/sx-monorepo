@@ -57,8 +57,8 @@ export async function approve(
 
       // Speeding a transaction up rejects `wait` even though the replacement
       // was mined; only a cancellation leaves the allowance in place.
-      await reset.wait().catch((e: any) => {
-        if (e.code !== 'TRANSACTION_REPLACED' || e.cancelled) throw e;
+      await reset.wait().catch((err: any) => {
+        if (err?.code !== 'TRANSACTION_REPLACED' || err.cancelled) throw err;
       });
     }
   }

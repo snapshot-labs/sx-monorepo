@@ -104,6 +104,15 @@ describe('approve', () => {
     expect(approveMock).toHaveBeenCalledTimes(1);
   });
 
+  it('rethrows a non-object rejection untouched', async () => {
+    allowanceMock.mockResolvedValue(allowanceOf(50n));
+    waitMock.mockRejectedValue(undefined);
+
+    await expect(approve(web3, TOKEN, SPENDER, 200n)).rejects.toBeUndefined();
+
+    expect(approveMock).toHaveBeenCalledTimes(1);
+  });
+
   it('does not read the allowance when revoking', async () => {
     await approve(web3, TOKEN, SPENDER, 0n);
 
