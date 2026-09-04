@@ -284,8 +284,12 @@ export function useOrgsActiveProposalsQuery({
   return useQuery({
     queryKey: ['spaces', 'orgsActiveProposals', orgIds],
     queryFn: async (): Promise<Record<string, number>> => {
+      // Read once: `orgs` is reactive and can change while we're in flight,
+      // which would sum the new org set over the old set's results.
+      const currentOrgs = orgs.value;
+
       const results = await Promise.all(
-        [...siblingIdsByNetwork(orgs.value)].map(([networkId, ids]) =>
+        [...siblingIdsByNetwork(currentOrgs)].map(([networkId, ids]) =>
           getNetwork(networkId).api.loadSpaces(
             { skip: 0, limit: 1000 },
             { id_in: ids }
@@ -302,7 +306,7 @@ export function useOrgsActiveProposalsQuery({
       }
 
       const counts: Record<string, number> = {};
-      for (const org of orgs.value) {
+      for (const org of currentOrgs) {
         counts[org.id] = org.spaceIds.reduce((sum, space) => {
           const loaded = byId.get(getCompositeSpaceId(space));
           return sum + (loaded?.active_proposals ?? 0);
