@@ -337,28 +337,15 @@ export function useDelegates(
     return getCompoundDelegationDelegates(filter);
   }
 
-  async function getDelegation(delegator: string) {
+  async function getAccountDelegations(delegator: string) {
     if (
       delegation.apiType !== 'delegate-registry' &&
       delegation.apiType !== 'apechain-delegate-registry'
     ) {
-      throw new Error('getDelegation is only supported for delegate-registry');
+      throw new Error(
+        'getAccountDelegations is only supported for delegate-registry'
+      );
     }
-
-    const delegationSubgraph = DELEGATION_SUBGRAPHS[delegation.chainId];
-    if (!delegationSubgraph) {
-      throw new Error('Delegation subgraph not found');
-    }
-
-    const client = new ApolloClient({
-      uri: delegationSubgraph,
-      cache: new InMemoryCache(),
-      defaultOptions: {
-        query: {
-          fetchPolicy: 'no-cache'
-        }
-      }
-    });
 
     const isApeChainDelegateRegistry =
       delegation.apiType === 'apechain-delegate-registry';
@@ -367,21 +354,72 @@ export function useDelegates(
       ? DELEGATIONS_RAW_QUERY
       : DELEGATIONS_QUERY;
 
-    const { data } = await client.query({
-      query,
-      variables: {
-        space: isApeChainDelegateRegistry
-          ? delegation.contractAddress
-          : space.id,
-        delegator
-      }
-    });
+    const chainIds = delegation.chainIds?.length
+      ? delegation.chainIds
+      : [delegation.chainId];
 
-    return data.delegations[0] ?? null;
+    const probedChainIds = chainIds.filter(
+      chainId => DELEGATION_SUBGRAPHS[chainId]
+    );
+
+    const results = await Promise.allSettled(
+      probedChainIds.map(async chainId => {
+        const client = new ApolloClient({
+          uri: DELEGATION_SUBGRAPHS[chainId],
+          cache: new InMemoryCache(),
+          defaultOptions: {
+            query: {
+              fetchPolicy: 'no-cache'
+            }
+          }
+        });
+
+        const { data } = await client.query({
+          query,
+          variables: {
+            space: isApeChainDelegateRegistry
+              ? delegation.contractAddress
+              : space.id,
+            delegator
+          }
+        });
+
+        return data.delegations[0]
+          ? { ...data.delegations[0], chainId: String(chainId) }
+          : null;
+      })
+    );
+
+    const found = results
+      .map(result => (result.status === 'fulfilled' ? result.value : null))
+      .filter(Boolean);
+    const failedChainIds = probedChainIds.filter(
+      (chainId, i) => results[i].status === 'rejected'
+    );
+
+    // An unread chain may hold a delegation, so only report having none when
+    // every chain answered.
+    if (!found.length && (failedChainIds.length || !probedChainIds.length)) {
+      throw (
+        (
+          results.find(
+            result => result.status === 'rejected'
+          ) as PromiseRejectedResult
+        )?.reason ?? new Error('Delegation subgraph not found')
+      );
+    }
+
+    if (failedChainIds.length) {
+      console.warn(
+        `Delegations could not be read on chains: ${failedChainIds.join(', ')}`
+      );
+    }
+
+    return found;
   }
 
   return {
     getDelegates,
-    getDelegation
+    getAccountDelegations
   };
 }

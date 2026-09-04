@@ -105,6 +105,7 @@ export type SpaceMetadataDelegation = {
   apiUrl: string | null;
   contractAddress: string | null;
   chainId: string | null;
+  chainIds?: string[];
 };
 
 export type SpaceMetadata = {
