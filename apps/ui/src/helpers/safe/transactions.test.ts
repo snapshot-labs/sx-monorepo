@@ -2,6 +2,7 @@ import { Interface } from '@ethersproject/abi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
+import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile } from './transactions';
 
@@ -632,5 +633,45 @@ describe('tuple arguments', () => {
 
     expect(tx._type).toBe('contractCall');
     expect(resaved.data).toBe(data);
+  });
+});
+
+describe('export round-trip', () => {
+  // Any ERC-721 ABI overloads safeTransferFrom; the export must pick the
+  // decoded overload, not the first one with that name.
+  const ABI = [
+    'function safeTransferFrom(address from, address to, uint256 tokenId)',
+    'function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)'
+  ];
+
+  it('re-imports a decoded call against an overloaded ABI byte-identical', async () => {
+    vi.mocked(getABI).mockResolvedValueOnce(
+      new Interface(ABI).fragments.map(fragment =>
+        JSON.parse(fragment.format('json'))
+      )
+    );
+    const data = new Interface(ABI).encodeFunctionData(
+      'safeTransferFrom(address,address,uint256,bytes)',
+      [
+        '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '1',
+        '0xdeadbeef'
+      ]
+    );
+
+    const { transactions } = await parseSafeImportFile(
+      file([
+        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
+      ]),
+      '1'
+    );
+    const exported = buildBatchFile(1, transactions as any);
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+
+    expect(
+      exported.transactions[0].contractMethod?.inputs.map(i => i.name)
+    ).toEqual(['from', 'to', 'tokenId', 'data']);
+    expect(reimported.transactions[0].data).toBe(data);
   });
 });
