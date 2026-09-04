@@ -108,7 +108,9 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
 export const spaceCreationNetworks: NetworkID[] =
   enabledReadWriteNetworks.filter(id => !governorOnlyNetworks.includes(id));
 
-const onchainApiNetwork =
+// Every onchain network is served by the same sx-api, so any enabled one can
+// stand in for all of them when a request isn't scoped to a single indexer.
+export const onchainApiNetwork =
   enabledNetworks.find(network => !offchainNetworks.includes(network)) || 'eth';
 
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =

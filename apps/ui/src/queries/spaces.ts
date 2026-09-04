@@ -7,7 +7,17 @@ import {
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
-import { enabledNetworks, explorePageProtocols, getNetwork } from '@/networks';
+import {
+  getOrganizationConfigBySpace,
+  OrganizationConfig
+} from '@/helpers/organizations';
+import {
+  enabledNetworks,
+  explorePageProtocols,
+  getNetwork,
+  offchainNetworks,
+  onchainApiNetwork
+} from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
@@ -208,5 +218,99 @@ export function useExploreSpacesQuery({
       return pages.length * protocolConfig.value.limit;
     },
     enabled: () => (controller ? toValue(controller) !== '' : true)
+  });
+}
+
+function getCompositeSpaceId(space: { network: NetworkID; id: string }) {
+  return `${space.network}:${space.id}`;
+}
+
+function uniqueOrgs(spaces: Space[]): OrganizationConfig[] {
+  const seen = new Set<string>();
+  const orgs: OrganizationConfig[] = [];
+
+  for (const space of spaces) {
+    const org = getOrganizationConfigBySpace(getCompositeSpaceId(space));
+    if (!org || seen.has(org.id)) continue;
+    seen.add(org.id);
+    orgs.push(org);
+  }
+
+  return orgs;
+}
+
+/**
+ * Groups every sibling space of `orgs` by the network whose API can resolve it.
+ * All onchain networks share the same sx-api, so their ids go in a single
+ * bucket (one request covering eth/arb1/sn); each offchain hub gets its own.
+ * Siblings on networks this build doesn't enable are dropped, both because
+ * `getNetwork` throws on them and because they are never rendered anyway.
+ */
+function siblingIdsByNetwork(orgs: OrganizationConfig[]) {
+  const buckets = new Map<NetworkID, string[]>();
+
+  for (const org of orgs) {
+    for (const space of org.spaceIds) {
+      if (!enabledNetworks.includes(space.network)) continue;
+
+      const networkId = offchainNetworks.includes(space.network)
+        ? space.network
+        : onchainApiNetwork;
+
+      const ids = buckets.get(networkId);
+      if (ids) ids.push(space.id);
+      else buckets.set(networkId, [space.id]);
+    }
+  }
+
+  return buckets;
+}
+
+/**
+ * Sums `active_proposals` across every space of each organization the user
+ * follows, so that a sidebar org entry shows the whole org's count rather than
+ * the count of the single space that got followed.
+ *
+ * Returns a map of org id → total (a `null` count is read as 0).
+ */
+export function useOrgsActiveProposalsQuery({
+  followedSpaces
+}: {
+  followedSpaces: MaybeRefOrGetter<Space[]>;
+}) {
+  const orgs = computed(() => uniqueOrgs(toValue(followedSpaces)));
+  const orgIds = computed(() => orgs.value.map(org => org.id).sort());
+
+  return useQuery({
+    queryKey: ['spaces', 'orgsActiveProposals', orgIds],
+    queryFn: async (): Promise<Record<string, number>> => {
+      const results = await Promise.all(
+        [...siblingIdsByNetwork(orgs.value)].map(([networkId, ids]) =>
+          getNetwork(networkId).api.loadSpaces(
+            { skip: 0, limit: 1000 },
+            { id_in: ids }
+          )
+        )
+      );
+
+      // NOTE: unlike the other queries here we don't prime the `spaces.detail`
+      // cache: spaces of every onchain network come back from a single api
+      // instance, so they are all formatted with that network's constants.
+      const byId = new Map<string, Space>();
+      for (const space of results.flat()) {
+        byId.set(getCompositeSpaceId(space), space);
+      }
+
+      const counts: Record<string, number> = {};
+      for (const org of orgs.value) {
+        counts[org.id] = org.spaceIds.reduce((sum, space) => {
+          const loaded = byId.get(getCompositeSpaceId(space));
+          return sum + (loaded?.active_proposals ?? 0);
+        }, 0);
+      }
+
+      return counts;
+    },
+    enabled: () => orgs.value.length > 0
   });
 }
