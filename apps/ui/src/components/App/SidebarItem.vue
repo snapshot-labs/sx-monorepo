@@ -20,12 +20,14 @@ const item = computed(() => {
 
   if (!org.value) return resolved;
 
-  const count = followedSpacesStore.orgActiveProposals[org.value.id];
-  if (count === undefined) return resolved;
-
+  // `resolveSpaceItem` can't know the org total, so it leaves a placeholder 0.
   return {
     ...resolved,
-    avatarSpace: { ...resolved.avatarSpace, active_proposals: count }
+    avatarSpace: {
+      ...resolved.avatarSpace,
+      active_proposals:
+        followedSpacesStore.orgActiveProposals[org.value.id] ?? 0
+    }
   };
 });
 </script>

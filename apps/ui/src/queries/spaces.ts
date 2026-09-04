@@ -221,7 +221,7 @@ export function useExploreSpacesQuery({
   });
 }
 
-function getCompositeSpaceId(space: { network: NetworkID; id: string }) {
+function getCompositeSpaceId(space: Pick<Space, 'id' | 'network'>) {
   return `${space.network}:${space.id}`;
 }
 
@@ -240,11 +240,17 @@ function uniqueOrgs(spaces: Space[]): OrganizationConfig[] {
 }
 
 /**
- * Groups every sibling space of `orgs` by the network whose API can resolve it.
- * All onchain networks share the same sx-api, so their ids go in a single
- * bucket (one request covering eth/arb1/sn); each offchain hub gets its own.
- * Siblings on networks this build doesn't enable are dropped, both because
- * `getNetwork` throws on them and because they are never rendered anyway.
+ * Groups every sibling space of `orgs` into as few requests as possible.
+ * Onchain mainnets share one sx-api and `loadSpaces` only scopes to an indexer
+ * when given a `network` filter, so their ids go in a single bucket (one
+ * request covering eth/arb1/sn); each offchain hub gets its own.
+ *
+ * Siblings on networks this build doesn't enable are skipped: `getNetwork`
+ * rejects them, and in an offchain-only build `onchainApiNetwork` falls back to
+ * `eth`, which would then throw.
+ *
+ * Every org currently lists mainnet spaces only. If one ever lists a testnet
+ * space it would need its own bucket, since testnets use a different endpoint.
  */
 function siblingIdsByNetwork(orgs: OrganizationConfig[]) {
   const buckets = new Map<NetworkID, string[]>();
@@ -298,8 +304,8 @@ export function useOrgsActiveProposalsQuery({
       );
 
       // NOTE: unlike the other queries here we don't prime the `spaces.detail`
-      // cache: spaces of every onchain network come back from a single api
-      // instance, so they are all formatted with that network's constants.
+      // cache — these spaces are loaded only for their counts, and most of them
+      // are siblings the user doesn't follow and never opens.
       const byId = new Map<string, Space>();
       for (const space of results.flat()) {
         byId.set(getCompositeSpaceId(space), space);
@@ -315,6 +321,9 @@ export function useOrgsActiveProposalsQuery({
 
       return counts;
     },
+    // Following a space changes the key; without this every org badge would
+    // blank out until the refetch lands.
+    placeholderData: keepPreviousData,
     enabled: () => orgs.value.length > 0
   });
 }

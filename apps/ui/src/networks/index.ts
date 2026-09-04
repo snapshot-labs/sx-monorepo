@@ -108,8 +108,9 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
 export const spaceCreationNetworks: NetworkID[] =
   enabledReadWriteNetworks.filter(id => !governorOnlyNetworks.includes(id));
 
-// Every onchain network is served by the same sx-api, so any enabled one can
-// stand in for all of them when a request isn't scoped to a single indexer.
+// Onchain mainnets all point at `API_URL`, so any one of them can stand in for
+// the rest when a request isn't scoped to a single indexer. Testnets are served
+// by `API_TESTNET_URL` instead, so they are not interchangeable with these.
 export const onchainApiNetwork =
   enabledNetworks.find(network => !offchainNetworks.includes(network)) || 'eth';
 

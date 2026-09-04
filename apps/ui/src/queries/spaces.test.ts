@@ -14,8 +14,9 @@ const ARBITRUM_ONCHAIN = [
 
 const ALL_NETWORKS = ['s', 'eth', 'arb1', 'sn'];
 
-// `enabledNetworks` is mutable so a test can simulate a build shipping without
-// the networks the organization configs point at.
+// `enabledNetworks` is mutable so a test can simulate an offchain-only build.
+// `onchainApiNetwork` is pinned to `eth` to match its `|| 'eth'` fallback,
+// which is what the real module resolves to when no onchain network is enabled.
 const { loadSpacesMock, enabledNetworks } = vi.hoisted(() => ({
   loadSpacesMock: vi.fn(),
   enabledNetworks: [] as string[]
