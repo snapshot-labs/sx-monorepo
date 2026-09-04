@@ -75,7 +75,9 @@ function formatVotingDuration(
   );
   const roundedDuration = Math.round(duration / 60) * 60;
 
-  return _d(roundedDuration);
+  // `_d` renders an empty string once every component is zero, which any
+  // duration below 30s rounds down to.
+  return _d(roundedDuration) || '< 1m';
 }
 </script>
 
