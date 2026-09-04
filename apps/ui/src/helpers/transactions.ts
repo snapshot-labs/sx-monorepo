@@ -146,6 +146,13 @@ export function getContractCallFormArgs({
   );
 }
 
+// Inverse of getContractCallFormArgs' `.join(', ')`: no quote handling, so
+// a quote in an element stays part of it. safe/build.ts relies on this
+// exact split to predict the save-path encoding.
+export function parseFormArrayValue(value: string): string[] {
+  return value.split(',').map(element => element.trim());
+}
+
 export async function createContractCallTransaction({
   form
 }: {
@@ -175,7 +182,7 @@ export async function createContractCallTransaction({
           const resolved = await resolver.resolveName(args[i]);
           if (resolved?.address) args[i] = resolved.address;
         } else if (input.type.endsWith('[]')) {
-          args[i] = args[i].split(',').map((value: string) => value.trim());
+          args[i] = parseFormArrayValue(args[i]);
         }
       })
     );
