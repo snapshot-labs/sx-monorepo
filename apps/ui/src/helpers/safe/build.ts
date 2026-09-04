@@ -1,16 +1,14 @@
 import { FormatTypes, Interface } from '@ethersproject/abi';
+import { parseFormArrayValue } from '@/helpers/transactions';
 import { Transaction } from '@/types';
 import { addChecksum } from './checksum';
-import { splitArrayValue } from './transactions';
 import { BatchFile, BatchTransaction } from './types';
 import { ETH_CONTRACT } from '../constants';
 
-// Safe's Transaction Builder rejects an array argument unless it is
-// bracketed (string[] must additionally be valid JSON); this app's own
-// form/import stores arrays as a bare `a, b` string, so bracket single-
-// dimension array args on export. Nested/matrix arrays (`T[][]`) can't be
-// built by this app's form at all, so they're passed through unchanged;
-// tuples (and tuple arrays) are already exported as JSON, untouched here.
+// Safe requires array args bracketed (string[] must also be valid JSON);
+// this app stores them as a bare `a, b`, so bracket single-dim arrays here.
+// Nested arrays can't be built by this app's form, so left unchanged;
+// tuples are already exported as JSON.
 function toSafeContractInputsValues(
   inputs: { name: string; type: string }[],
   args: Record<string, string>
@@ -21,13 +19,10 @@ function toSafeContractInputsValues(
       const elementType = input.type.replace(/\[\d*\]$/, '');
       if (elementType.endsWith(']')) return [input.name, args[input.name]];
 
-      // Quotes are part of a string element in the app's bare form (that is
-      // what createContractCallTransaction encodes on save); splitArrayValue's
-      // quote stripping is only right for non-string element types.
+      // Must split exactly like the save path (no quote stripping), or a
+      // quoted element would round-trip differently.
       const isString = elementType.startsWith('string');
-      const elements = isString
-        ? args[input.name].split(',').map(element => element.trim())
-        : splitArrayValue(args[input.name]);
+      const elements = parseFormArrayValue(args[input.name]);
 
       return [
         input.name,
@@ -35,7 +30,17 @@ function toSafeContractInputsValues(
       ];
     });
 
-  return { ...args, ...Object.fromEntries(bracketed) };
+  // A checkbox `bool` arg is a real boolean at runtime; must stringify it
+  // or export writes an unquoted JSON `false`/`true` that parseBooleanValue
+  // throws on re-reading.
+  const scalars = Object.fromEntries(
+    Object.entries(args).map(([name, value]) => [
+      name,
+      typeof value === 'string' ? value : String(value)
+    ])
+  );
+
+  return { ...scalars, ...Object.fromEntries(bracketed) };
 }
 
 export function buildBatchFile(
@@ -132,11 +137,9 @@ export function buildBatchFile(
           typeof tx._form.args === 'object' &&
           !Array.isArray(tx._form.args);
 
-        // _form.method is the full signature; select by it, not by bare
-        // name, or an overloaded ABI exports the wrong fragment. A bare
-        // name on an overloaded ABI, or a 4-byte-selector fallback absent
-        // from the ABI, makes getFunction throw — export the raw calldata
-        // below instead of breaking the download.
+        // Select by the full signature, not bare name, or an overloaded ABI
+        // exports the wrong fragment. getFunction throws for an unresolvable
+        // overload/selector; catch and fall through to the raw export below.
         let method = null;
         if (argsIsKeyed) {
           try {
