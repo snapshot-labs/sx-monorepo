@@ -31,9 +31,7 @@ function parseValue(value?: string | null): string {
 
 // Accepts a JSON array, Safe's bracketed-but-unquoted list (`[0xabc, 0xdef]`)
 // and the bare `a, b` this app exports (getContractCallFormArgs' join).
-// Exported so buildBatchFile (./build) can split the same bare form back
-// apart when bracketing it for Safe's own Transaction Builder parser.
-export function splitArrayValue(value: string): string[] {
+function splitArrayValue(value: string): string[] {
   const trimmed = value.trim();
   const body =
     trimmed.startsWith('[') && trimmed.endsWith(']')
@@ -105,10 +103,9 @@ function toRaw(tx: BatchTransaction): RawTransaction {
   });
 }
 
-// ethers Result values are BigNumber objects for (u)int and nested Result
-// arrays for tuples; getContractCallFormArgs' tuple branch JSON.stringifies
-// them as-is, which would otherwise leak `{"type":"BigNumber","hex":"0x…"}`
-// into the form, the tx list and exported Safe files.
+// ethers Result values are BigNumber objects (or nested arrays of them for
+// tuples); without this, they'd leak into the form/exported file as
+// `{"type":"BigNumber","hex":"0x..."}`.
 function toPlain(value: any): any {
   if (BigNumber.isBigNumber(value)) return value.toString();
   if (Array.isArray(value)) return value.map(toPlain);
@@ -124,7 +121,6 @@ function decodeWithAbi(
   try {
     parsed = new Interface(abi).parseTransaction({ data: tx.data! });
   } catch {
-    // Selector or arguments don't match this ABI.
     return null;
   }
 
@@ -135,15 +131,15 @@ function decodeWithAbi(
     return null;
   }
 
-  // getContractCallFormArgs/createContractCallTransaction (helpers/transactions.ts)
-  // round-trip array args through a bare comma-joined string; keep raw
-  // whatever that codec cannot losslessly reverse on edit+save:
-  // - fixed-size (`T[N]`) and nested (`T[][]`) arrays always throw on re-save;
-  // - a string[] element containing a comma is indistinguishable from a
-  //   separator once joined, and leading/trailing whitespace is stripped by
-  //   the re-save's trim().
+  // - fixed-size/nested arrays always throw on re-save;
+  // - an empty array collapses to the same '' the form uses for "no value";
+  // - bool[]: split(',') yields strings, and any non-empty string encodes true;
+  // - a string[] element with a comma or outer whitespace is lossy through the join/trim.
   const hasUnsafeArray = parsed.functionFragment.inputs.some((input, i) => {
     if (/\[\d+\]/.test(input.type) || /\]\[/.test(input.type)) return true;
+    if (!input.type.endsWith('[]')) return false;
+    if ((parsed.args[i] as unknown[]).length === 0) return true;
+    if (input.type === 'bool[]') return true;
 
     if (input.type === 'string[]') {
       return (parsed.args[i] as string[]).some(
@@ -155,6 +151,23 @@ function decodeWithAbi(
   });
   if (hasUnsafeArray) return null;
 
+  // getContractCallFormArgs stringifies every scalar; restore decoded bool
+  // args to real booleans for the Edit form's checkbox and ajv's
+  // `type: 'boolean'` check.
+  const args: Record<string, any> = getContractCallFormArgs({
+    abi,
+    method: parsed.signature,
+    args: Object.fromEntries(
+      parsed.functionFragment.inputs.map((input, i) => [
+        input.name,
+        toPlain(parsed.args[i])
+      ])
+    )
+  });
+  parsed.functionFragment.inputs.forEach((input, i) => {
+    if (input.type === 'bool') args[input.name] = parsed.args[i];
+  });
+
   return {
     _type: 'contractCall',
     to: tx.to,
@@ -165,16 +178,7 @@ function decodeWithAbi(
       abi,
       recipient: tx.to,
       method: parsed.signature,
-      args: getContractCallFormArgs({
-        abi,
-        method: parsed.signature,
-        args: Object.fromEntries(
-          parsed.functionFragment.inputs.map((input, i) => [
-            input.name,
-            toPlain(parsed.args[i])
-          ])
-        )
-      }),
+      args,
       amount: parsed.functionFragment.payable
         ? formatUnits(parseValue(tx.value), 18)
         : ''
@@ -186,8 +190,9 @@ function fromContractMethod(
   tx: BatchTransaction,
   method: ContractMethod
 ): ContractCallTransaction | RawTransaction {
-  // Safe's own encoder refuses these (NON_VALID_CONTRACT_METHODS); they must be
-  // called with empty calldata, so import as a plain transfer.
+  // Safe's encoder refuses receive/fallback (NON_VALID_CONTRACT_METHODS) and
+  // exports them with empty calldata; import as a plain transfer, keeping
+  // whatever data the file carries.
   // https://github.com/safe-global/safe-react-apps/blob/118f25df89f781631386e6b279d812dfc837204a/apps/tx-builder/src/utils.ts#L206
   if (method.name === 'receive' || method.name === 'fallback') return toRaw(tx);
 
@@ -258,7 +263,7 @@ async function parseSafeTransaction(
 
 export async function parseSafeImportFile(
   content: string,
-  chainId?: string
+  chainId: string
 ): Promise<{ transactions: Transaction[]; warnings: string[] }> {
   const warnings: string[] = [];
   let file: Partial<BatchFile> | null;
@@ -277,17 +282,15 @@ export async function parseSafeImportFile(
     throw new SafeImportError('No transactions found in file');
   }
 
-  if (chainId) {
-    // Safe writes chainId '' when unknown; that must not match any treasury,
-    // so this stays strict rather than `file.chainId && ...`.
-    const fileChainId = file.chainId ? String(file.chainId) : null;
-    if (fileChainId !== chainId) {
-      throw new SafeImportError(
-        fileChainId
-          ? `This file is for chain ${fileChainId}, not ${chainId}`
-          : `This file does not specify a chain; refusing to import into chain ${chainId}`
-      );
-    }
+  // Safe writes chainId '' when unknown; that must not match any treasury,
+  // so this stays strict rather than `file.chainId && ...`.
+  const fileChainId = file.chainId ? String(file.chainId) : null;
+  if (fileChainId !== chainId) {
+    throw new SafeImportError(
+      fileChainId
+        ? `This file is for chain ${fileChainId}, not ${chainId}`
+        : `This file does not specify a chain; refusing to import into chain ${chainId}`
+    );
   }
 
   const expectedChecksum = file.meta?.checksum;
