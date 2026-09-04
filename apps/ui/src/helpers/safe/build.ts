@@ -1,4 +1,4 @@
-import { FormatTypes, Interface, JsonFragment } from '@ethersproject/abi';
+import { FormatTypes, Interface } from '@ethersproject/abi';
 import { Transaction } from '@/types';
 import { addChecksum } from './checksum';
 import { BatchFile, BatchTransaction } from './types';
@@ -91,16 +91,12 @@ export function buildBatchFile(
         };
         delete outputTransaction.data;
       } else if (tx._type === 'contractCall') {
-        const iface = new Interface(tx._form.abi);
-        const jsonAbi = iface.format(FormatTypes.json);
-        if (Array.isArray(jsonAbi)) throw new Error('Invalid ABI');
-
-        const rawMethodName = tx._form.method.slice(
-          0,
-          tx._form.method.indexOf('(')
-        );
-        const method = JSON.parse(jsonAbi).find(
-          (fragment: JsonFragment) => fragment.name === rawMethodName
+        // _form.method is the full signature; select by it, not by bare
+        // name, or an overloaded ABI exports the wrong fragment.
+        const method = JSON.parse(
+          new Interface(tx._form.abi)
+            .getFunction(tx._form.method)
+            .format(FormatTypes.json)
         );
 
         outputTransaction.contractMethod = {
