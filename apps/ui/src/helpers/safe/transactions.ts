@@ -31,7 +31,9 @@ function parseValue(value?: string | null): string {
 
 // Accepts a JSON array, Safe's bracketed-but-unquoted list (`[0xabc, 0xdef]`)
 // and the bare `a, b` this app exports (getContractCallFormArgs' join).
-function splitArrayValue(value: string): string[] {
+// Exported so buildBatchFile (./build) can split the same bare form back
+// apart when bracketing it for Safe's own Transaction Builder parser.
+export function splitArrayValue(value: string): string[] {
   const trimmed = value.trim();
   const body =
     trimmed.startsWith('[') && trimmed.endsWith(']')
@@ -103,6 +105,17 @@ function toRaw(tx: BatchTransaction): RawTransaction {
   });
 }
 
+// ethers Result values are BigNumber objects for (u)int and nested Result
+// arrays for tuples; getContractCallFormArgs' tuple branch JSON.stringifies
+// them as-is, which would otherwise leak `{"type":"BigNumber","hex":"0x…"}`
+// into the form, the tx list and exported Safe files.
+function toPlain(value: any): any {
+  if (BigNumber.isBigNumber(value)) return value.toString();
+  if (Array.isArray(value)) return value.map(toPlain);
+
+  return value;
+}
+
 function decodeWithAbi(
   tx: BatchTransaction,
   abi: any[]
@@ -122,6 +135,26 @@ function decodeWithAbi(
     return null;
   }
 
+  // getContractCallFormArgs/createContractCallTransaction (helpers/transactions.ts)
+  // round-trip array args through a bare comma-joined string; keep raw
+  // whatever that codec cannot losslessly reverse on edit+save:
+  // - fixed-size (`T[N]`) and nested (`T[][]`) arrays always throw on re-save;
+  // - a string[] element containing a comma is indistinguishable from a
+  //   separator once joined, and leading/trailing whitespace is stripped by
+  //   the re-save's trim().
+  const hasUnsafeArray = parsed.functionFragment.inputs.some((input, i) => {
+    if (/\[\d+\]/.test(input.type) || /\]\[/.test(input.type)) return true;
+
+    if (input.type === 'string[]') {
+      return (parsed.args[i] as string[]).some(
+        value => value.includes(',') || value !== value.trim()
+      );
+    }
+
+    return false;
+  });
+  if (hasUnsafeArray) return null;
+
   return {
     _type: 'contractCall',
     to: tx.to,
@@ -138,7 +171,7 @@ function decodeWithAbi(
         args: Object.fromEntries(
           parsed.functionFragment.inputs.map((input, i) => [
             input.name,
-            parsed.args[i]
+            toPlain(parsed.args[i])
           ])
         )
       }),
@@ -228,7 +261,12 @@ export async function parseSafeImportFile(
   chainId?: string
 ): Promise<{ transactions: Transaction[]; warnings: string[] }> {
   const warnings: string[] = [];
-  const file = JSON.parse(content) as Partial<BatchFile> | null;
+  let file: Partial<BatchFile> | null;
+  try {
+    file = JSON.parse(content);
+  } catch {
+    throw new SafeImportError('This file is not valid JSON');
+  }
 
   if (
     !file ||
@@ -264,6 +302,9 @@ export async function parseSafeImportFile(
   }
 
   file.transactions.forEach((tx, i) => {
+    if (!tx || typeof tx !== 'object') {
+      throw new SafeImportError(`Transaction ${i + 1} is malformed`);
+    }
     if (!isAddress(tx.to)) {
       throw new SafeImportError(
         `Transaction ${i + 1} has an invalid recipient address`
