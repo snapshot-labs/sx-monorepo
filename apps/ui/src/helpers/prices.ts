@@ -18,7 +18,10 @@ const CHAINS: Record<string, { chain: string; native: string }> = {
   8453: { chain: 'base', native: 'coingecko:ethereum' },
   42161: { chain: 'arbitrum', native: 'coingecko:ethereum' },
   33139: { chain: 'apechain', native: 'coingecko:apecoin' },
-  33111: { chain: 'apechain', native: 'coingecko:apecoin' }
+  33111: { chain: 'apechain', native: 'coingecko:apecoin' },
+  324: { chain: 'era', native: 'coingecko:ethereum' },
+  42170: { chain: 'arbitrum_nova', native: 'coingecko:ethereum' },
+  42220: { chain: 'celo', native: 'coingecko:celo' }
 };
 
 const COIN_ID_OVERRIDES: Record<string, string> = {
