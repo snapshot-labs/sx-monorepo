@@ -1,6 +1,7 @@
 import { ETH_CONTRACT } from './constants';
 
 type PriceInfo = { usd: number; usd_24h_change: number };
+type CoinPrice = { price: number; confidence: number };
 
 const API_URL = 'https://coins.llama.fi';
 const MAX_COINS_PER_REQUEST = 200;
@@ -19,10 +20,11 @@ const CHAINS: Record<string, { chain: string; native: string }> = {
   33111: { chain: 'apechain', native: 'coingecko:apecoin' }
 };
 
-async function fetchCoins(path: string): Promise<Record<string, any>> {
+async function fetchCoins<T>(path: string): Promise<Record<string, T>> {
   try {
     const res = await fetch(`${API_URL}/${path}`);
-    return (await res.json()).coins ?? {};
+    const data = (await res.json()) as { coins?: Record<string, T> };
+    return data.coins ?? {};
   } catch {
     return {};
   }
@@ -61,8 +63,8 @@ async function getTokenPricesBatch(
   const coins = addresses.map(coinId).join(',');
 
   const [prices, changes] = await Promise.all([
-    fetchCoins(`prices/current/${coins}`),
-    fetchCoins(`percentage/${coins}`)
+    fetchCoins<CoinPrice>(`prices/current/${coins}`),
+    fetchCoins<number>(`percentage/${coins}`)
   ]);
 
   return Object.fromEntries(
