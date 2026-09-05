@@ -1,23 +1,15 @@
 <script setup lang="ts">
 import { getOrgProposalLabel } from '@/helpers/organizations';
-import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import {
   PROPOSALS_SUMMARY_LIMIT,
   useProposalsSummaryQuery
 } from '@/queries/proposals';
-import {
-  TOPICS_SUMMARY_LIMIT,
-  useTopicsSummaryQuery
-} from '@/queries/townhall';
 import { Space } from '@/types';
 
-const props = defineProps<{ space: Space; townhallSpace?: TownhallSpace }>();
+const props = defineProps<{ space: Space }>();
 
-const route = useRoute();
-const spaceParam = computed(() => route.params.space as string | undefined);
-const { spaceType, townhallSpaceId } = useTownhallSpace(spaceParam);
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
@@ -30,17 +22,8 @@ const socials = computed(() => getSocialNetworksLink(props.space));
 
 const { data, isPending, isError } = useProposalsSummaryQuery(
   toRef(() => props.space.network),
-  toRef(() => props.space.id),
-  toRef(() => spaceType.value === 'proposalsSpace')
+  toRef(() => props.space.id)
 );
-const {
-  data: topics,
-  isPending: isTopicsPending,
-  isError: isTopicsError
-} = useTopicsSummaryQuery({
-  spaceId: toRef(() => townhallSpaceId.value!),
-  enabled: computed(() => spaceType.value === 'discussionsSpace')
-});
 
 const showChildren = computed(
   () =>
@@ -64,7 +47,7 @@ watchEffect(() => setTitle(props.space.name));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
-        <UiTooltip v-if="spaceType === 'proposalsSpace'" title="New proposal">
+        <UiTooltip title="New proposal">
           <UiButton
             :to="{
               name: 'space-editor',
@@ -96,24 +79,14 @@ watchEffect(() => setTitle(props.space.name));
           />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
-          <template v-if="spaceType === 'proposalsSpace'">
-            <div>
-              <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>
-              proposals
-            </div>
-            <div>·</div>
-            <div>
-              <b class="text-skin-link">{{
-                _n(space.vote_count, 'compact')
-              }}</b>
-              votes
-            </div>
-          </template>
-          <div v-if="spaceType === 'discussionsSpace'">
-            <b class="text-skin-link">{{
-              _n(townhallSpace?.topic_count || 0)
-            }}</b>
-            discussions
+          <div>
+            <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>
+            proposals
+          </div>
+          <div>·</div>
+          <div>
+            <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b>
+            votes
           </div>
           <template v-if="isOffchainSpace">
             <div>·</div>
@@ -189,7 +162,6 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <div>
       <ProposalsList
-        v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
         :title="
           getOrgProposalLabel(organization, `${space.network}:${space.id}`) ??
@@ -202,18 +174,6 @@ watchEffect(() => setTitle(props.space.name));
         :route="{
           name: 'space-proposals',
           params: { space: `${space.network}:${space.id}` },
-          linkTitle: 'See more'
-        }"
-      />
-      <TownhallTopicsList
-        v-else-if="spaceType === 'discussionsSpace'"
-        title="Latest topics"
-        :is-error="isTopicsError"
-        :is-loading="isTopicsPending"
-        :limit="TOPICS_SUMMARY_LIMIT - 1"
-        :topics="topics ?? []"
-        :route="{
-          name: 'space-townhall-topics',
           linkTitle: 'See more'
         }"
       />

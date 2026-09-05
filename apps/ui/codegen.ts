@@ -33,11 +33,6 @@ const config: CodegenConfig = {
       schema: '../hub/src/graphql/schema.gql',
       documents: ['src/networks/offchain/api/queries.ts'],
       ...baseConfig
-    },
-    './src/helpers/townhall/gql/': {
-      schema: '../highlight/.checkpoint/schema.gql',
-      documents: ['src/helpers/townhall/api.ts'],
-      ...baseConfig
     }
   }
 };
