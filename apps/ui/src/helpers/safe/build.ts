@@ -62,6 +62,10 @@ export function buildBatchFile(
         data: tx.data
       } as BatchTransaction;
 
+      // Only '1' is emitted so call-only files stay byte-identical to the
+      // Transaction Builder standard.
+      if (tx.operation === '1') outputTransaction.operation = '1';
+
       if (tx._type === 'sendToken') {
         const isEth = tx._form.token.address === ETH_CONTRACT;
         if (isEth) return outputTransaction;

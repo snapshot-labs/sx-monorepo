@@ -417,7 +417,6 @@ describe('array arguments', () => {
 });
 
 describe('1inch Fusion swap import', () => {
-  // Safe Transaction Builder file produced by the Fusion order builder.
   const content = JSON.stringify(fusionSwap);
 
   it('captures the delegatecall operation from the file', async () => {
@@ -437,6 +436,40 @@ describe('1inch Fusion swap import', () => {
     expect(encodeMultiSend(batch).toLowerCase()).toBe(
       fusionSwapMultiSend.multiSend.toLowerCase()
     );
+  });
+
+  it('warns that the delegatecall transaction grants full control of the Safe', async () => {
+    const { warnings } = await parseSafeImportFile(content, '1');
+
+    expect(warnings).toEqual([
+      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
+
+  it('preserves the delegatecall operation through a download-file export/re-import', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1');
+    const exported = buildBatchFile(1, transactions);
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+
+    expect(exported.transactions[0].operation).toBeUndefined();
+    expect(exported.transactions[1].operation).toBe('1');
+    expect(reimported.transactions[1].operation).toBe('1');
+  });
+
+  it('keeps operation intact for a single-transaction batch, which v1 executes directly without MultiSend', async () => {
+    const singleTxContent = JSON.stringify({
+      version: '1.0',
+      chainId: '1',
+      transactions: [fusionSwap.transactions[1]]
+    });
+
+    const { transactions } = await parseSafeImportFile(singleTxContent, '1');
+    const [serialized] = transactions.map(serializeSafeSnapTransaction);
+
+    expect(serialized.operation).toBe('1');
+    expect(serialized.to).toBe(fusionSwap.transactions[1].to);
+    expect(serialized.value).toBe(fusionSwap.transactions[1].value);
+    expect(serialized.data).toBe(fusionSwap.transactions[1].data);
   });
 });
 
@@ -877,6 +910,44 @@ describe('file validation', () => {
         '1'
       )
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
+  });
+
+  it('accepts valid operation values and rejects malformed ones', async () => {
+    const validOperations = [undefined, '', '0', '1', 0, 1];
+    const invalidOperations = [
+      '2',
+      2,
+      '0x1',
+      '01',
+      ' 1',
+      true,
+      'delegatecall',
+      {},
+      [1]
+    ];
+
+    function fileWithOperation(operation: unknown) {
+      return file([
+        {
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          value: '0',
+          data: '0x',
+          operation
+        }
+      ]);
+    }
+
+    for (const operation of validOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1')
+      ).resolves.toBeDefined();
+    }
+
+    for (const operation of invalidOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1')
+      ).rejects.toThrow(/Transaction 1 has an invalid operation/);
+    }
   });
 });
 

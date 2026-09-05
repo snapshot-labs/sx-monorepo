@@ -45,6 +45,9 @@ const importingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
+// Tenderly simulates every transaction as a call, so a delegatecall batch
+// cannot be simulated.
+const hasDelegatecall = computed(() => model.value.some(isDelegatecall));
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -87,6 +90,17 @@ async function handleImportFile(event: Event) {
       treasury.value.network
     );
 
+    // Other strategies go through convertToMetaTransactions, which hardcodes
+    // operation 0.
+    if (
+      props.strategy.type !== 'safeSnap' &&
+      transactions.some(tx => tx.operation === '1')
+    ) {
+      throw new SafeImportError(
+        'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
+      );
+    }
+
     model.value = [...model.value, ...transactions];
     uiStore.addNotification(
       'success',
@@ -105,9 +119,14 @@ async function handleImportFile(event: Event) {
   }
 }
 
+function isDelegatecall(tx: TransactionType) {
+  return tx.operation === '1';
+}
+
 function editTx(index: number) {
   const tx = model.value[index];
-  if (tx._type === 'raw') return;
+  // The modal rebuilds the transaction without its operation.
+  if (tx._type === 'raw' || isDelegatecall(tx)) return;
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -118,7 +137,8 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    getChainIdKind(treasury.value.network) !== 'evm'
+    getChainIdKind(treasury.value.network) !== 'evm' ||
+    hasDelegatecall.value
   ) {
     return;
   }
@@ -251,12 +271,14 @@ watch(
                       :title="
                         tx._type === 'raw'
                           ? 'Editing raw transactions is not supported'
-                          : ''
+                          : isDelegatecall(tx)
+                            ? 'Editing delegatecall transactions is not supported'
+                            : ''
                       "
                     >
                       <button
                         type="button"
-                        :disabled="tx._type === 'raw'"
+                        :disabled="tx._type === 'raw' || isDelegatecall(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >
@@ -281,6 +303,12 @@ watch(
             <UiTooltip
               v-if="!network?.supportsSimulation"
               title="Simulation not supported on this network"
+            >
+              <IH-shield-exclamation />
+            </UiTooltip>
+            <UiTooltip
+              v-else-if="hasDelegatecall"
+              title="Simulation unavailable for delegatecall transactions"
             >
               <IH-shield-exclamation />
             </UiTooltip>

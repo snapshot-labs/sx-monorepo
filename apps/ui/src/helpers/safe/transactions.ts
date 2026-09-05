@@ -7,11 +7,7 @@ import { isAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { isBytesLike } from '@ethersproject/bytes';
 import { formatUnits } from '@ethersproject/units';
-import {
-  ContractCallTransaction,
-  RawTransaction,
-  Transaction
-} from '@snapshot-labs/sx';
+import { ContractCallTransaction, RawTransaction } from '@snapshot-labs/sx';
 import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
 import {
@@ -19,16 +15,9 @@ import {
   getContractCallFormArgs
 } from '@/helpers/transactions';
 import { getSalt } from '@/helpers/utils';
+import { Transaction } from '@/types';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
-
-// An editor transaction that may run as a delegatecall (Safe operation 1),
-// e.g. a 1inch Fusion swap. operation is undefined for a regular call.
-export type ImportedTransaction = Transaction & { operation?: string };
-
-// A Safe Transaction Builder transaction that may also carry an operation
-// (1 = delegatecall), as emitted by the Fusion order builder.
-type ImportTransaction = BatchTransaction & { operation?: string | number };
 
 // Only these messages reach the user; any other error gets a generic toast.
 export class SafeImportError extends Error {}
@@ -259,26 +248,23 @@ async function decode(
 }
 
 async function parseSafeTransaction(
-  tx: ImportTransaction,
+  tx: BatchTransaction,
   chainId?: string
-): Promise<ImportedTransaction> {
+): Promise<Transaction> {
   const transaction =
     (tx.contractMethod && fromContractMethod(tx, tx.contractMethod)) ||
     (await decode(tx, chainId)) ||
     toRaw(tx);
 
-  // Preserve delegatecall transactions (operation 1); a call is the default.
   return String(tx.operation) === '1'
     ? { ...transaction, operation: '1' }
     : transaction;
 }
 
-// A transaction may carry an `operation` (1 = delegatecall, e.g. a Fusion
-// swap), which the Transaction Builder standard omits but SafeSnap supports.
 export async function parseSafeImportFile(
   content: string,
   chainId: string
-): Promise<{ transactions: ImportedTransaction[]; warnings: string[] }> {
+): Promise<{ transactions: Transaction[]; warnings: string[] }> {
   const warnings: string[] = [];
   let file: Partial<BatchFile> | null;
   try {
@@ -337,6 +323,14 @@ export async function parseSafeImportFile(
     if (typeof value !== 'string' || !/^\d*$/.test(value)) {
       throw new SafeImportError(`Transaction ${i + 1} has an invalid value`);
     }
+    // Strict equality on purpose: String([1]) === '1' would let an array through.
+    const operation = (tx as { operation?: unknown }).operation;
+    const validOperations = [undefined, '', '0', '1', 0, 1];
+    if (!validOperations.some(valid => valid === operation)) {
+      throw new SafeImportError(
+        `Transaction ${i + 1} has an invalid operation`
+      );
+    }
   });
 
   const transactions = await Promise.all(
@@ -350,6 +344,16 @@ export async function parseSafeImportFile(
       })
     )
   );
+
+  const delegatecallIndexes = transactions
+    .map((tx, i) => (tx.operation === '1' ? i + 1 : null))
+    .filter((i): i is number => i !== null);
+  if (delegatecallIndexes.length > 0) {
+    const plural = delegatecallIndexes.length > 1;
+    warnings.push(
+      `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
+    );
+  }
 
   return { transactions, warnings };
 }
