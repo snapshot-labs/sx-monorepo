@@ -5,7 +5,6 @@ type PriceInfo = { usd: number; usd_24h_change: number };
 const API_URL = 'https://coins.llama.fi';
 const MAX_COINS_PER_REQUEST = 200;
 
-// DefiLlama chain slug and native asset coin id, by chain id
 const CHAINS: Record<string, { chain: string; native: string }> = {
   1: { chain: 'ethereum', native: 'coingecko:ethereum' },
   10: { chain: 'optimism', native: 'coingecko:ethereum' },
