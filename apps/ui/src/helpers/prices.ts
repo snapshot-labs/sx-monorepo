@@ -10,7 +10,7 @@ const CHAINS: Record<string, { chain: string; native: string }> = {
   10: { chain: 'optimism', native: 'coingecko:ethereum' },
   56: { chain: 'bsc', native: 'coingecko:binancecoin' },
   100: { chain: 'xdai', native: 'coingecko:xdai' },
-  137: { chain: 'polygon', native: 'coingecko:matic-network' },
+  137: { chain: 'polygon', native: 'coingecko:polygon-ecosystem-token' },
   5000: { chain: 'mantle', native: 'coingecko:mantle' },
   8453: { chain: 'base', native: 'coingecko:ethereum' },
   42161: { chain: 'arbitrum', native: 'coingecko:ethereum' },
