@@ -3,6 +3,7 @@ import { ETH_CONTRACT } from './constants';
 type PriceInfo = { usd: number; usd_24h_change: number };
 
 const API_URL = 'https://coins.llama.fi';
+const MAX_COINS_PER_REQUEST = 200;
 
 // DefiLlama chain slug and native asset coin id, by chain id
 const CHAINS: Record<string, { chain: string; native: string }> = {
@@ -27,14 +28,10 @@ async function fetchCoins(path: string): Promise<Record<string, any>> {
   }
 }
 
-export async function getTokenPrices(
-  chainId: string,
-  contractAddresses: string[]
+async function getTokenPricesBatch(
+  config: { chain: string; native: string },
+  addresses: string[]
 ): Promise<Record<string, PriceInfo | undefined>> {
-  const config = CHAINS[chainId];
-  if (!config) return {};
-
-  const addresses = contractAddresses.slice(0, 100);
   const coinId = (address: string) =>
     address === ETH_CONTRACT ? config.native : `${config.chain}:${address}`;
   const coins = addresses.map(coinId).join(',');
@@ -55,4 +52,23 @@ export async function getTokenPrices(
         }
       ])
   );
+}
+
+export async function getTokenPrices(
+  chainId: string,
+  contractAddresses: string[]
+): Promise<Record<string, PriceInfo | undefined>> {
+  const config = CHAINS[chainId];
+  if (!config) return {};
+
+  const batches: string[][] = [];
+  for (let i = 0; i < contractAddresses.length; i += MAX_COINS_PER_REQUEST) {
+    batches.push(contractAddresses.slice(i, i + MAX_COINS_PER_REQUEST));
+  }
+
+  const results = await Promise.all(
+    batches.map(addresses => getTokenPricesBatch(config, addresses))
+  );
+
+  return Object.assign({}, ...results);
 }
