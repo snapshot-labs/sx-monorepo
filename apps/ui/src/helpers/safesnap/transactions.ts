@@ -3,17 +3,17 @@ import {
   ContractCallTransaction,
   RawTransaction,
   SendNftTransaction,
-  SendTokenTransaction,
-  Transaction
+  SendTokenTransaction
 } from '@snapshot-labs/sx';
 import { createRawTransaction } from '@/helpers/transactions';
+import { Transaction } from '@/types';
 import { ETH_CONTRACT } from '../constants';
 
 type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  // Set when writing a proposal (creation), ignored when reading.
+  // 0 = call, 1 = delegatecall; read back on parse so editing keeps it.
   operation?: string;
   nonce?: string;
 };
@@ -69,7 +69,8 @@ export type SafeSnapExecutionData = {
   txs: SafeSnapTransaction[][];
 };
 
-// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+// Safe MultiSend v1.3.0, the delegatecall-capable one (not MultiSendCallOnly).
+// Not deployed on every chain in CHAIN_IDS: ApeChain (33139) has no code here.
 const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 function parseTransferFunds(
@@ -153,7 +154,7 @@ function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
   return createRawTransaction({ ...tx, salt: '' });
 }
 
-export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
+function parseByType(tx: SafeSnapTransaction): Transaction {
   switch (tx.type) {
     case 'transferFunds':
       return parseTransferFunds(tx);
@@ -166,6 +167,14 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   }
 }
 
+export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
+  const transaction = parseByType(tx);
+
+  return tx.operation === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
+}
+
 export function serializeSafeSnapTransaction(
   tx: Transaction
 ): SafeSnapTransaction {
@@ -173,7 +182,7 @@ export function serializeSafeSnapTransaction(
     to: tx.to,
     data: tx.data || '0x',
     value: tx.value || '0',
-    operation: '0',
+    operation: tx.operation ?? '0',
     nonce: '0'
   };
 

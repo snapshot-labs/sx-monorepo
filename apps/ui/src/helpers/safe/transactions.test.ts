@@ -1,10 +1,15 @@
 import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
+import { hexConcat, hexZeroPad } from '@ethersproject/bytes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile, SafeImportError } from './transactions';
+import { serializeSafeSnapTransaction } from '../safesnap/transactions';
+import fusionSwapMultiSend from './__fixtures__/fusion-swap-multisend.json';
+import fusionSwap from './__fixtures__/fusion-swap.json';
 
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 
@@ -12,6 +17,29 @@ vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 beforeEach(() => {
   vi.mocked(getABI).mockReset().mockRejectedValue(new Error('unmocked getABI'));
 });
+
+// Mirrors how Snapshot v1 (coerceConfig -> createMultiSendTx) re-encodes a
+// stored batch into the MultiSend call that the Safe module executes.
+function encodeMultiSend(
+  txs: { to: string; value: string; data: string; operation?: string }[]
+) {
+  const packed = hexConcat(
+    txs.map(tx => {
+      const data = tx.data || '0x';
+      const length = data === '0x' ? 0 : (data.length - 2) / 2;
+      return hexConcat([
+        hexZeroPad(BigNumber.from(tx.operation || '0').toHexString(), 1),
+        hexZeroPad(tx.to, 20),
+        hexZeroPad(BigNumber.from(tx.value || '0').toHexString(), 32),
+        hexZeroPad(BigNumber.from(length).toHexString(), 32),
+        data
+      ]);
+    })
+  );
+  return new Interface([
+    'function multiSend(bytes transactions)'
+  ]).encodeFunctionData('multiSend', [packed]);
+}
 
 const TRANSFER_ABI = [
   {
@@ -385,6 +413,63 @@ describe('array arguments', () => {
     });
 
     expect(tx.data).toBe(expected);
+  });
+});
+
+describe('1inch Fusion swap import', () => {
+  const content = JSON.stringify(fusionSwap);
+
+  it('captures the delegatecall operation from the file', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1');
+
+    expect(transactions).toHaveLength(2);
+    // approve -> call, buildAndSignOrder -> delegatecall.
+    expect(transactions[0].operation).toBeUndefined();
+    expect(transactions[1].operation).toBe('1');
+  });
+
+  it('serializes to the exact MultiSend batch the Fusion script produces', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1');
+    const batch = transactions.map(serializeSafeSnapTransaction);
+
+    expect(batch.map(tx => tx.operation)).toEqual(['0', '1']);
+    expect(encodeMultiSend(batch).toLowerCase()).toBe(
+      fusionSwapMultiSend.multiSend.toLowerCase()
+    );
+  });
+
+  it('warns that the delegatecall transaction grants full control of the Safe', async () => {
+    const { warnings } = await parseSafeImportFile(content, '1');
+
+    expect(warnings).toEqual([
+      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
+
+  it('preserves the delegatecall operation through a download-file export/re-import', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1');
+    const exported = buildBatchFile(1, transactions);
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+
+    expect(exported.transactions[0].operation).toBeUndefined();
+    expect(exported.transactions[1].operation).toBe('1');
+    expect(reimported.transactions[1].operation).toBe('1');
+  });
+
+  it('keeps operation intact for a single-transaction batch, which v1 executes directly without MultiSend', async () => {
+    const singleTxContent = JSON.stringify({
+      version: '1.0',
+      chainId: '1',
+      transactions: [fusionSwap.transactions[1]]
+    });
+
+    const { transactions } = await parseSafeImportFile(singleTxContent, '1');
+    const [serialized] = transactions.map(serializeSafeSnapTransaction);
+
+    expect(serialized.operation).toBe('1');
+    expect(serialized.to).toBe(fusionSwap.transactions[1].to);
+    expect(serialized.value).toBe(fusionSwap.transactions[1].value);
+    expect(serialized.data).toBe(fusionSwap.transactions[1].data);
   });
 });
 
@@ -825,6 +910,44 @@ describe('file validation', () => {
         '1'
       )
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
+  });
+
+  it('accepts valid operation values and rejects malformed ones', async () => {
+    const validOperations = [undefined, '', '0', '1', 0, 1];
+    const invalidOperations = [
+      '2',
+      2,
+      '0x1',
+      '01',
+      ' 1',
+      true,
+      'delegatecall',
+      {},
+      [1]
+    ];
+
+    function fileWithOperation(operation: unknown) {
+      return file([
+        {
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          value: '0',
+          data: '0x',
+          operation
+        }
+      ]);
+    }
+
+    for (const operation of validOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1')
+      ).resolves.toBeDefined();
+    }
+
+    for (const operation of invalidOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1')
+      ).rejects.toThrow(/Transaction 1 has an invalid operation/);
+    }
   });
 });
 

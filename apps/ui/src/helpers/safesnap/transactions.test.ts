@@ -1,5 +1,5 @@
-import { Transaction } from '@snapshot-labs/sx';
 import { describe, expect, it } from 'vitest';
+import { Transaction } from '@/types';
 import {
   createSafeSnapExecution,
   parseSafeSnapTransaction,
@@ -158,6 +158,22 @@ describe('serializeSafeSnapTransaction', () => {
 
     const serialized = serializeSafeSnapTransaction(tx);
     expect(parseSafeSnapTransaction(serialized)).toEqual(tx);
+  });
+
+  it('preserves a delegatecall operation (e.g. a Fusion swap)', () => {
+    const tx: Transaction = {
+      to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
+      value: '0',
+      data: '0xdeadbeef',
+      salt: '',
+      operation: '1',
+      _type: 'raw',
+      _form: { recipient: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769' }
+    };
+
+    const serialized = serializeSafeSnapTransaction(tx);
+    expect(serialized.operation).toBe('1');
+    expect(parseSafeSnapTransaction(serialized).operation).toBe('1');
   });
 });
 

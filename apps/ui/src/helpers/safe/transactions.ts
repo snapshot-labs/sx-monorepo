@@ -7,11 +7,7 @@ import { isAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { isBytesLike } from '@ethersproject/bytes';
 import { formatUnits } from '@ethersproject/units';
-import {
-  ContractCallTransaction,
-  RawTransaction,
-  Transaction
-} from '@snapshot-labs/sx';
+import { ContractCallTransaction, RawTransaction } from '@snapshot-labs/sx';
 import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
 import {
@@ -19,6 +15,7 @@ import {
   getContractCallFormArgs
 } from '@/helpers/transactions';
 import { getSalt } from '@/helpers/utils';
+import { Transaction } from '@/types';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
@@ -254,11 +251,14 @@ async function parseSafeTransaction(
   tx: BatchTransaction,
   chainId?: string
 ): Promise<Transaction> {
-  return (
+  const transaction =
     (tx.contractMethod && fromContractMethod(tx, tx.contractMethod)) ||
     (await decode(tx, chainId)) ||
-    toRaw(tx)
-  );
+    toRaw(tx);
+
+  return String(tx.operation) === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
 export async function parseSafeImportFile(
@@ -323,6 +323,14 @@ export async function parseSafeImportFile(
     if (typeof value !== 'string' || !/^\d*$/.test(value)) {
       throw new SafeImportError(`Transaction ${i + 1} has an invalid value`);
     }
+    // Strict equality on purpose: String([1]) === '1' would let an array through.
+    const operation = (tx as { operation?: unknown }).operation;
+    const validOperations = [undefined, '', '0', '1', 0, 1];
+    if (!validOperations.some(valid => valid === operation)) {
+      throw new SafeImportError(
+        `Transaction ${i + 1} has an invalid operation`
+      );
+    }
   });
 
   const transactions = await Promise.all(
@@ -336,6 +344,16 @@ export async function parseSafeImportFile(
       })
     )
   );
+
+  const delegatecallIndexes = transactions
+    .map((tx, i) => (tx.operation === '1' ? i + 1 : null))
+    .filter((i): i is number => i !== null);
+  if (delegatecallIndexes.length > 0) {
+    const plural = delegatecallIndexes.length > 1;
+    warnings.push(
+      `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
+    );
+  }
 
   return { transactions, warnings };
 }
