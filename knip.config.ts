@@ -18,9 +18,6 @@ const config: KnipConfig = {
       entry: ['src/index.ts'],
       ignoreDependencies: ['@logtail/pino', 'pino-pretty', 'ts-node']
     },
-    'apps/highlight': {
-      entry: ['src/index.ts']
-    },
     'apps/hub': {
       entry: ['src/index.ts']
     },

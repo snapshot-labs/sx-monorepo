@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen", "api#codegen", "highlight#codegen"],
+      "dependsOn": ["^build", "codegen", "api#codegen"],
       "outputs": ["dist/**", "dist.cjs/**", "build/**"],
       "env": ["ELECTRON"]
     },
@@ -49,18 +49,15 @@
       "outputs": [
         ".checkpoint/**",
         "src/networks/common/graphqlApi/gql/**",
-        "src/networks/offchain/api/gql/**",
-        "src/helpers/townhall/gql/**"
+        "src/networks/offchain/api/gql/**"
       ],
       "inputs": [
         "**/*.gql",
         "../api/.checkpoint/schema.gql",
         "../hub/src/graphql/schema.gql",
-        "../highlight/.checkpoint/schema.gql",
         "codegen.ts",
         "src/networks/common/graphqlApi/queries.ts",
-        "src/networks/offchain/api/queries.ts",
-        "src/helpers/townhall/api.ts"
+        "src/networks/offchain/api/queries.ts"
       ]
     },
     "transit": {
