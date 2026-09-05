@@ -21,6 +21,10 @@ const CHAINS: Record<string, { chain: string; native: string }> = {
   33111: { chain: 'apechain', native: 'coingecko:apecoin' }
 };
 
+const COIN_ID_OVERRIDES: Record<string, string> = {
+  '0x0d88ed6e74bbfd96b831231638b66c05571e824f': 'coingecko:aventus'
+};
+
 async function fetchCoins<T>(path: string): Promise<Record<string, T>> {
   try {
     const res = await fetch(`${API_URL}/${path}`);
@@ -91,7 +95,10 @@ export async function getTokenPrices(
   if (!config) return {};
 
   const coinId = (address: string) =>
-    address === ETH_CONTRACT ? config.native : `${config.chain}:${address}`;
+    address === ETH_CONTRACT
+      ? config.native
+      : COIN_ID_OVERRIDES[address.toLowerCase()] ??
+        `${config.chain}:${address}`;
   const batches = batchAddresses(contractAddresses, coinId);
 
   const results = await Promise.all(

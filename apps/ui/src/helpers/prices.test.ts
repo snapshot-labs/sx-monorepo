@@ -90,4 +90,31 @@ describe('getTokenPrices', () => {
     expect(result[confident]).toBeDefined();
     expect(result[unconfident]).toBeUndefined();
   });
+
+  it('prices a token DefiLlama does not index by address through its coin id override', async () => {
+    const avt = '0x0d88ed6e74bbfd96b831231638b66c05571e824f';
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (!url.includes('/prices/current/')) {
+          return { json: async () => ({}) };
+        }
+
+        if (!url.endsWith('coingecko:aventus')) {
+          return { json: async () => ({ coins: {} }) };
+        }
+
+        return {
+          json: async () => ({
+            coins: { 'coingecko:aventus': { price: 0.21, confidence: 0.99 } }
+          })
+        };
+      })
+    );
+
+    const result = await getTokenPrices('1', [avt]);
+
+    expect(result[avt]?.usd).toBe(0.21);
+  });
 });
