@@ -94,11 +94,8 @@ async function refreshVpByStrategy(proposals: Proposal[]) {
 }
 
 export default async function run() {
-  if (!process.env.OVERLORD_URL) return;
   while (true) {
-    log.info(
-      '[proposalStrategiesValue] Fetching proposals values from overlord'
-    );
+    log.info('[proposalStrategiesValue] Fetching proposals values');
     const proposals = await getProposals();
     log.info(`[proposalStrategiesValue] Found ${proposals.length} proposals`);
 
