@@ -1,8 +1,47 @@
-import { FormatTypes, Interface, JsonFragment } from '@ethersproject/abi';
+import { FormatTypes, Interface } from '@ethersproject/abi';
+import { parseFormArrayValue } from '@/helpers/transactions';
 import { Transaction } from '@/types';
 import { addChecksum } from './checksum';
 import { BatchFile, BatchTransaction } from './types';
 import { ETH_CONTRACT } from '../constants';
+
+// Safe requires array args bracketed (string[] must also be valid JSON);
+// this app stores them as a bare `a, b`, so bracket single-dim arrays here.
+// Nested arrays can't be built by this app's form, so left unchanged;
+// tuples are already exported as JSON.
+function toSafeContractInputsValues(
+  inputs: { name: string; type: string }[],
+  args: Record<string, string>
+): Record<string, string> {
+  const bracketed = inputs
+    .filter(input => input.type.endsWith(']') && !input.type.includes('tuple'))
+    .map(input => {
+      const elementType = input.type.replace(/\[\d*\]$/, '');
+      if (elementType.endsWith(']')) return [input.name, args[input.name]];
+
+      // Must split exactly like the save path (no quote stripping), or a
+      // quoted element would round-trip differently.
+      const isString = elementType.startsWith('string');
+      const elements = parseFormArrayValue(args[input.name]);
+
+      return [
+        input.name,
+        isString ? JSON.stringify(elements) : `[${elements.join(', ')}]`
+      ];
+    });
+
+  // A checkbox `bool` arg is a real boolean at runtime; must stringify it
+  // or export writes an unquoted JSON `false`/`true` that parseBooleanValue
+  // throws on re-reading.
+  const scalars = Object.fromEntries(
+    Object.entries(args).map(([name, value]) => [
+      name,
+      typeof value === 'string' ? value : String(value)
+    ])
+  );
+
+  return { ...scalars, ...Object.fromEntries(bracketed) };
+}
 
 export function buildBatchFile(
   chainId: number,
@@ -91,25 +130,41 @@ export function buildBatchFile(
         };
         delete outputTransaction.data;
       } else if (tx._type === 'contractCall') {
-        const iface = new Interface(tx._form.abi);
-        const jsonAbi = iface.format(FormatTypes.json);
-        if (Array.isArray(jsonAbi)) throw new Error('Invalid ABI');
+        // _form.args is only usable here when it is keyed by input name
+        // (e.g. an oSnap-parsed call stores it as a positional array).
+        const argsIsKeyed =
+          tx._form.args !== null &&
+          typeof tx._form.args === 'object' &&
+          !Array.isArray(tx._form.args);
 
-        const rawMethodName = tx._form.method.slice(
-          0,
-          tx._form.method.indexOf('(')
-        );
-        const method = JSON.parse(jsonAbi).find(
-          (fragment: JsonFragment) => fragment.name === rawMethodName
-        );
+        // Select by the full signature, not bare name, or an overloaded ABI
+        // exports the wrong fragment. getFunction throws for an unresolvable
+        // overload/selector; catch and fall through to the raw export below.
+        let method = null;
+        if (argsIsKeyed) {
+          try {
+            method = JSON.parse(
+              new Interface(tx._form.abi)
+                .getFunction(tx._form.method)
+                .format(FormatTypes.json)
+            );
+          } catch {
+            // fall through to the raw export below
+          }
+        }
 
-        outputTransaction.contractMethod = {
-          inputs: method.inputs,
-          name: method.name,
-          payable: method.payable
-        };
-        outputTransaction.contractInputsValues = tx._form.args;
-        delete outputTransaction.data;
+        if (method) {
+          outputTransaction.contractMethod = {
+            inputs: method.inputs,
+            name: method.name,
+            payable: method.payable
+          };
+          outputTransaction.contractInputsValues = toSafeContractInputsValues(
+            method.inputs,
+            tx._form.args
+          );
+          delete outputTransaction.data;
+        }
       }
 
       return outputTransaction;
