@@ -14,6 +14,8 @@ const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
 
 const expanded = ref(false);
 
+const isDelegatecall = computed(() => props.tx.operation === '1');
+
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
     return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals), 'standard', { formatDust: true })}</b> ${escapeHtml(
@@ -167,6 +169,12 @@ const parsedTitle = computedAsync(
         <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
         <IH-code v-else class="shrink-0" />
         <div class="truncate text-skin-link" v-html="parsedTitle" />
+        <UiTooltip
+          v-if="isDelegatecall"
+          title="This transaction runs as a delegatecall, granting it full control of the Safe."
+        >
+          <UiPill label="Delegatecall" class="text-skin-danger shrink-0" />
+        </UiTooltip>
       </div>
       <slot name="right">
         <IS-chevron-up

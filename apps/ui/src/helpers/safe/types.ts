@@ -21,6 +21,9 @@ export interface BatchTransaction {
   to: string;
   value: string;
   data?: string;
+  // Not in the Transaction Builder standard; 1 = delegatecall, carried
+  // through import and export.
+  operation?: string;
   contractMethod?: ContractMethod;
   contractInputsValues?: { [key: string]: string };
 }
