@@ -13,7 +13,6 @@ This is the Snapshot monorepository containing a Vue frontend, GraphQL API, a tr
 - [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
 - [`./apps/mcp`](./apps/mcp): MCP server for the Snapshot API
 - [`./apps/sequencer`](./apps/sequencer): Sequencer for Snapshot offchain protocol
-- [`./apps/auction`](./apps/auction): Brokester auction frontend using Vue 3
 - [`./apps/highlight`](./apps/highlight): Experimental sequencer for offchain data using Checkpoint
 
 ## Packages
@@ -38,7 +37,7 @@ bun install
 bun run dev
 ```
 
-This runs `ui` (port 8080). To run the auction app instead, use `bun run dev:interactive` and pick `Auction`, or run `turbo run dev --filter=auction` directly (port 8081).
+This runs `ui` (port 8080).
 
 #### UI with backend services
 
