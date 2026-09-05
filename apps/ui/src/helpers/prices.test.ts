@@ -51,4 +51,15 @@ describe('getTokenPrices', () => {
     expect(Object.keys(result)).toHaveLength(251);
     expect(calls).toHaveLength(4);
   });
+
+  it('keeps each request under the API URL length limit even when the address count alone would fit one batch', async () => {
+    const calls = mockFetch();
+
+    const erc20s = Array.from({ length: 180 }, (_, i) => fakeAddress(i));
+    const result = await getTokenPrices('1', erc20s);
+
+    expect(Object.keys(result)).toHaveLength(180);
+    expect(calls.length).toBeGreaterThan(2);
+    calls.forEach(url => expect(url.length).toBeLessThan(9000));
+  });
 });
