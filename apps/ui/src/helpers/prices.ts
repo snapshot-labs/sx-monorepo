@@ -1,0 +1,112 @@
+import { ETH_CONTRACT } from './constants';
+
+type PriceInfo = { usd: number; usd_24h_change: number };
+type CoinPrice = { price: number; confidence: number };
+
+const API_URL = 'https://coins.llama.fi';
+const MAX_COINS_PER_REQUEST = 200;
+const MAX_COINS_STRING_LENGTH = 8000;
+const MIN_CONFIDENCE = 0.5;
+
+const CHAINS: Record<string, { chain: string; native: string }> = {
+  1: { chain: 'ethereum', native: 'coingecko:ethereum' },
+  10: { chain: 'optimism', native: 'coingecko:ethereum' },
+  56: { chain: 'bsc', native: 'coingecko:binancecoin' },
+  100: { chain: 'xdai', native: 'coingecko:xdai' },
+  137: { chain: 'polygon', native: 'coingecko:polygon-ecosystem-token' },
+  5000: { chain: 'mantle', native: 'coingecko:mantle' },
+  8453: { chain: 'base', native: 'coingecko:ethereum' },
+  42161: { chain: 'arbitrum', native: 'coingecko:ethereum' },
+  33139: { chain: 'apechain', native: 'coingecko:apecoin' },
+  33111: { chain: 'apechain', native: 'coingecko:apecoin' },
+  324: { chain: 'era', native: 'coingecko:ethereum' },
+  42170: { chain: 'arbitrum_nova', native: 'coingecko:ethereum' },
+  42220: { chain: 'celo', native: 'coingecko:celo' }
+};
+
+const COIN_ID_OVERRIDES: Record<string, string> = {
+  '0x0d88ed6e74bbfd96b831231638b66c05571e824f': 'coingecko:aventus'
+};
+
+async function fetchCoins<T>(path: string): Promise<Record<string, T>> {
+  try {
+    const res = await fetch(`${API_URL}/${path}`);
+    const data = (await res.json()) as { coins?: Record<string, T> };
+    return data.coins ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function batchAddresses(
+  addresses: string[],
+  coinId: (address: string) => string
+): string[][] {
+  const batches: string[][] = [];
+  let current: string[] = [];
+
+  for (const address of addresses) {
+    const candidate = [...current, address];
+    const overLimit =
+      candidate.length > MAX_COINS_PER_REQUEST ||
+      candidate.map(coinId).join(',').length > MAX_COINS_STRING_LENGTH;
+
+    if (overLimit && current.length > 0) {
+      batches.push(current);
+      current = [address];
+    } else {
+      current = candidate;
+    }
+  }
+
+  if (current.length > 0) batches.push(current);
+
+  return batches;
+}
+
+async function getTokenPricesBatch(
+  addresses: string[],
+  coinId: (address: string) => string
+): Promise<Record<string, PriceInfo | undefined>> {
+  const coins = addresses.map(coinId).join(',');
+
+  const [prices, changes] = await Promise.all([
+    fetchCoins<CoinPrice>(`prices/current/${coins}`),
+    fetchCoins<number>(`percentage/${coins}`)
+  ]);
+
+  return Object.fromEntries(
+    addresses
+      .filter(
+        address => (prices[coinId(address)]?.confidence ?? 0) >= MIN_CONFIDENCE
+      )
+      .map(address => [
+        address,
+        {
+          usd: prices[coinId(address)].price,
+          usd_24h_change: changes[coinId(address)] ?? 0
+        }
+      ])
+  );
+}
+
+export async function getTokenPrices(
+  chainId: string,
+  contractAddresses: string[]
+): Promise<Record<string, PriceInfo | undefined>> {
+  const config = CHAINS[chainId];
+  if (!config) return {};
+
+  const coinId = (address: string) =>
+    address === ETH_CONTRACT
+      ? config.native
+      : COIN_ID_OVERRIDES[address.toLowerCase()] ??
+        `${config.chain}:${address}`;
+  const batches = batchAddresses(contractAddresses, coinId);
+
+  const results = await Promise.all(
+    batches.map(addresses => getTokenPricesBatch(addresses, coinId))
+  );
+
+  return Object.assign({}, ...results);
+}
