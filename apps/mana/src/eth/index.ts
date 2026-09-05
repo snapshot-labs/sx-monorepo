@@ -13,13 +13,12 @@ const jsonRpcRequestSchema = z.object({
     'execute',
     'executeQueuedProposal',
     'executeStarknetProposal',
-    'registerApeGasProposal',
-    'sendAuctionPartner'
+    'registerApeGasProposal'
   ]),
   params: z.any()
 });
 
-export const handlers = Object.fromEntries(
+const handlers = Object.fromEntries(
   Array.from(NETWORK_IDS.keys()).map(chainId => [
     chainId,
     createNetworkHandler(chainId)
