@@ -184,7 +184,7 @@ watch(
             v-text="getExecutionName(props.space.network, strategy.type)"
           />
         </div>
-        <div class="space-x-2 shrink-0">
+        <div class="flex gap-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsTokens"
@@ -217,14 +217,13 @@ watch(
               :disabled="
                 !treasury ||
                 disabled ||
-                importingFile ||
                 getChainIdKind(treasury.network) !== 'evm'
               "
+              :loading="importingFile"
               uniform
               @click="fileInput?.click()"
             >
-              <UiLoading v-if="importingFile" />
-              <IH-upload v-else />
+              <IH-upload />
             </UiButton>
           </UiTooltip>
         </div>
