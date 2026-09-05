@@ -6,6 +6,7 @@ type CoinPrice = { price: number; confidence: number };
 const API_URL = 'https://coins.llama.fi';
 const MAX_COINS_PER_REQUEST = 200;
 const MAX_COINS_STRING_LENGTH = 8000;
+const MIN_CONFIDENCE = 0.5;
 
 const CHAINS: Record<string, { chain: string; native: string }> = {
   1: { chain: 'ethereum', native: 'coingecko:ethereum' },
@@ -69,7 +70,9 @@ async function getTokenPricesBatch(
 
   return Object.fromEntries(
     addresses
-      .filter(address => prices[coinId(address)])
+      .filter(
+        address => (prices[coinId(address)]?.confidence ?? 0) >= MIN_CONFIDENCE
+      )
       .map(address => [
         address,
         {

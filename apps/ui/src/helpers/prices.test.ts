@@ -16,7 +16,7 @@ function mockFetch() {
 
       const coinIds = url.split('/').pop()!.split(',');
       const coins = Object.fromEntries(
-        coinIds.map(id => [id, { price: 1, symbol: 'X' }])
+        coinIds.map(id => [id, { price: 1, symbol: 'X', confidence: 0.99 }])
       );
 
       return { json: async () => ({ coins }) };
@@ -61,5 +61,33 @@ describe('getTokenPrices', () => {
     expect(Object.keys(result)).toHaveLength(180);
     expect(calls.length).toBeGreaterThan(2);
     calls.forEach(url => expect(url.length).toBeLessThan(9000));
+  });
+
+  it('drops a priced token whose confidence is below the DefiLlama TVL cutoff', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (!url.includes('/prices/current/')) {
+          return { json: async () => ({}) };
+        }
+
+        const coinIds = url.split('/').pop()!.split(',');
+        const coins = Object.fromEntries(
+          coinIds.map(id => [
+            id,
+            { price: 1, confidence: id.endsWith('1') ? 0.4 : 0.99 }
+          ])
+        );
+
+        return { json: async () => ({ coins }) };
+      })
+    );
+
+    const confident = fakeAddress(0);
+    const unconfident = fakeAddress(1);
+    const result = await getTokenPrices('1', [confident, unconfident]);
+
+    expect(result[confident]).toBeDefined();
+    expect(result[unconfident]).toBeUndefined();
   });
 });
