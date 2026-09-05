@@ -222,7 +222,6 @@ export const createNetworkHandler = (chainId: number) => {
     execute,
     executeQueuedProposal,
     executeStarknetProposal,
-    registerApeGasProposal,
-    getWallet
+    registerApeGasProposal
   };
 };
