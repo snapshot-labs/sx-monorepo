@@ -5,7 +5,6 @@ WORKDIR /app
 
 COPY package.json bun.lock turbo.json tsconfig.json ./
 COPY apps/api/package.json apps/api/
-COPY apps/auction/package.json apps/auction/
 COPY apps/delegates-api/package.json apps/delegates-api/
 COPY apps/highlight/package.json apps/highlight/
 COPY apps/hub/package.json apps/hub/
