@@ -200,12 +200,9 @@ function calculator(amount: number, quantity: number): number {
     return Number((amount * quantity).toFixed(2));
   }
 
-  return Number(
-    (quantity >= 12
-      ? (quantity / 12) * PRO_PRICES.yearly
-      : quantity * PRO_PRICES.monthly
-    ).toFixed(2)
-  );
+  return quantity >= 12
+    ? Math.round((quantity / 12) * PRO_PRICES.yearly)
+    : quantity * PRO_PRICES.monthly;
 }
 
 async function handleConnectorPick(connector: Connector) {
