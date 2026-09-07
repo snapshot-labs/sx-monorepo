@@ -44,9 +44,15 @@ export async function action(message, ipfs): Promise<void> {
 
   await db.queryAsync('REPLACE INTO users SET ?', params);
 
-  ['avatar', 'name'].forEach(type => {
-    if (profile[type] !== existingProfile[type]) {
-      clearStampCache(type, message.from).catch(err => capture(err));
-    }
-  });
+  await Promise.all(
+    ['avatar', 'name'].map(async type => {
+      if (profile[type] !== existingProfile[type]) {
+        try {
+          await clearStampCache(type, message.from, AbortSignal.timeout(5e3));
+        } catch (err) {
+          capture(err);
+        }
+      }
+    })
+  );
 }

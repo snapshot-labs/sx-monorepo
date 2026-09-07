@@ -25,6 +25,8 @@ describe('writer/profile', () => {
     jest.mocked(clearStampCache).mockReset();
   });
 
+  afterEach(() => jest.restoreAllMocks());
+
   it('reports cache failures without rejecting the saved profile', async () => {
     const err = new Error('Stamp network failure');
     jest.mocked(clearStampCache).mockRejectedValue(err);
@@ -42,11 +44,64 @@ describe('writer/profile', () => {
     expect(clearStampCache).not.toHaveBeenCalled();
   });
 
-  it('does not wait for best-effort cache clearing', async () => {
-    jest
-      .mocked(clearStampCache)
-      .mockImplementation(() => new Promise(() => {}));
-    await expect(action(message, 'ipfs')).resolves.toBeUndefined();
+  it('starts both cache clears in parallel and waits for both', async () => {
+    let resolveAvatar: () => void = () => {};
+    let resolveName: () => void = () => {};
+    const avatar = new Promise<void>(resolve => {
+      resolveAvatar = resolve;
+    });
+    const name = new Promise<void>(resolve => {
+      resolveName = resolve;
+    });
+    let notifyStarted: () => void = () => {};
+    const started = new Promise<void>(resolve => {
+      notifyStarted = resolve;
+    });
+    jest.mocked(clearStampCache).mockImplementation(async type => {
+      if (type === 'name') notifyStarted();
+      await (type === 'avatar' ? avatar : name);
+      return {};
+    });
+    let isFinished = false;
+    const result = action(message, 'ipfs').then(() => {
+      isFinished = true;
+    });
+    await started;
+    expect(clearStampCache).toHaveBeenCalledTimes(2);
+    expect(isFinished).toBe(false);
+    resolveAvatar();
+    await avatar;
+    expect(isFinished).toBe(false);
+    resolveName();
+    await result;
+    expect(isFinished).toBe(true);
+  });
+
+  it('bounds cache requests to five seconds and reports aborts without rejecting', async () => {
+    const controller = new AbortController();
+    const timeout = jest
+      .spyOn(AbortSignal, 'timeout')
+      .mockReturnValue(controller.signal);
+    const err = new Error('Stamp request timed out');
+    let notifyStarted: () => void = () => {};
+    const started = new Promise<void>(resolve => {
+      notifyStarted = resolve;
+    });
+    jest.mocked(clearStampCache).mockImplementation((_type, _id, signal) => {
+      const pending = new Promise((_resolve, reject) => {
+        signal?.addEventListener('abort', () => reject(err), { once: true });
+      });
+      if (_type === 'name') notifyStarted();
+      return pending;
+    });
+    const result = action(message, 'ipfs');
+    await started;
+    expect(timeout).toHaveBeenCalledTimes(2);
+    expect(timeout).toHaveBeenCalledWith(5000);
+    controller.abort();
+    await expect(result).resolves.toBeUndefined();
+    expect(capture).toHaveBeenCalledTimes(2);
+    expect(capture).toHaveBeenCalledWith(err);
   });
 
   it('still rejects a database failure before clearing the cache', async () => {
