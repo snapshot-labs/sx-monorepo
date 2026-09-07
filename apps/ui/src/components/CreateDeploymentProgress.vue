@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ProtocolID } from '@snapshot-labs/sx';
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Connector, ConnectorType, StrategyConfig } from '@/networks/types';
@@ -33,6 +34,7 @@ type Step =
 
 const props = defineProps<{
   networkId: NetworkID;
+  protocol: ProtocolID;
   salt: string;
   predictedSpaceAddress: string;
   metadata: SpaceMetadata;
@@ -148,6 +150,7 @@ async function deployStep(
 
     result = await createSpace(
       props.networkId,
+      props.protocol,
       props.salt,
       props.metadata,
       props.settings,
@@ -161,6 +164,7 @@ async function deployStep(
   } else {
     result = await deployDependency(
       props.networkId,
+      props.protocol,
       props.controller,
       props.predictedSpaceAddress,
       step.strategy

@@ -11,7 +11,7 @@ See root `AGENTS.md` for architecture and repo-wide tooling.
 
 ```bash
 bun run dev           # Vite dev server on port 8080
-bun run codegen       # GraphQL codegen from 3 schemas
+bun run codegen       # GraphQL codegen from 2 schemas
 ```
 
 ## Auto-Imports
@@ -122,7 +122,7 @@ Source of truth: `tailwind.config.ts`
 | Output dir                            | Schema source                   |
 | ------------------------------------- | ------------------------------- |
 | `src/networks/common/graphqlApi/gql/` | `../api/.checkpoint/schema.gql` |
-| `src/helpers/townhall/gql/`           | `../highlight/.checkpoint/schema.gql` |
+| `src/networks/offchain/api/gql/`      | `../hub/src/graphql/schema.gql` |
 
 Generated `gql/` directories are gitignored. **Never edit generated files.**
 

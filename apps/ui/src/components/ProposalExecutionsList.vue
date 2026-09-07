@@ -15,6 +15,26 @@ const props = defineProps<{
 
 const network = computed(() => getNetwork(props.networkId));
 
+const showActions = computed(() => {
+  const { proposal } = props;
+
+  if (!proposal.has_execution_window_opened) return false;
+
+  if (proposal.space.protocol === 'snapshot-x-inco') {
+    // Pre-reveal: tallies are encrypted, so gate only on the voting window.
+    if (proposal.quorum_reached == null) return true;
+
+    // Post-reveal: the attested on-chain verdict.
+    return !!(proposal.quorum_reached && proposal.support_achieved);
+  }
+
+  return (
+    proposal.scores.length > 0 &&
+    getProposalCurrentQuorum(proposal.network, proposal) >= proposal.quorum &&
+    toBigIntOrNumber(proposal.scores[0]) > toBigIntOrNumber(proposal.scores[1])
+  );
+});
+
 function downloadExecution(execution: ProposalExecution) {
   if (!execution.chainId) return;
 
@@ -102,12 +122,7 @@ function downloadExecution(execution: ProposalExecution) {
       v-if="
         proposal.executions &&
         proposal.executions.length > 0 &&
-        proposal.scores.length > 0 &&
-        getProposalCurrentQuorum(proposal.network, proposal) >=
-          proposal.quorum &&
-        toBigIntOrNumber(proposal.scores[0]) >
-          toBigIntOrNumber(proposal.scores[1]) &&
-        proposal.has_execution_window_opened &&
+        showActions &&
         network.helpers.isExecutorActionsSupported(execution.strategyType)
       "
       :proposal="proposal"

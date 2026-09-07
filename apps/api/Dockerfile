@@ -6,7 +6,6 @@ WORKDIR /app
 COPY package.json bun.lock turbo.json tsconfig.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/delegates-api/package.json apps/delegates-api/
-COPY apps/highlight/package.json apps/highlight/
 COPY apps/hub/package.json apps/hub/
 COPY apps/mana/package.json apps/mana/
 COPY apps/mcp/package.json apps/mcp/
@@ -26,8 +25,6 @@ FROM base AS build
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY apps/api apps/api
-# turbo's build task depends on highlight#codegen, so its source is needed too
-COPY apps/highlight apps/highlight
 COPY packages packages
 RUN bun run build --filter=api
 

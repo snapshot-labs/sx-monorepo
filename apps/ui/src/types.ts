@@ -41,6 +41,7 @@ export type NetworkID =
   | 'ape'
   | 'curtis'
   | 'sep'
+  | 'basesep'
   | 'sn'
   | 'sn-sep';
 
@@ -54,7 +55,7 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | 'none';
+export type Privacy = 'shutter' | 'inco' | 'none';
 export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
@@ -349,6 +350,9 @@ export type Proposal = {
    */
   completed: boolean;
   cancelled: boolean;
+  /** Set after finalizeReveal; null pre-reveal or non-confidential. */
+  quorum_reached?: boolean | null;
+  support_achieved?: boolean | null;
   state: ProposalState;
   privacy: Privacy;
   plugins: Record<string, unknown>;
