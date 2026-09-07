@@ -1,3 +1,4 @@
+import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import log from './log';
 import db from './mysql';
@@ -67,15 +68,20 @@ async function processVotes(votes: Vote[]) {
 
 export default async function run() {
   while (true) {
-    const votes = await getVotesPendingDeletion();
+    try {
+      const votes = await getVotesPendingDeletion();
 
-    if (votes.length) {
-      log.info(`[deleteProposalVotes] ${votes.length} votes to delete`);
-      await processVotes(votes);
-    }
+      if (votes.length) {
+        log.info(`[deleteProposalVotes] ${votes.length} votes to delete`);
+        await processVotes(votes);
+      }
 
-    if (votes.length < BATCH_SIZE) {
-      log.info('[deleteProposalVotes] sleeping');
+      if (votes.length < BATCH_SIZE) {
+        log.info('[deleteProposalVotes] sleeping');
+        await snapshot.utils.sleep(REFRESH_INTERVAL);
+      }
+    } catch (err) {
+      capture(err);
       await snapshot.utils.sleep(REFRESH_INTERVAL);
     }
   }
