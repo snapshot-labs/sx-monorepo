@@ -147,7 +147,8 @@ onMounted(() => {
   <div
     v-else-if="
       props.proposal.privacy !== 'none' &&
-      props.proposal.state === 'active' &&
+      (props.proposal.state === 'active' ||
+        (props.proposal.privacy === 'inco' && !props.proposal.completed)) &&
       withDetails
     "
     class="space-y-1"
