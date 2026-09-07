@@ -13,7 +13,6 @@ This is the Snapshot monorepository containing a Vue frontend, GraphQL API, a tr
 - [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
 - [`./apps/mcp`](./apps/mcp): MCP server for the Snapshot API
 - [`./apps/sequencer`](./apps/sequencer): Sequencer for Snapshot offchain protocol
-- [`./apps/highlight`](./apps/highlight): Experimental sequencer for offchain data using Checkpoint
 
 ## Packages
 

@@ -196,32 +196,19 @@ export const evmNetworks = {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
   }),
-  // Canonical SX is not deployed on Base Sepolia yet — only the Inco
-  // confidential reference deployment (inco-prefixed slots) is live.
   basesep: createStandardConfig(84532, {
     blockTime: 2,
     incoProxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
     incoMasterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
     authenticators: {
       EthSig: null,
-      EthSigV2: null,
-      EthTx: null,
       IncoEthTx: '0x9376EFC993DC6Ac09044300f26e015890bf97C17'
     },
-    strategies: {
-      Vanilla: '0xc501B2057E60CfD31559e4FD1e3134aF0BA9C673',
-      Comp: null,
-      OZVotes: null,
-      Whitelist: null
-    },
     proposalValidations: {
-      Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6',
-      VotingPower: null
+      Vanilla: '0x9A39194F870c410633C170889E9025fba2113c79'
     },
     executionStrategies: {
-      IncoSimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
-      SimpleQuorumAvatar: null,
-      SimpleQuorumTimelock: null
+      IncoSimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
     }
   })
 } as const;
