@@ -47,7 +47,11 @@ export function setData(result?: Record<string, string[]>) {
 
 export default async function run() {
   while (true) {
-    setData(await loadModerationData());
+    try {
+      setData(await loadModerationData());
+    } catch (err) {
+      capture(err);
+    }
     await snapshot.utils.sleep(20e3);
   }
 }

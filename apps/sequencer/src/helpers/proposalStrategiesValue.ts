@@ -1,3 +1,4 @@
+import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { getVpValueByStrategy } from './entityValue';
 import log from './log';
@@ -95,31 +96,32 @@ async function refreshVpByStrategy(proposals: Proposal[]) {
 
 export default async function run() {
   while (true) {
-    log.info('[proposalStrategiesValue] Fetching proposals values');
-    const proposals = await getProposals();
-    log.info(`[proposalStrategiesValue] Found ${proposals.length} proposals`);
+    try {
+      log.info('[proposalStrategiesValue] Fetching proposals values');
+      const proposals = await getProposals();
+      log.info(`[proposalStrategiesValue] Found ${proposals.length} proposals`);
 
-    if (proposals.length) {
-      try {
+      if (proposals.length) {
         await refreshVpByStrategy(proposals);
         log.info(
           `[proposalStrategiesValue] Refreshed from ${proposals[0].id} to ${
             proposals[proposals.length - 1].id
           }`
         );
-      } catch (err) {
-        if (err instanceof RateLimitError) {
-          log.info('Rate limit hit (429), sleeping for 1 minute...');
-          await snapshot.utils.sleep(60 * 1000);
-          continue;
-        }
-        throw err;
       }
-    }
 
-    if (proposals.length < BATCH_SIZE) {
-      log.info(`[proposalStrategiesValue] Sleeping ${REFRESH_INTERVAL}ms`);
-      await snapshot.utils.sleep(REFRESH_INTERVAL);
+      if (proposals.length < BATCH_SIZE) {
+        log.info(`[proposalStrategiesValue] Sleeping ${REFRESH_INTERVAL}ms`);
+        await snapshot.utils.sleep(REFRESH_INTERVAL);
+      }
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        log.info('Rate limit hit (429), sleeping for 1 minute...');
+        await snapshot.utils.sleep(60 * 1000);
+      } else {
+        capture(err);
+        await snapshot.utils.sleep(REFRESH_INTERVAL);
+      }
     }
   }
 }
