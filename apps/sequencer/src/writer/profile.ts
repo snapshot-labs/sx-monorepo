@@ -1,3 +1,4 @@
+import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
@@ -43,9 +44,9 @@ export async function action(message, ipfs): Promise<void> {
 
   await db.queryAsync('REPLACE INTO users SET ?', params);
 
-  ['avatar', 'name'].forEach(async type => {
+  ['avatar', 'name'].forEach(type => {
     if (profile[type] !== existingProfile[type]) {
-      await clearStampCache(type, message.from);
+      clearStampCache(type, message.from).catch(err => capture(err));
     }
   });
 }

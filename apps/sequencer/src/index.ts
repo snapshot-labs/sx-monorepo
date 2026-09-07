@@ -4,6 +4,7 @@ import { fallbackLogger } from '@snapshot-labs/snapshot-sentry';
 import cors from 'cors';
 import express from 'express';
 import api from './api';
+import startBackgroundTask from './helpers/backgroundTask';
 import deleteProposalVotes from './helpers/deleteProposalVotes';
 import log from './helpers/log';
 import initMetrics from './helpers/metrics';
@@ -21,13 +22,19 @@ import { trackTurboStatuses } from './helpers/turbo';
 import refreshVotesVpValue from './helpers/votesVpValue';
 
 const app = express();
+const stopBackgroundTasks: (() => void)[] = [];
 
 async function startServer() {
-  refreshModeration();
-  refreshProposalsVpValue();
-  refreshProposalsScoresValue();
-  refreshVotesVpValue();
-  deleteProposalVotes();
+  const backgroundTasks = {
+    refreshModeration,
+    refreshProposalsVpValue,
+    refreshProposalsScoresValue,
+    refreshVotesVpValue,
+    deleteProposalVotes
+  };
+  for (const [name, task] of Object.entries(backgroundTasks)) {
+    stopBackgroundTasks.push(startBackgroundTask(name, task));
+  }
 
   await initializeStrategies();
   refreshStrategies();
@@ -58,6 +65,7 @@ startServer()
       log.info(`Received ${signal}, shutting down gracefully...`);
 
       stopStrategies();
+      stopBackgroundTasks.forEach(stop => stop());
 
       server.close(() => {
         log.info('Server closed');
