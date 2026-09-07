@@ -6,7 +6,7 @@ import { writeHeapSnapshot } from 'v8';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
-import ethRpc, { handlers as ethHandlers } from './eth';
+import ethRpc from './eth';
 import pkg from '../package.json';
 import { registeredApeGasProposalsLoop } from './eth/registered';
 import logger from './logger';
@@ -33,16 +33,7 @@ app.use(cors({ maxAge: 86400 }));
 app.use('/eth_rpc', ethRpc);
 app.use('/stark_rpc', starkRpc);
 
-app.get('/', (req, res) =>
-  res.json({
-    version,
-    port: PORT,
-    posterWallets: {
-      base: ethHandlers[8453]?.getWallet('poster').address,
-      sep: ethHandlers[11155111]?.getWallet('poster').address
-    }
-  })
-);
+app.get('/', (req, res) => res.json({ version, port: PORT }));
 
 app.get('/debug/heapdump', (req, res) => {
   if (!debugSecret || req.header('secret') !== debugSecret) {

@@ -77,11 +77,7 @@ const hasPlaceHolderSidebar = computed(
     !['create-space-snapshot', 'create-space-snapshot-x'].includes(
       String(route.matched[0]?.name)
     ) &&
-    ![
-      'space-townhall-create',
-      'space-townhall-topic',
-      'settings-alias-authorize'
-    ].includes(String(route.matched[1]?.name)) &&
+    String(route.matched[1]?.name) !== 'settings-alias-authorize' &&
     !['editor', 'proposal'].includes(baseSubRouteName.value)
 );
 

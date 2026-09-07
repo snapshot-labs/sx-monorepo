@@ -14,26 +14,9 @@ const config: KnipConfig = {
     'apps/api': {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty']
     },
-    'apps/auction': {
-      entry: ['src/main.ts', 'src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],
-      vite: false,
-      ignoreDependencies: [
-        // used by the gitignored graphql-codegen output (gql/), which is not
-        // generated on CI since auction is excluded from build/codegen
-        '@graphql-typed-document-node/core',
-        '@iconify-json/heroicons-outline',
-        '@iconify-json/heroicons-solid',
-        'buffer',
-        'events',
-        'util'
-      ]
-    },
     'apps/delegates-api': {
       entry: ['src/index.ts'],
       ignoreDependencies: ['@logtail/pino', 'pino-pretty', 'ts-node']
-    },
-    'apps/highlight': {
-      entry: ['src/index.ts']
     },
     'apps/hub': {
       entry: ['src/index.ts']

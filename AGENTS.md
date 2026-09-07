@@ -23,7 +23,6 @@ CI will reject lint/type/test failures.
 | `apps/ui`        | Vue 3 frontend                                                        |
 | `apps/api`       | Apollo GraphQL server + Checkpoint blockchain indexer                 |
 | `apps/mana`      | Express transaction relayer                                           |
-| `apps/highlight` | Highlight integration app                                             |
 | `packages/sx.js` | Shared TypeScript SDK for governance (published as @snapshot-labs/sx) |
 | `scripts/`       | Monorepo dev scripts (dev-interactive, etc.)                          |
 | `tests/`         | E2E tests (Playwright)                                                |

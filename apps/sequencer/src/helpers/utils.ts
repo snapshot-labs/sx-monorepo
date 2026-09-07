@@ -291,9 +291,14 @@ export function captureError(
   capture(e, context);
 }
 
-export async function clearStampCache(type: string, id: string) {
+export async function clearStampCache(
+  type: string,
+  id: string,
+  signal?: AbortSignal
+) {
   return fetch(
-    `https://cdn.stamp.fyi/clear/${type}/${type === 'avatar' ? 'eth:' : ''}${id}`
+    `https://cdn.stamp.fyi/clear/${type}/${type === 'avatar' ? 'eth:' : ''}${id}`,
+    { signal }
   );
 }
 

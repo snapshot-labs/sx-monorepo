@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { createTune } from '@snapshot-labs/tune';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
@@ -5,6 +6,11 @@ import App from '@/App.vue';
 import { SIDEKICK_URL } from '@/helpers/constants';
 import router from '@/routes';
 import '@/style.scss';
+
+// Buffer polyfill for Inco SDK's ECIES path (dev).
+if (typeof globalThis.Buffer === 'undefined') {
+  globalThis.Buffer = Buffer;
+}
 
 const knownHosts = [
   'app.safe.global',
