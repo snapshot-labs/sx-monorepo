@@ -51,8 +51,13 @@ async function buildWalletClient(signer: Signer & TypedDataSigner) {
       const signedTypes = { ...types } as Record<string, TypedDataField[]>;
       delete signedTypes.EIP712Domain;
 
+      // ethers hashes every domain key, even ones set to undefined.
+      const signedDomain = Object.fromEntries(
+        Object.entries(domain ?? {}).filter(([, value]) => value !== undefined)
+      ) as TypedDataDomain;
+
       return signer._signTypedData(
-        domain as TypedDataDomain,
+        signedDomain,
         signedTypes,
         message as Record<string, unknown>
       ) as Promise<Hex>;
