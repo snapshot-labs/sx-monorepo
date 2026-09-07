@@ -155,4 +155,35 @@ describe('createEvmConfig', () => {
       evmConfig.executionStrategiesImplementations.SimpleQuorumTimelock
     ).toBeUndefined();
   });
+
+  it('should use inco factory, master space and implementations', () => {
+    const config = createStandardConfig(84532, {
+      blockTime: 2,
+      incoProxyFactory: '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494',
+      incoMasterSpace: '0x3F31D742D3158b07434A041e26B47e9EB94e010C',
+      executionStrategies: {
+        IncoSimpleQuorumAvatar: '0x1111111111111111111111111111111111111111',
+        IncoSimpleQuorumTimelock: '0x2222222222222222222222222222222222222222'
+      }
+    });
+
+    const evmConfig = createEvmConfig(config, 'snapshot-x-inco');
+
+    expect(evmConfig.proxyFactory).toBe(
+      '0xfDe801CFc7f9a931eB1CF026e60B08a366B13494'
+    );
+    expect(evmConfig.masterSpace).toBe(
+      '0x3F31D742D3158b07434A041e26B47e9EB94e010C'
+    );
+    expect(evmConfig.executionStrategiesImplementations).toEqual({
+      SimpleQuorumAvatar: '0x1111111111111111111111111111111111111111',
+      SimpleQuorumTimelock: '0x2222222222222222222222222222222222222222'
+    });
+  });
+
+  it('should throw when inco is not available', () => {
+    expect(() => createEvmConfig(evmNetworks.eth, 'snapshot-x-inco')).toThrow(
+      'snapshot-x-inco is not available on chain 1'
+    );
+  });
 });
