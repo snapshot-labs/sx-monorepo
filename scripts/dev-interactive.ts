@@ -2,14 +2,7 @@ import { execSync, fork } from 'child_process';
 import path from 'path';
 import { checkbox } from '@inquirer/prompts';
 
-type ServiceType =
-  | 'ui'
-  | 'api'
-  | 'mana'
-  | 'highlight'
-  | 'hub'
-  | 'sequencer'
-  | 'mcp';
+type ServiceType = 'ui' | 'api' | 'mana' | 'hub' | 'sequencer' | 'mcp';
 type Service = {
   env: Record<string, string>;
 };
@@ -30,11 +23,6 @@ const SERVICES: Record<ServiceType, Service> = {
   mana: {
     env: {
       VITE_MANA_URL: 'http://localhost:3001'
-    }
-  },
-  highlight: {
-    env: {
-      VITE_HIGHLIGHT_URL: 'http://localhost:3002'
     }
   },
   hub: {
@@ -99,7 +87,6 @@ async function run() {
         { name: 'UI', value: 'ui' as const },
         { name: 'API (only sep and sn-sep)', value: 'api' as const },
         { name: 'Mana', value: 'mana' as const },
-        { name: 'Highlight', value: 'highlight' as const },
         { name: 'Hub', value: 'hub' as const },
         { name: 'Sequencer', value: 'sequencer' as const },
         { name: 'MCP', value: 'mcp' as const }
@@ -109,7 +96,6 @@ async function run() {
     if (
       answer.includes('api') ||
       answer.includes('mana') ||
-      answer.includes('highlight') ||
       answer.includes('hub') ||
       answer.includes('sequencer')
     ) {
