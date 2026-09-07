@@ -44,9 +44,9 @@ const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
 
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
 
-const PRO_MONTHLY_PRICES: Record<SubscriptionLength, number> = {
-  monthly: 600,
-  yearly: 500
+const PRO_PRICES: Record<SubscriptionLength, number> = {
+  monthly: 400,
+  yearly: 4000
 } as const;
 
 const FEATURES = [
@@ -201,9 +201,9 @@ function calculator(amount: number, quantity: number): number {
   }
 
   return Number(
-    (
-      quantity *
-      (quantity >= 12 ? PRO_MONTHLY_PRICES.yearly : PRO_MONTHLY_PRICES.monthly)
+    (quantity >= 12
+      ? (quantity / 12) * PRO_PRICES.yearly
+      : quantity * PRO_PRICES.monthly
     ).toFixed(2)
   );
 }
@@ -319,9 +319,7 @@ onMounted(() => {
         class="max-w-[480px] w-full space-y-3"
       >
         <button
-          v-for="plan in Object.keys(
-            PRO_MONTHLY_PRICES
-          ) as SubscriptionLength[]"
+          v-for="plan in Object.keys(PRO_PRICES) as SubscriptionLength[]"
           :key="plan"
           :class="[
             'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
@@ -333,20 +331,15 @@ onMounted(() => {
             <h3 class="text-start">Pay {{ plan }}</h3>
             <div v-if="plan === 'yearly'">
               <div class="bg-skin-border text-sm rounded-full px-2">
-                Save ${{
-                  _n(
-                    (
-                      (PRO_MONTHLY_PRICES.monthly - PRO_MONTHLY_PRICES.yearly) *
-                      12
-                    ).toFixed(0)
-                  )
-                }}
+                Save ${{ _n(PRO_PRICES.monthly * 12 - PRO_PRICES.yearly) }}
               </div>
             </div>
           </div>
           <div class="flex items-center justify-end space-x-1 flex-wrap">
-            <h2>${{ PRO_MONTHLY_PRICES[plan] }}</h2>
-            <span class="text-sm text-skin-text">/ month</span>
+            <h2>${{ _n(PRO_PRICES[plan]) }}</h2>
+            <span class="text-sm text-skin-text">
+              / {{ plan === 'yearly' ? 'year' : 'month' }}
+            </span>
           </div>
         </button>
       </div>
@@ -508,10 +501,7 @@ onMounted(() => {
       :calculator="calculator"
       :network="paymentNetwork"
       :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
-      :unit-price="
-        PRO_MONTHLY_PRICES[subscriptionLength] *
-        (subscriptionLength === 'yearly' ? 12 : 1)
-      "
+      :unit-price="PRO_PRICES[subscriptionLength]"
       :barcode-payload="{
         type: 'turbo',
         params: { space: spaceKey },
