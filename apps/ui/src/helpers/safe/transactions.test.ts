@@ -493,9 +493,16 @@ describe('array arguments', () => {
 
 describe('1inch Fusion swap import', () => {
   const content = JSON.stringify(fusionSwap);
+  const safeSnap = { allowDelegatecall: true };
+
+  it('rejects the delegatecall unless the strategy allows it (SafeSnap only)', async () => {
+    await expect(parseSafeImportFile(content, '1')).rejects.toThrow(
+      /only supported with SafeSnap execution/
+    );
+  });
 
   it('captures the delegatecall operation from the file', async () => {
-    const { transactions } = await parseSafeImportFile(content, '1');
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
 
     expect(transactions).toHaveLength(2);
     // approve -> call, buildAndSignOrder -> delegatecall.
@@ -504,7 +511,7 @@ describe('1inch Fusion swap import', () => {
   });
 
   it('serializes to the exact MultiSend batch the Fusion script produces', async () => {
-    const { transactions } = await parseSafeImportFile(content, '1');
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
     const batch = transactions.map(serializeSafeSnapTransaction);
 
     expect(batch.map(tx => tx.operation)).toEqual(['0', '1']);
@@ -514,7 +521,7 @@ describe('1inch Fusion swap import', () => {
   });
 
   it('warns that the delegatecall transaction grants full control of the Safe', async () => {
-    const { warnings } = await parseSafeImportFile(content, '1');
+    const { warnings } = await parseSafeImportFile(content, '1', safeSnap);
 
     expect(warnings).toEqual([
       'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
@@ -522,9 +529,13 @@ describe('1inch Fusion swap import', () => {
   });
 
   it('preserves the delegatecall operation through a download-file export/re-import', async () => {
-    const { transactions } = await parseSafeImportFile(content, '1');
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
     const exported = buildBatchFile(1, transactions);
-    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+    const reimported = await parseSafeImportFile(
+      JSON.stringify(exported),
+      '1',
+      safeSnap
+    );
 
     expect(exported.transactions[0].operation).toBeUndefined();
     expect(exported.transactions[1].operation).toBe('1');
@@ -538,7 +549,11 @@ describe('1inch Fusion swap import', () => {
       transactions: [fusionSwap.transactions[1]]
     });
 
-    const { transactions } = await parseSafeImportFile(singleTxContent, '1');
+    const { transactions } = await parseSafeImportFile(
+      singleTxContent,
+      '1',
+      safeSnap
+    );
     const [serialized] = transactions.map(serializeSafeSnapTransaction);
 
     expect(serialized.operation).toBe('1');
@@ -1275,7 +1290,9 @@ describe('file validation', () => {
 
     for (const operation of validOperations) {
       await expect(
-        parseSafeImportFile(fileWithOperation(operation), '1')
+        parseSafeImportFile(fileWithOperation(operation), '1', {
+          allowDelegatecall: true
+        })
       ).resolves.toBeDefined();
     }
 
