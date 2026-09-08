@@ -153,7 +153,11 @@ onMounted(() => {
     "
     class="space-y-1"
   >
-    <div>
+    <div v-if="props.proposal.privacy === 'inco'">
+      Votes are encrypted and never revealed. The results will be decrypted
+      after the voting period is over.
+    </div>
+    <div v-else>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
