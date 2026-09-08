@@ -501,6 +501,20 @@ describe('1inch Fusion swap import', () => {
     );
   });
 
+  it('imports the bare array the order builder emits, assuming the treasury chain', async () => {
+    const { transactions, warnings } = await parseSafeImportFile(
+      JSON.stringify(fusionSwap.transactions),
+      '1',
+      safeSnap
+    );
+
+    expect(transactions.map(tx => tx.operation)).toEqual([undefined, '1']);
+    expect(warnings).toEqual([
+      'This file does not specify a chain; assuming chain 1',
+      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
+
   it('captures the delegatecall operation from the file', async () => {
     const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
 

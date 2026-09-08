@@ -311,6 +311,15 @@ export async function parseSafeImportFile(
     throw new SafeImportError('This file is not valid JSON');
   }
 
+  // A bare array (the Fusion order builder's output) has no chainId to check,
+  // so the treasury's chain is assumed rather than refused.
+  if (Array.isArray(file)) {
+    warnings.push(
+      `This file does not specify a chain; assuming chain ${chainId}`
+    );
+    file = { chainId, transactions: file };
+  }
+
   if (
     !file ||
     typeof file !== 'object' ||
