@@ -87,19 +87,9 @@ async function handleImportFile(event: Event) {
   try {
     const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
-      treasury.value.network
+      treasury.value.network,
+      { allowDelegatecall: props.strategy.type === 'safeSnap' }
     );
-
-    // Other strategies go through convertToMetaTransactions, which hardcodes
-    // operation 0.
-    if (
-      props.strategy.type !== 'safeSnap' &&
-      transactions.some(tx => tx.operation === '1')
-    ) {
-      throw new SafeImportError(
-        'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
-      );
-    }
 
     model.value = [...model.value, ...transactions];
     uiStore.addNotification(

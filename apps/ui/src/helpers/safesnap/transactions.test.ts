@@ -174,6 +174,9 @@ describe('serializeSafeSnapTransaction', () => {
     const serialized = serializeSafeSnapTransaction(tx);
     expect(serialized.operation).toBe('1');
     expect(parseSafeSnapTransaction(serialized).operation).toBe('1');
+    expect(
+      parseSafeSnapTransaction({ ...serialized, operation: 1 as any }).operation
+    ).toBe('1');
   });
 });
 

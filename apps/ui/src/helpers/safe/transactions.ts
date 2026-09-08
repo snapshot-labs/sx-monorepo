@@ -300,7 +300,8 @@ async function parseSafeTransaction(
 
 export async function parseSafeImportFile(
   content: string,
-  chainId: string
+  chainId: string,
+  { allowDelegatecall = false } = {}
 ): Promise<{ transactions: Transaction[]; warnings: string[] }> {
   const warnings: string[] = [];
   let file: Partial<BatchFile> | null;
@@ -390,6 +391,14 @@ export async function parseSafeImportFile(
     .map((tx, i) => (tx.operation === '1' ? i + 1 : null))
     .filter((i): i is number => i !== null);
   if (delegatecallIndexes.length > 0) {
+    // SafeSnap is the only executor that honours operation 1: EVM and
+    // Starknet strategies go through convertToMetaTransactions, which
+    // hardcodes 0, and read-only executions never execute at all.
+    if (!allowDelegatecall) {
+      throw new SafeImportError(
+        'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
+      );
+    }
     const plural = delegatecallIndexes.length > 1;
     warnings.push(
       `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
