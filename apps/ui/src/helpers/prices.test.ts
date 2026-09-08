@@ -1,0 +1,120 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ETH_CONTRACT } from './constants';
+import { getTokenPrices } from './prices';
+
+function fakeAddress(i: number) {
+  return `0x${i.toString(16).padStart(40, '0')}`;
+}
+
+function mockFetch() {
+  const calls: string[] = [];
+
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url: string) => {
+      calls.push(url);
+
+      const coinIds = url.split('/').pop()!.split(',');
+      const coins = Object.fromEntries(
+        coinIds.map(id => [id, { price: 1, symbol: 'X', confidence: 0.99 }])
+      );
+
+      return { json: async () => ({ coins }) };
+    })
+  );
+
+  return calls;
+}
+
+describe('getTokenPrices', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('prices every ERC-20 token alongside the native asset when there are exactly 100 of them', async () => {
+    mockFetch();
+
+    const erc20s = Array.from({ length: 100 }, (_, i) => fakeAddress(i));
+    const result = await getTokenPrices('1', [ETH_CONTRACT, ...erc20s]);
+
+    expect(Object.keys(result)).toHaveLength(101);
+    expect(result[ETH_CONTRACT]).toBeDefined();
+    erc20s.forEach(address => expect(result[address]).toBeDefined());
+  });
+
+  it('paginates across multiple requests when there are more addresses than a single batch allows', async () => {
+    const calls = mockFetch();
+
+    const erc20s = Array.from({ length: 250 }, (_, i) => fakeAddress(i));
+    const result = await getTokenPrices('1', [ETH_CONTRACT, ...erc20s]);
+
+    expect(Object.keys(result)).toHaveLength(251);
+    expect(calls).toHaveLength(4);
+  });
+
+  it('keeps each request under the API URL length limit even when the address count alone would fit one batch', async () => {
+    const calls = mockFetch();
+
+    const erc20s = Array.from({ length: 180 }, (_, i) => fakeAddress(i));
+    const result = await getTokenPrices('1', erc20s);
+
+    expect(Object.keys(result)).toHaveLength(180);
+    expect(calls.length).toBeGreaterThan(2);
+    calls.forEach(url => expect(url.length).toBeLessThan(9000));
+  });
+
+  it('drops a priced token whose confidence is below the DefiLlama TVL cutoff', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (!url.includes('/prices/current/')) {
+          return { json: async () => ({}) };
+        }
+
+        const coinIds = url.split('/').pop()!.split(',');
+        const coins = Object.fromEntries(
+          coinIds.map(id => [
+            id,
+            { price: 1, confidence: id.endsWith('1') ? 0.4 : 0.99 }
+          ])
+        );
+
+        return { json: async () => ({ coins }) };
+      })
+    );
+
+    const confident = fakeAddress(0);
+    const unconfident = fakeAddress(1);
+    const result = await getTokenPrices('1', [confident, unconfident]);
+
+    expect(result[confident]).toBeDefined();
+    expect(result[unconfident]).toBeUndefined();
+  });
+
+  it('prices a token DefiLlama does not index by address through its coin id override', async () => {
+    const avt = '0x0d88ed6e74bbfd96b831231638b66c05571e824f';
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (!url.includes('/prices/current/')) {
+          return { json: async () => ({}) };
+        }
+
+        if (!url.endsWith('coingecko:aventus')) {
+          return { json: async () => ({ coins: {} }) };
+        }
+
+        return {
+          json: async () => ({
+            coins: { 'coingecko:aventus': { price: 0.21, confidence: 0.99 } }
+          })
+        };
+      })
+    );
+
+    const result = await getTokenPrices('1', [avt]);
+
+    expect(result[avt]?.usd).toBe(0.21);
+  });
+});
