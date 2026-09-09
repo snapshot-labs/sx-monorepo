@@ -1,12 +1,21 @@
 import { Interface } from '@ethersproject/abi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
-import { createContractCallTransaction } from '@/helpers/transactions';
+import {
+  createContractCallTransaction,
+  createSendNftTransaction,
+  createSendTokenTransaction
+} from '@/helpers/transactions';
 import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile, SafeImportError } from './transactions';
 
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
+// The constructors resolve ENS names on mainnet; answer offline.
+vi.mock('@/helpers/ens', async importOriginal => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  resolveName: vi.fn(async () => '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')
+}));
 
 // Fail loudly on an unmocked getABI call instead of leaking a queued mock.
 beforeEach(() => {
@@ -1111,4 +1120,77 @@ describe('bool argument export', () => {
       expect(reimported.transactions[0].data).toBe(tx.data);
     }
   );
+});
+
+describe('export of stored calldata', () => {
+  const VITALIK = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045';
+  const USDC = {
+    name: 'USD Coin',
+    symbol: 'USDC',
+    decimals: 6,
+    contractAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+  } as any;
+
+  // The constructors resolve an ENS name into the calldata but keep the name
+  // in _form; a typed export rebuilt from _form would name a recipient Safe
+  // cannot encode.
+  it('exports a token transfer to an ENS name as the stored calldata', async () => {
+    const tx = await createSendTokenTransaction({
+      token: USDC,
+      form: { to: 'vitalik.eth', amount: '1' }
+    });
+    const exported = buildBatchFile(1, [tx]);
+
+    expect(tx.data).toContain(VITALIK.slice(2).toLowerCase());
+    expect(exported.transactions[0].contractMethod).toBeUndefined();
+    expect(exported.transactions[0].data).toBe(tx.data);
+  });
+
+  it('keeps the typed form for a token transfer to a plain address', async () => {
+    const tx = await createSendTokenTransaction({
+      token: USDC,
+      form: { to: VITALIK, amount: '1' }
+    });
+    const exported = buildBatchFile(1, [tx]);
+
+    expect(exported.transactions[0].contractMethod?.name).toBe('transfer');
+    expect(exported.transactions[0].data).toBeUndefined();
+
+    const reimported = await parseSafeImportFile(JSON.stringify(exported), '1');
+    expect(reimported.transactions[0].data).toBe(tx.data);
+  });
+
+  it('exports an ERC-1155 transfer as the stored calldata (its bytes payload encodes as 0x00, the typed form says 0x)', async () => {
+    const tx = await createSendNftTransaction({
+      nft: {
+        type: 'erc1155',
+        contractAddress: '0x495f947276749Ce646f68AC8c248420045cb7b5e',
+        tokenId: '1',
+        title: 'x',
+        collectionName: 'y'
+      },
+      address: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      form: { to: VITALIK, amount: '1' }
+    });
+    const exported = buildBatchFile(1, [tx]);
+
+    expect(exported.transactions[0].contractMethod).toBeUndefined();
+    expect(exported.transactions[0].data).toBe(tx.data);
+  });
+
+  it('exports a contract call with an ENS argument as the stored calldata', async () => {
+    const tx = await createContractCallTransaction({
+      form: {
+        to: USDC.contractAddress,
+        abi: TRANSFER_ABI,
+        method: 'transfer(address,uint256)',
+        args: { to: 'vitalik.eth', value: '100' },
+        amount: ''
+      }
+    });
+    const exported = buildBatchFile(1, [tx]);
+
+    expect(exported.transactions[0].contractMethod).toBeUndefined();
+    expect(exported.transactions[0].data).toBe(tx.data);
+  });
 });

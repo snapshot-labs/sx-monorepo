@@ -2,6 +2,7 @@ import { FormatTypes, Interface } from '@ethersproject/abi';
 import { parseFormArrayValue } from '@/helpers/transactions';
 import { Transaction } from '@/types';
 import { addChecksum } from './checksum';
+import { encodeContractMethod } from './transactions';
 import { BatchFile, BatchTransaction } from './types';
 import { ETH_CONTRACT } from '../constants';
 
@@ -164,6 +165,28 @@ export function buildBatchFile(
             tx._form.args
           );
           delete outputTransaction.data;
+        }
+      }
+
+      // The typed form is rebuilt from what the user typed (an ENS name, a
+      // hardcoded '0x' payload) while the proposal executes tx.data; keep it
+      // only when it re-encodes to that calldata, or Safe would run a
+      // different call than the proposal does.
+      if (outputTransaction.contractMethod) {
+        let encoded: string | null = null;
+        try {
+          encoded = encodeContractMethod(
+            outputTransaction.contractMethod,
+            outputTransaction.contractInputsValues ?? {}
+          );
+        } catch {
+          // unencodable typed form (e.g. an ENS name); export raw below
+        }
+
+        if (encoded?.toLowerCase() !== tx.data.toLowerCase()) {
+          delete outputTransaction.contractMethod;
+          delete outputTransaction.contractInputsValues;
+          outputTransaction.data = tx.data;
         }
       }
 
