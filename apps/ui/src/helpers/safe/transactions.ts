@@ -16,7 +16,8 @@ import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
 import {
   createRawTransaction,
-  getContractCallFormArgs
+  getContractCallFormArgs,
+  parseTupleValue
 } from '@/helpers/transactions';
 import { getSalt } from '@/helpers/utils';
 import { validateChecksum } from './checksum';
@@ -71,7 +72,7 @@ function parseBooleanValue(value: string): boolean {
 }
 
 function parseArg(type: string, value: string): any {
-  if (type.startsWith('tuple')) return JSON.parse(value);
+  if (type.startsWith('tuple')) return parseTupleValue(value);
   if (type.endsWith(']')) {
     // Safe writes string arrays as JSON (elements may contain commas).
     if (type.startsWith('string') && value.trim().startsWith('[')) {
