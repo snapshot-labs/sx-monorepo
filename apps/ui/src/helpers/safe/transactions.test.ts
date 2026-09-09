@@ -11,7 +11,10 @@ import {
 import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile, SafeImportError } from './transactions';
-import { serializeSafeSnapTransaction } from '../safesnap/transactions';
+import {
+  parseSafeSnapTransaction,
+  serializeSafeSnapTransaction
+} from '../safesnap/transactions';
 import fusionSwapMultiSend from './__fixtures__/fusion-swap-multisend.json';
 import fusionSwap from './__fixtures__/fusion-swap.json';
 
@@ -1624,6 +1627,31 @@ describe('export round-trip', () => {
 
     expect(exported!.transactions[0].data).toBe(data);
     expect(exported!.transactions[0].contractMethod).toBeUndefined();
+  });
+
+  it('keeps the calldata of a legacy SafeSnap NFT transfer that has no nftType', async () => {
+    const legacy = parseSafeSnapTransaction({
+      to: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+      data: '0x42842e0e',
+      value: '0',
+      type: 'transferNFT' as const,
+      recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      collectable: {
+        address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+        id: '810',
+        name: 'Weeedidit Palls #101',
+        tokenName: 'Weee Did It Palz'
+      }
+    });
+
+    const exported = buildBatchFile(1, [legacy]);
+    const { transactions } = await parseSafeImportFile(
+      JSON.stringify(exported),
+      '1'
+    );
+
+    expect(exported.transactions[0].data).toBe('0x42842e0e');
+    expect(transactions[0].data).toBe('0x42842e0e');
   });
 });
 

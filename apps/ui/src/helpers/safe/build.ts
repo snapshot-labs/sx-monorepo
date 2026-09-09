@@ -121,7 +121,9 @@ export function buildBatchFile(
           };
         }
 
-        delete outputTransaction.data;
+        // A legacy SafeSnap record has no nftType, so no contractMethod was
+        // built above; keep the calldata rather than exporting an empty call.
+        if (outputTransaction.contractMethod) delete outputTransaction.data;
       } else if (tx._type === 'stakeToken') {
         outputTransaction.contractMethod = {
           inputs: [
