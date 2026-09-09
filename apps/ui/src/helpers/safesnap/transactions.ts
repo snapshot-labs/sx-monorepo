@@ -170,8 +170,12 @@ function parseByType(tx: SafeSnapTransaction): Transaction {
 export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   const transaction = parseByType(tx);
 
-  // Stored plugin JSON is free-form; another client may have written a number.
-  return String(tx.operation) === '1'
+  // Stored plugin JSON is free-form; another client may have written a
+  // number. Strict equality on purpose: String(['1']) === '1' would let an
+  // array through.
+  const operation: unknown = tx.operation;
+
+  return operation === '1' || operation === 1
     ? { ...transaction, operation: '1' }
     : transaction;
 }

@@ -22,8 +22,9 @@ export interface BatchTransaction {
   value: string;
   data?: string;
   // Not in the Transaction Builder standard; 1 = delegatecall, carried
-  // through import and export.
-  operation?: string;
+  // through import and export. unknown because this is JSON straight off
+  // disk; validated against validOperations before use.
+  operation?: unknown;
   contractMethod?: ContractMethod;
   contractInputsValues?: { [key: string]: string };
 }

@@ -100,7 +100,10 @@ function downloadExecution(execution: ProposalExecution) {
     <div class="flex justify-between items-center border-y pr-3">
       <UiSectionHeader label="Transactions" class="border-b-0 pr-0 truncate" />
       <UiTooltip
-        v-if="execution.strategyType === 'ReadOnlyExecution'"
+        v-if="
+          execution.strategyType === 'ReadOnlyExecution' ||
+          execution.strategyType === 'safeSnap'
+        "
         title="Export transactions"
       >
         <button
