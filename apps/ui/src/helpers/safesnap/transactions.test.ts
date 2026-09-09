@@ -212,10 +212,11 @@ describe('createSafeSnapExecution', () => {
   });
 
   it('stores a single batch SafeSnap recomputes the hash from', () => {
+    const delegatecall = { ...raw('2'), operation: '1' as const };
     const execution = createSafeSnapExecution(
       1,
       '0x0d70332CEB7F3C94b061cda48327891E3449A9E1',
-      [raw('1'), raw('2')]
+      [raw('1'), delegatecall]
     );
 
     expect(execution.network).toBe('1');
@@ -225,10 +226,12 @@ describe('createSafeSnapExecution', () => {
     // One batch (single array) holding both transactions.
     expect(execution.txs).toHaveLength(1);
     expect(execution.txs[0]).toHaveLength(2);
+    // The writer itself must carry the operation, not just the serializer.
+    expect(execution.txs[0].map(tx => tx.operation)).toEqual(['0', '1']);
     // Read parser round-trips the stored batch.
     expect(execution.txs[0].map(parseSafeSnapTransaction)).toEqual([
       raw('1'),
-      raw('2')
+      delegatecall
     ]);
   });
 
