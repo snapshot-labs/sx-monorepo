@@ -1,5 +1,4 @@
 import { Interface } from '@ethersproject/abi';
-import { BigNumber } from '@ethersproject/bignumber';
 import {
   ContractCallTransaction,
   RawTransaction,
@@ -171,17 +170,20 @@ function parseByType(tx: SafeSnapTransaction): Transaction {
 export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   const transaction = parseByType(tx);
 
-  // v1 hashes, packs and executes `operation` through BigNumber.from (uint8),
-  // so anything it reads as 1 must show as a delegatecall here. Values it
-  // throws on cannot execute at all.
-  let delegatecall = false;
-  try {
-    delegatecall = BigNumber.from(tx.operation).eq(1);
-  } catch {
-    // unexecutable operation, leave it a call
+  // Strict equality: String([1]) === '1'. v1's uint8 encoders accept more
+  // spellings and disagree on some (-255 packs as 0x01), so anything but the
+  // canonical 0/1 invalidates the proposal rather than being guessed at.
+  // Stored JSON, typed string but untrusted.
+  const operation: unknown = tx.operation === undefined ? '0' : tx.operation;
+  if (![0, 1, '0', '1'].some(valid => valid === operation)) {
+    throw new Error(
+      `Unsupported SafeSnap operation ${JSON.stringify(tx.operation)}`
+    );
   }
 
-  return delegatecall ? { ...transaction, operation: '1' } : transaction;
+  return operation === 1 || operation === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
 export function serializeSafeSnapTransaction(
