@@ -185,6 +185,33 @@ function decodeWithAbi(
   };
 }
 
+function toAbi(method: ContractMethod): JsonFragment[] {
+  return [
+    {
+      name: method.name,
+      type: 'function',
+      stateMutability: method.payable ? 'payable' : 'nonpayable',
+      inputs: method.inputs ?? [],
+      outputs: []
+    }
+  ];
+}
+
+// Encodes a Safe contractMethod from its contractInputsValues strings; the
+// export uses it to check that a typed form reproduces the stored calldata.
+export function encodeContractMethod(
+  method: ContractMethod,
+  values: Record<string, string>
+): string {
+  return new Interface(toAbi(method)).encodeFunctionData(
+    method.name,
+    // Safe keys unnamed inputs by index (SolidityForm: name || index).
+    (method.inputs ?? []).map((input, i) =>
+      parseArg(input.type, values[input.name || i])
+    )
+  );
+}
+
 function fromContractMethod(
   tx: BatchTransaction,
   method: ContractMethod
@@ -195,36 +222,16 @@ function fromContractMethod(
   // https://github.com/safe-global/safe-react-apps/blob/118f25df89f781631386e6b279d812dfc837204a/apps/tx-builder/src/utils.ts#L206
   if (method.name === 'receive' || method.name === 'fallback') return toRaw(tx);
 
-  const inputs = method.inputs ?? [];
-  const abi: JsonFragment[] = [
-    {
-      name: method.name,
-      type: 'function',
-      stateMutability: method.payable ? 'payable' : 'nonpayable',
-      inputs,
-      outputs: []
-    }
-  ];
-
   const data =
     tx.data && tx.data !== '0x'
       ? tx.data
-      : new Interface(abi).encodeFunctionData(
-          method.name,
-          // Safe keys unnamed inputs by index (SolidityForm: name || index).
-          inputs.map((input, i) =>
-            parseArg(
-              input.type,
-              (tx.contractInputsValues ?? {})[input.name || i]
-            )
-          )
-        );
+      : encodeContractMethod(method, tx.contractInputsValues ?? {});
 
   const txWithData = { ...tx, data };
 
   // Fall back with the calldata computed above: parseSafeTransaction's own
   // toRaw(tx) would drop it when the file omitted data.
-  return decodeWithAbi(txWithData, abi) || toRaw(txWithData);
+  return decodeWithAbi(txWithData, toAbi(method)) || toRaw(txWithData);
 }
 
 async function decode(
