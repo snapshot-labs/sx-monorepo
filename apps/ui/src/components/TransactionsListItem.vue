@@ -171,9 +171,10 @@ const parsedTitle = computedAsync(
         <div class="truncate text-skin-link" v-html="parsedTitle" />
         <UiTooltip
           v-if="isDelegatecall"
+          class="shrink-0"
           title="This transaction runs as a delegatecall, granting it full control of the Safe."
         >
-          <UiPill label="Delegatecall" class="text-skin-danger shrink-0" />
+          <UiPill label="Delegatecall" class="text-skin-danger" />
         </UiTooltip>
       </div>
       <slot name="right">

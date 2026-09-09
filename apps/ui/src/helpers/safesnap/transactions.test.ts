@@ -178,6 +178,25 @@ describe('serializeSafeSnapTransaction', () => {
       parseSafeSnapTransaction({ ...serialized, operation: 1 as any }).operation
     ).toBe('1');
   });
+
+  it('does not treat an array operation as a delegatecall', () => {
+    const tx: Transaction = {
+      to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
+      value: '0',
+      data: '0xdeadbeef',
+      salt: '',
+      operation: '1',
+      _type: 'raw',
+      _form: { recipient: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769' }
+    };
+
+    const serialized = serializeSafeSnapTransaction(tx);
+
+    expect(
+      parseSafeSnapTransaction({ ...serialized, operation: ['1'] as any })
+        .operation
+    ).toBeUndefined();
+  });
 });
 
 describe('createSafeSnapExecution', () => {

@@ -480,7 +480,7 @@ export type Drafts = Record<string, Draft>;
 
 // operation is undefined for a regular call, '1' for a delegatecall
 // (e.g. an imported 1inch Fusion swap); see apps/ui/src/helpers/safe.
-export type Transaction = _Transaction & { operation?: string };
+export type Transaction = _Transaction & { operation?: '1' };
 
 // Utils
 export type RequiredProperty<T> = {

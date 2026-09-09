@@ -1283,9 +1283,13 @@ describe('file validation', () => {
       '2',
       2,
       '0x1',
+      '0x0',
       '01',
       ' 1',
       true,
+      false,
+      null,
+      -1,
       'delegatecall',
       {},
       [1]
@@ -1315,6 +1319,51 @@ describe('file validation', () => {
         parseSafeImportFile(fileWithOperation(operation), '1')
       ).rejects.toThrow(/Transaction 1 has an invalid operation/);
     }
+  });
+
+  it('gates a numeric delegatecall operation behind allowDelegatecall too', async () => {
+    const content = file([
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: 1
+      }
+    ]);
+
+    await expect(parseSafeImportFile(content, '1')).rejects.toThrow(
+      /only supported with SafeSnap execution/
+    );
+
+    const { transactions } = await parseSafeImportFile(content, '1', {
+      allowDelegatecall: true
+    });
+    expect(transactions[0].operation).toBe('1');
+  });
+
+  it('pluralizes the delegatecall warning for more than one delegatecall', async () => {
+    const content = file([
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: '1'
+      },
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: '1'
+      }
+    ]);
+
+    const { warnings } = await parseSafeImportFile(content, '1', {
+      allowDelegatecall: true
+    });
+
+    expect(warnings).toEqual([
+      'Transactions 1, 2 are a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
   });
 });
 
