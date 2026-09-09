@@ -1,4 +1,5 @@
 import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   ContractCallTransaction,
   RawTransaction,
@@ -170,13 +171,17 @@ function parseByType(tx: SafeSnapTransaction): Transaction {
 export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   const transaction = parseByType(tx);
 
-  // Another client may have stored a number. Strict on purpose:
-  // String(['1']) === '1' would let an array through.
-  const operation: unknown = tx.operation;
+  // v1 hashes, packs and executes `operation` through BigNumber.from (uint8),
+  // so anything it reads as 1 must show as a delegatecall here. Values it
+  // throws on cannot execute at all.
+  let delegatecall = false;
+  try {
+    delegatecall = BigNumber.from(tx.operation).eq(1);
+  } catch {
+    // unexecutable operation, leave it a call
+  }
 
-  return operation === '1' || operation === 1
-    ? { ...transaction, operation: '1' }
-    : transaction;
+  return delegatecall ? { ...transaction, operation: '1' } : transaction;
 }
 
 export function serializeSafeSnapTransaction(
