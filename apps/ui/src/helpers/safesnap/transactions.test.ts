@@ -179,23 +179,25 @@ describe('serializeSafeSnapTransaction', () => {
     ).toBe('1');
   });
 
-  it('does not treat an array operation as a delegatecall', () => {
-    const tx: Transaction = {
+  // Snapshot v1 hashes, packs and executes `operation` through ethers'
+  // BigNumber.from (uint8), so the badge must follow what it would run.
+  it('reads a stored operation exactly as the executor would', () => {
+    const stored = {
       to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
       value: '0',
-      data: '0xdeadbeef',
-      salt: '',
-      operation: '1',
-      _type: 'raw',
-      _form: { recipient: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769' }
+      data: '0xdeadbeef'
     };
+    const read = (operation: unknown) =>
+      parseSafeSnapTransaction({ ...stored, operation } as any).operation;
 
-    const serialized = serializeSafeSnapTransaction(tx);
-
-    expect(
-      parseSafeSnapTransaction({ ...serialized, operation: ['1'] as any })
-        .operation
-    ).toBeUndefined();
+    // BigNumber.from reads these as 1: executes as a delegatecall.
+    for (const operation of ['1', 1, [1], '0x1', '0x01', '01']) {
+      expect(read(operation), JSON.stringify(operation)).toBe('1');
+    }
+    // 0, or values BigNumber.from throws on (cannot execute at all).
+    for (const operation of ['0', 0, undefined, '', null, true, ['1']]) {
+      expect(read(operation), JSON.stringify(operation)).toBeUndefined();
+    }
   });
 });
 
