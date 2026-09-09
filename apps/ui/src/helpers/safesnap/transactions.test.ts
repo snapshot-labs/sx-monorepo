@@ -179,9 +179,10 @@ describe('serializeSafeSnapTransaction', () => {
     ).toBe('1');
   });
 
-  // Snapshot v1 hashes, packs and executes `operation` through ethers'
-  // BigNumber.from (uint8), so the badge must follow what it would run.
-  it('reads a stored operation exactly as the executor would', () => {
+  // v1 validates '0' | '1' (Plugin.validateTransaction) but its JSON import
+  // stores any value verbatim, and its uint8 encoders disagree on some of
+  // them (solidity.pack wraps -255 to 0x01); refuse rather than guess.
+  it('accepts only a canonical 0/1 operation', () => {
     const stored = {
       to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
       value: '0',
@@ -190,13 +191,26 @@ describe('serializeSafeSnapTransaction', () => {
     const read = (operation: unknown) =>
       parseSafeSnapTransaction({ ...stored, operation } as any).operation;
 
-    // BigNumber.from reads these as 1: executes as a delegatecall.
-    for (const operation of ['1', 1, [1], '0x1', '0x01', '01']) {
+    for (const operation of ['1', 1]) {
       expect(read(operation), JSON.stringify(operation)).toBe('1');
     }
-    // 0, or values BigNumber.from throws on (cannot execute at all).
-    for (const operation of ['0', 0, undefined, '', null, true, ['1']]) {
+    for (const operation of ['0', 0, undefined]) {
       expect(read(operation), JSON.stringify(operation)).toBeUndefined();
+    }
+    for (const operation of [
+      '',
+      null,
+      true,
+      [1],
+      ['1'],
+      '0x1',
+      '0x01',
+      '01',
+      2,
+      '2',
+      -255
+    ]) {
+      expect(() => read(operation), JSON.stringify(operation)).toThrow();
     }
   });
 });
