@@ -28,12 +28,7 @@ const SEARCH_CONFIG: Record<
     defaultRoute: 'space-proposals',
     searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
-    exclude: [
-      'space-editor',
-      'space-proposal',
-      'space-townhall-create',
-      'space-townhall-topic'
-    ]
+    exclude: ['space-editor', 'space-proposal']
   },
   my: {
     defaultRoute: 'my-explore',

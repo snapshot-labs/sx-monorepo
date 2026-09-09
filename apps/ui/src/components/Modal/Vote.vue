@@ -290,7 +290,7 @@ watchEffect(async () => {
           </span>
         </dd>
       </dl>
-      <div v-if="proposal.privacy === 'none'" class="s-box">
+      <div v-if="['none', 'inco'].includes(proposal.privacy)" class="s-box">
         <UiForm
           v-model="form"
           :error="formErrors"

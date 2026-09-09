@@ -5,5 +5,3 @@ export { getExecutionData } from './executors';
 export * from './strategies';
 export * from './networks';
 export * from './types';
-export * from './highlightConstants';
-export type { Receipt } from './clients/highlight/types';

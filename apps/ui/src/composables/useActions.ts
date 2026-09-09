@@ -1,4 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { ProtocolID } from '@snapshot-labs/sx';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
@@ -138,13 +139,7 @@ export function useActions() {
 
     let hash;
     // TODO: unify send/soc to both return txHash under same property
-    if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
-      console.log('Receipt', envelope.signatureData);
-    } else if (envelope.type === 'HIGHLIGHT_ENVELOPE') {
-      const receipt = await network.actions.send(envelope);
-
-      console.log('receipt', receipt);
-    } else if (envelope.signatureData || envelope.sig) {
+    if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
       hash = receipt.transaction_hash || receipt.hash;
 
@@ -194,6 +189,7 @@ export function useActions() {
 
   async function predictSpaceAddress(
     networkId: NetworkID,
+    protocol: ProtocolID,
     salt: string
   ): Promise<string | null> {
     if (!auth.value) {
@@ -202,11 +198,15 @@ export function useActions() {
     }
 
     const network = getReadWriteNetwork(networkId);
-    return network.actions.predictSpaceAddress(auth.value.provider, { salt });
+    return network.actions.predictSpaceAddress(auth.value.provider, {
+      protocol,
+      salt
+    });
   }
 
   async function deployDependency(
     networkId: NetworkID,
+    protocol: ProtocolID,
     controller: string,
     spaceAddress: string,
     dependencyConfig: StrategyConfig
@@ -221,6 +221,7 @@ export function useActions() {
       auth.value.provider,
       auth.value.connector.type,
       {
+        protocol,
         controller,
         spaceAddress,
         strategy: dependencyConfig
@@ -230,6 +231,7 @@ export function useActions() {
 
   async function createSpace(
     networkId: NetworkID,
+    protocol: ProtocolID,
     salt: string,
     metadata: SpaceMetadata,
     settings: SpaceSettings,
@@ -256,6 +258,7 @@ export function useActions() {
       auth.value.provider,
       salt,
       {
+        protocol,
         controller,
         votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
         minVotingDuration: getCurrentFromDuration(
@@ -485,6 +488,22 @@ export function useActions() {
     );
 
     return true;
+  }
+
+  async function revealResults(proposal: Proposal) {
+    if (!auth.value) return await forceLogin();
+
+    const network = getReadWriteNetwork(proposal.network);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+
+    await wrapPromise(
+      proposal.network,
+      network.actions.revealResults(auth.value.provider, proposal)
+    );
   }
 
   async function executeTransactions(proposal: Proposal) {
@@ -840,6 +859,7 @@ export function useActions() {
     updateProposal: wrapWithErrors(updateProposal),
     flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
+    revealResults: wrapWithErrors(revealResults),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),

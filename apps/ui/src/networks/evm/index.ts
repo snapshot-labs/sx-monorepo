@@ -17,10 +17,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
   const provider = getProvider(chainId);
   const constants = createConstants(networkId, { pin });
-  const api = createApi(apiUrl, networkId, constants, {
-    // NOTE: Highlight is currently disabled
-    // highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
-  });
+  const api = createApi(apiUrl, networkId, constants);
 
   const helpers = {
     getAuthenticatorSupportInfo: (authenticator: string) =>
@@ -118,6 +115,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'basesep',
       'mnt',
       'bnb',
       'bnbt',
@@ -126,7 +124,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, helpers, chainId),
+    actions: createActions(provider, helpers, networkId),
     api,
     constants,
     helpers

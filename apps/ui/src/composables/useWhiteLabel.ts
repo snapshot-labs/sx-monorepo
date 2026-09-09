@@ -39,10 +39,6 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
     network: 's',
     id: 'worldlibertyfinancial.com'
   },
-  'townhall.box': {
-    network: 's',
-    id: 'openagora.eth'
-  },
   'governance.starknet.io': {
     skinSettings: {
       bg_color: '#f9f8f9',
