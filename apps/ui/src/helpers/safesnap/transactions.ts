@@ -13,7 +13,7 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  // 0 = call, 1 = delegatecall; read back on parse so editing keeps it.
+  // '0' | '1'; read back on parse so editing keeps a delegatecall.
   operation?: string;
   nonce?: string;
 };
@@ -69,8 +69,8 @@ export type SafeSnapExecutionData = {
   txs: SafeSnapTransaction[][];
 };
 
-// Safe MultiSend v1.3.0, the delegatecall-capable one (not MultiSendCallOnly).
-// Not deployed on every chain in CHAIN_IDS: ApeChain (33139) has no code here.
+// Safe MultiSend v1.3.0 (delegatecall-capable, not MultiSendCallOnly).
+// Missing on some chains, see #2366.
 const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 function parseTransferFunds(
@@ -170,9 +170,8 @@ function parseByType(tx: SafeSnapTransaction): Transaction {
 export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   const transaction = parseByType(tx);
 
-  // Stored plugin JSON is free-form; another client may have written a
-  // number. Strict equality on purpose: String(['1']) === '1' would let an
-  // array through.
+  // Another client may have stored a number. Strict on purpose:
+  // String(['1']) === '1' would let an array through.
   const operation: unknown = tx.operation;
 
   return operation === '1' || operation === 1
