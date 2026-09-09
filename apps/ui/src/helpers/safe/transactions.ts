@@ -26,6 +26,12 @@ export class SafeImportError extends Error {}
 
 const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
 
+const validOperations = [undefined, '', '0', '1', 0, 1];
+
+function isDelegatecallOperation(operation: unknown): boolean {
+  return String(operation) === '1';
+}
+
 function parseValue(value?: string | null): string {
   return value ? BigNumber.from(value).toString() : '0';
 }
@@ -293,7 +299,7 @@ async function parseSafeTransaction(
     (await decode(tx, chainId)) ||
     toRaw(tx);
 
-  return String(tx.operation) === '1'
+  return isDelegatecallOperation(tx.operation)
     ? { ...transaction, operation: '1' }
     : transaction;
 }
@@ -311,8 +317,9 @@ export async function parseSafeImportFile(
     throw new SafeImportError('This file is not valid JSON');
   }
 
-  // A bare array (the Fusion order builder's output) has no chainId to check,
-  // so the treasury's chain is assumed rather than refused.
+  // A bare array (the Fusion order builder's output) never carries a chainId,
+  // so the treasury's chain is assumed. An object without one is a broken
+  // Transaction Builder file (Safe always writes the key) and is refused below.
   if (Array.isArray(file)) {
     warnings.push(
       `This file does not specify a chain; assuming chain ${chainId}`
@@ -351,6 +358,7 @@ export async function parseSafeImportFile(
     );
   }
 
+  const delegatecallIndexes: number[] = [];
   file.transactions.forEach((tx, i) => {
     if (!tx || typeof tx !== 'object') {
       throw new SafeImportError(`Transaction ${i + 1} is malformed`);
@@ -375,14 +383,24 @@ export async function parseSafeImportFile(
       throw new SafeImportError(`Transaction ${i + 1} has an invalid value`);
     }
     // Strict equality on purpose: String([1]) === '1' would let an array through.
-    const operation = (tx as { operation?: unknown }).operation;
-    const validOperations = [undefined, '', '0', '1', 0, 1];
+    const operation = tx.operation;
     if (!validOperations.some(valid => valid === operation)) {
       throw new SafeImportError(
         `Transaction ${i + 1} has an invalid operation`
       );
     }
+    if (isDelegatecallOperation(operation)) delegatecallIndexes.push(i + 1);
   });
+
+  // Checked before parsing so a refused file skips the ABI lookups below.
+  // SafeSnap is the only executor that honours operation 1: EVM and
+  // Starknet strategies go through convertToMetaTransactions, which
+  // hardcodes 0, and read-only executions never execute at all.
+  if (delegatecallIndexes.length > 0 && !allowDelegatecall) {
+    throw new SafeImportError(
+      'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
+    );
+  }
 
   const transactions = await Promise.all(
     file.transactions.map((tx, i) =>
@@ -396,18 +414,7 @@ export async function parseSafeImportFile(
     )
   );
 
-  const delegatecallIndexes = transactions
-    .map((tx, i) => (tx.operation === '1' ? i + 1 : null))
-    .filter((i): i is number => i !== null);
   if (delegatecallIndexes.length > 0) {
-    // SafeSnap is the only executor that honours operation 1: EVM and
-    // Starknet strategies go through convertToMetaTransactions, which
-    // hardcodes 0, and read-only executions never execute at all.
-    if (!allowDelegatecall) {
-      throw new SafeImportError(
-        'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
-      );
-    }
     const plural = delegatecallIndexes.length > 1;
     warnings.push(
       `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
