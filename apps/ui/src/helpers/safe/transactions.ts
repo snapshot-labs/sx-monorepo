@@ -116,10 +116,27 @@ function decodeWithAbi(
   tx: BatchTransaction,
   abi: any[]
 ): ContractCallTransaction | null {
+  const iface = new Interface(abi);
   let parsed: TransactionDescription;
   try {
-    parsed = new Interface(abi).parseTransaction({ data: tx.data! });
+    parsed = iface.parseTransaction({ data: tx.data! });
   } catch {
+    return null;
+  }
+
+  // The Edit form re-encodes from the parsed args, but ethers' decoder
+  // accepts trailing bytes (ERC-2771 sender, router referral tags) and
+  // non-canonical encodings; keep any calldata it would not rebuild raw.
+  const reencoded = iface.encodeFunctionData(
+    parsed.functionFragment,
+    parsed.args
+  );
+  if (reencoded.toLowerCase() !== tx.data!.toLowerCase()) return null;
+
+  // The form only carries an amount for payable methods, so a nonpayable
+  // ABI (e.g. the ERC20 fallback for an unverified contract) would zero
+  // the file's value on edit+save.
+  if (!parsed.functionFragment.payable && parseValue(tx.value) !== '0') {
     return null;
   }
 

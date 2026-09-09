@@ -62,9 +62,10 @@ describe('parseSafeImportFile', () => {
               { name: 'value', type: 'uint256' }
             ]
           },
+          // Disagrees with the calldata on purpose: the calldata must win.
           contractInputsValues: {
             to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-            value: '100'
+            value: '200'
           }
         }
       ]),
@@ -652,6 +653,141 @@ describe('decoding imported transactions', () => {
 
     expect(tx._type).toBe('raw');
     expect(tx.data).toBe(data);
+  });
+
+  describe('calldata the Edit form cannot rebuild byte-identical', () => {
+    const SET_ABI = ['function set(uint256 value)'];
+    const SET_METHOD = {
+      name: 'set',
+      payable: false,
+      inputs: [{ name: 'value', type: 'uint256' }]
+    };
+    // ethers' decoder ignores trailing bytes, so this parses as set(7).
+    const data = `${new Interface(SET_ABI).encodeFunctionData('set', ['7'])}deadbeef`;
+
+    it('falls back to raw for a calldata suffix decoded via the fetched ABI', async () => {
+      vi.mocked(getABI).mockResolvedValueOnce(SET_ABI as any);
+
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('raw');
+      expect(tx.data).toBe(data);
+    });
+
+    it('falls back to raw for a calldata suffix with contractMethod metadata', async () => {
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: '0',
+            data,
+            contractMethod: SET_METHOD,
+            contractInputsValues: { value: '7' }
+          }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('raw');
+      expect(tx.data).toBe(data);
+    });
+  });
+
+  describe('native value the Edit form cannot carry', () => {
+    const ONE_ETH = '1000000000000000000';
+    const data = new Interface(TRANSFER_ABI).encodeFunctionData('transfer', [
+      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      '100'
+    ]);
+
+    it('falls back to raw when the ERC20 fallback ABI says nonpayable but the file carries value', async () => {
+      vi.mocked(getABI).mockRejectedValueOnce(new Error('not verified'));
+
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: ONE_ETH,
+            data
+          }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('raw');
+      expect(tx.value).toBe(ONE_ETH);
+      expect(tx.data).toBe(data);
+    });
+
+    it('falls back to raw when contractMethod says nonpayable but the file carries value', async () => {
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: ONE_ETH,
+            data,
+            contractMethod: {
+              name: 'transfer',
+              payable: false,
+              inputs: TRANSFER_ABI[0].inputs
+            },
+            contractInputsValues: {
+              to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+              value: '100'
+            }
+          }
+        ]),
+        '1'
+      );
+
+      expect(tx._type).toBe('raw');
+      expect(tx.value).toBe(ONE_ETH);
+      expect(tx.data).toBe(data);
+    });
+
+    it('keeps a payable contractMethod editable with its value as the form amount', async () => {
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: ONE_ETH,
+            data,
+            contractMethod: {
+              name: 'transfer',
+              payable: true,
+              inputs: TRANSFER_ABI[0].inputs
+            },
+            contractInputsValues: {
+              to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+              value: '100'
+            }
+          }
+        ]),
+        '1'
+      );
+      const resaved = await createContractCallTransaction({
+        form: { ...(tx._form as any), to: tx.to }
+      });
+
+      expect(tx._type).toBe('contractCall');
+      expect((tx._form as any).amount).toBe('1.0');
+      expect(resaved.value).toBe(ONE_ETH);
+    });
   });
 
   it('falls back to raw with the freshly encoded calldata when contractMethod inputs are unnamed and the file omits data', async () => {
