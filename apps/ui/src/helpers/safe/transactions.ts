@@ -64,10 +64,8 @@ function splitArrayValue(value: string): string[] {
 function parseBooleanValue(value: string): boolean {
   const normalized = value.trim().toLowerCase();
 
-  if (['true', 'True', 'TRUE', '1'].some(s => s === normalized)) return true;
-  if (['false', 'False', 'FALSE', '0'].some(s => s === normalized)) {
-    return false;
-  }
+  if (['true', '1'].includes(normalized)) return true;
+  if (['false', '0'].includes(normalized)) return false;
 
   throw new Error('Invalid Boolean value');
 }
