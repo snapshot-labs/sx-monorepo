@@ -317,9 +317,8 @@ export async function parseSafeImportFile(
     throw new SafeImportError('This file is not valid JSON');
   }
 
-  // A bare array (the Fusion order builder's output) never carries a chainId,
-  // so the treasury's chain is assumed. An object without one is a broken
-  // Transaction Builder file (Safe always writes the key) and is refused below.
+  // The Fusion order builder's bare array never carries a chainId; an object
+  // without one is a broken Transaction Builder file and is refused below.
   if (Array.isArray(file)) {
     warnings.push(
       `This file does not specify a chain; assuming chain ${chainId}`
@@ -392,10 +391,8 @@ export async function parseSafeImportFile(
     if (isDelegatecallOperation(operation)) delegatecallIndexes.push(i + 1);
   });
 
-  // Checked before parsing so a refused file skips the ABI lookups below.
-  // SafeSnap is the only executor that honours operation 1: EVM and
-  // Starknet strategies go through convertToMetaTransactions, which
-  // hardcodes 0, and read-only executions never execute at all.
+  // Before parsing so a refused file skips the ABI lookups. Only SafeSnap
+  // honours operation 1; convertToMetaTransactions hardcodes 0.
   if (delegatecallIndexes.length > 0 && !allowDelegatecall) {
     throw new SafeImportError(
       'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
