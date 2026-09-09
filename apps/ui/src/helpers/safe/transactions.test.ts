@@ -892,6 +892,34 @@ describe('tuple arguments', () => {
     );
   });
 
+  it('keeps an unquoted integer above 2^53 exact instead of rounding it', async () => {
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        {
+          to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+          value: '0',
+          contractMethod: {
+            name: 'setPair',
+            payable: false,
+            inputs: ABI[0].inputs
+          },
+          contractInputsValues: {
+            pair: '["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", 1000000000000000000]'
+          }
+        }
+      ]),
+      '1'
+    );
+
+    expect(tx.data).toBe(
+      new Interface(ABI).encodeFunctionData('setPair', [
+        ['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '1000000000000000000']
+      ])
+    );
+  });
+
   it('exports plain values in contractInputsValues', async () => {
     vi.mocked(getABI).mockResolvedValueOnce(ABI);
 
