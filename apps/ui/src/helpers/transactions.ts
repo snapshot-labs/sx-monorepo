@@ -153,6 +153,17 @@ export function parseFormArrayValue(value: string): string[] {
   return value.split(',').map(element => element.trim());
 }
 
+// JSON.parse rounds integers above 2^53; quote long bare numbers first.
+// Only 16+ digits: shorter ones are exact, and quoting a bare 0/1 would
+// encode a bool component as true.
+export function parseTupleValue(value: string): any {
+  return JSON.parse(
+    value.replace(/"(?:[^"\\]|\\.)*"|-?\d{16,}/g, match =>
+      match.startsWith('"') ? match : `"${match}"`
+    )
+  );
+}
+
 export async function createContractCallTransaction({
   form
 }: {
@@ -177,7 +188,7 @@ export async function createContractCallTransaction({
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
         if (input.type.includes('tuple')) {
-          args[i] = JSON.parse(args[i]);
+          args[i] = parseTupleValue(args[i]);
         } else if (input.type === 'address') {
           const resolved = await resolver.resolveName(args[i]);
           if (resolved?.address) args[i] = resolved.address;
