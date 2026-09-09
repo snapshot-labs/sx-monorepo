@@ -63,8 +63,7 @@ export function buildBatchFile(
         data: tx.data
       } as BatchTransaction;
 
-      // Only '1' is emitted so call-only files stay byte-identical to the
-      // Transaction Builder standard.
+      // Emitted only for '1' so call-only files stay byte-identical to Safe's.
       if (tx.operation === '1') outputTransaction.operation = '1';
 
       if (tx._type === 'sendToken') {
@@ -121,8 +120,7 @@ export function buildBatchFile(
           };
         }
 
-        // A legacy SafeSnap record has no nftType, so no contractMethod was
-        // built above; keep the calldata rather than exporting an empty call.
+        // A legacy SafeSnap record has no nftType, hence no contractMethod.
         if (outputTransaction.contractMethod) delete outputTransaction.data;
       } else if (tx._type === 'stakeToken') {
         outputTransaction.contractMethod = {

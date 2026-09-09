@@ -45,8 +45,7 @@ const importingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
-// Tenderly simulates every transaction as a call, so a delegatecall batch
-// cannot be simulated.
+// Tenderly runs every transaction as a call.
 const hasDelegatecall = computed(() => model.value.some(isDelegatecall));
 
 function addTx(tx: TransactionType) {
