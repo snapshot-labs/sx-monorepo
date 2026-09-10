@@ -137,6 +137,34 @@ describe('parseSafeImportFile', () => {
     expect(tx.value).toBe('1000');
   });
 
+  it('keeps an explicit data "0x" as a plain transfer even with contractMethod (Safe treats any truthy data as custom hex)', async () => {
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        {
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          value: '1000000000000000000',
+          data: '0x',
+          contractMethod: {
+            name: 'transfer',
+            payable: false,
+            inputs: TRANSFER_ABI[0].inputs
+          },
+          contractInputsValues: {
+            to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+            value: '100'
+          }
+        }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe('0x');
+    expect(tx.value).toBe('1000000000000000000');
+  });
+
   it('parses a native transfer as a raw transaction', async () => {
     const {
       transactions: [tx]
@@ -294,6 +322,43 @@ describe('scalar arguments', () => {
       importOne({ flag: 'true', amount: '', names: '["a"]' })
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
   });
+
+  // web3-eth-abi formatParam: bytesN is right-padded to N bytes first, then
+  // an odd digit count gets a 0 after 0x; dynamic bytes only gets the latter.
+  it.each([
+    ['bytes32', '0x01', `0x01${'00'.repeat(31)}`],
+    ['bytes32', '0x1', `0x1${'0'.repeat(63)}`],
+    ['bytes', '0x1', '0x01']
+  ])(
+    'pads a %s value %s the way Safe encodes it',
+    async (type, value, expected) => {
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          {
+            to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+            value: '0',
+            data: null,
+            contractMethod: {
+              name: 'store',
+              payable: false,
+              inputs: [{ name: 'v', type }]
+            },
+            contractInputsValues: { v: value }
+          }
+        ]),
+        '1'
+      );
+
+      expect(tx.data).toBe(
+        new Interface([`function store(${type} v)`]).encodeFunctionData(
+          'store',
+          [expected]
+        )
+      );
+    }
+  );
 
   it('parses a JSON string array, keeping commas inside strings', async () => {
     const {
@@ -514,14 +579,35 @@ describe('decoding imported transactions', () => {
     expect(tx.data).toBe(data);
   });
 
-  it('still decodes as an editable contractCall when a string[] has no commas', async () => {
-    vi.mocked(getABI).mockResolvedValueOnce([
-      'function setNames(string[] names)'
-    ] as any);
+  // The Edit form validates args with abiToDefinition's schema; ajv has no
+  // format for these array types and throws at compile, leaving Confirm
+  // disabled.
+  it.each([
+    ['string[]', ['a', 'b']],
+    ['uint8[]', ['1', '2']],
+    ['bytes32[]', [`0x${'00'.repeat(31)}01`]]
+  ])('falls back to raw for a decoded %s', async (type, elements) => {
+    const abi = [`function set(${type} xs)`];
+    vi.mocked(getABI).mockResolvedValueOnce(abi as any);
+    const data = new Interface(abi).encodeFunctionData('set', [elements]);
 
-    const data = new Interface([
-      'function setNames(string[] names)'
-    ]).encodeFunctionData('setNames', [['a', 'b']]);
+    const {
+      transactions: [tx]
+    } = await parseSafeImportFile(
+      file([
+        { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+      ]),
+      '1'
+    );
+
+    expect(tx._type).toBe('raw');
+    expect(tx.data).toBe(data);
+  });
+
+  it('keeps a decoded uint256[] editable (the Edit form has a format for it)', async () => {
+    const abi = ['function set(uint256[] xs)'];
+    vi.mocked(getABI).mockResolvedValueOnce(abi as any);
+    const data = new Interface(abi).encodeFunctionData('set', [['1', '2']]);
 
     const {
       transactions: [tx]
@@ -533,6 +619,7 @@ describe('decoding imported transactions', () => {
     );
 
     expect(tx._type).toBe('contractCall');
+    expect((tx._form as any).args).toEqual({ xs: '1, 2' });
   });
 
   it('falls back to raw for a decoded empty array, preserving calldata across export/re-import', async () => {
@@ -1161,15 +1248,13 @@ describe('export round-trip', () => {
     expect(reimported.transactions[0].data).toBe(data);
   });
 
+  // The Edit form never lists a string[] method (no ajv format), but a
+  // WalletConnect request still builds such a call through the same
+  // constructor; export must write it in Safe's array syntax.
   it('brackets array args so the Safe Transaction Builder can parse them', async () => {
     const ARRAY_ABI = [
       'function batchNotify(address[] recipients, string[] names)'
     ];
-    vi.mocked(getABI).mockResolvedValueOnce(
-      new Interface(ARRAY_ABI).fragments.map(fragment =>
-        JSON.parse(fragment.format('json'))
-      )
-    );
     const data = new Interface(ARRAY_ABI).encodeFunctionData('batchNotify', [
       [
         '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
@@ -1178,13 +1263,21 @@ describe('export round-trip', () => {
       ['alice', 'bob']
     ]);
 
-    const { transactions } = await parseSafeImportFile(
-      file([
-        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
-      ]),
-      '1'
-    );
-    const exported = buildBatchFile(1, transactions as any);
+    const tx = await createContractCallTransaction({
+      form: {
+        to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        abi: ARRAY_ABI,
+        method: 'batchNotify(address[],string[])',
+        args: {
+          recipients:
+            '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+          names: 'alice, bob'
+        },
+        amount: ''
+      }
+    });
+    expect(tx.data).toBe(data);
+    const exported = buildBatchFile(1, [tx as any]);
 
     // Bracketed, unquoted: what Safe's own parseArrayOfValues requires.
     expect(exported.transactions[0].contractInputsValues?.recipients).toBe(
@@ -1201,22 +1294,21 @@ describe('export round-trip', () => {
 
   it('keeps quote characters that are part of a string[] element on export', async () => {
     const ARRAY_ABI = ['function setNames(string[] names)'];
-    vi.mocked(getABI).mockResolvedValueOnce(
-      new Interface(ARRAY_ABI).fragments.map(fragment =>
-        JSON.parse(fragment.format('json'))
-      )
-    );
     const data = new Interface(ARRAY_ABI).encodeFunctionData('setNames', [
       ['"alice"', 'bob']
     ]);
 
-    const { transactions } = await parseSafeImportFile(
-      file([
-        { to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', value: '0', data }
-      ]),
-      '1'
-    );
-    const exported = buildBatchFile(1, transactions as any);
+    const tx = await createContractCallTransaction({
+      form: {
+        to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        abi: ARRAY_ABI,
+        method: 'setNames(string[])',
+        args: { names: '"alice", bob' },
+        amount: ''
+      }
+    });
+    expect(tx.data).toBe(data);
+    const exported = buildBatchFile(1, [tx as any]);
 
     expect(exported.transactions[0].contractInputsValues?.names).toBe(
       JSON.stringify(['"alice"', 'bob'])
