@@ -19,6 +19,7 @@ const props = defineProps<{
   space: Space;
   disabled?: boolean;
   strategy: StrategyWithTreasury;
+  importTransactions: (transactions: TransactionType[]) => boolean;
   extraContacts?: Contact[];
 }>();
 
@@ -43,6 +44,11 @@ const simulationState: Ref<
 > = ref(null);
 const importingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+let isDisposed = false;
+
+onScopeDispose(() => {
+  isDisposed = true;
+});
 
 const network = computed(() => getNetwork(props.space.network));
 // Tenderly runs every transaction as a call.
@@ -79,18 +85,23 @@ async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file || !treasury.value) return;
+  if (!file || !treasury.value || props.disabled || importingFile.value) return;
 
+  const { importTransactions } = props;
+  const chainId = treasury.value.network;
+  const allowDelegatecall = props.strategy.type === 'safeSnap';
   importingFile.value = true;
 
   try {
     const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
-      treasury.value.network,
-      { allowDelegatecall: props.strategy.type === 'safeSnap' }
+      chainId,
+      { allowDelegatecall }
     );
 
-    model.value = [...model.value, ...transactions];
+    if (isDisposed || props.disabled || !importTransactions(transactions)) {
+      return;
+    }
     uiStore.addNotification(
       'success',
       `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`

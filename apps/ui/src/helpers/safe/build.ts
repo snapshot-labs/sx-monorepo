@@ -31,9 +31,6 @@ function toSafeContractInputsValues(
       ];
     });
 
-  // A checkbox `bool` arg is a real boolean at runtime; must stringify it
-  // or export writes an unquoted JSON `false`/`true` that parseBooleanValue
-  // throws on re-reading.
   const scalars = Object.fromEntries(
     Object.entries(args).map(([name, value]) => [
       name,

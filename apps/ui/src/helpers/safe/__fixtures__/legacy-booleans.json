@@ -1,0 +1,46 @@
+{
+  "version": "1.0",
+  "chainId": "1",
+  "createdAt": 1789069973499,
+  "meta": {
+    "name": "Batch File",
+    "txBuilderVersion": "1.17.0",
+    "checksum": "0x0325238e4f16134f60a62bce5843b425c0ab6d2b3387d02003cf2d650b327116"
+  },
+  "transactions": [
+    {
+      "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "value": "0",
+      "contractMethod": {
+        "inputs": [
+          {
+            "type": "bool",
+            "name": "flag"
+          }
+        ],
+        "name": "setFlag",
+        "payable": false
+      },
+      "contractInputsValues": {
+        "flag": true
+      }
+    },
+    {
+      "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "value": "0",
+      "contractMethod": {
+        "inputs": [
+          {
+            "type": "bool",
+            "name": "flag"
+          }
+        ],
+        "name": "setFlag",
+        "payable": false
+      },
+      "contractInputsValues": {
+        "flag": false
+      }
+    }
+  ]
+}

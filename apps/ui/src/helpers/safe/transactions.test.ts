@@ -17,6 +17,10 @@ import {
 } from '../safesnap/transactions';
 import fusionSwapMultiSend from './__fixtures__/fusion-swap-multisend.json';
 import fusionSwap from './__fixtures__/fusion-swap.json';
+import hexInteger from './__fixtures__/hex-integer.json';
+import legacyBooleans from './__fixtures__/legacy-booleans.json';
+import signedHexInteger from './__fixtures__/signed-hex-integer.json';
+import uppercaseHexInteger from './__fixtures__/uppercase-hex-integer.json';
 
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 // The constructors resolve ENS names on mainnet; answer offline.
@@ -409,6 +413,114 @@ describe('scalar arguments', () => {
     } = await importOne({ flag: 'true', amount: '1', names: 'a, b' });
 
     expect(tx.data).toBe(encode(true, '1', ['a', 'b']));
+  });
+});
+
+describe('legacy and Safe-generated metadata', () => {
+  it('imports actual booleans from the legacy execution exporter', async () => {
+    const { transactions, warnings } = await parseSafeImportFile(
+      JSON.stringify(legacyBooleans),
+      '1'
+    );
+    const iface = new Interface(['function setFlag(bool flag)']);
+
+    expect(warnings).toEqual([]);
+    expect(transactions.map(tx => tx.data)).toEqual(
+      [true, false].map(flag => iface.encodeFunctionData('setFlag', [flag]))
+    );
+  });
+
+  it.each([
+    ['bare', hexInteger, 'uint256', '255'],
+    ['signed', signedHexInteger, 'int256', '-255'],
+    ['uppercase-prefixed', uppercaseHexInteger, 'uint256', '255']
+  ])(
+    'imports a %s hexadecimal integer export from Safe',
+    async (_, batch, type, value) => {
+      const { transactions, warnings } = await parseSafeImportFile(
+        JSON.stringify(batch),
+        '1'
+      );
+
+      expect(warnings).toEqual([]);
+      expect(transactions[0].data).toBe(
+        new Interface([`function setCount(${type} count)`]).encodeFunctionData(
+          'setCount',
+          [value]
+        )
+      );
+    }
+  );
+
+  const importInteger = (count: string, type = 'uint256') =>
+    parseSafeImportFile(
+      file([
+        {
+          ...hexInteger.transactions[0],
+          contractMethod: {
+            name: 'setCount',
+            payable: false,
+            inputs: [{ name: 'count', type }]
+          },
+          contractInputsValues: { count }
+        }
+      ]),
+      '1'
+    );
+
+  it.each([
+    ['FF', 'uint256', '255'],
+    ['1e3', 'uint256', '483'],
+    [' "ff" ', 'uint256', '255'],
+    ['100', 'uint256', '100'],
+    ['010', 'uint256', '10'],
+    ['0xff', 'uint256', '255'],
+    ['0x10', 'uint256', '16'],
+    ['-10', 'int256', '-10'],
+    ['-0xff', 'int256', '-255'],
+    ['-ff', 'int256', '-255'],
+    ['-FF', 'int16', '-255'],
+    ['0XFF', 'uint256', '255'],
+    ['0XFF', 'int16', '255'],
+    ['-0XFF', 'int16', '-255'],
+    ['-7f', 'int8', '-127'],
+    ['-0x80', 'int8', '-128'],
+    ['-128', 'int8', '-128'],
+    ['ff', 'int16', '255'],
+    ['f'.repeat(64), 'uint256', BigNumber.from(2).pow(256).sub(1).toString()]
+  ])('encodes %j as %s value %s', async (value, type, expected) => {
+    const { transactions } = await importInteger(value, type);
+
+    expect(transactions[0].data).toBe(
+      new Interface([`function setCount(${type} count)`]).encodeFunctionData(
+        'setCount',
+        [expected]
+      )
+    );
+  });
+
+  it.each([
+    ['fg', 'uint256'],
+    ['1.5', 'uint256'],
+    ['+10', 'uint256'],
+    ['-ff', 'uint256'],
+    ['-0XFF', 'uint256'],
+    ['-0xff', 'uint256'],
+    ['0XFF', 'int8'],
+    ['-ff', 'int8'],
+    ['-129', 'int8'],
+    ['0X', 'uint256'],
+    ['0Xfg', 'uint256'],
+    ['0x', 'uint256'],
+    ['-', 'int256'],
+    [`1${'0'.repeat(78)}`, 'uint256'],
+    [`1${'f'.repeat(64)}`, 'uint256'],
+    ['ff', 'int8'],
+    ['-1', 'uint8']
+  ])('rejects invalid or out-of-range %j for %s', async (value, type) => {
+    await expect(importInteger(value, type)).rejects.toThrow(
+      /Transaction 1 in this file could not be imported/
+    );
   });
 });
 

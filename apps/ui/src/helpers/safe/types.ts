@@ -24,7 +24,7 @@ export interface BatchTransaction {
   // Not in the Transaction Builder standard. Raw JSON, validated on import.
   operation?: unknown;
   contractMethod?: ContractMethod;
-  contractInputsValues?: { [key: string]: string };
+  contractInputsValues?: { [key: string]: string | boolean };
 }
 
 export interface ContractMethod {

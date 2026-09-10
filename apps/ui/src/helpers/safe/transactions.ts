@@ -68,7 +68,9 @@ function splitArrayValue(value: string): string[] {
 
 // Same spellings as the Safe Transaction Builder's parseBooleanValue
 // (safe-global/safe-react-apps apps/tx-builder/src/utils.ts, MIT, 118f25df).
-function parseBooleanValue(value: string): boolean {
+function parseBooleanValue(value: string | boolean): boolean {
+  if (typeof value === 'boolean') return value;
+
   const normalized = value.trim().toLowerCase();
 
   if (['true', '1'].includes(normalized)) return true;
@@ -77,7 +79,10 @@ function parseBooleanValue(value: string): boolean {
   throw new Error('Invalid Boolean value');
 }
 
-function parseArg(type: string, value: string): any {
+function parseArg(type: string, value: string | boolean): any {
+  if (type === 'bool') return parseBooleanValue(value);
+  if (typeof value !== 'string') throw new Error('Invalid argument value');
+
   if (type.startsWith('tuple')) return parseTupleValue(value);
   if (type.endsWith(']')) {
     // Safe writes string arrays as JSON (elements may contain commas).
@@ -89,12 +94,22 @@ function parseArg(type: string, value: string): any {
     const elementType = type.replace(/\[\d*\]$/, '');
     return splitArrayValue(value).map(v => parseArg(elementType, v));
   }
-  if (type === 'bool') return parseBooleanValue(value);
   if (/^u?int\d*$/.test(type)) {
     const trimmed = value.replace(/["']/g, '').trim();
     if (!trimmed) throw new Error('Invalid empty integer value');
 
-    return trimmed;
+    const negative = trimmed.startsWith('-');
+    const magnitude = negative ? trimmed.slice(1) : trimmed;
+    let hex: string;
+    if (/^0x[0-9a-f]+$/i.test(magnitude)) {
+      hex = `0x${magnitude.slice(2)}`;
+    } else if (/^[0-9a-f]+$/i.test(magnitude) && /[a-f]/i.test(magnitude)) {
+      hex = `0x${magnitude}`;
+    } else {
+      return trimmed;
+    }
+
+    return BigNumber.from(negative ? `-${hex}` : hex).toString();
   }
   if (/^bytes\d*$/.test(type)) {
     // Safe encodes with web3-eth-abi, whose formatParam right-pads a short
@@ -231,11 +246,9 @@ function toAbi(method: ContractMethod): JsonFragment[] {
   ];
 }
 
-// Encodes a Safe contractMethod from its contractInputsValues strings; the
-// export uses it to check that a typed form reproduces the stored calldata.
 export function encodeContractMethod(
   method: ContractMethod,
-  values: Record<string, string>
+  values: Record<string, string | boolean>
 ): string {
   return new Interface(toAbi(method)).encodeFunctionData(
     method.name,
