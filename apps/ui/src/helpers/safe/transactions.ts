@@ -135,29 +135,31 @@ function decodeWithAbi(
     return null;
   }
 
+  // parsed.functionFragment is a deepCopy (@ethersproject/properties) of the
+  // interface's fragment; in ethers' ESM build (what Vite bundles) that copy
+  // loses prototype methods like format(), so read the live fragment instead.
+  const fragment = iface.getFunction(parsed.signature);
+
   // The Edit form re-encodes from the parsed args, but ethers' decoder
   // accepts trailing bytes (ERC-2771 sender, router referral tags) and
   // non-canonical encodings; keep any calldata it would not rebuild raw.
-  const reencoded = iface.encodeFunctionData(
-    parsed.functionFragment,
-    parsed.args
-  );
+  const reencoded = iface.encodeFunctionData(fragment, parsed.args);
   if (reencoded.toLowerCase() !== tx.data!.toLowerCase()) return null;
 
   // The form only carries an amount for payable methods, so a nonpayable
   // ABI (e.g. the ERC20 fallback for an unverified contract) would zero
   // the file's value on edit+save.
-  if (!parsed.functionFragment.payable && parseValue(tx.value) !== '0') {
+  if (!fragment.payable && parseValue(tx.value) !== '0') {
     return null;
   }
 
   // Modal/Transaction.vue hides view methods and swaps the selection to the
   // first listed one, so an unchanged edit+save would encode a different call.
-  if (parsed.functionFragment.stateMutability === 'view') return null;
+  if (fragment.stateMutability === 'view') return null;
 
   // Unnamed (ethers: null) or duplicate names collapse into one key below and
   // in createContractCallTransaction on edit+save; keep such calls raw.
-  const names = parsed.functionFragment.inputs.map(input => input.name);
+  const names = fragment.inputs.map(input => input.name);
   if (names.some(name => !name) || new Set(names).size !== names.length) {
     return null;
   }
@@ -167,7 +169,7 @@ function decodeWithAbi(
   // (string[], uint8[], bytes32[], bool[], fixed-size, nested), which leaves
   // the modal's Confirm disabled.
   try {
-    getValidator(abiToDefinition(parsed.functionFragment));
+    getValidator(abiToDefinition(fragment));
   } catch {
     return null;
   }
@@ -175,7 +177,7 @@ function decodeWithAbi(
   // - a fixed-size array gets no format (abiToDefinition keys on '[]'), but
   //   createContractCallTransaction leaves it a string, so re-save throws;
   // - an empty array collapses to the same '' the form uses for "no value".
-  const hasUnsafeArray = parsed.functionFragment.inputs.some(
+  const hasUnsafeArray = fragment.inputs.some(
     (input, i) =>
       /\[\d+\]/.test(input.type) ||
       (input.type.endsWith('[]') && (parsed.args[i] as unknown[]).length === 0)
@@ -189,13 +191,10 @@ function decodeWithAbi(
     abi,
     method: parsed.signature,
     args: Object.fromEntries(
-      parsed.functionFragment.inputs.map((input, i) => [
-        input.name,
-        toPlain(parsed.args[i])
-      ])
+      fragment.inputs.map((input, i) => [input.name, toPlain(parsed.args[i])])
     )
   });
-  parsed.functionFragment.inputs.forEach((input, i) => {
+  fragment.inputs.forEach((input, i) => {
     if (input.type === 'bool') args[input.name] = parsed.args[i];
   });
 
@@ -210,9 +209,7 @@ function decodeWithAbi(
       recipient: tx.to,
       method: parsed.signature,
       args,
-      amount: parsed.functionFragment.payable
-        ? formatUnits(parseValue(tx.value), 18)
-        : ''
+      amount: fragment.payable ? formatUnits(parseValue(tx.value), 18) : ''
     }
   };
 }
