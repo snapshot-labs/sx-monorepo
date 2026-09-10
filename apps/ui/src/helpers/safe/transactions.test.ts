@@ -790,6 +790,42 @@ describe('decoding imported transactions', () => {
     });
   });
 
+  describe('methods the Edit form cannot select', () => {
+    const importInspect = async (mutability: string) => {
+      const abi = [
+        `function inspect() ${mutability} returns (uint256)`,
+        'function clear()'
+      ];
+      vi.mocked(getABI).mockResolvedValueOnce(abi as any);
+      const data = new Interface(abi).encodeFunctionData('inspect', []);
+
+      const {
+        transactions: [tx]
+      } = await parseSafeImportFile(
+        file([
+          { to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', value: '0', data }
+        ]),
+        '1'
+      );
+
+      return { tx, data };
+    };
+
+    it('falls back to raw for a view method (the modal hides it and would swap in clear())', async () => {
+      const { tx, data } = await importInspect('view');
+
+      expect(tx._type).toBe('raw');
+      expect(tx.data).toBe(data);
+    });
+
+    it('keeps a pure method editable (the modal lists it)', async () => {
+      const { tx } = await importInspect('pure');
+
+      expect(tx._type).toBe('contractCall');
+      expect((tx._form as any).method).toBe('inspect()');
+    });
+  });
+
   it('falls back to raw with the freshly encoded calldata when contractMethod inputs are unnamed and the file omits data', async () => {
     const {
       transactions: [tx]
