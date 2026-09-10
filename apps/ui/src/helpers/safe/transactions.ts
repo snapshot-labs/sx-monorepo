@@ -19,7 +19,8 @@ import {
   getContractCallFormArgs,
   parseTupleValue
 } from '@/helpers/transactions';
-import { getSalt } from '@/helpers/utils';
+import { abiToDefinition, getSalt } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
@@ -90,6 +91,16 @@ function parseArg(type: string, value: string): any {
 
     return trimmed;
   }
+  if (/^bytes\d*$/.test(type)) {
+    // Safe encodes with web3-eth-abi, whose formatParam right-pads a short
+    // bytesN to N bytes and then turns an odd digit count into 0x0…
+    let hex = value.trim();
+    const size = Number(type.slice(5));
+    if (size) hex = hex.padEnd(2 + size * 2, '0');
+    if (hex.length % 2) hex = `0x0${hex.slice(2)}`;
+
+    return hex;
+  }
 
   return value;
 }
@@ -151,24 +162,24 @@ function decodeWithAbi(
     return null;
   }
 
-  // - fixed-size/nested arrays always throw on re-save;
-  // - an empty array collapses to the same '' the form uses for "no value";
-  // - bool[]: split(',') yields strings, and any non-empty string encodes true;
-  // - a string[] element with a comma or outer whitespace is lossy through the join/trim.
-  const hasUnsafeArray = parsed.functionFragment.inputs.some((input, i) => {
-    if (/\[\d+\]/.test(input.type) || /\]\[/.test(input.type)) return true;
-    if (!input.type.endsWith('[]')) return false;
-    if ((parsed.args[i] as unknown[]).length === 0) return true;
-    if (input.type === 'bool[]') return true;
+  // The Edit form validates args against abiToDefinition's schema; ajv
+  // (strict) throws at compile for array types without a registered format
+  // (string[], uint8[], bytes32[], bool[], fixed-size, nested), which leaves
+  // the modal's Confirm disabled.
+  try {
+    getValidator(abiToDefinition(parsed.functionFragment));
+  } catch {
+    return null;
+  }
 
-    if (input.type === 'string[]') {
-      return (parsed.args[i] as string[]).some(
-        value => value.includes(',') || value !== value.trim()
-      );
-    }
-
-    return false;
-  });
+  // - a fixed-size array gets no format (abiToDefinition keys on '[]'), but
+  //   createContractCallTransaction leaves it a string, so re-save throws;
+  // - an empty array collapses to the same '' the form uses for "no value".
+  const hasUnsafeArray = parsed.functionFragment.inputs.some(
+    (input, i) =>
+      /\[\d+\]/.test(input.type) ||
+      (input.type.endsWith('[]') && (parsed.args[i] as unknown[]).length === 0)
+  );
   if (hasUnsafeArray) return null;
 
   // getContractCallFormArgs stringifies every scalar; restore decoded bool
@@ -243,10 +254,10 @@ function fromContractMethod(
   // https://github.com/safe-global/safe-react-apps/blob/118f25df89f781631386e6b279d812dfc837204a/apps/tx-builder/src/utils.ts#L206
   if (method.name === 'receive' || method.name === 'fallback') return toRaw(tx);
 
+  // Safe's importer treats any truthy data, '0x' included, as custom hex and
+  // ignores contractMethod; a '0x' here must stay a plain transfer.
   const data =
-    tx.data && tx.data !== '0x'
-      ? tx.data
-      : encodeContractMethod(method, tx.contractInputsValues ?? {});
+    tx.data || encodeContractMethod(method, tx.contractInputsValues ?? {});
 
   const txWithData = { ...tx, data };
 
