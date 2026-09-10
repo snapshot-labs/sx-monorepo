@@ -1,5 +1,9 @@
 // @vitest-environment happy-dom
-import { QueryClient, VUE_QUERY_CLIENT } from '@tanstack/vue-query';
+import {
+  onlineManager,
+  QueryClient,
+  VUE_QUERY_CLIENT
+} from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createApp, nextTick, ref } from 'vue';
@@ -40,6 +44,7 @@ function proposalOf(spaceId: string) {
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } }
 });
+queryClient.mount();
 
 let testApp: ReturnType<typeof createApp>;
 
@@ -67,6 +72,7 @@ beforeEach(() => {
 
 afterEach(() => {
   testApp?.unmount();
+  onlineManager.setOnline(true);
 });
 
 describe('useProposalsSummaryQuery', () => {
@@ -114,6 +120,40 @@ describe('useProposalsSummaryQuery', () => {
     expect(
       queryClient.getQueryData(PROPOSALS_KEYS.spaceSummary('s', 'space-b.eth'))
     ).toEqual([proposalOf('space-b.eth')]);
+  });
+
+  it('should keep the data of a fetch paused while offline under the space it was requested for', async () => {
+    onlineManager.setOnline(false);
+
+    const spaceId = ref('space-a.eth');
+
+    const { fetchStatus } = withSetup(() =>
+      useProposalsSummaryQuery(ref('s'), spaceId)
+    );
+
+    await vi.waitFor(() => {
+      expect(fetchStatus.value).toBe('paused');
+    });
+
+    spaceId.value = 'space-b.eth';
+    await nextTick();
+    spaceId.value = 'space-c.eth';
+    await nextTick();
+
+    onlineManager.setOnline(true);
+
+    const dataOf = (id: string) =>
+      queryClient.getQueryData(PROPOSALS_KEYS.spaceSummary('s', id));
+
+    await vi.waitFor(() => {
+      expect(dataOf('space-a.eth')).toBeDefined();
+      expect(dataOf('space-b.eth')).toBeDefined();
+      expect(dataOf('space-c.eth')).toBeDefined();
+    });
+
+    expect(dataOf('space-a.eth')).toEqual([proposalOf('space-a.eth')]);
+    expect(dataOf('space-b.eth')).toEqual([proposalOf('space-b.eth')]);
+    expect(dataOf('space-c.eth')).toEqual([proposalOf('space-c.eth')]);
   });
 
   it('should not fetch while disabled', async () => {
