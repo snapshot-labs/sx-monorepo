@@ -490,6 +490,61 @@ describe('decoding imported transactions', () => {
     expect(tx.data).toBe(data);
   });
 
+  // ethers' TransactionDescription.functionFragment is a deepCopy that has no
+  // prototype methods (format()) in the ESM build Vite bundles; vitest loads
+  // the CJS build where they survive, so simulate the method-less copy here.
+  it.each([
+    [
+      'transfer',
+      ['function transfer(address to, uint256 value)'],
+      ['0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70', '100']
+    ],
+    [
+      'setPair',
+      ['function setPair((address token, uint256 amount) pair)'],
+      [['0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', '7']]
+    ]
+  ])(
+    'decodes %s without calling methods on the copied functionFragment',
+    async (name, abi, values) => {
+      vi.mocked(getABI).mockResolvedValueOnce(abi as any);
+      const data = new Interface(abi).encodeFunctionData(name, values);
+
+      const original = Interface.prototype.parseTransaction;
+      const spy = vi
+        .spyOn(Interface.prototype, 'parseTransaction')
+        .mockImplementation(function (this: Interface, tx) {
+          const parsed = original.call(this, tx);
+
+          return {
+            ...parsed,
+            functionFragment: JSON.parse(
+              JSON.stringify(parsed.functionFragment)
+            )
+          } as any;
+        });
+      try {
+        const {
+          transactions: [tx]
+        } = await parseSafeImportFile(
+          file([
+            {
+              to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+              value: '0',
+              data
+            }
+          ]),
+          '1'
+        );
+
+        expect(tx._type).toBe('contractCall');
+        expect(tx.data).toBe(data);
+      } finally {
+        spy.mockRestore();
+      }
+    }
+  );
+
   it('falls back to a standard ERC20 ABI for unresolved proxies (e.g. USDC)', async () => {
     vi.mocked(getABI).mockRejectedValueOnce(new Error('not verified'));
 
