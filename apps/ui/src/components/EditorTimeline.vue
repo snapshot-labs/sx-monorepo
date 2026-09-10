@@ -69,15 +69,15 @@ function handleDatePick(timestamp: number) {
 function formatVotingDuration(
   type: 'voting_delay' | 'min_voting_period' | 'max_voting_period'
 ): string {
-  const duration = getDurationFromCurrent(
-    props.space.network,
-    props.space[type]
-  );
+  const blocks = props.space[type];
+  const duration = getDurationFromCurrent(props.space.network, blocks);
   const roundedDuration = Math.round(duration / 60) * 60;
 
   // `_d` renders an empty string once every component is zero, which any
   // duration below 30s rounds down to.
-  return _d(roundedDuration) || '< 1m';
+  return (
+    _d(roundedDuration) || `${blocks} ${blocks === 1 ? 'block' : 'blocks'}`
+  );
 }
 </script>
 
