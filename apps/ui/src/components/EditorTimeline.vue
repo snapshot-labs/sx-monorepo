@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { _d } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Draft, Space } from '@/types';
 
 type EditModalSettings = {
@@ -69,15 +69,14 @@ function handleDatePick(timestamp: number) {
 function formatVotingDuration(
   type: 'voting_delay' | 'min_voting_period' | 'max_voting_period'
 ): string {
-  const blocks = props.space[type];
-  const duration = getDurationFromCurrent(props.space.network, blocks);
+  const value = props.space[type];
+  const duration = getDurationFromCurrent(props.space.network, value);
   const roundedDuration = Math.round(duration / 60) * 60;
+  const unit = getNetwork(props.space.network).currentUnit;
 
   // `_d` renders an empty string once every component is zero, which any
   // duration below 30s rounds down to.
-  return (
-    _d(roundedDuration) || `${blocks} ${blocks === 1 ? 'block' : 'blocks'}`
-  );
+  return _d(roundedDuration) || `${value} ${unit}${value === 1 ? '' : 's'}`;
 }
 </script>
 
