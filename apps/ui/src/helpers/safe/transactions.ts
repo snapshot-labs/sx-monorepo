@@ -27,6 +27,8 @@ import { BatchFile, BatchTransaction, ContractMethod } from './types';
 // Only these messages reach the user; any other error gets a generic toast.
 export class SafeImportError extends Error {}
 
+const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
+
 function parseValue(value?: string | null): string {
   return value ? BigNumber.from(value).toString() : '0';
 }
@@ -355,7 +357,11 @@ export async function parseSafeImportFile(
       throw new SafeImportError(`Transaction ${i + 1} has invalid calldata`);
     }
     const value = tx.value ?? '';
-    if (typeof value !== 'string' || !/^\d*$/.test(value)) {
+    if (
+      typeof value !== 'string' ||
+      !/^\d*$/.test(value) ||
+      (value !== '' && BigNumber.from(value).gt(MAX_UINT256))
+    ) {
       throw new SafeImportError(`Transaction ${i + 1} has an invalid value`);
     }
   });

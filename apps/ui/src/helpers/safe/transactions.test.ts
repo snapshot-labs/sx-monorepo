@@ -1,4 +1,5 @@
 import { Interface } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
 import {
@@ -1085,6 +1086,19 @@ describe('calldata and value validation', () => {
 
   it('rejects a negative value', async () => {
     await expect(importOne({ value: '-1' })).rejects.toThrow(/invalid value/);
+  });
+
+  it('rejects a value above uint256 and keeps the maximum', async () => {
+    const max = BigNumber.from(2).pow(256).sub(1).toString();
+
+    await expect(
+      importOne({ value: BigNumber.from(2).pow(256).toString() })
+    ).rejects.toThrow(/invalid value/);
+
+    const {
+      transactions: [tx]
+    } = await importOne({ value: max });
+    expect(tx.value).toBe(max);
   });
 
   it.each([
