@@ -140,6 +140,10 @@ function decodeWithAbi(
     return null;
   }
 
+  // Modal/Transaction.vue hides view methods and swaps the selection to the
+  // first listed one, so an unchanged edit+save would encode a different call.
+  if (parsed.functionFragment.stateMutability === 'view') return null;
+
   // Unnamed (ethers: null) or duplicate names collapse into one key below and
   // in createContractCallTransaction on edit+save; keep such calls raw.
   const names = parsed.functionFragment.inputs.map(input => input.name);
