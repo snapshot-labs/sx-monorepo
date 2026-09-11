@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
+import {
+  parseSafeImportFile,
+  SafeImportError
+} from '@/helpers/safe/transactions';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
 import { getChainIdKind, shorten } from '@/helpers/utils';
@@ -15,6 +19,7 @@ const props = defineProps<{
   space: Space;
   disabled?: boolean;
   strategy: StrategyWithTreasury;
+  importTransactions: (transactions: TransactionType[]) => boolean;
   extraContacts?: Contact[];
 }>();
 
@@ -37,8 +42,17 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
+const importingFile = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
+let isDisposed = false;
+
+onScopeDispose(() => {
+  isDisposed = true;
+});
 
 const network = computed(() => getNetwork(props.space.network));
+// Tenderly runs every transaction as a call.
+const hasDelegatecall = computed(() => model.value.some(isDelegatecall));
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -67,9 +81,61 @@ function openModal(
   modalOpen.value[type] = true;
 }
 
+async function handleImportFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file || !treasury.value || props.disabled || importingFile.value) return;
+
+  const { importTransactions } = props;
+  const chainId = treasury.value.network;
+  const allowDelegatecall = props.strategy.type === 'safeSnap';
+  importingFile.value = true;
+
+  try {
+    const { transactions, warnings } = await parseSafeImportFile(
+      await file.text(),
+      chainId,
+      { allowDelegatecall }
+    );
+
+    if (isDisposed || props.disabled || !importTransactions(transactions)) {
+      return;
+    }
+    uiStore.addNotification(
+      'success',
+      `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
+    );
+    warnings.forEach(warning => uiStore.addNotification('warning', warning));
+  } catch (err) {
+    if (err instanceof SafeImportError) {
+      uiStore.addNotification('error', err.message);
+    } else {
+      console.error(err);
+      uiStore.addNotification('error', 'Failed to import Safe file');
+    }
+  } finally {
+    importingFile.value = false;
+  }
+}
+
+function isDelegatecall(tx: TransactionType) {
+  return tx.operation === '1';
+}
+
+function editDisabledReason(tx: TransactionType) {
+  if (tx._type === 'raw') return 'Editing raw transactions is not supported';
+  if (isDelegatecall(tx)) {
+    return 'Editing delegatecall transactions is not supported';
+  }
+
+  return '';
+}
+
 function editTx(index: number) {
   const tx = model.value[index];
-  if (tx._type === 'raw') return;
+  // The modal rebuilds the transaction without its operation.
+  if (tx._type === 'raw' || isDelegatecall(tx)) return;
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -80,7 +146,8 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    getChainIdKind(treasury.value.network) !== 'evm'
+    getChainIdKind(treasury.value.network) !== 'evm' ||
+    hasDelegatecall.value
   ) {
     return;
   }
@@ -146,7 +213,7 @@ watch(
             v-text="getExecutionName(props.space.network, strategy.type)"
           />
         </div>
-        <div class="space-x-2 shrink-0">
+        <div class="flex gap-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsTokens"
@@ -174,6 +241,20 @@ watch(
               <IH-code />
             </UiButton>
           </UiTooltip>
+          <UiTooltip title="Import Safe file">
+            <UiButton
+              :disabled="
+                !treasury ||
+                disabled ||
+                getChainIdKind(treasury.network) !== 'evm'
+              "
+              :loading="importingFile"
+              uniform
+              @click="fileInput?.click()"
+            >
+              <IH-upload />
+            </UiButton>
+          </UiTooltip>
         </div>
       </div>
       <template v-if="model.length > 0 && treasury">
@@ -195,16 +276,10 @@ watch(
                 </template>
                 <template #right>
                   <div class="flex gap-3">
-                    <UiTooltip
-                      :title="
-                        tx._type === 'raw'
-                          ? 'Editing raw transactions is not supported'
-                          : ''
-                      "
-                    >
+                    <UiTooltip :title="editDisabledReason(tx)">
                       <button
                         type="button"
-                        :disabled="tx._type === 'raw'"
+                        :disabled="!!editDisabledReason(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >
@@ -229,6 +304,12 @@ watch(
             <UiTooltip
               v-if="!network?.supportsSimulation"
               title="Simulation not supported on this network"
+            >
+              <IH-shield-exclamation />
+            </UiTooltip>
+            <UiTooltip
+              v-else-if="hasDelegatecall"
+              title="Simulation unavailable for delegatecall transactions"
             >
               <IH-shield-exclamation />
             </UiTooltip>
@@ -298,5 +379,13 @@ watch(
         @add="addTx"
       />
     </teleport>
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".json"
+      class="hidden"
+      @change="handleImportFile"
+    />
   </div>
 </template>

@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "chainId": "1",
+  "createdAt": 1789069973524,
+  "meta": {
+    "name": "Hexadecimal integer",
+    "description": "",
+    "txBuilderVersion": "1.19.0",
+    "createdFromSafeAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "createdFromOwnerAddress": "",
+    "checksum": "0xf7aa7e2fcc33b4ade7eeffceae65d9b82affab7f6bb5df2594782831822f1a2a"
+  },
+  "transactions": [
+    {
+      "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "value": "0",
+      "data": "",
+      "contractMethod": {
+        "name": "setCount",
+        "payable": false,
+        "inputs": [
+          {
+            "name": "count",
+            "type": "uint256"
+          }
+        ]
+      },
+      "contractInputsValues": {
+        "count": "ff"
+      }
+    }
+  ]
+}

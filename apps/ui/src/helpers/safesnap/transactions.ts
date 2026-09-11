@@ -3,16 +3,17 @@ import {
   ContractCallTransaction,
   RawTransaction,
   SendNftTransaction,
-  SendTokenTransaction,
-  Transaction
+  SendTokenTransaction
 } from '@snapshot-labs/sx';
+import { createRawTransaction } from '@/helpers/transactions';
+import { Transaction } from '@/types';
 import { ETH_CONTRACT } from '../constants';
 
 type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  // Set when writing a proposal (creation), ignored when reading.
+  // '0' | '1'; read back on parse so editing keeps a delegatecall.
   operation?: string;
   nonce?: string;
 };
@@ -68,7 +69,8 @@ export type SafeSnapExecutionData = {
   txs: SafeSnapTransaction[][];
 };
 
-// Canonical Safe MultiSendCallOnly v1.3.0 (same address on every supported chain).
+// Safe MultiSend v1.3.0 (delegatecall-capable, not MultiSendCallOnly).
+// Missing on some chains, see #2366.
 const MULTI_SEND_ADDRESS = '0xA238CBeb142c10Ef7Ad8442C6D1f9E89e07e7761';
 
 function parseTransferFunds(
@@ -149,17 +151,10 @@ function parseContractInteraction(
 }
 
 function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
-  return {
-    to: tx.to,
-    data: tx.data,
-    value: tx.value,
-    salt: '',
-    _type: 'raw',
-    _form: { recipient: tx.to }
-  };
+  return createRawTransaction({ ...tx, salt: '' });
 }
 
-export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
+function parseByType(tx: SafeSnapTransaction): Transaction {
   switch (tx.type) {
     case 'transferFunds':
       return parseTransferFunds(tx);
@@ -172,6 +167,25 @@ export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
   }
 }
 
+export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
+  const transaction = parseByType(tx);
+
+  // Strict equality: String([1]) === '1'. v1's uint8 encoders accept more
+  // spellings and disagree on some (-255 packs as 0x01), so anything but the
+  // canonical 0/1 invalidates the proposal rather than being guessed at.
+  // Stored JSON, typed string but untrusted.
+  const operation: unknown = tx.operation === undefined ? '0' : tx.operation;
+  if (![0, 1, '0', '1'].some(valid => valid === operation)) {
+    throw new Error(
+      `Unsupported SafeSnap operation ${JSON.stringify(tx.operation)}`
+    );
+  }
+
+  return operation === 1 || operation === '1'
+    ? { ...transaction, operation: '1' }
+    : transaction;
+}
+
 export function serializeSafeSnapTransaction(
   tx: Transaction
 ): SafeSnapTransaction {
@@ -179,7 +193,7 @@ export function serializeSafeSnapTransaction(
     to: tx.to,
     data: tx.data || '0x',
     value: tx.value || '0',
-    operation: '0',
+    operation: tx.operation ?? '0',
     nonce: '0'
   };
 

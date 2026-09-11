@@ -138,18 +138,54 @@ const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
+  const draft = proposal.value;
+  const draftKey = proposalKey.value;
   const executions = [] as (StrategyWithTreasury & {
     key: string;
     transactions: Transaction[];
+    importTransactions: (transactions: Transaction[]) => boolean;
   })[];
 
   for (const strategy of strategiesWithTreasuries.value) {
     const key = getExecutionKey(strategy.treasury.chainId, strategy.address);
+    const treasuryAddress = strategy.treasury.address;
+    const strategyType = strategy.type;
 
     executions.push({
       ...strategy,
       key,
-      transactions: proposal.value.executions[key] ?? []
+      transactions: draft.executions[key] ?? [],
+      importTransactions: transactions => {
+        if (
+          proposalKey.value !== draftKey ||
+          proposal.value !== draft ||
+          proposals[draftKey] !== draft
+        ) {
+          return false;
+        }
+
+        const currentExecution = editorExecutions.value.find(
+          execution => execution.key === key
+        );
+        if (
+          !currentExecution ||
+          currentExecution.treasury.address !== treasuryAddress ||
+          currentExecution.type !== strategyType ||
+          (!supportsMultipleTreasuries.value &&
+            editorExecutions.value.some(
+              execution =>
+                execution.key !== key && execution.transactions.length > 0
+            ))
+        ) {
+          return false;
+        }
+
+        draft.executions[key] = [
+          ...(draft.executions[key] ?? []),
+          ...transactions
+        ];
+        return true;
+      }
     });
   }
 
@@ -809,8 +845,9 @@ watchEffect(() => {
             <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
-              :key="execution.key"
+              :key="`${proposalKey}:${execution.key}`"
               :model-value="execution.transactions"
+              :import-transactions="execution.importTransactions"
               :disabled="
                 !supportsMultipleTreasuries &&
                 hasExecution &&
