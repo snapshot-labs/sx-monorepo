@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
+import {
+  parseSafeImportFile,
+  SafeImportError
+} from '@/helpers/safe/transactions';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
 import { getChainIdKind, shorten } from '@/helpers/utils';
@@ -37,6 +41,8 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
+const importingFile = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -65,6 +71,38 @@ function openModal(
   editedTx.value = null;
   modalState.value[type] = null;
   modalOpen.value[type] = true;
+}
+
+async function handleImportFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+  if (!file || !treasury.value) return;
+
+  importingFile.value = true;
+
+  try {
+    const { transactions, warnings } = await parseSafeImportFile(
+      await file.text(),
+      treasury.value.network
+    );
+
+    model.value = [...model.value, ...transactions];
+    uiStore.addNotification(
+      'success',
+      `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
+    );
+    warnings.forEach(warning => uiStore.addNotification('warning', warning));
+  } catch (err) {
+    if (err instanceof SafeImportError) {
+      uiStore.addNotification('error', err.message);
+    } else {
+      console.error(err);
+      uiStore.addNotification('error', 'Failed to import Safe file');
+    }
+  } finally {
+    importingFile.value = false;
+  }
 }
 
 function editTx(index: number) {
@@ -146,7 +184,7 @@ watch(
             v-text="getExecutionName(props.space.network, strategy.type)"
           />
         </div>
-        <div class="space-x-2 shrink-0">
+        <div class="flex gap-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsTokens"
@@ -172,6 +210,20 @@ watch(
               @click="openModal('contractCall')"
             >
               <IH-code />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Import Safe file">
+            <UiButton
+              :disabled="
+                !treasury ||
+                disabled ||
+                getChainIdKind(treasury.network) !== 'evm'
+              "
+              :loading="importingFile"
+              uniform
+              @click="fileInput?.click()"
+            >
+              <IH-upload />
             </UiButton>
           </UiTooltip>
         </div>
@@ -298,5 +350,13 @@ watch(
         @add="addTx"
       />
     </teleport>
+
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".json"
+      class="hidden"
+      @change="handleImportFile"
+    />
   </div>
 </template>

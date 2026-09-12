@@ -6,6 +6,7 @@ import {
   SendTokenTransaction,
   Transaction
 } from '@snapshot-labs/sx';
+import { createRawTransaction } from '@/helpers/transactions';
 import { ETH_CONTRACT } from '../constants';
 
 type SafeSnapBaseTransaction = {
@@ -149,14 +150,7 @@ function parseContractInteraction(
 }
 
 function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
-  return {
-    to: tx.to,
-    data: tx.data,
-    value: tx.value,
-    salt: '',
-    _type: 'raw',
-    _form: { recipient: tx.to }
-  };
+  return createRawTransaction({ ...tx, salt: '' });
 }
 
 export function parseSafeSnapTransaction(tx: SafeSnapTransaction): Transaction {
