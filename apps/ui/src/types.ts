@@ -478,7 +478,7 @@ export type SkinSettings = {
 
 export type Drafts = Record<string, Draft>;
 
-export type Transaction = _Transaction;
+export type Transaction = _Transaction & { operation?: '1' };
 
 // Utils
 export type RequiredProperty<T> = {
