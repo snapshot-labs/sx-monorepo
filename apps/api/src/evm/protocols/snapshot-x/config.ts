@@ -1,5 +1,5 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
-import { evmNetworks } from '@snapshot-labs/sx';
+import { buildRegistry, evmNetworks } from '@snapshot-labs/sx';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory';
 import ProxyFactory from './abis/ProxyFactory';
@@ -30,6 +30,12 @@ type Config = Pick<CheckpointConfig, 'sources' | 'templates' | 'abis'> & {
 
 export function createConfig(networkId: NetworkID): Config {
   const network = evmNetworks[networkId];
+  const {
+    SimpleQuorumAvatar,
+    IncoSimpleQuorumAvatar,
+    SimpleQuorumTimelock,
+    IncoSimpleQuorumTimelock
+  } = network.ExecutionStrategies;
 
   const sources = [
     {
@@ -212,12 +218,15 @@ export function createConfig(networkId: NetworkID): Config {
     protocolConfig: {
       chainId: network.Meta.eip712ChainId,
       manaRpcUrl: `${MANA_URL}/eth_rpc/${network.Meta.eip712ChainId}`,
-      masterSpace: network.Meta.masterSpace,
       incoMasterSpace: network.Meta.incoMasterSpace ?? null,
-      masterSimpleQuorumAvatar:
-        network.ExecutionStrategies.SimpleQuorumAvatar ?? null,
-      masterSimpleQuorumTimelock:
-        network.ExecutionStrategies.SimpleQuorumTimelock ?? null,
+      implementations: buildRegistry([
+        [network.Meta.masterSpace, 'Space'],
+        [network.Meta.incoMasterSpace, 'Space'],
+        [SimpleQuorumAvatar, 'SimpleQuorumAvatar'],
+        [IncoSimpleQuorumAvatar, 'SimpleQuorumAvatar'],
+        [SimpleQuorumTimelock, 'SimpleQuorumTimelock'],
+        [IncoSimpleQuorumTimelock, 'SimpleQuorumTimelock']
+      ]),
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower ?? null,
       apeGasStrategy: network.Strategies.ApeGas ?? null,
