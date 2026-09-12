@@ -6,7 +6,10 @@ import {
   metadataNetwork,
   offchainNetworks
 } from '@/networks';
-import { useFollowedSpacesQuery } from '@/queries/spaces';
+import {
+  useFollowedSpacesQuery,
+  useOrgsActiveProposalsQuery
+} from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
@@ -76,6 +79,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       followedSpacesIdsByAccount.value[web3.value.account] =
         spaces.map(getCompositeSpaceId);
     }
+  });
+
+  const { data: orgActiveProposals } = useOrgsActiveProposalsQuery({
+    followedSpaces
   });
 
   const followedSpaceIdsByNetwork = computed(() =>
@@ -176,6 +183,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         hasSpaceDataLoaded.value
     ),
     followedSpaceLoading,
+    orgActiveProposals: computed(() => orgActiveProposals.value ?? {}),
     toggleSpaceFollow,
     isFollowed
   };
