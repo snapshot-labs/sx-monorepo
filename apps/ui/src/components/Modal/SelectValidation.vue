@@ -148,6 +148,8 @@ const definition = computed(() => {
   if (selectedValidation.value.key === 'basic') {
     updated.properties.minScore.examples = ['e.g. 1.23'];
     delete updated.properties.strategies;
+
+    if (props.type === 'proposal') delete updated.properties.useLatestBlock;
   }
 
   return updated;
@@ -241,6 +243,8 @@ function handleApply() {
     } else {
       delete params.strategies;
     }
+
+    if (params.useLatestBlock === false) delete params.useLatestBlock;
   }
 
   emit('save', { name: selectedValidation.value.key, params });

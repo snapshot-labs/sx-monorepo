@@ -17,6 +17,13 @@ export type VoteValidationPowerItem = {
   strategies: Strategy[];
 };
 
+const VOTE_VALIDATION_STALE_TIME = 60 * 1000;
+
+function usesLatestBlock(proposal: Proposal): boolean {
+  return !!proposal.voting_power_validation_strategy_strategies_params[0]
+    ?.useLatestBlock;
+}
+
 async function getVoteValidationPower(account: string, proposal: Proposal) {
   const network = getNetwork(proposal.network);
   // Skipped for onchain proposals, or when using 'any' strategy
@@ -83,6 +90,8 @@ export function useVoteValidationPowerQuery(
     queryFn: async () =>
       getVoteValidationPower(toValue(account), toValue(proposal)),
     enabled: () => !!toValue(account) && toValue(active),
-    staleTime: 60 * 1000
+    staleTime: computed(() =>
+      usesLatestBlock(toValue(proposal)) ? 0 : VOTE_VALIDATION_STALE_TIME
+    )
   });
 }
