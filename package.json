@@ -46,7 +46,7 @@
     "prettier": "3.2.5"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=24.0.0"
   },
   "packageManager": "bun@1.4.0",
   "workspaces": [
