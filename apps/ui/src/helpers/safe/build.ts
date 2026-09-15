@@ -12,7 +12,7 @@ import { ETH_CONTRACT } from '../constants';
 // tuples are already exported as JSON.
 function toSafeContractInputsValues(
   inputs: { name: string; type: string }[],
-  args: Record<string, string>
+  args: Record<string, string | boolean>
 ): Record<string, string> {
   const bracketed = inputs
     .filter(input => input.type.endsWith(']') && !input.type.includes('tuple'))
@@ -23,7 +23,7 @@ function toSafeContractInputsValues(
       // Must split exactly like the save path (no quote stripping), or a
       // quoted element would round-trip differently.
       const isString = elementType.startsWith('string');
-      const elements = parseFormArrayValue(args[input.name]);
+      const elements = parseFormArrayValue(args[input.name] as string);
 
       return [
         input.name,
@@ -134,7 +134,7 @@ export function buildBatchFile(
       } else if (tx._type === 'contractCall') {
         // _form.args is only usable here when it is keyed by input name
         // (e.g. an oSnap-parsed call stores it as a positional array).
-        const argsIsKeyed =
+        const hasNamedArgs =
           tx._form.args !== null &&
           typeof tx._form.args === 'object' &&
           !Array.isArray(tx._form.args);
@@ -143,7 +143,7 @@ export function buildBatchFile(
         // exports the wrong fragment. getFunction throws for an unresolvable
         // overload/selector; catch and fall through to the raw export below.
         let method = null;
-        if (argsIsKeyed) {
+        if (hasNamedArgs) {
           try {
             method = JSON.parse(
               new Interface(tx._form.abi)

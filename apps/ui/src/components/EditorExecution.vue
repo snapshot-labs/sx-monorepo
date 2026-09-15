@@ -42,7 +42,7 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
-const importingFile = ref(false);
+const isImportingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 let isDisposed = false;
 
@@ -85,12 +85,14 @@ async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file || !treasury.value || props.disabled || importingFile.value) return;
+  if (!file || !treasury.value || props.disabled || isImportingFile.value) {
+    return;
+  }
 
   const { importTransactions } = props;
   const chainId = treasury.value.network;
   const allowDelegatecall = props.strategy.type === 'safeSnap';
-  importingFile.value = true;
+  isImportingFile.value = true;
 
   try {
     const { transactions, warnings } = await parseSafeImportFile(
@@ -115,7 +117,7 @@ async function handleImportFile(event: Event) {
       uiStore.addNotification('error', 'Failed to import Safe file');
     }
   } finally {
-    importingFile.value = false;
+    isImportingFile.value = false;
   }
 }
 
@@ -248,7 +250,7 @@ watch(
                 disabled ||
                 getChainIdKind(treasury.network) !== 'evm'
               "
-              :loading="importingFile"
+              :loading="isImportingFile"
               uniform
               @click="fileInput?.click()"
             >
