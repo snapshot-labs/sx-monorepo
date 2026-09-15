@@ -13,7 +13,7 @@ type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  // '0' | '1'; read back on parse so editing keeps a delegatecall.
+  // '0' | '1'; preserved when reading and writing proposals.
   operation?: string;
   nonce?: string;
 };

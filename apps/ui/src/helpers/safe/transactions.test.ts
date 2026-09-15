@@ -514,7 +514,7 @@ describe('1inch Fusion swap import', () => {
     expect(transactions.map(tx => tx.operation)).toEqual([undefined, '1']);
     expect(warnings).toEqual([
       'This file does not specify a chain; assuming chain 1',
-      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+      'Transaction 2 uses delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
     ]);
   });
 
@@ -541,7 +541,7 @@ describe('1inch Fusion swap import', () => {
     const { warnings } = await parseSafeImportFile(content, '1', safeSnap);
 
     expect(warnings).toEqual([
-      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+      'Transaction 2 uses delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
     ]);
   });
 
@@ -1365,7 +1365,7 @@ describe('file validation', () => {
     });
 
     expect(warnings).toEqual([
-      'Transactions 1, 2 are a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+      'Transactions 1, 2 use delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
     ]);
   });
 });

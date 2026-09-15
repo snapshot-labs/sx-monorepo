@@ -112,7 +112,7 @@ function isDelegatecall(tx: TransactionType) {
   return tx.operation === '1';
 }
 
-function editDisabledReason(tx: TransactionType) {
+function getEditDisabledReason(tx: TransactionType) {
   if (tx._type === 'raw') return 'Editing raw transactions is not supported';
   if (isDelegatecall(tx)) {
     return 'Editing delegatecall transactions is not supported';
@@ -265,10 +265,10 @@ watch(
                 </template>
                 <template #right>
                   <div class="flex gap-3">
-                    <UiTooltip :title="editDisabledReason(tx)">
+                    <UiTooltip :title="getEditDisabledReason(tx)">
                       <button
                         type="button"
-                        :disabled="!!editDisabledReason(tx)"
+                        :disabled="!!getEditDisabledReason(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >

@@ -357,7 +357,7 @@ export async function parseSafeImportFile(
     );
   }
 
-  const delegatecallIndexes: number[] = [];
+  const delegatecallIndices: number[] = [];
   file.transactions.forEach((tx, i) => {
     if (!tx || typeof tx !== 'object') {
       throw new SafeImportError(`Transaction ${i + 1} is malformed`);
@@ -388,12 +388,12 @@ export async function parseSafeImportFile(
         `Transaction ${i + 1} has an invalid operation`
       );
     }
-    if (isDelegatecallOperation(operation)) delegatecallIndexes.push(i + 1);
+    if (isDelegatecallOperation(operation)) delegatecallIndices.push(i + 1);
   });
 
   // Before parsing so a refused file skips the ABI lookups. Only SafeSnap
   // honours operation 1; convertToMetaTransactions hardcodes 0.
-  if (delegatecallIndexes.length > 0 && !allowDelegatecall) {
+  if (delegatecallIndices.length > 0 && !allowDelegatecall) {
     throw new SafeImportError(
       'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
     );
@@ -411,10 +411,10 @@ export async function parseSafeImportFile(
     )
   );
 
-  if (delegatecallIndexes.length > 0) {
-    const plural = delegatecallIndexes.length > 1;
+  if (delegatecallIndices.length > 0) {
+    const isPlural = delegatecallIndices.length > 1;
     warnings.push(
-      `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
+      `Transaction${isPlural ? 's' : ''} ${delegatecallIndices.join(', ')} ${isPlural ? 'use' : 'uses'} delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
     );
   }
 
