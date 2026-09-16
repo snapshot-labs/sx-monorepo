@@ -1,11 +1,15 @@
 # Private voting runs on the generalised-el-gamal protocol stack. Its source lives
-# in another repository, but nothing here builds it — the coordinator below and the
-# keypers in docker-compose.keyper.yml both run the published image, so this repo is
-# the only one you need checked out to operate the stack.
+# in another repository, but nothing here builds it: the coordinator below runs the
+# published image, so this repo is the only one you need checked out.
 #
-#   1. Snapshot + coordinator:  docker compose up -d
-#   2. each keyper:             docker compose -p keyperN -f docker-compose.keyper.yml \
-#                                 --env-file .env.keyperN up -d
+#   docker compose up -d        Snapshot's half, plus the coordinator
+#
+# To run one yourself (local testing, or you are also an operator), use the keyper
+# stack in the protocol repo — no checkout needed, just two files:
+#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/docker-compose.keyper.yml
+#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/.env.keyper.example
+# Set its GEG_API_URL to this deployment's translator (:3002), not the example's
+# default, which points at the protocol repo's own api service.
 #
 # The coordinator is part of this stack, and it is fail-closed: COORDINATOR_SIGNING_KEY
 # and COORDINATOR_API_TOKEN must both be set or `docker compose up -d` refuses to run

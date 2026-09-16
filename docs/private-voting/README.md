@@ -11,11 +11,12 @@ It is built on **linearly-homomorphic threshold ElGamal over BLS12-381**. Voters
 committee master public key, the ciphertexts are summed homomorphically, and a committee of
 independent **keypers** jointly decrypt only the sum.
 
-**Snapshot does not run the committee.** The keypers and their coordinator are the
-[generalised-el-gamal][geg] protocol's own services, run by separate operators; this repository is
-the data layer they read ballots from and write results to.
+**Snapshot does not run the committee.** The keypers are the [generalised-el-gamal][geg] protocol's
+own service, each run by a separate operator holding a signing key this repository never sees; this
+repository is the data layer they read ballots from and write results to. The coordinator *is* run
+here — it relays their writes and publishes the result, but it holds no share and cannot decrypt.
 
-[geg]: https://github.com/shutter-network/generalised-el-gamal
+[geg]: https://github.com/shutter-network/generalised-elgamal-voting
 
 ---
 
@@ -245,9 +246,10 @@ power does.
 
 ## Running it
 
-See **[`RUNNING.md`](../../RUNNING.md)** at the repository root — a copy-paste walkthrough covering
-both repositories: every environment file, both stacks, creating a proposal, voting, and watching
-the tally publish.
+See **[`DEPLOYMENT_SETUP.md`](./DEPLOYMENT_SETUP.md)** beside this file — a copy-paste walkthrough
+run entirely from this repository: the environment, the stack, creating a proposal, voting, and
+watching the tally publish. Its §1b links the two files you need if you also want to run a keyper
+yourself; everything else is here.
 
 The three "Running it" sections that used to be here described a compose file that started the
 committee alongside Snapshot's services. That arrangement gave one `docker compose up` the power to

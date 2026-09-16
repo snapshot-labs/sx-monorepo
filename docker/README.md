@@ -22,8 +22,7 @@ different entry points, so a rebuild covers all of them.
 
 ## What does *not* come up: the committee
 
-Private voting needs a keyper committee and a coordinator. **They are not in this
-repository and cannot be started from here.** They belong to the
+Private voting needs a keyper committee. They belong to the
 generalised-el-gamal protocol, and each keyper is meant to be run by an
 independent operator with its own signing key.
 
@@ -39,7 +38,7 @@ unaffected. Private proposals simply cannot be created until `TE_KEYPERS` points
 at reachable keypers.
 
 **For the full system**, including the committee and a private vote end to end,
-see [`../RUNNING.md`](../RUNNING.md).
+see [`../docs/private-voting/DEPLOYMENT_SETUP.md`](../docs/private-voting/DEPLOYMENT_SETUP.md).
 
 ## Prerequisites
 

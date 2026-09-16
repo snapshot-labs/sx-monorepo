@@ -18,7 +18,7 @@ it relays writes and publishes the result. It cannot produce a decryption share,
 the result it publishes is checkable by anyone — the UI re-derives the tally from the
 ballots and verifies the totals against the aggregate.
 
-[geg]: https://github.com/shutter-network/generalised-el-gamal
+[geg]: https://github.com/shutter-network/generalised-elgamal-voting
 
 ```
 sx-monorepo (docker compose)         separate projects, separate machines
@@ -54,12 +54,11 @@ power from a real ERC-20 balance, one that actually holds some of that token.
 
 ## 1. Environments
 
-Five files: `.env`, one per keyper, and the UI's. A script writes the first four,
-because they share identities that must agree; the UI's is three lines you paste.
+Three files: `.env` for Snapshot and the coordinator, the UI's, and — only if you
+are running a keyper yourself — that keyper's own, which lives with it rather than
+here.
 
-### 1a. Identities — `.env` and `.env.keyper1..3`
-
-One command writes all four files:
+### 1a. Identities — `.env`
 
 ```bash
 cd sx-monorepo
@@ -67,20 +66,16 @@ python3 scripts/geg/gen-env.py            # prints the plan, writes nothing
 python3 scripts/geg/gen-env.py --write
 ```
 
-It mints a key per identity and derives every address from the key that owns it:
-
-| written | holds |
-| --- | --- |
-| `.env` | the hub and sequencer's own secrets, the committee as URLs, the coordinator's signing key and relay token, the eligibility issuer's key |
-| `.env.keyper1..3` | one signing key per committee member, plus that member's port and state directory |
-
-All four are `chmod 600` and gitignored.
+It mints a key per identity this deployment owns and derives every address from the
+key that owns it: the hub and sequencer's own secrets, the coordinator's signing key
+and relay token, and the eligibility issuer's key. The file is `chmod 600` and
+gitignored.
 
 **This is the step that used to go wrong.** One address is written in three places —
 `COORDINATOR_SIGNING_KEY` in `.env`, `TE_RESULT_PUBLISHER_ADDRESS` beside it, and
-`COORDINATOR_IDENTITY` in every keyper file — and when they drift the failure is an
+`COORDINATOR_IDENTITY` in every keyper's env — and when they drift the failure is an
 authorisation error naming neither side, hours later, on a proposal whose ballots are
-already cast. Deriving all three from one key is the whole reason this script exists.
+already cast. Deriving them from one key is the whole reason this script exists.
 
 Two values still want a human. Both are carried through untouched on a re-run, so
 this applies to a first run, or after you delete `.env`:
@@ -91,30 +86,63 @@ this applies to a first run, or after you delete `.env`:
   It decides every proposal's `scale`, so it is a statement about your hardware — see
   the RAM table in `.env.example` before changing it.
 
+**`TE_KEYPERS` is carried, not generated.** Those URLs come from the people who
+operate the keypers; the script cannot mint them. Put the URLs they give you in
+`.env` before creating a private proposal.
+
 Re-running is safe and is how you repair a file you edited by mistake: existing keys
 are read back off disk and only the derived values are recomputed. `--rotate` mints
-new ones instead, which **orphans every election already in flight** — a keyper that
-changes its key cannot finish an election it holds a share for.
+new ones instead, which **orphans every election already in flight** — the
+coordinator's address is pinned by every keyper and frozen into every proposal
+already created.
 
-`.env.example` is the annotated reference for every variable, including the ones this
-script does not set.
+`.env.example` is the annotated reference for every variable.
 
-### 1b. What the committee files mean
+### 1b. The keypers — run elsewhere, by other people
 
-Worth knowing before you start anything, because two of these only fail at tally time:
+**This repo does not run keypers, and that is the security property.** Each is
+operated independently, on its own machine, holding a signing key Snapshot never
+sees. A committee this stack could start is a committee it could impersonate, and the
+secrecy of every ballot rests on no quorum of them colluding. What you need from each
+operator is a URL; what they need from you is the coordinator's address.
 
-- **Each keyper needs its own `KEYPER_STATE_DIR_HOST`.** Two sharing a directory
-  overwrite each other's shares, and nothing complains until a tally cannot reach
-  quorum. The script assigns `./keyper-state1`, `2`, `3`.
-- **`KEYPER_PORT` must match that keyper's entry in `TE_KEYPERS`.** The URLs are
-  dialled from inside the coordinator's container, which is why they are
-  `host.docker.internal` and not `localhost`.
+To run one yourself — for local testing, or because you are also an operator — use
+the keyper stack in the protocol repository. It runs the published image, so you need
+no checkout of that repo: take these two files and run them from wherever you put
+them.
+
+- [`docker-compose.keyper.yml`](https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/docker-compose.keyper.yml) — the keyper service,
+  pinned to the published image
+- [`.env.keyper.example`](https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/.env.keyper.example) — the template for its
+  configuration; copy it to `.env.keyper1` and fill it in
+
+```bash
+# in the directory holding those two files
+docker compose -p keyper1 -f docker-compose.keyper.yml --env-file .env.keyper1 up -d
+```
+
+The variables that file asks for, and what they mean here:
+
+| variable | value for this deployment |
+| --- | --- |
+| `KEYPER_SIGNING_KEY` | yours, generated by you, never shared. Its address goes to the admin |
+| `COORDINATOR_IDENTITY` | the admin's coordinator address — `TE_RESULT_PUBLISHER_ADDRESS` from their `.env` |
+| `GEG_API_URL` | **the translator, `http://<host>:3002`** — *not* the example's `:8500`, which is the protocol repo's own api service |
+| `COORDINATOR_URL` | the admin's coordinator, `http://<host>:8400` |
+| `KEYPER_PORT` | must match this keyper's entry in the admin's `TE_KEYPERS` |
+| `KEYPER_STATE_DIR_HOST` | its own directory. Two keypers sharing one overwrite each other's shares, and nothing complains until a tally cannot reach quorum |
+
+Three things about the committee that only fail at tally time, so are worth knowing
+before you start:
+
 - **`TE_KEYPERS` carries URLs and no addresses.** The sequencer reads each keyper's
   signing address from its own `/status` when it freezes the committee onto a
   proposal, and refuses two URLs that answer with the same address. A second copy of
   the address here would only be somewhere for it to go stale.
 - **`TE_THRESHOLD_T` is the quorum, not the fault tolerance** — the number of keypers
   that must act together. It has to be a strict majority, so 2 of 3.
+- **The URLs are dialled from inside the coordinator's container**, which is why on
+  one machine they are `host.docker.internal` and not `localhost`.
 
 ### 1c. The UI — `sx-monorepo/apps/ui/.env`
 
@@ -160,8 +188,9 @@ If this fails with `required variable COORDINATOR_SIGNING_KEY is missing`, step 
 has not been done. The coordinator is fail-closed on its two secrets, and compose
 refuses to start *any* service until both are in `.env`.
 
-Then the committee. Each keyper runs as its own compose project, which is what keeps
-their state directories and containers separate:
+Then the committee — on the operators' machines, not this one. If you are running
+them yourself for local testing, from the directory where you put the two files from
+step 1b, each as its own compose project so their state and containers stay separate:
 
 ```bash
 for n in 1 2 3; do
@@ -201,6 +230,7 @@ A bare GET on `/graphql` answering `400` is right — it only accepts POSTs.
 **To stop everything, keeping all data:**
 
 ```bash
+# keypers, if you are running them locally — from their own directory
 for n in 1 2 3; do
   docker compose -p keyper$n -f docker-compose.keyper.yml \
     --env-file .env.keyper$n stop
@@ -449,7 +479,8 @@ stalls again:
 ```bash
 docker ps --format "{{.Names}}\t{{.Status}}" | grep keyper
 
-# Restart any that are down (safe to run for all three):
+# Restart any that are down (safe to run for all three). Locally-run keypers only;
+# otherwise this is the operators' job and you ask them.
 for n in 1 2 3; do
   docker compose -p keyper$n -f docker-compose.keyper.yml \
     --env-file .env.keyper$n up -d
