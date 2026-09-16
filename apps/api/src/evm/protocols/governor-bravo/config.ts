@@ -2,22 +2,8 @@ import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import GovernorModule from './abis/GovernorModule';
 import Timelock from './abis/Timelock';
+import { GOVERNANCES } from './governances';
 import { GovernorBravoConfig, NetworkID } from '../../types';
-
-const START_BLOCKS: Partial<Record<NetworkID, number>> = {
-  eth: 12006099,
-  sep: 9025765
-};
-
-const MODULE_ADDRESSES: Partial<Record<NetworkID, string[]>> = {
-  eth: [
-    // Compound Governor
-    '0xc0Da02939E1441F497fd74F78cE7Decb17B66529',
-    // Uniswap Governor
-    '0x408ED6354d4973f66138C91495F2f2FCbd8724C3'
-  ],
-  sep: ['0x69112D158A607DD388034c0C09242FF966985258']
-};
 
 type Config = Pick<CheckpointConfig, 'sources' | 'templates' | 'abis'> & {
   protocolConfig: GovernorBravoConfig;
@@ -26,13 +12,12 @@ type Config = Pick<CheckpointConfig, 'sources' | 'templates' | 'abis'> & {
 export function createConfig(indexerName: NetworkID): Config | null {
   const network = evmNetworks[indexerName];
 
-  const start = START_BLOCKS[indexerName];
-  const contracts = MODULE_ADDRESSES[indexerName];
-  if (!start || !contracts) return null;
+  const governance = GOVERNANCES[indexerName];
+  if (!governance) return null;
 
-  const sources = contracts.map(contract => ({
-    contract,
-    start,
+  const sources = Object.values(governance).map(governance => ({
+    contract: governance.address,
+    start: governance.startBlock,
     abi: 'GovernorModule',
     events: [
       {

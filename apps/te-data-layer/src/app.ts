@@ -296,10 +296,12 @@ export function buildApp(): Express {
       const start = Number(req.query.start ?? 0);
       const count = Number(req.query.count ?? 0);
       const params = new URLSearchParams();
-      if (Number.isFinite(start) && start > 0)
+      if (Number.isFinite(start) && start > 0) {
         params.set('start', String(start));
-      if (Number.isFinite(count) && count > 0)
+      }
+      if (Number.isFinite(count) && count > 0) {
         params.set('count', String(count));
+      }
       const qs = params.toString();
       const { ballots } = await hubGet<{ ballots: unknown[] }>(
         `/api/proposal/${id}/te_geg_ballots${qs ? `?${qs}` : ''}`

@@ -21,16 +21,21 @@ async function getProposal(id: string): Promise<any | undefined> {
   // Threshold-ElGamal columns: NULL when privacy != 'shutter-elgamal' or
   // before DKG completion. Parse JSON fields and hex-encode the binary mpk
   // so downstream callers see the same shape as actions.ts/getProposal.
-  if (typeof proposal.te_config === 'string')
+  if (typeof proposal.te_config === 'string') {
     proposal.te_config = JSON.parse(proposal.te_config);
-  if (typeof proposal.te_committee_pks === 'string')
+  }
+  if (typeof proposal.te_committee_pks === 'string') {
     proposal.te_committee_pks = JSON.parse(proposal.te_committee_pks);
-  if (typeof proposal.te_keyper_urls === 'string')
+  }
+  if (typeof proposal.te_keyper_urls === 'string') {
     proposal.te_keyper_urls = JSON.parse(proposal.te_keyper_urls);
-  if (typeof proposal.te_aggregate === 'string')
+  }
+  if (typeof proposal.te_aggregate === 'string') {
     proposal.te_aggregate = JSON.parse(proposal.te_aggregate);
-  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk))
+  }
+  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk)) {
     proposal.te_mpk = `0x${proposal.te_mpk.toString('hex')}`;
+  }
   let proposalState = 'pending';
   const ts = parseInt((Date.now() / 1e3).toFixed());
   if (ts > proposal.start) proposalState = 'active';
@@ -230,8 +235,9 @@ export async function updateProposalAndVotes(
 
     // Check if voting power is final
     const withOverride = hasStrategyOverride(proposal.strategies);
-    if (vpState === 'final' && withOverride && proposal.state !== 'closed')
+    if (vpState === 'final' && withOverride && proposal.state !== 'closed') {
       vpState = 'pending';
+    }
 
     // Update votes voting power
     if (!isFinal) await updateVotesVp(votes, vpState, proposalId);

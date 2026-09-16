@@ -11,6 +11,7 @@ export default async function (parent, { id }) {
       p.id AS id,
       spaces.settings,
       spaces.domain as spaceDomain,
+      spaces.created as spaceCreated,
       spaces.flagged as spaceFlagged,
       spaces.verified as spaceVerified,
       spaces.turbo_expiration as spaceTurboExpiration,
@@ -18,7 +19,7 @@ export default async function (parent, { id }) {
     FROM proposals p
     INNER JOIN spaces ON spaces.id = p.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE p.id = ? AND spaces.settings IS NOT NULL
+    WHERE p.id = ? AND spaces.deleted = 0 AND spaces.settings IS NOT NULL
     LIMIT 1
   `;
   try {

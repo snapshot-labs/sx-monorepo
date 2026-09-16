@@ -36,7 +36,7 @@ router.get('/:space', async (req, res) => {
   });
 });
 
-router.get('/:space/members', async (req, res) => {
+router.get('/:space/members', async (req, res, next) => {
   let space: any = {};
 
   try {
@@ -47,19 +47,25 @@ router.get('/:space/members', async (req, res) => {
     return res.status(404).json({ error: 'NOT_FOUND' });
   }
 
-  const members = [...space.admins, ...space.moderators, ...space.members].map(
-    member => ({
+  try {
+    const members = [
+      ...(space.admins ?? []),
+      ...(space.moderators ?? []),
+      ...(space.members ?? [])
+    ].map(member => ({
       type: 'EthereumAddress',
       id: member
-    })
-  );
+    }));
 
-  return res.json({
-    '@context': context,
-    type: 'DAO',
-    name: space.name,
-    members
-  });
+    return res.json({
+      '@context': context,
+      type: 'DAO',
+      name: space.name,
+      members
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 router.get('/:space/proposals', async (req, res) => {
@@ -140,7 +146,7 @@ router.get('/:space/activities', async (req, res) => {
   });
 });
 
-router.get('/:space/contracts', async (req, res) => {
+router.get('/:space/contracts', async (req, res, next) => {
   let space: any = {};
 
   try {
@@ -151,18 +157,22 @@ router.get('/:space/contracts', async (req, res) => {
     return res.status(404).json({ error: 'NOT_FOUND' });
   }
 
-  const contracts = space.treasuries.map(treasury => ({
-    type: 'EthereumAddress',
-    id: treasury.address,
-    name: treasury.name
-  }));
+  try {
+    const contracts = (space.treasuries ?? []).map(treasury => ({
+      type: 'EthereumAddress',
+      id: treasury.address,
+      name: treasury.name
+    }));
 
-  return res.json({
-    '@context': context,
-    type: 'DAO',
-    name: space.name,
-    contracts
-  });
+    return res.json({
+      '@context': context,
+      type: 'DAO',
+      name: space.name,
+      contracts
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 export default router;

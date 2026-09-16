@@ -1,7 +1,7 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import db from './mysql';
-import { getProvider } from './provider';
+import { EvmProvider, getProvider } from './provider';
 import { fetchWithKeepAlive } from './utils';
 
 type Space = {
@@ -14,7 +14,8 @@ const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
 const EVM_INDEXER = process.env.NETWORK === 'mainnet' ? 'eth' : 'sep';
 const RUN_INTERVAL = 10 * 1e3; // 10 seconds
 
-const provider = getProvider(process.env.DEFAULT_NETWORK ?? '1');
+// DEFAULT_NETWORK is always an EVM chain, and block.number below is ethers-only.
+const provider = getProvider(process.env.DEFAULT_NETWORK ?? '1') as EvmProvider;
 
 // Periodically sync the turbo status of spaces with the schnaps-api
 export async function trackTurboStatuses() {

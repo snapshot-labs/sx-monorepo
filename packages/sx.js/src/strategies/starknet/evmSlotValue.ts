@@ -72,8 +72,9 @@ export default function createEvmSlotValueStrategy({
       clientConfig: ClientConfig
     ): Promise<string[]> {
       if (call === 'propose') throw new Error('Not supported for proposing');
-      if (signerAddress.length !== 42)
+      if (signerAddress.length !== 42) {
         throw new Error('Not supported for non-Ethereum addresses');
+      }
       if (!metadata) throw new Error('Invalid metadata');
 
       const voteEnvelope = envelope as Envelope<Vote>;
@@ -193,6 +194,16 @@ export default function createEvmSlotValueStrategy({
           // can be removed after contracts include this
           // https://github.com/snapshot-labs/sx-starknet/pull/624
           if (err.message.includes('Slot is zero')) return 0n;
+
+          // Satellite already has the timestamp -> block mapping, but not the
+          // token account's storage root yet.
+          if (err.message.includes('SP_ACCOUNT_FIELD_NOT_SAVED')) {
+            throw new VotingPowerDetailsError(
+              'Storage root is not saved yet',
+              type,
+              'NOT_READY_YET'
+            );
+          }
         }
 
         throw err;

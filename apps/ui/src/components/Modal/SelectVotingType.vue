@@ -25,6 +25,10 @@ const availableVotingTypes = computed(() =>
   props.withAny ? (['any', ...props.votingTypes] as const) : props.votingTypes
 );
 
+function getVotingTypeInfo(type: AvailableVotingTypes) {
+  return VOTING_TYPES_INFO[type as keyof typeof VOTING_TYPES_INFO];
+}
+
 function handleSelect(type: AvailableVotingTypes) {
   emit('save', type);
   emit('close');
@@ -47,15 +51,15 @@ function handleSelect(type: AvailableVotingTypes) {
           <div class="flex items-center gap-2">
             <h4
               class="text-skin-link inline"
-              v-text="VOTING_TYPES_INFO[type].label"
+              v-text="getVotingTypeInfo(type).label"
             />
             <UiPill
-              v-if="VOTING_TYPES_INFO[type].isBeta"
+              v-if="getVotingTypeInfo(type).isBeta"
               variant="secondary"
               label="Beta"
             />
           </div>
-          <div v-text="VOTING_TYPES_INFO[type].description" />
+          <div v-text="getVotingTypeInfo(type).description" />
         </div>
       </UiSelector>
     </div>

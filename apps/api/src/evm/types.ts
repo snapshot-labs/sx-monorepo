@@ -11,15 +11,17 @@ export type NetworkID =
   | 'bnb'
   | 'bnbt'
   | 'ape'
-  | 'curtis';
+  | 'curtis'
+  | 'basesep';
 
 export type SnapshotXConfig = {
   chainId: number;
   manaRpcUrl: string;
   masterSpace: string;
-  masterSimpleQuorumAvatar: string;
-  masterSimpleQuorumTimelock: string;
-  propositionPowerValidationStrategyAddress: string;
+  incoMasterSpace: string | null;
+  masterSimpleQuorumAvatar: string | null;
+  masterSimpleQuorumTimelock: string | null;
+  propositionPowerValidationStrategyAddress: string | null;
   apeGasStrategy: string | null;
   apeGasStrategyDelay: number;
 };

@@ -330,8 +330,9 @@ function requireInt(
     throw new TeConfigError(`${name} is required`);
   }
   const n = Number(value);
-  if (!Number.isInteger(n))
+  if (!Number.isInteger(n)) {
     throw new TeConfigError(`${name} must be an integer`);
+  }
   return n;
 }
 

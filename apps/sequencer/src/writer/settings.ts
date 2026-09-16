@@ -51,10 +51,12 @@ export async function verify(body): Promise<any> {
   );
 
   if (!space?.turbo && !space?.domain) {
-    if (msg.payload.domain)
+    if (msg.payload.domain) {
       return Promise.reject('domain is a turbo feature only');
-    if (msg.payload.skinSettings)
+    }
+    if (msg.payload.skinSettings) {
       return Promise.reject('skin is a turbo feature only');
+    }
   }
 
   const anotherSpaceWithDomain = (
@@ -70,8 +72,9 @@ export async function verify(body): Promise<any> {
 
   if (!isAdmin && !isController) return Promise.reject('not allowed');
 
-  if (!isController && !isEqual(admins, newAdmins))
+  if (!isController && !isEqual(admins, newAdmins)) {
     return Promise.reject('not allowed change admins');
+  }
 
   const labels = msg.payload.labels || [];
   if (labels.length) {
@@ -115,8 +118,9 @@ export async function action(body): Promise<void> {
     return Promise.reject('failed store settings');
   }
 
-  if (existingSettings.avatar !== msg.payload.avatar)
+  if (existingSettings.avatar !== msg.payload.avatar) {
     await clearStampCache('space', space);
+  }
 
   if (existingSpace?.domain != msg.payload.domain) {
     await addToWalletConnectWhitelist(msg.payload.domain);

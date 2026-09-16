@@ -47,11 +47,10 @@ watch(formErrors, value => emit('errors', value));
   <UiContainerSettings :title="title" :description="description">
     <div class="s-box">
       <UiInputAddress
-        :model-value="model"
+        v-model="model"
         :error="formErrors.controller"
         :definition="definition"
         :required="true"
-        @update:model-value="v => (model = v)"
       />
     </div>
   </UiContainerSettings>

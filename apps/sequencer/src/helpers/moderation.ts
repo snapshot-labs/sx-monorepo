@@ -46,10 +46,14 @@ export function setData(result?: Record<string, string[]>) {
 }
 
 export default async function run() {
-  setData(await loadModerationData());
-
-  await snapshot.utils.sleep(20e3);
-  run();
+  while (true) {
+    try {
+      setData(await loadModerationData());
+    } catch (err) {
+      capture(err);
+    }
+    await snapshot.utils.sleep(20e3);
+  }
 }
 
 export function containsFlaggedLinks(body: string): boolean {
@@ -66,16 +70,19 @@ export function containsFlaggedLinks(body: string): boolean {
 }
 
 export function flagEntity({ type, action, value }) {
-  if (!type || !action || !value)
+  if (!type || !action || !value) {
     throw new Error(`missing params. 'type', 'action' and 'value' required`);
+  }
   if (!['proposal', 'space'].includes(type)) throw new Error('invalid type');
-  if (type === 'proposal' && !['flag', 'unflag'].includes(action))
+  if (type === 'proposal' && !['flag', 'unflag'].includes(action)) {
     throw new Error('invalid action');
+  }
   if (
     type === 'space' &&
     !['flag', 'unflag', 'verify', 'hibernate', 'reactivate'].includes(action)
-  )
+  ) {
     throw new Error('invalid action');
+  }
 
   let query;
   switch (`${type}-${action}`) {

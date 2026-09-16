@@ -1,6 +1,7 @@
 import { metadataNetwork } from '@/networks';
 import { NavConfig, NavContext } from './types';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
+import IHCode from '~icons/heroicons-outline/code';
 import IHKey from '~icons/heroicons-outline/key';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHUsers from '~icons/heroicons-outline/users';
@@ -29,6 +30,11 @@ export default {
         notifications: {
           name: 'Notifications',
           icon: IHAtSymbol,
+          hidden: metadataNetwork !== 's' || isWhiteLabel
+        },
+        'api-keys': {
+          name: 'API keys',
+          icon: IHCode,
           hidden: metadataNetwork !== 's' || isWhiteLabel
         }
       }

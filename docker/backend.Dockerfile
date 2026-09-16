@@ -6,7 +6,10 @@
 # points directly, so no separate tsc build step is needed for the apps.
 #
 # Build context is the monorepo root (sx-monorepo/).
-FROM oven/bun:1.3.14
+# Keep in step with the monorepo's `packageManager` pin in package.json: the
+# lockfile format moved with bun 1.4, and an older bun cannot do a frozen
+# install against it.
+FROM oven/bun:1.4.0
 
 WORKDIR /app
 

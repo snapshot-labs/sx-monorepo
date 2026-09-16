@@ -22,7 +22,6 @@ import {
   SpacesFilter
 } from '@/networks/types';
 import {
-  Follow,
   NetworkID,
   Proposal,
   ProposalExecution,
@@ -36,19 +35,6 @@ import {
   UserActivity,
   Vote
 } from '@/types';
-import { fetchBlockTimestamps } from './blockTimestamps';
-import {
-  PROPOSAL_QUERY as HIGHLIGHT_PROPOSAL_QUERY,
-  PROPOSALS_QUERY as HIGHLIGHT_PROPOSALS_QUERY,
-  SPACE_QUERY as HIGHLIGHT_SPACE_QUERY,
-  SPACES_QUERY as HIGHLIGHT_SPACES_QUERY,
-  USER_QUERY as HIGHLIGHT_USER_QUERY,
-  VOTES_QUERY as HIGHLIGHT_VOTES_QUERY,
-  joinHighlightProposal,
-  joinHighlightSpace,
-  joinHighlightUser,
-  mixinHighlightVotes
-} from './highlight';
 import {
   LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
@@ -66,13 +52,11 @@ import {
   ApiProposalWithMetadata,
   ApiSpace,
   ApiSpaceWithMetadata,
-  ApiStrategyParsedMetadata,
-  ApiVote
+  ApiStrategyParsedMetadata
 } from './types';
 
 type ApiOptions = {
   baseNetworkId?: NetworkID;
-  highlightApiUrl?: string;
 };
 
 const DELEGATES_SUBGRAPH_URL =
@@ -112,27 +96,6 @@ function isProposalWithSpaceMetadata(
   );
 }
 
-function applyBlockTimestamps(
-  proposal: Proposal,
-  blockTimestamps: Record<number, number>
-): Proposal {
-  return {
-    ...proposal,
-    start:
-      (proposal.start_block_number &&
-        blockTimestamps[proposal.start_block_number]) ||
-      proposal.start,
-    min_end:
-      (proposal.min_end_block_number &&
-        blockTimestamps[proposal.min_end_block_number]) ||
-      proposal.min_end,
-    max_end:
-      (proposal.max_end_block_number &&
-        blockTimestamps[proposal.max_end_block_number]) ||
-      proposal.max_end
-  };
-}
-
 function getProposalState(
   networkId: NetworkID,
   proposal: ApiProposal,
@@ -153,6 +116,29 @@ function getProposalState(
   if (proposal.executed) {
     if (proposal.vetoed) return 'vetoed';
     return proposal.execution_settled ? 'executed' : 'queued';
+  }
+
+  // Revealed confidential proposal: 'passed' or 'rejected'.
+  if (
+    proposal.quorum_reached !== null &&
+    proposal.quorum_reached !== undefined &&
+    proposal.support_achieved !== null &&
+    proposal.support_achieved !== undefined
+  ) {
+    return proposal.quorum_reached && proposal.support_achieved
+      ? 'passed'
+      : 'rejected';
+  }
+
+  // Pre-reveal: scores encrypted, so show 'closed' not 'rejected'.
+  if (proposal.space?.protocol === 'snapshot-x-inco') {
+    if (Number(proposal.start_block_number ?? proposal.start) > current) {
+      return 'pending';
+    }
+    if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
+      return 'closed';
+    }
+    return 'active';
   }
 
   if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
@@ -188,7 +174,7 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: String(CHAIN_IDS[network])
+      chainId: String(CHAIN_IDS[network as keyof typeof CHAIN_IDS])
     };
   }
 
@@ -219,7 +205,7 @@ function formatDelegation(delegation: string): SpaceMetadataDelegation {
       apiType: api_type,
       apiUrl: api_url,
       contractAddress: address === 'null' ? null : address,
-      chainId: String(CHAIN_IDS[network])
+      chainId: String(CHAIN_IDS[network as keyof typeof CHAIN_IDS])
     };
   }
 
@@ -251,7 +237,7 @@ function formatDelegations(
       apiType: 'governor-subgraph',
       apiUrl,
       contractAddress,
-      chainId: String(CHAIN_IDS[space._indexer])
+      chainId: String(CHAIN_IDS[space._indexer as keyof typeof CHAIN_IDS])
     }
   ];
 }
@@ -337,10 +323,15 @@ function formatSpace(
   space: ApiSpaceWithMetadata,
   constants: NetworkConstants
 ): Space {
+  const isConfidential = space.protocol === 'snapshot-x-inco';
+
   return {
     ...space,
     voting_delay: Number(space.voting_delay),
-    min_voting_period: Number(space.min_voting_period),
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_voting_period: Number(
+      isConfidential ? space.max_voting_period : space.min_voting_period
+    ),
     max_voting_period: Number(space.max_voting_period),
     turbo_expiration: 0,
     network: space._indexer as NetworkID,
@@ -400,6 +391,7 @@ function formatProposal(
   const state = getProposalState(networkId, proposal, current);
 
   const isStarknetNetwork = starknetNetworks.includes(networkId);
+  const isConfidential = proposal.space.protocol === 'snapshot-x-inco';
 
   const emptyAddress = isStarknetNetwork
     ? STARKNET_EMPTY_ADDRESS
@@ -409,8 +401,14 @@ function formatProposal(
     ...proposal,
     start: Number(proposal.start),
     start_block_number: Number(proposal.start_block_number) || null,
-    min_end: Number(proposal.min_end),
-    min_end_block_number: Number(proposal.min_end_block_number) || null,
+    // Inco reveal and execution are gated on max end, min end is unused.
+    min_end: Number(isConfidential ? proposal.max_end : proposal.min_end),
+    min_end_block_number:
+      Number(
+        isConfidential
+          ? proposal.max_end_block_number
+          : proposal.min_end_block_number
+      ) || null,
     max_end: Number(proposal.max_end),
     max_end_block_number: Number(proposal.max_end_block_number) || null,
     snapshot: Number(proposal.snapshot),
@@ -452,16 +450,25 @@ function formatProposal(
     discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
-    has_execution_window_opened: ['EthRelayer'].includes(
-      proposal.execution_strategy_type
-    )
-      ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
-      : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
+    has_execution_window_opened:
+      ['EthRelayer'].includes(proposal.execution_strategy_type) ||
+      isConfidential
+        ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
+        : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
+    quorum_reached: proposal.quorum_reached ?? null,
+    support_achieved: proposal.support_achieved ?? null,
     state,
     network: networkId,
-    privacy: 'none',
-    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
+    privacy: proposal.space.protocol === 'snapshot-x-inco' ? 'inco' : 'none',
+    // OZ Governor quorum becomes static at proposal time.
+    // Compound Governor quorum is only set on deployment.
+    // SX quorum is dynamic and quorum changes affect past proposals.
+    quorum: ['@openzeppelin/governor', 'governor-bravo'].includes(
+      proposal.space.protocol
+    )
+      ? Number(proposal.quorum || 0)
+      : Number(proposal.execution_strategy_details?.quorum || 0),
     quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,
     flag_code: 0,
@@ -493,26 +500,6 @@ export function createApi(
       }
     }
   });
-
-  const highlightApolloClient = opts.highlightApiUrl
-    ? new ApolloClient({
-        link: createHttpLink({ uri: opts.highlightApiUrl }),
-        cache: new InMemoryCache({
-          addTypename: false
-        }),
-        defaultOptions: {
-          query: {
-            fetchPolicy: 'no-cache'
-          }
-        }
-      })
-    : null;
-
-  const highlightVotesCache = {
-    key: null as string | null,
-    data: [] as ApiVote[],
-    remaining: [] as ApiVote[]
-  };
 
   return {
     apiUrl: uri,
@@ -569,40 +556,6 @@ export function createApi(
         }
       });
 
-      if (highlightApolloClient) {
-        const cacheKey = `${proposal.space.id}/${proposal.proposal_id}`;
-        const cacheValid = highlightVotesCache.key === cacheKey;
-
-        if (!cacheValid) {
-          const { data: highlightData } = await highlightApolloClient.query({
-            query: HIGHLIGHT_VOTES_QUERY,
-            variables: {
-              space: proposal.space.id,
-              proposal: proposal.proposal_id
-            }
-          });
-
-          highlightVotesCache.key = cacheKey;
-          highlightVotesCache.data = highlightData.votes;
-          highlightVotesCache.remaining = highlightData.votes;
-        } else if (skip === 0) {
-          highlightVotesCache.remaining = highlightVotesCache.data;
-        }
-
-        const { result, remaining } = mixinHighlightVotes(
-          data.votes,
-          highlightVotesCache.remaining,
-          filter,
-          orderBy,
-          orderDirection,
-          limit
-        );
-
-        highlightVotesCache.remaining = remaining;
-
-        data.votes = result;
-      }
-
       const addresses = data.votes.map(vote => vote.voter.id);
       const names = await getNames(addresses);
 
@@ -643,29 +596,29 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: ProposalsFilter = clone(filters || {});
+      const {
+        state: stateFilter,
+        labels,
+        ...restFilters
+      }: ProposalsFilter = filters || {};
 
       const metadataFilters: Record<string, any> = {};
       if (searchQuery) metadataFilters.title_contains_nocase = searchQuery;
 
-      const state = _filters.state;
+      const state = stateFilter;
 
       if (state === 'active') {
-        _filters.start_lte = current;
-        _filters.max_end_gte = current;
+        restFilters.start_lte = current;
+        restFilters.max_end_gte = current;
       } else if (state === 'pending') {
-        _filters.start_gt = current;
+        restFilters.start_gt = current;
       } else if (state === 'closed') {
-        _filters.max_end_lt = current;
+        restFilters.max_end_lt = current;
       }
 
-      delete _filters.state;
-
-      if (_filters.labels?.length) {
-        metadataFilters.labels_contains = _filters.labels;
+      if (labels?.length) {
+        metadataFilters.labels_contains = labels;
       }
-
-      delete _filters.labels;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -678,89 +631,35 @@ export function createApi(
             metadata_: Object.keys(metadataFilters).length
               ? metadataFilters
               : undefined,
-            ..._filters
+            ...restFilters
           }
         }
       });
 
-      if (highlightApolloClient) {
-        const { data: highlightData } = await highlightApolloClient.query({
-          query: HIGHLIGHT_PROPOSALS_QUERY,
-          variables: { ids: data.proposals.map(proposal => proposal.id) }
-        });
-
-        data.proposals = data.proposals.map(proposal => {
-          const highlightProposal = highlightData.sxproposals.find(
-            (highlightProposal: any) => highlightProposal.id === proposal.id
-          );
-
-          return joinHighlightProposal(proposal, highlightProposal);
-        });
-      }
-
-      const proposals = data.proposals
+      return data.proposals
         .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
-
-      const blockTimestamps = await fetchBlockTimestamps(
-        networkId,
-        proposals.flatMap(p => [
-          p.start_block_number,
-          p.min_end_block_number,
-          p.max_end_block_number
-        ]),
-        current
-      );
-
-      return proposals.map(p => applyBlockTimestamps(p, blockTimestamps));
     },
     loadProposal: async (
       spaceId: string,
       proposalId: number,
       current: number
     ): Promise<Proposal | null> => {
-      const [{ data }, highlightResult] = await Promise.all([
-        apollo.query({
-          query: PROPOSAL_QUERY,
-          variables: { id: `${spaceId}/${proposalId}` }
-        }),
-        highlightApolloClient
-          ?.query({
-            query: HIGHLIGHT_PROPOSAL_QUERY,
-            variables: { id: `${spaceId}/${proposalId}` }
-          })
-          .catch(() => null)
-      ]);
+      const { data } = await apollo.query({
+        query: PROPOSAL_QUERY,
+        variables: { id: `${spaceId}/${proposalId}` }
+      });
 
       if (!data.proposal) return null;
-
-      data.proposal = joinHighlightProposal(
-        data.proposal,
-        highlightResult?.data.sxproposal
-      );
-
       if (!isProposalWithSpaceMetadata(data.proposal)) return null;
-
-      const proposal = formatProposal(
+      return formatProposal(
         data.proposal,
         networkId,
         current,
         opts.baseNetworkId
       );
-
-      const blockTimestamps = await fetchBlockTimestamps(
-        networkId,
-        [
-          proposal.start_block_number,
-          proposal.min_end_block_number,
-          proposal.max_end_block_number
-        ],
-        current
-      );
-
-      return applyBlockTimestamps(proposal, blockTimestamps);
     },
     loadSpaces: async (
       { limit, skip = 0 }: PaginationOpts,
@@ -794,67 +693,27 @@ export function createApi(
         }
       });
 
-      if (highlightApolloClient) {
-        const { data: highlightData } = await highlightApolloClient.query({
-          query: HIGHLIGHT_SPACES_QUERY,
-          variables: { ids: data.spaces.map((space: any) => space.id) }
-        });
-
-        data.spaces = data.spaces.map(space => {
-          const highlightSpace = highlightData.sxspaces.find(
-            (highlightSpace: any) => highlightSpace.id === space.id
-          );
-
-          return joinHighlightSpace(space, highlightSpace);
-        });
-      }
-
       return data.spaces
         .filter(space => isSpaceWithMetadata(space))
         .map(space => formatSpace(space, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
-      const [{ data }, highlightResult] = await Promise.all([
-        apollo.query({
-          query: SPACE_QUERY,
-          variables: { indexer: networkId, id }
-        }),
-        highlightApolloClient
-          ?.query({
-            query: HIGHLIGHT_SPACE_QUERY,
-            variables: { id }
-          })
-          .catch(() => null)
-      ]);
+      const { data } = await apollo.query({
+        query: SPACE_QUERY,
+        variables: { indexer: networkId, id }
+      });
 
       if (!data.space) return null;
-
-      data.space = joinHighlightSpace(
-        data.space,
-        highlightResult?.data.sxspace
-      );
-
       if (!isSpaceWithMetadata(data.space)) return null;
       return formatSpace(data.space, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
-      const [{ data }, highlightResult] = await Promise.all([
-        apollo.query({
-          query: USER_QUERY,
-          variables: { indexer: networkId, id }
-        }),
-        highlightApolloClient
-          ?.query({
-            query: HIGHLIGHT_USER_QUERY,
-            variables: { id }
-          })
-          .catch(() => null)
-      ]);
+      const { data } = await apollo.query({
+        query: USER_QUERY,
+        variables: { indexer: networkId, id }
+      });
 
-      return joinHighlightUser(
-        data.user ?? null,
-        highlightResult?.data?.sxuser ?? null
-      );
+      return data.user ?? null;
     },
     async loadUserActivities(userId: string): Promise<UserActivity[]> {
       const { data } = await apollo.query({
@@ -916,7 +775,7 @@ export function createApi(
       }));
     },
     loadFollows: async () => {
-      return [] as Follow[];
+      return [];
     },
     loadAlias: async () => {
       return null;

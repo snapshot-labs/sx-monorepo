@@ -66,6 +66,20 @@ async function run() {
               .where('proposals.vetoed', false)
               .whereRaw('upper_inf(proposals.block_range)')
         }
+      },
+      Proposal: {
+        state: {
+          sql: knex =>
+            knex.select(
+              knex.raw(
+                `case
+                  when proposals.start > extract(epoch from now())::integer then 'pending'
+                  when proposals.max_end > extract(epoch from now())::integer then 'active'
+                  else 'closed'
+                end`
+              )
+            )
+        }
       }
     }
   });

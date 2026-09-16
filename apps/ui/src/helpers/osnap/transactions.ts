@@ -74,7 +74,7 @@ type OSnapRawTransaction = OSnapBaseTransaction & {
   type: 'raw';
 };
 
-type OSnapTransaction =
+export type OSnapTransaction =
   | OSnapTransferFundsTransaction
   | OSnapTransferNFTTransaction
   | OSnapContractInteractionTransaction

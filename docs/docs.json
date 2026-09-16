@@ -29,7 +29,7 @@
         },
         {
           "anchor": "Contact us",
-          "href": "/#intercom",
+          "href": "/contact-us",
           "icon": "headset",
           "iconType": "regular"
         },
@@ -121,7 +121,8 @@
           {
             "group": "FAQ",
             "pages": [
-              "faq"
+              "faq",
+              "contact-us"
             ]
           }
         ]
@@ -132,7 +133,7 @@
           {
             "group": "Getting started",
             "pages": [
-              "developers/index"
+              "developers"
             ]
           },
           {
@@ -207,11 +208,6 @@
       "cursor",
       "vscode"
     ]
-  },
-  "integrations": {
-    "intercom": {
-      "appId": "n9dmxtcs"
-    }
   },
   "externalLinks": [
     {

@@ -28,8 +28,9 @@ jest.mock('@ethersproject/contracts', () => ({
         throw new Error('rpc down');
       }
       const v = supplies[this.address.toLowerCase()];
-      if (v === undefined)
+      if (v === undefined) {
         throw new Error(`no supply stubbed for ${this.address}`);
+      }
       return { toString: () => v };
     }
   }

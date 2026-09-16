@@ -239,6 +239,56 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         link: { name: 'space-discussions', params: { space: 's:ens.eth' } }
       }
     }
+  },
+  shutterpen: {
+    id: 'shutterpen',
+    name: 'Shutter PEN',
+    spaceIds: [
+      {
+        network: 'eth',
+        id: '0xC85cf8400ABB7056088279c122912E7e19634885'
+      },
+      {
+        network: 's',
+        id: 'shutterpen.eth'
+      }
+    ],
+    routes: [
+      {
+        path: 'onchain',
+        meta: { orgSpaceId: 'eth:0xC85cf8400ABB7056088279c122912E7e19634885' },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'offchain',
+        meta: { orgSpaceId: 's:shutterpen.eth' },
+        children: DEFAULT_SPACE_ROUTES
+      }
+    ],
+    navItems: {
+      proposals: {
+        name: 'Onchain',
+        link: {
+          name: 'space-proposals',
+          params: { space: 'eth:0xC85cf8400ABB7056088279c122912E7e19634885' }
+        },
+        activeRoute: {
+          prefix: 'space-onchain'
+        }
+      },
+      offchain: {
+        name: 'Offchain',
+        icon: IHNewspaper,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:shutterpen.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-offchain'
+        },
+        position: 2
+      }
+    }
   }
 };
 

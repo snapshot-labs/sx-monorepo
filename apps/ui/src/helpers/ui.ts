@@ -1,5 +1,9 @@
 import { getNetwork } from '@/networks';
-import { NetworkID } from '@/types';
+import { ChainId, NetworkID } from '@/types';
+
+export function getExecutionKey(chainId: ChainId | null, address: string) {
+  return `${chainId}:${address.toLowerCase()}`;
+}
 
 export function getExecutionName(networkId: NetworkID, strategyType: string) {
   try {

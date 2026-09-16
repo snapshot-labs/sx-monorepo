@@ -107,16 +107,10 @@ function canSeeSettings(context: NavContext): boolean {
 
 function getSpaceMainConfig(context: NavContext): NavConfig {
   const items: Record<string, NavItem> = {
-    overview: { name: 'Overview', icon: IHGlobeAlt }
+    overview: { name: 'Overview', icon: IHGlobeAlt },
+    proposals: { name: 'Proposals', icon: IHNewspaper },
+    leaderboard: { name: 'Leaderboard', icon: IHUserGroup }
   };
-
-  if (context.spaceType === 'discussionsSpace') {
-    items['townhall-topics'] = { name: 'Topics', icon: IHAnnotation };
-    items['townhall-roles'] = { name: 'Roles', icon: IHUserGroup };
-  } else {
-    items.proposals = { name: 'Proposals', icon: IHNewspaper };
-    items.leaderboard = { name: 'Leaderboard', icon: IHUserGroup };
-  }
 
   if (
     context.space &&
@@ -163,7 +157,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
 
 export default {
   routeName: 'space',
-  isVisible: ({ route }) =>
+  isVisible: ({ route }: NavContext) =>
     !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name)),
   getConfig(context: NavContext): NavConfig | null {
     if (!context.space) return null;

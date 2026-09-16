@@ -6,7 +6,7 @@ import ICAgora from '~icons/c/agora';
 import ICKarmahq from '~icons/c/karmahq';
 import ICTally from '~icons/c/tally';
 
-const SOURCE_ICONS = {
+const SOURCE_ICONS: Record<string, { icon: typeof ICAgora; link: string }> = {
   agora: { icon: ICAgora, link: 'https://www.agora.xyz' },
   karmahq: { icon: ICKarmahq, link: 'https://karmahq.xyz' },
   tally: { icon: ICTally, link: 'https://www.tally.xyz' }

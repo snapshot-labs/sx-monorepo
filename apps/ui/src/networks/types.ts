@@ -4,13 +4,13 @@ import {
   Connector as LockConnector,
   ConnectorType as LockConnectorType
 } from '@snapshot-labs/lock';
+import { ProtocolID } from '@snapshot-labs/sx';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
   ChainId,
   Choice,
   DelegationType,
-  Follow,
   NetworkID,
   Privacy,
   Proposal,
@@ -29,6 +29,14 @@ import {
 } from '@/types';
 
 export type PaginationOpts = { limit: number; skip?: number };
+export type ExplorerUrlType =
+  | 'transaction'
+  | 'address'
+  | 'contract'
+  | 'strategy'
+  | 'token'
+  | 'block';
+
 export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
@@ -63,6 +71,11 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Protocols this contract is built for, on networks hosting more than one
+   * (e.g. snapshot-x and snapshot-x-inco). Absent means protocol-agnostic.
+   */
+  protocols?: ProtocolID[];
   /**
    * Deprecated strategy can still be used but can't be added to new spaces.
    */
@@ -187,13 +200,13 @@ export type ReadOnlyNetworkActions = {
     web3: Web3Provider | Wallet,
     account: string,
     proposal: Proposal
-  );
+  ): Promise<any>;
   cancelProposal(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal
-  );
+  ): Promise<any>;
   vote(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
@@ -209,42 +222,55 @@ export type ReadOnlyNetworkActions = {
     networkId: NetworkID,
     spaceId: string,
     from?: string
-  );
+  ): Promise<any>;
   unfollowSpace(
     web3: Web3Provider | Wallet,
     networkId: NetworkID,
     spaceId: string,
     from?: string
-  );
-  setAlias(web3: Web3Provider, alias: string);
-  revokeAlias(web3: Web3Provider | Wallet, alias: string);
-  updateUser(web3: Web3Provider | Wallet, user: User, from?: string);
+  ): Promise<any>;
+  setAlias(web3: Web3Provider, alias: string): Promise<any>;
+  revokeAlias(web3: Web3Provider | Wallet, alias: string): Promise<any>;
+  updateUser(
+    web3: Web3Provider | Wallet,
+    user: User,
+    from?: string
+  ): Promise<any>;
   updateStatement(
     web3: Web3Provider | Wallet,
     statement: Statement,
     from?: string
-  );
+  ): Promise<any>;
   transferOwnership(
     web3: Web3Provider,
     connectorType: ConnectorType,
     space: Space,
     owner: string
-  );
-  updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
-  createSpaceRaw(web3: Web3Provider, id: string, settings: string);
-  deleteSpace(web3: Web3Provider, space: Space);
+  ): Promise<any>;
+  updateSettingsRaw(
+    web3: Web3Provider,
+    space: Space,
+    settings: string
+  ): Promise<any>;
+  createSpaceRaw(
+    web3: Web3Provider,
+    id: string,
+    settings: string
+  ): Promise<any>;
+  deleteSpace(web3: Web3Provider, space: Space): Promise<any>;
   send(envelope: any): Promise<any>;
 };
 
 export type NetworkActions = ReadOnlyNetworkActions & {
   predictSpaceAddress(
     web3: Web3Provider,
-    params: { salt: string }
+    params: { protocol: ProtocolID; salt: string }
   ): Promise<string | null>;
   deployDependency(
     web3: Web3Provider,
     connectorType: ConnectorType,
     params: {
+      protocol: ProtocolID;
       controller: string;
       spaceAddress: string;
       strategy: StrategyConfig;
@@ -254,6 +280,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     web3: Web3Provider,
     salt: string,
     params: {
+      protocol: ProtocolID;
       controller: string;
       votingDelay: number;
       minVotingDuration: number;
@@ -265,10 +292,11 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       executionDestinations: string[];
       metadata: SpaceMetadata;
     }
-  );
-  executeTransactions(web3: Web3Provider, proposal: Proposal);
-  executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
-  vetoProposal(web3: Web3Provider, proposal: Proposal);
+  ): Promise<any>;
+  revealResults(web3: Web3Provider, proposal: Proposal): Promise<any>;
+  executeTransactions(web3: Web3Provider, proposal: Proposal): Promise<any>;
+  executeQueuedProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;
+  vetoProposal(web3: Web3Provider, proposal: Proposal): Promise<any>;
   updateSettings(
     web3: Web3Provider,
     connectorType: ConnectorType,
@@ -283,7 +311,20 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
-  );
+  ): Promise<any>;
+  getUpdateSettingsTransaction(
+    space: Space,
+    metadata: SpaceMetadata,
+    authenticatorsToAdd: StrategyConfig[],
+    authenticatorsToRemove: number[],
+    votingStrategiesToAdd: StrategyConfig[],
+    votingStrategiesToRemove: number[],
+    validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
+  ): Promise<Transaction>;
   delegate(
     web3: Web3Provider,
     space: Space,
@@ -293,7 +334,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     delegationContract: string,
     chainIdOverride?: ChainId,
     delegateesMetadata?: Record<string, any>
-  );
+  ): Promise<any>;
   getDelegatee(
     delegation: SpaceMetadataDelegation,
     delegator: string
@@ -343,7 +384,9 @@ export type NetworkApi = {
       | 'proposal_count-asc',
     user?: string
   ): Promise<UserActivity[]>;
-  loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
+  loadFollows(
+    userId: string
+  ): Promise<{ space: Pick<Space, 'id' | 'network'> }[]>;
   loadAlias(
     address: string,
     alias: string,
@@ -437,17 +480,7 @@ export type NetworkHelpers = {
   waitForTransaction(txId: string): Promise<any>;
   waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
-  getExplorerUrl(
-    id: string,
-    type:
-      | 'transaction'
-      | 'address'
-      | 'contract'
-      | 'strategy'
-      | 'token'
-      | 'block',
-    chainId?: ChainId
-  ): string;
+  getExplorerUrl(id: string, type: ExplorerUrlType, chainId?: ChainId): string;
 };
 
 type BaseNetwork = {
@@ -475,7 +508,11 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
+export type ExplorePageProtocol =
+  | 'snapshot'
+  | 'snapshot-x'
+  | 'snapshot-x-inco'
+  | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;

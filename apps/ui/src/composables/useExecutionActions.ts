@@ -34,6 +34,7 @@ export function useExecutionActions(
   const message: Ref<string | null> = ref(null);
   const warningMessage: Ref<string | null> = ref(null);
   const executionNetwork = ref<Network>(getNetwork(toValue(proposal).network));
+  const revealResultsSending = ref(false);
   const executeProposalSending = ref(false);
   const executeQueuedProposalSending = ref(false);
   const vetoProposalSending = ref(false);
@@ -52,6 +53,14 @@ export function useExecutionActions(
   }, 1000);
 
   const network = computed(() => getNetwork(toValue(proposal).network));
+  const isPendingConfidentialReveal = computed(() => {
+    const proposalValue = toValue(proposal);
+
+    return (
+      proposalValue.space.protocol === 'snapshot-x-inco' &&
+      proposalValue.quorum_reached == null
+    );
+  });
   const hasExecuteQueued = computed(() => {
     const executionValue = toValue(execution);
     const proposalValue = toValue(proposal);
@@ -131,6 +140,16 @@ export function useExecutionActions(
     }
   }
 
+  async function revealResults() {
+    revealResultsSending.value = true;
+
+    try {
+      await actions.revealResults(toValue(proposal));
+    } finally {
+      revealResultsSending.value = false;
+    }
+  }
+
   async function executeProposal() {
     executeProposalSending.value = true;
 
@@ -192,15 +211,18 @@ export function useExecutionActions(
 
   return {
     hasExecuteQueued,
+    isPendingConfidentialReveal,
     fetchingDetails,
     message,
     warningMessage,
     executionTx,
     executionTxUrl,
+    revealResultsSending,
     executeProposalSending,
     executeQueuedProposalSending,
     vetoProposalSending,
     executionCountdown,
+    revealResults,
     executeProposal,
     executeQueuedProposal,
     vetoProposal

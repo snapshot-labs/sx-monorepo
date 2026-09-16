@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.18;
+
+import { Test } from "forge-std/Test.sol";
+import { VanillaVotingStrategy } from "../src/voting-strategies/VanillaVotingStrategy.sol";
+
+contract VanillaVotingStrategyTest is Test {
+    VanillaVotingStrategy public vanillaVotingStrategy;
+
+    function setUp() public {
+        vanillaVotingStrategy = new VanillaVotingStrategy();
+    }
+
+    function testGetVotingPower() public view {
+        // The voting power should always be 1.
+        assertEq(vanillaVotingStrategy.getVotingPower(0, address(0), "", ""), 1);
+    }
+}

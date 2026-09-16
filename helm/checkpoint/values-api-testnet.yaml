@@ -9,4 +9,4 @@ image:
 
 config:
   PORT: '3000'
-  ENABLED_NETWORKS: 'sep,curtis,bnbt,sn-sep'
+  ENABLED_NETWORKS: 'sep,curtis,bnbt,sn-sep,basesep'

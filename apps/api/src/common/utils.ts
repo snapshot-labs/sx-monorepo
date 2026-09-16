@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker';
 import { getExecutionData, utils } from '@snapshot-labs/sx';
-import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { keccak256 } from 'viem';
 import { Network, Proposal, ScoresTick } from '../../.checkpoint/models';
@@ -55,13 +54,16 @@ function getUrl(uri: string, gateway = 'pineapple.fyi') {
     !uri.startsWith('ipns://') &&
     !uri.startsWith('https://') &&
     !uri.startsWith('http://')
-  )
+  ) {
     return `${ipfsGateway}/ipfs/${uri}`;
+  }
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs')
+  if (uriScheme === 'ipfs') {
     return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns')
+  }
+  if (uriScheme === 'ipns') {
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  }
   return uri;
 }
 
@@ -129,7 +131,7 @@ export function getExecutionHash({
     return keccak256(data.executionParams[0] as `0x${string}`);
   }
 
-  return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
+  return hash.computePoseidonHashOnElements(data.executionParams);
 }
 
 export function getSpaceDecimals(decimals: number[]) {

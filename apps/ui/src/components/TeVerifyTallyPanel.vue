@@ -101,8 +101,9 @@ async function run() {
     const run = runVerify(
       { proposalId, payload, ballotsPayload, budget: budget.value },
       progress => {
-        if (status.value.kind === 'verifying')
+        if (status.value.kind === 'verifying') {
           status.value = { kind: 'verifying', progress };
+        }
       }
     );
     cancelRun.value = run.cancel;

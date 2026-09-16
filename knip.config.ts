@@ -14,26 +14,9 @@ const config: KnipConfig = {
     'apps/api': {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty']
     },
-    'apps/auction': {
-      entry: ['src/main.ts', 'src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],
-      vite: false,
-      ignoreDependencies: [
-        // used by the gitignored graphql-codegen output (gql/), which is not
-        // generated on CI since auction is excluded from build/codegen
-        '@graphql-typed-document-node/core',
-        '@iconify-json/heroicons-outline',
-        '@iconify-json/heroicons-solid',
-        'buffer',
-        'events',
-        'util'
-      ]
-    },
     'apps/delegates-api': {
       entry: ['src/index.ts'],
       ignoreDependencies: ['@logtail/pino', 'pino-pretty', 'ts-node']
-    },
-    'apps/highlight': {
-      entry: ['src/index.ts']
     },
     'apps/hub': {
       entry: ['src/index.ts'],
@@ -65,14 +48,36 @@ const config: KnipConfig = {
       // public/blst.js is a runtime-served asset copied from the SDK
       ignore: ['src/assets/styles/highlightjs/**', 'public/blst.js'],
       ignoreDependencies: [
-        '@vue/cli-plugin-babel',
-        '@babel/core',
         '@iconify-json/heroicons-solid',
         '@electron-forge/maker-dmg',
         '@electron-forge/maker-zip',
         'buffer',
         'events',
         'util'
+      ]
+    },
+    // Solidity only: foundry resolves these through remappings.txt, which knip
+    // cannot follow, so every dependency looks unused to it.
+    'contracts/sx-evm': {
+      ignoreDependencies: [
+        '@openzeppelin/contracts',
+        '@openzeppelin/contracts-upgradeable',
+        'forge-std',
+        'murky',
+        'solhint-plugin-prettier'
+      ],
+      ignoreBinaries: ['forge']
+    },
+    // Same as sx-evm: these are resolved through foundry remappings. The
+    // scripts and tests are only ever run through the test:* shell scripts.
+    'contracts/sx-starknet': {
+      entry: ['scripts/**/*.ts', 'tests/**/*.ts'],
+      ignoreDependencies: [
+        '@gnosis.pm/safe-contracts',
+        '@gnosis.pm/zodiac',
+        '@openzeppelin/contracts',
+        '@openzeppelin/contracts-upgradeable',
+        'forge-std'
       ]
     },
     'packages/eslint-config': {},
@@ -88,7 +93,9 @@ const config: KnipConfig = {
       entry: ['tests/**/*.ts', 'scripts/*.{ts,mjs}']
     },
     'packages/sx.js': {
-      ignoreBinaries: ['anvil', 'starknet-devnet']
+      ignoreBinaries: ['anvil', 'starknet-devnet'],
+      // deliberate optional peer, lazy-loaded for confidential voting
+      ignoreDependencies: ['@inco/lightning-js']
     },
     'packages/tune': {
       entry: ['src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],

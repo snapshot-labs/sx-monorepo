@@ -41,6 +41,7 @@ export type NetworkID =
   | 'ape'
   | 'curtis'
   | 'sep'
+  | 'basesep'
   | 'sn'
   | 'sn-sep';
 
@@ -54,7 +55,7 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | 'shutter-elgamal' | 'none';
+export type Privacy = 'shutter' | 'shutter-elgamal' | 'inco' | 'none';
 export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
@@ -164,6 +165,7 @@ export type Validation = {
 
 export type OffchainAdditionalRawData = {
   type: 'offchain';
+  skinSettings: SkinSettings;
 } & Pick<
   OffchainApiSpace,
   | 'private'
@@ -172,7 +174,6 @@ export type OffchainAdditionalRawData = {
   | 'hibernated'
   | 'domain'
   | 'skin'
-  | 'skinSettings'
   | 'strategies'
   | 'categories'
   | 'admins'
@@ -349,6 +350,9 @@ export type Proposal = {
    */
   completed: boolean;
   cancelled: boolean;
+  /** Set after finalizeReveal; null pre-reveal or non-confidential. */
+  quorum_reached?: boolean | null;
+  support_achieved?: boolean | null;
   state: ProposalState;
   privacy: Privacy;
   te_config?: any;
@@ -478,7 +482,7 @@ export type SkinSettings = {
   heading_color: string;
   primary_color: string;
   theme: Theme;
-  logo?: string;
+  logo?: string | null;
 };
 
 export type Drafts = Record<string, Draft>;

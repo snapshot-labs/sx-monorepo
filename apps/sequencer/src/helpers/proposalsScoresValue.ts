@@ -106,13 +106,18 @@ async function refreshProposalsScoresTotalValue(proposals: Proposal[]) {
 
 export default async function run() {
   while (true) {
-    const proposals = await getProposals();
+    try {
+      const proposals = await getProposals();
 
-    if (proposals.length) {
-      await refreshProposalsScoresTotalValue(proposals);
-    }
+      if (proposals.length) {
+        await refreshProposalsScoresTotalValue(proposals);
+      }
 
-    if (proposals.length < BATCH_SIZE) {
+      if (proposals.length < BATCH_SIZE) {
+        await snapshot.utils.sleep(REFRESH_INTERVAL);
+      }
+    } catch (err) {
+      capture(err);
       await snapshot.utils.sleep(REFRESH_INTERVAL);
     }
   }

@@ -74,8 +74,9 @@ async function handleSubmit() {
 function handleApprove(approved: boolean) {
   approveFn.value?.(approved);
 
-  if (approved) approving.value = true;
-  else {
+  if (approved) {
+    approving.value = true;
+  } else {
     form.pairingCode = '';
     step.value = 'INIT';
   }

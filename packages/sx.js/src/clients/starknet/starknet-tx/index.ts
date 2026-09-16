@@ -1,7 +1,6 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { TransactionResponse } from '@ethersproject/providers';
-import { poseidonHashMany } from 'micro-starknet';
 import randomBytes from 'randombytes';
 import { Account, CallData, hash, shortString, uint256 } from 'starknet';
 import SpaceAbi from './abis/Space.json';
@@ -171,7 +170,7 @@ export class StarknetTx {
   }
 
   async getSalt({ sender, saltNonce }: { sender: string; saltNonce: string }) {
-    return poseidonHashMany([BigInt(sender), BigInt(saltNonce)]);
+    return BigInt(hash.computePoseidonHashOnElements([sender, saltNonce]));
   }
 
   async predictSpaceAddress({

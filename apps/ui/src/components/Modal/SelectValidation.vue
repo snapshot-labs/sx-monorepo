@@ -1,4 +1,6 @@
 <script lang="ts">
+type EnumOption = { const: string; title: string };
+
 type ValidationDetails = {
   key:
     | 'any'
@@ -114,10 +116,10 @@ const definition = computed(() => {
 
     if (updated.properties[key].anyOf) {
       updated.properties[key].enum = updated.properties[key].anyOf.map(
-        item => item.const
+        (item: EnumOption) => item.const
       );
       updated.properties[key].options = updated.properties[key].anyOf.map(
-        item => ({
+        (item: EnumOption) => ({
           id: item.const,
           name: item.title
         })
@@ -128,9 +130,9 @@ const definition = computed(() => {
     if (updated.properties[key].items?.anyOf) {
       updated.properties[key].items.enum = updated.properties[
         key
-      ].items.anyOf.map(item => item.const);
+      ].items.anyOf.map((item: EnumOption) => item.const);
       updated.properties[key].options = updated.properties[key].items.anyOf.map(
-        item => ({
+        (item: EnumOption) => ({
           id: item.const,
           name: item.title
         })
@@ -188,14 +190,20 @@ function handleSelect(validationDetails: ValidationDetails) {
 
   if (selectedValidation.value.key === 'basic') {
     if (form.value.strategies) {
-      customStrategies.value = form.value.strategies.map(strategy => ({
-        id: crypto.randomUUID(),
-        chainId: strategy.network,
-        address: strategy.name,
-        name: strategy.name,
-        paramsDefinition: null,
-        params: clone(strategy.params)
-      }));
+      customStrategies.value = form.value.strategies.map(
+        (strategy: {
+          network: string;
+          name: string;
+          params: Record<string, any>;
+        }) => ({
+          id: crypto.randomUUID(),
+          chainId: strategy.network,
+          address: strategy.name,
+          name: strategy.name,
+          paramsDefinition: null,
+          params: clone(strategy.params)
+        })
+      );
     }
 
     form.value.strategies ??= [];
@@ -207,9 +215,15 @@ function handleSelect(validationDetails: ValidationDetails) {
     // Remove unsupported options
     form.value.stamps =
       definition.value.properties?.stamps?.options
-        ?.filter(option => form.value.stamps.includes(option.id))
-        ?.map(option => option.id) ?? form.value.stamps;
+        ?.filter((option: { id: string }) =>
+          form.value.stamps.includes(option.id)
+        )
+        ?.map((option: { id: string }) => option.id) ?? form.value.stamps;
   }
+}
+
+function getValidationInfo(key: ValidationDetails['key']) {
+  return VALIDATION_TYPES_INFO[key === 'any' ? 'any-voting' : key];
 }
 
 function handleApply() {
@@ -344,11 +358,7 @@ watch(
           <div class="flex items-center gap-2 overflow-hidden">
             <h4
               class="text-skin-link truncate"
-              v-text="
-                VALIDATION_TYPES_INFO[
-                  validation.key === 'any' ? `any-${type}` : validation.key
-                ].label
-              "
+              v-text="getValidationInfo(validation.key).label"
             />
             <UiPill
               v-if="validation.key === 'passport-gated'"
@@ -356,13 +366,7 @@ watch(
               label="Beta"
             />
           </div>
-          <div
-            v-text="
-              VALIDATION_TYPES_INFO[
-                validation.key === 'any' ? `any-${type}` : validation.key
-              ].description
-            "
-          />
+          <div v-text="getValidationInfo(validation.key).description" />
         </div>
       </UiSelector>
     </div>

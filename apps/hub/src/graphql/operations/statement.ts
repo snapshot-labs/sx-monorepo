@@ -4,7 +4,12 @@ import db from '../../helpers/mysql';
 
 export default async function (parent, args) {
   const id = args.id;
-  const query = `SELECT s.* FROM statements s WHERE id = ? LIMIT 1`;
+  const query = `
+    SELECT s.* FROM statements s
+    INNER JOIN spaces sp ON sp.id = s.space
+    WHERE s.id = ? AND sp.deleted = 0
+    LIMIT 1
+  `;
   try {
     const statements = await db.queryAsync(query, id);
     if (statements.length === 1) return statements[0];

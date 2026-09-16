@@ -9,7 +9,8 @@ import {
   domain as baseDomain,
   proposeTypes,
   updateProposalTypes,
-  voteTypes
+  voteTypes,
+  voteTypesInco
 } from './types';
 import { getStrategiesWithParams } from '../../../strategies/evm';
 import { bytesToHex } from '../../../utils/bytes';
@@ -183,20 +184,29 @@ export class EthereumSig {
       this.config
     );
 
-    const message: EIP712VoteMessage = {
-      space: data.space,
-      voter,
-      proposalId: data.proposal,
-      choice: data.choice,
-      userVotingStrategies,
-      voteMetadataURI: data.metadataUri
-    };
+    const message: EIP712VoteMessage = data.ciphertext
+      ? {
+          space: data.space,
+          voter,
+          proposalId: data.proposal,
+          ciphertext: data.ciphertext,
+          userVotingStrategies,
+          voteMetadataURI: data.metadataUri
+        }
+      : {
+          space: data.space,
+          voter,
+          proposalId: data.proposal,
+          choice: data.choice,
+          userVotingStrategies,
+          voteMetadataURI: data.metadataUri
+        };
 
     const signatureData = await this.sign(
       signer,
       data.authenticator,
       message,
-      voteTypes
+      data.ciphertext ? voteTypesInco : voteTypes
     );
 
     return {

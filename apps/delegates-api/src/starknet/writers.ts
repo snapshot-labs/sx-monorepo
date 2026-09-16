@@ -46,8 +46,9 @@ export default function createWriters(indexerName: string) {
     delegate.delegatedVotes = formatUnits(BigInt(event.new_votes), DECIMALS);
     await delegate.save();
 
-    if (event.previous_votes == BIGINT_ZERO && event.new_votes > BIGINT_ZERO)
+    if (event.previous_votes == BIGINT_ZERO && event.new_votes > BIGINT_ZERO) {
       governance.currentDelegates += 1;
+    }
 
     if (event.new_votes == BIGINT_ZERO) governance.currentDelegates -= 1;
 

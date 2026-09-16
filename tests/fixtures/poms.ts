@@ -67,7 +67,7 @@ export class ExplorePage {
   async selectNetwork(name: string) {
     await this.page.getByRole('combobox', { name: 'Network' }).click();
     await this.page.getByRole('combobox', { name: 'Network' }).fill(name);
-    await this.page.getByText(name).click();
+    await this.page.getByText(name, { exact: true }).click();
   }
 
   async isSpaceVisible(name: string) {

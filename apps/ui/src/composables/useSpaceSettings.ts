@@ -1,7 +1,12 @@
 import objectHash from 'object-hash';
 import { Ref } from 'vue';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
-import { clone, compareAddresses, omit } from '@/helpers/utils';
+import {
+  clone,
+  compareAddresses,
+  getUserFacingErrorMessage,
+  omit
+} from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 import {
@@ -100,15 +105,18 @@ export function useSpaceSettings(space: Ref<Space>) {
   const { getDurationFromCurrent } = useMetaStore();
   const {
     updateSettings,
+    getUpdateSettingsTransaction,
     updateSettingsRaw,
     transferOwnership,
     deleteSpace: deleteSpaceAction
   } = useActions();
   const { isWhiteLabel } = useWhiteLabel();
   const { setSkin } = useSkin();
+  const uiStore = useUiStore();
 
   const loading = ref(true);
   const isModifiedEvaluating = ref(false);
+  const isOwnerEvaluating = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
 
@@ -129,7 +137,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       return compareAddresses(owner, account);
     },
     false,
-    { lazy: true }
+    { lazy: true, evaluating: isOwnerEvaluating }
   );
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
@@ -219,8 +227,9 @@ export function useSpaceSettings(space: Ref<Space>) {
 
       if (metadata.name) result.name = metadata.name;
       if (metadata.description) result.description = metadata.description;
-      if (metadata.payload !== null)
+      if (metadata.payload !== null) {
         result.properties.payload = metadata.payload;
+      }
       if (metadata.token !== null) result.properties.token = metadata.token;
 
       return result;
@@ -310,7 +319,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
   async function hasStrategyChanged(
     strategy: StrategyConfig,
-    previousParams: any,
+    previousParams: string[] | null,
     previousMetadata: any = {}
   ) {
     const metadata = strategy.generateMetadata
@@ -638,7 +647,10 @@ export function useSpaceSettings(space: Ref<Space>) {
         type: voteType.value === 'any' ? '' : voteType.value,
         quorum: Number(quorum.value),
         quorumType: quorumType.value,
-        privacy: privacy.value === 'none' ? '' : privacy.value,
+        privacy:
+          privacy.value === 'none' || privacy.value === 'inco'
+            ? ''
+            : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
       validation:
@@ -651,7 +663,9 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
     Object.entries(prunedSaveData).forEach(([key, value]) => {
-      if (value === null || value === '') delete prunedSaveData[key];
+      if (value === null || value === '') {
+        delete prunedSaveData[key as keyof OffchainSpaceSettings];
+      }
     });
     if (
       prunedSaveData.delegationPortal &&
@@ -672,7 +686,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       } else {
         Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
           if (value === null || value === '') {
-            delete prunedSaveData.skinSettings?.[key];
+            delete prunedSaveData.skinSettings?.[key as keyof SkinSettings];
           }
         });
       }
@@ -681,33 +695,71 @@ export function useSpaceSettings(space: Ref<Space>) {
     return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));
   }
 
-  async function saveOnchain() {
-    if (!validationStrategy.value) {
-      throw new Error('Validation strategy is missing');
+  async function getOnchainSettingsChanges() {
+    try {
+      if (!validationStrategy.value) {
+        throw new Error('Validation strategy is missing');
+      }
+
+      const [authenticatorsToAdd, authenticatorsToRemove] =
+        await processChanges(
+          authenticators.value,
+          space.value.authenticators,
+          [],
+          []
+        );
+
+      const [strategiesToAdd, strategiesToRemove] = await processChanges(
+        votingStrategies.value,
+        space.value.strategies,
+        space.value.strategies_params,
+        space.value.strategies_parsed_metadata
+      );
+
+      return {
+        authenticatorsToAdd,
+        authenticatorsToRemove,
+        strategiesToAdd,
+        strategiesToRemove,
+        validationStrategy: validationStrategy.value
+      };
+    } catch (err) {
+      console.error(err);
+      uiStore.addNotification('error', getUserFacingErrorMessage(err));
+
+      throw err;
     }
+  }
 
-    const [authenticatorsToAdd, authenticatorsToRemove] = await processChanges(
-      authenticators.value,
-      space.value.authenticators,
-      [],
-      []
-    );
-
-    const [strategiesToAdd, strategiesToRemove] = await processChanges(
-      votingStrategies.value,
-      space.value.strategies,
-      space.value.strategies_params,
-      space.value.strategies_parsed_metadata
-    );
+  async function saveOnchain() {
+    const changes = await getOnchainSettingsChanges();
 
     return updateSettings(
       space.value,
       form.value,
-      authenticatorsToAdd,
-      authenticatorsToRemove,
-      strategiesToAdd,
-      strategiesToRemove,
-      validationStrategy.value,
+      changes.authenticatorsToAdd,
+      changes.authenticatorsToRemove,
+      changes.strategiesToAdd,
+      changes.strategiesToRemove,
+      changes.validationStrategy,
+      executionStrategies.value,
+      votingDelay.value,
+      minVotingPeriod.value,
+      maxVotingPeriod.value
+    );
+  }
+
+  async function getSettingsUpdateTransaction() {
+    const changes = await getOnchainSettingsChanges();
+
+    return getUpdateSettingsTransaction(
+      space.value,
+      form.value,
+      changes.authenticatorsToAdd,
+      changes.authenticatorsToRemove,
+      changes.strategiesToAdd,
+      changes.strategiesToRemove,
+      changes.validationStrategy,
       executionStrategies.value,
       votingDelay.value,
       minVotingPeriod.value,
@@ -1060,6 +1112,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     ),
     isController,
     isOwner,
+    isOwnerEvaluating,
     isAdmin,
     canModifySettings,
     form,
@@ -1091,6 +1144,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     isPrivate,
     skinSettings,
     save,
+    getSettingsUpdateTransaction,
     saveController,
     deleteSpace,
     reset

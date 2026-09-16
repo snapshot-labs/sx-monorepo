@@ -1,5 +1,5 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
-import { FunctionFragment } from '@ethersproject/abi';
+import { FormatTypes, FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { namehash } from '@ethersproject/hash';
 import { upload as pin } from '@snapshot-labs/pineapple';
@@ -12,7 +12,7 @@ import sha3 from 'js-sha3';
 import { validateAndParseAddress } from 'starknet';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
-import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
@@ -40,11 +40,11 @@ dayjs.extend(duration);
 
 dayjs.updateLocale('en', {
   relativeTime: {
-    future: value => {
+    future: (value: string) => {
       if (value === 'now') return 'in few seconds';
       return `${value} left`;
     },
-    past: value => {
+    past: (value: string) => {
       if (value === 'now') return 'just now';
       return `${value} ago`;
     },
@@ -75,10 +75,12 @@ export function getUrl(uri: string) {
   }
 
   const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs')
+  if (uriScheme === 'ipfs') {
     return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns')
+  }
+  if (uriScheme === 'ipns') {
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  }
   return uri;
 }
 
@@ -105,8 +107,9 @@ export function shorten(
   if (key === 'symbol') limit = MAX_SYMBOL_LENGTH;
   if (key === 'name') limit = 64;
   if (key === 'choice') limit = 12;
-  if (limit)
+  if (limit) {
     return str.length > limit ? `${str.slice(0, limit).trim()}...` : str;
+  }
   return shortenAddress(str);
 }
 
@@ -194,7 +197,7 @@ export function _p(value: number, maximumFractionDigits = 2) {
   return formatter.format(value);
 }
 
-export function jsonParse(input, fallback?) {
+export function jsonParse(input: unknown, fallback?: any) {
   if (typeof input !== 'string') {
     return fallback || {};
   }
@@ -250,8 +253,8 @@ export function _d(s: number): string {
     .trim();
 }
 
-export function toBigIntOrNumber(value) {
-  const parsedValue = parseFloat(value);
+export function toBigIntOrNumber(value: number | string) {
+  const parsedValue = parseFloat(String(value));
   if (Number.isInteger(parsedValue)) {
     return BigInt(value);
   } else {
@@ -259,7 +262,7 @@ export function toBigIntOrNumber(value) {
   }
 }
 
-export function _t(number, format = 'MMM D, YYYY · h:mm A') {
+export function _t(number: number, format = 'MMM D, YYYY · h:mm A') {
   try {
     return dayjs(number * 1000).format(format);
   } catch (err) {
@@ -284,7 +287,7 @@ export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
     type: 'object',
     required: [] as string[],
     additionalProperties: false,
-    properties: {}
+    properties: {} as Record<string, Record<string, unknown>>
   };
 
   abi.inputs.forEach((input, i) => {
@@ -313,7 +316,11 @@ export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
         definition.properties[inputName].chainId = chainId;
       }
     }
-    if (input.type.endsWith('[]')) {
+    if (input.type.includes('tuple')) {
+      definition.properties[inputName].format = 'long';
+      definition.properties[inputName].abiType = input.format(FormatTypes.full);
+      definition.properties[inputName].examples = ['{ "key": "value" }'];
+    } else if (input.type.endsWith('[]')) {
       definition.properties[inputName].format = input.type;
       definition.properties[inputName].examples = ['0x0, 0x1'];
     }
@@ -357,7 +364,8 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
 }
 
 export function uniqBy<T>(arr: T[], predicate: keyof T | ((o: T) => any)): T[] {
-  const cb = typeof predicate === 'function' ? predicate : o => o[predicate];
+  const cb =
+    typeof predicate === 'function' ? predicate : (o: T) => o[predicate];
 
   const pickedObjects = arr
     .filter(item => item)
@@ -807,7 +815,7 @@ export function getUserFacingErrorMessage(
 }
 
 async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
-  const registries = {
+  const registries: Record<number, string> = {
     146: '0xDe1DAdcF11a7447C3D093e97FdbD513f488cE3b4' // Sonic
   };
 
@@ -830,7 +838,7 @@ async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
   );
 }
 
-export async function getSpaceController(id: string, network: NetworkID) {
+export async function getSpaceController(id: string, network: 's' | 's-tn') {
   const chainMapping = {
     ens: {
       s: 1,
@@ -843,7 +851,7 @@ export async function getSpaceController(id: string, network: NetworkID) {
     sonic: {
       s: 146
     }
-  };
+  } as const;
 
   if (id.endsWith('.shib')) {
     const owner = await getOwner(id, chainMapping.shibarium[network]);
@@ -852,6 +860,8 @@ export async function getSpaceController(id: string, network: NetworkID) {
   }
 
   if (id.endsWith('.sonic')) {
+    if (network !== 's') throw new Error('Unsupported network');
+
     return getUnstoppableDomainsNameOwner(id, chainMapping.sonic[network]);
   }
 

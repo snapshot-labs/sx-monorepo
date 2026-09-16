@@ -1,39 +1,39 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import snapshot from '@snapshot-labs/snapshot.js';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 
-export const BROVIDER_URL =
-  process.env.BROVIDER_URL ?? 'https://rpc.brovider.xyz';
-const providers = new Map<string, StaticJsonRpcProvider>();
+// snapshot.js types getProvider per network id but does not export the two
+// arms, so name them off a sample id of each kind rather than deep-importing
+// its internals.
+export type EvmProvider = ReturnType<typeof snapshot.utils.getProvider<'1'>>;
+export type StarknetProvider = ReturnType<
+  typeof snapshot.utils.getProvider<'0x534e5f4d41494e'>
+>;
 
-// Loose `any` return type matches snapshot.js: starknet networks return a
-// starknet RpcProvider, not a StaticJsonRpcProvider.
-export function getProvider(network: string | number): any {
-  const key = String(network);
-  const config = (
-    networks as Record<string, { starknet?: boolean } | undefined>
-  )[key];
-  if (!config) {
-    throw new Error(`Network '${key}' is not supported`);
-  }
-  // snapshot.js builds the RPC URL without a query string, so EVM providers are
-  // created locally to append ?client=sequencer. Starknet networks need
-  // snapshot.js (RpcProvider + broviderId mapping) and keep going through it.
-  if (config.starknet) {
-    return snapshot.utils.getProvider(network, { broviderUrl: BROVIDER_URL });
-  }
+const BROVIDER_URL = process.env.BROVIDER_URL ?? 'https://rpc.brovider.xyz';
 
-  let provider = providers.get(key);
-  if (!provider) {
-    provider = new StaticJsonRpcProvider(
-      {
-        url: `${BROVIDER_URL}/${key}?client=sequencer`,
-        timeout: 25000,
-        allowGzip: true
-      },
-      Number(network)
-    );
-    providers.set(key, provider);
-  }
-  return provider;
+export const PROVIDER_OPTIONS = {
+  broviderUrl: BROVIDER_URL,
+  clientName: 'sequencer'
+};
+
+export function getProvider(
+  network: string | number
+): EvmProvider | StarknetProvider {
+  return snapshot.utils.getProvider(network, PROVIDER_OPTIONS);
+}
+
+export function verify(
+  address: string,
+  sig: string | string[],
+  data: any,
+  network: string
+) {
+  return snapshot.utils.verify(address, sig, data, network, PROVIDER_OPTIONS);
+}
+
+export function getSpaceUri(id: string, network: string) {
+  return snapshot.utils.getSpaceUri(id, network, PROVIDER_OPTIONS);
+}
+
+export function getSpaceController(space: string, network: string) {
+  return snapshot.utils.getSpaceController(space, network, PROVIDER_OPTIONS);
 }

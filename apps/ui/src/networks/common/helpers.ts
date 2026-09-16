@@ -1,5 +1,6 @@
 import {
   getExecutionData as _getExecutionData,
+  ProtocolID,
   Choice as SdkChoice,
   utils
 } from '@snapshot-labs/sx';
@@ -19,6 +20,21 @@ export function getSdkChoice(choice: Choice): SdkChoice {
   if (choice === 'for') return SdkChoice.For;
   if (choice === 'against') return SdkChoice.Against;
   return SdkChoice.Abstain;
+}
+
+/**
+ * Keeps strategies usable with the given protocol: untagged strategies are
+ * protocol-agnostic, tagged ones must include it. Networks hosting both
+ * snapshot-x and snapshot-x-inco tag their protocol-specific contracts.
+ */
+export function filterStrategiesByProtocol<
+  T extends { protocols?: ProtocolID[] }
+>(strategies: T[], protocol: string): T[] {
+  return strategies.filter(
+    strategy =>
+      !strategy.protocols ||
+      strategy.protocols.some(supported => supported === protocol)
+  );
 }
 
 export function getExecutionData(

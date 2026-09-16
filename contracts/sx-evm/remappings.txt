@@ -1,0 +1,4 @@
+forge-std/=node_modules/forge-std/src/
+@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/contracts/
+@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/contracts
+@murky/=node_modules/murky/src
