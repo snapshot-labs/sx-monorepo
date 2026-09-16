@@ -1,0 +1,48 @@
+{
+  "description": "ATTESTATION_V1 credentials minted by the hub. geg's Python verify_attestation must accept every one.",
+  "eligibilityKey": "0xaebcb8f335ff1f8359fa39369d49355fc93b7d9f742ad90a74d442716d2ac524d3f0f6bf9a1e4e4a8b8a31cf15b835af",
+  "cases": [
+    {
+      "name": "v1_weight1_nonce1",
+      "scheme": "ATTESTATION_V1",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "pseudonym": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "vk": "0xa600c68ca015fae9e0af22c7afe3bc3b84ec6f33b91737f3a3fc685100ed3bfa4bbd682523ebee1b7ca4046df1c19bb3",
+      "weight": "1",
+      "nonce": "1",
+      "maxWeight": "10",
+      "signature": "0xb4cc8daa2c24ca09ab4bf94b9d6690ad60592f36ed2defbe3c71b1d1296ecb40aefc10329fe03c1b47113fe0d57b79ac430a4850c37524d7911d6131cb37347e2a9d04aefa8b6bdab4e0a01ac286d628",
+      "expected": {
+        "verify": true
+      }
+    },
+    {
+      "name": "v1_weight5_nonce1",
+      "scheme": "ATTESTATION_V1",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "pseudonym": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "vk": "0xa600c68ca015fae9e0af22c7afe3bc3b84ec6f33b91737f3a3fc685100ed3bfa4bbd682523ebee1b7ca4046df1c19bb3",
+      "weight": "5",
+      "nonce": "1",
+      "maxWeight": "10",
+      "signature": "0xadb8b16a5cbc482b8e5df67cd45f68a934f77b251dfc19106aa1a04944aaf3e0d9484c78eaca2d35e66f654e8ba04a6d188a477b5b5b005faec490d76451897df49586ad90dd1ab8fc0a91680ec1a49f",
+      "expected": {
+        "verify": true
+      }
+    },
+    {
+      "name": "v1_weight_at_cap",
+      "scheme": "ATTESTATION_V1",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "pseudonym": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "vk": "0xa600c68ca015fae9e0af22c7afe3bc3b84ec6f33b91737f3a3fc685100ed3bfa4bbd682523ebee1b7ca4046df1c19bb3",
+      "weight": "9007199254740991",
+      "nonce": "1770000000",
+      "maxWeight": "9007199254740991",
+      "signature": "0xb13e358264c9acc076bb9a462511fd9a291a9d84357a9b1f4996abb055a03a28f05796a89c84a72b6bbcb2de399d51e00ae49d8c2097dc019b1e3672877ed3dca0c0751f5315c4a8d4913cd2588744be",
+      "expected": {
+        "verify": true
+      }
+    }
+  ]
+}

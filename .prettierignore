@@ -1,0 +1,4 @@
+# The generalised-el-gamal vector corpus is a pinned copy owned by that repo and
+# is only ever rewritten by packages/geg-parity/scripts/sync-geg-vectors.mjs.
+# Reformatting it here would make every future sync look like a diff.
+packages/geg-parity/vectors/

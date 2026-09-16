@@ -45,12 +45,19 @@ dist.cjs
 
 /legacy-docs
 
-# Python bytecode (keyper service)
-services/keypers/**/__pycache__/
-services/keypers/**/*.pyc
-
-# Keyper DKG state — encrypted secrets, must never be committed
-keyper-state/
-
 # MySQL data directory — bind-mounted from the container, must never be committed
 mysql-data/
+
+# --- Private voting: operator secrets and committee state --------------------
+# One env file per keyper, each holding that keyper's signing key. The template
+# beside them carries no secrets and is meant to be committed.
+.env.keyper*
+!.env.keyper.example
+
+# Bind-mounted committee state, created on first run. The keyper directories hold
+# Fernet-encrypted per-election secret shares — losing them makes any election
+# still awaiting decryption undecryptable. coordinator-state holds the per-keyper
+# bearer tokens the coordinator mints, so that a restart reuses them instead of
+# re-bootstrapping the committee.
+keyper-state*/
+coordinator-state/

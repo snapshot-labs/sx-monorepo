@@ -1,11 +1,15 @@
 /**
- * Unit tests for the DLEQ decryption-share verification added to
- * POST /proposal/:id/te_decryption_share.
+ * Unit tests for DLEQ decryption-share verification.
  *
- * Tests the exact transcript seeding and verification path used in the
- * endpoint without touching the DB or HTTP layer. The test generates real
- * DLEQ proofs via the SDK (same library the endpoint calls) so a
- * transcript mismatch between prover and verifier sides surfaces here.
+ * Pins the exact transcript seeding the hub verifies against, without touching
+ * the DB or HTTP layer. Real DLEQ proofs are generated via the SDK — the same
+ * library the endpoint calls — so a transcript mismatch between prover and
+ * verifier surfaces here rather than as an unexplained share rejection.
+ *
+ * The endpoint this guards is now `POST /proposal/:id/te_geg_decryption_share`
+ * in `geg.ts` (`verifyShareProofs`). It replaced an identically-seeded check in
+ * `te.ts`, deleted with the `SX-TE-*` digests; the transcript construction is
+ * unchanged, which is exactly why this test kept its value across the move.
  */
 import {
   G2Point,
@@ -13,7 +17,7 @@ import {
   partialDecrypt,
   Transcript,
   verifyDecryptionShare
-} from '@snapshot-labs/private-vote-sdk';
+} from '@shutter-network/urban-verified-crypto';
 
 // Fixed scalar — small enough to be readable, non-zero.
 const MSK_K = 0xdeadbeefcafebaben;

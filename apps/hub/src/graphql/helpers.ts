@@ -439,6 +439,14 @@ export async function handleRelatedSpaces(info: any, spaces: any[]) {
   return spaces;
 }
 
+function deriveDkgStatus(proposal: any): string | null {
+  if (proposal.te_dkg_status) return proposal.te_dkg_status;
+  if (proposal.privacy !== 'shutter-elgamal') return null;
+  if (proposal.te_mpk) return null;
+  const now = Math.floor(Date.now() / 1e3);
+  return now > Number(proposal.start) ? 'dkg_failed' : null;
+}
+
 export function formatUser(user) {
   const profile = jsonParse(user.profile, {});
   delete user.profile;
@@ -497,7 +505,7 @@ export function formatProposal(proposal) {
   proposal.te_keyper_addresses = jsonParse(proposal.te_keyper_addresses, null);
   proposal.te_aggregate = jsonParse(proposal.te_aggregate, null);
   proposal.te_mpk = bytesToHex(proposal.te_mpk);
-  proposal.te_dkg_status = proposal.te_dkg_status || null;
+  proposal.te_dkg_status = deriveDkgStatus(proposal);
   const rawFlagged = proposal.flagged;
   proposal.flagCode = rawFlagged;
   proposal.flagged = rawFlagged > 0;

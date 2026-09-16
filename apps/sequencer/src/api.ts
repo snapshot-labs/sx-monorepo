@@ -8,6 +8,10 @@ import { flagEntity } from './helpers/moderation';
 import poke from './helpers/poke';
 import relayer from './helpers/relayer';
 import serve from './helpers/requestDeduplicator';
+import {
+  issueBallotCredential,
+  TeIssueError
+} from './helpers/teAttestationIssuer';
 import { sendError, verifyAuth } from './helpers/utils';
 import typedData from './ingestor';
 import { updateProposalAndVotes } from './scores';
@@ -51,6 +55,27 @@ router.get('/', (req, res) => {
     version: v,
     relayer: relayer.address
   });
+});
+
+router.post('/te_attestation', async (req: Request, res: Response) => {
+  if (process.env.MAINTENANCE) return sendError(res, maintenanceMsg, 503);
+  try {
+    const { space, proposal, vk, voter } = req.body || {};
+    const result = await issueBallotCredential({
+      space,
+      proposalId: proposal,
+      vk,
+      voter
+    });
+    return res.json(result);
+  } catch (err: any) {
+    if (err instanceof TeIssueError) {
+      return sendError(res, err.message, err.status);
+    }
+    capture(err);
+    log.warn(`[te-issue] unexpected failure: ${err?.message || err}`);
+    return sendError(res, 'server_error', 500);
+  }
 });
 
 router.get('/scores/:proposalId', async (req, res) => {

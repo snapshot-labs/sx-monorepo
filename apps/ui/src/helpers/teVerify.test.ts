@@ -1,11 +1,12 @@
+import { G2Point, initCurves } from '@shutter-network/urban-verified-crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
-import { G2Point, initCurves } from '@snapshot-labs/private-vote-sdk';
 import { pseudonymFor } from './teBallot';
 import {
-  type AuditBallot,
-  type AuditPayload,
-  type BallotsPayload,
   aggregateBallots,
+  AuditBallot,
+  AuditPayload,
+  BallotsPayload,
+  diagnoseTally,
   fingerprintHex,
   shortHex,
   verifyTally
@@ -32,8 +33,11 @@ beforeAll(async () => {
 
 // Factories rather than module-level constants so G2_GEN_HEX is read at call
 // time (inside it() callbacks), not at describe-evaluation time.
-function makeBallotsPayload(ballots: AuditBallot[]): BallotsPayload {
-  return { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, ballots };
+function makeBallotsPayload(
+  ballots: AuditBallot[],
+  scale?: number | null
+): BallotsPayload {
+  return { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, scale, ballots };
 }
 
 function makeDummyAggregate(numCandidates = BASE_CONFIG.numCandidates) {
@@ -155,8 +159,10 @@ describe('aggregateBallots: structural rejections', () => {
       makeDummyAggregate()
     );
     expect(result.total).toBe(1);
-    // Nothing was accumulated (the only ballot was skipped), so the
-    // recomputed aggregate (all-null) cannot match any published aggregate.
+    expect(result.contributing).toBe(0);
+    // Nothing was accumulated, so the recomputed aggregate is the empty sum —
+    // the identity. The dummy aggregate is not the identity, so this is a real
+    // mismatch rather than an artefact of having accumulated nothing.
     expect(result.aggregateMatches).toBe(false);
   });
 
@@ -180,6 +186,109 @@ describe('aggregateBallots: structural rejections', () => {
       makeDummyAggregate()
     );
     expect(result.total).toBe(3);
+  });
+
+  // The regression this guards: an election nobody voted in. The committee
+  // publishes the identity in every slot, and the client's sum over zero ballots
+  // is that same identity — so it must verify, not report as tampered-with. It
+  // read as a mismatch for as long as an empty accumulator was hardcoded to fail,
+  // which meant a legitimate zero-turnout result looked like an attack.
+  describe('an election with no votes', () => {
+    const IDENTITY = `0x${'c0'.padEnd(192, '0')}`;
+
+    function emptyAggregate(numCandidates = BASE_CONFIG.numCandidates) {
+      return {
+        election_id: PROPOSAL_ID,
+        num_candidates: numCandidates,
+        ciphertexts: Array.from({ length: numCandidates }, () => ({
+          c1: IDENTITY,
+          c2: IDENTITY
+        }))
+      };
+    }
+
+    it('verifies an empty aggregate against no ballots', async () => {
+      const result = await aggregateBallots(
+        makeBallotsPayload([]),
+        emptyAggregate()
+      );
+      expect(result.total).toBe(0);
+      expect(result.contributing).toBe(0);
+      expect(result.aggregateMatches).toBe(true);
+    });
+
+    // The reason the empty case still has to be *compared* rather than waved
+    // through: a hub could serve an empty ballot list under an aggregate that no
+    // empty list could produce. That is precisely a hub hiding ballots.
+    it('rejects a non-empty aggregate when no ballots were served', async () => {
+      const result = await aggregateBallots(
+        makeBallotsPayload([]),
+        makeDummyAggregate()
+      );
+      expect(result.contributing).toBe(0);
+      expect(result.aggregateMatches).toBe(false);
+    });
+
+    it('treats an all-dust election as empty, since no ballot carries weight', async () => {
+      const result = await aggregateBallots(
+        makeBallotsPayload([makeBallot(1, 0), makeBallot(2, 0)]),
+        emptyAggregate()
+      );
+      expect(result.total).toBe(2); // the ballots exist...
+      expect(result.contributing).toBe(0); // ...but none of them counted
+      expect(result.aggregateMatches).toBe(true);
+    });
+  });
+
+  // The committee counts a voter above the ceiling *at* the ceiling. If this
+  // function does not, it sums a bigger aggregate than the keypers did and reports
+  // an honest election as tampered with — the audit tool crying wolf, which is
+  // worse than no audit tool. `maxWeight` is served by the hub precisely so the two
+  // sides cannot drift.
+  describe('the proposal scale', () => {
+    // The cap this block used to cover is gone (W1). What replaced it divides every
+    // voter by the same amount, so a verifier must apply the identical divisor or it
+    // reports an honest committee as having published a false aggregate.
+
+    it('applies the scale, matching the committee', async () => {
+      // vp 5 at scale 4 rounds half-up to 1, reproducing the weight-1 aggregate —
+      // the generator, which is what a single vp=1 ballot produces.
+      const result = await aggregateBallots(
+        makeBallotsPayload([makeBallot(1, 5)], 4),
+        makeAuditPayload().aggregate
+      );
+      expect(result.aggregateMatches).toBe(true);
+    });
+
+    it('reports ballots that round to zero, and what they held', async () => {
+      // Admitted and recorded, but worth nothing — reported so it does not look
+      // like a ballot silently went missing.
+      const result = await aggregateBallots(
+        makeBallotsPayload([makeBallot(1, 1), makeBallot(2, 100)], 100),
+        makeAuditPayload().aggregate
+      );
+      expect(result.scaledToZero).toEqual([
+        { voter: expect.any(String), vp: 1 }
+      ]);
+    });
+
+    it('says nothing when the proposal is unscaled', async () => {
+      const result = await aggregateBallots(
+        makeBallotsPayload([makeBallot(1, 1)], 1),
+        makeAuditPayload().aggregate
+      );
+      expect(result.scaledToZero).toEqual([]);
+      expect(result.aggregateMatches).toBe(true);
+    });
+
+    // The regression the served scale exists to prevent.
+    it('would mis-report the election as tampered with if the scale were ignored', async () => {
+      const unscaled = await aggregateBallots(
+        makeBallotsPayload([makeBallot(1, 5)], null),
+        makeAuditPayload().aggregate
+      );
+      expect(unscaled.aggregateMatches).toBe(false);
+    });
   });
 
   it('matches when a single vp=1 ballot equals the published aggregate', async () => {
@@ -234,10 +343,19 @@ describe('aggregateBallots: WASM accumulation path', () => {
 // ---------------------------------------------------------------------------
 // verifyTally: structural rejections
 // ---------------------------------------------------------------------------
+// The bound is `budget x Sum(counted weights)`, derived by the caller from the
+// ballots. Every case below is rejected on shape before the bound is consulted, so
+// 0n is passed to say "irrelevant here" rather than to assert anything about it.
+const ANY_BOUND = 0n;
+
 describe('verifyTally: structural rejections', () => {
   it('throws when aggregate is missing', async () => {
     await expect(
-      verifyTally(PROPOSAL_ID, makeAuditPayload({ aggregate: null as any }))
+      verifyTally(
+        PROPOSAL_ID,
+        makeAuditPayload({ aggregate: null as any }),
+        ANY_BOUND
+      )
     ).rejects.toThrow('No encrypted ballots');
   });
 
@@ -257,7 +375,8 @@ describe('verifyTally: structural rejections', () => {
               })
             )
           }
-        })
+        }),
+        ANY_BOUND
       )
     ).rejects.toThrow('disagrees with ciphertexts.length');
   });
@@ -267,9 +386,21 @@ describe('verifyTally: structural rejections', () => {
     await expect(
       verifyTally(
         PROPOSAL_ID,
-        makeAuditPayload({ te_threshold_t: 2, shares: [] })
+        makeAuditPayload({ te_threshold_t: 2, shares: [] }),
+        ANY_BOUND
       )
     ).rejects.toThrow('not enough decryption shares');
+  });
+
+  it('throws when the committee has published no result to check', async () => {
+    // Verification checks published totals rather than re-deriving them, so with
+    // nothing published there is nothing to check. Solving it here instead is
+    // deliberately not the fallback: that is an escalation someone chooses, on a
+    // machine sized for it, not something a browser tab does on page load.
+    const payload = makeAuditPayload({ te_threshold_t: 0, shares: [] });
+    await expect(verifyTally(PROPOSAL_ID, payload, ANY_BOUND)).rejects.toThrow(
+      'has not published a result'
+    );
   });
 });
 
@@ -293,11 +424,170 @@ describe('verifyTally: WASM heap cleanup on early throw', () => {
     });
 
     for (let i = 0; i < 100; i++) {
-      await expect(verifyTally(PROPOSAL_ID, payload)).rejects.toThrow(
-        'not enough decryption shares'
-      );
+      await expect(
+        verifyTally(PROPOSAL_ID, payload, ANY_BOUND)
+      ).rejects.toThrow('not enough decryption shares');
     }
     // Reaching here without a WASM OOM abort confirms the finally block freed
     // ctSums + committeePKs on every iteration.
   }, 30_000);
+});
+
+describe('aggregateBallots: the committee admitted set', () => {
+  const generatorAggregate = () => ({
+    election_id: PROPOSAL_ID,
+    num_candidates: BASE_CONFIG.numCandidates,
+    ciphertexts: Array.from({ length: BASE_CONFIG.numCandidates }, () => ({
+      c1: G2_GEN_HEX,
+      c2: G2_GEN_HEX
+    }))
+  });
+
+  const seq = (b: AuditBallot, sequenceNumber: number) => ({
+    ...b,
+    sequenceNumber
+  });
+
+  // The regression: one excluded ballot must not read as a failed audit.
+  it('sums only the admitted ballots, so an exclusion still matches', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([
+        seq(makeBallot(1, 1), 0), // refused by the committee
+        seq(makeBallot(2, 1), 1) // the only one it counted
+      ]),
+      {
+        ...generatorAggregate(),
+        admitted: [1],
+        exclusions: [{ sequenceNumber: 0, reason: 'INVALID_PROOF' }]
+      }
+    );
+    expect(result.aggregateMatches).toBe(true);
+    expect(result.contributing).toBe(1);
+    expect(result.total).toBe(2);
+  });
+
+  // The same fixture without the admitted set is the old behaviour, and it is
+  // what made this a false alarm: two ballots sum to 2G, not G.
+  it('would not match if every ballot were summed', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([seq(makeBallot(1, 1), 0), seq(makeBallot(2, 1), 1)]),
+      generatorAggregate()
+    );
+    expect(result.aggregateMatches).toBe(false);
+    expect(result.contributing).toBe(2);
+  });
+
+  it('reports the exclusions rather than folding them into the match', async () => {
+    const exclusions = [
+      { sequenceNumber: 0, reason: 'INVALID_PROOF' },
+      { sequenceNumber: 2, reason: 'OUT_OF_WINDOW' }
+    ];
+    const result = await aggregateBallots(
+      makeBallotsPayload([
+        seq(makeBallot(1, 1), 0),
+        seq(makeBallot(2, 1), 1),
+        seq(makeBallot(3, 1), 2)
+      ]),
+      { ...generatorAggregate(), admitted: [1], exclusions }
+    );
+    expect(result.aggregateMatches).toBe(true);
+    expect(result.exclusions).toEqual(exclusions);
+  });
+
+  // An aggregate published before the committee took over carries neither field,
+  // and must keep behaving exactly as it did.
+  it('falls back to summing everything when admitted is absent', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([seq(makeBallot(1, 1), 0), seq(makeBallot(2, 1), 1)]),
+      makeDummyAggregate()
+    );
+    expect(result.contributing).toBe(2);
+    expect(result.exclusions).toEqual([]);
+    expect(result.admittedSetResolved).toBe(true);
+  });
+
+  // Two views that disagree about which ballots exist — reported on its own,
+  // because it is not a sum that came out differently.
+  it('flags an admitted ballot the hub did not serve', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([seq(makeBallot(1, 1), 0)]),
+      { ...generatorAggregate(), admitted: [0, 7], exclusions: [] }
+    );
+    expect(result.admittedSetResolved).toBe(false);
+  });
+
+  it('resolves cleanly when every admitted ballot is present', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([seq(makeBallot(1, 1), 0)]),
+      { ...generatorAggregate(), admitted: [0], exclusions: [] }
+    );
+    expect(result.admittedSetResolved).toBe(true);
+    expect(result.aggregateMatches).toBe(true);
+  });
+
+  // A ballot with no sequence number cannot be shown to be one the committee
+  // counted, so it must not be summed into a comparison against its aggregate.
+  it('ignores a ballot with no sequence number once admitted is in play', async () => {
+    const result = await aggregateBallots(
+      makeBallotsPayload([makeBallot(1, 1), seq(makeBallot(2, 1), 1)]),
+      { ...generatorAggregate(), admitted: [1], exclusions: [] }
+    );
+    expect(result.contributing).toBe(1);
+    expect(result.aggregateMatches).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// diagnoseTally: why there is no verified tally, derived rather than trusted
+//
+// The keyper-vs-coordinator split decides what an operator does next, so it is
+// computed from public share counts instead of read off an unsigned field.
+// ---------------------------------------------------------------------------
+describe('diagnoseTally', () => {
+  const withShares = (perCandidate: number, need: number) =>
+    makeAuditPayload({
+      te_threshold_t: need,
+      shares: Array.from(
+        { length: BASE_CONFIG.numCandidates * perCandidate },
+        (_, i) => ({
+          keyper_index: (i % perCandidate) + 1,
+          candidate: Math.floor(i / perCandidate),
+          sigma: G2_GEN_HEX,
+          proof_e: `0x${'11'.repeat(32)}`,
+          proof_z: `0x${'22'.repeat(32)}`
+        })
+      )
+    });
+
+  it('reports awaiting-shares when a candidate is short of the quorum', () => {
+    const d = diagnoseTally(withShares(1, 2));
+    expect(d.kind).toBe('awaiting-shares');
+    if (d.kind === 'awaiting-shares') {
+      expect(d.candidatesShort).toBe(BASE_CONFIG.numCandidates);
+      expect(d.need).toBe(2);
+    }
+  });
+
+  it('reports awaiting-coordinator when every share is present but no result is', () => {
+    // The distinction that matters: chasing keypers here would be wasted effort.
+    expect(diagnoseTally(withShares(2, 2)).kind).toBe('awaiting-coordinator');
+  });
+
+  it('reports published once totals exist', () => {
+    const payload = withShares(2, 2);
+    payload.te_result = {
+      totals: ['1', '2', '3'].slice(0, BASE_CONFIG.numCandidates),
+      keyper_indices: [1, 2],
+      bsgs_bound: '10'
+    };
+    expect(diagnoseTally(payload).kind).toBe('published');
+  });
+
+  it('treats an empty totals array as no result at all', () => {
+    // A result row that exists but carries nothing is not something to verify
+    // against; it must not read as "published" and then fail cryptically.
+    const payload = withShares(2, 2);
+    payload.te_result = { totals: [], keyper_indices: [], bsgs_bound: '0' };
+    expect(diagnoseTally(payload).kind).toBe('awaiting-coordinator');
+  });
 });

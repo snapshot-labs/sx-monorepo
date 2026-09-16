@@ -1,111 +1,129 @@
-# Running permanent private voting with Docker
+# Running the Snapshot stack with Docker
 
-This stack lets a Snapshot operator run the whole permanent-private-voting
-backend - hub, sequencer, a 3-keyper threshold committee, and an automatic
-DKG coordinator - with a single command. It is the off-chain, self-hosted
-equivalent of the on-chain threshold-ElGamal committee: keypers still run
-Feldman VSS distributed key generation and threshold partial-decryption with
-DLEQ proofs, but DKG results and decryption shares travel over HTTP to the hub
-instead of an on-chain bulletin board.
+This compose file brings up **Snapshot's half** of the system: the hub, the
+sequencer, the translator, and MySQL. One command, from the monorepo root:
+
+```sh
+cp .env.example .env     # fill in the values it asks for
+docker compose up -d
+```
 
 ## What comes up
 
-| Service     | Port        | Role                                                        |
-| ----------- | ----------- | ---------------------------------------------------------- |
-| `mysql`     | 3306        | `snapshot_hub` + `snapshot_sequencer` (schema auto-loaded) |
-| `hub`       | 3000        | GraphQL + REST API, collects and finalises DKG results     |
-| `sequencer` | 3001        | Vote ingestion and the threshold tally worker              |
-| `keyper1-3` | 5001-5003   | Threshold committee members                                |
-| `auto-dkg`  | -           | Watches for new private proposals and runs the DKG ceremony |
+| Service         | Port | Role                                                                 |
+| --------------- | ---- | -------------------------------------------------------------------- |
+| `mysql`         | 3306 | `snapshot_hub` + `snapshot_sequencer` (schemas auto-loaded on first boot) |
+| `hub`           | 3000 | GraphQL + REST API; stores ballots, committee artifacts and results    |
+| `sequencer`     | 3001 | Vote ingestion, proposal writes, and the scores mirror                 |
+| `te-data-layer` | 3002 | Translator: presents the hub to the private-voting protocol as its data layer |
+
+All three services run the same image (`docker/backend.Dockerfile`) with
+different entry points, so a rebuild covers all of them.
+
+## What does *not* come up: the committee
+
+Private voting needs a keyper committee and a coordinator. **They are not in this
+repository and cannot be started from here.** They belong to the
+generalised-el-gamal protocol, and each keyper is meant to be run by an
+independent operator with its own signing key.
+
+That separation is the security property, not an inconvenience: a committee this
+repository could start is a committee this repository could impersonate, and the
+whole point of a threshold scheme is that no single party can decrypt a tally
+alone. An earlier version of this stack did bundle three keypers and an auto-DKG
+driver into this compose file; that arrangement gave one `docker compose up` the
+power to read every ballot.
+
+The stack starts and runs fine without them — public voting is entirely
+unaffected. Private proposals simply cannot be created until `TE_KEYPERS` points
+at reachable keypers.
+
+**For the full system**, including the committee and a private vote end to end,
+see [`../RUNNING.md`](../RUNNING.md).
 
 ## Prerequisites
 
 - Docker Desktop (or Docker Engine) with Compose v2.
-- The UI is run separately on the host (see below); it is not containerised
-  because operators usually deploy it as static assets behind their own CDN.
+- The UI runs on the host, not in a container — operators usually deploy it as
+  static assets behind their own CDN.
 
-## Quick start
-
-From the monorepo root (`sx-monorepo/`):
+## Checking it came up
 
 ```sh
-# Optional: override the baked-in dev defaults.
-cp .env.example .env
-
-docker compose up --build
+docker compose ps
+curl -s -o /dev/null -w "%{http_code}\n" localhost:3000/graphql   # 400 is correct
+curl -s localhost:3002/elections                                  # {"electionIds":[...]}
 ```
 
-First boot builds two images (the bun backend image shared by hub and
-sequencer, and the Python keyper image shared by the three keypers and the
-auto-dkg coordinator), initialises MySQL with both databases and their
-schemas, and starts every service. Subsequent boots reuse the cached images
-and the persisted MySQL volume.
-
-Check health:
-
-```sh
-curl http://localhost:3000/api          # hub
-curl http://localhost:3001              # sequencer
-curl http://localhost:5001/status       # keyper 1
-```
+A bare `GET` on `/graphql` answering **400** is the healthy response — it only
+accepts POSTs. The translator returning a JSON list means the hub is reachable
+through it, which is what the keypers and coordinator depend on.
 
 ### Run the UI against the stack
 
 ```sh
 cd apps/ui
 bun install        # once
-bun run dev        # serves on http://localhost:8080, pointed at the hub/sequencer
+bun run dev        # http://localhost:8080, pointed at the hub and sequencer
 ```
 
-## How automatic DKG works
+## Configuration worth knowing
 
-When a permanent-private proposal (`privacy='shutter-elgamal'`) is created, its
-`te_mpk` (master public key) starts out `NULL`, so the UI shows a "generating
-encryption keys" state and disables voting. The `auto-dkg` service polls the
-hub database every couple of seconds, finds such proposals, writes the
-committee allow-list (`te_keyper_addresses`) and config onto the proposal row,
-then drives the keypers through the DKG ceremony. Each keyper signs its result
-and POSTs it to the hub; once `t+1` keypers agree, the hub finalises `te_mpk`
-and voting opens. This usually completes within a few seconds.
+Everything is read from `.env`; see `.env.example` for the full list with
+explanations. Three settings cause confusing failures if they are wrong:
 
-## Keyper committee keys
+- **`TE_KEYPERS`** — one URL per committee member, no addresses. The sequencer
+  reads each keyper's signing address from its `/status` when it freezes a
+  committee onto a proposal. Every keyper must be reachable when a private
+  proposal is created; the key ceremony needs all of them.
 
-The three dev keypers use deterministic signing keys derived from
-`sha256("keyper-{id}")`. Their addresses are:
+- **`SEQUENCER_PUBLIC_URL`** — where the **browser** should reach the sequencer.
+  The hub 307-redirects `/api/scores/:id` here, and the UI calls that to finalise
+  a closed proposal's scores. It defaults to `http://localhost:${SEQ_PORT:-3001}`.
+  Set it to a container-internal hostname and the browser cannot resolve the
+  redirect, the fetch fails silently, and every closed proposal sits on
+  "Finalizing results" forever.
 
-| Keyper | Address                                      |
-| ------ | -------------------------------------------- |
-| 1      | `0xB4293721D07805e6aFf49a6A462C2C17Ef2445C7` |
-| 2      | `0x818f35eFAe8b482B0c88EcFdfC94e49Af3a008C3` |
-| 3      | `0x199fA19f3acb034a9C636D62847a12083805eE78` |
-
-These are dev-only. For a real deployment, set `KEYPER_PRIVATE_KEY_1/2/3` in
-`.env` to keys held by three independent operators (ideally each keyper runs on
-separate infrastructure rather than one compose file).
+- **`MIN_DKG_LEAD_TIME_S`** (default 180) — how far ahead a private proposal must
+  open. The committee needs that long to generate the election key, and a
+  proposal whose voting opens without one is terminally dead, not merely late.
 
 ## Networking notes
 
-- Services talk to each other by compose service name (`mysql`, `hub`, ...).
-- MySQL runs without TLS on the private compose network, so the hub and
-  sequencer are started with `DB_SSL=false`. The MySQL helpers only attempt
-  TLS when `DB_SSL` is not `false`, which keeps host-run dev (TLS to a managed
-  DB) unchanged.
+- Services reach each other by compose service name (`mysql`, `hub`, …).
+- MySQL runs without TLS on the private compose network, so the hub and sequencer
+  set `DB_SSL=false`. The MySQL helpers only attempt TLS when `DB_SSL` is not
+  `false`, which leaves host-run dev against a managed database unchanged.
+- The keypers and coordinator are separate stacks, on separate hosts in a real
+  deployment, so the translator's port is published rather than internal-only.
 - **Host port conflicts.** Only the host side of each mapping is configurable;
-  containers always reach each other on the fixed internal ports. If another
-  process already holds a default port (for example something else listening on
-  3000), override just that host port via env and leave the rest alone:
+  containers always reach each other on fixed internal ports. Override just the
+  one that clashes:
 
   ```sh
-  HUB_PORT=3010 docker compose up
+  HUB_PORT=3010 docker compose up -d
   ```
 
-  Overridable: `HUB_PORT`, `SEQ_PORT`, `MYSQL_PORT`.
+  Overridable: `HUB_PORT`, `SEQ_PORT`, `MYSQL_PORT`, `TE_DATA_LAYER_PORT`.
+
+## Rebuilding
+
+The image does not rebuild on `up`. After changing application code:
+
+```sh
+docker compose build && docker compose up -d
+```
+
+Skipping the build is a quiet failure mode: the containers keep running the code
+baked into the last image, so a fix looks deployed and is not.
 
 ## Resetting state
 
 ```sh
-docker compose down -v   # also removes the MySQL volume, wiping all data
+docker compose stop      # keeps all data; the next start resumes where it left off
+docker compose down -v   # removes the MySQL volume, wiping every proposal and vote
 ```
 
-Without `-v`, the `mysql-data` volume persists across `up`/`down` cycles, so
-the schema init runs only on the very first boot.
+`down -v` is not recoverable for private proposals. Their ballots are encrypted
+under keys the keypers hold per election, so a wiped database cannot be
+reconstructed from anything the committee still has.

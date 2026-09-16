@@ -18,6 +18,7 @@ import {
   run as refreshStrategies,
   stop as stopStrategies
 } from './helpers/strategies';
+import { publishEligibilityKey } from './helpers/teEligibility';
 import { startTeTallyScheduler } from './helpers/teTallyScheduler';
 import { trackTurboStatuses } from './helpers/turbo';
 import refreshVotesVpValue from './helpers/votesVpValue';
@@ -37,6 +38,9 @@ async function startServer() {
 
   initMetrics(app);
   trackTurboStatuses();
+  // Before the scheduler, so a tally cannot read a key row this boot has not
+  // written yet.
+  await publishEligibilityKey();
   startTeTallyScheduler();
 
   app.disable('x-powered-by');

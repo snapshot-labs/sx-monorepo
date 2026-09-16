@@ -1,0 +1,36 @@
+{
+  "name": "tally_basic",
+  "description": "t=1, n=3 threshold decrypt of Σ Enc(mᵢ) for ms=[2,2,3] → V=7. Uses shares from α=1 and α=3. partialDecrypt DLEQ nonces are non-reproducible, so this file varies across runs but always verifies.",
+  "version": 1,
+  "inputs": {
+    "ct_sum": {
+      "c1": "9192a0570f1f959617addf1ce1dbb69032f7b3772e18816a0be63c7a844514d0726cfdb2abed0adcea6d6fdf6d42d3e2190102115d009723d810bece7d582679d8f7a6f9fea194e76ad956c4984aa2e980812bb19fec3912e0754f19f448c10b",
+      "c2": "83750783a6facaa48ec710de1fab105e3be8758a71ae5aaf8636a433ce923c5c3a12e40b5c1fd07ab8e1b829d42796c40d0d7020779758ac27ffeb4874fdcf3abb0b7dfce446cb3ab665f0d41666d93272fbdc3cac2d413e93c597d221ea8c32"
+    },
+    "committee_pks": [
+      "8cf258824ed93dce50e5262c480608f3e0aa62c4fb37af6be8776cf6af241d57438cf4f1c1b94b2e5ed5e64adbc4a45a076b041983497c5545d3cbc5d780982e799c37196af9a82c300fa4b730d4049703e8daa5c858271b402178968bd4db4e",
+      "b4524d3ae548282bab8d48e889fda32d1c71c08afa4184f1c7efd7279ce3806e9ba26021073fd157cf4f5b23c78c999e0357875160af46d22dbf0d243ae95f4fbce3235a41bfb144f72bd9077bab4be04514980b5307e46bc7a14217525f4129",
+      "b0e2fe19b5d695dae46a2e819fe394977533f6aab6981e94f9fba42b15c63b4d633e0f7a00638e5c975a1fa01a0b978f1429d51b84c6a15117da99be2b30ffdcca594e198931e0e8ae48bfc02260a49c231bb5f772da67a9a153aca6ac45eb27"
+    ],
+    "alphas": [
+      "1",
+      "3"
+    ],
+    "upper_bound": "10",
+    "shares": [
+      {
+        "keyper_index": 1,
+        "sigma": "a8426790e0ae3640c60d1221b1f5d1616b44feded9e0335461d33b4270d9de37f53b2b163e516efedbc3527a049275fa159722801e490735f205a4611b453fecefab1645ca183bf16c10cb8a656933d94c32ac9eeb10a62d597d4898339930fc",
+        "dleq_proof": "6dd93ed704489121b108bcffe8b1b1958db379a06e3da7f59b3e54851cdda0492c5fd773be04d637118c79f4dede34de240b973fc7283548689a949715fb8478"
+      },
+      {
+        "keyper_index": 3,
+        "sigma": "b94e7c2967519a5921fa1cc05ac6e63b14003717349c1179168c091dbfd9a2510599dd61e0b9d96c56466d57b6eac4cf1521a1cc18699b073b8c1cf7d79e67fdadab5f0f1da7eac329905dda54231653ccb036b3ba0a77d067cd507c437e4972",
+        "dleq_proof": "71e751d0c96163673479827f2f5152f6c8cf0b027cb72929451e5e4a2811735927795ed56be291592fa92f384628e68064dd2535f22f326541b607c4dd283d88"
+      }
+    ]
+  },
+  "expected": {
+    "V": "7"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "share_basic",
+  "description": "Partial decryption share from keyper α=2 over Enc(m=7). The DLEQ inside partialDecrypt uses a fresh nonce, so this file varies across runs but always verifies.",
+  "version": 1,
+  "inputs": {
+    "ct_sum": {
+      "c1": "8a0a0147f8bd72cba24cba0ead921cd194e4cff65c2eeb2d3362431bb662e8eb85c884e3b3675a40d58505dfd7c2c1f115ccf1730bd5a4d2401f6b05a40e704254a35b0c7bef059f41f88c33bb44d32516001b650e1b695d62fb6f8a4df0f3d2",
+      "c2": "8115bace50b2d433e8639a9cdc77444966510bbf19d6765fb3fe77d8bbeb7dca6197c246776f26565405b5541599052605a26cf971ea44250c6dd539abfe4d5979f2510236ca7bdc126c6a1669b61fa3af44d7b074da7292bc56f9e8f6e4c9ed"
+    },
+    "committee_pk": "b4b600e76916adc2025a91984e3bba82f6f1c8de5566e343c58b9b42ea658f48ec5b75ab4a66052cf254afe612b1d1ba1263b36be58666b5c0058be31a340207ba7b57acf04d1f16023fded4364a807ed675bb264b9696ae5fa2c24a9da65935",
+    "keyper_index": 2,
+    "transcript_label": "vec:share:basic",
+    "share": {
+      "keyper_index": 2,
+      "sigma": "a95ee9d3e7f635456a106f5b18b378423d7cfe39f9c856fdeb9bb74ca0db6b40afe2eed89f9706e29c4f3fc95c6f8d5f0860cd66c8866163acf7128226469604df80b0765457939ef1c67fb1ea5467512a55ec62913d9215dbee1c2fa2fcae26",
+      "dleq_proof": "08add1c5f30f1b371ff8ccda04969416196dc0f0bfa7536339eadd38ff43efc03b772fdf457f06618133432095d742190657dc0e489aac6a2eb4c02698dddb5f"
+    }
+  },
+  "expected": {
+    "verify": true
+  }
+}

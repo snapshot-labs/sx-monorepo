@@ -290,6 +290,8 @@ export function createActions(
         if (typeof sdkChoice === 'number') {
           const { buildTeBallotEnvelope } = await import('@/helpers/teBallot');
           sdkChoice = await buildTeBallotEnvelope({
+            sequencerUrl: client.sequencerUrl,
+            space: proposal.space.id,
             voter: account,
             proposalId: proposal.proposal_id as string,
             mpk: proposal.te_mpk,
@@ -305,6 +307,8 @@ export function createActions(
             '@/helpers/teBallot'
           );
           sdkChoice = await buildTeWeightedBallotEnvelope({
+            sequencerUrl: client.sequencerUrl,
+            space: proposal.space.id,
             voter: account,
             proposalId: proposal.proposal_id as string,
             mpk: proposal.te_mpk,

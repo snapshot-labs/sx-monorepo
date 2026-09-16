@@ -366,6 +366,21 @@ onMounted(() => {
     "
     :proposal="proposal"
   />
+  <!-- Voting is over but no result was published: the window in which a tally can
+       be stalled. `completed` requires scores_state='final', so a stalled proposal
+       is never `completed` — it sits at 'closed' indefinitely until someone
+       retries, which is what makes the notice the only sign anything is wrong. -->
+  <TeTallyStalledNotice
+    v-if="
+      proposal.privacy === 'shutter-elgamal' &&
+      proposal.state === 'closed' &&
+      !proposal.completed &&
+      withDetails &&
+      offchainNetworks.includes(proposal.network)
+    "
+    :proposal="proposal"
+    :api-base-url="getOffchainHubApiBase(proposal.network)"
+  />
   <TeVerifyTallyPanel
     v-if="
       proposal.privacy === 'shutter-elgamal' &&

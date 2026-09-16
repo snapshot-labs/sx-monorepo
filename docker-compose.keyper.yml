@@ -1,0 +1,82 @@
+# Keyper operator stack — one independently-operated committee member.
+#
+# Run this on your own machine. You hold only your own keyper signing key; the
+# admin's API + coordinator, and the other keypers, are all external to this stack
+# (reached over HTTP by URL — no shared Docker network).
+#
+# Backend-agnostic: a keyper only speaks HTTP. It reads election data from the admin's
+# public API (which serves the port read surface) and relays its signed DKG/decryption
+# writes through the admin's coordinator (which pays gas / writes to the data layer).
+#
+# Runs the published geg image — this repo holds no geg source, so there is
+# nothing to build here. Pin a different tag with GEG_IMAGE if you need to.
+#
+# Required .env (see .env.keyper.example):
+#   KEYPER_SIGNING_KEY     your keyper's secp256k1 key (secret). Its address must be
+#                          a member of the election's KeyperSet / config.keypers[].
+#   COORDINATOR_IDENTITY   the admin's coordinator address (public; out-of-band).
+#                          The keyper pins it — only the coordinator may bootstrap it.
+#                          This is the ONLY secret you pre-share (the relay bearer
+#                          token is pushed over /auth/bootstrap, not configured here).
+#   GEG_API_URL            the admin's public API base URL (reads). Base only — no
+#                          path; the keyper appends its read-surface path itself.
+#   COORDINATOR_URL        the admin's public coordinator URL (write relay).
+# Optional:
+#   KEYPER_PORT            listen + publish port; MUST match this keyper's endpoint
+#                          in the election config. Default 8100.
+#   KEYPER_STATE_DIR_HOST  host path for encrypted state (default ./keyper-state).
+#                          Give each local instance its own path, or the committee
+#                          members overwrite each other's shares.
+#   KEYPER_SECRET_TTL_S    seconds past voting_end to retain per-election secret
+#                          (default 7776000 = 90 days, also the code default;
+#                           `never` opts in explicitly to indefinite retention)
+#                          shares before pruning. Default 90 days (7776000).
+#
+# Quick start (one real operator):
+#   cp .env.keyper.example .env.keyper        # fill in your values
+#   docker compose -p keyper1 -f docker-compose.keyper.yml --env-file .env.keyper up -d
+#
+# `-p` is required: without it compose derives the project name from this
+# directory and collides with the main stack. Each keyper needs its own project
+# name, its own KEYPER_PORT, and its own KEYPER_STATE_DIR_HOST.
+#
+# Operator onboarding (one-time): share your keyper's public URL with the admin
+# (goes into config.keypers[].endpoint); receive COORDINATOR_IDENTITY from them out
+# of band (the one secret you pre-share). No tokens to mint or hold — the coordinator
+# installs both your inbound bearer token AND your relay token over the sealed,
+# signed /auth/bootstrap channel once it can reach your /status.
+
+services:
+  keyper:
+    image: ${GEG_IMAGE:-ghcr.io/shutter-network/generalised-elgamal-voting:0.1.0}
+    command: ["python", "-m", "geg.services.keyper"]
+    environment:
+      KEYPER_SIGNING_KEY: ${KEYPER_SIGNING_KEY:?set KEYPER_SIGNING_KEY (your keyper private key)}
+      COORDINATOR_IDENTITY: ${COORDINATOR_IDENTITY:?set COORDINATOR_IDENTITY (coordinator address from the admin)}
+      # Reads. Snapshot's translator serves the port contract; the keyper appends
+      # `/port` itself, so this is the base URL only. (8500 is geg's own `api`
+      # service, which exists only in geg's bundled stacks — not here.)
+      GEG_API_URL: ${GEG_API_URL:-http://host.docker.internal:3002}
+      COORDINATOR_URL: ${COORDINATOR_URL:-http://host.docker.internal:8400}
+      KEYPER_PORT: ${KEYPER_PORT:-8100}
+      KEYPER_STATE_DIR: /keyper-state
+      # How long (seconds past voting_end) this keyper retains its per-election secret
+      # shares before the prune loop drops them. There is no tally deadline, so this is
+      # the sole bound on late decryption. Default 90 days.
+      KEYPER_SECRET_TTL_S: ${KEYPER_SECRET_TTL_S:-7776000}
+    ports:
+      - "${KEYPER_PORT:-8100}:${KEYPER_PORT:-8100}"
+    volumes:
+      - ${KEYPER_STATE_DIR_HOST:-./keyper-state}:/keyper-state
+    extra_hosts:
+      # Reach the admin's services + the other keypers via host-published ports
+      # in local multi-operator testing. Harmless with real public URLs.
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:${KEYPER_PORT:-8100}/health')"]
+      interval: 120s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    restart: unless-stopped

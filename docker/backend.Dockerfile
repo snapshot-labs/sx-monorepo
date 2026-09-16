@@ -18,11 +18,6 @@ COPY . .
 # Install all workspace dependencies.
 RUN bun install --frozen-lockfile
 
-# The sequencer imports @snapshot-labs/private-vote-sdk, whose package "exports"
-# point at dist/. Build just that one package (tsup + wasm copy) so the import
-# resolves at runtime. The hub has no workspace dependencies.
-RUN cd packages/private-vote-sdk && bun run build
-
 ENV NODE_ENV=production
 
 # hub: 3000, sequencer: 3001

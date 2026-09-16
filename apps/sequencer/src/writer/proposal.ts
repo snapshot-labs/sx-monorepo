@@ -9,14 +9,49 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
+import { effectivePrivacy } from '../helpers/privacy';
 import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
+import {
+  assertBallotShape,
+  ballotParamsColumn,
+  buildCommitteeSnapshot,
+  committeeColumns,
+  readTeEnv,
+  TeConfigError,
+  votingPowerFallback,
+  weightedBudgetFromEnv
+} from '../helpers/teCommittee';
+import { getEligibilityKey } from '../helpers/teEligibility';
+import { resolveVotingPowerBound } from '../helpers/teVotingPowerBound';
 import {
   captureError,
   getQuorum,
   jsonParse,
   validateChoices
 } from '../helpers/utils';
+
+/**
+ * Resolve `V` for a space's strategies at a proposal's snapshot block.
+ *
+ * A read failure is **not** absorbed into the fallback: the fallback exists for
+ * strategies we cannot interpret, while an RPC failure means we simply have not
+ * looked yet. Since `V` is fixed by the frozen snapshot block, refusing and letting
+ * the author retry returns the identical number, whereas guessing low is
+ * unrecoverable. The two were conflated in the original plan wording; they are
+ * different failures with different right answers.
+ */
+async function resolveVotingPowerBoundFor(
+  space: any,
+  payload: { snapshot?: string | number; budget?: number }
+) {
+  return resolveVotingPowerBound({
+    strategies: space?.strategies ?? [],
+    proposalNetwork: String(space?.network ?? '1'),
+    snapshotBlock: Number(payload?.snapshot ?? 0),
+    fallbackValue: votingPowerFallback(payload?.budget ?? 1)
+  });
+}
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 const MIN_DKG_LEAD_TIME_S = parseInt(
@@ -78,6 +113,18 @@ async function validateSpace(space: any) {
   }
 
   await validateSpaceSettings(space);
+}
+
+/**
+ * The address recorded as the config's admin key: the space's first admin, or the
+ * proposal author when the space lists none. Mirrors the fallback the hub applies
+ * when it decides who may resume a stalled tally, so the recorded value matches the
+ * live rule as it stood at creation.
+ */
+function adminForConfig(space: any, author: string): string {
+  const admins = Array.isArray(space?.admins) ? space.admins : [];
+  const first = admins.find((a: any) => typeof a === 'string' && a);
+  return first || author;
 }
 
 export async function verify(body): Promise<any> {
@@ -160,13 +207,53 @@ export async function verify(body): Promise<any> {
     return Promise.reject('not allowed to set privacy');
   }
 
-  const effectivePrivacy =
-    spacePrivacy !== 'any' ? spacePrivacy : proposalPrivacy ?? '';
-  if (effectivePrivacy === 'shutter-elgamal') {
+  // No `existing` on creation: a proposal that does not exist yet has no privacy
+  // to preserve, so the chain collapses to the `''` this always used.
+  if (effectivePrivacy(space, msg.payload) === 'shutter-elgamal') {
     const now = Math.floor(Date.now() / 1e3);
     if (msg.payload.start - now < MIN_DKG_LEAD_TIME_S) {
       return Promise.reject(
         `shutter-elgamal proposals must start at least ${MIN_DKG_LEAD_TIME_S}s from now to allow DKG to complete`
+      );
+    }
+    // Build the committee snapshot now, purely to reject a misconfigured
+    // deployment while the author is still watching. `action` rebuilds it for
+    // the actual write. A committee that fails these checks produces a proposal
+    // whose key generation can never finish, which would otherwise surface
+    // minutes later as an unexplained terminal failure with no author feedback.
+    try {
+      await buildCommitteeSnapshot({
+        eligibilityKey: await getEligibilityKey(),
+        votingStart: parseInt(msg.payload.start),
+        votingEnd: parseInt(msg.payload.end),
+        adminAddress: adminForConfig(space, body.address),
+        // A placeholder: `verify` only proves the committee is well-formed, and the
+        // real bound is resolved once in `action`.
+        //
+        // Deliberately *not* resolved here as well. This path is synchronous in
+        // front of the author, and `resolveVotingPowerBound` makes live RPC calls
+        // with retries — putting them here makes proposal validation block on chain
+        // latency, and doubles the reads for no gain. `action` runs inside the same
+        // request, so a failure there still reaches the author.
+        maxTotalWeight: 1
+      });
+      // The ballot's own shape is bounded too, and it depends on this proposal
+      // rather than on the deployment: a weighted proposal encodes one proof
+      // branch per (choice, budget step).
+      assertBallotShape(
+        msg.payload.choices.length,
+        msg.payload.type === 'weighted'
+          ? parseInt(readTeEnv().weightedBudget || '100', 10)
+          : 1
+      );
+    } catch (err: any) {
+      if (err instanceof TeConfigError) {
+        log.warn(`[writer] private voting misconfigured: ${err.message}`);
+        return Promise.reject(`private voting unavailable: ${err.message}`);
+      }
+      log.warn(`[writer] eligibility key unavailable: ${err?.message || err}`);
+      return Promise.reject(
+        'private voting unavailable: could not reach the eligibility service'
       );
     }
   }
@@ -300,10 +387,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const plugins = JSON.stringify(metadata.plugins || {});
   const spaceNetwork = spaceSettings.network;
   const proposalSnapshot = parseInt(msg.payload.snapshot || '0');
-  let privacy = spaceSettings.voting?.privacy ?? 'any';
-  if (privacy === 'any') {
-    privacy = msg.payload.privacy ?? '';
-  }
+  const privacy = effectivePrivacy(spaceSettings, msg.payload);
 
   let quorum = spaceSettings.voting?.quorum || 0;
   if (!quorum && spaceSettings.plugins?.quorum) {
@@ -356,6 +440,50 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     flagged: +containsFlaggedLinks(msg.payload.body),
     cb: CB.PENDING_SYNC
   };
+
+  // Freeze the threshold committee onto the row. This is the protocol's single
+  // config write — proposal creation *is* its registration event — so nothing
+  // downstream ever rewrites these columns. `verify` already proved the snapshot
+  // builds, so a throw here is a genuine fault and must abort the insert rather
+  // than leave a private proposal with no committee.
+  if (privacy === 'shutter-elgamal') {
+    // `spaceSettings`, not `space`: in `action` the latter is `msg.space`, a bare id
+    // string. Reading `.strategies`/`.admins` off it yields undefined rather than
+    // throwing, so every proposal silently took the fallback bound and the author as
+    // committee admin.
+    const bound = await resolveVotingPowerBoundFor(spaceSettings, {
+      snapshot: String(proposal.snapshot),
+      budget: msg.payload.type === 'weighted' ? weightedBudgetFromEnv() : 1
+    });
+    log.info(
+      `[te-vpbound] ${proposal.id}: V=${bound.value} via ${bound.source}${
+        bound.unrecognised ? ` (unrecognised: ${bound.unrecognised})` : ''
+      }`
+    );
+    const snapshot = await buildCommitteeSnapshot({
+      eligibilityKey: await getEligibilityKey(),
+      votingStart: proposal.start,
+      votingEnd: proposal.end,
+      adminAddress: adminForConfig(spaceSettings, proposal.author),
+      maxTotalWeight: bound.value
+    });
+    Object.assign(
+      proposal,
+      committeeColumns(snapshot),
+      // Without this the proposal has a committee and a key but no ballot shape,
+      // so the browser refuses to build a ballot and ingest refuses to verify
+      // one — a proposal that looks ready and cannot be voted on.
+      //
+      // The budget comes from the snapshot rather than the environment, so the
+      // two copies of it cannot describe different ballots later.
+      ballotParamsColumn(
+        msg.payload.choices,
+        msg.payload.type,
+        snapshot.weightedBudget,
+        snapshot
+      )
+    );
+  }
 
   const query = `
     INSERT INTO proposals SET ?;

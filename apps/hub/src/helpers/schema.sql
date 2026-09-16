@@ -1,3 +1,38 @@
+-- ===========================================================================
+--  READ THIS BEFORE ADDING OR CHANGING A COLUMN
+--
+--  Editing this file does NOT migrate an existing database.
+--
+--  It is loaded by docker/mysql-init/00-init.sh, which is a
+--  docker-entrypoint-initdb.d script: it runs only when the MySQL data
+--  directory is empty. Since mysql-data/ is a persistent bind mount, any stack
+--  that has booted even once will never see a change made here.
+--
+--  Applies automatically:  test databases -- test/setupDb.ts drops and recreates
+--                          from this file on every run
+--                          a genuinely fresh stack with an empty mysql-data/
+--  Does NOT apply:         every already-running stack, and every deployed
+--                          environment
+--
+--  So a change here needs one of:
+--    * a hand-applied ALTER, which is this repo's current practice -- see the
+--      "Unknown column 'turbo'" entry in evidence/manual-metamask.md
+--    * a full reset:  docker compose down && rm -rf mysql-data && docker compose up
+--
+--  The failure mode is deferred, not immediate: a stack looks perfectly healthy
+--  until the first request touches the missing column, then returns a 500 that
+--  says nothing about schema drift. If you add a column, say so in the PR body.
+--
+--  There is no migration mechanism for hub or the sequencer today. One is
+--  planned but deliberately deferred; apps/mana already uses knex migrations if
+--  you want the pattern. The plan, the intended migration files, and the MySQL 8
+--  specifics that bite -- ADD COLUMN IF NOT EXISTS does not exist, and
+--  ALGORITHM=INSTANT should be stated explicitly.
+--
+--  NOTE: apps/sequencer/test/schema.sql keeps its own copy of the proposals
+--  table for the sequencer's tests. The two have drifted before. Change both.
+-- ===========================================================================
+
 CREATE TABLE spaces (
   id VARCHAR(64) NOT NULL,
   name VARCHAR(64) NOT NULL,
@@ -81,6 +116,40 @@ CREATE TABLE proposals (
   te_aggregate JSON DEFAULT NULL,
   -- NULL = pending/ok; 'dkg_failed' = all attempts exhausted, needs operator intervention.
   te_dkg_status VARCHAR(24) DEFAULT NULL,
+  -- Immutable committee + role snapshot, written once by the sequencer at
+  -- proposal creation from its own env (writer/proposal.ts). Proposal creation
+  -- is the registration event for the threshold protocol, so this is the single
+  -- config write: everything downstream reads it and never mutates it.
+  --
+  -- Deliberately sx-shaped, NOT the protocol's wire format. The hub is the only
+  -- process that knows the protocol's JSON (it already links the crypto SDK), so
+  -- it maps this snapshot onto the wire config and derives the mutable fields --
+  -- numCandidates/budget/mode/variant -- live from `choices` and `type` on every
+  -- read. Those four cannot be frozen here: update-proposal lets an author edit
+  -- `choices` and `type` right up until `start`, which would leave a frozen copy
+  -- stale. Deriving them is safe precisely because that same endpoint refuses
+  -- edits once voting has opened, so they are constant for the whole voting
+  -- window.
+  te_geg_config JSON DEFAULT NULL,
+  -- Set by the coordinator when it gives up on a tally, cleared only by the
+  -- admin identity. The split is the point: the party that marks a stall cannot
+  -- clear it, so a coordinator restart can never quietly resurrect an election
+  -- that a human has not looked at.
+  te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
+  -- The coordinator's own account of *why* it stalled, for an operator to read.
+  --
+  -- Deliberately NOT part of the signed `tally_stall` digest, unlike the flag
+  -- above. It is a hint, not an artifact: it cannot make an unverifiable tally
+  -- look verifiable, and the split that actually decides what an operator does --
+  -- keyper problem or coordinator problem -- is derived client-side from share
+  -- counts nobody can forge (`diagnoseTally`). Surfaced as a claim ("the
+  -- coordinator reports...") rather than as fact.
+  --
+  -- If this value ever gates an automated action -- auto-retry, auto-resume,
+  -- auto-scaling the coordinator -- it must be moved inside the signed digest
+  -- first. Unauthenticated input driving automation is a different risk class
+  -- from unauthenticated input driving a human's attention.
+  te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),
@@ -166,6 +235,78 @@ CREATE TABLE te_dkg_submissions (
   PRIMARY KEY (proposal_id, keyper_index),
   INDEX idx_te_dkg_match (proposal_id, mpk_hex(64))
 );
+
+-- The published tally. Written once, by the result publisher named in the
+-- election's frozen config, and mirrored into proposals.scores by the sequencer.
+--
+-- totals_json holds the per-candidate integers as JSON *strings* rather than
+-- numbers: they are sums over weighted ballots and can exceed 2^53, where a
+-- JSON number stops being exact. They are also what the publisher's signature
+-- covers, so a rounded value here would not just display wrong, it would fail
+-- to verify.
+CREATE TABLE te_results (
+  proposal_id VARCHAR(66) NOT NULL PRIMARY KEY,
+  totals_json TEXT NOT NULL,
+  keyper_indices TEXT NOT NULL,
+  bsgs_bound VARCHAR(80) NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL
+);
+
+-- Per-keyper aggregate submissions. The aggregate is committee-owned: each
+-- member derives it independently from the same ballots and the same config,
+-- and the one that a quorum submits *byte-identically* becomes canonical
+-- (promoted into proposals.te_aggregate). A single writer could otherwise
+-- isolate a ballot and nobody would be able to tell.
+--
+-- Unlike te_dkg_submissions this is deliberately NOT append-only: a keyper may
+-- overwrite its own row until the quorum finalises. The aggregate is a
+-- deterministic re-derivation, so a member that submitted a stale one must be
+-- able to re-converge with the rest — the coordinator explicitly asks the
+-- committee to re-derive when it sees submissions that do not agree. After the
+-- quorum, the row set is frozen and a change is a 409.
+--
+-- digest is stored alongside the JSON because it is what the quorum counts on
+-- (cheap and indexed), while the JSON is what an auditor reads to see exactly
+-- what each keyper claimed when a quorum *fails* to form.
+CREATE TABLE te_aggregate_submissions (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  keyper_address VARCHAR(42) NOT NULL,
+  aggregate_json MEDIUMTEXT NOT NULL,
+  digest VARCHAR(66) NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index),
+  INDEX idx_te_agg_match (proposal_id, digest)
+);
+
+-- The eligibility public key currently in use, published by the sequencer.
+--
+-- The sequencer holds the private half and mints one credential per private
+-- ballot; the hub needs the public half for one job: refusing to serve a
+-- proposal whose frozen key no longer matches the key in use, which is what
+-- stops a rotated key producing a legitimate-looking all-zeros tally.
+--
+-- Written on every sequencer boot. Rotating the key means changing an
+-- environment variable, which means a restart, so this row cannot lag reality.
+-- One row, enforced by a fixed primary key.
+CREATE TABLE te_eligibility_key (
+  id TINYINT NOT NULL PRIMARY KEY,
+  public_key VARCHAR(100) NOT NULL,
+  updated BIGINT NOT NULL
+);
+
+CREATE TABLE te_request_nonces (
+  proposal_id VARCHAR(66) NOT NULL,
+  op VARCHAR(32) NOT NULL,
+  issued_at BIGINT NOT NULL,
+  accepted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, op, issued_at),
+  INDEX idx_te_nonce_accepted (accepted_at)
+);
+
+
 
 CREATE TABLE follows (
   id VARCHAR(66) NOT NULL,
@@ -281,3 +422,22 @@ CREATE TABLE networks (
   PRIMARY KEY (id),
   INDEX premium (premium)
 );
+
+-- The re-vote counter the eligibility credential carries.
+--
+-- The committee ranks a voter's duplicate ballots by (nonce, sequenceNumber), so
+-- this is what decides which of their ballots is counted. It has to be strictly
+-- increasing per (proposal, pseudonym) and it has to survive a restart: a
+-- regression would let a stale ballot outrank a genuine re-vote.
+--
+-- A counter rather than the issuance timestamp, because credentials are now
+-- minted before the vote is cast and two requests in the same second — a
+-- double-click — would otherwise share a nonce and leave the ordering undefined.
+CREATE TABLE te_revote_nonces (
+  proposal_id VARCHAR(66) NOT NULL,
+  pseudonym VARCHAR(66) NOT NULL,
+  last BIGINT NOT NULL,
+  updated BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, pseudonym)
+);
+

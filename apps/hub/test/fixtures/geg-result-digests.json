@@ -1,0 +1,60 @@
+{
+  "description": "GEG-RESULT-v1 digests and signatures from geg's write_auth (b94e63c: the digest now binds the totals).",
+  "cases": [
+    {
+      "name": "three_candidates",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "result": {
+        "totals": [
+          100,
+          0,
+          42
+        ],
+        "keyperIndices": [
+          1,
+          2
+        ],
+        "bsgsBound": 1000
+      },
+      "digest": "0x2006bc9fc693b9fbf951287d89de691119358e5d2d0b71f9bf136de14b977977",
+      "signature": "0xcbcc884577bd5b5afba176cd9ece8fc66bbabcd4119bda76cd3e71220586cc9f64e11d0eb40807940f9d3e52f0bb7570546db943d3bbb0ffa7a177db7d8d5b7b1b",
+      "signer": "0x782304C889b0AB7eb7e628C2C4870Ae05474eBd9"
+    },
+    {
+      "name": "all_zero",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "result": {
+        "totals": [
+          0,
+          0
+        ],
+        "keyperIndices": [
+          2,
+          3
+        ],
+        "bsgsBound": 1
+      },
+      "digest": "0xff5a12eb61d14b9ef821c3938e9a760d13e94b9ba7b1b8e9f811becc22d15f17",
+      "signature": "0xb52380fdb91c042a450dcf7e24694c02c39f57f3954febfaae88a8cfc323fb6a3d4676c57a2e723439db9c36d362704e7f62526450d2d249da4b2d8b7c5be9ca1c",
+      "signer": "0x2A42BfFDd82FA2c0445ba3305532f156701dC2D6"
+    },
+    {
+      "name": "large_totals",
+      "electionId": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "result": {
+        "totals": [
+          9007199254740993,
+          1
+        ],
+        "keyperIndices": [
+          1,
+          3
+        ],
+        "bsgsBound": 9007199254740994
+      },
+      "digest": "0xb9a103e8aa93440948765df11c8cadd9be86eb834a2877e6ef23621ed3028ab4",
+      "signature": "0xedb9ce07a34fa49caf9c09af6a2deb11001d5fd95a59850eec52398f11e266c7173be4f19c3dd37052d49d16f16117fed0f2e914de5208b1f534a4a92e2b27a91b",
+      "signer": "0xC3F2FB610de5D4352eD4F88117c3Eb323DfD8A9f"
+    }
+  ]
+}

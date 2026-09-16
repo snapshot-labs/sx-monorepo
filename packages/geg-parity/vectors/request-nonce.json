@@ -1,0 +1,41 @@
+{
+  "_comment": "requestNoncePayload parity: geg request_nonce_payload + request_digest. Regenerate from geg, never hand-edit.",
+  "cases": [
+    {
+      "name": "tally_stall_at_1787000000",
+      "op": "tally_stall",
+      "electionId": "0xdededededededededededededededededededededededededededededededede",
+      "payload": "0x000000006a8374c0",
+      "digest": "0x7aa2b1f3a9116fcdef0332c742e66cbbef603a0b920dbed686b0e0735c46c97e",
+      "signature": "0x2cb92bab86843e381278f8eef508418d9c68ec4dd0bbc445bdf45f7f47d00ae401f7dfb1cbdf1cb8a5899dd86d66183cdde00a5448987a54a2115b4a9e347b491c",
+      "signer": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"
+    },
+    {
+      "name": "tally_resume_at_1787000000",
+      "op": "tally_resume",
+      "electionId": "0xdededededededededededededededededededededededededededededededede",
+      "payload": "0x000000006a8374c0",
+      "digest": "0xeecf181eac4b7d2f918e5ae3dd824f72cbf75bc56f74b86e69c9a9f15fabb80f",
+      "signature": "0xf9a546d173cfc968cf0017c8e0b02f042743945a98bc840e9711fd06ec8d924d4cb91adf6367a5c046042129522cd10767505d3df0aa27f0172cc8854b7610731c",
+      "signer": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"
+    },
+    {
+      "name": "tally_stall_at_0",
+      "op": "tally_stall",
+      "electionId": "0xdededededededededededededededededededededededededededededededede",
+      "payload": "0x0000000000000000",
+      "digest": "0x29b93a9e18d62365a58b7bc20008ec2a94ab501ee37ac88c9bb5669e85e4809b",
+      "signature": "0xb1c1d6d173af41de84634adf6e20292d7e97fd047c4436bd0bc98cd8a085c2564380b50480f3906e798096c064c6e31d17dce9a2995323eeb67a4084265898c71b",
+      "signer": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"
+    },
+    {
+      "name": "tally_stall_at_max_u32",
+      "op": "tally_stall",
+      "electionId": "0xdededededededededededededededededededededededededededededededede",
+      "payload": "0x00000000ffffffff",
+      "digest": "0x09a74802be7dfefa89781f2459009d87e221de03057e6b95abf6875f2e8b482b",
+      "signature": "0x37f54674660f6938af73f003d4df20d36e95a0b81726c511dda381015bead47d2d0924518deb0fcacc77df9ca68ae413d7a615c27527ec4fec373dc3918516b01b",
+      "signer": "0x19E7E376E7C213B7E7e7e46cc70A5dD086DAff2A"
+    }
+  ]
+}

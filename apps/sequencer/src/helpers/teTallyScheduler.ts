@@ -24,20 +24,37 @@ const POLL_INTERVAL_MS = Number(process.env.TE_TALLY_POLL_MS || 5000);
 
 const inFlight = new Set<string>();
 
-async function tick(): Promise<void> {
-  let proposals: { id: string }[];
-  try {
-    const ts = Math.floor(Date.now() / 1e3);
-    proposals = await db.queryAsync(
-      `SELECT id FROM proposals
+/**
+ * Which proposals this loop will act on.
+ *
+ * Exported so the backward-compatibility test can assert against the *real*
+ * predicate rather than a copy of it. `privacy = 'shutter-elgamal'` is the D14
+ * gate: a public proposal must never be picked up here, and a test that
+ * re-typed this SQL would keep passing if the gate were dropped.
+ *
+ * A stalled tally is one the committee could not complete; polling it every few
+ * seconds produces noise, not progress. It re-enters the moment an admin clears
+ * the flag.
+ */
+export function selectTallyCandidates(ts: number): Promise<{ id: string }[]> {
+  return db.queryAsync(
+    `SELECT id FROM proposals
         WHERE privacy = 'shutter-elgamal'
           AND scores_state != 'final'
           AND end < ?
           AND te_mpk IS NOT NULL
+          AND te_tally_stalled = 0
         ORDER BY end ASC
         LIMIT 25`,
-      [ts]
-    );
+    [ts]
+  );
+}
+
+async function tick(): Promise<void> {
+  let proposals: { id: string }[];
+  try {
+    const ts = Math.floor(Date.now() / 1e3);
+    proposals = await selectTallyCandidates(ts);
   } catch (err: any) {
     log.warn(`[te-scheduler] query failed: ${err.message}`);
     return;

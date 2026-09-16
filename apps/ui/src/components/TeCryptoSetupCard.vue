@@ -21,7 +21,7 @@ const thresholdLabel = computed(() => {
   const t = props.proposal.te_threshold_t;
   const n = props.proposal.te_threshold_n;
   if (t == null || n == null) return '?';
-  return `${t + 1}-of-${n}`;
+  return `${t}-of-${n}`;
 });
 
 // Same threshold rendered for the diagram badge, e.g. "2 of 3".
@@ -29,7 +29,7 @@ const diagramThreshold = computed(() => {
   const t = props.proposal.te_threshold_t;
   const n = props.proposal.te_threshold_n;
   if (t == null || n == null) return '?';
-  return `${t + 1} of ${n}`;
+  return `${t} of ${n}`;
 });
 
 const keyperCount = computed(

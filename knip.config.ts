@@ -36,10 +36,12 @@ const config: KnipConfig = {
       entry: ['src/index.ts']
     },
     'apps/hub': {
-      entry: ['src/index.ts']
+      entry: ['src/index.ts'],
+      // Run by hand against a live stack, not imported by the service.
+      ignore: ['benchmarks/**', 'scripts/seed-mixed-vp-proposal.ts']
     },
     'apps/mana': {
-      entry: ['src/index.ts', 'knexfile.ts', 'migrations/*.ts'],
+      entry: ['src/index.ts', 'src/db.ts', 'knexfile.ts', 'migrations/*.ts'],
       knex: false,
       ignoreDependencies: ['pg']
     },
@@ -47,6 +49,9 @@ const config: KnipConfig = {
     'apps/sequencer': {
       entry: ['src/**/*.ts', 'scripts/**/*.ts'],
       ignoreDependencies: ['ajv']
+    },
+    'apps/te-data-layer': {
+      ignoreDependencies: ['ts-node']
     },
     'apps/ui': {
       entry: [
@@ -77,15 +82,10 @@ const config: KnipConfig = {
       ignoreDependencies: ['events']
     },
     'packages/prettier-config': {},
-    'packages/private-vote-sdk': {
-      entry: ['scripts/*.{ts,mjs}'],
-      // benchmarks are run manually; blst/types.ts and the test-vector
-      // schema are pure declaration files kept as public SDK surface
-      ignore: [
-        'benchmarks/**',
-        'src/crypto/blst/types.ts',
-        'tests/vectors/_schema.ts'
-      ]
+    'packages/geg-parity': {
+      // Tests and the vector-sync script are the whole package; it ships no
+      // source, so there is no entry point to walk from.
+      entry: ['tests/**/*.ts', 'scripts/*.{ts,mjs}']
     },
     'packages/sx.js': {
       ignoreBinaries: ['anvil', 'starknet-devnet']
