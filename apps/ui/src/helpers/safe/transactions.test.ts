@@ -1,5 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
+import { hexConcat, hexZeroPad } from '@ethersproject/bytes';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { getABI } from '@/helpers/etherscan';
 import {
@@ -10,6 +11,16 @@ import {
 import { buildBatchFile } from './build';
 import { addChecksum } from './checksum';
 import { parseSafeImportFile, SafeImportError } from './transactions';
+import {
+  parseSafeSnapTransaction,
+  serializeSafeSnapTransaction
+} from '../safesnap/transactions';
+import fusionSwapMultiSend from './__fixtures__/fusion-swap-multisend.json';
+import fusionSwap from './__fixtures__/fusion-swap.json';
+import hexInteger from './__fixtures__/hex-integer.json';
+import legacyBooleans from './__fixtures__/legacy-booleans.json';
+import signedHexInteger from './__fixtures__/signed-hex-integer.json';
+import uppercaseHexInteger from './__fixtures__/uppercase-hex-integer.json';
 
 vi.mock('@/helpers/etherscan', () => ({ getABI: vi.fn() }));
 // The constructors resolve ENS names on mainnet; answer offline.
@@ -22,6 +33,29 @@ vi.mock('@/helpers/ens', async importOriginal => ({
 beforeEach(() => {
   vi.mocked(getABI).mockReset().mockRejectedValue(new Error('unmocked getABI'));
 });
+
+// Mirrors how Snapshot v1 (coerceConfig -> createMultiSendTx) re-encodes a
+// stored batch into the MultiSend call that the Safe module executes.
+function encodeMultiSend(
+  txs: { to: string; value: string; data: string; operation?: string }[]
+) {
+  const packed = hexConcat(
+    txs.map(tx => {
+      const data = tx.data || '0x';
+      const length = data === '0x' ? 0 : (data.length - 2) / 2;
+      return hexConcat([
+        hexZeroPad(BigNumber.from(tx.operation || '0').toHexString(), 1),
+        hexZeroPad(tx.to, 20),
+        hexZeroPad(BigNumber.from(tx.value || '0').toHexString(), 32),
+        hexZeroPad(BigNumber.from(length).toHexString(), 32),
+        data
+      ]);
+    })
+  );
+  return new Interface([
+    'function multiSend(bytes transactions)'
+  ]).encodeFunctionData('multiSend', [packed]);
+}
 
 const TRANSFER_ABI = [
   {
@@ -382,6 +416,114 @@ describe('scalar arguments', () => {
   });
 });
 
+describe('legacy and Safe-generated metadata', () => {
+  it('imports actual booleans from the legacy execution exporter', async () => {
+    const { transactions, warnings } = await parseSafeImportFile(
+      JSON.stringify(legacyBooleans),
+      '1'
+    );
+    const iface = new Interface(['function setFlag(bool flag)']);
+
+    expect(warnings).toEqual([]);
+    expect(transactions.map(tx => tx.data)).toEqual(
+      [true, false].map(flag => iface.encodeFunctionData('setFlag', [flag]))
+    );
+  });
+
+  it.each([
+    ['bare', hexInteger, 'uint256', '255'],
+    ['signed', signedHexInteger, 'int256', '-255'],
+    ['uppercase-prefixed', uppercaseHexInteger, 'uint256', '255']
+  ])(
+    'imports a %s hexadecimal integer export from Safe',
+    async (_, batch, type, value) => {
+      const { transactions, warnings } = await parseSafeImportFile(
+        JSON.stringify(batch),
+        '1'
+      );
+
+      expect(warnings).toEqual([]);
+      expect(transactions[0].data).toBe(
+        new Interface([`function setCount(${type} count)`]).encodeFunctionData(
+          'setCount',
+          [value]
+        )
+      );
+    }
+  );
+
+  const importInteger = (count: string, type = 'uint256') =>
+    parseSafeImportFile(
+      file([
+        {
+          ...hexInteger.transactions[0],
+          contractMethod: {
+            name: 'setCount',
+            payable: false,
+            inputs: [{ name: 'count', type }]
+          },
+          contractInputsValues: { count }
+        }
+      ]),
+      '1'
+    );
+
+  it.each([
+    ['FF', 'uint256', '255'],
+    ['1e3', 'uint256', '483'],
+    [' "ff" ', 'uint256', '255'],
+    ['100', 'uint256', '100'],
+    ['010', 'uint256', '10'],
+    ['0xff', 'uint256', '255'],
+    ['0x10', 'uint256', '16'],
+    ['-10', 'int256', '-10'],
+    ['-0xff', 'int256', '-255'],
+    ['-ff', 'int256', '-255'],
+    ['-FF', 'int16', '-255'],
+    ['0XFF', 'uint256', '255'],
+    ['0XFF', 'int16', '255'],
+    ['-0XFF', 'int16', '-255'],
+    ['-7f', 'int8', '-127'],
+    ['-0x80', 'int8', '-128'],
+    ['-128', 'int8', '-128'],
+    ['ff', 'int16', '255'],
+    ['f'.repeat(64), 'uint256', BigNumber.from(2).pow(256).sub(1).toString()]
+  ])('encodes %j as %s value %s', async (value, type, expected) => {
+    const { transactions } = await importInteger(value, type);
+
+    expect(transactions[0].data).toBe(
+      new Interface([`function setCount(${type} count)`]).encodeFunctionData(
+        'setCount',
+        [expected]
+      )
+    );
+  });
+
+  it.each([
+    ['fg', 'uint256'],
+    ['1.5', 'uint256'],
+    ['+10', 'uint256'],
+    ['-ff', 'uint256'],
+    ['-0XFF', 'uint256'],
+    ['-0xff', 'uint256'],
+    ['0XFF', 'int8'],
+    ['-ff', 'int8'],
+    ['-129', 'int8'],
+    ['0X', 'uint256'],
+    ['0Xfg', 'uint256'],
+    ['0x', 'uint256'],
+    ['-', 'int256'],
+    [`1${'0'.repeat(78)}`, 'uint256'],
+    [`1${'f'.repeat(64)}`, 'uint256'],
+    ['ff', 'int8'],
+    ['-1', 'uint8']
+  ])('rejects invalid or out-of-range %j for %s', async (value, type) => {
+    await expect(importInteger(value, type)).rejects.toThrow(
+      /Transaction 1 in this file could not be imported/
+    );
+  });
+});
+
 describe('array arguments', () => {
   const RECIPIENTS_ABI = [
     {
@@ -461,6 +603,92 @@ describe('array arguments', () => {
     });
 
     expect(tx.data).toBe(expected);
+  });
+});
+
+describe('1inch Fusion swap import', () => {
+  const content = JSON.stringify(fusionSwap);
+  const safeSnap = { allowDelegatecall: true };
+
+  it('rejects the delegatecall unless the strategy allows it (SafeSnap only)', async () => {
+    await expect(parseSafeImportFile(content, '1')).rejects.toThrow(
+      /only supported with SafeSnap execution/
+    );
+  });
+
+  it('imports the bare array the order builder emits, assuming the treasury chain', async () => {
+    const { transactions, warnings } = await parseSafeImportFile(
+      JSON.stringify(fusionSwap.transactions),
+      '1',
+      safeSnap
+    );
+
+    expect(transactions.map(tx => tx.operation)).toEqual([undefined, '1']);
+    expect(warnings).toEqual([
+      'This file does not specify a chain; assuming chain 1',
+      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
+
+  it('captures the delegatecall operation from the file', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
+
+    expect(transactions).toHaveLength(2);
+    // approve -> call, buildAndSignOrder -> delegatecall.
+    expect(transactions[0].operation).toBeUndefined();
+    expect(transactions[1].operation).toBe('1');
+  });
+
+  it('serializes to the exact MultiSend batch the Fusion script produces', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
+    const batch = transactions.map(serializeSafeSnapTransaction);
+
+    expect(batch.map(tx => tx.operation)).toEqual(['0', '1']);
+    expect(encodeMultiSend(batch).toLowerCase()).toBe(
+      fusionSwapMultiSend.multiSend.toLowerCase()
+    );
+  });
+
+  it('warns that the delegatecall transaction grants full control of the Safe', async () => {
+    const { warnings } = await parseSafeImportFile(content, '1', safeSnap);
+
+    expect(warnings).toEqual([
+      'Transaction 2 is a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
+
+  it('preserves the delegatecall operation through a download-file export/re-import', async () => {
+    const { transactions } = await parseSafeImportFile(content, '1', safeSnap);
+    const exported = buildBatchFile(1, transactions);
+    const reimported = await parseSafeImportFile(
+      JSON.stringify(exported),
+      '1',
+      safeSnap
+    );
+
+    expect(exported.transactions[0].operation).toBeUndefined();
+    expect(exported.transactions[1].operation).toBe('1');
+    expect(reimported.transactions[1].operation).toBe('1');
+  });
+
+  it('keeps operation intact for a single-transaction batch, which v1 executes directly without MultiSend', async () => {
+    const singleTxContent = JSON.stringify({
+      version: '1.0',
+      chainId: '1',
+      transactions: [fusionSwap.transactions[1]]
+    });
+
+    const { transactions } = await parseSafeImportFile(
+      singleTxContent,
+      '1',
+      safeSnap
+    );
+    const [serialized] = transactions.map(serializeSafeSnapTransaction);
+
+    expect(serialized.operation).toBe('1');
+    expect(serialized.to).toBe(fusionSwap.transactions[1].to);
+    expect(serialized.value).toBe(fusionSwap.transactions[1].value);
+    expect(serialized.data).toBe(fusionSwap.transactions[1].data);
   });
 });
 
@@ -1163,6 +1391,95 @@ describe('file validation', () => {
       )
     ).rejects.toThrow(/Transaction 1 in this file could not be imported/);
   });
+
+  it('accepts valid operation values and rejects malformed ones', async () => {
+    const validOperations = [undefined, '', '0', '1', 0, 1];
+    const invalidOperations = [
+      '2',
+      2,
+      '0x1',
+      '0x0',
+      '01',
+      ' 1',
+      true,
+      false,
+      null,
+      -1,
+      'delegatecall',
+      {},
+      [1]
+    ];
+
+    function fileWithOperation(operation: unknown) {
+      return file([
+        {
+          to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+          value: '0',
+          data: '0x',
+          operation
+        }
+      ]);
+    }
+
+    for (const operation of validOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1', {
+          allowDelegatecall: true
+        })
+      ).resolves.toBeDefined();
+    }
+
+    for (const operation of invalidOperations) {
+      await expect(
+        parseSafeImportFile(fileWithOperation(operation), '1')
+      ).rejects.toThrow(/Transaction 1 has an invalid operation/);
+    }
+  });
+
+  it('gates a numeric delegatecall operation behind allowDelegatecall too', async () => {
+    const content = file([
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: 1
+      }
+    ]);
+
+    await expect(parseSafeImportFile(content, '1')).rejects.toThrow(
+      /only supported with SafeSnap execution/
+    );
+
+    const { transactions } = await parseSafeImportFile(content, '1', {
+      allowDelegatecall: true
+    });
+    expect(transactions[0].operation).toBe('1');
+  });
+
+  it('pluralizes the delegatecall warning for more than one delegatecall', async () => {
+    const content = file([
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: '1'
+      },
+      {
+        to: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+        value: '0',
+        data: '0x',
+        operation: '1'
+      }
+    ]);
+
+    const { warnings } = await parseSafeImportFile(content, '1', {
+      allowDelegatecall: true
+    });
+
+    expect(warnings).toEqual([
+      'Transactions 1, 2 are a delegatecall, which grants full control of the Safe. Only import this file if you trust its source'
+    ]);
+  });
 });
 
 describe('tuple arguments', () => {
@@ -1422,6 +1739,31 @@ describe('export round-trip', () => {
 
     expect(exported!.transactions[0].data).toBe(data);
     expect(exported!.transactions[0].contractMethod).toBeUndefined();
+  });
+
+  it('keeps the calldata of a legacy SafeSnap NFT transfer that has no nftType', async () => {
+    const legacy = parseSafeSnapTransaction({
+      to: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+      data: '0x42842e0e',
+      value: '0',
+      type: 'transferNFT' as const,
+      recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      collectable: {
+        address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
+        id: '810',
+        name: 'Weeedidit Palls #101',
+        tokenName: 'Weee Did It Palz'
+      }
+    });
+
+    const exported = buildBatchFile(1, [legacy]);
+    const { transactions } = await parseSafeImportFile(
+      JSON.stringify(exported),
+      '1'
+    );
+
+    expect(exported.transactions[0].data).toBe('0x42842e0e');
+    expect(transactions[0].data).toBe('0x42842e0e');
   });
 });
 

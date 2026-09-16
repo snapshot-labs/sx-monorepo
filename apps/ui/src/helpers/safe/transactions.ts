@@ -7,11 +7,7 @@ import { isAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { isBytesLike } from '@ethersproject/bytes';
 import { formatUnits } from '@ethersproject/units';
-import {
-  ContractCallTransaction,
-  RawTransaction,
-  Transaction
-} from '@snapshot-labs/sx';
+import { ContractCallTransaction, RawTransaction } from '@snapshot-labs/sx';
 import { abis } from '@/helpers/abis';
 import { getABI } from '@/helpers/etherscan';
 import {
@@ -21,6 +17,7 @@ import {
 } from '@/helpers/transactions';
 import { abiToDefinition, getSalt } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { Transaction } from '@/types';
 import { validateChecksum } from './checksum';
 import { BatchFile, BatchTransaction, ContractMethod } from './types';
 
@@ -28,6 +25,12 @@ import { BatchFile, BatchTransaction, ContractMethod } from './types';
 export class SafeImportError extends Error {}
 
 const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
+
+const validOperations = [undefined, '', '0', '1', 0, 1];
+
+function isDelegatecallOperation(operation: unknown): boolean {
+  return String(operation) === '1';
+}
 
 function parseValue(value?: string | null): string {
   return value ? BigNumber.from(value).toString() : '0';
@@ -65,7 +68,9 @@ function splitArrayValue(value: string): string[] {
 
 // Same spellings as the Safe Transaction Builder's parseBooleanValue
 // (safe-global/safe-react-apps apps/tx-builder/src/utils.ts, MIT, 118f25df).
-function parseBooleanValue(value: string): boolean {
+function parseBooleanValue(value: string | boolean): boolean {
+  if (typeof value === 'boolean') return value;
+
   const normalized = value.trim().toLowerCase();
 
   if (['true', '1'].includes(normalized)) return true;
@@ -74,7 +79,10 @@ function parseBooleanValue(value: string): boolean {
   throw new Error('Invalid Boolean value');
 }
 
-function parseArg(type: string, value: string): any {
+function parseArg(type: string, value: string | boolean): any {
+  if (type === 'bool') return parseBooleanValue(value);
+  if (typeof value !== 'string') throw new Error('Invalid argument value');
+
   if (type.startsWith('tuple')) return parseTupleValue(value);
   if (type.endsWith(']')) {
     // Safe writes string arrays as JSON (elements may contain commas).
@@ -86,12 +94,22 @@ function parseArg(type: string, value: string): any {
     const elementType = type.replace(/\[\d*\]$/, '');
     return splitArrayValue(value).map(v => parseArg(elementType, v));
   }
-  if (type === 'bool') return parseBooleanValue(value);
   if (/^u?int\d*$/.test(type)) {
     const trimmed = value.replace(/["']/g, '').trim();
     if (!trimmed) throw new Error('Invalid empty integer value');
 
-    return trimmed;
+    const negative = trimmed.startsWith('-');
+    const magnitude = negative ? trimmed.slice(1) : trimmed;
+    let hex: string;
+    if (/^0x[0-9a-f]+$/i.test(magnitude)) {
+      hex = `0x${magnitude.slice(2)}`;
+    } else if (/^[0-9a-f]+$/i.test(magnitude) && /[a-f]/i.test(magnitude)) {
+      hex = `0x${magnitude}`;
+    } else {
+      return trimmed;
+    }
+
+    return BigNumber.from(negative ? `-${hex}` : hex).toString();
   }
   if (/^bytes\d*$/.test(type)) {
     // Safe encodes with web3-eth-abi, whose formatParam right-pads a short
@@ -228,11 +246,9 @@ function toAbi(method: ContractMethod): JsonFragment[] {
   ];
 }
 
-// Encodes a Safe contractMethod from its contractInputsValues strings; the
-// export uses it to check that a typed form reproduces the stored calldata.
 export function encodeContractMethod(
   method: ContractMethod,
-  values: Record<string, string>
+  values: Record<string, string | boolean>
 ): string {
   return new Interface(toAbi(method)).encodeFunctionData(
     method.name,
@@ -291,16 +307,20 @@ async function parseSafeTransaction(
   tx: BatchTransaction,
   chainId?: string
 ): Promise<Transaction> {
-  return (
+  const transaction =
     (tx.contractMethod && fromContractMethod(tx, tx.contractMethod)) ||
     (await decode(tx, chainId)) ||
-    toRaw(tx)
-  );
+    toRaw(tx);
+
+  return isDelegatecallOperation(tx.operation)
+    ? { ...transaction, operation: '1' }
+    : transaction;
 }
 
 export async function parseSafeImportFile(
   content: string,
-  chainId: string
+  chainId: string,
+  { allowDelegatecall = false } = {}
 ): Promise<{ transactions: Transaction[]; warnings: string[] }> {
   const warnings: string[] = [];
   let file: Partial<BatchFile> | null;
@@ -308,6 +328,15 @@ export async function parseSafeImportFile(
     file = JSON.parse(content);
   } catch {
     throw new SafeImportError('This file is not valid JSON');
+  }
+
+  // The Fusion order builder's bare array never carries a chainId; an object
+  // without one is a broken Transaction Builder file and is refused below.
+  if (Array.isArray(file)) {
+    warnings.push(
+      `This file does not specify a chain; assuming chain ${chainId}`
+    );
+    file = { chainId, transactions: file };
   }
 
   if (
@@ -341,6 +370,7 @@ export async function parseSafeImportFile(
     );
   }
 
+  const delegatecallIndexes: number[] = [];
   file.transactions.forEach((tx, i) => {
     if (!tx || typeof tx !== 'object') {
       throw new SafeImportError(`Transaction ${i + 1} is malformed`);
@@ -364,7 +394,23 @@ export async function parseSafeImportFile(
     ) {
       throw new SafeImportError(`Transaction ${i + 1} has an invalid value`);
     }
+    // Strict equality on purpose: String([1]) === '1' would let an array through.
+    const operation = tx.operation;
+    if (!validOperations.some(valid => valid === operation)) {
+      throw new SafeImportError(
+        `Transaction ${i + 1} has an invalid operation`
+      );
+    }
+    if (isDelegatecallOperation(operation)) delegatecallIndexes.push(i + 1);
   });
+
+  // Before parsing so a refused file skips the ABI lookups. Only SafeSnap
+  // honours operation 1; convertToMetaTransactions hardcodes 0.
+  if (delegatecallIndexes.length > 0 && !allowDelegatecall) {
+    throw new SafeImportError(
+      'This file contains a delegatecall transaction, which is only supported with SafeSnap execution'
+    );
+  }
 
   const transactions = await Promise.all(
     file.transactions.map((tx, i) =>
@@ -377,6 +423,13 @@ export async function parseSafeImportFile(
       })
     )
   );
+
+  if (delegatecallIndexes.length > 0) {
+    const plural = delegatecallIndexes.length > 1;
+    warnings.push(
+      `Transaction${plural ? 's' : ''} ${delegatecallIndexes.join(', ')} ${plural ? 'are' : 'is'} a delegatecall, which grants full control of the Safe. Only import this file if you trust its source`
+    );
+  }
 
   return { transactions, warnings };
 }

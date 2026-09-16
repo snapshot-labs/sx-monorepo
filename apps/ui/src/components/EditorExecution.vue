@@ -19,6 +19,7 @@ const props = defineProps<{
   space: Space;
   disabled?: boolean;
   strategy: StrategyWithTreasury;
+  importTransactions: (transactions: TransactionType[]) => boolean;
   extraContacts?: Contact[];
 }>();
 
@@ -41,10 +42,17 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
-const importingFile = ref(false);
+const isImportingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+let isDisposed = false;
+
+onScopeDispose(() => {
+  isDisposed = true;
+});
 
 const network = computed(() => getNetwork(props.space.network));
+// Tenderly runs every transaction as a call.
+const hasDelegatecall = computed(() => model.value.some(isDelegatecall));
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -77,17 +85,25 @@ async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file || !treasury.value) return;
+  if (!file || !treasury.value || props.disabled || isImportingFile.value) {
+    return;
+  }
 
-  importingFile.value = true;
+  const { importTransactions } = props;
+  const chainId = treasury.value.network;
+  const allowDelegatecall = props.strategy.type === 'safeSnap';
+  isImportingFile.value = true;
 
   try {
     const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
-      treasury.value.network
+      chainId,
+      { allowDelegatecall }
     );
 
-    model.value = [...model.value, ...transactions];
+    if (isDisposed || props.disabled || !importTransactions(transactions)) {
+      return;
+    }
     uiStore.addNotification(
       'success',
       `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
@@ -101,13 +117,27 @@ async function handleImportFile(event: Event) {
       uiStore.addNotification('error', 'Failed to import Safe file');
     }
   } finally {
-    importingFile.value = false;
+    isImportingFile.value = false;
   }
+}
+
+function isDelegatecall(tx: TransactionType) {
+  return tx.operation === '1';
+}
+
+function editDisabledReason(tx: TransactionType) {
+  if (tx._type === 'raw') return 'Editing raw transactions is not supported';
+  if (isDelegatecall(tx)) {
+    return 'Editing delegatecall transactions is not supported';
+  }
+
+  return '';
 }
 
 function editTx(index: number) {
   const tx = model.value[index];
-  if (tx._type === 'raw') return;
+  // The modal rebuilds the transaction without its operation.
+  if (tx._type === 'raw' || isDelegatecall(tx)) return;
 
   editedTx.value = index;
   modalState.value[tx._type] = tx._form;
@@ -118,7 +148,8 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    getChainIdKind(treasury.value.network) !== 'evm'
+    getChainIdKind(treasury.value.network) !== 'evm' ||
+    hasDelegatecall.value
   ) {
     return;
   }
@@ -219,7 +250,7 @@ watch(
                 disabled ||
                 getChainIdKind(treasury.network) !== 'evm'
               "
-              :loading="importingFile"
+              :loading="isImportingFile"
               uniform
               @click="fileInput?.click()"
             >
@@ -247,16 +278,10 @@ watch(
                 </template>
                 <template #right>
                   <div class="flex gap-3">
-                    <UiTooltip
-                      :title="
-                        tx._type === 'raw'
-                          ? 'Editing raw transactions is not supported'
-                          : ''
-                      "
-                    >
+                    <UiTooltip :title="editDisabledReason(tx)">
                       <button
                         type="button"
-                        :disabled="tx._type === 'raw'"
+                        :disabled="!!editDisabledReason(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >
@@ -281,6 +306,12 @@ watch(
             <UiTooltip
               v-if="!network?.supportsSimulation"
               title="Simulation not supported on this network"
+            >
+              <IH-shield-exclamation />
+            </UiTooltip>
+            <UiTooltip
+              v-else-if="hasDelegatecall"
+              title="Simulation unavailable for delegatecall transactions"
             >
               <IH-shield-exclamation />
             </UiTooltip>
