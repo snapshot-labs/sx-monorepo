@@ -1,7 +1,8 @@
-import { Interface } from '@ethersproject/abi';
+import { defaultAbiCoder, Interface } from '@ethersproject/abi';
 import { VoidSigner } from '@ethersproject/abstract-signer';
+import { Contract } from '@ethersproject/contracts';
 import { namehash } from '@ethersproject/hash';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
   getEnsTextRecord,
@@ -280,6 +281,51 @@ describe('ens', () => {
     );
   });
 
+  describe('stale ENSv1 records below an ENSv2 name', () => {
+    beforeAll(async () => {
+      const registry = new Contract(
+        '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+        [
+          'function owner(bytes32) view returns (address)',
+          'function resolver(bytes32) view returns (address)'
+        ],
+        getProvider(11155111)
+      );
+      const node = namehash('tiny.fox.eth');
+      expect(await registry.owner(node)).not.toBe(EMPTY_ADDRESS);
+      expect(await registry.resolver(node)).not.toBe(EMPTY_ADDRESS);
+    });
+
+    it.each([
+      ['getNameOwner', getNameOwner],
+      ['getSpaceController', getSpaceController],
+      ['getResolver', getResolver]
+    ] as const)('%s should not fall back to ENSv1', async (_name, lookup) => {
+      expect(await lookup('tiny.fox.eth', 11155111)).toBe(EMPTY_ADDRESS);
+    });
+
+    it('should not update the stale ENSv1 resolver', async () => {
+      const signer = new VoidSigner(
+        '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
+        getProvider(11155111)
+      );
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(new Error('Transaction intercepted'));
+
+      await expect(
+        setEnsTextRecord(
+          signer,
+          'tiny.fox.eth',
+          'snapshot',
+          EMPTY_ADDRESS,
+          11155111
+        )
+      ).rejects.toThrow('No resolver set for name');
+      expect(send).not.toHaveBeenCalled();
+    });
+  });
+
   describe.each([
     ['getNameOwner', getNameOwner],
     ['getResolver', getResolver]
@@ -291,6 +337,52 @@ describe('ens', () => {
         vi.spyOn(getProvider(11155111), 'call').mockRejectedValueOnce(error);
 
         await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
+      }
+    );
+
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s when checking ENSv1 delegation',
+      async code => {
+        const error = Object.assign(new Error('Resolver lookup failed'), {
+          code
+        });
+        const rpc = vi
+          .spyOn(getProvider(11155111), 'call')
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
+          )
+          .mockRejectedValueOnce(error);
+
+        await expect(lookup('ens.eth', 11155111)).rejects.toBe(error);
+        expect(rpc.mock.calls[1][0].to).toBe(
+          '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
+        );
+      }
+    );
+
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s when checking DNS delegation',
+      async code => {
+        const error = Object.assign(new Error('DNS delegation failed'), {
+          code,
+          data: '0x'
+        });
+        const dnsResolver = '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8';
+        const rpc = vi
+          .spyOn(getProvider(11155111), 'call')
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
+          )
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(
+              ['address', 'bytes32', 'uint256'],
+              [dnsResolver, namehash('ethplay.org'), 8]
+            )
+          )
+          .mockRejectedValueOnce(error);
+
+        await expect(lookup('ethplay.org', 11155111)).rejects.toBe(error);
+        expect(rpc.mock.calls[2][0].to).toBe(dnsResolver);
       }
     );
   });
