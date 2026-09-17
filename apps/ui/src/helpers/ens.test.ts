@@ -1,12 +1,20 @@
-import { describe, expect, it } from 'vitest';
+import { defaultAbiCoder, Interface } from '@ethersproject/abi';
+import { VoidSigner } from '@ethersproject/abstract-signer';
+import { Contract } from '@ethersproject/contracts';
+import { namehash } from '@ethersproject/hash';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
   getEnsTextRecord,
   getNameOwner,
   getResolver,
   getSpaceController,
-  resolveName
+  resolveName,
+  setEnsTextRecord
 } from './ens';
+import { getProvider } from './provider';
+
+afterEach(() => vi.restoreAllMocks());
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -29,20 +37,20 @@ describe('ens', () => {
   });
 
   describe('getNameOwner', () => {
-    describe('for names migrated to ENSv2', () => {
-      it('should return the owner of a migrated name on testnet', async () => {
-        const owner = await getNameOwner('test123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+    describe('for names registered in ENSv2', () => {
+      it('should return the owner of an ENSv2 name on testnet', async () => {
+        const owner = await getNameOwner('john1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve a case variant to the same owner', async () => {
-        const owner = await getNameOwner('TEST123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const owner = await getNameOwner('JOHN1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve the same address as the space controller', async () => {
-        const controller = await getSpaceController('test123.eth', 11155111);
-        expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const controller = await getSpaceController('john1.eth', 11155111);
+        expect(controller).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
     });
 
@@ -196,14 +204,14 @@ describe('ens', () => {
   });
 
   describe('getResolver', () => {
-    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
-      const resolver = await getResolver('test123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    it('should return the resolver of an ENSv2 name on testnet', async () => {
+      const resolver = await getResolver('john1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should normalize the name before resolving', async () => {
-      const resolver = await getResolver('TEST123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+      const resolver = await getResolver('JOHN1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should return the v1 resolver of an unmigrated name on testnet', async () => {
@@ -220,6 +228,177 @@ describe('ens', () => {
       const resolver = await getResolver('lucemans.cb.id', 1);
       expect(resolver).toBe('0x0000000000000000000000000000000000000000');
     }, 10000);
+  });
+
+  describe('setEnsTextRecord', () => {
+    it.each([
+      [
+        'ENSv2',
+        'JOHN1.eth',
+        11155111,
+        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3'
+      ],
+      ['ENSv1', 'ens.eth', 1, '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9'],
+      [
+        'ENSv1 on Sepolia',
+        'ens.eth',
+        11155111,
+        '0x179A862703a4adfb29896552DF9e307980D19285'
+      ]
+    ] as const)(
+      'should encode an accepted %s controller update',
+      async (version, name, chainId, owner) => {
+        const provider = getProvider(chainId);
+        const signer = new VoidSigner(owner, provider);
+        const intercepted = new Error('Transaction intercepted');
+        const send = vi
+          .spyOn(signer, 'sendTransaction')
+          .mockRejectedValue(intercepted);
+
+        await expect(
+          setEnsTextRecord(signer, name, 'snapshot', owner, chainId)
+        ).rejects.toBe(intercepted);
+        expect(send).toHaveBeenCalledOnce();
+
+        const isV2 = version === 'ENSv2';
+        const setter = new Interface([
+          `function setText(${isV2 ? 'bytes' : 'bytes32'},string,string)`
+        ]);
+        const transaction = send.mock.calls[0][0];
+        expect(transaction).toMatchObject({
+          to: await getResolver(name, chainId),
+          data: setter.encodeFunctionData('setText', [
+            isV2 ? '0x056a6f686e310365746800' : namehash(name),
+            'snapshot',
+            owner
+          ])
+        });
+        await expect(
+          provider.call({ ...transaction, from: owner })
+        ).resolves.toBe('0x');
+      },
+      10000
+    );
+  });
+
+  describe('stale ENSv1 records below an ENSv2 name', () => {
+    beforeAll(async () => {
+      const registry = new Contract(
+        '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+        [
+          'function owner(bytes32) view returns (address)',
+          'function resolver(bytes32) view returns (address)'
+        ],
+        getProvider(11155111)
+      );
+      const node = namehash('tiny.fox.eth');
+      expect(await registry.owner(node)).not.toBe(EMPTY_ADDRESS);
+      expect(await registry.resolver(node)).not.toBe(EMPTY_ADDRESS);
+    });
+
+    it.each([
+      ['getNameOwner', getNameOwner],
+      ['getSpaceController', getSpaceController],
+      ['getResolver', getResolver]
+    ] as const)('%s should not fall back to ENSv1', async (_name, lookup) => {
+      expect(await lookup('tiny.fox.eth', 11155111)).toBe(EMPTY_ADDRESS);
+    });
+
+    it('should not update the stale ENSv1 resolver', async () => {
+      const signer = new VoidSigner(
+        '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
+        getProvider(11155111)
+      );
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(new Error('Transaction intercepted'));
+
+      await expect(
+        setEnsTextRecord(
+          signer,
+          'tiny.fox.eth',
+          'snapshot',
+          EMPTY_ADDRESS,
+          11155111
+        )
+      ).rejects.toThrow('No resolver set for name');
+      expect(send).not.toHaveBeenCalled();
+    });
+  });
+
+  describe.each([
+    ['getNameOwner', getNameOwner],
+    ['getResolver', getResolver]
+  ] as const)('%s helper failures', (_name, lookup) => {
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s instead of falling back to ENSv1',
+      async code => {
+        const error = Object.assign(new Error('Helper failed'), { code });
+        vi.spyOn(getProvider(11155111), 'call').mockRejectedValueOnce(error);
+
+        await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
+      }
+    );
+
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s when checking ENSv1 delegation',
+      async code => {
+        const error = Object.assign(new Error('Resolver lookup failed'), {
+          code
+        });
+        const rpc = vi
+          .spyOn(getProvider(11155111), 'call')
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
+          )
+          .mockRejectedValueOnce(error);
+
+        await expect(lookup('ens.eth', 11155111)).rejects.toBe(error);
+        expect(rpc.mock.calls[1][0].to).toBe(
+          '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
+        );
+      }
+    );
+
+    it.each([
+      ['CALL_EXCEPTION', 'CALL_EXCEPTION', '0x'],
+      ['SERVER_ERROR', 'SERVER_ERROR', '0x'],
+      ['truncated OffchainLookup', 'CALL_EXCEPTION', '0x556f1830'],
+      [
+        'wrong-sender OffchainLookup',
+        'CALL_EXCEPTION',
+        `0x556f1830${defaultAbiCoder
+          .encode(
+            ['address', 'string[]', 'bytes', 'bytes4', 'bytes'],
+            [EMPTY_ADDRESS, [], '0x', '0x00000000', '0x']
+          )
+          .slice(2)}`
+      ]
+    ])(
+      'should propagate %s when checking DNS delegation',
+      async (_name, code, data) => {
+        const error = Object.assign(new Error('DNS delegation failed'), {
+          code,
+          data
+        });
+        const dnsResolver = '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8';
+        const rpc = vi
+          .spyOn(getProvider(11155111), 'call')
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
+          )
+          .mockResolvedValueOnce(
+            defaultAbiCoder.encode(
+              ['address', 'bytes32', 'uint256'],
+              [dnsResolver, namehash('ethplay.org'), 8]
+            )
+          )
+          .mockRejectedValueOnce(error);
+
+        await expect(lookup('ethplay.org', 11155111)).rejects.toBe(error);
+        expect(rpc.mock.calls[2][0].to).toBe(dnsResolver);
+      }
+    );
   });
 
   describe('getSpaceController', () => {

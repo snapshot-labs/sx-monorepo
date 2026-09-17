@@ -18,8 +18,14 @@ type ENSContracts = {
   registryAbi: string[];
   resolvers: Record<ENSChainId, string[]>;
   resolverAbi: string[];
+  resolverV2Abi: string[];
   universalResolver: Partial<Record<ENSChainId, string>>;
   universalResolverAbi: string[];
+  universalHelper: Partial<Record<ENSChainId, string>>;
+  universalHelperAbi: string[];
+  ensV1Resolver: Partial<Record<ENSChainId, string>>;
+  dnsTldResolver: Partial<Record<ENSChainId, string>>;
+  dnsTldResolverAbi: string[];
   nameWrappers: Record<ENSChainId, string>;
   nameWrapperAbi: string[];
 };
@@ -35,13 +41,28 @@ const ENS_CONTRACTS: ENSContracts = {
     'function text(bytes32 node, string key) view returns (string)',
     'function setText(bytes32 node, string key, string value)'
   ],
+  resolverV2Abi: ['function setText(bytes name, string key, string value)'],
   universalResolver: {
     11155111: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
   },
   universalResolverAbi: [
     'function resolve(bytes name, bytes data) view returns (bytes, address)',
-    'function findOwner(bytes name) view returns (address)',
     'function findResolver(bytes name) view returns (address, bytes32, uint256)'
+  ],
+  universalHelper: {
+    11155111: '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5'
+  },
+  universalHelperAbi: [
+    'function findExactOwner(bytes name) view returns (address)'
+  ],
+  ensV1Resolver: {
+    11155111: '0xb2BF4a9A86d29661EA93223582b9945943931e42'
+  },
+  dnsTldResolver: {
+    11155111: '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8'
+  },
+  dnsTldResolverAbi: [
+    'function getResolver(bytes name) view returns (address, bool)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
@@ -86,6 +107,7 @@ const UNSUPPORTED_RESOLVER_PROFILE = '0x7b1c461b';
 const RESOLVER_ERROR = '0x95c0c752';
 const HTTP_ERROR = '0x01800152';
 const NOT_IMPLEMENTED = '0xd6234725';
+const OFFCHAIN_LOOKUP = '0x556f1830';
 
 function isDNSDomain(name: string): boolean {
   return !name.endsWith('.eth') && name.split('.').length === 2;
@@ -289,61 +311,115 @@ export async function setEnsTextRecord(
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
   const normalized = ensNormalize(ens);
-  const ensHash = namehash(normalized);
-  const resolverAddress = await getResolver(normalized, chainId);
+  const { address, isV2 } = await getResolverDetails(normalized, chainId);
 
-  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) {
+  if (!address || address === EVM_EMPTY_ADDRESS) {
     throw new Error('No resolver set for name');
   }
 
   const contract = new Contract(
-    resolverAddress,
-    ENS_CONTRACTS.resolverAbi,
+    address,
+    isV2 ? ENS_CONTRACTS.resolverV2Abi : ENS_CONTRACTS.resolverAbi,
     signer
   );
 
-  return contract.setText(ensHash, record, value);
+  return contract.setText(
+    isV2 ? dnsEncodeName(normalized) : namehash(normalized),
+    record,
+    value
+  );
 }
 
-// findOwner is ENSv2-only; an unmigrated name returns the empty address,
-// so a revert is a failure and must not fall back to a stale v1 owner
-async function getEnsOwnerV2(
-  name: string,
-  chainId: ENSChainId,
-  universalResolver: string
-) {
+async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
+  const helper = ENS_CONTRACTS.universalHelper[chainId];
+  if (!helper) return null;
+
   const owner = await call(
     getProvider(chainId),
-    ENS_CONTRACTS.universalResolverAbi,
-    [universalResolver, 'findOwner', [dnsEncodeName(name)]]
+    ENS_CONTRACTS.universalHelperAbi,
+    [helper, 'findExactOwner', [dnsEncodeName(name)]]
   );
 
   return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
 }
 
-export async function getResolver(name: string, chainId: ENSChainId) {
+async function getEnsResolverV2(
+  name: string,
+  chainId: ENSChainId,
+  universalResolver: string
+) {
+  return call(getProvider(chainId), ENS_CONTRACTS.universalResolverAbi, [
+    universalResolver,
+    'findResolver',
+    [dnsEncodeName(name)]
+  ]);
+}
+
+async function delegatesToEnsV1(
+  name: string,
+  chainId: ENSChainId,
+  resolver: string
+) {
+  if (resolver === ENS_CONTRACTS.ensV1Resolver[chainId]) return true;
+  if (resolver !== ENS_CONTRACTS.dnsTldResolver[chainId]) return false;
+
+  try {
+    const [target, offchain] = await call(
+      getProvider(chainId),
+      ENS_CONTRACTS.dnsTldResolverAbi,
+      [resolver, 'getResolver', [dnsEncodeName(name)]],
+      { ccipReadEnabled: false }
+    );
+    return !offchain && target !== EVM_EMPTY_ADDRESS;
+  } catch (err: any) {
+    const data = revertData(err);
+    if (err?.code === 'CALL_EXCEPTION' && data?.startsWith(OFFCHAIN_LOOKUP)) {
+      try {
+        const [sender] = defaultAbiCoder.decode(
+          ['address', 'string[]', 'bytes', 'bytes4', 'bytes'],
+          `0x${data.slice(10)}`
+        );
+        if (sender === resolver) return false;
+      } catch {
+        throw err;
+      }
+    }
+    throw err;
+  }
+}
+
+async function getResolverDetails(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const normalized = ensNormalize(name);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
-  if (
-    universalResolver &&
-    (await getEnsOwnerV2(normalized, chainId, universalResolver))
-  ) {
-    const [resolver, , offset] = await call(
-      provider,
-      ENS_CONTRACTS.universalResolverAbi,
-      [universalResolver, 'findResolver', [dnsEncodeName(normalized)]]
+  if (universalResolver) {
+    const owner = await getEnsOwnerV2(normalized, chainId);
+    const [resolver, , offset] = await getEnsResolverV2(
+      normalized,
+      chainId,
+      universalResolver
     );
 
-    return offset.isZero() ? resolver : EVM_EMPTY_ADDRESS;
+    if (owner || !(await delegatesToEnsV1(normalized, chainId, resolver))) {
+      return {
+        address: offset.isZero() ? resolver : EVM_EMPTY_ADDRESS,
+        isV2: true
+      };
+    }
   }
 
-  return call(provider, ENS_CONTRACTS.registryAbi, [
+  const address: string = await call(provider, ENS_CONTRACTS.registryAbi, [
     ENS_CONTRACTS.registry,
     'resolver',
     [namehash(normalized)]
   ]);
+
+  return { address, isV2: false };
+}
+
+export async function getResolver(name: string, chainId: ENSChainId) {
+  return (await getResolverDetails(name, chainId)).address;
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
@@ -351,25 +427,29 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   const normalized = ensNormalize(name);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
+  let useV1 = true;
   if (universalResolver) {
-    const ensOwnerV2 = await getEnsOwnerV2(
+    const ensOwnerV2 = await getEnsOwnerV2(normalized, chainId);
+    if (ensOwnerV2) return ensOwnerV2;
+
+    const [resolver] = await getEnsResolverV2(
       normalized,
       chainId,
       universalResolver
     );
-    if (ensOwnerV2) return ensOwnerV2;
+    useV1 = await delegatesToEnsV1(normalized, chainId, resolver);
   }
 
   const ensHash = namehash(normalized);
 
-  let owner = await call(
-    provider,
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'owner', [ensHash]],
-    {
-      blockTag: 'latest'
-    }
-  );
+  let owner = useV1
+    ? await call(
+        provider,
+        ENS_CONTRACTS.registryAbi,
+        [ENS_CONTRACTS.registry, 'owner', [ensHash]],
+        { blockTag: 'latest' }
+      )
+    : EVM_EMPTY_ADDRESS;
 
   if (!normalized.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
     const resolvedAddress = universalResolver
