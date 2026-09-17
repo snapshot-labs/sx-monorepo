@@ -1,12 +1,35 @@
 <script setup lang="ts">
-import { resolveSpaceItem } from '@/helpers/organizations';
+import {
+  getOrganizationConfigBySpace,
+  resolveSpaceItem
+} from '@/helpers/organizations';
 import { Space } from '@/types';
 
 const props = defineProps<{
   space: Space;
 }>();
 
-const item = computed(() => resolveSpaceItem(props.space));
+const followedSpacesStore = useFollowedSpacesStore();
+
+const org = computed(() =>
+  getOrganizationConfigBySpace(`${props.space.network}:${props.space.id}`)
+);
+
+const item = computed(() => {
+  const resolved = resolveSpaceItem(props.space, org.value);
+
+  if (!org.value) return resolved;
+
+  // `resolveSpaceItem` can't know the org total, so it leaves a placeholder 0.
+  return {
+    ...resolved,
+    avatarSpace: {
+      ...resolved.avatarSpace,
+      active_proposals:
+        followedSpacesStore.orgActiveProposals[org.value.id] ?? 0
+    }
+  };
+});
 </script>
 
 <template>
