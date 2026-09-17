@@ -1,3 +1,6 @@
+import { Interface } from '@ethersproject/abi';
+import { VoidSigner } from '@ethersproject/abstract-signer';
+import { namehash } from '@ethersproject/hash';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
@@ -5,7 +8,8 @@ import {
   getNameOwner,
   getResolver,
   getSpaceController,
-  resolveName
+  resolveName,
+  setEnsTextRecord
 } from './ens';
 import { getProvider } from './provider';
 
@@ -223,6 +227,57 @@ describe('ens', () => {
       const resolver = await getResolver('lucemans.cb.id', 1);
       expect(resolver).toBe('0x0000000000000000000000000000000000000000');
     }, 10000);
+  });
+
+  describe('setEnsTextRecord', () => {
+    it.each([
+      [
+        'ENSv2',
+        'JOHN1.eth',
+        11155111,
+        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3'
+      ],
+      ['ENSv1', 'ens.eth', 1, '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9'],
+      [
+        'ENSv1 on Sepolia',
+        'ens.eth',
+        11155111,
+        '0x179A862703a4adfb29896552DF9e307980D19285'
+      ]
+    ] as const)(
+      'should encode an accepted %s controller update',
+      async (version, name, chainId, owner) => {
+        const provider = getProvider(chainId);
+        const signer = new VoidSigner(owner, provider);
+        const intercepted = new Error('Transaction intercepted');
+        const send = vi
+          .spyOn(signer, 'sendTransaction')
+          .mockRejectedValue(intercepted);
+
+        await expect(
+          setEnsTextRecord(signer, name, 'snapshot', owner, chainId)
+        ).rejects.toBe(intercepted);
+        expect(send).toHaveBeenCalledOnce();
+
+        const isV2 = version === 'ENSv2';
+        const setter = new Interface([
+          `function setText(${isV2 ? 'bytes' : 'bytes32'},string,string)`
+        ]);
+        const transaction = send.mock.calls[0][0];
+        expect(transaction).toMatchObject({
+          to: await getResolver(name, chainId),
+          data: setter.encodeFunctionData('setText', [
+            isV2 ? '0x056a6f686e310365746800' : namehash(name),
+            'snapshot',
+            owner
+          ])
+        });
+        await expect(
+          provider.call({ ...transaction, from: owner })
+        ).resolves.toBe('0x');
+      },
+      10000
+    );
   });
 
   describe.each([
