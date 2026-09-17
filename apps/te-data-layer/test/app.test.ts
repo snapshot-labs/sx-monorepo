@@ -111,8 +111,9 @@ describe('election id translation', () => {
     hubReplies({ electionIds: [PREFIXED, `0x${'ab'.repeat(32)}`] });
     const res = await request(app).get('/elections');
     expect(res.body.electionIds).toEqual([PREFIXED, `0x${'ab'.repeat(32)}`]);
-    for (const id of res.body.electionIds)
+    for (const id of res.body.electionIds) {
       expect(id.startsWith('0x')).toBe(true);
+    }
   });
 });
 

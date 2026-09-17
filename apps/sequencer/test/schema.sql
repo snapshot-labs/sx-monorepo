@@ -82,9 +82,6 @@ CREATE TABLE proposals (
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
-  -- Threshold-ElGamal private voting (privacy='shutter-elgamal').
-  -- All te_* columns are NULL when privacy is not 'shutter-elgamal'.
-  -- te_mpk is also NULL between proposal creation and DKG completion.
   te_config JSON DEFAULT NULL,
   te_mpk VARBINARY(96) DEFAULT NULL,
   te_committee_pks JSON DEFAULT NULL,
@@ -93,14 +90,10 @@ CREATE TABLE proposals (
   te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
   te_aggregate JSON DEFAULT NULL,
-  -- NULL = pending/ok; 'dkg_failed' = all attempts exhausted.
   te_dkg_status VARCHAR(24) DEFAULT NULL,
-  -- Immutable committee + role snapshot written at proposal creation.
-  -- See apps/hub/src/helpers/schema.sql for the full rationale.
   te_geg_config JSON DEFAULT NULL,
-  -- Set by the coordinator when it abandons a tally; cleared by the admin.
-  -- NOT NULL because 0 means "not stalled", which is a fact, not an unknown.
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
+  te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),

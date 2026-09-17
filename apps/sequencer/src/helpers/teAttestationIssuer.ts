@@ -103,14 +103,21 @@ export async function issueBallotCredential(args: {
 }): Promise<IssueResult> {
   const { space, proposalId, vk, voter } = args;
 
-  if (typeof space !== 'string' || !space)
+  if (typeof space !== 'string' || !space) {
     throw new TeIssueError('space: expected a space id', 400);
-  if (typeof proposalId !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(proposalId))
+  }
+  if (
+    typeof proposalId !== 'string' ||
+    !/^0x[0-9a-fA-F]{64}$/.test(proposalId)
+  ) {
     throw new TeIssueError('proposalId: expected a 32-byte hex id', 400);
-  if (typeof vk !== 'string' || !/^0x[0-9a-fA-F]{96}$/.test(vk))
+  }
+  if (typeof vk !== 'string' || !/^0x[0-9a-fA-F]{96}$/.test(vk)) {
     throw new TeIssueError('vk: expected 48 bytes of hex', 400);
-  if (typeof voter !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(voter))
+  }
+  if (typeof voter !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(voter)) {
     throw new TeIssueError('voter: expected an address', 400);
+  }
 
   const now = Math.floor(Date.now() / 1000);
 
@@ -118,26 +125,30 @@ export async function issueBallotCredential(args: {
   // does not resolve, which is the same answer as an unknown proposal.
   const proposal = await getProposal(space, proposalId);
   if (!proposal) throw new TeIssueError('unknown proposal', 404);
-  if (proposal.privacy !== 'shutter-elgamal')
+  if (proposal.privacy !== 'shutter-elgamal') {
     throw new TeIssueError('proposal is not private', 404);
-  if (!proposal.te_mpk)
+  }
+  if (!proposal.te_mpk) {
     throw new TeIssueError(
       'the committee has not finished key generation',
       409
     );
+  }
 
   // The same half-open window ingest enforces, so a credential is never issued
   // for a ballot that would be refused the moment it is cast.
-  if (!isWithinGegVotingWindow(now, proposal.start, proposal.end))
+  if (!isWithinGegVotingWindow(now, proposal.start, proposal.end)) {
     throw new TeIssueError('voting is not open for this proposal', 422);
+  }
 
   const teConfig =
     typeof proposal.te_config === 'string'
       ? jsonParse(proposal.te_config, null)
       : proposal.te_config;
   const budget = Number(teConfig?.budget);
-  if (!Number.isInteger(budget) || budget < 1)
+  if (!Number.isInteger(budget) || budget < 1) {
     throw new TeIssueError('proposal has no usable ballot budget', 503);
+  }
 
   let vp: any;
   try {

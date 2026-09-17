@@ -61,8 +61,9 @@ watch(
 
 onMounted(async () => {
   const pending = lsGet('showOnboarding')?.[web3.value.account] ?? true;
-  if (pending && web3.value.account)
+  if (pending && web3.value.account) {
     await usersStore.fetchUser(web3.value.account, true);
+  }
 });
 </script>
 

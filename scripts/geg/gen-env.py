@@ -9,18 +9,21 @@ The committee addresses in `TE_KEYPERS` are derived from the keyper private keys
 any of those can drift, and the symptom is an authorisation failure that names
 neither side of the mismatch.
 
-So this derives every address from the key that owns it, and writes all the files
-at once — all of them in this repo, since the coordinator and the keypers now run
-the published protocol image and need no checkout of their own:
+So this derives every address from the key that owns it and writes the one file
+that holds them:
 
     .env              hub, sequencer, and the coordinator (one compose project)
-    .env.keyper1..N   one per committee member
+
+**It owns no keyper material.** A keyper is run by an independent operator, who
+generates their own signing key and never shares it; Snapshot only ever learns the
+*URL* to dial. `TE_KEYPERS` is therefore carried through from whatever is already
+in `.env` rather than generated — those URLs are facts you receive, not identities
+this script can mint. See the keyper stack in the protocol repo.
 
 **Existing keys are reused.** Re-running is how you repair a drifted file: keys are
 read back out of whatever is already on disk and only the derived values are
-recomputed. Pass `--rotate` to mint new ones — that is a destructive act, since a
-keyper that changes its key loses its committee membership and its ability to
-finish any election it already holds a share for.
+recomputed. Pass `--rotate` to mint new ones — destructive, because the coordinator's
+address is pinned by every keyper and frozen into every proposal already created.
 
     python3 scripts/geg/gen-env.py
     python3 scripts/geg/gen-env.py --write
@@ -51,15 +54,10 @@ HEX32 = re.compile(r"(0x)?[0-9a-fA-F]{64}")
 def normalize_key(value: str) -> str:
     return value if value.startswith("0x") else "0x" + value
 
-# The keypers are separate compose projects with no shared network, so their URLs go
-# through the host. localhost would resolve to the calling container itself.
-DEFAULT_DATA_LAYER_URL = "http://host.docker.internal:3002"
 # The coordinator shares docker-compose.yml's network with the translator, so it
 # addresses it by service name — no host round-trip, and no dependency on the
 # translator's port being published.
 DEFAULT_COORDINATOR_DATA_LAYER_URL = "http://te-data-layer:3002"
-DEFAULT_COORDINATOR_URL = "http://host.docker.internal:8400"
-DEFAULT_KEYPER_HOST = "host.docker.internal"
 
 
 def derive_addresses(keys: list[str]) -> list[str]:
@@ -121,26 +119,15 @@ def main() -> int:
                     help="mint new keys instead of reusing what is on disk (destructive)")
     ap.add_argument("--rotate-coordinator", action="store_true",
                     help="mint a new coordinator key only, keeping the committee intact")
-    ap.add_argument("--keypers", type=int, default=3, metavar="N",
-                    help="committee size (default 3)")
     ap.add_argument("--sx-env", default=str(REPO_ROOT / ".env"),
                     help="Snapshot-side env file to write (default .env)")
-    ap.add_argument("--data-layer-url", default=DEFAULT_DATA_LAYER_URL,
-                    help="how the keypers reach the translator (through the host)")
     ap.add_argument("--coordinator-data-layer-url",
                     default=DEFAULT_COORDINATOR_DATA_LAYER_URL,
                     help="how the coordinator reaches the translator (same network)")
-    ap.add_argument("--coordinator-url", default=DEFAULT_COORDINATOR_URL,
-                    help="how the keypers reach the coordinator's write relay")
-    ap.add_argument("--keyper-host", default=DEFAULT_KEYPER_HOST,
-                    help="host in the keyper URLs the coordinator dials")
     args = ap.parse_args()
 
     sx_path = Path(args.sx_env)
-    keyper_paths = [REPO_ROOT / f".env.keyper{i}" for i in range(1, args.keypers + 1)]
-
     sx_env = parse_env_file(sx_path)
-    keyper_envs = [parse_env_file(p) for p in keyper_paths]
     # Where the coordinator's own settings used to live, before it became a service
     # in docker-compose.yml. Still read so an existing deployment keeps its key.
     coordinator_env = parse_env_file(REPO_ROOT / ".env.coordinator")
@@ -213,39 +200,6 @@ def main() -> int:
         )
     )
 
-    # The committee. Each key belongs to one operator and, in a real deployment,
-    # never leaves that operator's machine — they are generated together here only
-    # because one machine is running all of them.
-    keyper_sks = [
-        key(
-            f"keyper{i}",
-            keyper_envs[i - 1].get("KEYPER_SIGNING_KEY", ""),
-            sx_env.get(f"GEG_KEYPER_PRIVATE_KEY_{i}", ""),
-        )
-        for i in range(1, args.keypers + 1)
-    ]
-    keyper_addrs = derive_addresses(keyper_sks)
-    keyper_ports = [
-        int(keyper_envs[i - 1].get("KEYPER_PORT") or 8100 + i)
-        for i in range(1, args.keypers + 1)
-    ]
-    # The state directory holds this keyper's encrypted shares. Repointing it would
-    # silently strand every election it is a member of, so an existing value wins.
-    keyper_state_dirs = [
-        keyper_envs[i - 1].get("KEYPER_STATE_DIR_HOST") or f"./keyper-state{i}"
-        for i in range(1, args.keypers + 1)
-    ]
-
-    # URLs only. The sequencer reads each keyper's signing address from its own
-    # /status when it freezes a committee onto a proposal, and refuses two URLs that
-    # report the same address. A second copy of the address here would only be
-    # somewhere for it to go stale when an operator rotates their key.
-    te_keypers = ",".join(
-        f"http://{args.keyper_host}:{port}" for port in keyper_ports
-    )
-
-    # The quorum the protocol requires: a strict majority of the committee.
-    quorum = args.keypers // 2 + 1
 
     # The eligibility issuer signs on G1; any 32-byte scalar works as its secret.
     eligibility_sk = key("eligibility", sx_env.get("TE_ELIGIBILITY_PRIVATE_KEY", ""))
@@ -254,6 +208,9 @@ def main() -> int:
     # a secret rather than regenerated. Omitting it used to drop it on every re-run,
     # silently reverting a tuned deployment to the compose default.
     solver_ceiling = carry("TE_SOLVER_CEILING") or "1e12"
+    # Received from the keyper operators, not minted here — see the module docstring.
+    te_keypers = carry("TE_KEYPERS") or "https://keyper1.example,https://keyper2.example,https://keyper3.example"
+    quorum = carry("TE_THRESHOLD_T") or "2"
     auth_secret = carry("SEQ_AUTH_SECRET", lambda: secrets.token_hex(32))
     wc_project = carry("WALLETCONNECT_PROJECT_ID") or "<your_walletconnect_project_id>"
 
@@ -262,10 +219,10 @@ def main() -> int:
 # Snapshot-side environment. Compose reads this file and docker-compose.yml by
 # default, so `docker compose up -d` needs no flags.
 #
-# ONE file. The committee section below is generated by scripts/geg/gen-env.py,
-# together with the .env.keyperN files beside it -- every address here is derived
-# from the key that owns it. Do not edit an address by hand; change the key it comes
-# from and re-run.
+# Generated by scripts/geg/gen-env.py. Every address here is derived from the key
+# that owns it, so do not edit one by hand -- change the key it comes from and
+# re-run. Values the script does not own (Snapshot's own secrets, and the keyper
+# URLs you receive from their operators) are carried through untouched.
 #
 # Snapshot's own secrets are carried through untouched on re-runs, so this stays a
 # single file rather than two that a reader has to merge in their head. An earlier
@@ -282,13 +239,13 @@ SEQ_AUTH_SECRET={auth_secret}
 WALLETCONNECT_PROJECT_ID={wc_project}
 
 # --- committee --------------------------------------------------------------
-# The committee, as URLs. The sequencer resolves each keyper's signing address from
-# its /status when it freezes a committee onto a proposal, the same way the
-# protocol's own admin UI assembles one -- and refuses two URLs that answer with the
-# same address, since that would make the threshold smaller than it looks.
+# The committee, as URLs -- one per keyper, supplied by the operator who runs it.
+# The sequencer resolves each keyper's signing address from its own /status when it
+# freezes a committee onto a proposal, and refuses two URLs that answer with the same
+# address, since that would make the threshold smaller than it looks.
 #
-# The URLs are dialled by the *coordinator* and the sequencer from inside their
-# containers -- which is why they are host.docker.internal and not localhost.
+# Dialled by the *coordinator* and the sequencer from inside their containers, so on
+# one machine they are host.docker.internal rather than localhost.
 TE_KEYPERS={te_keypers}
 # The quorum: t of n keypers act together. Must be a strict majority (2t > n).
 TE_THRESHOLD_T={quorum}
@@ -299,13 +256,13 @@ TE_WEIGHTED_BUDGET=100
 # Part of `docker compose up -d`, and fail-closed: without the two values below,
 # compose refuses to start anything. Its key has three
 # names across this deployment and they must all be the same address: the key here,
-# TE_RESULT_PUBLISHER_ADDRESS below, and COORDINATOR_IDENTITY in every .env.keyperN.
+# TE_RESULT_PUBLISHER_ADDRESS below, and COORDINATOR_IDENTITY in every keyper's env.
 # All three are derived from this one key, which is the point of this script.
 COORDINATOR_SIGNING_KEY={coordinator_sk}
 
 # Bearer token the keypers present when relaying writes. The coordinator pushes each
 # keyper its own token over the sealed /auth/bootstrap channel, so this never gets
-# copied into a keyper env. Fail-closed: unset and the coordinator will not start.
+# copied into a keyper's env. Fail-closed: unset and the coordinator will not start.
 COORDINATOR_API_TOKEN={api_token}
 
 # The translator, over the compose network this service shares with it.
@@ -342,51 +299,7 @@ MIN_DKG_LEAD_TIME_S=180
 TE_SOLVER_CEILING={solver_ceiling}
 """
 
-    keyper_bodies = []
-    for i, (sk, port, state_dir) in enumerate(
-        zip(keyper_sks, keyper_ports, keyper_state_dirs), start=1
-    ):
-        keyper_bodies.append(f"""\
-# Keyper {i} env, for docker-compose.keyper.yml (this repo).
-#
-# Generated by the Snapshot repo's scripts/geg/gen-env.py. This key's address is
-# frozen into every proposal's committee list (TE_KEYPERS on the Snapshot side), so
-# changing it drops this keyper out of the committee -- including for elections it
-# already holds a share for.
-#
-# In a real deployment this file lives only on this operator's machine, and the
-# operator generates the key themselves; all {len(keyper_sks)} are written here because one
-# machine is running the whole committee.
-#
-# SECRETS. Never commit this file.
-
-#   docker compose -p keyper{i} -f docker-compose.keyper.yml \\
-#     --env-file .env.keyper{i} up -d
-
-KEYPER_SIGNING_KEY={sk}
-
-# The coordinator's address, pinned: no other identity may bootstrap this keyper.
-COORDINATOR_IDENTITY={coordinator_addr}
-
-# Reads: Snapshot's translator. Base URL only -- the keyper appends the port read
-# surface (/port) itself.
-GEG_API_URL={args.data_layer_url}
-# Writes: relayed through the coordinator, which is the only writer to the data layer.
-COORDINATOR_URL={args.coordinator_url}
-
-# Listen + published port. MUST match this keyper's endpoint in TE_KEYPERS.
-KEYPER_PORT={port}
-
-# Its own state directory, or the committee members overwrite each other's shares.
-KEYPER_STATE_DIR_HOST={state_dir}
-
-# Seconds past voting_end that this keyper keeps its share. There is no tally
-# deadline, so this is the only bound on how late a tally can still decrypt.
-KEYPER_SECRET_TTL_S=7776000
-""")
-
     plan = [(sx_path, sx_body)]
-    plan += list(zip(keyper_paths, keyper_bodies))
 
     if args.write:
         for path, body in plan:
@@ -402,8 +315,6 @@ KEYPER_SECRET_TTL_S=7776000
 
     print("", file=sys.stderr)
     print(f"  coordinator  {coordinator_addr}", file=sys.stderr)
-    for i, (addr, port) in enumerate(zip(keyper_addrs, keyper_ports), start=1):
-        print(f"  keyper {i}     {addr}  :{port}", file=sys.stderr)
     if args.rotate:
         print("\n  every key was rotated: any election already in flight is orphaned",
               file=sys.stderr)

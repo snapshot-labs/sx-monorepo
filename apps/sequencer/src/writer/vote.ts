@@ -48,17 +48,20 @@ export async function verify(body): Promise<any> {
     proposal.start > msgTs ||
     tsInt > proposal.end ||
     proposal.start > tsInt
-  )
+  ) {
     return Promise.reject('not in voting window');
+  }
 
   if (proposal.privacy === 'shutter') {
-    if (msg.payload.reason)
+    if (msg.payload.reason) {
       return Promise.reject('reason not allowed with shutter');
+    }
     if (
       typeof msg.payload.choice !== 'string' ||
       !msg.payload.choice.startsWith('0x')
-    )
+    ) {
       return Promise.reject('invalid choice');
+    }
   } else if (proposal.privacy === 'shutter-elgamal') {
     // The committee re-checks the voting window at tally time against the frozen
     // config, and its window is half-open where Snapshot's is closed. Adopt geg's
@@ -67,8 +70,9 @@ export async function verify(body): Promise<any> {
     if (!isWithinGegVotingWindow(msgTs, proposal.start, proposal.end)) {
       return Promise.reject('not in voting window');
     }
-    if (msg.payload.reason)
+    if (msg.payload.reason) {
       return Promise.reject('reason not allowed with shutter-elgamal');
+    }
     // The voter ships the encrypted ballot as a JSON object under
     // ``choice`` (the same shape ``buildBallot`` produces in the SDK,
     // serialised with all bytes as 0x-hex). Verify it now so we never
@@ -96,8 +100,9 @@ export async function verify(body): Promise<any> {
         msg.payload.choice,
         proposal.choices
       )
-    )
+    ) {
       return Promise.reject('invalid choice');
+    }
   }
 
   if (proposal.validation?.name && proposal.validation.name !== 'any') {
@@ -105,9 +110,10 @@ export async function verify(body): Promise<any> {
       const {
         validation: { name: validationName, params: validationParams }
       } = proposal;
-      if (validationName === 'basic')
+      if (validationName === 'basic') {
         validationParams.strategies =
           validationParams.strategies ?? proposal.strategies;
+      }
 
       const validate = await snapshot.utils.validate(
         validationName,
@@ -237,12 +243,15 @@ export async function verifyBallotCredential(
   // the voter was told had been cast.
   if (
     credential.electionId?.toLowerCase() !== String(proposal.id).toLowerCase()
-  )
+  ) {
     throw new GegAttestationError('credential is for a different proposal');
-  if (credential.pseudonym !== envelope.pseudonym)
+  }
+  if (credential.pseudonym !== envelope.pseudonym) {
     throw new GegAttestationError('credential does not match this pseudonym');
-  if (credential.vk !== envelope.vk)
+  }
+  if (credential.vk !== envelope.vk) {
     throw new GegAttestationError('credential does not match this ballot key');
+  }
 
   // JSON numbers, not strings. The credential is stored verbatim inside `choice`
   // and served to the committee from there, and geg's decoder requires an integer
@@ -250,10 +259,12 @@ export async function verifyBallotCredential(
   // refusing: `BigInt("10000")` and `bindingMessage` both accept a string, so a
   // quoted weight verifies here and is then rejected by every keyper — the ballot
   // is excluded for a reason that looks nothing like the cause.
-  if (!Number.isInteger(credential.weight))
+  if (!Number.isInteger(credential.weight)) {
     throw new GegAttestationError('credential weight must be an integer');
-  if (!Number.isInteger(credential.nonce))
+  }
+  if (!Number.isInteger(credential.nonce)) {
     throw new GegAttestationError('credential nonce must be an integer');
+  }
 
   const weight = BigInt(credential.weight);
   const nonce = BigInt(credential.nonce);
@@ -337,8 +348,9 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
       return Promise.reject('already voted at later time');
     } else if (votes[0].created === parseInt(msg.timestamp)) {
       const localCompare = id.localeCompare(votes[0].id);
-      if (localCompare <= 0)
+      if (localCompare <= 0) {
         return Promise.reject('already voted same time with lower index');
+      }
     }
     // Update previous vote
     log.info(`[writer] Update previous vote, ${voter}, ${proposalId}`);
@@ -388,8 +400,9 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
   // Update proposal scores and voters vp
   try {
     const result = await updateProposalAndVotes(proposalId);
-    if (!result)
+    if (!result) {
       log.warn(`[writer] updateProposalAndVotes() false, ${proposalId}`);
+    }
   } catch (err: any) {
     captureError(
       err,

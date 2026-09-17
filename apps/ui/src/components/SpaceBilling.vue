@@ -20,11 +20,16 @@ const {
   toRef(() => props.space.network)
 );
 
+const { redirectToPortal, isLoading } = useStripeCheckout();
+
+const portalPaymentId = ref<string | null>(null);
+
 const chainId = computed(() => getNetwork(props.space.network).chainId);
 const turboExpirationDate = computed(() =>
   dayjs(props.space.turbo_expiration * 1000)
 );
 const payments = computed(() => data.value?.pages.flat() || []);
+
 const statusText = computed(() => {
   if (!props.space.turbo) return 'Free';
 
@@ -48,6 +53,13 @@ const statusText = computed(() => {
 
   return 'Active';
 });
+
+async function openPortal(paymentId: string) {
+  if (isLoading.value) return;
+
+  portalPaymentId.value = paymentId;
+  await redirectToPortal(props.space.network);
+}
 </script>
 
 <template>
@@ -142,7 +154,11 @@ const statusText = computed(() => {
           </span>
         </div>
 
-        <UiDropdown>
+        <UiLoading
+          v-if="isLoading && portalPaymentId === payment.id"
+          class="flex items-center"
+        />
+        <UiDropdown v-else>
           <template #button>
             <div class="flex items-center h-full">
               <button type="button" class="text-skin-link">
@@ -152,6 +168,14 @@ const statusText = computed(() => {
           </template>
           <template #items>
             <UiDropdownItem
+              v-if="payment.id.startsWith('stripe:')"
+              @click="openPortal(payment.id)"
+            >
+              <IH-arrow-sm-right class="-rotate-45" :width="16" />
+              Manage subscription
+            </UiDropdownItem>
+            <UiDropdownItem
+              v-else
               :to="
                 getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
               "

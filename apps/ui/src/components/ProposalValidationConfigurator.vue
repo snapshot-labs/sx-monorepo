@@ -46,13 +46,16 @@ const isSelectValidationModalOpen = ref(false);
 const initialValidation = ref<Validation>();
 
 const availableValidations = computed(() => {
-  return Object.keys(PROPOSAL_VALIDATIONS).reduce((acc, id) => {
-    acc[id] = {
-      ...VALIDATION_TYPES_INFO[id],
-      ...PROPOSAL_VALIDATIONS[id]
-    };
-    return acc;
-  }, {} as ValidationRecords);
+  return (Object.keys(PROPOSAL_VALIDATIONS) as ValidationDetailId[]).reduce(
+    (acc, id) => {
+      acc[id] = {
+        ...VALIDATION_TYPES_INFO[id],
+        ...PROPOSAL_VALIDATIONS[id]
+      };
+      return acc;
+    },
+    {} as ValidationRecords
+  );
 });
 
 function handleClick(validationId: string) {
@@ -61,7 +64,7 @@ function handleClick(validationId: string) {
     params: {}
   };
 
-  if (PROPOSAL_VALIDATIONS[validationId].withoutParams) {
+  if (PROPOSAL_VALIDATIONS[validationId as ValidationDetailId].withoutParams) {
     validation.value = selectedValidation;
     return;
   }

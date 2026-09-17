@@ -39,8 +39,9 @@ export function encodeParams(
  */
 export function decodeParams(params: string[]): string[][] {
   const [v0, v1, v2, v3] = params;
-  if (!v0 || !v1 || !v2 || !v3)
+  if (!v0 || !v1 || !v2 || !v3) {
     throw new Error('Invalid storage proof parameters');
+  }
 
   const slot: string[] = [v0, v1, v2, v3];
   const numNodes = Number(params[4]);

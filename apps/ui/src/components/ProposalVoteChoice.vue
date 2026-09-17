@@ -30,7 +30,10 @@ withDefaults(
     </UiTooltip>
   </div>
   <div
-    v-else-if="proposal.privacy !== 'none' && !proposal.completed"
+    v-else-if="
+      proposal.privacy === 'inco' ||
+      (proposal.privacy !== 'none' && !proposal.completed)
+    "
     class="flex gap-1 items-center"
   >
     <span class="text-skin-heading leading-[22px]">Encrypted choice</span>

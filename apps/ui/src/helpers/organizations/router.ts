@@ -141,8 +141,13 @@ export function resolveOrgLocation(
   router: Router,
   whiteLabelOrg?: OrganizationConfig | null
 ): RouteLocationRaw {
-  if (typeof to === 'string' || !('name' in to) || typeof to.name !== 'string')
+  if (
+    typeof to === 'string' ||
+    !('name' in to) ||
+    typeof to.name !== 'string'
+  ) {
     return to;
+  }
 
   const params = (to.params ?? {}) as RouteParams;
   whiteLabelOrg ??= getOrganizationConfigByDomain(window.location.hostname);

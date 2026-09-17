@@ -48,16 +48,7 @@ dist.cjs
 # MySQL data directory — bind-mounted from the container, must never be committed
 mysql-data/
 
-# --- Private voting: operator secrets and committee state --------------------
-# One env file per keyper, each holding that keyper's signing key. The template
-# beside them carries no secrets and is meant to be committed.
-.env.keyper*
-!.env.keyper.example
-
-# Bind-mounted committee state, created on first run. The keyper directories hold
-# Fernet-encrypted per-election secret shares — losing them makes any election
-# still awaiting decryption undecryptable. coordinator-state holds the per-keyper
-# bearer tokens the coordinator mints, so that a restart reuses them instead of
-# re-bootstrapping the committee.
-keyper-state*/
+# --- Private voting: coordinator state ---------------------------------------
+# Bind-mounted, created on first run: the per-keyper bearer tokens the coordinator
+# mints, so a restart reuses them instead of re-bootstrapping the committee.
 coordinator-state/

@@ -3,7 +3,8 @@ import {
   createContractCallTransaction,
   createSendNftTransaction,
   createSendTokenTransaction,
-  createStakeTokenTransaction
+  createStakeTokenTransaction,
+  getContractCallFormArgs
 } from './transactions';
 
 describe('transactions', () => {
@@ -165,6 +166,56 @@ describe('transactions', () => {
       });
 
       expect(tx).toMatchSnapshot();
+    });
+
+    it('should create contract call transaction with tuple', async () => {
+      const tx = await createContractCallTransaction({
+        form: {
+          to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
+          abi: ['function swap((uint256 amountIn, address[] path) trade)'],
+          method: 'swap((uint256,address[]))',
+          args: {
+            trade: JSON.stringify({
+              amountIn: '1',
+              path: ['0x000000000000000000000000000000000000dead']
+            })
+          }
+        }
+      });
+
+      expect(tx).toMatchSnapshot();
+    });
+  });
+
+  describe('getContractCallFormArgs', () => {
+    it('should serialize tuple and array arguments', () => {
+      const args = getContractCallFormArgs({
+        abi: [
+          'function swap((uint256 amountIn, address[] path) trade, address[] receivers, uint256 deadline)'
+        ],
+        method: 'swap((uint256,address[]),address[],uint256)',
+        args: {
+          trade: {
+            amountIn: '1',
+            path: ['0x000000000000000000000000000000000000dead']
+          },
+          receivers: ['0x000000000000000000000000000000000000dead'],
+          deadline: 1
+        }
+      });
+
+      expect(args).toEqual({
+        trade: JSON.stringify(
+          {
+            amountIn: '1',
+            path: ['0x000000000000000000000000000000000000dead']
+          },
+          null,
+          2
+        ),
+        receivers: '0x000000000000000000000000000000000000dead',
+        deadline: '1'
+      });
     });
   });
 

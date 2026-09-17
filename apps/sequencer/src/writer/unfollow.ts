@@ -9,8 +9,9 @@ export async function verify(message): Promise<any> {
     message.network || DEFAULT_NETWORK_ID
   ]);
 
-  if (follows.length === 0)
+  if (follows.length === 0) {
     return Promise.reject('you can only unfollow a space you follow');
+  }
 
   return true;
 }

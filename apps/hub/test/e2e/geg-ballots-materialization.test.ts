@@ -249,8 +249,9 @@ describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
     const route = source.slice(source.indexOf("te_geg_ballots', async"));
     const orderings = route.match(/ORDER BY created ASC[^`]*/g) ?? [];
     expect(orderings.length).toBeGreaterThan(0);
-    for (const o of orderings)
+    for (const o of orderings) {
       expect(o).toMatch(/ORDER BY created ASC, id ASC/);
+    }
   });
 
   it('does contain a tied timestamp, so the fixture is not vacuous', () => {

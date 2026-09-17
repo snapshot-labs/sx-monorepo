@@ -1,4 +1,4 @@
-import { Interface } from '@ethersproject/abi';
+import { defaultAbiCoder, Interface, ParamType } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
 import Ajv, { AnySchema, ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
@@ -278,6 +278,21 @@ ajv.addKeyword({
     }
   }
 });
+ajv.addKeyword({
+  keyword: 'abiType',
+  type: 'string',
+  schemaType: 'string',
+  validate: (schema: string, data: string) => {
+    if (!data) return false;
+
+    try {
+      defaultAbiCoder.encode([ParamType.from(schema)], [JSON.parse(data)]);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+});
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
 ajv.addKeyword('showControls');
@@ -338,6 +353,10 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       default:
         return 'Invalid format.';
     }
+  }
+
+  if (errorObject.keyword === 'abiType') {
+    return 'Must be a JSON value matching the parameter type.';
   }
 
   if (errorObject.keyword === 'maxLength') {

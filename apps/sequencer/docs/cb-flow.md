@@ -4,13 +4,13 @@
 
 | Value | Constant | Proposals | Votes |
 |------:|----------|-----------|-------|
-| 0 | `PENDING_SYNC` | Default. Waiting for strategy values from Overlord | N/A |
+| 0 | `PENDING_SYNC` | Default. Waiting for strategy values | N/A |
 | -1 | `PENDING_COMPUTE` | Strategy values synced. Waiting for `scores_total_value` computation | Default. Waiting for `vp_value` computation |
 | -2 | `PENDING_FINAL` | Score value computed, but proposal still active | Value computed, but `vp_state` not final |
 | 1 | `FINAL` | Fully computed | Fully computed |
 | -3 | `PENDING_DELETE` | N/A | Proposal deleted, vote awaiting async cleanup |
 | -10 | `INELIGIBLE` | Invalid payload format, cannot compute (permanent) | Invalid data, cannot compute (permanent) |
-| -11 | `ERROR_SYNC` | Overlord sync failed, will be retried | N/A |
+| -11 | `ERROR_SYNC` | Strategy value sync failed, will be retried | N/A |
 
 > 🟦 Blue = user action &nbsp;&nbsp; 🟧 Orange = async background script
 
@@ -19,7 +19,7 @@
 ```mermaid
 flowchart TD
     A([Proposal Created]):::user --> B["cb = 0<br>PENDING_SYNC"]
-    B -->|proposalStrategiesValue.ts<br>fetches USD values from Overlord| C{Success?}
+    B -->|proposalStrategiesValue.ts<br>assigns strategy values| C{Success?}
     C -->|Yes| D["cb = -1<br>PENDING_COMPUTE"]
     C -->|No, status 400| G
     C -->|No, other error| E["cb = -11<br>ERROR_SYNC"]

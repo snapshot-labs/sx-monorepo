@@ -1,6 +1,10 @@
 import {
+  BaseError,
+  ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
   decodeAbiParameters,
   getAddress,
+  parseAbi,
   parseAbiParameters,
   PublicClient
 } from 'viem';
@@ -42,8 +46,9 @@ export async function updateProposalValidationStrategy(
   space.voting_power_validation_strategy_metadata = metadataUri;
 
   if (
+    protocolConfig.propositionPowerValidationStrategyAddress !== null &&
     strategyAddress ===
-    getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
+      getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
   ) {
     try {
       const [threshold, strategies] = decodeAbiParameters(
@@ -86,29 +91,57 @@ export async function handleCustomExecutionStrategy(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
 ) {
-  const type = await client.readContract({
-    address: address as `0x${string}`,
-    abi: IExecutionStrategy,
-    functionName: 'getStrategyType',
-    blockNumber: BigInt(blockNumber)
-  });
-
-  let executionStrategy = await ExecutionStrategy.loadEntity(
+  const existingStrategy = await ExecutionStrategy.loadEntity(
     address,
     config.indexerName
   );
 
-  if (executionStrategy) return;
+  if (existingStrategy) return;
 
-  executionStrategy = new ExecutionStrategy(address, config.indexerName);
-  executionStrategy.address = address;
-  executionStrategy.type = type;
-  executionStrategy.quorum = '0';
-  executionStrategy.treasury_chain = protocolConfig.chainId;
-  executionStrategy.treasury = getAddress(address);
-  executionStrategy.timelock_delay = 0n;
+  try {
+    const type = await client.readContract({
+      address: address as `0x${string}`,
+      abi: IExecutionStrategy,
+      functionName: 'getStrategyType',
+      blockNumber: BigInt(blockNumber)
+    });
 
-  await executionStrategy.save();
+    let quorum = '0';
+    if (type.startsWith('SimpleQuorum')) {
+      const value = await client.readContract({
+        address: address as `0x${string}`,
+        abi: parseAbi(['function quorum() view returns (uint256)']),
+        functionName: 'quorum',
+        blockNumber: BigInt(blockNumber)
+      });
+      quorum = value.toString();
+    }
+
+    const executionStrategy = new ExecutionStrategy(
+      address,
+      config.indexerName
+    );
+    executionStrategy.address = address;
+    executionStrategy.type = type;
+    executionStrategy.quorum = quorum;
+    executionStrategy.treasury_chain = protocolConfig.chainId;
+    executionStrategy.treasury = getAddress(address);
+    executionStrategy.timelock_delay = 0n;
+
+    await executionStrategy.save();
+  } catch (err) {
+    const isContractFailure =
+      err instanceof BaseError &&
+      err.walk(
+        cause =>
+          cause instanceof ContractFunctionRevertedError ||
+          cause instanceof ContractFunctionZeroDataError
+      ) !== null;
+
+    if (!isContractFailure) throw err;
+
+    logger.warn({ err, address }, 'Failed to handle custom execution strategy');
+  }
 }
 
 export async function registerApeGasProposal(

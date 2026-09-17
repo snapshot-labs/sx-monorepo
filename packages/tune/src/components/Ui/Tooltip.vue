@@ -16,7 +16,7 @@ withDefaults(
 
 <template>
   <div
-    v-tippy="title ? { content: title, placement, touch } : undefined"
+    v-tippy="{ content: title ?? '', placement, touch }"
     :aria-label="title || undefined"
     class="inline-block relative"
   >

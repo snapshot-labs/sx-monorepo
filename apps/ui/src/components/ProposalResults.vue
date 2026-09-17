@@ -36,17 +36,15 @@ const queryClient = useQueryClient();
 const displayAllChoices = ref(false);
 const showEncryptedInfo = ref(false);
 
-const { proposal } = useGovernorQuorum(() => props.proposal);
-
-const totalProgress = computed(() => quorumProgress(proposal.value));
+const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const quorumAmount = computed(() => {
   const current = getProposalCurrentQuorum(
-    proposal.value.network,
-    proposal.value
+    props.proposal.network,
+    props.proposal
   );
   const format = (n: number) => _vp(n / 10 ** props.decimals);
-  return `${format(current)} / ${format(proposal.value.quorum)}`;
+  return `${format(current)} / ${format(props.proposal.quorum)}`;
 });
 
 const placeholderResults = computed(() =>
@@ -178,7 +176,8 @@ onMounted(() => {
   <div
     v-else-if="
       props.proposal.privacy !== 'none' &&
-      props.proposal.state === 'active' &&
+      (props.proposal.state === 'active' ||
+        (props.proposal.privacy === 'inco' && !props.proposal.completed)) &&
       withDetails
     "
     class="space-y-1"
@@ -214,12 +213,13 @@ onMounted(() => {
       keypers, until voting closes. Only then are the combined totals decrypted
       and published. Individual choices are never revealed.
     </div>
-    <div
-      v-else-if="proposal.privacy !== 'shutter-elgamal'"
-      class="text-sm text-skin-text"
-    >
-      Votes are encrypted while voting is open. When the voting period ends, the
-      results are decrypted and published.
+    <div v-else-if="props.proposal.privacy === 'inco'">
+      Votes are encrypted and never revealed. The results will be decrypted
+      after the voting period is over.
+    </div>
+    <div v-else-if="proposal.privacy !== 'shutter-elgamal'">
+      All votes are encrypted and will be decrypted only after the voting period
+      is over, making the results visible.
     </div>
     <div v-if="proposal.quorum" class="flex items-center justify-between">
       <span class="text-skin-link">

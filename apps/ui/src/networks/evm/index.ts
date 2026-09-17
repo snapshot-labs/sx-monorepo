@@ -1,10 +1,10 @@
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getRelayerInfo } from '@/helpers/mana';
+import { networks } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress } from '@/helpers/utils';
-import { Network } from '@/networks/types';
-import { NetworkID, Space } from '@/types';
+import { ExplorerUrlType, Network } from '@/networks/types';
+import { ChainId, NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
 import { METADATA } from './metadata';
@@ -17,10 +17,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
   const provider = getProvider(chainId);
   const constants = createConstants(networkId, { pin });
-  const api = createApi(apiUrl, networkId, constants, {
-    // NOTE: Highlight is currently disabled
-    // highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
-  });
+  const api = createApi(apiUrl, networkId, constants);
 
   const helpers = {
     getAuthenticatorSupportInfo: (authenticator: string) =>
@@ -83,16 +80,25 @@ export function createEvmNetwork(networkId: NetworkID): Network {
           }
         }, interval);
       }),
-    getExplorerUrl: (id, type, chainIdOverride) => {
+    getExplorerUrl: (
+      id: string,
+      type: ExplorerUrlType,
+      chainIdOverride?: ChainId
+    ) => {
       let dataType: 'tx' | 'address' | 'token' | 'block' = 'tx';
-      if (type === 'token') dataType = 'token';
-      else if (type === 'block') dataType = 'block';
-      else if (['address', 'contract', 'strategy'].includes(type))
+      if (type === 'token') {
+        dataType = 'token';
+      } else if (type === 'block') {
+        dataType = 'block';
+      } else if (['address', 'contract', 'strategy'].includes(type)) {
         dataType = 'address';
+      }
 
       if (dataType === 'address') id = formatAddress(id);
 
-      return `${networks[chainIdOverride ?? chainId].explorer.url}/${dataType}/${id}`;
+      const network = networks[chainIdOverride ?? chainId];
+
+      return `${network.explorer.url}/${dataType}/${id}`;
     }
   };
 
@@ -109,6 +115,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'basesep',
       'mnt',
       'bnb',
       'bnbt',
@@ -117,7 +124,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
-    actions: createActions(provider, helpers, chainId),
+    actions: createActions(provider, helpers, networkId),
     api,
     constants,
     helpers

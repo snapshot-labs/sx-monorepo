@@ -37,7 +37,9 @@ export async function simulate(
 
   try {
     const res = await fetch(url, init);
-    const data = await res.json();
+    const data: {
+      simulation_results: { transaction: { status: boolean } }[];
+    } = await res.json();
 
     return !data.simulation_results.find(
       result => result.transaction.status === false

@@ -92,7 +92,7 @@ export default async function (_parent, args, context, info) {
       )
     );
 
-    const items = await handleRelatedSpaces(info, spaces);
+    const items = await handleRelatedSpaces(info, spaces, 'items');
 
     return { items, metrics };
   } catch (err: any) {

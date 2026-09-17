@@ -15,17 +15,20 @@ const { logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
 
-const SEARCH_CONFIG = {
+const SEARCH_CONFIG: Record<
+  string,
+  {
+    defaultRoute: string;
+    searchRoute: string;
+    placeholder: string;
+    exclude?: string[];
+  }
+> = {
   space: {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
-    exclude: [
-      'space-editor',
-      'space-proposal',
-      'space-townhall-create',
-      'space-townhall-topic'
-    ]
+    exclude: ['space-editor', 'space-proposal']
   },
   my: {
     defaultRoute: 'my-explore',
@@ -48,8 +51,8 @@ const user = computed(
 const cb = computed(() => getCacheHash(user.value.avatar));
 
 const searchConfig = computed(() => {
-  const rootName = route.matched[0]?.name || '';
-  const subRootName = route.matched[1]?.name || '';
+  const rootName = String(route.matched[0]?.name || '');
+  const subRootName = String(route.matched[1]?.name || '');
   const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
 
   if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {
@@ -64,8 +67,9 @@ function handleSearchSubmit(event: Event) {
 
   if (!searchConfig.value) return;
 
-  if (!searchValue.value)
+  if (!searchValue.value) {
     return router.push({ name: searchConfig.value.defaultRoute });
+  }
 
   router.push({
     name: searchConfig.value.searchRoute,

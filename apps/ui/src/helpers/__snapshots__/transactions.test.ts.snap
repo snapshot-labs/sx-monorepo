@@ -82,6 +82,27 @@ exports[`transactions > createContractCallTransaction > should create contract c
 }
 `;
 
+exports[`transactions > createContractCallTransaction > should create contract call transaction with tuple 1`] = `
+{
+  "_form": {
+    "abi": [
+      "function swap((uint256 amountIn, address[] path) trade)",
+    ],
+    "amount": undefined,
+    "args": {
+      "trade": "{"amountIn":"1","path":["0x000000000000000000000000000000000000dead"]}",
+    },
+    "method": "swap((uint256,address[]))",
+    "recipient": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  },
+  "_type": "contractCall",
+  "data": "0xd32ef6360000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000dead",
+  "salt": "0x000000000000000000000000000000000000000000000000000000000000",
+  "to": "0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844",
+  "value": "0",
+}
+`;
+
 exports[`transactions > createSendNftTransaction > should create erc721 transaction 1`] = `
 {
   "_form": {

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
@@ -10,6 +9,8 @@ import {
   MIN_DKG_LEAD_TIME_S,
   VERIFIED_URL
 } from '@/helpers/constants';
+import { networks } from '@/helpers/networks';
+import { getExecutionKey } from '@/helpers/ui';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
@@ -56,7 +57,8 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { strategiesWithTreasuries } = useTreasuries(props.space);
+const { isResolvingTreasuries, isSafeSnapResolving, strategiesWithTreasuries } =
+  useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
 const { limits, lists } = useSettings();
@@ -180,15 +182,17 @@ const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
   const executions = [] as (StrategyWithTreasury & {
+    key: string;
     transactions: Transaction[];
   })[];
 
   for (const strategy of strategiesWithTreasuries.value) {
-    const transactions = proposal.value.executions[strategy.address] ?? [];
+    const key = getExecutionKey(strategy.treasury.chainId, strategy.address);
 
     executions.push({
       ...strategy,
-      transactions
+      key,
+      transactions: proposal.value.executions[key] ?? []
     });
   }
 
@@ -284,6 +288,7 @@ const formErrors = computed(() => {
   );
 });
 const isSubmitButtonLoading = computed(() => {
+  if (isResolvingTreasuries.value) return true;
   if (web3.value.authLoading) return true;
   if (!web3.value.account) return false;
 
@@ -299,7 +304,15 @@ const isUsingOnlyInoperativeSigAuthenticators = computed(
       ?.isUsingOnlySigAuthenticators ?? false
 );
 
+const isMissingExecution = computed(
+  () => props.space.protocol === 'snapshot-x-inco' && !hasExecution.value
+);
+
 const canSubmit = computed(() => {
+  if (isSafeSnapResolving.value) {
+    return false;
+  }
+
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
     !proposal.value?.originalProposal;
@@ -313,7 +326,8 @@ const canSubmit = computed(() => {
     unsupportedPremiumStrategiesList.value.length ||
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
-    rankedChoicePrivacyConflict.value
+    rankedChoicePrivacyConflict.value ||
+    isMissingExecution.value
   ) {
     return false;
   }
@@ -322,6 +336,9 @@ const canSubmit = computed(() => {
     ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
+const submitButtonTooltip = computed(() =>
+  isSafeSnapResolving.value ? 'Resolving Safe module…' : ''
+);
 const spaceType = computed(() => {
   if (props.space.turbo) return 'turbo';
   if (props.space.verified) return 'verified';
@@ -329,8 +346,9 @@ const spaceType = computed(() => {
 });
 
 const spaceTypeForProposalLimit = computed(() => {
-  if (lists.value['space.ecosystem.list'].includes(props.space.id))
+  if (lists.value['space.ecosystem.list'].includes(props.space.id)) {
     return 'ecosystem';
+  }
   if (props.space.additionalRawData?.flagged) return 'flagged';
   return spaceType.value;
 });
@@ -425,10 +443,9 @@ async function handleProposeClick() {
   try {
     const choices = proposal.value.choices.filter(choice => !!choice);
     const executions = editorExecutions.value
-      .filter(
-        strategy =>
-          strategy.treasury.chainId && strategy.transactions.length > 0
-      )
+      // Empty strategies are kept: getPlugins needs them to tell a cleared
+      // execution from one it cannot rebuild.
+      .filter(strategy => strategy.treasury.chainId)
       .map(strategy => ({
         strategyType: strategy.type,
         strategyAddress: strategy.address,
@@ -518,12 +535,12 @@ function handleAcceptTerms() {
 }
 
 function handleExecutionUpdated(
-  strategyAddress: string,
+  executionKey: string,
   transactions: Transaction[]
 ) {
   if (!proposal.value) return;
 
-  proposal.value.executions[strategyAddress] = transactions;
+  proposal.value.executions[executionKey] = transactions;
 }
 
 function handleTransactionAccept() {
@@ -532,17 +549,17 @@ function handleTransactionAccept() {
     !walletConnectTransactionExecutionStrategy.value ||
     !transaction.value ||
     !proposal.value
-  )
+  ) {
     return;
+  }
 
-  const transactions =
-    proposal.value.executions[
-      walletConnectTransactionExecutionStrategy.value.address
-    ] ?? [];
-
-  proposal.value.executions[
+  const key = getExecutionKey(
+    walletConnectNetwork.value,
     walletConnectTransactionExecutionStrategy.value.address
-  ] = [...transactions, transaction.value];
+  );
+  const transactions = proposal.value.executions[key] ?? [];
+
+  proposal.value.executions[key] = [...transactions, transaction.value];
 
   reset();
 }
@@ -620,19 +637,21 @@ watchEffect(() => {
             <IH-collection />
           </UiButton>
         </UiTooltip>
-        <UiButton
-          class="min-w-[46px] !px-0 md:!px-3"
-          primary
-          :loading="isSubmitButtonLoading"
-          :disabled="!canSubmit"
-          @click="handleProposeClick"
-        >
-          <span
-            class="hidden md:inline-block"
-            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
-          />
-          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-        </UiButton>
+        <UiTooltip :title="submitButtonTooltip">
+          <UiButton
+            class="min-w-[46px] !px-0 md:!px-3"
+            primary
+            :loading="isSubmitButtonLoading"
+            :disabled="!canSubmit"
+            @click="handleProposeClick"
+          >
+            <span
+              class="hidden md:inline-block"
+              v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
+            />
+            <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+          </UiButton>
+        </UiTooltip>
       </div>
     </UiTopnav>
     <div
@@ -764,6 +783,9 @@ watchEffect(() => {
               >Go to settings</AppLink
             >
           </UiAlert>
+          <UiAlert v-else-if="isMissingExecution" type="error" class="mb-4">
+            Proposals on Inco spaces require execution.
+          </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
               <UiAlert type="error" class="mb-4">
@@ -858,7 +880,7 @@ watchEffect(() => {
             <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
-              :key="execution.address"
+              :key="execution.key"
               :model-value="execution.transactions"
               :disabled="
                 !supportsMultipleTreasuries &&
@@ -870,7 +892,7 @@ watchEffect(() => {
               :extra-contacts="extraContacts"
               class="mb-3"
               @update:model-value="
-                value => handleExecutionUpdated(execution.address, value)
+                value => handleExecutionUpdated(execution.key, value)
               "
             />
           </div>
@@ -997,7 +1019,11 @@ watchEffect(() => {
         @close="modalOpen = false"
       />
       <ModalTransaction
-        v-if="transaction && walletConnectNetwork"
+        v-if="
+          transaction &&
+          walletConnectNetwork &&
+          walletConnectSpaceKey === spaceKey
+        "
         :open="!!transaction"
         :network="walletConnectNetwork"
         :initial-state="transaction._form"

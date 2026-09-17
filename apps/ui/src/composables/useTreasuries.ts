@@ -1,3 +1,7 @@
+import {
+  getSafeSnapConfig,
+  getSafeSnapStrategies
+} from '@/helpers/safesnap/strategies';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { SelectedStrategy, Space, SpaceMetadataTreasury } from '@/types';
@@ -8,13 +12,14 @@ export type StrategyWithTreasury = SelectedStrategy & {
 
 type InputType = Space | null;
 export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
-  const strategiesWithTreasuries = computedAsync(async () => {
-    const space = isRef(spaceRef) ? spaceRef.value : spaceRef;
+  const isResolvingTreasuries = ref(false);
+  const strategiesWithTreasuries = computedAsync(
+    async () => {
+      const space = toValue(spaceRef);
 
-    if (!space) return null;
+      if (!space) return null;
 
-    return space.treasuries
-      .map(treasury => {
+      const treasuryStrategies = space.treasuries.map(treasury => {
         const strategy = space.executors_strategies.find(strategy => {
           return (
             strategy.treasury &&
@@ -40,15 +45,59 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
           type: strategy.type,
           treasury
         };
-      })
-      .filter(
-        strategy =>
-          strategy &&
-          getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
+      });
+
+      // computedAsync's default onError is a noop, so an unhandled rejection
+      // would pin strategiesWithTreasuries at null — which the submit gate
+      // reads as "still resolving", blocking every proposal on the space.
+      let safeSnapStrategies: StrategyWithTreasury[] = [];
+      try {
+        safeSnapStrategies = await getSafeSnapStrategies(space);
+      } catch (err) {
+        console.error(
+          'useTreasuries: failed to resolve SafeSnap strategies',
+          err
+        );
+      }
+
+      // A SafeSnap module supersedes a plain treasury for the same Safe.
+      const strategies = [
+        ...treasuryStrategies.filter(
+          strategy =>
+            !safeSnapStrategies.some(
+              safeSnap =>
+                compareAddresses(
+                  safeSnap.treasury.address,
+                  strategy.treasury.address
+                ) && safeSnap.treasury.chainId === strategy.treasury.chainId
+            )
+        ),
+        ...safeSnapStrategies
+      ];
+
+      return strategies.filter(strategy =>
+        getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
       ) as StrategyWithTreasury[];
-  }, null);
+    },
+    null,
+    isResolvingTreasuries
+  );
+
+  // Gate only spaces with a SafeSnap config: everything else settles on the
+  // next tick, so `null` there is not worth blocking submit on.
+  const isSafeSnapResolving = computed(() => {
+    const space = toValue(spaceRef);
+
+    return (
+      !!space &&
+      !!getSafeSnapConfig(space) &&
+      strategiesWithTreasuries.value === null
+    );
+  });
 
   return {
+    isResolvingTreasuries,
+    isSafeSnapResolving,
     strategiesWithTreasuries
   };
 }

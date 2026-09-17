@@ -15,7 +15,7 @@ const isDMCA = computed(() => props.item.flag_code === FLAGS.DMCA);
   <UiAlert v-if="isDMCA" type="error" class="mb-3">
     This content has been removed in response to a DMCA request. If you have any
     questions or believe this was an error, please
-    <AppLink :to="`${DOCS_URL}/faq/support-and-feedback`">contact us</AppLink>.
+    <AppLink :to="`${DOCS_URL}/contact-us`">contact us</AppLink>.
   </UiAlert>
   <UiAlert v-else-if="item.flagged && isHidden" type="error" class="mb-3">
     <UiButton class="float-right ml-2" @click="isHidden = false">Show</UiButton>

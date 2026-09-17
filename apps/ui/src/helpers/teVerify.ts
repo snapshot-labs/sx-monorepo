@@ -456,12 +456,14 @@ export function diagnoseTally(payload: AuditPayload): TallyDiagnosis {
 
   const perCandidate = new Array(numCandidates).fill(0);
   for (const s of payload.shares) {
-    if (s.candidate >= 0 && s.candidate < numCandidates)
+    if (s.candidate >= 0 && s.candidate < numCandidates) {
       perCandidate[s.candidate]++;
+    }
   }
   const candidatesShort = perCandidate.filter(n => n < need).length;
-  if (candidatesShort > 0)
+  if (candidatesShort > 0) {
     return { kind: 'awaiting-shares', candidatesShort, need };
+  }
 
   const totals = payload.te_result?.totals;
   if (!totals || totals.length === 0) return { kind: 'awaiting-coordinator' };

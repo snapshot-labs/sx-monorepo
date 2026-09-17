@@ -1,6 +1,20 @@
-import gql from 'graphql-tag';
+import { gql } from './gql';
 
-const SPACE_FRAGMENT = gql`
+gql(`
+  fragment offchainRelatedSpaceFragment on Space {
+    id
+    name
+    avatar
+    cover
+    network
+    proposalsCount
+    votesCount
+    followersCount
+    activeProposals
+    turbo
+    verified
+  }
+
   fragment offchainSpaceFragment on Space {
     id
     verified
@@ -65,29 +79,10 @@ const SPACE_FRAGMENT = gql`
     votesCount
     followersCount
     children {
-      id
-      name
-      avatar
-      cover
-      proposalsCount
-      votesCount
-      followersCount
-      activeProposals
-      turbo
-      verified
-      network
+      ...offchainRelatedSpaceFragment
     }
     parent {
-      id
-      name
-      avatar
-      cover
-      proposalsCount
-      votesCount
-      activeProposals
-      turbo
-      verified
-      network
+      ...offchainRelatedSpaceFragment
     }
     # needed for settings
     terms
@@ -122,26 +117,7 @@ const SPACE_FRAGMENT = gql`
       params
     }
   }
-`;
 
-// The te_* proposal columns only exist in the local private-voting hub
-// schema. Production hubs reject queries containing unknown fields, which
-// would blank every proposal list, so request them only when a local hub
-// is configured.
-const TE_PROPOSAL_FIELDS = (import.meta as any).env?.VITE_LOCAL_HUB_URL
-  ? `
-    te_config
-    te_mpk
-    te_dkg_status
-    te_committee_pks
-    te_threshold_t
-    te_threshold_n
-    te_keyper_urls
-    te_keyper_addresses
-    te_aggregate`
-  : '';
-
-const PROPOSAL_FRAGMENT = gql`
   fragment offchainProposalFragment on Proposal {
     id
     ipfs
@@ -191,25 +167,95 @@ const PROPOSAL_FRAGMENT = gql`
     updated
     votes
     privacy
-    ${TE_PROPOSAL_FIELDS}
     plugins
     flagged
     flagCode
     app
   }
-`;
 
-export const PROPOSAL_QUERY = gql`
-  query ($id: String!) {
+  fragment offchainVoteFragment on Vote {
+    id
+    ipfs
+    voter
+    space {
+      id
+    }
+    proposal {
+      id
+    }
+    choice
+    vp
+    reason
+    created
+    app
+  }
+
+  fragment offchainStrategyFragment on StrategyItem {
+    id
+    author
+    about
+    version
+    spacesCount
+    verifiedSpacesCount
+    examples
+    schema
+    disabled
+  }
+
+  fragment offchainStatementFragment on Statement {
+    about
+    statement
+    space
+    delegate
+    network
+    discourse
+    status
+    source
+  }
+
+  fragment offchainProposalTeFragment on Proposal {
+    ...offchainProposalFragment
+    te_config
+    te_mpk
+    te_dkg_status
+    te_committee_pks
+    te_threshold_t
+    te_threshold_n
+    te_keyper_urls
+    te_keyper_addresses
+    te_aggregate
+  }
+`);
+
+// The te_* columns exist only in the local private-voting hub schema; a
+// production hub rejects a query naming unknown fields, which would blank every
+// proposal list. Both documents below are static so graphql-codegen can analyse
+// them — the choice is made here at runtime, not by splicing strings into one
+// document, which codegen cannot see through.
+const USE_TE_FIELDS = Boolean((import.meta as any).env?.VITE_LOCAL_HUB_URL);
+
+const PROPOSAL_QUERY_BASE = gql(`
+  query Proposal($id: String!) {
     proposal(id: $id) {
       ...offchainProposalFragment
     }
   }
-  ${PROPOSAL_FRAGMENT}
-`;
+`);
 
-export const PROPOSALS_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $where: ProposalWhere) {
+const PROPOSAL_QUERY_TE = gql(`
+  query ProposalTe($id: String!) {
+    proposal(id: $id) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSAL_QUERY = (
+  USE_TE_FIELDS ? PROPOSAL_QUERY_TE : PROPOSAL_QUERY_BASE
+) as typeof PROPOSAL_QUERY_TE;
+
+const PROPOSALS_QUERY_BASE = gql(`
+  query Proposals($first: Int!, $skip: Int!, $where: ProposalWhere) {
     proposals(
       first: $first
       skip: $skip
@@ -220,63 +266,66 @@ export const PROPOSALS_QUERY = gql`
       ...offchainProposalFragment
     }
   }
-  ${PROPOSAL_FRAGMENT}
-`;
+`);
 
-export const SPACES_QUERY = gql`
-  query ($first: Int, $skip: Int, $where: SpaceWhere) {
+const PROPOSALS_QUERY_TE = gql(`
+  query ProposalsTe($first: Int!, $skip: Int!, $where: ProposalWhere) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: desc
+    ) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSALS_QUERY = (
+  USE_TE_FIELDS ? PROPOSALS_QUERY_TE : PROPOSALS_QUERY_BASE
+) as typeof PROPOSALS_QUERY_TE;
+
+export const SPACES_QUERY = gql(`
+  query Spaces($first: Int, $skip: Int, $where: SpaceWhere) {
     spaces(first: $first, skip: $skip, where: $where) {
       ...offchainSpaceFragment
     }
   }
-  ${SPACE_FRAGMENT}
-`;
+`);
 
-export const RANKING_QUERY = gql`
-  query ($first: Int, $skip: Int, $where: RankingWhere) {
+export const RANKING_QUERY = gql(`
+  query Ranking($first: Int, $skip: Int, $where: RankingWhere) {
     ranking(first: $first, skip: $skip, where: $where) {
       items {
         ...offchainSpaceFragment
       }
     }
   }
-  ${SPACE_FRAGMENT}
-`;
+`);
 
-export const SPACE_QUERY = gql`
-  query ($id: String!) {
+export const SPACE_QUERY = gql(`
+  query Space($id: String!) {
     space(id: $id) {
       ...offchainSpaceFragment
     }
   }
-  ${SPACE_FRAGMENT}
-`;
+`);
 
-export const USER_VOTES_QUERY = gql`
-  query ($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
+export const USER_VOTES_QUERY = gql(`
+  query UserVotes($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
     votes(
       first: $first
       skip: $skip
       where: { space_in: $spaceIds, voter: $voter }
     ) {
-      id
-      voter
-      space {
-        id
-      }
-      proposal {
-        id
-      }
-      choice
-      vp
-      reason
-      created
+      ...offchainVoteFragment
     }
   }
-`;
+`);
 
-export const USER_FOLLOWS_QUERY = gql`
-  query ($follower: String!, $first: Int) {
+export const USER_FOLLOWS_QUERY = gql(`
+  query UserFollows($follower: String!, $first: Int) {
     follows(where: { follower: $follower }, first: $first) {
       network
       space {
@@ -284,10 +333,10 @@ export const USER_FOLLOWS_QUERY = gql`
       }
     }
   }
-`;
+`);
 
-export const VOTES_QUERY = gql`
-  query (
+export const VOTES_QUERY = gql(`
+  query Votes(
     $first: Int!
     $skip: Int!
     $orderBy: String!
@@ -301,26 +350,13 @@ export const VOTES_QUERY = gql`
       orderBy: $orderBy
       orderDirection: $orderDirection
     ) {
-      id
-      voter
-      space {
-        id
-      }
-      proposal {
-        id
-      }
-      ipfs
-      choice
-      vp
-      reason
-      created
-      app
+      ...offchainVoteFragment
     }
   }
-`;
+`);
 
-export const SCORES_TICKS_VOTES_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $where: VoteWhere) {
+export const SCORES_TICKS_VOTES_QUERY = gql(`
+  query ScoresTicksVotes($first: Int!, $skip: Int!, $where: VoteWhere) {
     votes(
       first: $first
       skip: $skip
@@ -333,9 +369,9 @@ export const SCORES_TICKS_VOTES_QUERY = gql`
       created
     }
   }
-`;
+`);
 
-export const ALIASES_QUERY = gql`
+export const ALIASES_QUERY = gql(`
   query Aliases($address: String!, $alias: String!, $created_gt: Int) {
     aliases(
       where: { address: $address, alias: $alias, created_gt: $created_gt }
@@ -344,9 +380,9 @@ export const ALIASES_QUERY = gql`
       alias
     }
   }
-`;
+`);
 
-export const ALIASES_BY_ADDRESS_QUERY = gql`
+export const ALIASES_BY_ADDRESS_QUERY = gql(`
   query AliasesByAddress($address: String!) {
     aliases(
       first: 1000
@@ -359,24 +395,17 @@ export const ALIASES_BY_ADDRESS_QUERY = gql`
       created
     }
   }
-`;
+`);
 
-export const STATEMENTS_QUERY = gql`
-  query ($where: StatementsWhere) {
+export const STATEMENTS_QUERY = gql(`
+  query Statements($where: StatementsWhere) {
     statements(where: $where) {
-      about
-      statement
-      space
-      delegate
-      network
-      discourse
-      status
-      source
+      ...offchainStatementFragment
     }
   }
-`;
+`);
 
-export const USER_QUERY = gql`
+export const USER_QUERY = gql(`
   query User($id: String!) {
     user(id: $id) {
       id
@@ -392,10 +421,10 @@ export const USER_QUERY = gql`
       created
     }
   }
-`;
+`);
 
-export const LEADERBOARD_QUERY = gql`
-  query (
+export const LEADERBOARD_QUERY = gql(`
+  query Leaderboard(
     $first: Int!
     $skip: Int!
     $orderBy: String
@@ -415,41 +444,25 @@ export const LEADERBOARD_QUERY = gql`
       votesCount
     }
   }
-`;
+`);
 
-const STRATEGY_FRAGMENT = gql`
-  fragment offchainStrategyFragment on StrategyItem {
-    id
-    author
-    about
-    version
-    spacesCount
-    verifiedSpacesCount
-    examples
-    schema
-    disabled
-  }
-`;
-
-export const STRATEGIES_QUERY = gql`
+export const STRATEGIES_QUERY = gql(`
   query Strategies {
     strategies {
       ...offchainStrategyFragment
     }
   }
-  ${STRATEGY_FRAGMENT}
-`;
+`);
 
-export const STRATEGY_QUERY = gql`
+export const STRATEGY_QUERY = gql(`
   query Strategy($id: String!) {
     strategy(id: $id) {
       ...offchainStrategyFragment
     }
   }
-  ${STRATEGY_FRAGMENT}
-`;
+`);
 
-export const NETWORKS_QUERY = gql`
+export const NETWORKS_QUERY = gql(`
   query Networks {
     networks {
       id
@@ -457,13 +470,13 @@ export const NETWORKS_QUERY = gql`
       premium
     }
   }
-`;
+`);
 
-export const SETTINGS_QUERY = gql`
+export const SETTINGS_QUERY = gql(`
   query Settings {
     options {
       name
       value
     }
   }
-`;
+`);

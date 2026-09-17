@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { networks as snapshotJsNetworks } from '@/helpers/networks';
 import { getUrl } from '@/helpers/utils';
 import { BaseDefinition } from '@/types';
 
@@ -9,6 +9,8 @@ type NetworkDetails = {
 };
 
 defineOptions({ inheritAttrs: false });
+
+const model = defineModel<string>();
 
 const props = defineProps<{
   path?: string;
@@ -57,6 +59,7 @@ const shouldShowPicker = computed(() => {
       />
     </UiTooltip>
     <UiInputString
+      v-model="model"
       :definition="definition"
       :required="required"
       v-bind="$attrs as any"

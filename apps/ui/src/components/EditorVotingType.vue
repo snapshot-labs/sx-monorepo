@@ -11,7 +11,7 @@ const props = defineProps<{
 const modalOpen = ref(false);
 
 const activeVotingType = computed<VoteTypeInfo>(
-  () => VOTING_TYPES_INFO[proposal.value.type]
+  () => VOTING_TYPES_INFO[proposal.value.type as keyof typeof VOTING_TYPES_INFO]
 );
 
 const hasMultipleVotingType = computed<boolean>(

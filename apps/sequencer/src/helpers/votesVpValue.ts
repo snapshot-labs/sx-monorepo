@@ -230,14 +230,18 @@ async function processAllBatches(
 
 export default async function run() {
   while (true) {
-    log.info('[votesVpValue] Start refresh');
+    try {
+      log.info('[votesVpValue] Start refresh');
 
-    const proposalVpValues = await getProposalVpValues();
-    log.info(`[votesVpValue] Found ${proposalVpValues.size} proposals`);
+      const proposalVpValues = await getProposalVpValues();
+      log.info(`[votesVpValue] Found ${proposalVpValues.size} proposals`);
 
-    const totalProcessed = await processAllBatches(proposalVpValues);
+      const totalProcessed = await processAllBatches(proposalVpValues);
 
-    log.info(`[votesVpValue] ${totalProcessed} votes processed, sleeping`);
+      log.info(`[votesVpValue] ${totalProcessed} votes processed, sleeping`);
+    } catch (err) {
+      capture(err);
+    }
     await snapshot.utils.sleep(REFRESH_INTERVAL);
   }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
+import { networks } from '@/helpers/networks';
 import { _t, getChoiceText, getEncryptedChoicePreview } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
@@ -122,8 +122,9 @@ const dkgInProgress = computed(
       </div>
       <div
         v-else-if="
-          proposal.privacy !== 'none' &&
-          ['pending', 'active'].includes(proposal.state)
+          proposal.privacy === 'inco' ||
+          (proposal.privacy !== 'none' &&
+            ['pending', 'active'].includes(proposal.state))
         "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >
@@ -233,7 +234,7 @@ const dkgInProgress = computed(
 
   <slot
     v-else-if="
-      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+      ['passed', 'rejected', 'closed', 'queued', 'vetoed', 'executed'].includes(
         proposal.state
       )
     "

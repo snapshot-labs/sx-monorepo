@@ -23,7 +23,6 @@ CI will reject lint/type/test failures.
 | `apps/ui`        | Vue 3 frontend                                                        |
 | `apps/api`       | Apollo GraphQL server + Checkpoint blockchain indexer                 |
 | `apps/mana`      | Express transaction relayer                                           |
-| `apps/highlight` | Highlight integration app                                             |
 | `packages/sx.js` | Shared TypeScript SDK for governance (published as @snapshot-labs/sx) |
 | `scripts/`       | Monorepo dev scripts (dev-interactive, etc.)                          |
 | `tests/`         | E2E tests (Playwright)                                                |
@@ -59,6 +58,7 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
   - **Offchain spaces** — Snapshot spaces fetched from [snapshot-hub](https://github.com/snapshot-labs/snapshot-hub). Writes go through [snapshot-sequencer](https://github.com/snapshot-labs/snapshot-sequencer).
 - **Strategies** — voting power calculation (token balance, whitelist, cross-chain proofs)
 - **Executors** — onchain execution patterns (Safe, Timelock)
+- **Confidential voting (Inco)** — spaces with protocol `snapshot-x-inco` use encrypted vote choices (payable, voter-pays-fee `vote`) and a `requestReveal` → `finalizeReveal` → `execute` reveal/execute split via [`@inco/lightning-js`](https://www.npmjs.com/package/@inco/lightning-js). Active on Base Sepolia (chainId 84532). When touching `vote`/`execute` paths or the `Space` ABI, branch on `space.protocol === 'snapshot-x-inco'` and read [`docs/CONFIDENTIAL_VOTING.md`](docs/CONFIDENTIAL_VOTING.md) first.
 
 ## Tooling
 

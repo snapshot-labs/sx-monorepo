@@ -1,16 +1,21 @@
 import { Provider } from '@ethersproject/providers';
 import set from 'lodash.set';
-import { multicall3 } from '@/helpers/call';
+import { CallOptions, multicall3 } from '@/helpers/call';
 
 export default class Multicaller {
   public network: string;
   public provider: Provider;
   public abi: any[];
-  public options: any = {};
+  public options: CallOptions = {};
   public calls: [string, string, any[]?][] = [];
   public paths: string[] = [];
 
-  constructor(network: string, provider: Provider, abi: any[], options?) {
+  constructor(
+    network: string,
+    provider: Provider,
+    abi: any[],
+    options?: CallOptions
+  ) {
     this.network = network;
     this.provider = provider;
     this.abi = abi;

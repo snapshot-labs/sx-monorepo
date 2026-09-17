@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import log from './log';
-import { getProvider } from './provider';
+import { EvmProvider, getProvider } from './provider';
 
 /** Minimal ERC-20/721 fragment — `totalSupply()` is all this needs. */
 const TOTAL_SUPPLY_ABI = ['function totalSupply() view returns (uint256)'];
@@ -72,10 +72,12 @@ async function readSupply(
   block: number,
   decimals: number
 ): Promise<number> {
+  // Upstream now types getProvider as EvmProvider | StarknetProvider; this is an
+  // ERC-20 totalSupply read, so narrow it the way upstream does in turbo.ts.
   const contract = new Contract(
     address,
     TOTAL_SUPPLY_ABI,
-    getProvider(network)
+    getProvider(network) as EvmProvider
   );
   const raw = await withTimeout<{ toString(): string }>(
     contract.totalSupply({ blockTag: block }),

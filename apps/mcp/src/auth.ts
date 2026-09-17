@@ -13,6 +13,7 @@ import { type Request, type Response } from 'express';
 import { type JWTPayload, jwtVerify, SignJWT } from 'jose';
 import { createFreshAccount } from './cdp.js';
 import { resolveUserFromAlias } from './hub.js';
+import logger from './logger.js';
 
 const ALG = 'HS256';
 
@@ -100,7 +101,10 @@ export class SnapshotOAuthProvider implements OAuthServerProvider {
     params: AuthorizationParams,
     res: Response
   ): Promise<void> {
-    const { signerKey, signerAddress } = await createFreshAccount();
+    const { signerKey, signerAddress } = await createFreshAccount().catch((e: unknown) => {
+      logger.error({ err: e }, 'authorize: CDP account creation failed');
+      throw e;
+    });
     const sessionToken = await sign(
       {
         redirectUri: params.redirectUri,

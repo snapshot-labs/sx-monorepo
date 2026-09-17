@@ -76,7 +76,10 @@ export const useUiStore = defineStore('ui', {
       }
     },
     async restorePendingTransactions() {
-      const persistedTransactions = lsGet(PENDING_TRANSACTIONS_STORAGE_KEY, []);
+      const persistedTransactions: PendingTransaction[] = lsGet(
+        PENDING_TRANSACTIONS_STORAGE_KEY,
+        []
+      );
 
       this.pendingTransactions = persistedTransactions.filter(
         tx =>

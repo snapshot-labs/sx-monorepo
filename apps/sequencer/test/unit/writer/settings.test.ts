@@ -3,6 +3,11 @@ jest.mock('../../../src/helpers/spaceValidation', () => ({
   validateSpaceSettings: jest.fn()
 }));
 
+jest.mock('@snapshot-labs/snapshot-sentry', () => ({
+  capture: jest.fn()
+}));
+
+import { capture as mockCapture } from '@snapshot-labs/snapshot-sentry';
 import { verify } from '../../../src/writer/settings';
 import { spacesGetSpaceFixtures } from '../../fixtures/space';
 import input from '../../fixtures/writer-payload/space.json';
@@ -140,6 +145,20 @@ describe('writer/settings', () => {
         };
 
         return expect(verify(inputWithLongId)).rejects.toBe('id too long');
+      });
+
+      it('rejects if the space controller cannot be resolved', async () => {
+        const resolutionError = new Error('rpc down');
+        mockGetSpaceController.mockRejectedValueOnce(resolutionError);
+        const rejection = await verify(input).then(
+          () => Promise.reject(new Error('expected rejection')),
+          err => err
+        );
+        expect(rejection).toBeInstanceOf(Error);
+        expect(JSON.parse(JSON.stringify(rejection))).toBe(
+          'unable to resolve space controller'
+        );
+        expect(mockCapture).toHaveBeenCalledWith(resolutionError);
       });
 
       const maxStrategiesForNormalSpace =

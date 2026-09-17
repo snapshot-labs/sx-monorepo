@@ -1,0 +1,32 @@
+{
+  "name": "sx-evm",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snapshot-labs/sx-monorepo.git",
+    "directory": "contracts/sx-evm"
+  },
+  "scripts": {
+    "clean": "forge clean",
+    "coverage": "FOUNDRY_PROFILE=coverage forge coverage --no-match-coverage testFork --ir-minimum --report lcov",
+    "lint": "bun run lint:sol && bun run prettier:check",
+    "lint:sol": "solhint \"{src,test,script}/**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.{json,md,sol,yml}\"",
+    "prettier": "prettier --write \"**/*.{json,md,sol,yml}\"",
+    "format": "bun run prettier",
+    "test": "forge test --optimize -vv"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#3d7a93876a2e5e1d7fe29b5a0e96e222afdc4cfa",
+    "@openzeppelin/contracts-upgradeable": "github:OpenZeppelin/openzeppelin-contracts-upgradeable#65420cb9c943c32eb7e8c9da60183a413d90067a",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.7",
+    "murky": "github:dmfxyz/murky#991e371eb1dfa9f86701869eb08ec4e98c3cc0b0"
+  },
+  "devDependencies": {
+    "prettier": "3.2.5",
+    "prettier-plugin-solidity": "1.4.3",
+    "solhint": "^3.4.0",
+    "solhint-plugin-prettier": "0.1.0"
+  }
+}

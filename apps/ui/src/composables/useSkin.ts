@@ -6,7 +6,7 @@ function hexToCssRgb(hex: string): string {
   return `${r},${g},${b}`;
 }
 
-const B64U_LOOKUP = {
+const B64U_LOOKUP: Record<string, string> = {
   '/': '_',
   _: '/',
   '+': '-',
@@ -38,7 +38,7 @@ export function useSkin() {
         acc[`--${colorName.replace('_color', '')}`] = hexToCssRgb(hex);
         return acc;
       },
-      {}
+      {} as Record<string, string>
     );
 
     if (colorVariables['--content']) {

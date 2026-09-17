@@ -50,7 +50,7 @@
     "vue": ">=3.5.0"
   },
   "devDependencies": {
-    "@types/node": "^22.6.0",
+    "@types/node": "^24",
     "typescript": "^5.8.3",
     "vue": "^3.5.30"
   },

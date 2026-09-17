@@ -1,4 +1,4 @@
-const UNISWAP_CHAINS_BY_NETWORK = {
+const UNISWAP_CHAINS_BY_NETWORK: Record<number, string> = {
   '1': 'mainnet',
   '42161': 'arbitrum',
   '10': 'optimism',

@@ -66,8 +66,9 @@ export default function createEthSigAuthenticator(): Authenticator {
       }
 
       const [r, s, v] = envelope.signatureData.signature;
-      if (!r || !s || !v)
+      if (!r || !s || !v) {
         throw new Error('signature needs to contain r, s and v');
+      }
 
       const compiled = callData.compile('authenticate_vote', [
         r,
