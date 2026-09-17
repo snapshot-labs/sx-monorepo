@@ -47,6 +47,23 @@ bun start
 
 To load a space settings in the database you can go on this endpoint <http://localhost:3000/api/spaces/yam.eth/poke> (change yam.eth with the space you want to activate).
 
+## Historical archive access
+
+Historical access is disabled by default. `HISTORICAL_DATA_ACCESS_MODE=observe`
+records low-cardinality gated-resource classifications without changing
+responses.
+`enforce` limits non-entitled requests to the recent window configured by
+`HISTORICAL_DATA_CUTOFF_DAYS`. Manual pilot entitlements are full SHA-256 API
+key hashes in `HISTORICAL_DATA_API_KEY_HASHES`; a key must also be valid in
+Keycard. The internal `KEYCARD_SECRET` remains entitled.
+
+The first scope covers proposal, vote, and message history in GraphQL, nested
+proposals returned with votes, and EIP-4824 proposal/activity lists. It does not
+cover aliases, follows, subscriptions, statements, users, all-time aggregate
+queries, IPFS, exports, subgraphs, or independently hosted APIs. This is an
+access-control seam for preferential Hub access, not a data-secrecy boundary or
+a billing system.
+
 ## Flag codes
 
 The hub uses flag codes (`flagCode`) to mark proposals and spaces for various reasons:

@@ -1,9 +1,15 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
+import { applyHistoricalCollectionBoundary } from '../../helpers/historicalAccess';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { buildWhereQuery, checkLimits, formatProposal } from '../helpers';
 
-export default async function (parent, args) {
+export default async function (parent, args, context?) {
+  args = applyHistoricalCollectionBoundary(
+    args,
+    context?.historicalAccess,
+    'proposals'
+  );
   const { first, skip, where = {} } = args;
 
   checkLimits(args, 'proposals');

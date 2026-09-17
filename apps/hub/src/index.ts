@@ -6,6 +6,7 @@ import express from 'express';
 import api from './api';
 import eip4824 from './eip4824';
 import graphql from './graphql';
+import { getHistoricalAccessConfig } from './helpers/historicalAccess';
 import { checkKeycard } from './helpers/keycard';
 import log from './helpers/log';
 import initMetrics from './helpers/metrics';
@@ -26,13 +27,21 @@ setInterval(() => {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Validate rollout configuration at startup instead of failing open per request.
+getHistoricalAccessConfig();
+
 const { stop: stopMetrics } = initMetrics(app);
 refreshSpacesCache();
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ limit: '20mb', extended: false }));
-app.use(cors({ maxAge: 86400 }));
+app.use(
+  cors({
+    maxAge: 86400,
+    exposedHeaders: ['X-Historical-Data-Access', 'X-Historical-Data-Cutoff']
+  })
+);
 app.set('trust proxy', 1);
 app.use(checkKeycard, rateLimit);
 app.use('/api', api);
