@@ -86,7 +86,6 @@ and contribute nothing, so such a vote is refused at ingest rather than accepted
 | Sequencer | [apps/sequencer](../../apps/sequencer) | Vote ingestion and ballot verification; freezes the committee onto each proposal; mirrors published totals into `scores`. |
 | Translator | [apps/te-data-layer](../../apps/te-data-layer) | Presents the hub to the protocol as its data layer, over the port contract. |
 | Voter UI | [apps/ui](../../apps/ui) | Builds encrypted ballots locally; the verify-tally panel; the stall notice and admin retry. |
-| Cross-language vectors | [packages/geg-parity](../../packages/geg-parity) | TS ⇄ Python parity for the crypto primitives. |
 | Committee | **not in this repo** | Keypers and coordinator live in the protocol repository, run by independent operators. |
 
 ---

@@ -19,9 +19,7 @@ const config: KnipConfig = {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty', 'ts-node']
     },
     'apps/hub': {
-      entry: ['src/index.ts'],
-      // Run by hand against a live stack, not imported by the service.
-      ignore: ['benchmarks/**', 'scripts/seed-mixed-vp-proposal.ts']
+      entry: ['src/index.ts']
     },
     'apps/mana': {
       entry: ['src/index.ts', 'src/db.ts', 'knexfile.ts', 'migrations/*.ts'],
@@ -87,11 +85,6 @@ const config: KnipConfig = {
       ignoreDependencies: ['events']
     },
     'packages/prettier-config': {},
-    'packages/geg-parity': {
-      // Tests and the vector-sync script are the whole package; it ships no
-      // source, so there is no entry point to walk from.
-      entry: ['tests/**/*.ts', 'scripts/*.{ts,mjs}']
-    },
     'packages/sx.js': {
       ignoreBinaries: ['anvil', 'starknet-devnet'],
       // deliberate optional peer, lazy-loaded for confidential voting

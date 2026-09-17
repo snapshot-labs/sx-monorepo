@@ -47,7 +47,7 @@ const REQUEST_DST = Buffer.from('GEG-REQUEST-v1', 'utf8');
  * exclusions would verify fine and one with a single bad ballot would fail
  * authorisation with no obvious link to the cause.
  */
-export const EXCLUSION_CODES: Record<string, number> = {
+const EXCLUSION_CODES: Record<string, number> = {
   INVALID_PROOF: 0,
   INVALID_SIGNATURE: 1,
   INVALID_ATTESTATION: 2,
