@@ -33,6 +33,8 @@ type Overrides = {
   };
   executionStrategies?: {
     IncoSimpleQuorumVanilla?: string;
+    IncoSimpleQuorumAvatar?: string;
+    IncoSimpleQuorumTimelock?: string;
     SimpleQuorumAvatar?: AddressOverride;
     SimpleQuorumTimelock?: AddressOverride;
   };
@@ -114,6 +116,8 @@ export function createStandardConfig(
     },
     ExecutionStrategies: {
       IncoSimpleQuorumVanilla: executionStrategies.IncoSimpleQuorumVanilla,
+      IncoSimpleQuorumAvatar: executionStrategies.IncoSimpleQuorumAvatar,
+      IncoSimpleQuorumTimelock: executionStrategies.IncoSimpleQuorumTimelock,
       SimpleQuorumAvatar: resolveAddress(
         executionStrategies.SimpleQuorumAvatar,
         '0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42'
@@ -127,15 +131,28 @@ export function createStandardConfig(
 }
 
 export function createEvmConfig(
-  network: ReturnType<typeof createStandardConfig>
+  network: ReturnType<typeof createStandardConfig>,
+  protocol: ProtocolID = 'snapshot-x'
 ): EvmNetworkConfig {
+  const { Meta, ExecutionStrategies } = network;
+  const isInco = protocol === 'snapshot-x-inco';
+
+  const proxyFactory = isInco ? Meta.incoProxyFactory : Meta.proxyFactory;
+  const masterSpace = isInco ? Meta.incoMasterSpace : Meta.masterSpace;
+
+  if (!proxyFactory || !masterSpace) {
+    throw new Error(
+      `${protocol} is not available on chain ${Meta.eip712ChainId}`
+    );
+  }
+
   return {
-    eip712ChainId: network.Meta.eip712ChainId,
-    maxPriorityFeePerGas: network.Meta.maxPriorityFeePerGas,
-    blockTime: network.Meta.blockTime,
-    hasNonNativeBlockNumbers: network.Meta.hasNonNativeBlockNumbers,
-    proxyFactory: network.Meta.proxyFactory,
-    masterSpace: network.Meta.masterSpace,
+    eip712ChainId: Meta.eip712ChainId,
+    maxPriorityFeePerGas: Meta.maxPriorityFeePerGas,
+    blockTime: Meta.blockTime,
+    hasNonNativeBlockNumbers: Meta.hasNonNativeBlockNumbers,
+    proxyFactory,
+    masterSpace,
     authenticators: buildRegistry([
       [network.Authenticators.EthSig, { type: 'ethSig' }],
       [network.Authenticators.EthSigV2, { type: 'ethSigV2' }],
@@ -149,10 +166,15 @@ export function createEvmConfig(
       [network.Strategies.Whitelist, { type: 'whitelist' }],
       [network.Strategies.ApeGas, { type: 'apeGas' }]
     ]),
-    executionStrategiesImplementations: {
-      SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
-      SimpleQuorumTimelock: network.ExecutionStrategies.SimpleQuorumTimelock
-    }
+    executionStrategiesImplementations: isInco
+      ? {
+          SimpleQuorumAvatar: ExecutionStrategies.IncoSimpleQuorumAvatar,
+          SimpleQuorumTimelock: ExecutionStrategies.IncoSimpleQuorumTimelock
+        }
+      : {
+          SimpleQuorumAvatar: ExecutionStrategies.SimpleQuorumAvatar,
+          SimpleQuorumTimelock: ExecutionStrategies.SimpleQuorumTimelock
+        }
   };
 }
 
