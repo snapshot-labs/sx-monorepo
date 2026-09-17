@@ -372,11 +372,17 @@ async function delegatesToEnsV1(
     );
     return !offchain && target !== EVM_EMPTY_ADDRESS;
   } catch (err: any) {
-    if (
-      err?.code === 'CALL_EXCEPTION' &&
-      revertData(err)?.startsWith(OFFCHAIN_LOOKUP)
-    ) {
-      return false;
+    const data = revertData(err);
+    if (err?.code === 'CALL_EXCEPTION' && data?.startsWith(OFFCHAIN_LOOKUP)) {
+      try {
+        const [sender] = defaultAbiCoder.decode(
+          ['address', 'string[]', 'bytes', 'bytes4', 'bytes'],
+          `0x${data.slice(10)}`
+        );
+        if (sender === resolver) return false;
+      } catch {
+        throw err;
+      }
     }
     throw err;
   }

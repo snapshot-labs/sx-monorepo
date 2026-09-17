@@ -360,12 +360,26 @@ describe('ens', () => {
       }
     );
 
-    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+    it.each([
+      ['CALL_EXCEPTION', 'CALL_EXCEPTION', '0x'],
+      ['SERVER_ERROR', 'SERVER_ERROR', '0x'],
+      ['truncated OffchainLookup', 'CALL_EXCEPTION', '0x556f1830'],
+      [
+        'wrong-sender OffchainLookup',
+        'CALL_EXCEPTION',
+        `0x556f1830${defaultAbiCoder
+          .encode(
+            ['address', 'string[]', 'bytes', 'bytes4', 'bytes'],
+            [EMPTY_ADDRESS, [], '0x', '0x00000000', '0x']
+          )
+          .slice(2)}`
+      ]
+    ])(
       'should propagate %s when checking DNS delegation',
-      async code => {
+      async (_name, code, data) => {
         const error = Object.assign(new Error('DNS delegation failed'), {
           code,
-          data: '0x'
+          data
         });
         const dnsResolver = '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8';
         const rpc = vi
