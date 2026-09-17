@@ -43,6 +43,26 @@ export async function approve(
 ) {
   const contract = new Contract(tokenAddress, abis.erc20, web3.getSigner());
 
+  // Mainnet USDT, and any other token carrying the same legacy guard, reverts
+  // when a non-zero allowance is overwritten with another non-zero value.
+  if (amount > 0n) {
+    const allowance = await getTokenAllowance(
+      web3,
+      tokenAddress,
+      spenderAddress
+    );
+
+    if (allowance > 0n) {
+      const reset = await contract.approve(spenderAddress, 0n);
+
+      // Speeding a transaction up rejects `wait` even though the replacement
+      // was mined; only a cancellation leaves the allowance in place.
+      await reset.wait().catch((err: any) => {
+        if (err?.code !== 'TRANSACTION_REPLACED' || err.cancelled) throw err;
+      });
+    }
+  }
+
   return contract.approve(spenderAddress, amount);
 }
 
