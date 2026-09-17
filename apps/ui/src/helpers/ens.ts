@@ -20,6 +20,8 @@ type ENSContracts = {
   resolverAbi: string[];
   universalResolver: Partial<Record<ENSChainId, string>>;
   universalResolverAbi: string[];
+  universalHelper: Partial<Record<ENSChainId, string>>;
+  universalHelperAbi: string[];
   nameWrappers: Record<ENSChainId, string>;
   nameWrapperAbi: string[];
 };
@@ -40,8 +42,13 @@ const ENS_CONTRACTS: ENSContracts = {
   },
   universalResolverAbi: [
     'function resolve(bytes name, bytes data) view returns (bytes, address)',
-    'function findOwner(bytes name) view returns (address)',
     'function findResolver(bytes name) view returns (address, bytes32, uint256)'
+  ],
+  universalHelper: {
+    11155111: '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5'
+  },
+  universalHelperAbi: [
+    'function findExactOwner(bytes name) view returns (address)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
   resolvers: {
@@ -305,17 +312,14 @@ export async function setEnsTextRecord(
   return contract.setText(ensHash, record, value);
 }
 
-// findOwner is ENSv2-only; an unmigrated name returns the empty address,
-// so a revert is a failure and must not fall back to a stale v1 owner
-async function getEnsOwnerV2(
-  name: string,
-  chainId: ENSChainId,
-  universalResolver: string
-) {
+async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
+  const helper = ENS_CONTRACTS.universalHelper[chainId];
+  if (!helper) return null;
+
   const owner = await call(
     getProvider(chainId),
-    ENS_CONTRACTS.universalResolverAbi,
-    [universalResolver, 'findOwner', [dnsEncodeName(name)]]
+    ENS_CONTRACTS.universalHelperAbi,
+    [helper, 'findExactOwner', [dnsEncodeName(name)]]
   );
 
   return owner && owner !== EVM_EMPTY_ADDRESS ? owner : null;
@@ -326,10 +330,7 @@ export async function getResolver(name: string, chainId: ENSChainId) {
   const normalized = ensNormalize(name);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
-  if (
-    universalResolver &&
-    (await getEnsOwnerV2(normalized, chainId, universalResolver))
-  ) {
+  if (universalResolver && (await getEnsOwnerV2(normalized, chainId))) {
     const [resolver, , offset] = await call(
       provider,
       ENS_CONTRACTS.universalResolverAbi,
@@ -352,11 +353,7 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
   if (universalResolver) {
-    const ensOwnerV2 = await getEnsOwnerV2(
-      normalized,
-      chainId,
-      universalResolver
-    );
+    const ensOwnerV2 = await getEnsOwnerV2(normalized, chainId);
     if (ensOwnerV2) return ensOwnerV2;
   }
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
   getEnsTextRecord,
@@ -7,6 +7,9 @@ import {
   getSpaceController,
   resolveName
 } from './ens';
+import { getProvider } from './provider';
+
+afterEach(() => vi.restoreAllMocks());
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -29,20 +32,20 @@ describe('ens', () => {
   });
 
   describe('getNameOwner', () => {
-    describe('for names migrated to ENSv2', () => {
-      it('should return the owner of a migrated name on testnet', async () => {
-        const owner = await getNameOwner('test123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+    describe('for names registered in ENSv2', () => {
+      it('should return the owner of an ENSv2 name on testnet', async () => {
+        const owner = await getNameOwner('john1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve a case variant to the same owner', async () => {
-        const owner = await getNameOwner('TEST123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const owner = await getNameOwner('JOHN1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve the same address as the space controller', async () => {
-        const controller = await getSpaceController('test123.eth', 11155111);
-        expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const controller = await getSpaceController('john1.eth', 11155111);
+        expect(controller).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
     });
 
@@ -196,14 +199,14 @@ describe('ens', () => {
   });
 
   describe('getResolver', () => {
-    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
-      const resolver = await getResolver('test123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    it('should return the resolver of an ENSv2 name on testnet', async () => {
+      const resolver = await getResolver('john1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should normalize the name before resolving', async () => {
-      const resolver = await getResolver('TEST123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+      const resolver = await getResolver('JOHN1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should return the v1 resolver of an unmigrated name on testnet', async () => {
@@ -220,6 +223,21 @@ describe('ens', () => {
       const resolver = await getResolver('lucemans.cb.id', 1);
       expect(resolver).toBe('0x0000000000000000000000000000000000000000');
     }, 10000);
+  });
+
+  describe.each([
+    ['getNameOwner', getNameOwner],
+    ['getResolver', getResolver]
+  ] as const)('%s helper failures', (_name, lookup) => {
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s instead of falling back to ENSv1',
+      async code => {
+        const error = Object.assign(new Error('Helper failed'), { code });
+        vi.spyOn(getProvider(11155111), 'call').mockRejectedValueOnce(error);
+
+        await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
+      }
+    );
   });
 
   describe('getSpaceController', () => {
