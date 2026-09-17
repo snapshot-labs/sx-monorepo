@@ -2,19 +2,19 @@
 -- before this feature. New databases get all of it from src/helpers/schema.sql;
 -- this file is what an existing deployment applies.
 --
--- Ordering matters only in that the ALTERs touch live tables and the CREATEs do
--- not. Run the ALTERs first, confirm they were instant, then create the tables.
+-- Ordering matters only in that the ALTER touches a live table and the CREATEs do
+-- not. Run the ALTER first, confirm it was instant, then create the tables.
 --
--- ON THE ALTERs
+-- Not idempotent: MySQL 8 has no ADD COLUMN IF NOT EXISTS, so a second run fails
+-- on the first duplicate column and creates nothing further. That is intentional
+-- — it is a loud signal that the migration already ran, not a reason to edit it.
 --
--- `proposals` and `votes` are large in production, and `votes` is the largest
--- table Snapshot has. Every column added below is nullable, or NOT NULL with a
--- default, so all of them qualify for MySQL 8's INSTANT algorithm: metadata
--- only, no table rebuild, regardless of row count.
+-- ON THE ALTER
 --
--- Each table is altered in ONE statement rather than one statement per column.
--- Eleven separate instant adds are eleven metadata operations and eleven chances
--- for one to fall back to a copy unnoticed.
+-- Only `proposals` is altered; `proposals` is large in production, 
+-- so every column added below is nullable, or NOT NULL with
+-- a default, and all of them qualify for MySQL 8's INSTANT algorithm:
+-- metadata only, no table rebuild, regardless of row count.
 --
 -- ALGORITHM=INSTANT is named explicitly so the statement ERRORS if any column is
 -- rejected for it, rather than silently rebuilding a table with tens of millions

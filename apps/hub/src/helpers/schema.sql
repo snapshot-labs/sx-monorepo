@@ -104,8 +104,7 @@ CREATE TABLE proposals (
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
   -- Threshold-ElGamal private voting (privacy='shutter-elgamal').
-  -- All te_* columns are NULL when privacy is not 'shutter-elgamal'.
-  -- te_mpk is also NULL between proposal creation and DKG completion.
+  -- All te_* columns are NULL when privacy is not 'shutter-elgamal';
   te_config JSON DEFAULT NULL,
   te_mpk VARBINARY(96) DEFAULT NULL,
   te_committee_pks JSON DEFAULT NULL,
@@ -114,41 +113,9 @@ CREATE TABLE proposals (
   te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
   te_aggregate JSON DEFAULT NULL,
-  -- NULL = pending/ok; 'dkg_failed' = all attempts exhausted, needs operator intervention.
   te_dkg_status VARCHAR(24) DEFAULT NULL,
-  -- Immutable committee + role snapshot, written once by the sequencer at
-  -- proposal creation from its own env (writer/proposal.ts). Proposal creation
-  -- is the registration event for the threshold protocol, so this is the single
-  -- config write: everything downstream reads it and never mutates it.
-  --
-  -- Deliberately sx-shaped, NOT the protocol's wire format. The hub is the only
-  -- process that knows the protocol's JSON (it already links the crypto SDK), so
-  -- it maps this snapshot onto the wire config and derives the mutable fields --
-  -- numCandidates/budget/mode/variant -- live from `choices` and `type` on every
-  -- read. Those four cannot be frozen here: update-proposal lets an author edit
-  -- `choices` and `type` right up until `start`, which would leave a frozen copy
-  -- stale. Deriving them is safe precisely because that same endpoint refuses
-  -- edits once voting has opened, so they are constant for the whole voting
-  -- window.
   te_geg_config JSON DEFAULT NULL,
-  -- Set by the coordinator when it gives up on a tally, cleared only by the
-  -- admin identity. The split is the point: the party that marks a stall cannot
-  -- clear it, so a coordinator restart can never quietly resurrect an election
-  -- that a human has not looked at.
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
-  -- The coordinator's own account of *why* it stalled, for an operator to read.
-  --
-  -- Deliberately NOT part of the signed `tally_stall` digest, unlike the flag
-  -- above. It is a hint, not an artifact: it cannot make an unverifiable tally
-  -- look verifiable, and the split that actually decides what an operator does --
-  -- keyper problem or coordinator problem -- is derived client-side from share
-  -- counts nobody can forge (`diagnoseTally`). Surfaced as a claim ("the
-  -- coordinator reports...") rather than as fact.
-  --
-  -- If this value ever gates an automated action -- auto-retry, auto-resume,
-  -- auto-scaling the coordinator -- it must be moved inside the signed digest
-  -- first. Unauthenticated input driving automation is a different risk class
-  -- from unauthenticated input driving a human's attention.
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
@@ -184,8 +151,8 @@ CREATE TABLE votes (
   vp DECIMAL(64,30) NOT NULL,
   vp_by_strategy JSON NOT NULL,
   vp_state VARCHAR(24) NOT NULL,
-  vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   cb INT(11) NOT NULL,
+  vp_value DECIMAL(13,3) NOT NULL DEFAULT '0.000',
   PRIMARY KEY (voter, space, proposal),
   INDEX id (id),
   INDEX ipfs (ipfs),
@@ -305,8 +272,6 @@ CREATE TABLE te_request_nonces (
   PRIMARY KEY (proposal_id, op, issued_at),
   INDEX idx_te_nonce_accepted (accepted_at)
 );
-
-
 
 CREATE TABLE follows (
   id VARCHAR(66) NOT NULL,

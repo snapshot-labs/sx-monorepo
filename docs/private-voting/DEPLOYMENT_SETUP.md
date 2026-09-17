@@ -114,11 +114,11 @@ them.
 - [`docker-compose.keyper.yml`](https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/docker-compose.keyper.yml) — the keyper service,
   pinned to the published image
 - [`.env.keyper.example`](https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/.env.keyper.example) — the template for its
-  configuration; copy it to `.env.keyper1` and fill it in
+  configuration; copy it to `.env.keyper` and fill it in
 
 ```bash
 # in the directory holding those two files
-docker compose -p keyper1 -f docker-compose.keyper.yml --env-file .env.keyper1 up -d
+docker compose -p keyper -f docker-compose.keyper.yml --env-file .env.keyper up -d
 ```
 
 The variables that file asks for, and what they mean here:
