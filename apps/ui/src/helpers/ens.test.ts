@@ -17,6 +17,31 @@ import { getProvider } from './provider';
 afterEach(() => vi.restoreAllMocks());
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const UNIVERSAL_HELPER = '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5';
+const RETIRED_ROOT_REGISTRY = '0xc960f7217d3643b525ef36bec8adf86953cd9ab8';
+const ENS_V2 = new Interface([
+  'function ROOT_REGISTRY() view returns (address)',
+  'function findExactOwner(bytes) view returns (address)',
+  'function findResolver(bytes) view returns (address, bytes32, uint256)'
+]);
+
+function stubEnsV2(
+  handlers: Record<string, (to: string) => string | Error | undefined>
+) {
+  const provider = getProvider(11155111);
+  const original = provider.call.bind(provider);
+
+  return vi.spyOn(provider, 'call').mockImplementation(async (tx, blockTag) => {
+    const data = String(await tx.data);
+    const fn = Object.keys(handlers).find(name =>
+      data.startsWith(ENS_V2.getSighash(name))
+    );
+    const result = fn && handlers[fn](String(await tx.to));
+    if (!result) return original(tx, blockTag);
+    if (result instanceof Error) throw result;
+    return result;
+  });
+}
 
 describe('ens', () => {
   describe('dnsEncodeName', () => {
@@ -58,6 +83,11 @@ describe('ens', () => {
       it('should still resolve a DNS-imported domain through its DNS owner', async () => {
         const owner = await getNameOwner('ethplay.org', 11155111);
         expect(owner).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+      }, 10000);
+
+      it('should still resolve a DNS-imported domain without a resolver through its registry owner', async () => {
+        const owner = await getNameOwner('gregskril.com', 11155111);
+        expect(owner).toBe('0x179A862703a4adfb29896552DF9e307980D19285');
       }, 10000);
 
       it('should still resolve a subdomain through the registry', async () => {
@@ -330,11 +360,27 @@ describe('ens', () => {
     ['getNameOwner', getNameOwner],
     ['getResolver', getResolver]
   ] as const)('%s helper failures', (_name, lookup) => {
+    it('should throw when the helper reads a root registry the resolver does not', async () => {
+      const rpc = stubEnsV2({
+        ROOT_REGISTRY: to =>
+          to === UNIVERSAL_HELPER
+            ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+            : undefined
+      });
+
+      await expect(lookup('john1.eth', 11155111)).rejects.toThrow(
+        'root registry'
+      );
+      expect(
+        rpc.mock.calls.map(([tx]) => String(tx.data).slice(0, 10))
+      ).not.toContain(ENS_V2.getSighash('findExactOwner'));
+    });
+
     it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
       'should propagate %s instead of falling back to ENSv1',
       async code => {
         const error = Object.assign(new Error('Helper failed'), { code });
-        vi.spyOn(getProvider(11155111), 'call').mockRejectedValueOnce(error);
+        stubEnsV2({ findExactOwner: () => error });
 
         await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
       }
@@ -346,57 +392,13 @@ describe('ens', () => {
         const error = Object.assign(new Error('Resolver lookup failed'), {
           code
         });
-        const rpc = vi
-          .spyOn(getProvider(11155111), 'call')
-          .mockResolvedValueOnce(
-            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
-          )
-          .mockRejectedValueOnce(error);
+        stubEnsV2({
+          findExactOwner: () =>
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS]),
+          findResolver: () => error
+        });
 
         await expect(lookup('ens.eth', 11155111)).rejects.toBe(error);
-        expect(rpc.mock.calls[1][0].to).toBe(
-          '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe'
-        );
-      }
-    );
-
-    it.each([
-      ['CALL_EXCEPTION', 'CALL_EXCEPTION', '0x'],
-      ['SERVER_ERROR', 'SERVER_ERROR', '0x'],
-      ['truncated OffchainLookup', 'CALL_EXCEPTION', '0x556f1830'],
-      [
-        'wrong-sender OffchainLookup',
-        'CALL_EXCEPTION',
-        `0x556f1830${defaultAbiCoder
-          .encode(
-            ['address', 'string[]', 'bytes', 'bytes4', 'bytes'],
-            [EMPTY_ADDRESS, [], '0x', '0x00000000', '0x']
-          )
-          .slice(2)}`
-      ]
-    ])(
-      'should propagate %s when checking DNS delegation',
-      async (_name, code, data) => {
-        const error = Object.assign(new Error('DNS delegation failed'), {
-          code,
-          data
-        });
-        const dnsResolver = '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8';
-        const rpc = vi
-          .spyOn(getProvider(11155111), 'call')
-          .mockResolvedValueOnce(
-            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS])
-          )
-          .mockResolvedValueOnce(
-            defaultAbiCoder.encode(
-              ['address', 'bytes32', 'uint256'],
-              [dnsResolver, namehash('ethplay.org'), 8]
-            )
-          )
-          .mockRejectedValueOnce(error);
-
-        await expect(lookup('ethplay.org', 11155111)).rejects.toBe(error);
-        expect(rpc.mock.calls[2][0].to).toBe(dnsResolver);
       }
     );
   });
@@ -410,6 +412,11 @@ describe('ens', () => {
     it('should resolve a DNS-imported space through its DNS owner', async () => {
       const controller = await getSpaceController('ethplay.org', 11155111);
       expect(controller).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+    }, 10000);
+
+    it('should resolve a DNS-imported space without a resolver through its registry owner', async () => {
+      const controller = await getSpaceController('gregskril.com', 11155111);
+      expect(controller).toBe('0x179A862703a4adfb29896552DF9e307980D19285');
     }, 10000);
 
     it('should return an empty address for an un-imported DNS domain', async () => {
