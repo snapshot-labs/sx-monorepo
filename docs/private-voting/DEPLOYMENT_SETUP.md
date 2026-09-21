@@ -155,9 +155,6 @@ VITE_LOCAL_SEQUENCER_URL=http://localhost:3001
 # Must match MIN_DKG_LEAD_TIME_S, or the editor lets you pick a start time the
 # sequencer then rejects.
 VITE_MIN_DKG_LEAD_TIME_S=180
-# Must match TE_WEIGHTED_BUDGET, or the UI quotes the wrong per-voter ceiling
-# (1,000,000 / budget) when explaining private voting.
-VITE_TE_WEIGHTED_BUDGET=100
 EOF
 ```
 
