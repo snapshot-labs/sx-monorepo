@@ -108,14 +108,15 @@ const isPrivateVoting = computed(
 /**
  * The "?" beside the private-voting switch.
  *
- * It names the per-voter ceiling because that silently changes results: voting
- * power above it is counted *at* it, and the tally stays internally consistent
- * either way, so nothing downstream reveals that it happened. This switch is the
- * last point at which the author can choose a mode where it does not apply.
+ * It names the 0.5 floor because that is the one way private voting refuses a
+ * voter the public path would have accepted, and this switch is the last point
+ * at which the author can choose a mode where it does not apply.
  *
- * The two figures differ because the ceiling is `1,000,000 / budget`, and only
- * weighted ballots spend budget on splitting points across choices. Both are
- * derived, so a deployment at a different budget shows its own numbers.
+ * The per-voter ceiling it used to name is gone: voting power is counted as
+ * held, and keeping the tally computable is the scale factor's job instead (see
+ * `teVoteWeight`). Scaling is a proposal-level fact resolved at creation, not a
+ * mode the author picks here, so it is surfaced on the proposal rather than in
+ * this tooltip.
  */
 const privateVotingTooltip = computed(
   () =>

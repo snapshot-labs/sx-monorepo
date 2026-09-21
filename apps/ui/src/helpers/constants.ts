@@ -20,19 +20,6 @@ export const MIN_DKG_LEAD_TIME_S = Number(
   import.meta.env.VITE_MIN_DKG_LEAD_TIME_S ?? 180
 );
 
-/**
- * Points a voter distributes across choices on a weighted private proposal.
- *
- * Sets the granularity of a split: 100 gives whole-percent splits, 10 gives 10%
- * steps. It no longer implies a per-voter ceiling — voting power is counted as
- * held, and keeping the tally computable is the scale factor's job (see
- * `teVoteWeight`). It does still cost proof branches, so it trades against how many
- * choices a proposal may have.
- */
-export const TE_WEIGHTED_BUDGET = Number(
-  import.meta.env.VITE_TE_WEIGHTED_BUDGET ?? 100
-);
-
 export const API_URL =
   import.meta.env.VITE_API_URL ?? 'https://api.snapshot.box';
 export const API_TESTNET_URL =
