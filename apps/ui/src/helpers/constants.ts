@@ -175,8 +175,9 @@ export const PRIVACY_TYPES_INFO: Record<
   'shutter-elgamal': {
     label: 'Permanent private voting',
     description:
-      'Choices are encrypted and never decrypted: only the aggregate tally is ever revealed. ' +
-      'Powered by threshold-ElGamal homomorphic tallying. ' +
+      'Choices are encrypted and only the aggregate tally is ever published. ' +
+      'Powered by threshold-ElGamal homomorphic tallying, with the decryption ' +
+      'key split across independent keypers. ' +
       'Voting power counts in full, and holdings below 0.5 cannot vote.',
     isAlpha: true
   },

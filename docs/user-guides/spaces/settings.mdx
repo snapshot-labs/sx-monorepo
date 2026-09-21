@@ -86,7 +86,7 @@ To enable it, select **Shutter** in the **Privacy** dropdown on the Voting tab.
 
 <Info>**Alpha** — Permanent private voting is currently in alpha.</Info>
 
-Permanent private voting keeps every ballot encrypted forever: choices are never individually decrypted, and only the aggregate tally is ever revealed. It is powered by threshold-ElGamal homomorphic tallying, so not even the backend can see how anyone voted.
+Permanent private voting keeps every ballot encrypted: only the aggregate tally is ever published, and the backend never sees how anyone voted. It is powered by threshold-ElGamal homomorphic tallying, with the decryption key split across three independent keypers so that no single one can open anything. Privacy rests on those keypers not colluding: two of the three acting together could decrypt individual choices.
 
 To enable it, select **Permanent private voting** in the **Privacy** dropdown on the Voting tab.
 

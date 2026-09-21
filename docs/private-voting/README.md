@@ -280,30 +280,50 @@ Two states are worth naming because they are visible to users:
 
 ## Security model
 
-Threshold `t = 2, n = 3`: two keypers must cooperate to open a tally; one alone learns nothing.
+Threshold `t = 2, n = 3`: two keypers must cooperate to decrypt anything; one alone learns nothing. Two acting together can open individual ballots, not only the tally — see the table below.
 
 | Adversary | Outcome |
 | --- | --- |
 | Network observer (passive) | Freshly-randomised ciphertexts and public signatures. The candidate vector is information-theoretically masked. No exposure beyond Snapshot's existing voter↔proposal links. |
 | Single malicious keyper | Holds 1 of 3 shares — learns nothing. Malformed shares are caught by the DLEQ proof, re-run by the "Verify tally" button. |
-| Two colluding keypers | Can decrypt the per-candidate **aggregate** only. Individual ballots are never decrypted by anyone. |
-| Malicious hub or sequencer | Cannot forge ballots (Schnorr + EIP-712), cannot decrypt, and **cannot produce the canonical aggregate** — it only records what keypers submit and promotes what a quorum agrees on. Hiding a ballot now requires corrupting a majority of the committee. |
+| Two colluding keypers (= `t`) | **Privacy is lost.** Reconstructing `t` shares recovers the election secret, and every ballot is encrypted under the same `mpk`, so any individual ciphertext opens as `C2 - x*C1` — trivially, since the plaintext space is bounded by the budget. Aggregation is what the honest protocol *computes*, not a limit on what a key holder *can* compute offline, and no hub-side check constrains it. The pseudonym is no cover either: it is `keccak(voter || proposalId)` over a public voter list, and the committee feed ships `voter` in plaintext beside each ballot. **Privacy therefore holds against fewer than `t` keypers — this is an assumption about committee composition, not a property of the cryptography.** See *Operator policy* below. |
 | Ballot stuffing | The budget proof requires the ciphertext sum to encrypt exactly `B`. Over-budget ballots fail verification at ingest. |
 | Replay across proposals | Each ballot binds the proposal id into `electionId` and `pseudonym = keccak256(voter ‖ proposalId)`. |
 | Deleting an inconvenient tally | **Not prevented.** A private proposal is deletable on the same terms as a public one, at any point, by its author, an admin, or a moderator. Unlike a public tally it is not reconstructible afterwards — accepted deliberately. |
 | Long-term key compromise | Forward secrecy is per-proposal; each proposal runs a fresh DKG. |
 
-**Operational trust vs protocol trust — the hub.** This deployment runs the hub, and treats it as
-trusted in day-to-day operation. That is a *deployment* position, and it is what justifies recording
-purely diagnostic fields unsigned — the coordinator's stall reason, for instance, is stored and shown
-verbatim with no signature over it.
+**Trust boundary — the hub, the translator and the sequencer.** This deployment runs all three and
+places them **inside** the trust boundary. They are assumed to behave; a compromise of any of them is
+not something this design defends against. That is a *deployment* position, and it is what justifies
+recording purely diagnostic fields unsigned — the coordinator's stall reason, for instance, is stored
+and shown verbatim with no signature over it.
 
-It is deliberately **not** a protocol assumption, and the row above stays true: nothing in a tally's
-integrity rests on the hub behaving. The aggregate is canonical only when a keyper quorum submits it
-byte-identically, every decryption share carries a DLEQ proof, and the "Verify tally" button
-recomputes the aggregate from the raw ballots and checks the published totals against the shares
-itself. All of that holds if the hub misbehaves, and it is why those checks exist rather than being
-skipped for a service we operate.
+**What still holds if one of them misbehaves.** Tally integrity does not rest on them. The aggregate
+is canonical only when a keyper quorum submits it byte-identically, every decryption share carries a
+DLEQ proof, and the "Verify tally" button recomputes the aggregate from the raw ballots and checks
+the published totals against the shares. None of that can be forged by a service outside the
+committee, which is why those checks exist rather than being skipped for something we operate.
+
+**What does not hold: ballot authenticity.** A compromised hub or translator can forge a ballot that
+every committee-side check accepts. `POST /te_attestation` issues a credential for any named `voter`
+paired with any `vk`, with no authentication — so an attacker mints a credential carrying the
+victim's weight, bound to a Schnorr key it holds, signs a ballot with that key, and serves it from
+`GET /api/proposal/:id/te_geg_ballots`. The credential signature, the pseudonym match, the Schnorr
+signature and the ZK proofs all verify.
+
+Ordinary voting is **not** affected. Every user-reachable path goes through the sequencer, which
+derives `keccak(voter || proposalId)` from the EIP-712-authenticated address and rejects any envelope
+that disagrees (`helpers/te.ts::verifyTeBallot`, called from `writer/vote.ts`). A voter, a space
+admin or a network attacker cannot spend a credential issued for someone else. The forgery path
+exists only for code running *as* the hub or the translator, because such a ballot never passes
+through that check — the feed carries `voter`, `vp` and `choice`, and no signature the committee
+could verify independently. Supplying the `voter` field does not help the committee, since the same
+compromised component supplies it.
+
+Closing this would mean authenticating credential issuance and carrying a wallet-signed binding
+through to the keypers. That was weighed and declined: it returns a second wallet prompt to every
+private vote, for an adversary this deployment does not defend against. **A deployment that does not
+control its own hub should not rely on ballot authenticity without it.**
 
 The rule that keeps the two apart: **unsigned hub-supplied data may direct a human's attention; it
 must never gate an automated action or stand in for a cryptographic check.** A stall reason that only
