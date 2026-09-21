@@ -10,6 +10,7 @@ import {
   committeeColumns,
   frozenWeightedBudget,
   parseCommitteeSnapshotLoose,
+  TeCommitteeSnapshot,
   TeConfigError,
   votingPowerFallback,
   weightedBudgetFromEnv
@@ -141,7 +142,7 @@ export async function action(body, ipfs): Promise<void> {
   // proposal keeps the snapshot it was created with — the committee is frozen
   // for its whole life, and re-deriving it here could silently swap the
   // committee under a proposal mid-ceremony if env changed in between.
-  let frozenBudget: number | null = null;
+  let frozenSnapshot: TeCommitteeSnapshot | null = null;
   if (privacy === 'shutter-elgamal' && existing && !existing.te_geg_config) {
     try {
       const snapshot = await buildCommitteeSnapshot({
@@ -172,7 +173,7 @@ export async function action(body, ipfs): Promise<void> {
         ).value
       });
       Object.assign(proposal, committeeColumns(snapshot));
-      frozenBudget = snapshot.weightedBudget;
+      frozenSnapshot = snapshot;
     } catch (err: any) {
       const reason =
         err instanceof TeConfigError
@@ -190,8 +191,11 @@ export async function action(body, ipfs): Promise<void> {
   // builds from its own (correct) reading of the same fields.
   if (privacy === 'shutter-elgamal') {
     try {
+      const committee =
+        frozenSnapshot ?? parseCommitteeSnapshotLoose(existing?.te_geg_config);
       const budget =
-        frozenBudget ?? frozenWeightedBudget(existing?.te_geg_config);
+        frozenSnapshot?.weightedBudget ??
+        frozenWeightedBudget(existing?.te_geg_config);
       Object.assign(
         proposal,
         // The snapshot is the authority for both halves: an author editing `type`
@@ -200,7 +204,7 @@ export async function action(body, ipfs): Promise<void> {
           msg.payload.choices,
           msg.payload.type,
           budget,
-          parseCommitteeSnapshotLoose(existing?.te_geg_config)
+          committee
         )
       );
     } catch (err: any) {

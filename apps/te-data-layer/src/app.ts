@@ -10,8 +10,13 @@
  *
  *   **Stateless and keyless.** No database handle, no signing key, no cache of
  *   record. Everything comes from the hub, which is the sole store. That is what
- *   makes it safe to run several replicas behind a load balancer, and it means a
- *   compromise here cannot forge an artifact — only withhold one.
+ *   makes it safe to run several replicas behind a load balancer, and it bounds a
+ *   compromise here to withholding and reordering: every artifact the *committee*
+ *   produces carries a keyper or publisher signature this service cannot make.
+ *   Ballots are the exception — they come from voters, not keypers, and their
+ *   authenticity rests on the sequencer's check rather than on anything provable
+ *   here. That is precisely why the hub and this translator sit inside a single
+ *   trust boundary.
  *
  *   **A translator, not an authority.** It maps shapes and forwards status. Where
  *   the protocol expects a write Snapshot has no equivalent for, it answers 501
@@ -145,9 +150,20 @@ export function buildApp(): Express {
   const reads = Router();
 
   /**
-   * Verifiability tier. Zero means the data layer offers availability only — it
-   * can withhold or reorder, but every artifact is self-verifying, so it cannot
-   * forge one. That is an accurate description of a Snapshot-backed deployment.
+   * Verifiability tier. Zero means this service is trusted for availability
+   * only: it may withhold or reorder, and the protocol is built to notice.
+   *
+   * It is not trusted for integrity, and does not need to be. Aggregates,
+   * decryption shares and the published result each carry a keyper or publisher
+   * signature over content this service cannot construct, so a wrong answer here
+   * is detected rather than believed.
+   *
+   * Ballots are the one artifact that originates with voters rather than the
+   * committee. Their authenticity is established upstream, by the sequencer
+   * deriving the pseudonym from the EIP-712-authenticated voter, and that proof
+   * does not travel with the ballot — so it is not re-checkable downstream. The
+   * hub and this translator are placed inside one trust boundary for exactly
+   * that reason.
    */
   reads.get('/capability', (req, res) => {
     res.json({ verifiabilityTier: 0 });
