@@ -65,6 +65,16 @@ If you wish to use a different configuration, toggle the **Use custom strategies
 
 ![Use a custom setup using various Voting Strategies to calculate if a user is eligible to create a proposal or vote.](/images/80.png)
 
+#### Validate at the latest block
+
+By default, voting validation checks the strategies at the proposal's snapshot block, so anyone who receives a token after the proposal is created cannot vote on it. If your space gates voting with a non-transferable token (SBT), tick **Validate at the latest block** in the Basic validation settings. The strategies are then checked at the current block, so a member can verify, mint their token and vote right away.
+
+<Warning>
+Only use this option with non-transferable tokens. With a transferable token, the same token could be moved between wallets to pass validation multiple times.
+</Warning>
+
+The option applies to voting validation only and takes effect for proposals created after it is enabled. A typical setup for one vote per verified person: the [ticket](https://snapshot.box/#/strategy/ticket) Voting Strategy, Basic voting validation with a minimum score of `1`, a custom `erc721` strategy pointing at the SBT contract, and **Validate at the latest block** enabled.
+
 ## Validation strategy example: Gitcoin Passport
 
 Validation strategy built together with **Gitcoin Passport.** You can select individual or multiple stamps that matter for your space. You can also decide if they need to meet all of these criteria or only one. The more criteria you select, the more sybil resistant your space is.
