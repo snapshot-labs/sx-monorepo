@@ -266,18 +266,26 @@ describe('ens', () => {
         'ENSv2',
         'JOHN1.eth',
         11155111,
-        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3'
+        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3',
+        '0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8'
       ],
-      ['ENSv1', 'ens.eth', 1, '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9'],
+      [
+        'ENSv1',
+        'ens.eth',
+        1,
+        '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9',
+        '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41'
+      ],
       [
         'ENSv1 on Sepolia',
         'ens.eth',
         11155111,
-        '0x179A862703a4adfb29896552DF9e307980D19285'
+        '0x179A862703a4adfb29896552DF9e307980D19285',
+        '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD'
       ]
     ] as const)(
       'should encode an accepted %s controller update',
-      async (version, name, chainId, owner) => {
+      async (version, name, chainId, owner, resolver) => {
         const provider = getProvider(chainId);
         const signer = new VoidSigner(owner, provider);
         const intercepted = new Error('Transaction intercepted');
@@ -296,7 +304,7 @@ describe('ens', () => {
         ]);
         const transaction = send.mock.calls[0][0];
         expect(transaction).toMatchObject({
-          to: await getResolver(name, chainId),
+          to: resolver,
           data: setter.encodeFunctionData('setText', [
             isV2 ? '0x056a6f686e310365746800' : namehash(name),
             'snapshot',
