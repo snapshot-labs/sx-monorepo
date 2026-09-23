@@ -5,6 +5,7 @@ import { namehash } from '@ethersproject/hash';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
+  ENS_REGISTRY_ADDRESS,
   getEnsTextRecord,
   getNameOwner,
   getResolver,
@@ -322,7 +323,7 @@ describe('ens', () => {
   describe('stale ENSv1 records below an ENSv2 name', () => {
     beforeAll(async () => {
       const registry = new Contract(
-        '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+        ENS_REGISTRY_ADDRESS,
         [
           'function owner(bytes32) view returns (address)',
           'function resolver(bytes32) view returns (address)'

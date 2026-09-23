@@ -80,6 +80,8 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
+export const ENS_REGISTRY_ADDRESS = ENS_CONTRACTS.registry;
+
 export function dnsEncodeName(name: string): string {
   const value = name.replace(/^\.|\.$/g, '');
   const labels = (value ? value.split('.') : []).map(label => {
