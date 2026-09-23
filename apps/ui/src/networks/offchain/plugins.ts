@@ -75,8 +75,8 @@ export function getPlugins(
     );
   }
 
-  // Rebuilding collapses batches into one and forces every transaction to a
-  // call, so an untouched safe keeps its original entry.
+  // Rebuilding collapses batches into one, so an untouched safe keeps its
+  // original entry.
   function getUnchangedSafe(info: ExecutionInfo) {
     const original = findOriginalExecution(info.chainId, info.strategyAddress);
 
