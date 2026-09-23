@@ -377,6 +377,31 @@ describe('ens', () => {
     );
   });
 
+  describe('active ENSv1 2LD whose ENSv2 mirror reservation has expired', () => {
+    beforeAll(async () => {
+      const registry = new Contract(
+        '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+        ['function owner(bytes32) view returns (address)'],
+        getProvider(11155111)
+      );
+      expect(await registry.owner(namehash('ensauth-demo.eth'))).not.toBe(
+        EMPTY_ADDRESS
+      );
+    });
+
+    it.each([
+      ['getNameOwner', getNameOwner],
+      ['getSpaceController', getSpaceController],
+      ['getResolver', getResolver]
+    ] as const)(
+      '%s should not fall back to ENSv1',
+      async (_name, lookup) => {
+        expect(await lookup('ensauth-demo.eth', 11155111)).toBe(EMPTY_ADDRESS);
+      },
+      10000
+    );
+  });
+
   describe.each([
     ['getNameOwner', getNameOwner],
     ['getResolver', getResolver]
