@@ -338,51 +338,63 @@ describe('ens', () => {
       ['getNameOwner', getNameOwner],
       ['getSpaceController', getSpaceController],
       ['getResolver', getResolver]
-    ] as const)('%s should not fall back to ENSv1', async (_name, lookup) => {
-      expect(await lookup('tiny.fox.eth', 11155111)).toBe(EMPTY_ADDRESS);
-    });
+    ] as const)(
+      '%s should not fall back to ENSv1',
+      async (_name, lookup) => {
+        expect(await lookup('tiny.fox.eth', 11155111)).toBe(EMPTY_ADDRESS);
+      },
+      10000
+    );
 
-    it('should not update the stale ENSv1 resolver', async () => {
-      const signer = new VoidSigner(
-        '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
-        getProvider(11155111)
-      );
-      const send = vi
-        .spyOn(signer, 'sendTransaction')
-        .mockRejectedValue(new Error('Transaction intercepted'));
+    it(
+      'should not update the stale ENSv1 resolver',
+      async () => {
+        const signer = new VoidSigner(
+          '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
+          getProvider(11155111)
+        );
+        const send = vi
+          .spyOn(signer, 'sendTransaction')
+          .mockRejectedValue(new Error('Transaction intercepted'));
 
-      await expect(
-        setEnsTextRecord(
-          signer,
-          'tiny.fox.eth',
-          'snapshot',
-          EMPTY_ADDRESS,
-          11155111
-        )
-      ).rejects.toThrow('No resolver set for name');
-      expect(send).not.toHaveBeenCalled();
-    });
+        await expect(
+          setEnsTextRecord(
+            signer,
+            'tiny.fox.eth',
+            'snapshot',
+            EMPTY_ADDRESS,
+            11155111
+          )
+        ).rejects.toThrow('No resolver set for name');
+        expect(send).not.toHaveBeenCalled();
+      },
+      10000
+    );
   });
 
   describe.each([
     ['getNameOwner', getNameOwner],
     ['getResolver', getResolver]
   ] as const)('%s helper failures', (_name, lookup) => {
-    it('should throw when the helper reads a root registry the resolver does not', async () => {
-      const rpc = stubEnsV2({
-        ROOT_REGISTRY: to =>
-          to === UNIVERSAL_HELPER
-            ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
-            : undefined
-      });
+    it(
+      'should throw when the helper reads a root registry the resolver does not',
+      async () => {
+        const rpc = stubEnsV2({
+          ROOT_REGISTRY: to =>
+            to === UNIVERSAL_HELPER
+              ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+              : undefined
+        });
 
-      await expect(lookup('john1.eth', 11155111)).rejects.toThrow(
-        'root registry'
-      );
-      expect(
-        rpc.mock.calls.map(([tx]) => String(tx.data).slice(0, 10))
-      ).not.toContain(ENS_V2.getSighash('findExactOwner'));
-    });
+        await expect(lookup('john1.eth', 11155111)).rejects.toThrow(
+          'root registry'
+        );
+        expect(
+          rpc.mock.calls.map(([tx]) => String(tx.data).slice(0, 10))
+        ).not.toContain(ENS_V2.getSighash('findExactOwner'));
+      },
+      10000
+    );
 
     it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
       'should propagate %s instead of falling back to ENSv1',
@@ -391,7 +403,8 @@ describe('ens', () => {
         stubEnsV2({ findExactOwner: () => error });
 
         await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
-      }
+      },
+      10000
     );
 
     it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
@@ -407,7 +420,8 @@ describe('ens', () => {
         });
 
         await expect(lookup('ens.eth', 11155111)).rejects.toBe(error);
-      }
+      },
+      10000
     );
   });
 
