@@ -10,12 +10,16 @@ import {
   getNameOwner,
   getResolver,
   getSpaceController,
+  resetEnsV2Cache,
   resolveName,
   setEnsTextRecord
 } from './ens';
 import { getProvider } from './provider';
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  resetEnsV2Cache();
+});
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 const UNIVERSAL_HELPER = '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5';

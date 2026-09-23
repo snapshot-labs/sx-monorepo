@@ -329,26 +329,55 @@ export async function setEnsTextRecord(
   );
 }
 
+const ensV2RootRegistryGuards = new Map<ENSChainId, Promise<void>>();
+
+function ensureEnsV2RootRegistry(
+  chainId: ENSChainId,
+  helper: string,
+  universalResolver: string
+) {
+  let guard = ensV2RootRegistryGuards.get(chainId);
+
+  if (!guard) {
+    guard = (async () => {
+      const provider = getProvider(chainId);
+      const [helperRoot, resolverRoot] = await Promise.all([
+        call(provider, ENS_CONTRACTS.universalHelperAbi, [
+          helper,
+          'ROOT_REGISTRY'
+        ]),
+        call(provider, ENS_CONTRACTS.universalResolverAbi, [
+          universalResolver,
+          'ROOT_REGISTRY'
+        ])
+      ]);
+
+      if (helperRoot !== resolverRoot) {
+        throw new Error(
+          `ENSv2 helper ${helper} reads root registry ${helperRoot}, universal resolver reads ${resolverRoot}`
+        );
+      }
+    })();
+
+    guard.catch(() => ensV2RootRegistryGuards.delete(chainId));
+    ensV2RootRegistryGuards.set(chainId, guard);
+  }
+
+  return guard;
+}
+
+export function resetEnsV2Cache() {
+  ensV2RootRegistryGuards.clear();
+}
+
 async function getEnsOwnerV2(name: string, chainId: ENSChainId) {
   const helper = ENS_CONTRACTS.universalHelper[chainId];
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
   if (!helper || !universalResolver) return null;
 
+  await ensureEnsV2RootRegistry(chainId, helper, universalResolver);
+
   const provider = getProvider(chainId);
-  const [helperRoot, resolverRoot] = await Promise.all([
-    call(provider, ENS_CONTRACTS.universalHelperAbi, [helper, 'ROOT_REGISTRY']),
-    call(provider, ENS_CONTRACTS.universalResolverAbi, [
-      universalResolver,
-      'ROOT_REGISTRY'
-    ])
-  ]);
-
-  if (helperRoot !== resolverRoot) {
-    throw new Error(
-      `ENSv2 helper ${helper} reads root registry ${helperRoot}, universal resolver reads ${resolverRoot}`
-    );
-  }
-
   const owner = await call(provider, ENS_CONTRACTS.universalHelperAbi, [
     helper,
     'findExactOwner',
@@ -382,12 +411,10 @@ async function getResolverDetails(name: string, chainId: ENSChainId) {
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
   if (universalResolver) {
-    const owner = await getEnsOwnerV2(name, chainId);
-    const [resolver, , offset] = await getEnsResolverV2(
-      name,
-      chainId,
-      universalResolver
-    );
+    const [owner, [resolver, , offset]] = await Promise.all([
+      getEnsOwnerV2(name, chainId),
+      getEnsResolverV2(name, chainId, universalResolver)
+    ]);
 
     if (owner || !delegatesToEnsV1(chainId, resolver)) {
       return {
