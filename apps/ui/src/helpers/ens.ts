@@ -379,13 +379,12 @@ function delegatesToEnsV1(chainId: ENSChainId, resolver: string) {
 
 async function getResolverDetails(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
-  const normalized = ensNormalize(name);
   const universalResolver = ENS_CONTRACTS.universalResolver[chainId];
 
   if (universalResolver) {
-    const owner = await getEnsOwnerV2(normalized, chainId);
+    const owner = await getEnsOwnerV2(name, chainId);
     const [resolver, , offset] = await getEnsResolverV2(
-      normalized,
+      name,
       chainId,
       universalResolver
     );
@@ -401,14 +400,15 @@ async function getResolverDetails(name: string, chainId: ENSChainId) {
   const address: string = await call(provider, ENS_CONTRACTS.registryAbi, [
     ENS_CONTRACTS.registry,
     'resolver',
-    [namehash(normalized)]
+    [namehash(name)]
   ]);
 
   return { address, isV2: false };
 }
 
 export async function getResolver(name: string, chainId: ENSChainId) {
-  return (await getResolverDetails(name, chainId)).address;
+  const normalized = ensNormalize(name);
+  return (await getResolverDetails(normalized, chainId)).address;
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
