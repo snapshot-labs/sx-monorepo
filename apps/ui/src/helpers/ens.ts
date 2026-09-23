@@ -19,6 +19,7 @@ type ENSContracts = {
   resolvers: Record<ENSChainId, string[]>;
   resolverAbi: string[];
   resolverV2Abi: string[];
+  erc165Abi: string[];
   ensV2: Partial<
     Record<
       ENSChainId,
@@ -48,6 +49,9 @@ const ENS_CONTRACTS: ENSContracts = {
     'function setText(bytes32 node, string key, string value)'
   ],
   resolverV2Abi: ['function setText(bytes name, string key, string value)'],
+  erc165Abi: [
+    'function supportsInterface(bytes4 interfaceId) view returns (bool)'
+  ],
   ensV2: {
     11155111: {
       universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
@@ -320,20 +324,21 @@ export async function setEnsTextRecord(
   if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
 
   const normalized = ensNormalize(ens);
-  const { address, isV2 } = await getResolverDetails(normalized, chainId);
+  const { address } = await getResolverDetails(normalized, chainId);
 
   if (!address || address === EVM_EMPTY_ADDRESS) {
     throw new Error('No resolver set for name');
   }
 
+  const setsTextByName = await resolverSetsTextByName(address, chainId);
   const contract = new Contract(
     address,
-    isV2 ? ENS_CONTRACTS.resolverV2Abi : ENS_CONTRACTS.resolverAbi,
+    setsTextByName ? ENS_CONTRACTS.resolverV2Abi : ENS_CONTRACTS.resolverAbi,
     signer
   );
 
   return contract.setText(
-    isV2 ? dnsEncodeName(normalized) : namehash(normalized),
+    setsTextByName ? dnsEncodeName(normalized) : namehash(normalized),
     record,
     value
   );
@@ -419,6 +424,21 @@ function delegatesToEnsV1(chainId: ENSChainId, resolver: string) {
   return resolver === ensV2.ensV1Resolver || resolver === ensV2.dnsTldResolver;
 }
 
+const SET_TEXT_BY_NAME_INTERFACE_ID = '0xc7279f88';
+
+async function resolverSetsTextByName(resolver: string, chainId: ENSChainId) {
+  try {
+    return await call(getProvider(chainId), ENS_CONTRACTS.erc165Abi, [
+      resolver,
+      'supportsInterface',
+      [SET_TEXT_BY_NAME_INTERFACE_ID]
+    ]);
+  } catch (err: any) {
+    if (err?.code === 'CALL_EXCEPTION') return false;
+    throw err;
+  }
+}
+
 async function getResolverDetails(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensV2 = ENS_CONTRACTS.ensV2[chainId];
@@ -430,10 +450,7 @@ async function getResolverDetails(name: string, chainId: ENSChainId) {
     ]);
 
     if (owner || !delegatesToEnsV1(chainId, resolver)) {
-      return {
-        address: offset.isZero() ? resolver : EVM_EMPTY_ADDRESS,
-        isV2: true
-      };
+      return { address: offset.isZero() ? resolver : EVM_EMPTY_ADDRESS };
     }
   }
 
@@ -443,7 +460,7 @@ async function getResolverDetails(name: string, chainId: ENSChainId) {
     [namehash(name)]
   ]);
 
-  return { address, isV2: false };
+  return { address };
 }
 
 export async function getResolver(name: string, chainId: ENSChainId) {

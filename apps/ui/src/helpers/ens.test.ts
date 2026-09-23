@@ -322,6 +322,56 @@ describe('ens', () => {
       },
       10000
     );
+
+    it('should use the classic bytes32 setter when an ENSv2-owned name points at a resolver without the bytes-name interface', async () => {
+      const owner = '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3';
+      const resolver = '0xd7e590Ad0E92A6aC1d81f4483A9B951D3585a50F';
+      const name = 'john1.eth';
+      const provider = getProvider(11155111);
+      const signer = new VoidSigner(owner, provider);
+
+      vi.spyOn(provider, 'call').mockImplementation(async tx => {
+        const data = String(await tx.data);
+        if (data.startsWith('0x01ffc9a7')) {
+          return defaultAbiCoder.encode(['bool'], [false]);
+        }
+        if (data.startsWith(ENS_V2.getSighash('findExactOwner'))) {
+          return defaultAbiCoder.encode(['address'], [owner]);
+        }
+        if (data.startsWith(ENS_V2.getSighash('findResolver'))) {
+          return defaultAbiCoder.encode(
+            ['address', 'bytes32', 'uint256'],
+            [resolver, namehash(name), 0]
+          );
+        }
+        if (data.startsWith(ENS_V2.getSighash('ROOT_REGISTRY'))) {
+          return defaultAbiCoder.encode(
+            ['address'],
+            ['0x1111111111111111111111111111111111111111']
+          );
+        }
+        throw new Error(`Unexpected call: ${data}`);
+      });
+
+      const intercepted = new Error('Transaction intercepted');
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(intercepted);
+
+      await expect(
+        setEnsTextRecord(signer, name, 'snapshot', owner, 11155111)
+      ).rejects.toBe(intercepted);
+
+      const setter = new Interface(['function setText(bytes32,string,string)']);
+      expect(send.mock.calls[0][0]).toMatchObject({
+        to: resolver,
+        data: setter.encodeFunctionData('setText', [
+          namehash(name),
+          'snapshot',
+          owner
+        ])
+      });
+    });
   });
 
   describe('stale ENSv1 records below an ENSv2 name', () => {
