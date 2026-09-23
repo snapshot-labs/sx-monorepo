@@ -505,6 +505,58 @@ describe('ens', () => {
     );
   });
 
+  describe('setEnsTextRecord helper failures', () => {
+    it(
+      'should throw when the helper reads a root registry the resolver does not',
+      async () => {
+        const signer = new VoidSigner(
+          '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3',
+          getProvider(11155111)
+        );
+        const send = vi
+          .spyOn(signer, 'sendTransaction')
+          .mockRejectedValue(new Error('Transaction intercepted'));
+        stubEnsV2({
+          ROOT_REGISTRY: to =>
+            to === UNIVERSAL_HELPER
+              ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+              : undefined
+        });
+
+        await expect(
+          setEnsTextRecord(
+            signer,
+            'john1.eth',
+            'snapshot',
+            EMPTY_ADDRESS,
+            11155111
+          )
+        ).rejects.toThrow('root registry');
+        expect(send).not.toHaveBeenCalled();
+      },
+      10000
+    );
+  });
+
+  describe('getSpaceController helper failures', () => {
+    it(
+      'should throw when the helper reads a root registry the resolver does not',
+      async () => {
+        stubEnsV2({
+          ROOT_REGISTRY: to =>
+            to === UNIVERSAL_HELPER
+              ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+              : undefined
+        });
+
+        await expect(
+          getSpaceController('john1.eth', 11155111)
+        ).rejects.toThrow('root registry');
+      },
+      10000
+    );
+  });
+
   describe('getSpaceController', () => {
     it('should resolve a controller from the snapshot record', async () => {
       const controller = await getSpaceController('boorger.eth', 11155111);
