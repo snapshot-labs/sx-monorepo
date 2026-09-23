@@ -137,7 +137,14 @@ export function useSpaceSettings(space: Ref<Space>) {
       return compareAddresses(owner, account);
     },
     false,
-    { lazy: true, evaluating: isOwnerEvaluating }
+    {
+      lazy: true,
+      evaluating: isOwnerEvaluating,
+      onError: err => {
+        console.error(err);
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
+      }
+    }
   );
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
