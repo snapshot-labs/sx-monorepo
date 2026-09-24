@@ -1,5 +1,6 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import graphqlFields from 'graphql-fields';
+import { applyHistoricalCollectionBoundary } from '../../helpers/historicalAccess';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import serve from '../../helpers/requestDeduplicator';
@@ -27,7 +28,27 @@ const INDEX_COVERED_WHERE_KEYS = new Set([
   'created_lte'
 ]);
 
-async function query(parent, args, context?, info?) {
+export function getVotesRequestDeduplicationKey(
+  args,
+  requestedFields,
+  context?
+) {
+  const historicalAccess = context?.historicalAccess;
+  return JSON.stringify({
+    args,
+    requestedFields,
+    historicalAccess:
+      historicalAccess?.mode === 'enforce'
+        ? {
+            mode: historicalAccess.mode,
+            cutoff: historicalAccess.cutoff,
+            isEntitled: historicalAccess.isEntitled
+          }
+        : undefined
+  });
+}
+
+async function query(parent, args, context?, info?, proposalCutoff?) {
   const requestedFields = info ? graphqlFields(info) : {};
   const { first, skip } = args;
   const where = { ...(args.where || {}) };
@@ -189,9 +210,13 @@ async function query(parent, args, context?, info?) {
       INNER JOIN spaces ON spaces.id = p.space
       LEFT JOIN skins ON spaces.id = skins.id
       WHERE spaces.deleted = 0 AND spaces.settings IS NOT NULL AND p.id IN (?)
+        ${proposalCutoff ? 'AND p.created >= ?' : ''}
     `;
     try {
-      let proposals = await db.queryAsync(query, [proposalIds]);
+      let proposals = await db.queryAsync(
+        query,
+        proposalCutoff ? [proposalIds, proposalCutoff] : [proposalIds]
+      );
       proposals = Object.fromEntries(
         proposals.map(proposal => [proposal.id, formatProposal(proposal)])
       );
@@ -212,11 +237,22 @@ async function query(parent, args, context?, info?) {
 }
 
 export default async function (parent, args, context?, info?) {
-  const requestedFields = info ? graphqlFields(info) : {};
-  return await serve(JSON.stringify({ args, requestedFields }), query, [
-    parent,
+  args = applyHistoricalCollectionBoundary(
     args,
-    context,
-    info
-  ]);
+    context?.historicalAccess,
+    'votes'
+  );
+  const requestedFields = info ? graphqlFields(info) : {};
+  const proposalCutoff = requestedFields.proposal
+    ? applyHistoricalCollectionBoundary(
+        { where: {} },
+        context?.historicalAccess,
+        'vote_proposals'
+      ).where?.created_gte
+    : undefined;
+  return await serve(
+    getVotesRequestDeduplicationKey(args, requestedFields, context),
+    query,
+    [parent, args, context, info, proposalCutoff]
+  );
 }

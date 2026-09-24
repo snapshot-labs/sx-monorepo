@@ -1,4 +1,7 @@
-import fetchVotes from '../../src/graphql/operations/votes';
+import { parse } from 'graphql';
+import fetchVotes, {
+  getVotesRequestDeduplicationKey
+} from '../../src/graphql/operations/votes';
 import db from '../../src/helpers/mysql';
 
 jest.mock('../../src/helpers/mysql', () => ({
@@ -15,6 +18,36 @@ const queryAsync = db.queryAsync as jest.Mock;
 
 const PROPOSAL =
   '0x67d414042da88026e2c718284e90a5d79e1c0a32d322a288b373e0d7a21f4cef';
+
+function proposalInfo() {
+  const document: any = parse('query { votes { id proposal { id } } }');
+  const operation: any = document.definitions[0];
+  return {
+    fieldNodes: [operation.selectionSet.selections[0]],
+    fragments: {},
+    variableValues: {}
+  };
+}
+
+function voteRow() {
+  return {
+    id: 'vote-1',
+    ipfs: 'ipfs-1',
+    voter: '0x0000000000000000000000000000000000000001',
+    space: 'example.eth',
+    proposal: PROPOSAL,
+    reason: '',
+    app: 'snapshot',
+    created: 1700000001,
+    vp: 1,
+    vp_state: 'final',
+    vp_value: 1,
+    choice: '1',
+    metadata: '{}',
+    vp_by_strategy: '[]',
+    settings: '{}'
+  };
+}
 
 describe('votes resolver index usage', () => {
   beforeEach(() => queryAsync.mockReset());
@@ -302,4 +335,87 @@ describe('votes resolver index usage', () => {
       'ORDER BY v.created ASC, v.id ASC'
     );
   });
+
+  it('separates entitled and restricted requests in the deduplication key', () => {
+    const args = { first: 20, where: { created_gte: 1700000000 } };
+    const restricted = getVotesRequestDeduplicationKey(
+      args,
+      {},
+      {
+        historicalAccess: {
+          mode: 'enforce',
+          cutoff: 1700000000,
+          isEntitled: false,
+          response: { rawKey: 'must-not-appear' }
+        }
+      }
+    );
+    const entitled = getVotesRequestDeduplicationKey(
+      args,
+      {},
+      {
+        historicalAccess: {
+          mode: 'enforce',
+          cutoff: 1700000000,
+          isEntitled: true,
+          response: { rawKey: 'must-not-appear' }
+        }
+      }
+    );
+
+    expect(restricted).not.toBe(entitled);
+    expect(restricted).not.toContain('must-not-appear');
+    expect(entitled).not.toContain('must-not-appear');
+  });
+
+  it('preserves the existing deduplication key while off or observing', () => {
+    const args = { first: 20, where: {} };
+    const original = getVotesRequestDeduplicationKey(args, {}, undefined);
+
+    for (const mode of ['off', 'observe']) {
+      expect(
+        getVotesRequestDeduplicationKey(
+          args,
+          {},
+          {
+            historicalAccess: {
+              mode,
+              cutoff: 1700000000,
+              isEntitled: false
+            }
+          }
+        )
+      ).toBe(original);
+    }
+  });
+
+  it.each([
+    [false, true, 2],
+    [true, false, 1]
+  ])(
+    'applies the archive boundary to nested proposals (entitled=%s)',
+    async (isEntitled, expectsCutoff, expectedParamCount) => {
+      const cutoff = 1700000000;
+      queryAsync.mockResolvedValueOnce([voteRow()]).mockResolvedValueOnce([]);
+
+      await fetchVotes(
+        null,
+        { first: 20, skip: 0, where: { created_gte: cutoff } },
+        {
+          historicalAccess: {
+            mode: 'enforce',
+            cutoff,
+            keyState: isEntitled ? 'entitled' : 'anonymous',
+            isEntitled
+          }
+        },
+        proposalInfo()
+      );
+
+      const [proposalSql, proposalParams] = queryAsync.mock.calls[1];
+      expect(proposalSql.includes('p.created >= ?')).toBe(expectsCutoff);
+      expect(proposalParams).toHaveLength(expectedParamCount);
+      if (expectsCutoff) expect(proposalParams[1]).toBe(cutoff);
+    }
+  );
 });
