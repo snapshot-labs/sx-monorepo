@@ -19,6 +19,7 @@ const props = defineProps<{
   space: Space;
   disabled?: boolean;
   strategy: StrategyWithTreasury;
+  importTransactions: (transactions: TransactionType[]) => boolean;
   extraContacts?: Contact[];
 }>();
 
@@ -41,8 +42,13 @@ const modalOpen = ref({
 const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
-const importingFile = ref(false);
+const isImportingFile = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+let isDisposed = false;
+
+onScopeDispose(() => {
+  isDisposed = true;
+});
 
 const network = computed(() => getNetwork(props.space.network));
 // Tenderly runs every transaction as a call.
@@ -79,18 +85,25 @@ async function handleImportFile(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = '';
-  if (!file || !treasury.value) return;
+  if (!file || !treasury.value || props.disabled || isImportingFile.value) {
+    return;
+  }
 
-  importingFile.value = true;
+  const { importTransactions } = props;
+  const chainId = treasury.value.network;
+  const allowDelegatecall = props.strategy.type === 'safeSnap';
+  isImportingFile.value = true;
 
   try {
     const { transactions, warnings } = await parseSafeImportFile(
       await file.text(),
-      treasury.value.network,
-      { allowDelegatecall: props.strategy.type === 'safeSnap' }
+      chainId,
+      { allowDelegatecall }
     );
 
-    model.value = [...model.value, ...transactions];
+    if (isDisposed || props.disabled || !importTransactions(transactions)) {
+      return;
+    }
     uiStore.addNotification(
       'success',
       `Imported ${transactions.length} transaction${transactions.length === 1 ? '' : 's'}`
@@ -104,7 +117,7 @@ async function handleImportFile(event: Event) {
       uiStore.addNotification('error', 'Failed to import Safe file');
     }
   } finally {
-    importingFile.value = false;
+    isImportingFile.value = false;
   }
 }
 
@@ -237,7 +250,7 @@ watch(
                 disabled ||
                 getChainIdKind(treasury.network) !== 'evm'
               "
-              :loading="importingFile"
+              :loading="isImportingFile"
               uniform
               @click="fileInput?.click()"
             >
