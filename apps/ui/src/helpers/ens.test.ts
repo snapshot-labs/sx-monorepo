@@ -1,14 +1,52 @@
-import { describe, expect, it } from 'vitest';
+import { defaultAbiCoder, Interface } from '@ethersproject/abi';
+import { VoidSigner } from '@ethersproject/abstract-signer';
+import { Contract } from '@ethersproject/contracts';
+import { namehash } from '@ethersproject/hash';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   dnsEncodeName,
+  ENS_REGISTRY_ADDRESS,
   getEnsTextRecord,
   getNameOwner,
   getResolver,
   getSpaceController,
-  resolveName
+  resetEnsV2Cache,
+  resolveName,
+  setEnsTextRecord
 } from './ens';
+import { getProvider } from './provider';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  resetEnsV2Cache();
+});
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+const UNIVERSAL_HELPER = '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5';
+const RETIRED_ROOT_REGISTRY = '0xc960f7217d3643b525ef36bec8adf86953cd9ab8';
+const ENS_V2 = new Interface([
+  'function ROOT_REGISTRY() view returns (address)',
+  'function findExactOwner(bytes) view returns (address)',
+  'function findResolver(bytes) view returns (address, bytes32, uint256)'
+]);
+
+function stubEnsV2(
+  handlers: Record<string, (to: string) => string | Error | undefined>
+) {
+  const provider = getProvider(11155111);
+  const original = provider.call.bind(provider);
+
+  return vi.spyOn(provider, 'call').mockImplementation(async (tx, blockTag) => {
+    const data = String(await tx.data);
+    const fn = Object.keys(handlers).find(name =>
+      data.startsWith(ENS_V2.getSighash(name))
+    );
+    const result = fn && handlers[fn](String(await tx.to));
+    if (!result) return original(tx, blockTag);
+    if (result instanceof Error) throw result;
+    return result;
+  });
+}
 
 describe('ens', () => {
   describe('dnsEncodeName', () => {
@@ -29,20 +67,20 @@ describe('ens', () => {
   });
 
   describe('getNameOwner', () => {
-    describe('for names migrated to ENSv2', () => {
-      it('should return the owner of a migrated name on testnet', async () => {
-        const owner = await getNameOwner('test123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+    describe('for names registered in ENSv2', () => {
+      it('should return the owner of an ENSv2 name on testnet', async () => {
+        const owner = await getNameOwner('john1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve a case variant to the same owner', async () => {
-        const owner = await getNameOwner('TEST123.eth', 11155111);
-        expect(owner).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const owner = await getNameOwner('JOHN1.eth', 11155111);
+        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
 
       it('should resolve the same address as the space controller', async () => {
-        const controller = await getSpaceController('test123.eth', 11155111);
-        expect(controller).toBe('0x1208a26FAa0F4AC65B42098419EB4dAA5e580AC6');
+        const controller = await getSpaceController('john1.eth', 11155111);
+        expect(controller).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
       }, 10000);
     });
 
@@ -50,6 +88,11 @@ describe('ens', () => {
       it('should still resolve a DNS-imported domain through its DNS owner', async () => {
         const owner = await getNameOwner('ethplay.org', 11155111);
         expect(owner).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+      }, 10000);
+
+      it('should still resolve a DNS-imported domain without a resolver through its registry owner', async () => {
+        const owner = await getNameOwner('gregskril.com', 11155111);
+        expect(owner).toBe('0x179A862703a4adfb29896552DF9e307980D19285');
       }, 10000);
 
       it('should still resolve a subdomain through the registry', async () => {
@@ -196,14 +239,14 @@ describe('ens', () => {
   });
 
   describe('getResolver', () => {
-    it('should return the ENSv2 resolver of a migrated name on testnet', async () => {
-      const resolver = await getResolver('test123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+    it('should return the resolver of an ENSv2 name on testnet', async () => {
+      const resolver = await getResolver('john1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should normalize the name before resolving', async () => {
-      const resolver = await getResolver('TEST123.eth', 11155111);
-      expect(resolver).toBe('0x7cF791B101633754dE5Ea5Cb186cfEFf4163ccC3');
+      const resolver = await getResolver('JOHN1.eth', 11155111);
+      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
     }, 10000);
 
     it('should return the v1 resolver of an unmigrated name on testnet', async () => {
@@ -222,6 +265,282 @@ describe('ens', () => {
     }, 10000);
   });
 
+  describe('setEnsTextRecord', () => {
+    it.each([
+      [
+        'ENSv2',
+        'JOHN1.eth',
+        11155111,
+        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3',
+        '0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8'
+      ],
+      [
+        'ENSv1',
+        'ens.eth',
+        1,
+        '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9',
+        '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41'
+      ],
+      [
+        'ENSv1 on Sepolia',
+        'ens.eth',
+        11155111,
+        '0x179A862703a4adfb29896552DF9e307980D19285',
+        '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD'
+      ]
+    ] as const)(
+      'should encode an accepted %s controller update',
+      async (version, name, chainId, owner, resolver) => {
+        const provider = getProvider(chainId);
+        const signer = new VoidSigner(owner, provider);
+        const intercepted = new Error('Transaction intercepted');
+        const send = vi
+          .spyOn(signer, 'sendTransaction')
+          .mockRejectedValue(intercepted);
+
+        await expect(
+          setEnsTextRecord(signer, name, 'snapshot', owner, chainId)
+        ).rejects.toBe(intercepted);
+        expect(send).toHaveBeenCalledOnce();
+
+        const isV2 = version === 'ENSv2';
+        const setter = new Interface([
+          `function setText(${isV2 ? 'bytes' : 'bytes32'},string,string)`
+        ]);
+        const transaction = send.mock.calls[0][0];
+        expect(transaction).toMatchObject({
+          to: resolver,
+          data: setter.encodeFunctionData('setText', [
+            isV2 ? '0x056a6f686e310365746800' : namehash(name),
+            'snapshot',
+            owner
+          ])
+        });
+        await expect(
+          provider.call({ ...transaction, from: owner })
+        ).resolves.toBe('0x');
+      },
+      10000
+    );
+
+    it('should use the classic bytes32 setter when an ENSv2-owned name points at a resolver without the bytes-name interface', async () => {
+      const owner = '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3';
+      const resolver = '0xd7e590Ad0E92A6aC1d81f4483A9B951D3585a50F';
+      const name = 'john1.eth';
+      const provider = getProvider(11155111);
+      const signer = new VoidSigner(owner, provider);
+
+      vi.spyOn(provider, 'call').mockImplementation(async tx => {
+        const data = String(await tx.data);
+        if (data.startsWith('0x01ffc9a7')) {
+          return defaultAbiCoder.encode(['bool'], [false]);
+        }
+        if (data.startsWith(ENS_V2.getSighash('findExactOwner'))) {
+          return defaultAbiCoder.encode(['address'], [owner]);
+        }
+        if (data.startsWith(ENS_V2.getSighash('findResolver'))) {
+          return defaultAbiCoder.encode(
+            ['address', 'bytes32', 'uint256'],
+            [resolver, namehash(name), 0]
+          );
+        }
+        if (data.startsWith(ENS_V2.getSighash('ROOT_REGISTRY'))) {
+          return defaultAbiCoder.encode(
+            ['address'],
+            ['0x1111111111111111111111111111111111111111']
+          );
+        }
+        throw new Error(`Unexpected call: ${data}`);
+      });
+
+      const intercepted = new Error('Transaction intercepted');
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(intercepted);
+
+      await expect(
+        setEnsTextRecord(signer, name, 'snapshot', owner, 11155111)
+      ).rejects.toBe(intercepted);
+
+      const setter = new Interface(['function setText(bytes32,string,string)']);
+      expect(send.mock.calls[0][0]).toMatchObject({
+        to: resolver,
+        data: setter.encodeFunctionData('setText', [
+          namehash(name),
+          'snapshot',
+          owner
+        ])
+      });
+    });
+  });
+
+  describe('stale ENSv1 records below an ENSv2 name', () => {
+    beforeAll(async () => {
+      const registry = new Contract(
+        ENS_REGISTRY_ADDRESS,
+        [
+          'function owner(bytes32) view returns (address)',
+          'function resolver(bytes32) view returns (address)'
+        ],
+        getProvider(11155111)
+      );
+      const node = namehash('tiny.fox.eth');
+      expect(await registry.owner(node)).not.toBe(EMPTY_ADDRESS);
+      expect(await registry.resolver(node)).not.toBe(EMPTY_ADDRESS);
+    });
+
+    it.each([
+      ['getNameOwner', getNameOwner],
+      ['getSpaceController', getSpaceController],
+      ['getResolver', getResolver]
+    ] as const)(
+      '%s should not fall back to ENSv1',
+      async (_name, lookup) => {
+        expect(await lookup('tiny.fox.eth', 11155111)).toBe(EMPTY_ADDRESS);
+      },
+      10000
+    );
+
+    it('should not update the stale ENSv1 resolver', async () => {
+      const signer = new VoidSigner(
+        '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
+        getProvider(11155111)
+      );
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(new Error('Transaction intercepted'));
+
+      await expect(
+        setEnsTextRecord(
+          signer,
+          'tiny.fox.eth',
+          'snapshot',
+          EMPTY_ADDRESS,
+          11155111
+        )
+      ).rejects.toThrow('No resolver set for name');
+      expect(send).not.toHaveBeenCalled();
+    }, 10000);
+  });
+
+  describe('active ENSv1 2LD whose ENSv2 mirror reservation has expired', () => {
+    beforeAll(async () => {
+      const registry = new Contract(
+        '0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e',
+        ['function owner(bytes32) view returns (address)'],
+        getProvider(11155111)
+      );
+      expect(await registry.owner(namehash('ensauth-demo.eth'))).not.toBe(
+        EMPTY_ADDRESS
+      );
+    });
+
+    it.each([
+      ['getNameOwner', getNameOwner],
+      ['getSpaceController', getSpaceController],
+      ['getResolver', getResolver]
+    ] as const)(
+      '%s should not fall back to ENSv1',
+      async (_name, lookup) => {
+        expect(await lookup('ensauth-demo.eth', 11155111)).toBe(EMPTY_ADDRESS);
+      },
+      10000
+    );
+  });
+
+  describe.each([
+    ['getNameOwner', getNameOwner],
+    ['getResolver', getResolver]
+  ] as const)('%s helper failures', (_name, lookup) => {
+    it('should throw when the helper reads a root registry the resolver does not', async () => {
+      const rpc = stubEnsV2({
+        ROOT_REGISTRY: to =>
+          to === UNIVERSAL_HELPER
+            ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+            : undefined
+      });
+
+      await expect(lookup('john1.eth', 11155111)).rejects.toThrow(
+        'root registry'
+      );
+      expect(
+        rpc.mock.calls.map(([tx]) => String(tx.data).slice(0, 10))
+      ).not.toContain(ENS_V2.getSighash('findExactOwner'));
+    }, 10000);
+
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s instead of falling back to ENSv1',
+      async code => {
+        const error = Object.assign(new Error('Helper failed'), { code });
+        stubEnsV2({ findExactOwner: () => error });
+
+        await expect(lookup('john1.eth', 11155111)).rejects.toBe(error);
+      },
+      10000
+    );
+
+    it.each(['CALL_EXCEPTION', 'SERVER_ERROR'])(
+      'should propagate %s when checking ENSv1 delegation',
+      async code => {
+        const error = Object.assign(new Error('Resolver lookup failed'), {
+          code
+        });
+        stubEnsV2({
+          findExactOwner: () =>
+            defaultAbiCoder.encode(['address'], [EMPTY_ADDRESS]),
+          findResolver: () => error
+        });
+
+        await expect(lookup('ens.eth', 11155111)).rejects.toBe(error);
+      },
+      10000
+    );
+  });
+
+  describe('setEnsTextRecord helper failures', () => {
+    it('should throw when the helper reads a root registry the resolver does not', async () => {
+      const signer = new VoidSigner(
+        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3',
+        getProvider(11155111)
+      );
+      const send = vi
+        .spyOn(signer, 'sendTransaction')
+        .mockRejectedValue(new Error('Transaction intercepted'));
+      stubEnsV2({
+        ROOT_REGISTRY: to =>
+          to === UNIVERSAL_HELPER
+            ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+            : undefined
+      });
+
+      await expect(
+        setEnsTextRecord(
+          signer,
+          'john1.eth',
+          'snapshot',
+          EMPTY_ADDRESS,
+          11155111
+        )
+      ).rejects.toThrow('root registry');
+      expect(send).not.toHaveBeenCalled();
+    }, 10000);
+  });
+
+  describe('getSpaceController helper failures', () => {
+    it('should throw when the helper reads a root registry the resolver does not', async () => {
+      stubEnsV2({
+        ROOT_REGISTRY: to =>
+          to === UNIVERSAL_HELPER
+            ? defaultAbiCoder.encode(['address'], [RETIRED_ROOT_REGISTRY])
+            : undefined
+      });
+
+      await expect(getSpaceController('john1.eth', 11155111)).rejects.toThrow(
+        'root registry'
+      );
+    }, 10000);
+  });
+
   describe('getSpaceController', () => {
     it('should resolve a controller from the snapshot record', async () => {
       const controller = await getSpaceController('boorger.eth', 11155111);
@@ -231,6 +550,11 @@ describe('ens', () => {
     it('should resolve a DNS-imported space through its DNS owner', async () => {
       const controller = await getSpaceController('ethplay.org', 11155111);
       expect(controller).toBe('0x8D852E6cC57A855D0D75E1e2af57C9679D555958');
+    }, 10000);
+
+    it('should resolve a DNS-imported space without a resolver through its registry owner', async () => {
+      const controller = await getSpaceController('gregskril.com', 11155111);
+      expect(controller).toBe('0x179A862703a4adfb29896552DF9e307980D19285');
     }, 10000);
 
     it('should return an empty address for an un-imported DNS domain', async () => {
