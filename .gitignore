@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+# this monorepo uses bun (bun.lock); keep stray npm lockfiles out
+package-lock.json
 
 # testing
 coverage
@@ -42,3 +44,11 @@ dist.cjs
 .browser
 
 /legacy-docs
+
+# MySQL data directory — bind-mounted from the container, must never be committed
+mysql-data/
+
+# --- Private voting: coordinator state ---------------------------------------
+# Bind-mounted, created on first run: the per-keyper bearer tokens the coordinator
+# mints, so a restart reuses them instead of re-bootstrapping the committee.
+coordinator-state/

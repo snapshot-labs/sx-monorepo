@@ -8,6 +8,7 @@ import deleteProposalVotes from './helpers/deleteProposalVotes';
 import log from './helpers/log';
 import initMetrics from './helpers/metrics';
 import refreshModeration from './helpers/moderation';
+import { patchPrivacySchemas } from './helpers/privacySchemaPatch';
 import refreshProposalsScoresValue from './helpers/proposalsScoresValue';
 import refreshProposalsVpValue from './helpers/proposalStrategiesValue';
 import rateLimit from './helpers/rateLimit';
@@ -17,12 +18,15 @@ import {
   run as refreshStrategies,
   stop as stopStrategies
 } from './helpers/strategies';
+import { publishEligibilityKey } from './helpers/teEligibility';
+import { startTeTallyScheduler } from './helpers/teTallyScheduler';
 import { trackTurboStatuses } from './helpers/turbo';
 import refreshVotesVpValue from './helpers/votesVpValue';
 
 const app = express();
 
 async function startServer() {
+  patchPrivacySchemas();
   refreshModeration();
   refreshProposalsVpValue();
   refreshProposalsScoresValue();
@@ -34,6 +38,10 @@ async function startServer() {
 
   initMetrics(app);
   trackTurboStatuses();
+  // Before the scheduler, so a tally cannot read a key row this boot has not
+  // written yet.
+  await publishEligibilityKey();
+  startTeTallyScheduler();
 
   app.disable('x-powered-by');
   app.use(express.json({ limit: '20mb' }));

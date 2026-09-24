@@ -18,6 +18,20 @@ const DEFAULT_ADDRESS_FORMAT: AddressFormat[] = [
 
 export class PublicError extends Error {}
 
+// MySQL VARBINARY columns come back as Buffer; GraphQL exposes them as 0x-hex
+// strings so the UI / SDK can decode them with Buffer.from(s.slice(2), 'hex').
+function bytesToHex(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  if (Buffer.isBuffer(value)) return `0x${value.toString('hex')}`;
+  if (value instanceof Uint8Array) {
+    return `0x${Buffer.from(value).toString('hex')}`;
+  }
+  if (typeof value === 'string') {
+    return value.startsWith('0x') ? value : `0x${value}`;
+  }
+  return null;
+}
+
 const ARG_LIMITS = {
   default: {
     first: 1000,
@@ -449,6 +463,14 @@ export async function handleRelatedSpaces(
   return spaces;
 }
 
+function deriveDkgStatus(proposal: any): string | null {
+  if (proposal.te_dkg_status) return proposal.te_dkg_status;
+  if (proposal.privacy !== 'shutter-elgamal') return null;
+  if (proposal.te_mpk) return null;
+  const now = Math.floor(Date.now() / 1e3);
+  return now > Number(proposal.start) ? 'dkg_failed' : null;
+}
+
 export function formatUser(user) {
   const profile = jsonParse(user.profile, {});
   delete user.profile;
@@ -502,6 +524,14 @@ export function formatProposal(proposal) {
   }));
   proposal.privacy = proposal.privacy || '';
   proposal.quorumType = proposal.quorum_type || 'default';
+  // Threshold-ElGamal private voting fields. Off for non shutter-elgamal proposals.
+  proposal.te_config = jsonParse(proposal.te_config, null);
+  proposal.te_committee_pks = jsonParse(proposal.te_committee_pks, null);
+  proposal.te_keyper_urls = jsonParse(proposal.te_keyper_urls, null);
+  proposal.te_keyper_addresses = jsonParse(proposal.te_keyper_addresses, null);
+  proposal.te_aggregate = jsonParse(proposal.te_aggregate, null);
+  proposal.te_mpk = bytesToHex(proposal.te_mpk);
+  proposal.te_dkg_status = deriveDkgStatus(proposal);
   const rawFlagged = proposal.flagged;
   proposal.flagCode = rawFlagged;
   proposal.flagged = rawFlagged > 0;

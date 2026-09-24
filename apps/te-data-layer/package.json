@@ -1,0 +1,36 @@
+{
+  "name": "te-data-layer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Serves Snapshot's private-voting state over the threshold protocol's data-layer contract, so the keypers and their coordinator can run unmodified.",
+  "scripts": {
+    "lint": "bun run lint:nofix --fix",
+    "lint:nofix": "eslint . --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "test": "jest --collectCoverage=false"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-fetch": "^2.7.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.6.0",
+    "@types/node-fetch": "^2.6.12",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

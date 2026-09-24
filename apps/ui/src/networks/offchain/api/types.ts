@@ -7,7 +7,7 @@ import {
   VoteType
 } from '@/types';
 import {
-  OffchainProposalFragmentFragment,
+  OffchainProposalTeFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
   OffchainSpaceFragmentFragment,
   OffchainStatementFragmentFragment,
@@ -59,7 +59,7 @@ export type ApiSpace = Override<
       {
         type: VoteType | '' | null;
         quorumType: 'default' | 'rejection';
-        privacy: '' | 'shutter' | 'any';
+        privacy: '' | 'shutter' | 'shutter-elgamal' | 'any';
       }
     >;
     delegationPortal: DelegationPortal | null;
@@ -75,16 +75,21 @@ export type ApiSpace = Override<
   }
 >;
 
+// Based on the *Te* fragment, which spreads `offchainProposalFragment` and adds
+// the nine te_* columns — so this stays a superset of upstream's shape. Against a
+// production hub those columns are simply absent at runtime; every consumer
+// guards with a falsy check (see `queries.ts` for why the document is picked at
+// runtime rather than spliced).
 export type ApiProposal = Override<
-  OffchainProposalFragmentFragment,
+  OffchainProposalTeFragmentFragment,
   {
     type: VoteType;
     state: 'active' | 'pending' | 'closed';
     scores_state: 'invalid' | 'pending' | 'final';
-    privacy: 'shutter' | '';
+    privacy: 'shutter' | 'shutter-elgamal' | '';
     quorumType: 'default' | 'rejection';
     space: Override<
-      OffchainProposalFragmentFragment['space'],
+      OffchainProposalTeFragmentFragment['space'],
       { labels: SpaceMetadataLabel[] }
     >;
     strategies: Strategy[];

@@ -102,6 +102,12 @@ export async function getProposal(space, id) {
   proposal.choices = jsonParse(proposal.choices);
   proposal.vp_value_by_strategy = jsonParse(proposal.vp_value_by_strategy, []);
 
+  // Threshold-ElGamal columns. Always present (NULL on non-private proposals).
+  proposal.te_config = jsonParse(proposal.te_config, null);
+  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk)) {
+    proposal.te_mpk = `0x${proposal.te_mpk.toString('hex')}`;
+  }
+
   return proposal;
 }
 
@@ -122,7 +128,7 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  const query = `SELECT settings, domain, deleted, flagged, verified, turbo_expiration, hibernated FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]
@@ -137,8 +143,7 @@ export async function getSpace(
     verified: spaces[0].verified === 1,
     flagged: spaces[0].flagged === 1,
     hibernated: spaces[0].hibernated === 1,
-    turbo:
-      spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3
+    turbo: spaces[0].turbo_expiration > Date.now() / 1e3
   };
 }
 

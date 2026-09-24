@@ -1,0 +1,17 @@
+# Keep the Docker build context small and reproducible.
+**/node_modules
+.git
+**/.git
+**/dist
+**/build
+**/.turbo
+**/coverage
+**/test-results
+**/playwright-report
+.engine-room-shots
+*.log
+.keyper*.log
+**/.env
+**/.env.*
+!**/.env.example
+**/.DS_Store

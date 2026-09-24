@@ -66,7 +66,9 @@ export default async function ingestor(req) {
     const underTs = (ts - under).toFixed();
     const { domain, message, types } = body.data;
 
-    if (JSON.stringify(body).length > 1e5) {
+    // Deliberately 1e6, not upstream's 1e5: a single threshold-ElGamal ballot's
+    // `choice` runs ~158 KB, so at 1e5 every private vote is rejected at ingest.
+    if (JSON.stringify(body).length > 1e6) {
       return Promise.reject('too large message');
     }
 
