@@ -138,23 +138,65 @@ const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
 const editorExecutions = computed(() => {
   if (!proposal.value || !strategiesWithTreasuries.value) return [];
 
+  const draft = proposal.value;
+  const draftKey = proposalKey.value;
   const executions = [] as (StrategyWithTreasury & {
     key: string;
     transactions: Transaction[];
+    importTransactions: (transactions: Transaction[]) => boolean;
   })[];
 
   for (const strategy of strategiesWithTreasuries.value) {
     const key = getExecutionKey(strategy.treasury.chainId, strategy.address);
+    const treasuryAddress = strategy.treasury.address;
+    const strategyType = strategy.type;
 
     executions.push({
       ...strategy,
       key,
-      transactions: proposal.value.executions[key] ?? []
+      transactions: draft.executions[key] ?? [],
+      importTransactions: transactions => {
+        if (
+          proposalKey.value !== draftKey ||
+          proposal.value !== draft ||
+          proposals[draftKey] !== draft
+        ) {
+          return false;
+        }
+
+        const currentExecution = editorExecutions.value.find(
+          execution => execution.key === key
+        );
+        if (
+          !currentExecution ||
+          currentExecution.treasury.address !== treasuryAddress ||
+          currentExecution.type !== strategyType ||
+          isTreasuryLocked(key)
+        ) {
+          return false;
+        }
+
+        draft.executions[key] = [
+          ...(draft.executions[key] ?? []),
+          ...transactions
+        ];
+        return true;
+      }
     });
   }
 
   return executions;
 });
+
+function isTreasuryLocked(key: string) {
+  return (
+    !supportsMultipleTreasuries.value &&
+    editorExecutions.value.some(
+      execution => execution.key !== key && execution.transactions.length > 0
+    )
+  );
+}
+
 const hasExecution = computed(() =>
   editorExecutions.value.some(strategy => strategy.transactions.length > 0)
 );
@@ -605,18 +647,12 @@ watchEffect(() => {
             Change to a
             <AppLink
               :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
-              class="font-semibold text-rose-500"
             >
               premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             or
-            <AppLink
-              :to="{ name: 'space-pro' }"
-              class="font-semibold text-rose-500"
-            >
-              upgrade your space
-            </AppLink>
+            <AppLink :to="{ name: 'space-pro' }"> upgrade your space </AppLink>
             to continue.
           </UiAlert>
           <UiAlert
@@ -636,7 +672,7 @@ watchEffect(() => {
             no longer available.
             <AppLink
               :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="inline-flex items-center"
             >
               See migration guide
               <IH-arrow-sm-right class="-rotate-45" />
@@ -648,7 +684,6 @@ watchEffect(() => {
                   name: 'space-settings',
                   params: { tab: 'voting-strategies' }
                 }"
-                class="font-semibold text-rose-500"
                 >update your space</AppLink
               >.
             </template>
@@ -662,10 +697,7 @@ watchEffect(() => {
             class="mb-4"
           >
             This space is configured with premium strategies, please
-            <AppLink
-              :to="{ name: 'space-pro' }"
-              class="font-semibold text-rose-500"
-            >
+            <AppLink :to="{ name: 'space-pro' }">
               upgrade to Snapshot Pro
             </AppLink>
             or
@@ -674,13 +706,12 @@ watchEffect(() => {
                 name: 'space-settings',
                 params: { tab: 'voting-strategies' }
               }"
-              class="font-semibold text-rose-500"
               >edit your strategies</AppLink
             >
             to create a proposal.
             <AppLink
               :to="`${DOCS_URL}/user-guides/premium-voting-strategies`"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="inline-flex items-center"
             >
               Learn more
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
@@ -708,7 +739,6 @@ watchEffect(() => {
                 name: 'space-settings',
                 params: { tab: 'authenticators' }
               }"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
               >Go to settings</AppLink
             >
           </UiAlert>
@@ -724,12 +754,7 @@ watchEffect(() => {
                   "
                 >
                   Please verify your space to publish more proposals.
-                  <AppLink
-                    :to="VERIFIED_URL"
-                    class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >
-                    Verify space </AppLink
-                  >.</span
+                  <AppLink :to="VERIFIED_URL"> Verify space </AppLink>.</span
                 >
                 <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
                   You can publish up to
@@ -737,11 +762,7 @@ watchEffect(() => {
                   proposals per day and
                   {{ limits['space.verified.proposal_limit_per_month'] }}
                   proposals per month.
-                  <AppLink
-                    :to="{ name: 'space-pro' }"
-                    class="text-rose-500 dark:text-neutral-100 font-semibold"
-                    >Increase limit</AppLink
-                  >.
+                  <AppLink :to="{ name: 'space-pro' }">Increase limit</AppLink>.
                 </span>
               </UiAlert>
             </template>
@@ -809,13 +830,10 @@ watchEffect(() => {
             <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
-              :key="execution.key"
+              :key="`${proposalKey}:${execution.key}`"
               :model-value="execution.transactions"
-              :disabled="
-                !supportsMultipleTreasuries &&
-                hasExecution &&
-                execution.transactions.length === 0
-              "
+              :import-transactions="execution.importTransactions"
+              :disabled="isTreasuryLocked(execution.key)"
               :space="space"
               :strategy="execution"
               :extra-contacts="extraContacts"
