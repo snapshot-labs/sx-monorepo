@@ -34,6 +34,7 @@ import {
   getSpaceDecimals,
   getSpaceLink,
   updateCounter,
+  updateProposalScores,
   updateScoresTick
 } from '../common/utils';
 
@@ -468,6 +469,8 @@ export function createWriters(config: FullConfig) {
     );
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
+    proposal.scores = ['0', '0', '0'];
+    proposal.scores_parsed = [0, 0, 0];
     proposal.scores_1 = '0';
     proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
@@ -850,20 +853,7 @@ export function createWriters(config: FullConfig) {
     }
 
     proposal.vote_count += 1;
-    proposal.scores_total = (
-      BigInt(proposal.scores_total) + BigInt(vote.vp)
-    ).toString();
-    proposal.scores_total_parsed = getParsedVP(
-      proposal.scores_total,
-      proposal.vp_decimals
-    );
-    proposal[`scores_${choice}`] = (
-      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-    ).toString();
-    proposal[`scores_${choice}_parsed`] = getParsedVP(
-      proposal[`scores_${choice}`],
-      proposal.vp_decimals
-    );
+    updateProposalScores(proposal, choice, BigInt(vote.vp));
 
     await updateScoresTick(proposal, created, config.indexerName);
     await proposal.save();
