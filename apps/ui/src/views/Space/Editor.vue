@@ -647,18 +647,12 @@ watchEffect(() => {
             Change to a
             <AppLink
               :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
-              class="font-semibold text-rose-500"
             >
               premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             or
-            <AppLink
-              :to="{ name: 'space-pro' }"
-              class="font-semibold text-rose-500"
-            >
-              upgrade your space
-            </AppLink>
+            <AppLink :to="{ name: 'space-pro' }"> upgrade your space </AppLink>
             to continue.
           </UiAlert>
           <UiAlert
@@ -678,7 +672,7 @@ watchEffect(() => {
             no longer available.
             <AppLink
               :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="inline-flex items-center"
             >
               See migration guide
               <IH-arrow-sm-right class="-rotate-45" />
@@ -690,7 +684,6 @@ watchEffect(() => {
                   name: 'space-settings',
                   params: { tab: 'voting-strategies' }
                 }"
-                class="font-semibold text-rose-500"
                 >update your space</AppLink
               >.
             </template>
@@ -704,10 +697,7 @@ watchEffect(() => {
             class="mb-4"
           >
             This space is configured with premium strategies, please
-            <AppLink
-              :to="{ name: 'space-pro' }"
-              class="font-semibold text-rose-500"
-            >
+            <AppLink :to="{ name: 'space-pro' }">
               upgrade to Snapshot Pro
             </AppLink>
             or
@@ -716,13 +706,12 @@ watchEffect(() => {
                 name: 'space-settings',
                 params: { tab: 'voting-strategies' }
               }"
-              class="font-semibold text-rose-500"
               >edit your strategies</AppLink
             >
             to create a proposal.
             <AppLink
               :to="`${DOCS_URL}/user-guides/premium-voting-strategies`"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="inline-flex items-center"
             >
               Learn more
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
@@ -750,7 +739,6 @@ watchEffect(() => {
                 name: 'space-settings',
                 params: { tab: 'authenticators' }
               }"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
               >Go to settings</AppLink
             >
           </UiAlert>
@@ -766,12 +754,7 @@ watchEffect(() => {
                   "
                 >
                   Please verify your space to publish more proposals.
-                  <AppLink
-                    :to="VERIFIED_URL"
-                    class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >
-                    Verify space </AppLink
-                  >.</span
+                  <AppLink :to="VERIFIED_URL"> Verify space </AppLink>.</span
                 >
                 <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
                   You can publish up to
@@ -779,11 +762,7 @@ watchEffect(() => {
                   proposals per day and
                   {{ limits['space.verified.proposal_limit_per_month'] }}
                   proposals per month.
-                  <AppLink
-                    :to="{ name: 'space-pro' }"
-                    class="text-rose-500 dark:text-neutral-100 font-semibold"
-                    >Increase limit</AppLink
-                  >.
+                  <AppLink :to="{ name: 'space-pro' }">Increase limit</AppLink>.
                 </span>
               </UiAlert>
             </template>

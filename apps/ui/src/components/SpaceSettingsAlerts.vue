@@ -101,7 +101,7 @@ const hasAnyAlerts = computed(
         no longer available.
         <AppLink
           :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
-          class="inline-flex items-center font-semibold text-rose-500"
+          class="inline-flex items-center"
         >
           See migration guide
           <IH-arrow-sm-right class="-rotate-45" />
