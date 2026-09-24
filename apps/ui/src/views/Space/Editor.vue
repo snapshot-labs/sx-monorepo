@@ -171,11 +171,7 @@ const editorExecutions = computed(() => {
           !currentExecution ||
           currentExecution.treasury.address !== treasuryAddress ||
           currentExecution.type !== strategyType ||
-          (!supportsMultipleTreasuries.value &&
-            editorExecutions.value.some(
-              execution =>
-                execution.key !== key && execution.transactions.length > 0
-            ))
+          isTreasuryLocked(key)
         ) {
           return false;
         }
@@ -191,6 +187,16 @@ const editorExecutions = computed(() => {
 
   return executions;
 });
+
+function isTreasuryLocked(key: string) {
+  return (
+    !supportsMultipleTreasuries.value &&
+    editorExecutions.value.some(
+      execution => execution.key !== key && execution.transactions.length > 0
+    )
+  );
+}
+
 const hasExecution = computed(() =>
   editorExecutions.value.some(strategy => strategy.transactions.length > 0)
 );
@@ -848,11 +854,7 @@ watchEffect(() => {
               :key="`${proposalKey}:${execution.key}`"
               :model-value="execution.transactions"
               :import-transactions="execution.importTransactions"
-              :disabled="
-                !supportsMultipleTreasuries &&
-                hasExecution &&
-                execution.transactions.length === 0
-              "
+              :disabled="isTreasuryLocked(execution.key)"
               :space="space"
               :strategy="execution"
               :extra-contacts="extraContacts"
