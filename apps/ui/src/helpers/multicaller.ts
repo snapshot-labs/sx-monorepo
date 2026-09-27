@@ -1,5 +1,5 @@
 import { Provider } from '@ethersproject/providers';
-import set from 'lodash.set';
+import set from 'lodash/set';
 import { CallOptions, multicall3 } from '@/helpers/call';
 
 export default class Multicaller {
