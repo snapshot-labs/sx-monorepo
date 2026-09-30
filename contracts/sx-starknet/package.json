@@ -31,7 +31,7 @@
     "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#05f218fb6617932e56bf5388c3b389c3028a7b73",
     "@openzeppelin/contracts-upgradeable": "github:OpenZeppelin/openzeppelin-contracts-upgradeable#56118009a30763d6b635676bed7968874036bb53",
     "@openzeppelin/hardhat-upgrades": "^3.2.0",
-    "@snapshot-labs/sx": "^0.1.11",
+    "@snapshot-labs/sx": "^0.1.12",
     "@types/chai": "^4.2.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "^24",
