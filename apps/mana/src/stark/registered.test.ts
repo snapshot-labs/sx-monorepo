@@ -49,7 +49,8 @@ const valid = {
     strategies: [],
     proposal: 32,
     choice: 1,
-    metadataUri: ''
+    metadataUri: 'ipfs://metadata',
+    executionStrategy: { addr: '0x789', params: ['0x101'] }
   }
 };
 

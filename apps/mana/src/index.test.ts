@@ -65,7 +65,14 @@ it('starts and keeps serving HTTP after isolating a malformed stored registratio
     type: 'Vote',
     sender: '0x123',
     hash: '0xe002',
-    data: { space: '0x123', authenticator: '0x456' }
+    data: {
+      space: '0x123',
+      authenticator: '0x456',
+      strategies: [],
+      proposal: 32,
+      choice: 1,
+      metadataUri: 'ipfs://metadata'
+    }
   };
   vi.mocked(db.getTransactionsToProcess).mockResolvedValue([invalid, valid]);
   vi.mocked(db.markOldTransactionsAsProcessed).mockImplementation(async () => {
