@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import * as herodotus from './herodotus';
 import { getClient, NETWORKS } from './networks';
+import { registeredTransactionSchema } from './transaction';
 import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 import logger from './logger';
@@ -83,18 +84,27 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  async function registerTransaction(id: number, params: any, res: Response) {
-    try {
-      const { type, sender, hash, payload } = params;
+  async function registerTransaction(
+    id: number,
+    params: unknown,
+    res: Response
+  ) {
+    const parsed = registeredTransactionSchema.safeParse(params);
+    if (!parsed.success) {
+      return rpcError(res, 400, 'Invalid transaction parameters', id);
+    }
 
-      logger.info({ type, sender, hash, payload }, 'Registering transaction');
+    try {
+      const { type, sender, hash, payload } = parsed.data;
+
+      logger.info({ type, sender, hash }, 'Registering transaction');
 
       await db.registerTransaction(chainId, type, sender, hash, payload);
 
       return rpcSuccess(res, true, id);
-    } catch (err) {
-      logger.error({ err }, 'Failed to register transaction');
-      return rpcError(res, 500, err, id);
+    } catch {
+      logger.error('Failed to register transaction');
+      return rpcError(res, 500, 'Failed to register transaction', id);
     }
   }
 
