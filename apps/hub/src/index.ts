@@ -5,6 +5,7 @@ import cors from 'cors';
 import express from 'express';
 import api from './api';
 import eip4824 from './eip4824';
+import geg from './geg';
 import graphql from './graphql';
 import { checkKeycard } from './helpers/keycard';
 import log from './helpers/log';
@@ -12,6 +13,7 @@ import initMetrics from './helpers/metrics';
 import { closeDatabase } from './helpers/mysql';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
+import te from './te';
 import './helpers/strategies';
 
 /** Heartbeat — one log line every 30s. A missing tick = the process is
@@ -30,13 +32,26 @@ const { stop: stopMetrics } = initMetrics(app);
 refreshSpacesCache();
 
 app.disable('x-powered-by');
-app.use(express.json({ limit: '20mb' }));
+// The raw body is kept because JSON.parse is lossy for integers above 2^53,
+// and one payload carries them: a published tally's totals are sums over
+// weighted ballots. Rounding them would break the signature check on a
+// perfectly valid result — see helpers/bigIntJson.ts.
+app.use(
+  express.json({
+    limit: '20mb',
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf.toString('utf8');
+    }
+  })
+);
 app.use(express.urlencoded({ limit: '20mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.set('trust proxy', 1);
 app.use(checkKeycard, rateLimit);
 app.use('/api', api);
 app.use('/api/eip4824', eip4824);
+app.use('/api', te);
+app.use('/api', geg);
 app.use('/graphql', graphql);
 
 fallbackLogger(app);

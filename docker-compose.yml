@@ -1,0 +1,240 @@
+# Private voting runs on the generalised-el-gamal protocol stack. Its source lives
+# in another repository, but nothing here builds it: the coordinator below runs the
+# published image, so this repo is the only one you need checked out.
+#
+#   docker compose up -d        Snapshot's half, plus the coordinator
+#
+# To run one yourself (local testing, or you are also an operator), use the keyper
+# stack in the protocol repo — no checkout needed, just two files:
+#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/docker-compose.keyper.yml
+#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/.env.keyper.example
+# Set its GEG_API_URL to this deployment's translator (:3002), not the example's
+# default, which points at the protocol repo's own api service.
+#
+# The coordinator is part of this stack, and it is fail-closed: COORDINATOR_SIGNING_KEY
+# and COORDINATOR_API_TOKEN must both be set or `docker compose up -d` refuses to run
+# at all — including for the other services. That is deliberate. A coordinator that
+# booted without a signing key would fail much later, at result-publishing time, on a
+# proposal whose votes are already cast. Set both in .env before starting; see
+# .env.example, or run scripts/geg/gen-env.py --write.
+#
+# Who points where:
+#   coordinator → GEG_DATA_LAYER_URL → te-data-layer root   reads + writes; sole writer
+#   keyper      → GEG_API_URL        → te-data-layer /port  reads only; appends /port
+#   keyper      → COORDINATOR_URL    → coordinator :8400    keyper writes relay here
+#   sequencer   → TE_KEYPERS         → each keyper's URL, frozen into the proposal
+#
+# The coordinator shares this compose network, so it reaches the translator at
+# `http://te-data-layer:3002` directly. The keypers are separate compose projects
+# (and separate machines in a real deployment), so they still go through the host.
+#
+# The keyper URLs in TE_KEYPERS are dialled by the coordinator, so they must be
+# addresses reachable from *its* host — public URLs in a real deployment, and
+# host.docker.internal:810N when everything runs on one machine.
+#
+# Required .env on this machine:
+#   SEQ_RELAYER_PK          Sequencer relayer private key
+#   SEQ_AUTH_SECRET         Sequencer auth secret
+#
+# Required for private voting (all unset = public voting only, and every
+# private path stays dormant):
+#   TE_ELIGIBILITY_PRIVATE_KEY   the sequencer's credential-issuing key
+#   TE_KEYPERS                   one URL per committee member (addresses are
+#                                read from each keyper's /status, not configured)
+#   TE_RESULT_PUBLISHER_ADDRESS  the coordinator's address
+#   COORDINATOR_SIGNING_KEY      the coordinator's key. Its address MUST equal
+#                                TE_RESULT_PUBLISHER_ADDRESS above and
+#                                COORDINATOR_IDENTITY in every keyper env —
+#                                scripts/geg/gen-env.py derives all three from it.
+#   COORDINATOR_API_TOKEN        bearer token for the keyper write relay
+#
+# Worth setting deliberately rather than inheriting:
+#   TE_SOLVER_CEILING            what the coordinator can solve, and therefore the
+#                                `scale` every proposal counts in. The 1e12 default
+#                                is ~a 0.5 GB machine; see .env.example.
+#
+# Quick start:
+#   cp .env.example .env
+#   mkdir -p mysql-data
+#   docker compose -f docker-compose.yml up -d
+
+services:
+  mysql:
+    image: mysql:8.0
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --max_connections=300
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+      - ./apps/hub/src/helpers/schema.sql:/schema/hub-schema.sql:ro
+      - ./apps/sequencer/src/helpers/schema.sql:/schema/sequencer-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  hub:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    image: sx-backend:local
+    command: ["bun", "run", "apps/hub/src/index.ts"]
+    environment:
+      PORT: "3000"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      # The hub only ever 307-redirects to this, and the party following the
+      # redirect is the *browser* — /api/scores/:id is what the UI calls to finalise
+      # a closed proposal's scores. So it must be an address the browser can
+      # resolve: `http://sequencer:3001` is container-internal, and a browser
+      # following it fails DNS, which the UI swallows and the proposal sits on
+      # "Finalizing results" forever. Override for a real deployment.
+      SEQUENCER_URL: "${SEQUENCER_PUBLIC_URL:-http://localhost:${SEQ_PORT:-3001}}"
+      STAMP_URL: https://stamp.fyi
+      SCORE_API_URL: https://score.snapshot.org
+      SIDEKICK_URL: https://sh5.co
+      KEYCARD_URL: ""
+      RATE_LIMIT_DATABASE_URL: ""
+    ports:
+      - "${HUB_PORT:-3000}:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "const r = await fetch('http://localhost:3000/api'); process.exit(r ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  sequencer:
+    image: sx-backend:local
+    command: ["bun", "run", "apps/sequencer/src/index.ts"]
+    environment:
+      PORT: "3001"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      RELAYER_PK: ${SEQ_RELAYER_PK:-}
+      DEFAULT_NETWORK: "11155111"
+      SHUTTER_URL: ""
+      SIDEKICK_URL: https://sh5.co
+      SCORE_API_URL: https://score.snapshot.org
+      SCHNAPS_API_URL: https://schnaps.snapshot.box
+      BROVIDER_URL: https://rpc.snapshot.org
+      OVERLORD_URL: https://overlord.snapshot.box
+      AUTH_SECRET: ${SEQ_AUTH_SECRET}
+      WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
+      LAST_CB: "1"
+      # Read at proposal creation to freeze the hub's eligibility public key, keeping
+      # the hub's private half the single source of truth.
+      HUB_URL: http://hub:3000
+      # The committee, frozen onto each private proposal as it is created. Addresses
+      # are configured explicitly and never discovered from a keyper's own /status —
+      # discovery let a network attacker substitute an address mid-ceremony.
+      TE_KEYPERS: "${TE_KEYPERS:-}"
+      # The quorum: t of n keypers act together. Must be a majority (2t > n),
+      # so a committee of 3 needs 2.
+      TE_THRESHOLD_T: "${TE_THRESHOLD_T:-2}"
+      # Denominator for weighted vote splits: 100 means percentages.
+      TE_WEIGHTED_BUDGET: "${TE_WEIGHTED_BUDGET:-100}"
+      # The coordinator's address: it signs the published result, and the hub accepts
+      # a result from no other key.
+      TE_RESULT_PUBLISHER_ADDRESS: "${TE_RESULT_PUBLISHER_ADDRESS:-}"
+      TE_ELIGIBILITY_PRIVATE_KEY: "${TE_ELIGIBILITY_PRIVATE_KEY:-}"
+      # A private proposal must open at least this far ahead, or the key ceremony
+      # cannot finish and the proposal is terminally failed when voting opens.
+      MIN_DKG_LEAD_TIME_S: "${MIN_DKG_LEAD_TIME_S:-180}"
+      # How large a discrete-log search this deployment's coordinator can solve:
+      # `budget x sum(admitted weights)`. It decides the proposal's `scale`, so it is
+      # a statement about the coordinator's hardware, not a preference. Cost is ~2*sqrt(bound)*11us
+      # and ~218 bytes*sqrt(bound), so 1e12 is roughly 21s and 220MB.
+      TE_SOLVER_CEILING: "${TE_SOLVER_CEILING:-1e12}"
+    ports:
+      - "${SEQ_PORT:-3001}:3001"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      hub:
+        condition: service_started
+    restart: unless-stopped
+
+  te-data-layer:
+    image: sx-backend:local
+    command: ["bun", "run", "apps/te-data-layer/src/index.ts"]
+    environment:
+      PORT: "3002"
+      HUB_URL: http://hub:3000
+      LOG_LEVEL: "${TE_DATA_LAYER_LOG_LEVEL:-info}"
+    ports:
+      # Published because the coordinator and the keypers are separate stacks, on
+      # separate hosts in a real deployment and separate compose projects locally.
+      - "${TE_DATA_LAYER_PORT:-3002}:3002"
+    depends_on:
+      hub:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "const r = await fetch('http://localhost:3002/health'); process.exit(r.ok ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # The protocol's coordinator: it drives the DKG, relays the keypers' signed writes
+  # to the translator (it is the data layer's sole writer), and publishes the result.
+  #
+  # Fail-closed on its two secrets: unset, and compose refuses to start anything.
+  coordinator:
+    image: ${GEG_IMAGE:-ghcr.io/shutter-network/generalised-elgamal-voting:0.1.0}
+    command: ["python", "-m", "geg.services.coordinator"]
+    environment:
+      GEG_DATA_LAYER: database
+      # The translator's root surface, over this compose network. Keep the root
+      # reachable only by the coordinator — keypers are given the read-only /port
+      # mount instead, because the ballot write path is unauthenticated.
+      GEG_DATA_LAYER_URL: ${GEG_DATA_LAYER_URL:-http://te-data-layer:3002}
+      # Also the result-publisher identity: this key signs the published result, so
+      # its address must equal each proposal's frozen result_publisher_key — i.e.
+      # TE_RESULT_PUBLISHER_ADDRESS, which the sequencer reads from the same .env.
+      COORDINATOR_SIGNING_KEY: ${COORDINATOR_SIGNING_KEY:?set COORDINATOR_SIGNING_KEY (secp256k1 key; its address is the result publisher)}
+      # Bearer token for the write relay. Fail-closed: unset means no keyper can write.
+      COORDINATOR_API_TOKEN: ${COORDINATOR_API_TOKEN:?set COORDINATOR_API_TOKEN (relay bearer token)}
+      COORDINATOR_PORT: "8400"
+      # Seconds between data-layer polls: how quickly a new proposal starts its DKG,
+      # and how fast the tally advances once voting closes.
+      COORDINATOR_POLL_S: ${COORDINATOR_POLL_S:-30.0}
+      # The per-keyper bearer tokens this process mints live here, so a restart
+      # reuses them instead of re-bootstrapping the whole committee.
+      COORDINATOR_STATE_DIR: /coordinator-state
+    ports:
+      # Published because the keypers are separate compose projects — on separate
+      # hosts in a real deployment — and this is where their writes go.
+      - "${COORDINATOR_PORT:-8400}:8400"
+    volumes:
+      - ./coordinator-state:/coordinator-state
+    extra_hosts:
+      # The keyper endpoints frozen into each proposal are dialled from here, so they
+      # must resolve from this container: host-published ports locally, real URLs in
+      # production (where this is harmless).
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      te-data-layer:
+        condition: service_healthy
+    restart: unless-stopped

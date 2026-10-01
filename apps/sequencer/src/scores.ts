@@ -18,6 +18,24 @@ async function getProposal(id: string): Promise<any | undefined> {
   proposal.scores = JSON.parse(proposal.scores);
   proposal.scores_by_strategy = JSON.parse(proposal.scores_by_strategy);
   proposal.vp_value_by_strategy = JSON.parse(proposal.vp_value_by_strategy);
+  // Threshold-ElGamal columns: NULL when privacy != 'shutter-elgamal' or
+  // before DKG completion. Parse JSON fields and hex-encode the binary mpk
+  // so downstream callers see the same shape as actions.ts/getProposal.
+  if (typeof proposal.te_config === 'string') {
+    proposal.te_config = JSON.parse(proposal.te_config);
+  }
+  if (typeof proposal.te_committee_pks === 'string') {
+    proposal.te_committee_pks = JSON.parse(proposal.te_committee_pks);
+  }
+  if (typeof proposal.te_keyper_urls === 'string') {
+    proposal.te_keyper_urls = JSON.parse(proposal.te_keyper_urls);
+  }
+  if (typeof proposal.te_aggregate === 'string') {
+    proposal.te_aggregate = JSON.parse(proposal.te_aggregate);
+  }
+  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk)) {
+    proposal.te_mpk = `0x${proposal.te_mpk.toString('hex')}`;
+  }
   let proposalState = 'pending';
   const ts = parseInt((Date.now() / 1e3).toFixed());
   if (ts > proposal.start) proposalState = 'active';
@@ -127,6 +145,27 @@ export async function updateProposalAndVotes(
     return true;
   }
 
+  if (proposal.privacy === 'shutter-elgamal') {
+    if (proposal.state !== 'closed') {
+      // Voting is still open: the tally stays encrypted until close, but the
+      // *number* of ballots cast is public (same as Snapshot's classic
+      // shielded `shutter` mode, which shows a live vote count while hiding
+      // the choices). Keep proposals.votes in sync so the UI doesn't show
+      // "0 votes" while ballots are arriving.
+      const [{ n }] = await db.queryAsync(
+        'SELECT COUNT(*) AS n FROM votes WHERE proposal = ?',
+        [proposal.id]
+      );
+      await db.queryAsync(
+        'UPDATE proposals SET votes = ? WHERE id = ? LIMIT 1',
+        [n, proposal.id]
+      );
+      return true;
+    }
+    const finalised = await runShutterElgamalTally(proposal);
+    return finalised;
+  }
+
   const ts = Number((Date.now() / 1e3).toFixed());
 
   // Delay computation of final scores, to allow time for last minute votes to finish
@@ -143,12 +182,8 @@ export async function updateProposalAndVotes(
     (proposal.votes > 20000 && proposal.scores_updated > ts - 300) ||
     pendingRequests[proposalId]
   ) {
-    console.log(
-      'ignore score calculation',
-      proposal.space,
-      proposalId,
-      proposal.votes,
-      proposal.scores_updated
+    log.info(
+      `[scores] skipping recalculation space=${proposal.space} proposal=${proposalId} votes=${proposal.votes} scores_updated=${proposal.scores_updated}`
     );
     return false;
   }
@@ -219,4 +254,84 @@ export async function updateProposalAndVotes(
     delete pendingRequests[proposalId];
     throw err;
   }
+}
+
+/**
+ * Threshold-ElGamal tally mirror.
+ *
+ * Idempotent. Called by ``updateProposalAndVotes`` once the proposal has closed.
+ *
+ * **This does not tally anything.** It publishes, in Snapshot's own columns, a
+ * result the committee established elsewhere:
+ *
+ *   1. The keypers build the weighted aggregate themselves from the ballot feed
+ *      and post it signed to ``POST /api/proposal/:id/te_aggregate``, which the
+ *      hub admits only on a quorum of matching digests (``geg.ts``).
+ *   2. The tally aggregator solves the discrete log — Lagrange over ``t+1``
+ *      DLEQ-verified shares, then BSGS within ``budget × Σ(scaled weights)`` —
+ *      and the result publisher posts the totals to ``POST /te_result``, which
+ *      the hub stores in ``te_results`` behind a signature check.
+ *   3. This function reads that row. No row yet means the committee has not
+ *      finished: return ``false``, leave ``scores_state`` pending, and let the
+ *      next scheduler tick retry.
+ *
+ * So ``recoverTally`` is never called here, and BSGS never runs in this process.
+ * Exactly one party solves the discrete log; everyone downstream — the hub, this
+ * function, and the browser audit in ``ui/helpers/teVerify`` — only *checks* what
+ * that party published, which is the cheaper half of the same guarantee.
+ *
+ * The one piece of arithmetic that is ours is the units: ``te_results`` counts in
+ * scaled units multiplied by the budget, ``proposals.scores`` in token units,
+ * hence ``total × scale / budget`` below.
+ *
+ * ``scores_by_strategy`` is intentionally empty: per-voter strategy breakdown
+ * leaks individual votes through homomorphic isolation, which is the exact
+ * privacy property this mode preserves.
+ */
+async function runShutterElgamalTally(proposal: any): Promise<boolean> {
+  const rows = await db.queryAsync(
+    'SELECT totals_json FROM te_results WHERE proposal_id = ? LIMIT 1',
+    [proposal.id]
+  );
+  if (!rows[0]) return false;
+
+  let totals: string[];
+  try {
+    totals = JSON.parse(rows[0].totals_json);
+  } catch (err: any) {
+    log.warn(`[te-tally] ${proposal.id} unreadable result: ${err.message}`);
+    return false;
+  }
+
+  const budget = Number(proposal.te_config?.budget ?? 1);
+  // Totals are stored as decimal strings because they can exceed 2^53, where a
+  // JSON number stops being exact. `Number()` here is lossy at that scale and
+  // that is accepted: `scores` is a float column and the published figure is a
+  // presentation of the tally, not the artifact anyone verifies. The exact
+  // integers stay in te_results for an auditor.
+  const scale = Number(proposal.te_config?.scale ?? 1);
+  const numericScores = totals.map(t => (Number(t) * scale) / budget);
+  const total = numericScores.reduce((a, b) => a + b, 0);
+
+  const [{ n }] = await db.queryAsync(
+    'SELECT COUNT(*) AS n FROM votes WHERE proposal = ?',
+    [proposal.id]
+  );
+
+  await updateProposalScores(
+    proposal,
+    {
+      scores_state: 'final',
+      scores: numericScores,
+      // Deliberately empty: a per-strategy breakdown of a private tally would
+      // narrow each ballot down to the strategies that produced it.
+      scores_by_strategy: [],
+      scores_total: total
+    },
+    n
+  );
+  log.info(
+    `[te-tally] ${proposal.id} mirrored published result; scores=${JSON.stringify(numericScores)}`
+  );
+  return true;
 }

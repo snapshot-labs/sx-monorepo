@@ -14,6 +14,22 @@ const require = createRequire(import.meta.url);
 
 const ELECTRON = process.env.ELECTRON || false;
 
+/**
+ * Applied under Vitest only, never to the app bundle.
+ *
+ * The crypto package ships the same code as CommonJS and as an ES module. The
+ * ESM build loads its emscripten BLST binary through a dynamic `require('fs')`:
+ * unreachable in a browser, fine in CommonJS, and a hard failure under Node's
+ * ESM loader — which is exactly where Vitest runs these tests.
+ */
+const TEST_ONLY_ALIASES: Record<string, string> = process.env.VITEST
+  ? {
+      '@shutter-network/urban-verified-crypto': require.resolve(
+        '@shutter-network/urban-verified-crypto'
+      )
+    }
+  : {};
+
 export default defineConfig({
   base: ELECTRON ? './' : undefined,
   define: {
@@ -79,6 +95,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      ...TEST_ONLY_ALIASES,
       // polyfills
       stream: require.resolve('stream-browserify'),
       events: require.resolve('events'),
