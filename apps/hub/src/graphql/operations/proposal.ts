@@ -1,9 +1,10 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
+import { enforceHistoricalEntityBoundary } from '../../helpers/historicalAccess';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { formatProposal } from '../helpers';
 
-export default async function (parent, { id }) {
+export default async function (parent, { id }, context?) {
   const query = `
     SELECT
       p.*,
@@ -22,12 +23,25 @@ export default async function (parent, { id }) {
     WHERE p.id = ? AND spaces.deleted = 0 AND spaces.settings IS NOT NULL
     LIMIT 1
   `;
+  let proposals;
   try {
-    const proposals = await db.queryAsync(query, [id]);
-    return proposals.map(proposal => formatProposal(proposal))[0] || null;
+    proposals = await db.queryAsync(query, [id]);
   } catch (err: any) {
     log.error(`[graphql] proposal, ${JSON.stringify(err)}`);
     capture(err, { id });
     return Promise.reject(new Error('request failed'));
   }
+
+  const proposal = proposals[0];
+  if (!proposal) return null;
+  if (
+    !enforceHistoricalEntityBoundary(
+      proposal.created,
+      context?.historicalAccess,
+      'proposal'
+    )
+  ) {
+    return null;
+  }
+  return formatProposal(proposal);
 }
