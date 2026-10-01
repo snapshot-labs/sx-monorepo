@@ -5,7 +5,9 @@ import logger from './logger';
 import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
-const validNetworkIds = Array.from(NETWORK_IDS.values());
+// Offchain spaces are keyed by ENS name and get one account shared across EVM chains.
+const OFFCHAIN_NETWORK_IDS = ['s', 's-tn'];
+const validNetworkIds = [...NETWORK_IDS.values(), ...OFFCHAIN_NETWORK_IDS];
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
