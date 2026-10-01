@@ -1,6 +1,7 @@
 import { utils } from '@snapshot-labs/sx';
 import { processProposal } from './herodotus';
-import { getClient } from './networks';
+import { getClient, NETWORKS } from './networks';
+import { registeredTransactionSchema } from './transaction';
 import * as db from '../db';
 import { sleep } from '../utils';
 import logger from './logger';
@@ -19,6 +20,19 @@ type Transaction = {
 const failedCounter: Record<string, number | undefined> = {};
 
 async function processTransaction(transaction: Transaction) {
+  const parsed = registeredTransactionSchema.safeParse({
+    ...transaction,
+    payload: transaction.data
+  });
+  if (!parsed.success || !NETWORKS.has(transaction.network)) {
+    await db.markTransactionProcessed(transaction.id, { failed: true });
+    logger.warn(
+      { transactionId: transaction.id },
+      'Marked invalid registered transaction as failed'
+    );
+    return;
+  }
+
   const storageAddress = utils.encoding.getStorageVarAddress(
     '_commits',
     transaction.hash,
@@ -49,13 +63,6 @@ async function processTransaction(transaction: Transaction) {
       receipt = await client.updateProposal(account, payload);
     } else if (transaction.type === 'Vote') {
       receipt = await client.vote(account, payload);
-    } else {
-      logger.warn(
-        {
-          transaction
-        },
-        'Skipped unknown transaction type'
-      );
     }
 
     logger.info({ receipt }, 'Transaction broadcasted successfully');
@@ -75,15 +82,27 @@ async function processTransaction(transaction: Transaction) {
 
 export async function registeredTransactionsLoop() {
   while (true) {
-    const transactions = await db.getTransactionsToProcess();
+    try {
+      const transactions = await db.getTransactionsToProcess();
 
-    logger.info({ count: transactions.length }, 'Processing transactions');
+      logger.info({ count: transactions.length }, 'Processing transactions');
 
-    for (const transaction of transactions) {
-      await processTransaction(transaction);
+      for (const transaction of transactions) {
+        try {
+          await processTransaction(transaction);
+        } catch {
+          logger.error(
+            { transactionId: transaction.id },
+            'Failed to process registered transaction; retrying'
+          );
+        }
+      }
+
+      await db.markOldTransactionsAsProcessed();
+    } catch {
+      logger.error('Failed to process registered transaction queue; retrying');
     }
 
-    await db.markOldTransactionsAsProcessed();
     await sleep(INTERVAL);
   }
 }
