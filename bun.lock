@@ -76,7 +76,7 @@
         "@snapshot-labs/keycard": "^0.5.1",
         "@snapshot-labs/snapshot-metrics": "^2.0.1",
         "@snapshot-labs/snapshot-sentry": "^4.0.0",
-        "@snapshot-labs/snapshot.js": "^0.17.5",
+        "@snapshot-labs/snapshot.js": "^0.17.6",
         "bluebird": "^3.7.2",
         "connection-string": "^1.0.1",
         "cors": "^2.8.5",
@@ -179,7 +179,7 @@
         "@snapshot-labs/pineapple": "^1.2.1",
         "@snapshot-labs/snapshot-metrics": "^2.0.1",
         "@snapshot-labs/snapshot-sentry": "^4.0.0",
-        "@snapshot-labs/snapshot.js": "^0.17.5",
+        "@snapshot-labs/snapshot.js": "^0.17.6",
         "ajv": "8.11.0",
         "bluebird": "^3.7.2",
         "connection-string": "^1.0.1",
@@ -234,7 +234,7 @@
         "@reown/walletkit": "^1.2.11",
         "@snapshot-labs/lock": "0.3.2",
         "@snapshot-labs/pineapple": "^1.2.1",
-        "@snapshot-labs/snapshot.js": "^0.17.5",
+        "@snapshot-labs/snapshot.js": "^0.17.6",
         "@snapshot-labs/sx": "^0.1.11",
         "@snapshot-labs/tune": "0.1.0",
         "@tanstack/vue-query": "^5.64.2",
@@ -1780,7 +1780,7 @@
 
     "@snapshot-labs/snapshot-sentry": ["@snapshot-labs/snapshot-sentry@4.0.0", "", { "dependencies": { "@sentry/node": "^10.52.0" }, "peerDependencies": { "express": "^4 || ^5" }, "optionalPeers": ["express"] }, "sha512-g9yAJQj+55Iu42yVl+dOtOg1e0K9KoFAxV0o8FQL2X2x3N2+FpyUKmrMBzdwhlDW12iyQ4CqpvCx25l6l1fmpg=="],
 
-    "@snapshot-labs/snapshot.js": ["@snapshot-labs/snapshot.js@0.17.5", "", { "dependencies": { "@ethersproject/abi": "^5.6.4", "@ethersproject/address": "^5.6.1", "@ethersproject/bignumber": "^5.7.0", "@ethersproject/bytes": "^5.6.1", "@ethersproject/contracts": "^5.6.2", "@ethersproject/hash": "^5.7.0", "@ethersproject/providers": "^5.6.8", "@ethersproject/units": "^5.7.0", "@ethersproject/wallet": "^5.6.2", "ajv": "8.11.0", "ajv-errors": "^3.0.0", "ajv-formats": "^2.1.1", "cross-fetch": "^3.1.6", "json-to-graphql-query": "^2.2.4", "lodash": "^4.18.1", "starknet": "^6.21.0", "viem": "^2.55.11" } }, "sha512-YxFfcOUBGt7mgN76YWHGxYPyxZMWqBXrO7reoCAWwWrIMdsy9TWZ/9EUDjX1jB2U2CECrV5KzJ8SMwvn+8aSOw=="],
+    "@snapshot-labs/snapshot.js": ["@snapshot-labs/snapshot.js@0.17.6", "", { "dependencies": { "@ethersproject/abi": "^5.6.4", "@ethersproject/address": "^5.6.1", "@ethersproject/bignumber": "^5.7.0", "@ethersproject/bytes": "^5.6.1", "@ethersproject/contracts": "^5.6.2", "@ethersproject/hash": "^5.7.0", "@ethersproject/providers": "^5.6.8", "@ethersproject/units": "^5.7.0", "@ethersproject/wallet": "^5.6.2", "ajv": "8.11.0", "ajv-errors": "^3.0.0", "ajv-formats": "^2.1.1", "cross-fetch": "^3.1.6", "json-to-graphql-query": "^2.2.4", "lodash": "^4.18.1", "starknet": "^6.21.0", "viem": "^2.55.11" } }, "sha512-7v8wycmGi3N/sJ63ugb45hMFXw2W1QhZYOFEcbYojErvGLhT71CvtW5k5OUZypFNoJA7EgtOkLRaT3ukWn6llg=="],
 
     "@snapshot-labs/sx": ["@snapshot-labs/sx@workspace:packages/sx.js"],
 
