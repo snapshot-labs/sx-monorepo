@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-const UNIVERSAL_HELPER = '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5';
+const UNIVERSAL_HELPER = '0xd453e5Bdb62CC3beA84341B1e306319C8Ffd7DFe';
 const RETIRED_ROOT_REGISTRY = '0xc960f7217d3643b525ef36bec8adf86953cd9ab8';
 const ENS_V2 = new Interface([
   'function ROOT_REGISTRY() view returns (address)',
@@ -69,18 +69,18 @@ describe('ens', () => {
   describe('getNameOwner', () => {
     describe('for names registered in ENSv2', () => {
       it('should return the owner of an ENSv2 name on testnet', async () => {
-        const owner = await getNameOwner('john1.eth', 11155111);
-        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
+        const owner = await getNameOwner('fox.eth', 11155111);
+        expect(owner).toBe('0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809');
       }, 10000);
 
       it('should resolve a case variant to the same owner', async () => {
-        const owner = await getNameOwner('JOHN1.eth', 11155111);
-        expect(owner).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
+        const owner = await getNameOwner('FOX.eth', 11155111);
+        expect(owner).toBe('0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809');
       }, 10000);
 
       it('should resolve the same address as the space controller', async () => {
-        const controller = await getSpaceController('john1.eth', 11155111);
-        expect(controller).toBe('0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3');
+        const controller = await getSpaceController('fox.eth', 11155111);
+        expect(controller).toBe('0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809');
       }, 10000);
     });
 
@@ -120,7 +120,7 @@ describe('ens', () => {
     describe('for names using the onchain resolver', () => {
       it('should return the owner of the name on mainnet', async () => {
         const owner = await getNameOwner('ens.eth', 1);
-        expect(owner).toBe('0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9');
+        expect(owner).toBe('0x2d2e339c93dA91682Db720ee73e3c8F854f5F246');
       });
 
       it('should return the owner of the name on testnet', async () => {
@@ -240,13 +240,13 @@ describe('ens', () => {
 
   describe('getResolver', () => {
     it('should return the resolver of an ENSv2 name on testnet', async () => {
-      const resolver = await getResolver('john1.eth', 11155111);
-      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
+      const resolver = await getResolver('fox.eth', 11155111);
+      expect(resolver).toBe('0x3DF10566A3f1B90dd692B49ec6f3653f5bCE6CFF');
     }, 10000);
 
     it('should normalize the name before resolving', async () => {
-      const resolver = await getResolver('JOHN1.eth', 11155111);
-      expect(resolver).toBe('0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8');
+      const resolver = await getResolver('FOX.eth', 11155111);
+      expect(resolver).toBe('0x3DF10566A3f1B90dd692B49ec6f3653f5bCE6CFF');
     }, 10000);
 
     it('should return the v1 resolver of an unmigrated name on testnet', async () => {
@@ -269,16 +269,16 @@ describe('ens', () => {
     it.each([
       [
         'ENSv2',
-        'JOHN1.eth',
+        'FOX.eth',
         11155111,
-        '0xF7f2639C67b58D978DB1Db166AF0501Da903f3A3',
-        '0xa0BC06a89DEfEf9bc09BF8F2f3d3229ed56F96B8'
+        '0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809',
+        '0x3DF10566A3f1B90dd692B49ec6f3653f5bCE6CFF'
       ],
       [
         'ENSv1',
         'ens.eth',
         1,
-        '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9',
+        '0x2d2e339c93dA91682Db720ee73e3c8F854f5F246',
         '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41'
       ],
       [
@@ -311,7 +311,7 @@ describe('ens', () => {
         expect(transaction).toMatchObject({
           to: resolver,
           data: setter.encodeFunctionData('setText', [
-            isV2 ? '0x056a6f686e310365746800' : namehash(name),
+            isV2 ? dnsEncodeName(name.toLowerCase()) : namehash(name),
             'snapshot',
             owner
           ])
