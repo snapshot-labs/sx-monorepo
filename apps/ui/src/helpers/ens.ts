@@ -55,9 +55,9 @@ const ENS_CONTRACTS: ENSContracts = {
   ensV2: {
     11155111: {
       universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
-      universalHelper: '0x33f571aa8A160a21b877cF6E0Fb8806692b97DF5',
-      ensV1Resolver: '0xb2BF4a9A86d29661EA93223582b9945943931e42',
-      dnsTldResolver: '0xb0C788195697dB17543bF22CBC1b0E2b4A04F9b8'
+      universalHelper: '0xd453e5Bdb62CC3beA84341B1e306319C8Ffd7DFe',
+      ensV1Resolver: '0x322B7581cA210a69c6D0e0D7c88a7688D2789Cb0',
+      dnsTldResolver: '0x0c9F5E9AE61165140b49919F0dF13C0a6642e80d'
     }
   },
   universalResolverAbi: [
