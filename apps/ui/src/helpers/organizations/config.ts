@@ -261,7 +261,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
         },
         activeRoute: {
-          prefix: 'space-proposals',
+          prefix: 'space-proposal',
           params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
         }
       },
@@ -273,10 +273,18 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 's:shutterdao0x36.eth' }
         },
         activeRoute: {
-          prefix: 'space-proposals',
+          prefix: 'space-proposal',
           params: { space: 's:shutterdao0x36.eth' }
         },
         position: 3
+      },
+      discussions: {
+        name: 'Discussions',
+        icon: IHAnnotation,
+        link: {
+          name: 'space-discussions',
+          params: { space: 's:shutterdao0x36.eth' }
+        }
       }
     }
   },
