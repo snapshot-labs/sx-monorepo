@@ -240,6 +240,64 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       }
     }
   },
+  shutterdao0x36: {
+    id: 'shutterdao0x36',
+    name: 'Shutter DAO 0x36',
+    spaceIds: [
+      {
+        network: 'eth',
+        id: '0x594EB60b35C4E91A06a5df988e0504f7463cB769'
+      },
+      {
+        network: 's',
+        id: 'shutterdao0x36.eth'
+      }
+    ],
+    routes: [
+      {
+        path: 'onchain',
+        meta: { orgSpaceId: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'offchain',
+        meta: { orgSpaceId: 's:shutterdao0x36.eth' },
+        children: DEFAULT_SPACE_ROUTES
+      }
+    ],
+    navItems: {
+      proposals: {
+        name: 'Onchain',
+        link: {
+          name: 'space-proposals',
+          params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
+        },
+        activeRoute: {
+          prefix: 'space-onchain'
+        }
+      },
+      offchain: {
+        name: 'Offchain',
+        icon: IHNewspaper,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:shutterdao0x36.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-offchain'
+        },
+        position: 2
+      },
+      discussions: {
+        name: 'Discussions',
+        icon: IHAnnotation,
+        link: {
+          name: 'space-discussions',
+          params: { space: 's:shutterdao0x36.eth' }
+        }
+      }
+    }
+  },
   shutterpen: {
     id: 'shutterpen',
     name: 'Shutter PEN',
