@@ -240,6 +240,20 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       }
     }
   },
+  shutterdao0x36: {
+    id: 'shutterdao0x36',
+    name: 'Shutter DAO 0x36',
+    spaceIds: [
+      {
+        network: 'eth',
+        id: '0x594EB60b35C4E91A06a5df988e0504f7463cB769'
+      },
+      {
+        network: 's',
+        id: 'shutterdao0x36.eth'
+      }
+    ]
+  },
   shutterpen: {
     id: 'shutterpen',
     name: 'Shutter PEN',
