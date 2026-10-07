@@ -171,7 +171,7 @@ export function isDustVotingPower(vp: number): boolean {
   return !Number.isFinite(vp) || Math.round(vp) < 1;
 }
 
-export function isWithinGegVotingWindow(
+export function isWithinSgpVotingWindow(
   t: number,
   votingStart: number,
   votingEnd: number

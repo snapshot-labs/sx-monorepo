@@ -143,7 +143,7 @@ export async function action(body, ipfs): Promise<void> {
   // for its whole life, and re-deriving it here could silently swap the
   // committee under a proposal mid-ceremony if env changed in between.
   let frozenSnapshot: TeCommitteeSnapshot | null = null;
-  if (privacy === 'shutter-elgamal' && existing && !existing.te_geg_config) {
+  if (privacy === 'shutter-elgamal' && existing && !existing.te_sgp_config) {
     try {
       const snapshot = await buildCommitteeSnapshot({
         eligibilityKey: await getEligibilityKey(),
@@ -192,10 +192,10 @@ export async function action(body, ipfs): Promise<void> {
   if (privacy === 'shutter-elgamal') {
     try {
       const committee =
-        frozenSnapshot ?? parseCommitteeSnapshotLoose(existing?.te_geg_config);
+        frozenSnapshot ?? parseCommitteeSnapshotLoose(existing?.te_sgp_config);
       const budget =
         frozenSnapshot?.weightedBudget ??
-        frozenWeightedBudget(existing?.te_geg_config);
+        frozenWeightedBudget(existing?.te_sgp_config);
       Object.assign(
         proposal,
         // The snapshot is the authority for both halves: an author editing `type`

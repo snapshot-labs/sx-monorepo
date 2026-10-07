@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Live gate: the DKG write path, signed by geg and finalised at quorum.
+"""Live gate: the DKG write path, signed by SGP and finalised at quorum.
 
-Submits DKG results through the running translator using geg's *own* signing code,
+Submits DKG results through the running translator using SGP's *own* signing code,
 and asserts the hub behaves exactly as the protocol's port requires:
 
   * a submission from a non-member is refused (403)
@@ -11,15 +11,17 @@ and asserts the hub behaves exactly as the protocol's port requires:
   * the key publishes at t+1 byte-identical submissions, and not before
   * a divergent submission never reaches quorum
 
-The signatures are produced by `geg.core.write_auth.sign_dkg_result`, so this also
-proves the hub's TypeScript digest reconstruction agrees with the Python one over
-the wire rather than only against a checked-in vector.
+The signatures are produced by
+`shutter_governance_protocol.core.write_auth.sign_dkg_result`, so this also proves
+the hub's TypeScript digest reconstruction agrees with the Python one over the
+wire rather than only against a checked-in vector.
 
 Usage, with the stack up and a proposal whose te_mpk is NULL:
 
-    python3 scripts/geg/verify-dkg-quorum.py <proposal-id> <keys.json> [geg-repo]
+    python3 scripts/sgp/verify-dkg-quorum.py <proposal-id> <keys.json> [sgp-repo]
 
-    The geg checkout is required — pass it as the last argument or set GEG_REPO.
+    The SGP checkout is required — pass it as the last argument or set
+    SHUTTER_GOVERNANCE_PROTOCOL_REPO.
 
 `keys.json` is `{"keys": [...secp256k1 hex...], "addresses": [...]}` for the
 committee named in that proposal's config, in committee order.
@@ -49,20 +51,20 @@ DIVERGENT_PK = "0x" + "c9" * 96
 results: list[tuple[bool, str]] = []
 
 
-def resolve_geg_repo(explicit: str | None) -> Path:
-    """The generalised-el-gamal checkout to run against.
+def resolve_sgp_repo(explicit: str | None) -> Path:
+    """The shutter-governance-protocol checkout to run against.
 
-    Explicit argument first, then GEG_REPO. There is deliberately no default:
-    this is a cross-repo dev tool and the checkout lives wherever the person
+    Explicit argument first, then SHUTTER_GOVERNANCE_PROTOCOL_REPO. There is
+    deliberately no default: this is a cross-repo dev tool and the checkout lives wherever the person
     running it put it. Guessing a sibling path only converts "you did not say
-    where geg is" into a confusing failure several steps later.
+    where SGP is" into a confusing failure several steps later.
     """
-    raw = explicit or os.environ.get("GEG_REPO")
+    raw = explicit or os.environ.get("SHUTTER_GOVERNANCE_PROTOCOL_REPO")
     if not raw:
         print(
-            "FAIL: no generalised-el-gamal checkout given.\n"
+            "FAIL: no shutter-governance-protocol checkout given.\n"
             "      pass its path as an argument, or set "
-            "GEG_REPO=/path/to/generalised-el-gamal",
+            "SHUTTER_GOVERNANCE_PROTOCOL_REPO=/path/to/shutter-governance-protocol",
             file=sys.stderr,
         )
         raise SystemExit(2)
@@ -94,7 +96,7 @@ def get(path: str):
 
 
 def run(proposal_id: str, keys_path: str) -> int:
-    from geg.core.write_auth import sign_dkg_result
+    from shutter_governance_protocol.core.write_auth import sign_dkg_result
 
     eid_hex = proposal_id[2:] if proposal_id.startswith("0x") else proposal_id
     election_id = bytes.fromhex(eid_hex)
@@ -183,17 +185,17 @@ def main() -> int:
         print(__doc__, file=sys.stderr)
         return 2
     proposal_id, keys_path = sys.argv[1], sys.argv[2]
-    geg_repo = resolve_geg_repo(sys.argv[3] if len(sys.argv) > 3 else None)
+    sgp_repo = resolve_sgp_repo(sys.argv[3] if len(sys.argv) > 3 else None)
 
-    if os.environ.get("_GEG_REEXEC") != "1":
-        venv_python = geg_repo / ".venv" / "bin" / "python"
+    if os.environ.get("_SGP_REEXEC") != "1":
+        venv_python = sgp_repo / ".venv" / "bin" / "python"
         if not venv_python.exists():
-            print(f"FAIL: no geg venv at {venv_python}", file=sys.stderr)
+            print(f"FAIL: no SGP venv at {venv_python}", file=sys.stderr)
             return 2
-        env = {**os.environ, "_GEG_REEXEC": "1"}
+        env = {**os.environ, "_SGP_REEXEC": "1"}
         return subprocess.call(
             [str(venv_python), str(Path(__file__).resolve()),
-             proposal_id, keys_path, str(geg_repo)],
+             proposal_id, keys_path, str(sgp_repo)],
             env=env,
         )
     return run(proposal_id, keys_path)

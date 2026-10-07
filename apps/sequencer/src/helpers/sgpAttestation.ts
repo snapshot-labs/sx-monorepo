@@ -31,7 +31,7 @@ import {
   schnorrVerify
 } from '@shutter-network/urban-verified-crypto';
 
-export class GegAttestationError extends Error {}
+export class SgpAttestationError extends Error {}
 
 /**
  * The signed message, built here rather than taken from the crypto package.
@@ -41,7 +41,7 @@ export class GegAttestationError extends Error {}
  * implemented upstream in `@shutter-network/urban-verified-crypto`, but are not
  * in a released version yet. When they are: bump the pin, drop everything down
  * to `mintAttestation`, and import `signAttestation` instead. The tests in
- * `test/unit/geg-attestation.test.ts` stay — they verify the credential, not the
+ * `test/unit/sgp-attestation.test.ts` stay — they verify the credential, not the
  * code path that produced it, so they are exactly what should prove the swap was
  * inert.
  *
@@ -55,7 +55,7 @@ export class GegAttestationError extends Error {}
  *
  * Reproducing the framing here is what lets the crypto stay an unmodified
  * published dependency rather than a fork carrying one extra method. It is pure
- * byte concatenation, no curve arithmetic, and `test/unit/geg-attestation.test.ts`
+ * byte concatenation, no curve arithmetic, and `test/unit/sgp-attestation.test.ts`
  * pins it against the protocol's own reference vectors — so a drift on either
  * side fails the build rather than quietly minting credentials the keypers
  * reject.
@@ -148,12 +148,12 @@ async function getIssuer(): Promise<Issuer> {
 
   const raw = process.env.TE_ELIGIBILITY_PRIVATE_KEY;
   if (!raw?.trim()) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       'TE_ELIGIBILITY_PRIVATE_KEY is not configured'
     );
   }
   if (!SK_RE.test(raw.trim())) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       'TE_ELIGIBILITY_PRIVATE_KEY must be 32 bytes of hex'
     );
   }
@@ -168,7 +168,7 @@ async function getIssuer(): Promise<Issuer> {
   } catch (err: any) {
     // schnorrKeygen rejects sk ≡ 0 mod Q, which would make every signature
     // trivially verifiable under the identity key.
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       `TE_ELIGIBILITY_PRIVATE_KEY is not a valid scalar: ${err?.message || err}`
     );
   }
@@ -201,7 +201,7 @@ export interface MintArgs {
 function bytes(hex: string, label: string, size: number): Uint8Array {
   const body = hex.startsWith('0x') ? hex.slice(2) : hex;
   if (body.length !== size * 2 || !/^[0-9a-fA-F]*$/.test(body)) {
-    throw new GegAttestationError(`${label}: expected ${size} bytes of hex`);
+    throw new SgpAttestationError(`${label}: expected ${size} bytes of hex`);
   }
   return new Uint8Array(Buffer.from(body, 'hex'));
 }
@@ -209,10 +209,10 @@ function bytes(hex: string, label: string, size: number): Uint8Array {
 /** Issue one credential. Returns the 80-byte signature as `0x` hex. */
 export async function mintAttestation(args: MintArgs): Promise<string> {
   if (args.weight < 1n) {
-    throw new GegAttestationError(`weight must be >= 1 (got ${args.weight})`);
+    throw new SgpAttestationError(`weight must be >= 1 (got ${args.weight})`);
   }
   if (args.nonce < 1n) {
-    throw new GegAttestationError(`nonce must be >= 1 (got ${args.nonce})`);
+    throw new SgpAttestationError(`nonce must be >= 1 (got ${args.nonce})`);
   }
   const { sk, vk } = await getIssuer();
   const message = attestationMessage(

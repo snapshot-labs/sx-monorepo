@@ -1,8 +1,8 @@
 /**
- * `/te_ballots` and `/te_geg_ballots` must agree on ballot order.
+ * `/te_ballots` and `/te_sgp_ballots` must agree on ballot order.
  *
  * They read the same rows under the same filter, for two different readers: the
- * committee pages `te_geg_ballots` and expresses admission and exclusion as
+ * committee pages `te_sgp_ballots` and expresses admission and exclusion as
  * *positions* in that order, while the audit panel reads `te_ballots` and
  * recomputes the aggregate from it. An auditor can only line the committee's
  * `admitted`/`exclusions` up against real ballots if the two lists are the same
@@ -49,7 +49,7 @@ function envelope(i: number) {
         .padStart(2, '0')
         .repeat(96)}`
     })),
-    // The geg feed reads the credential and the binding out of the envelope, so
+    // The SGP feed reads the credential and the binding out of the envelope, so
     // a fixture without them is a ballot it refuses to serve.
     attestation: {
       scheme: 'ATTESTATION_V1',
@@ -109,10 +109,10 @@ async function seed(): Promise<void> {
       mode: 'exact',
       variant: 'A'
     }),
-    te_geg_config: JSON.stringify({
+    te_sgp_config: JSON.stringify({
       v: 1,
       // A real committee: parseCommitteeSnapshot refuses an empty one, and the
-      // geg route resolves the config before it ever reaches the ballots.
+      // SGP route resolves the config before it ever reaches the ballots.
       keypers: [1, 2, 3].map(i => ({
         address: `0x${String(i).repeat(40)}`,
         url: `https://k${i}.example`
@@ -158,7 +158,7 @@ async function json(path: string): Promise<any> {
   return r.json();
 }
 
-describe('/te_ballots and /te_geg_ballots agree on order', () => {
+describe('/te_ballots and /te_sgp_ballots agree on order', () => {
   beforeAll(seed);
 
   afterAll(async () => {
@@ -175,7 +175,7 @@ describe('/te_ballots and /te_geg_ballots agree on order', () => {
 
   it('returns the same ballots in the same positions', async () => {
     const audit = await json('te_ballots');
-    const committee = await json('te_geg_ballots');
+    const committee = await json('te_sgp_ballots');
 
     expect(audit.ballots).toHaveLength(CREATED_AT.length);
     expect(committee.ballots).toHaveLength(CREATED_AT.length);
@@ -197,7 +197,7 @@ describe('/te_ballots and /te_geg_ballots agree on order', () => {
 
   /**
    * The tiebreak, asserted against the query text — for the same reason the
-   * `te_geg_ballots` suite does it that way. With `id ASC` removed, MySQL still
+   * `te_sgp_ballots` suite does it that way. With `id ASC` removed, MySQL still
    * happens to return these rows in id order, so the comparison above passes
    * with the property broken. A test that cannot fail on the bug is worse than
    * none, so the check kept is the one that does.
@@ -216,7 +216,7 @@ describe('/te_ballots and /te_geg_ballots agree on order', () => {
     await db.queryAsync('UPDATE votes SET cb = -3 WHERE id = ?', ['0xord0002']);
     try {
       const audit = await json('te_ballots');
-      const committee = await json('te_geg_ballots');
+      const committee = await json('te_sgp_ballots');
       expect(audit.ballots).toHaveLength(CREATED_AT.length - 1);
       expect(committee.ballots).toHaveLength(CREATED_AT.length - 1);
       // And both renumber contiguously around the hole, still in step.

@@ -15,7 +15,7 @@ describe('scaleWeight', () => {
 
   it('rounds half *up*, matching the committee exactly', () => {
     // The cross-language landmine: `Math.round` is half-up in JS, `round` is
-    // half-to-even in Python. Integer `(w + s//2) // s` has no such split, and geg
+    // half-to-even in Python. Integer `(w + s//2) // s` has no such split, and SGP
     // pins the identical boundary in test_aggregation.py.
     expect(scaleWeight(1, 2)).toBe(1);
     expect(scaleWeight(3, 2)).toBe(2);

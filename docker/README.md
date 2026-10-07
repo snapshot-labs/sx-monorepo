@@ -23,7 +23,7 @@ different entry points, so a rebuild covers all of them.
 ## What does *not* come up: the committee
 
 Private voting needs a keyper committee. They belong to the
-generalised-el-gamal protocol, and each keyper is meant to be run by an
+Shutter Governance Protocol (SGP), and each keyper is meant to be run by an
 independent operator with its own signing key.
 
 That separation is the security property, not an inconvenience: a committee this

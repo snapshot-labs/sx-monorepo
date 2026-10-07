@@ -371,7 +371,7 @@ describe('committeeColumns', () => {
     const snapshot = await build();
     const columns = committeeColumns(snapshot);
 
-    // The quorum, denormalised for readers that predate te_geg_config: the UI's
+    // The quorum, denormalised for readers that predate te_sgp_config: the UI's
     // "2-of-3" label and the tally's share-count gate both read this column.
     expect(columns.te_threshold_t).toBe(2);
     expect(columns.te_threshold_n).toBe(3);
@@ -384,14 +384,14 @@ describe('committeeColumns', () => {
     // getAddress() output and a lowercase copy would never match.
     expect(JSON.parse(columns.te_keyper_addresses)).toEqual([K1, K2, K3]);
     // The snapshot is the authority; the columns above are copies of it.
-    expect(JSON.parse(columns.te_geg_config)).toEqual(snapshot);
+    expect(JSON.parse(columns.te_sgp_config)).toEqual(snapshot);
   });
 
   it('keeps the denormalised arrays aligned with the snapshot order', async () => {
     const columns = committeeColumns(await build());
     const addresses = JSON.parse(columns.te_keyper_addresses);
     const urls = JSON.parse(columns.te_keyper_urls);
-    const snapshot = JSON.parse(columns.te_geg_config);
+    const snapshot = JSON.parse(columns.te_sgp_config);
     snapshot.keypers.forEach((k: any, i: number) => {
       expect(addresses[i]).toBe(k.address);
       expect(urls[i]).toBe(k.url);
@@ -422,7 +422,7 @@ describe('frozenWeightedBudget / ballotParamsColumn', () => {
   });
 
   // The regression this whole change is about (M-2). `te_config` and
-  // `te_geg_config` are both written at creation from one env read, so they agree
+  // `te_sgp_config` are both written at creation from one env read, so they agree
   // — until the env moves and the proposal is edited. Only `te_config` used to be
   // rebuilt, so the browser and ingest would agree on the new budget while the
   // committee verified against the old one, rejecting every ballot as
@@ -453,11 +453,11 @@ describe('teSolverCeiling', () => {
   /**
    * The single definition of how large a search this deployment can solve.
    *
-   * geg no longer decides this: feasibility depends on the coordinator's hardware,
-   * which a library cannot see (see W17 and docs/COORDINATOR_SIZING.md). That makes
-   * this the one place the number lives, so it has to reject garbage rather than
-   * coerce it — a silently-NaN ceiling would disable the guard entirely and only
-   * show up as a tally that never finishes.
+   * SGP no longer decides this: feasibility depends on the coordinator's hardware,
+   * which a library cannot see (see `shutter-governance-protocol/COORDINATOR_SIZING.md`).
+   * That makes this the one place the number lives, so it has to reject garbage
+   * rather than coerce it — a silently-NaN ceiling would disable the guard entirely
+   * and only show up as a tally that never finishes.
    */
   it('defaults when unset or blank', () => {
     expect(teSolverCeiling({} as any)).toBe(DEFAULT_TE_SOLVER_CEILING);

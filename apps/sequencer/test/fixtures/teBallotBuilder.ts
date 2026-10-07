@@ -3,7 +3,7 @@ import {
   G2Point,
   schnorrKeygen
 } from '@shutter-network/urban-verified-crypto';
-import { mintAttestation } from '../../src/helpers/gegAttestation';
+import { mintAttestation } from '../../src/helpers/sgpAttestation';
 
 const toHex = (b: Uint8Array) => `0x${Buffer.from(b).toString('hex')}`;
 

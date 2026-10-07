@@ -10,7 +10,7 @@
  * A config has two halves.
  *
  * **Frozen** — committee, threshold, role keys, and the voting window. The
- * sequencer writes these into `proposals.te_geg_config` at proposal creation
+ * sequencer writes these into `proposals.te_sgp_config` at proposal creation
  * (see apps/sequencer/src/helpers/teCommittee.ts) and nothing rewrites them.
  *
  * **Derived live** — `numCandidates`, `budget`, `mode`, `variant`. These follow
@@ -80,7 +80,7 @@ export interface TeCommitteeSnapshot {
 }
 
 /** The protocol's election config, in its exact wire shape. */
-export interface GegElectionConfig {
+export interface SgpElectionConfig {
   electionId: string;
   numCandidates: number;
   budget: number;
@@ -102,7 +102,7 @@ export interface GegElectionConfig {
   selfSubmitFee: string;
 }
 
-export class GegConfigError extends Error {}
+export class SgpConfigError extends Error {}
 
 /**
  * The per-proposal ballot parameters, derived from mutable proposal fields.
@@ -118,7 +118,7 @@ function deriveBallotParams(
   weightedBudget: number
 ): { numCandidates: number; budget: number; mode: 'exact'; variant: 'A' } {
   if (!Array.isArray(choices) || choices.length === 0) {
-    throw new GegConfigError('proposal has no choices');
+    throw new SgpConfigError('proposal has no choices');
   }
   return {
     numCandidates: choices.length,
@@ -134,22 +134,22 @@ export function parseCommitteeSnapshot(raw: unknown): TeCommitteeSnapshot {
     try {
       snapshot = JSON.parse(raw);
     } catch {
-      throw new GegConfigError('te_geg_config is not valid JSON');
+      throw new SgpConfigError('te_sgp_config is not valid JSON');
     }
   }
   if (!snapshot || typeof snapshot !== 'object') {
-    throw new GegConfigError('proposal has no committee snapshot');
+    throw new SgpConfigError('proposal has no committee snapshot');
   }
   if (snapshot.v !== 1) {
-    throw new GegConfigError(
+    throw new SgpConfigError(
       `unsupported committee snapshot version ${snapshot.v}`
     );
   }
   if (!Array.isArray(snapshot.keypers) || snapshot.keypers.length === 0) {
-    throw new GegConfigError('committee snapshot has no keypers');
+    throw new SgpConfigError('committee snapshot has no keypers');
   }
   if (snapshot.keypers.length !== snapshot.thresholdN) {
-    throw new GegConfigError(
+    throw new SgpConfigError(
       `committee snapshot lists ${snapshot.keypers.length} keypers but n = ${snapshot.thresholdN}`
     );
   }
@@ -170,7 +170,7 @@ export function composeElectionConfig(args: {
   type: string | null | undefined;
   snapshot: TeCommitteeSnapshot;
   currentEligibilityKey?: string;
-}): GegElectionConfig {
+}): SgpElectionConfig {
   const { proposalId, choices, type, snapshot } = args;
 
   if (
@@ -178,7 +178,7 @@ export function composeElectionConfig(args: {
     args.currentEligibilityKey.toLowerCase() !==
       snapshot.eligibilityKey.toLowerCase()
   ) {
-    throw new GegConfigError(
+    throw new SgpConfigError(
       'frozen eligibility key does not match the hub key in use; ' +
         'the key was rotated and credentials on this proposal can no longer verify'
     );

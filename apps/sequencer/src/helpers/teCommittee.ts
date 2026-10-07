@@ -4,7 +4,7 @@
  * Proposal creation is the registration event for the threshold protocol — the
  * one moment a proposal's committee, threshold, and role keys are decided — so
  * this is the single config write in sx. Everything downstream reads
- * `proposals.te_geg_config` and never mutates it.
+ * `proposals.te_sgp_config` and never mutates it.
  *
  * Freezing matters because the committee is configured fleet-wide in env. Without
  * a per-proposal snapshot, changing `TE_KEYPERS` or `TE_THRESHOLD_T` would
@@ -24,7 +24,7 @@
  * the crypto SDK), so it owns that mapping. Keeping wire-format knowledge in one
  * place is what stops an enum-value or key-name drift — which surfaces as every
  * read failing to decode — from being possible in two places at once. The mapping
- * itself is `apps/hub/src/helpers/gegConfig.ts`.
+ * itself is `apps/hub/src/helpers/sgpConfig.ts`.
  */
 
 import { keccak256 } from '@ethersproject/keccak256';
@@ -58,7 +58,7 @@ export interface TeKeyper {
   url: string;
 }
 
-/** The frozen snapshot, stored verbatim as `proposals.te_geg_config`. */
+/** The frozen snapshot, stored verbatim as `proposals.te_sgp_config`. */
 export interface TeCommitteeSnapshot {
   /** Schema version of this snapshot, so a later shape change is detectable. */
   v: 1;
@@ -137,9 +137,9 @@ export function assertBallotShape(numCandidates: number, budget: number): void {
  * How large a BSGS search this deployment's coordinator can actually solve.
  *
  * `budget x Σ(admitted weights)`, and the single place that number is defined —
- * geg deliberately no longer decides it, because feasibility depends on the
+ * SGP deliberately no longer decides it, because feasibility depends on the
  * machine the coordinator runs on and a library cannot see that. Sized from the
- * table in `generalised-el-gamal/docs/COORDINATOR_SIZING.md`: cost is
+ * table in `shutter-governance-protocol/COORDINATOR_SIZING.md`: cost is
  * `2√bound x 11 µs` of wall clock and `218 B x √bound` of memory, so 1e12 is about
  * 21 s and 220 MB, and quadrupling the bound doubles both.
  *
@@ -432,7 +432,7 @@ export async function buildCommitteeSnapshot(args: {
 /**
  * The columns to write alongside a private proposal.
  *
- * `te_geg_config` is the authority. The four `te_threshold_*` / `te_keyper_*`
+ * `te_sgp_config` is the authority. The four `te_threshold_*` / `te_keyper_*`
  * columns are denormalised copies for readers that already exist — the UI's
  * committee card, and the hub's write-authorisation path which indexes
  * `te_keyper_addresses[keyper_index - 1]`. Never edit those to fix a
@@ -446,28 +446,28 @@ export async function buildCommitteeSnapshot(args: {
  * proposal that has no frozen bound.
  */
 export function parseCommitteeSnapshotLoose(
-  teGegConfig: unknown
+  teSgpConfig: unknown
 ): { maxTotalWeight?: number; solverCeiling?: number } | null {
   try {
     const snapshot =
-      typeof teGegConfig === 'string'
-        ? JSON.parse(teGegConfig)
-        : (teGegConfig as any);
+      typeof teSgpConfig === 'string'
+        ? JSON.parse(teSgpConfig)
+        : (teSgpConfig as any);
     return snapshot && typeof snapshot === 'object' ? snapshot : null;
   } catch {
     return null;
   }
 }
 
-export function frozenWeightedBudget(teGegConfig: unknown): number {
+export function frozenWeightedBudget(teSgpConfig: unknown): number {
   const snapshot =
-    typeof teGegConfig === 'string'
-      ? JSON.parse(teGegConfig)
-      : (teGegConfig as any);
+    typeof teSgpConfig === 'string'
+      ? JSON.parse(teSgpConfig)
+      : (teSgpConfig as any);
   const budget = Number(snapshot?.weightedBudget);
   if (!Number.isInteger(budget) || budget < 1) {
     throw new TeConfigError(
-      `te_geg_config.weightedBudget is missing or invalid (${snapshot?.weightedBudget})`
+      `te_sgp_config.weightedBudget is missing or invalid (${snapshot?.weightedBudget})`
     );
   }
   return budget;
@@ -550,14 +550,14 @@ export function ballotParamsColumn(
 }
 
 export function committeeColumns(snapshot: TeCommitteeSnapshot): {
-  te_geg_config: string;
+  te_sgp_config: string;
   te_threshold_t: number;
   te_threshold_n: number;
   te_keyper_urls: string;
   te_keyper_addresses: string;
 } {
   return {
-    te_geg_config: JSON.stringify(snapshot),
+    te_sgp_config: JSON.stringify(snapshot),
     te_threshold_t: snapshot.thresholdT,
     te_threshold_n: snapshot.thresholdN,
     te_keyper_urls: JSON.stringify(snapshot.keypers.map(k => k.url)),

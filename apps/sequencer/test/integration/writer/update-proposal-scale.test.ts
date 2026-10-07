@@ -1,15 +1,15 @@
 /**
  * A public -> private edit must adopt the scale of the snapshot it just built.
  *
- * Creation writes `te_config` and `te_geg_config` together, so `scale` and the
+ * Creation writes `te_config` and `te_sgp_config` together, so `scale` and the
  * committee agree. An edit that turns a *public* proposal private has to build the
  * committee snapshot here, because creation took the public path and left
- * `te_geg_config` NULL — and that NULL is exactly the branch condition.
+ * `te_sgp_config` NULL — and that NULL is exactly the branch condition.
  *
- * So passing `existing.te_geg_config` on to `ballotParamsColumn` handed it the
+ * So passing `existing.te_sgp_config` on to `ballotParamsColumn` handed it the
  * column that is guaranteed empty in this path, and `scale` fell back to 1 while
  * the hub served the keypers the scale derived from the new snapshot
- * (`hub/src/te.ts` recomputes it from `te_geg_config`). The committee then counts
+ * (`hub/src/te.ts` recomputes it from `te_sgp_config`). The committee then counts
  * in scaled units and `scores.ts` divides by 1, under-reporting every score by the
  * scale factor — enough to fail a quorum on a result that actually met it. The
  * same field drives the pre-signature notice in `Proposal.vue`, so a voter whose
@@ -115,7 +115,7 @@ async function seed(): Promise<void> {
     scores_updated: 0,
     vp_value_by_strategy: '[]',
     votes: 0,
-    te_geg_config: null,
+    te_sgp_config: null,
     te_config: null
   });
 }
@@ -142,11 +142,11 @@ function turnPrivate() {
 
 async function storedRow(): Promise<{ teConfig: any; snapshot: any }> {
   const [row] = await db.queryAsync(
-    'SELECT te_config, te_geg_config FROM proposals WHERE id = ?',
+    'SELECT te_config, te_sgp_config FROM proposals WHERE id = ?',
     [ID]
   );
   const parse = (v: any) => (typeof v === 'string' ? JSON.parse(v) : v);
-  return { teConfig: parse(row.te_config), snapshot: parse(row.te_geg_config) };
+  return { teConfig: parse(row.te_config), snapshot: parse(row.te_sgp_config) };
 }
 
 describe('update-proposal: a public -> private edit adopts the new scale', () => {

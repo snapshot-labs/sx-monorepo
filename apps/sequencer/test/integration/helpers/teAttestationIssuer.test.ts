@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import snapshot from '@snapshot-labs/snapshot.js';
-import { resetIssuer } from '../../../src/helpers/gegAttestation';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
+import { resetIssuer } from '../../../src/helpers/sgpAttestation';
 import * as issuer from '../../../src/helpers/teAttestationIssuer';
 
 function setVp(vp: number) {

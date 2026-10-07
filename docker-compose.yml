@@ -1,4 +1,4 @@
-# Private voting runs on the generalised-el-gamal protocol stack. Its source lives
+# Private voting runs on the Shutter Governance Protocol (SGP) stack. Its source lives
 # in another repository, but nothing here builds it: the coordinator below runs the
 # published image, so this repo is the only one you need checked out.
 #
@@ -6,9 +6,9 @@
 #
 # To run one yourself (local testing, or you are also an operator), use the keyper
 # stack in the protocol repo — no checkout needed, just two files:
-#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/docker-compose.keyper.yml
-#   https://github.com/shutter-network/generalised-elgamal-voting/blob/main/deploy/.env.keyper.example
-# Set its GEG_API_URL to this deployment's translator (:3002), not the example's
+#   https://github.com/shutter-network/shutter-governance-protocol/blob/main/deploy/docker-compose.keyper.yml
+#   https://github.com/shutter-network/shutter-governance-protocol/blob/main/deploy/.env.keyper.example
+# Set its SHUTTER_GOVERNANCE_PROTOCOL_API_URL to this deployment's translator(:3002), not the example's
 # default, which points at the protocol repo's own api service.
 #
 # The coordinator is part of this stack, and it is fail-closed: COORDINATOR_SIGNING_KEY
@@ -16,13 +16,13 @@
 # at all — including for the other services. That is deliberate. A coordinator that
 # booted without a signing key would fail much later, at result-publishing time, on a
 # proposal whose votes are already cast. Set both in .env before starting; see
-# .env.example, or run scripts/geg/gen-env.py --write.
+# .env.example, or run scripts/sgp/gen-env.py --write.
 #
 # Who points where:
-#   coordinator → GEG_DATA_LAYER_URL → te-data-layer root   reads + writes; sole writer
-#   keyper      → GEG_API_URL        → te-data-layer /port  reads only; appends /port
-#   keyper      → COORDINATOR_URL    → coordinator :8400    keyper writes relay here
-#   sequencer   → TE_KEYPERS         → each keyper's URL, frozen into the proposal
+#   coordinator → SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL → te-data-layer root   reads + writes; sole writer
+#   keyper      → SHUTTER_GOVERNANCE_PROTOCOL_API_URL        → te-data-layer /port  reads only; appends /port
+#   keyper      → COORDINATOR_URL                            → coordinator :8400    keyper writes relay here
+#   sequencer   → TE_KEYPERS                                 → each keyper's URL, frozen into the proposal
 #
 # The coordinator shares this compose network, so it reaches the translator at
 # `http://te-data-layer:3002` directly. The keypers are separate compose projects
@@ -45,7 +45,7 @@
 #   COORDINATOR_SIGNING_KEY      the coordinator's key. Its address MUST equal
 #                                TE_RESULT_PUBLISHER_ADDRESS above and
 #                                COORDINATOR_IDENTITY in every keyper env —
-#                                scripts/geg/gen-env.py derives all three from it.
+#                                scripts/sgp/gen-env.py derives all three from it.
 #   COORDINATOR_API_TOKEN        bearer token for the keyper write relay
 #
 # Worth setting deliberately rather than inheriting:
@@ -202,14 +202,14 @@ services:
   #
   # Fail-closed on its two secrets: unset, and compose refuses to start anything.
   coordinator:
-    image: ${GEG_IMAGE:-ghcr.io/shutter-network/generalised-elgamal-voting:0.1.0}
-    command: ["python", "-m", "geg.services.coordinator"]
+    image: ${SHUTTER_GOVERNANCE_PROTOCOL_IMAGE:-ghcr.io/shutter-network/shutter-governance-protocol:0.1.0}
+    command: ["python", "-m", "shutter_governance_protocol.services.coordinator"]
     environment:
-      GEG_DATA_LAYER: database
+      SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER: database
       # The translator's root surface, over this compose network. Keep the root
       # reachable only by the coordinator — keypers are given the read-only /port
       # mount instead, because the ballot write path is unauthenticated.
-      GEG_DATA_LAYER_URL: ${GEG_DATA_LAYER_URL:-http://te-data-layer:3002}
+      SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL: ${SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL:-http://te-data-layer:3002}
       # Also the result-publisher identity: this key signs the published result, so
       # its address must equal each proposal's frozen result_publisher_key — i.e.
       # TE_RESULT_PUBLISHER_ADDRESS, which the sequencer reads from the same .env.

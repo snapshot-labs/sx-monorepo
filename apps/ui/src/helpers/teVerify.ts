@@ -362,7 +362,7 @@ export async function aggregateBallots(
       }
 
       const raw = BigInt(Math.round(b.vp));
-      // Integer half-up, byte-matching geg's `(w + s//2) // s`. `Math.round(w/s)`
+      // Integer half-up, byte-matching SGP's `(w + s//2) // s`. `Math.round(w/s)`
       // would agree in JavaScript and disagree in Python at exactly `.5`.
       const w = scale > 1n ? (raw + scale / 2n) / scale : raw;
       if (raw > 0n && w === 0n) {

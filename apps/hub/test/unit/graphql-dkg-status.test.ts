@@ -2,7 +2,7 @@
  * `te_dkg_status` is derived on read, never stored.
  *
  * The column exists and used to be written by the in-repo auto-DKG service, deleted
- * in the geg migration. The protocol's coordinator knows an election's key ceremony
+ * in the SGP migration. The protocol's coordinator knows an election's key ceremony
  * failed — it logs exactly that — but keeps the fact in its own memory and has no
  * route to report it. So for a while nothing wrote the column, the UI's two
  * "DKG failed" notices could not fire, and a permanently dead proposal presented a
@@ -12,7 +12,7 @@
  * owns. It follows from two things the hub already holds: a private proposal with no
  * master public key whose voting window has opened. The key must exist *before*
  * voting opens or no ceremony can produce one matching the ballots — the same
- * condition geg's own `derive_state` uses, and the reason the state is terminal
+ * condition SGP's own `derive_state` uses, and the reason the state is terminal
  * rather than merely late.
  *
  * These cases are the whole contract. The dangerous direction is a false negative:

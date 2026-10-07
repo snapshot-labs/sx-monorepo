@@ -7,30 +7,19 @@
  * voting power attached to each ballot is the same figure Snapshot shows for any
  * ordinary vote. What the surface buys is the ability for someone who trusts
  * nobody here to recompute the result themselves.
- *
- * **This file used to authorise writes as well.** `POST /te_dkg` and
- * `POST /te_decryption_share` accepted keyper submissions under the `SX-TE-DKG-v1`
- * and `SX-TE-DECRYPT-v1` digests, which were this repository's own invention and
- * matched nothing outside it. Those writes now belong to `geg.ts`, under the
- * protocol's `GEG-*` digests, verified against the committee frozen into each
- * proposal — see `helpers/gegDigests.ts`. Only the reads stayed, because the verify
- * panel is built on them and the protocol's own read routes return protocol shapes
- * rather than the `{voter, vp, choice}` a client needs to re-aggregate.
- *
- * The one subtlety left in here is `auditAggregate`; its own comment explains why.
  */
 
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import express from 'express';
-import { deriveScale } from './helpers/gegConfig';
 import db from './helpers/mysql';
+import { deriveScale } from './helpers/sgpConfig';
 import { sendError } from './helpers/utils';
 
 const router = express.Router();
 
 async function loadProposal(proposalId: string): Promise<any | null> {
   const rows = await (db as any).queryAsync(
-    'SELECT id, privacy, te_mpk, te_config, te_geg_config, te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n, te_aggregate FROM proposals WHERE id = ? LIMIT 1',
+    'SELECT id, privacy, te_mpk, te_config, te_sgp_config, te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n, te_aggregate FROM proposals WHERE id = ? LIMIT 1',
     [proposalId]
   );
   return rows[0] || null;
@@ -190,7 +179,7 @@ router.get('/proposal/:id/te_ballots', async (req, res) => {
     // The unit the committee's aggregation counts in. A verifier must apply the same
     // divisor or its recomputed aggregate will not match, so this travels with the
     // ballots rather than being inferred.
-    const snapshot = parseJsonField<any>(proposal.te_geg_config, null);
+    const snapshot = parseJsonField<any>(proposal.te_sgp_config, null);
     const scale = deriveScale(
       Number(teConfig?.budget ?? 1),
       Number(snapshot?.maxTotalWeight ?? 0),

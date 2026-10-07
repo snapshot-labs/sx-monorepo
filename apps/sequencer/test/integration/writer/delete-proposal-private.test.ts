@@ -155,7 +155,7 @@ describe('delete-proposal: private proposals', () => {
   });
 
   // Mirrors the public path rather than hard-deleting. The ciphertexts stay, and
-  // are unreachable: te_geg_ballots 404s without the proposal row.
+  // are unreachable: te_sgp_ballots 404s without the proposal row.
   it('soft-deletes the ballots, exactly as a public proposal does', async () => {
     const id = '0xdel-private-ballots';
     await seed(id, 'shutter-elgamal', PAST, 'final');
