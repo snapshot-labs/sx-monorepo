@@ -253,6 +253,18 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         id: 'shutterdao0x36.eth'
       }
     ],
+    routes: [
+      {
+        path: 'onchain',
+        meta: { orgSpaceId: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'offchain',
+        meta: { orgSpaceId: 's:shutterdao0x36.eth' },
+        children: DEFAULT_SPACE_ROUTES
+      }
+    ],
     navItems: {
       proposals: {
         name: 'Onchain',
@@ -261,8 +273,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
         },
         activeRoute: {
-          prefix: 'space-proposal',
-          params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
+          prefix: 'space-onchain'
         }
       },
       offchain: {
@@ -273,10 +284,9 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 's:shutterdao0x36.eth' }
         },
         activeRoute: {
-          prefix: 'space-proposal',
-          params: { space: 's:shutterdao0x36.eth' }
+          prefix: 'space-offchain'
         },
-        position: 3
+        position: 2
       },
       discussions: {
         name: 'Discussions',
