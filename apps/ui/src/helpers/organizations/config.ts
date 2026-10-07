@@ -252,7 +252,33 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         network: 's',
         id: 'shutterdao0x36.eth'
       }
-    ]
+    ],
+    navItems: {
+      proposals: {
+        name: 'Onchain',
+        link: {
+          name: 'space-proposals',
+          params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
+        },
+        activeRoute: {
+          prefix: 'space-proposals',
+          params: { space: 'eth:0x594EB60b35C4E91A06a5df988e0504f7463cB769' }
+        }
+      },
+      offchain: {
+        name: 'Offchain',
+        icon: IHNewspaper,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:shutterdao0x36.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-proposals',
+          params: { space: 's:shutterdao0x36.eth' }
+        },
+        position: 3
+      }
+    }
   },
   shutterpen: {
     id: 'shutterpen',
