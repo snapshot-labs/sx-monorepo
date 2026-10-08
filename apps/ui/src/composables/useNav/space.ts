@@ -50,7 +50,8 @@ const SETTINGS_TABS: {
   { key: 'whitelabel', name: 'Custom domain', offchainOnly: true },
   { key: 'advanced', name: 'Advanced', offchainOnly: true },
   { key: 'controller', name: 'Controller' },
-  { key: 'billing', name: 'Billing', offchainOnly: true }
+  { key: 'billing', name: 'Billing', offchainOnly: true },
+  { key: 'credits', name: 'Credits', offchainOnly: true }
 ];
 
 function getSpaceSettingsConfig(context: NavContext): NavConfig {
