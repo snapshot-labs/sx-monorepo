@@ -5,10 +5,10 @@
  * exhausted its attempts and persisted a flag saying so.
  */
 
-import { requestDigest, requestNoncePayload } from './gegRequest';
+import { requestDigest, requestNoncePayload } from './sgpRequest';
 
-/** What the hub reports for a geg election. Only the fields the stall UI needs. */
-export type GegElectionState = {
+/** What the hub reports for an SGP election. Only the fields the stall UI needs. */
+export type SgpElectionState = {
   tallyStalled: boolean;
   /**
    * The coordinator's account of why, when it supplied one.
@@ -30,11 +30,11 @@ function endpoint(
   return `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(proposalId)}/${route}`;
 }
 
-export async function fetchGegElection(
+export async function fetchSgpElection(
   apiBaseUrl: string,
   proposalId: string
-): Promise<GegElectionState> {
-  const r = await fetch(endpoint(apiBaseUrl, proposalId, 'te_geg_election'), {
+): Promise<SgpElectionState> {
+  const r = await fetch(endpoint(apiBaseUrl, proposalId, 'te_sgp_election'), {
     credentials: 'omit'
   });
   if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);

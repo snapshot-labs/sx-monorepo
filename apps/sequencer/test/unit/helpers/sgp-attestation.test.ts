@@ -1,22 +1,11 @@
 /**
  * The eligibility credential — the ingest self-check.
  *
- * `gegAttestation.ts` assembles the signed message itself: the crypto package is
+ * `sgpAttestation.ts` assembles the signed message itself: the crypto package is
  * an unmodified published dependency and does not expose its transcript bytes.
  * A one-character slip in that framing produces an election where every ballot is
  * silently excluded and the tally comes out as zeros, with no runtime signal —
  * the keypers simply reject credentials they cannot verify.
- *
- * This file used to check that framing against the protocol's own corpus in both
- * directions. That corpus (`packages/geg-parity`) has been removed now the
- * equivalence is established and exercised by live runs against real Python
- * keypers, which reject a mismatched credential outright.
- *
- * What remains is the local half: mint a credential, verify it with our own
- * verifier, and confirm the tamper and bounds cases behave. Self-consistent by
- * construction, so it cannot prove cross-language agreement — it guards the
- * minting path itself: key handling, hex conventions, field order at the call
- * site.
  */
 
 import {
@@ -27,11 +16,9 @@ import {
   mintAttestation,
   resetIssuer,
   verifyAttestation
-} from '../../../src/helpers/gegAttestation';
+} from '../../../src/helpers/sgpAttestation';
 
 describe('verifyAttestation — the ingest self-check', () => {
-  // The curve layer is process-wide and lazily initialised; the corpus block that
-  // used to do this was removed with packages/geg-parity.
   beforeAll(async () => {
     await initCurves();
   });

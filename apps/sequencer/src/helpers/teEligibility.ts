@@ -19,23 +19,23 @@
  * and refusing it up front is strictly kinder than discovering it after voting.
  */
 
-import { eligibilityPublicKey, GegAttestationError } from './gegAttestation';
 import log from './log';
 import db from './mysql';
+import { eligibilityPublicKey, SgpAttestationError } from './sgpAttestation';
 
 export class TeEligibilityError extends Error {}
 
 /**
- * Test seam. The issuer itself is memoised in `gegAttestation`; this re-exports
+ * Test seam. The issuer itself is memoised in `sgpAttestation`; this re-exports
  * its reset so callers that used to clear an HTTP cache keep working.
  */
-export { resetIssuer as resetEligibilityKeyCache } from './gegAttestation';
+export { resetIssuer as resetEligibilityKeyCache } from './sgpAttestation';
 
 export async function getEligibilityKey(): Promise<string> {
   try {
     return await eligibilityPublicKey();
   } catch (err: any) {
-    if (err instanceof GegAttestationError) {
+    if (err instanceof SgpAttestationError) {
       throw new TeEligibilityError(err.message);
     }
     throw err;
@@ -61,7 +61,7 @@ export async function publishEligibilityKey(): Promise<void> {
   try {
     publicKey = await eligibilityPublicKey();
   } catch (err: any) {
-    if (err instanceof GegAttestationError) {
+    if (err instanceof SgpAttestationError) {
       log.warn(
         `[te] eligibility key not published: ${err.message}. Private voting is unavailable until it is configured.`
       );

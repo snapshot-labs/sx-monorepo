@@ -13,7 +13,7 @@
  * ballot excluded as INVALID_ATTESTATION and a tally of all zeros, hours later.
  */
 
-import { eligibilityPublicKey } from '../../../src/helpers/gegAttestation';
+import { eligibilityPublicKey } from '../../../src/helpers/sgpAttestation';
 import {
   getEligibilityKey,
   resetEligibilityKeyCache,

@@ -266,7 +266,7 @@ export async function updateProposalAndVotes(
  *
  *   1. The keypers build the weighted aggregate themselves from the ballot feed
  *      and post it signed to ``POST /api/proposal/:id/te_aggregate``, which the
- *      hub admits only on a quorum of matching digests (``geg.ts``).
+ *      hub admits only on a quorum of matching digests (``sgp.ts``).
  *   2. The tally aggregator solves the discrete log — Lagrange over ``t+1``
  *      DLEQ-verified shares, then BSGS within ``budget × Σ(scaled weights)`` —
  *      and the result publisher posts the totals to ``POST /te_result``, which

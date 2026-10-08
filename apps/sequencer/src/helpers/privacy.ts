@@ -16,9 +16,9 @@
  * privacy twice — `verify()` fell back to the proposal's current value, while
  * `action()` fell back to `''` — so an update omitting `privacy` passed the
  * `shutter-elgamal` lead-time gate as private and was then written public. The
- * proposal kept its `te_geg_config`, `te_mpk` and keyper rows while dropping out
- * of `te_geg_elections`, stranding a key ceremony that nothing would ever
- * finish, and answering 400 on every geg read thereafter. Nothing in the
+ * proposal kept its `te_sgp_config`, `te_mpk` and keyper rows while dropping out
+ * of `te_sgp_elections`, stranding a key ceremony that nothing would ever
+ * finish, and answering 400 on every SGP read thereafter. Nothing in the
  * response said privacy had changed. That is finding L-2.
  *
  * The fix is not "pick the right fallback" but "derive it once": the two halves

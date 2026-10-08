@@ -1,7 +1,7 @@
 /**
  * A proposal that is not private is not an election, and must say so as 404.
  *
- * The distinction is not cosmetic. geg's data-layer client maps 404 onto
+ * The distinction is not cosmetic. SGP's data-layer client maps 404 onto
  * `KeyError` — "no such election" — and every other status onto `ValueError`,
  * which means "your request was malformed". A caller told its request was
  * malformed has no reason to stop sending it, and no way to tell a public
@@ -26,15 +26,15 @@ const HOST = `http://localhost:${process.env.PORT || 3030}`;
 const ID = '0xdddd000000000000000000000000000000000000000000000000000000000001';
 
 const ROUTES: [method: 'GET' | 'POST', path: string][] = [
-  ['GET', 'te_geg_election'],
-  ['GET', 'te_geg_ballots'],
-  ['GET', 'te_geg_aggregate'],
-  ['GET', 'te_geg_decryption_shares'],
+  ['GET', 'te_sgp_election'],
+  ['GET', 'te_sgp_ballots'],
+  ['GET', 'te_sgp_aggregate'],
+  ['GET', 'te_sgp_decryption_shares'],
   ['GET', 'te_result'],
-  ['GET', 'te_geg_dkg'],
-  ['POST', 'te_geg_dkg'],
+  ['GET', 'te_sgp_dkg'],
+  ['POST', 'te_sgp_dkg'],
   ['POST', 'te_aggregate'],
-  ['POST', 'te_geg_decryption_share'],
+  ['POST', 'te_sgp_decryption_share'],
   ['POST', 'te_result'],
   ['POST', 'te_tally_stalled']
 ];
@@ -96,9 +96,9 @@ describe('a non-private proposal is not an election', () => {
   // The status is what the client branches on, but an operator reading a log
   // still has to tell "this proposal is public" from "this proposal is gone".
   it('keeps the two 404s distinguishable by message', async () => {
-    const publicProposal = await (await call('GET', 'te_geg_election')).text();
+    const publicProposal = await (await call('GET', 'te_sgp_election')).text();
     const missing = await (
-      await fetch(`${HOST}/api/proposal/0x${'ff'.repeat(32)}/te_geg_election`)
+      await fetch(`${HOST}/api/proposal/0x${'ff'.repeat(32)}/te_sgp_election`)
     ).text();
 
     expect(publicProposal).toContain('proposal_not_private');
@@ -109,7 +109,7 @@ describe('a non-private proposal is not an election', () => {
   // offered as an election in the first place, so the 404 is a backstop for a
   // proposal that changed after it was listed, not the primary defence.
   it('does not list it as an election at all', async () => {
-    const res = await fetch(`${HOST}/api/te_geg_elections`);
+    const res = await fetch(`${HOST}/api/te_sgp_elections`);
     expect(await res.text()).not.toContain(ID);
   });
 });

@@ -25,25 +25,25 @@ import {
   EligibilityKeyError,
   eligibilityPublicKey
 } from './helpers/eligibilityKey';
-import { canonicalAggregate, canonicalPoint } from './helpers/gegAggregate';
+import log from './helpers/log';
+import db from './helpers/mysql';
+import { canonicalAggregate, canonicalPoint } from './helpers/sgpAggregate';
 import {
   composeElectionConfig,
-  GegConfigError,
-  parseCommitteeSnapshot
-} from './helpers/gegConfig';
+  parseCommitteeSnapshot,
+  SgpConfigError
+} from './helpers/sgpConfig';
 import {
   aggregateDigest,
   aggregateDigestPreScale,
   decryptionShareDigest,
   dkgResultDigest,
-  GegDigestError,
   recoverDigestSigner,
   requestDigest,
   requestNoncePayload,
-  resultDigest
-} from './helpers/gegDigests';
-import log from './helpers/log';
-import db from './helpers/mysql';
+  resultDigest,
+  SgpDigestError
+} from './helpers/sgpDigests';
 import { sendError } from './helpers/utils';
 
 const router = express.Router();
@@ -87,7 +87,7 @@ function parseJsonField<T>(value: unknown, fallback: T): T {
 async function loadProposal(proposalId: string): Promise<any | null> {
   const rows = await (db as any).queryAsync(
     `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
-            te_committee_pks, te_geg_config, te_config, te_aggregate,
+            te_committee_pks, te_sgp_config, te_config, te_aggregate,
             te_dkg_status, te_tally_stalled, te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
     [proposalId]
@@ -106,12 +106,12 @@ async function loadProposal(proposalId: string): Promise<any | null> {
  * The trade-off is that an auditor cannot enumerate history through here and must
  * be given proposal ids. The per-proposal reads remain complete and public.
  */
-router.get('/te_geg_elections', async (req, res) => {
+router.get('/te_sgp_elections', async (req, res) => {
   try {
     const rows = await (db as any).queryAsync(
       `SELECT id FROM proposals
         WHERE privacy = 'shutter-elgamal'
-          AND te_geg_config IS NOT NULL
+          AND te_sgp_config IS NOT NULL
           AND (te_dkg_status IS NULL OR te_dkg_status = '')
           AND (scores_state IS NULL OR scores_state != 'final')
         ORDER BY start ASC
@@ -131,7 +131,7 @@ router.get('/te_geg_elections', async (req, res) => {
  * `cancelled` is always false — Snapshot has no proposal cancellation, and
  * deletion removes the row entirely, which surfaces as a 404 instead.
  */
-router.get('/proposal/:id/te_geg_election', async (req, res) => {
+router.get('/proposal/:id/te_sgp_election', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -146,12 +146,12 @@ router.get('/proposal/:id/te_geg_election', async (req, res) => {
         proposalId,
         choices: parseJsonField<string[]>(proposal.choices, []),
         type: proposal.type,
-        snapshot: parseCommitteeSnapshot(proposal.te_geg_config),
+        snapshot: parseCommitteeSnapshot(proposal.te_sgp_config),
         currentEligibilityKey: await eligibilityPublicKey()
       });
     } catch (err: any) {
-      if (err instanceof GegConfigError || err instanceof EligibilityKeyError) {
-        log.error(`[geg] ${proposalId}: ${err.message}`);
+      if (err instanceof SgpConfigError || err instanceof EligibilityKeyError) {
+        log.error(`[sgp] ${proposalId}: ${err.message}`);
         return sendError(res, err.message, 503);
       }
       throw err;
@@ -161,7 +161,7 @@ router.get('/proposal/:id/te_geg_election', async (req, res) => {
     const ingestBudget = Number(ingestConfig?.budget);
     if (ingestBudget !== config.budget) {
       log.error(
-        `[geg] ${proposalId}: ballot budget disagrees — te_config says ${ingestConfig?.budget}, ` +
+        `[sgp] ${proposalId}: ballot budget disagrees — te_config says ${ingestConfig?.budget}, ` +
           `the committee config says ${config.budget}`
       );
       return sendError(
@@ -201,7 +201,7 @@ router.get('/proposal/:id/te_geg_election', async (req, res) => {
       finalizedKey
     });
   } catch (err: any) {
-    log.error(`[geg] te_geg_election ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_sgp_election ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -235,7 +235,7 @@ router.get('/proposal/:id/te_geg_election', async (req, res) => {
  * `BALLOT_PAGE`, and a client asking for more gets a short page, which its read
  * loop already handles by advancing on the length it received.
  */
-router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
+router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -259,7 +259,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
     // It runs before any read: there is no point paying for rows this request is
     // about to refuse to serve.
     try {
-      const snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      const snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
       // Refuse to serve credentials minted under a superseded key.
       const currentEligibilityKey = await eligibilityPublicKey();
       if (
@@ -267,7 +267,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
         snapshot.eligibilityKey.toLowerCase()
       ) {
         log.error(
-          `[geg] ${proposalId}: eligibility key rotated since this proposal was created`
+          `[sgp] ${proposalId}: eligibility key rotated since this proposal was created`
         );
         return sendError(
           res,
@@ -277,8 +277,8 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
         );
       }
     } catch (err: any) {
-      if (err instanceof GegConfigError) {
-        log.error(`[geg] ${proposalId}: ${err.message}`);
+      if (err instanceof SgpConfigError) {
+        log.error(`[sgp] ${proposalId}: ${err.message}`);
         return sendError(res, err.message, 500);
       }
       throw err;
@@ -335,7 +335,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
       // prevent. Ingest verifies the envelope before storing it, so this cannot
       // fire without something having corrupted the row.
       if (!envelope?.ciphertexts) {
-        log.error(`[geg] ${proposalId}: vote ${row.id} has no ballot envelope`);
+        log.error(`[sgp] ${proposalId}: vote ${row.id} has no ballot envelope`);
         return sendError(
           res,
           `vote ${row.id} has no ballot envelope; the row is corrupt`,
@@ -351,7 +351,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
       ].filter(Boolean);
       if (missing.length) {
         log.error(
-          `[geg] ${proposalId}: vote ${row.id} is missing ${missing.join(', ')}`
+          `[sgp] ${proposalId}: vote ${row.id} is missing ${missing.join(', ')}`
         );
         return sendError(
           res,
@@ -395,7 +395,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
 
     return res.json({ ballots, total: Number(total) });
   } catch (err: any) {
-    log.error(`[geg] te_geg_ballots ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_sgp_ballots ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -428,7 +428,7 @@ router.get('/proposal/:id/te_geg_ballots', async (req, res) => {
  * signed two different results for one election is evidence worth keeping rather
  * than a race to smooth over.
  */
-router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
+router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -439,11 +439,11 @@ router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
       // No committee means there is nothing to authorise against. Refuse loudly
       // rather than storing an unverifiable submission.
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -453,7 +453,7 @@ router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
     try {
       pkCanon = canonicalPoint(pkElection, 'pkElection', 96);
       if (!Array.isArray(committeePKs) || committeePKs.length === 0) {
-        throw new GegDigestError('committeePKs: expected a non-empty array');
+        throw new SgpDigestError('committeePKs: expected a non-empty array');
       }
       committeeCanon = committeePKs.map((pk, i) =>
         canonicalPoint(pk, `committeePKs[${i}]`, 96)
@@ -493,7 +493,7 @@ router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
       : -1;
     if (index === -1) {
       log.warn(
-        `[geg] ${proposalId}: DKG submission from non-member ${signer ?? 'unrecoverable'}`
+        `[sgp] ${proposalId}: DKG submission from non-member ${signer ?? 'unrecoverable'}`
       );
       // 403 is what the protocol's client maps to an authorisation error; a 401
       // here would be read as a transport problem and retried.
@@ -512,7 +512,7 @@ router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
         existing[0].committee_pks_hex !== committeeJson
       ) {
         log.warn(
-          `[geg] ${proposalId}: keyper ${keyperIndex} changed its DKG submission`
+          `[sgp] ${proposalId}: keyper ${keyperIndex} changed its DKG submission`
         );
         return sendError(res, 'keyper_changed_submission', 409);
       }
@@ -547,18 +547,18 @@ router.post('/proposal/:id/te_geg_dkg', async (req, res) => {
         [pkCanon.slice(2), committeeJson, proposalId]
       );
       log.info(
-        `[geg] ${proposalId}: DKG finalised at ${matching}/${required} matching submissions`
+        `[sgp] ${proposalId}: DKG finalised at ${matching}/${required} matching submissions`
       );
     } else {
       log.info(
-        `[geg] ${proposalId}: DKG submission ${matching}/${required} from keyper ${keyperIndex}`
+        `[sgp] ${proposalId}: DKG submission ${matching}/${required} from keyper ${keyperIndex}`
       );
     }
 
     // 204: the protocol's port defines this write as returning nothing.
     return res.status(204).end();
   } catch (err: any) {
-    log.error(`[geg] te_geg_dkg ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_sgp_dkg ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -622,9 +622,9 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -692,14 +692,14 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
         );
       if (preScaleMember) {
         log.warn(
-          `[geg] ${proposalId}: aggregate from ${preScaleSigner} signed under the ` +
+          `[sgp] ${proposalId}: aggregate from ${preScaleSigner} signed under the ` +
             `pre-scale digest format (4-field tally tuple); this keyper is running a ` +
             `build from before weight scaling`
         );
         return sendError(res, 'aggregate_pre_scale_digest', 409);
       }
       log.warn(
-        `[geg] ${proposalId}: aggregate from non-member ${signer ?? 'unrecoverable'}`
+        `[sgp] ${proposalId}: aggregate from non-member ${signer ?? 'unrecoverable'}`
       );
       return sendError(res, 'not_a_registered_keyper', 403);
     }
@@ -716,7 +716,7 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
     }
     if (existing[0] && proposal.te_aggregate) {
       log.warn(
-        `[geg] ${proposalId}: keyper ${keyperIndex} changed its aggregate after the quorum`
+        `[sgp] ${proposalId}: keyper ${keyperIndex} changed its aggregate after the quorum`
       );
       return sendError(
         res,
@@ -754,7 +754,7 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
 
     if (reached.length > 1) {
       log.error(
-        `[geg] ${proposalId}: ${reached.length} distinct aggregates each reached the quorum of ${required}`
+        `[sgp] ${proposalId}: ${reached.length} distinct aggregates each reached the quorum of ${required}`
       );
       return sendError(res, 'aggregate: split quorum', 409);
     }
@@ -771,18 +771,18 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
         [winner[0].aggregate_json, proposalId]
       );
       log.info(
-        `[geg] ${proposalId}: aggregate canonical at ${reached[0].c}/${required} matching submissions`
+        `[sgp] ${proposalId}: aggregate canonical at ${reached[0].c}/${required} matching submissions`
       );
     } else {
       const mine = groups.find((g: any) => g.digest === digestHex);
       log.info(
-        `[geg] ${proposalId}: aggregate submission ${mine?.c ?? 1}/${required} from keyper ${keyperIndex}`
+        `[sgp] ${proposalId}: aggregate submission ${mine?.c ?? 1}/${required} from keyper ${keyperIndex}`
       );
     }
 
     return res.status(204).end();
   } catch (err: any) {
-    log.error(`[geg] te_aggregate ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_aggregate ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -799,7 +799,7 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
  * would either fail to decode it or, worse, act on a tally nobody signed.
  * Resolving from the signed submissions cannot be polluted that way.
  */
-router.get('/proposal/:id/te_geg_aggregate', async (req, res) => {
+router.get('/proposal/:id/te_sgp_aggregate', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -810,9 +810,9 @@ router.get('/proposal/:id/te_geg_aggregate', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -822,14 +822,14 @@ router.get('/proposal/:id/te_geg_aggregate', async (req, res) => {
     // returning either would make the tally depend on row order.
     if (canonical === 'split') {
       log.error(
-        `[geg] ${proposalId}: distinct aggregates each reached the quorum`
+        `[sgp] ${proposalId}: distinct aggregates each reached the quorum`
       );
       return sendError(res, 'aggregate: split quorum', 409);
     }
 
     return res.json({ aggregate: canonical });
   } catch (err: any) {
-    log.error(`[geg] te_geg_aggregate ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_sgp_aggregate ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -937,7 +937,7 @@ async function verifyShareProofs(
  * signature covers the whole entries list: only a party holding the complete
  * envelope can verify it.
  */
-router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
+router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -948,9 +948,9 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -1007,7 +1007,7 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
       : -1;
     if (index === -1) {
       log.warn(
-        `[geg] ${proposalId}: decryption share from non-member ${signer ?? 'unrecoverable'}`
+        `[sgp] ${proposalId}: decryption share from non-member ${signer ?? 'unrecoverable'}`
       );
       return sendError(res, 'not_a_registered_keyper', 403);
     }
@@ -1047,7 +1047,7 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
         });
       if (same) return res.status(204).end(); // idempotent resend
       log.warn(
-        `[geg] ${proposalId}: keyper ${keyperIndex} already submitted different shares`
+        `[sgp] ${proposalId}: keyper ${keyperIndex} already submitted different shares`
       );
       return sendError(res, 'keyper already submitted different shares', 409);
     }
@@ -1065,7 +1065,7 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
     );
     if (badCandidate !== null) {
       log.error(
-        `[geg] ${proposalId}: keyper ${keyperIndex} DLEQ invalid for candidate ${badCandidate}`
+        `[sgp] ${proposalId}: keyper ${keyperIndex} DLEQ invalid for candidate ${badCandidate}`
       );
       return sendError(res, 'invalid_dleq_proof', 400);
     }
@@ -1094,12 +1094,12 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
     }
 
     log.info(
-      `[geg] ${proposalId}: decryption shares from keyper ${keyperIndex} (${entries.length} candidates)`
+      `[sgp] ${proposalId}: decryption shares from keyper ${keyperIndex} (${entries.length} candidates)`
     );
     return res.status(204).end();
   } catch (err: any) {
     log.error(
-      `[geg] te_geg_decryption_share ${proposalId}: ${err?.message || err}`
+      `[sgp] te_sgp_decryption_share ${proposalId}: ${err?.message || err}`
     );
     capture(err);
     return sendError(res, 'server_error', 500);
@@ -1112,7 +1112,7 @@ router.post('/proposal/:id/te_geg_decryption_share', async (req, res) => {
  * partial envelope decodes to a shorter tuple and would corrupt recovery rather
  * than fail it.
  */
-router.get('/proposal/:id/te_geg_decryption_shares', async (req, res) => {
+router.get('/proposal/:id/te_sgp_decryption_shares', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -1152,7 +1152,7 @@ router.get('/proposal/:id/te_geg_decryption_shares', async (req, res) => {
     return res.json({ shares });
   } catch (err: any) {
     log.error(
-      `[geg] te_geg_decryption_shares ${proposalId}: ${err?.message || err}`
+      `[sgp] te_sgp_decryption_shares ${proposalId}: ${err?.message || err}`
     );
     capture(err);
     return sendError(res, 'server_error', 500);
@@ -1168,10 +1168,11 @@ router.get('/proposal/:id/te_geg_decryption_shares', async (req, res) => {
  * here; what the hub guarantees is that the artifact it stores is the one that
  * key signed, over these exact numbers.
  *
- * The signature binds the totals (upstream `GEG-RESULT-v1`). An earlier form
- * signed only (operation, election), which meant one captured signature
- * authorised *any* totals for that proposal — so this route deliberately fails
- * closed on a digest mismatch rather than trusting the caller's identity alone.
+ * The signature binds the totals (upstream
+ * `SHUTTER-GOVERNANCE-PROTOCOL-RESULT-v1`). An earlier form signed only (operation,
+ * election), which meant one captured signature authorised *any* totals for that
+ * proposal — so this route deliberately fails closed on a digest mismatch rather
+ * than trusting the caller's identity alone.
  *
  * Write-once: a result is the terminal artifact of an election, and a second
  * one would mean two different published outcomes. Identical resends are a
@@ -1188,9 +1189,9 @@ router.post('/proposal/:id/te_result', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -1237,7 +1238,7 @@ router.post('/proposal/:id/te_result', async (req, res) => {
       signer.toLowerCase() !== snapshot.resultPublisherAddress.toLowerCase()
     ) {
       log.warn(
-        `[geg] ${proposalId}: result from ${signer ?? 'unrecoverable'}, not the result publisher`
+        `[sgp] ${proposalId}: result from ${signer ?? 'unrecoverable'}, not the result publisher`
       );
       return sendError(res, 'not_the_result_publisher', 403);
     }
@@ -1258,7 +1259,7 @@ router.post('/proposal/:id/te_result', async (req, res) => {
         existing[0].keyper_indices === indicesJson &&
         existing[0].bsgs_bound === bsgsBound;
       if (same) return res.status(204).end();
-      log.warn(`[geg] ${proposalId}: a different result was already published`);
+      log.warn(`[sgp] ${proposalId}: a different result was already published`);
       return sendError(res, 'result already published', 409);
     }
 
@@ -1275,10 +1276,10 @@ router.post('/proposal/:id/te_result', async (req, res) => {
         Math.floor(Date.now() / 1000)
       ]
     );
-    log.info(`[geg] ${proposalId}: result published, totals ${totalsJson}`);
+    log.info(`[sgp] ${proposalId}: result published, totals ${totalsJson}`);
     return res.status(204).end();
   } catch (err: any) {
-    log.error(`[geg] te_result ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_result ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -1316,7 +1317,7 @@ router.get('/proposal/:id/te_result', async (req, res) => {
       `"bsgsBound":${rows[0].bsgs_bound}}}`;
     res.type('application/json').send(payload);
   } catch (err: any) {
-    log.error(`[geg] te_result ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_result ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
@@ -1372,9 +1373,9 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
 
     let snapshot;
     try {
-      snapshot = parseCommitteeSnapshot(proposal.te_geg_config);
+      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
     } catch (err: any) {
-      log.error(`[geg] ${proposalId}: ${err.message}`);
+      log.error(`[sgp] ${proposalId}: ${err.message}`);
       return sendError(res, 'committee_not_configured', 503);
     }
 
@@ -1411,7 +1412,7 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
     const now = Math.floor(Date.now() / 1000);
     if (Math.abs(now - issuedAt) > REQUEST_FRESHNESS_S) {
       log.warn(
-        `[geg] ${proposalId}: ${op} issuedAt ${issuedAt} is outside the ±${REQUEST_FRESHNESS_S}s window (now ${now})`
+        `[sgp] ${proposalId}: ${op} issuedAt ${issuedAt} is outside the ±${REQUEST_FRESHNESS_S}s window (now ${now})`
       );
       return sendError(res, 'issuedAt is not within the accepted window', 400);
     }
@@ -1429,7 +1430,7 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
       !!signer && expected.some(a => a.toLowerCase() === signer!.toLowerCase());
     if (!permitted) {
       log.warn(
-        `[geg] ${proposalId}: ${op} from ${signer ?? 'unrecoverable'}, expected one of ${expected.join(', ')}`
+        `[sgp] ${proposalId}: ${op} from ${signer ?? 'unrecoverable'}, expected one of ${expected.join(', ')}`
       );
       return sendError(
         res,
@@ -1448,7 +1449,7 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
       if (err?.code === 'ER_DUP_ENTRY') {
         const already = Boolean(proposal.te_tally_stalled) === stalled;
         log.warn(
-          `[geg] ${proposalId}: ${op} reused nonce ${issuedAt}${
+          `[sgp] ${proposalId}: ${op} reused nonce ${issuedAt}${
             already ? ' (no-op, already in that state)' : ' — REJECTED'
           }`
         );
@@ -1471,18 +1472,18 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
       [stalled ? 1 : 0, reason, proposalId]
     );
     log.info(
-      `[geg] ${proposalId}: tally ${stalled ? 'marked stalled' : 'resumed by admin'}`
+      `[sgp] ${proposalId}: tally ${stalled ? 'marked stalled' : 'resumed by admin'}`
     );
     return res.status(204).end();
   } catch (err: any) {
-    log.error(`[geg] te_tally_stalled ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_tally_stalled ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }
 });
 
 /** Every DKG submission recorded so far, for the auditor and the coordinator. */
-router.get('/proposal/:id/te_geg_dkg', async (req, res) => {
+router.get('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
     const proposal = await loadProposal(proposalId);
@@ -1504,7 +1505,7 @@ router.get('/proposal/:id/te_geg_dkg', async (req, res) => {
       }))
     });
   } catch (err: any) {
-    log.error(`[geg] te_geg_dkg read ${proposalId}: ${err?.message || err}`);
+    log.error(`[sgp] te_sgp_dkg read ${proposalId}: ${err?.message || err}`);
     capture(err);
     return sendError(res, 'server_error', 500);
   }

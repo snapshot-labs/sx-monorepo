@@ -46,7 +46,7 @@ const PRIVATE_ID = '0xd14-private';
 
 /** Every column the private-voting feature added to `proposals`. */
 const TE_COLUMNS = [
-  'te_geg_config',
+  'te_sgp_config',
   'te_config',
   'te_mpk',
   'te_committee_pks',

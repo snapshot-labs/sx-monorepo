@@ -5,7 +5,6 @@ import cors from 'cors';
 import express from 'express';
 import api from './api';
 import eip4824 from './eip4824';
-import geg from './geg';
 import graphql from './graphql';
 import { checkKeycard } from './helpers/keycard';
 import log from './helpers/log';
@@ -13,6 +12,7 @@ import initMetrics from './helpers/metrics';
 import { closeDatabase } from './helpers/mysql';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
+import sgp from './sgp';
 import te from './te';
 import './helpers/strategies';
 
@@ -51,7 +51,7 @@ app.use(checkKeycard, rateLimit);
 app.use('/api', api);
 app.use('/api/eip4824', eip4824);
 app.use('/api', te);
-app.use('/api', geg);
+app.use('/api', sgp);
 app.use('/graphql', graphql);
 
 fallbackLogger(app);

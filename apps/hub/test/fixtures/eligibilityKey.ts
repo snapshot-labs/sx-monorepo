@@ -14,7 +14,7 @@ export const ELIGIBILITY_KEY = `0x${'ab'.repeat(48)}`;
  *
  * `eligibilityPublicKey()` reads this row from the database, so **any suite that
  * calls it must call this first**. It used to be seeded by exactly one suite
- * (`geg-ballots-materialization`), which left every other suite that needed it
+ * (`sgp-ballots-materialization`), which left every other suite that needed it
  * passing or failing on jest's suite order: run one of them first against a fresh
  * database and all of its tests fail with "the sequencer has not published an
  * eligibility key", which reads like a routing or config fault rather than a

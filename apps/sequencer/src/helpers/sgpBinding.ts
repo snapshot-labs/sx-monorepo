@@ -5,7 +5,7 @@ import {
   G1Point,
   schnorrVerify
 } from '@shutter-network/urban-verified-crypto';
-import { GegAttestationError } from './gegAttestation';
+import { SgpAttestationError } from './sgpAttestation';
 import { ensureCurvesInit } from './te';
 
 export function hexToBytes(
@@ -21,7 +21,7 @@ export function hexToBytes(
     body.length % 2 !== 0 ||
     (size !== undefined && body.length !== size * 2)
   ) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       size === undefined
         ? `${label}: expected hex`
         : `${label}: expected ${size} bytes of hex`

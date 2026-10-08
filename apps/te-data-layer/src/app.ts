@@ -173,7 +173,7 @@ export function buildApp(): Express {
     '/elections',
     handle(async (req, res) => {
       const { electionIds } = await hubGet<{ electionIds: string[] }>(
-        '/api/te_geg_elections'
+        '/api/te_sgp_elections'
       );
       // Ids pass through unchanged, and the reason is worth stating because the
       // contract is asymmetric: *path segments* carry bare hex, but every byte
@@ -191,7 +191,7 @@ export function buildApp(): Express {
       const id = toProposalId(electionIdParam(req));
       res.json(
         await hubGet<Record<string, unknown>>(
-          `/api/proposal/${id}/te_geg_election`
+          `/api/proposal/${id}/te_sgp_election`
         )
       );
     })
@@ -204,7 +204,7 @@ export function buildApp(): Express {
       // Forwarded verbatim. The keyper index is deliberately absent from this
       // payload — the hub recovers it from the signature, so a submission can only
       // ever count for whoever actually signed it.
-      await hubPost(`/api/proposal/${id}/te_geg_dkg`, {
+      await hubPost(`/api/proposal/${id}/te_sgp_dkg`, {
         pkElection: req.body?.pkElection,
         committeePKs: req.body?.committeePKs,
         keyperSig: req.body?.keyperSig
@@ -232,7 +232,7 @@ export function buildApp(): Express {
     '/elections/:eid/shares',
     handle(async (req, res) => {
       const id = toProposalId(electionIdParam(req));
-      await hubPost(`/api/proposal/${id}/te_geg_decryption_share`, {
+      await hubPost(`/api/proposal/${id}/te_sgp_decryption_share`, {
         share: req.body?.share,
         keyperSig: req.body?.keyperSig
       });
@@ -275,7 +275,7 @@ export function buildApp(): Express {
     handle(async (req, res) => {
       const id = toProposalId(electionIdParam(req));
       const { submissions } = await hubGet<{ submissions: unknown[] }>(
-        `/api/proposal/${id}/te_geg_dkg`
+        `/api/proposal/${id}/te_sgp_dkg`
       );
       res.json({ submissions });
     })
@@ -288,7 +288,7 @@ export function buildApp(): Express {
       // Derived from the same read as the election itself: a finalized key exists
       // exactly when the committee reached its quorum.
       const { finalizedKey } = await hubGet<{ finalizedKey: unknown }>(
-        `/api/proposal/${id}/te_geg_election`
+        `/api/proposal/${id}/te_sgp_election`
       );
       res.json({ finalizedKey: finalizedKey ?? null });
     })
@@ -299,7 +299,7 @@ export function buildApp(): Express {
     handle(async (req, res) => {
       const id = toProposalId(electionIdParam(req));
       const { count } = await hubGet<{ count: number }>(
-        `/api/proposal/${id}/te_geg_ballots?countOnly=1`
+        `/api/proposal/${id}/te_sgp_ballots?countOnly=1`
       );
       res.json({ count });
     })
@@ -320,7 +320,7 @@ export function buildApp(): Express {
       }
       const qs = params.toString();
       const { ballots } = await hubGet<{ ballots: unknown[] }>(
-        `/api/proposal/${id}/te_geg_ballots${qs ? `?${qs}` : ''}`
+        `/api/proposal/${id}/te_sgp_ballots${qs ? `?${qs}` : ''}`
       );
       res.json({ ballots });
     })
@@ -338,7 +338,7 @@ export function buildApp(): Express {
       // is a fact the coordinator acts on — it is how it knows to keep asking the
       // committee to derive — so it must be reported, never 501'd.
       const { aggregate } = await hubGet<{ aggregate: unknown }>(
-        `/api/proposal/${id}/te_geg_aggregate`
+        `/api/proposal/${id}/te_sgp_aggregate`
       );
       res.json({ aggregate: aggregate ?? null });
     })
@@ -359,7 +359,7 @@ export function buildApp(): Express {
     handle(async (req, res) => {
       const id = toProposalId(electionIdParam(req));
       const { shares } = await hubGet<{ shares: unknown[] }>(
-        `/api/proposal/${id}/te_geg_decryption_shares`
+        `/api/proposal/${id}/te_sgp_decryption_shares`
       );
       res.json({ shares });
     })

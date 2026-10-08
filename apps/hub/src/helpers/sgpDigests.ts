@@ -6,9 +6,10 @@
  * recovers the signer and checks committee membership, while an on-chain backend
  * relays the same signature to a contract that `ecrecover`s the same digest. The
  * digests therefore mirror the Solidity byte-for-byte and are not ours to change —
- * they are the protocol's, and geg's Python computes them from the same definition.
+ * they are the protocol's, and SGP's Python computes them from the same definition.
  *
- *   dkg-result = keccak256("GEG-DKG-RESULT-v1" ‖ electionId ‖ pkElection
+ *   dkg-result = keccak256("SHUTTER-GOVERNANCE-PROTOCOL-DKG-RESULT-v1"
+ *                          ‖ electionId ‖ pkElection
  *                          ‖ abi.encode(bytes[] committeePKs))
  *
  * Signed as an EIP-191 personal-sign message, so plain `ecrecover` and OpenZeppelin's
@@ -22,8 +23,8 @@
  * ABI encoding is delegated to `@ethersproject/abi` rather than hand-rolled. The
  * offset arithmetic for a dynamic array of dynamic elements is easy to get subtly
  * wrong, and the aggregate digest that follows in a later phase encodes a nested
- * struct with several dynamic members. Parity with the Python side is pinned by
- * `test/unit/geg-digests.test.ts` against generated vectors.
+ * struct with several dynamic members. Parity with the Python side is exercised by
+ * live runs against real keypers, which reject a mismatched digest outright.
  */
 
 import { defaultAbiCoder } from '@ethersproject/abi';
@@ -31,11 +32,23 @@ import { getAddress } from '@ethersproject/address';
 import { keccak256 } from '@ethersproject/keccak256';
 import { verifyMessage } from '@ethersproject/wallet';
 
-const DKG_RESULT_DST = Buffer.from('GEG-DKG-RESULT-v1', 'utf8');
-const AGGREGATE_DST = Buffer.from('GEG-AGGREGATE-v1', 'utf8');
-const DECRYPT_SHARE_DST = Buffer.from('GEG-DECRYPT-SHARE-v1', 'utf8');
-const RESULT_DST = Buffer.from('GEG-RESULT-v1', 'utf8');
-const REQUEST_DST = Buffer.from('GEG-REQUEST-v1', 'utf8');
+const DKG_RESULT_DST = Buffer.from(
+  'SHUTTER-GOVERNANCE-PROTOCOL-DKG-RESULT-v1',
+  'utf8'
+);
+const AGGREGATE_DST = Buffer.from(
+  'SHUTTER-GOVERNANCE-PROTOCOL-AGGREGATE-v1',
+  'utf8'
+);
+const DECRYPT_SHARE_DST = Buffer.from(
+  'SHUTTER-GOVERNANCE-PROTOCOL-DECRYPT-SHARE-v1',
+  'utf8'
+);
+const RESULT_DST = Buffer.from('SHUTTER-GOVERNANCE-PROTOCOL-RESULT-v1', 'utf8');
+const REQUEST_DST = Buffer.from(
+  'SHUTTER-GOVERNANCE-PROTOCOL-REQUEST-v1',
+  'utf8'
+);
 
 /**
  * Exclusion reasons as the digest encodes them: the protocol's **declaration
@@ -56,20 +69,20 @@ const EXCLUSION_CODES: Record<string, number> = {
   OUT_OF_WINDOW: 5
 };
 
-export class GegDigestError extends Error {}
+export class SgpDigestError extends Error {}
 
 /** Strict fixed-size hex decode. A wrong length here would silently shift the digest. */
 function decodeSized(value: unknown, label: string, size: number): Buffer {
   if (typeof value !== 'string') {
-    throw new GegDigestError(`${label}: not a string`);
+    throw new SgpDigestError(`${label}: not a string`);
   }
   const body =
     value.startsWith('0x') || value.startsWith('0X') ? value.slice(2) : value;
   if (!/^[0-9a-fA-F]*$/.test(body)) {
-    throw new GegDigestError(`${label}: not hex`);
+    throw new SgpDigestError(`${label}: not hex`);
   }
   if (body.length !== size * 2) {
-    throw new GegDigestError(
+    throw new SgpDigestError(
       `${label}: expected ${size} bytes, got ${body.length / 2}`
     );
   }
@@ -91,7 +104,7 @@ export function dkgResultDigest(args: {
   const electionId = decodeSized(args.electionId, 'electionId', 32);
   const pkElection = decodeSized(args.pkElection, 'pkElection', 96);
   if (!Array.isArray(args.committeePKs) || args.committeePKs.length === 0) {
-    throw new GegDigestError('committeePKs: expected a non-empty array');
+    throw new SgpDigestError('committeePKs: expected a non-empty array');
   }
   const committeePKs = args.committeePKs.map((pk, i) =>
     decodeSized(pk, `committeePKs[${i}]`, 96)
@@ -111,13 +124,13 @@ export function dkgResultDigest(args: {
 }
 
 /** One `(c1, c2)` ciphertext pair of the aggregate, compressed G2 points. */
-export interface GegAggregateCiphertext {
+export interface SgpAggregateCiphertext {
   c1: string;
   c2: string;
 }
 
 /** A ballot the committee left out, and why. */
-export interface GegExclusion {
+export interface SgpExclusion {
   sequenceNumber: number;
   reason: string;
 }
@@ -135,33 +148,34 @@ export interface GegExclusion {
  * committee-owned aggregate: two keypers that summed the same ciphertexts over a
  * different set of ballots produce different digests and never reach a quorum.
  *
- * **This tuple must match `geg.core.write_auth._TALLY_ABI` field for field.** It is
- * the second implementation of one signed format, and the two are only ever checked
- * against each other by the parity vectors. When weight scaling added the trailing
- * `totalScaledWeight`, geg was updated and this was not: keypers signed five fields,
- * the hub hashed four, and `ecrecover` returned a well-formed but wrong address for
- * every keyper. The hub reported it as `aggregate from non-member 0x…` and returned
- * 403 — a message that points at the committee roster, which was correct, and says
- * nothing about the digest, which was not. A shape change here is a wire-format
- * change: bump the parity vectors in the same commit.
+ * **This tuple must match `shutter_governance_protocol.core.write_auth._TALLY_ABI`
+ * field for field.** It is the second implementation of one signed format, and the
+ * two are only ever checked against each other by live runs. When weight scaling
+ * added the trailing `totalScaledWeight`, SGP was updated and this was not: keypers
+ * signed five fields, the hub hashed four, and `ecrecover` returned a well-formed
+ * but wrong address for every keyper. The hub reported it as `aggregate from
+ * non-member 0x…` and returned 403 — a message that points at the committee roster,
+ * which was correct, and says nothing about the digest, which was not. A shape
+ * change here is a wire-format change: update it in the same release as the
+ * protocol.
  */
 export function aggregateDigest(args: {
   electionId: string;
-  aggregates: GegAggregateCiphertext[];
+  aggregates: SgpAggregateCiphertext[];
   admitted: number[];
-  exclusions: GegExclusion[];
+  exclusions: SgpExclusion[];
   totalAdmittedWeight: number | string | bigint;
   totalScaledWeight: number | string | bigint;
 }): Buffer {
   const electionId = decodeSized(args.electionId, 'electionId', 32);
   if (!Array.isArray(args.aggregates)) {
-    throw new GegDigestError('aggregates: expected an array');
+    throw new SgpDigestError('aggregates: expected an array');
   }
   if (!Array.isArray(args.admitted)) {
-    throw new GegDigestError('admitted: expected an array');
+    throw new SgpDigestError('admitted: expected an array');
   }
   if (!Array.isArray(args.exclusions)) {
-    throw new GegDigestError('exclusions: expected an array');
+    throw new SgpDigestError('exclusions: expected an array');
   }
 
   const pairs = args.aggregates.map((ct, i) => [
@@ -170,17 +184,17 @@ export function aggregateDigest(args: {
   ]);
   const admitted = args.admitted.map((seq, i) => {
     if (!Number.isInteger(seq) || seq < 0) {
-      throw new GegDigestError(`admitted[${i}]: expected a sequence number`);
+      throw new SgpDigestError(`admitted[${i}]: expected a sequence number`);
     }
     return seq;
   });
   const exclusions = args.exclusions.map((x, i) => {
     const code = EXCLUSION_CODES[x?.reason as string];
     if (code === undefined) {
-      throw new GegDigestError(`exclusions[${i}].reason: unknown ${x?.reason}`);
+      throw new SgpDigestError(`exclusions[${i}].reason: unknown ${x?.reason}`);
     }
     if (!Number.isInteger(x?.sequenceNumber) || x.sequenceNumber < 0) {
-      throw new GegDigestError(
+      throw new SgpDigestError(
         `exclusions[${i}].sequenceNumber: expected a sequence number`
       );
     }
@@ -200,10 +214,10 @@ export function aggregateDigest(args: {
     try {
       out = BigInt(value).toString();
     } catch {
-      throw new GegDigestError(`${name}: expected an integer (got ${value})`);
+      throw new SgpDigestError(`${name}: expected an integer (got ${value})`);
     }
     if (out.startsWith('-')) {
-      throw new GegDigestError(`${name}: must not be negative`);
+      throw new SgpDigestError(`${name}: must not be negative`);
     }
     return out;
   };
@@ -244,9 +258,9 @@ export function aggregateDigest(args: {
  */
 export function aggregateDigestPreScale(args: {
   electionId: string;
-  aggregates: GegAggregateCiphertext[];
+  aggregates: SgpAggregateCiphertext[];
   admitted: number[];
-  exclusions: GegExclusion[];
+  exclusions: SgpExclusion[];
   totalAdmittedWeight: number | string | bigint;
 }): Buffer {
   const electionId = decodeSized(args.electionId, 'electionId', 32);
@@ -281,7 +295,7 @@ export function aggregateDigestPreScale(args: {
 }
 
 /** One keyper's partial decryption of one candidate. */
-export interface GegShareEntry {
+export interface SgpShareEntry {
   /** 96-byte compressed G2 point. */
   sigma: string;
   /** 64-byte DLEQ proof: `e ‖ z`, two 32-byte big-endian scalars. */
@@ -301,11 +315,11 @@ export interface GegShareEntry {
  */
 export function decryptionShareDigest(args: {
   electionId: string;
-  entries: GegShareEntry[];
+  entries: SgpShareEntry[];
 }): Buffer {
   const electionId = decodeSized(args.electionId, 'electionId', 32);
   if (!Array.isArray(args.entries) || args.entries.length === 0) {
-    throw new GegDigestError('entries: expected a non-empty array');
+    throw new SgpDigestError('entries: expected a non-empty array');
   }
 
   const sigmas = args.entries.map((e, i) =>
@@ -352,10 +366,10 @@ export function resultDigest(args: {
 }): Buffer {
   const electionId = decodeSized(args.electionId, 'electionId', 32);
   if (!Array.isArray(args.totals) || args.totals.length === 0) {
-    throw new GegDigestError('totals: expected a non-empty array');
+    throw new SgpDigestError('totals: expected a non-empty array');
   }
   if (!Array.isArray(args.keyperIndices) || args.keyperIndices.length === 0) {
-    throw new GegDigestError('keyperIndices: expected a non-empty array');
+    throw new SgpDigestError('keyperIndices: expected a non-empty array');
   }
 
   const asUint = (value: unknown, label: string): string => {
@@ -363,9 +377,9 @@ export function resultDigest(args: {
     try {
       n = BigInt(value as any);
     } catch {
-      throw new GegDigestError(`${label}: expected an integer (got ${value})`);
+      throw new SgpDigestError(`${label}: expected an integer (got ${value})`);
     }
-    if (n < 0n) throw new GegDigestError(`${label}: must not be negative`);
+    if (n < 0n) throw new SgpDigestError(`${label}: must not be negative`);
     return n.toString();
   };
 
@@ -412,7 +426,7 @@ export function resultDigest(args: {
 
 export function requestNoncePayload(issuedAt: number): Buffer {
   if (!Number.isInteger(issuedAt) || issuedAt < 0) {
-    throw new GegDigestError(
+    throw new SgpDigestError(
       `issuedAt must be a non-negative integer, got ${issuedAt}`
     );
   }

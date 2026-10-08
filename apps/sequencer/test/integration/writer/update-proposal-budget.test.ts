@@ -2,7 +2,7 @@
  * An edit must not move the ballot budget out from under the committee.
  *
  * `te_config.budget` (what the browser builds to, and what ingest verifies) and
- * `te_geg_config.weightedBudget` (what the hub advertises to the keypers) are
+ * `te_sgp_config.weightedBudget` (what the hub advertises to the keypers) are
  * written together at creation from one `TE_WEIGHTED_BUDGET`, so they agree. But
  * the committee snapshot is deliberately never rebuilt for an already-private
  * proposal — re-deriving it could swap the committee mid-ceremony — while an edit
@@ -84,7 +84,7 @@ async function seed(): Promise<void> {
     scores_updated: 0,
     vp_value_by_strategy: '[]',
     votes: 0,
-    te_geg_config: snapshot(CREATED_BUDGET),
+    te_sgp_config: snapshot(CREATED_BUDGET),
     te_config: JSON.stringify({
       numCandidates: 3,
       budget: CREATED_BUDGET,

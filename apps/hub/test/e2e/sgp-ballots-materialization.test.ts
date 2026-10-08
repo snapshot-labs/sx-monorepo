@@ -1,5 +1,5 @@
 /**
- * `te_geg_ballots` — the feed the committee tallies from, against the database.
+ * `te_sgp_ballots` — the feed the committee tallies from, against the database.
  *
  * The plan calls this route correctness-critical for one reason: a ballot's
  * admission is expressed *as its sequence number* inside an artifact every keyper
@@ -151,7 +151,7 @@ async function seed(): Promise<void> {
       mode: 'exact',
       variant: 'A'
     }),
-    te_geg_config: JSON.stringify(committee())
+    te_sgp_config: JSON.stringify(committee())
   });
 
   for (let i = 0; i < N_BALLOTS; i++) {
@@ -183,16 +183,16 @@ type Ballot = {
 
 async function read(query = ''): Promise<{ ballots: Ballot[]; total: number }> {
   const res = await fetch(
-    `${HOST}/api/proposal/${ID}/te_geg_ballots${query ? `?${query}` : ''}`
+    `${HOST}/api/proposal/${ID}/te_sgp_ballots${query ? `?${query}` : ''}`
   );
   expect(res.status).toBe(200);
   return (await res.json()) as any;
 }
 
-/** Page the way geg's `read_all_ballots` does: count, then walk by page size. */
+/** Page the way SGP's `read_all_ballots` does: count, then walk by page size. */
 async function readAllPaged(pageSize: number): Promise<Ballot[]> {
   const { count } = (await (
-    await fetch(`${HOST}/api/proposal/${ID}/te_geg_ballots?countOnly=1`)
+    await fetch(`${HOST}/api/proposal/${ID}/te_sgp_ballots?countOnly=1`)
   ).json()) as any;
   const out: Ballot[] = [];
   let start = 0;
@@ -206,7 +206,7 @@ async function readAllPaged(pageSize: number): Promise<Ballot[]> {
   return out;
 }
 
-describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
+describe('GET /api/proposal/:id/te_sgp_ballots — materialization', () => {
   beforeAll(seed);
 
   afterAll(async () => {
@@ -245,8 +245,8 @@ describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
    * check that actually fails on removal is the one kept.
    */
   it('orders by (created, id) so tied timestamps cannot reorder', () => {
-    const source = readFileSync(join(__dirname, '../../src/geg.ts'), 'utf8');
-    const route = source.slice(source.indexOf("te_geg_ballots', async"));
+    const source = readFileSync(join(__dirname, '../../src/sgp.ts'), 'utf8');
+    const route = source.slice(source.indexOf("te_sgp_ballots', async"));
     const orderings = route.match(/ORDER BY created ASC[^`]*/g) ?? [];
     expect(orderings.length).toBeGreaterThan(0);
     for (const o of orderings) {
@@ -261,7 +261,7 @@ describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
 
   it('counts without returning ballots, and agrees with a full read', async () => {
     const res = await fetch(
-      `${HOST}/api/proposal/${ID}/te_geg_ballots?countOnly=1`
+      `${HOST}/api/proposal/${ID}/te_sgp_ballots?countOnly=1`
     );
     const body = (await res.json()) as any;
     expect(body).toEqual({ count: N_BALLOTS });
@@ -325,7 +325,7 @@ describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
       [JSON.stringify(stripped), ID, '0xvote0003']
     );
     try {
-      const res = await fetch(`${HOST}/api/proposal/${ID}/te_geg_ballots`);
+      const res = await fetch(`${HOST}/api/proposal/${ID}/te_sgp_ballots`);
       expect(res.status).toBe(500);
       expect(JSON.stringify(await res.json())).toMatch(/credential/i);
     } finally {
@@ -347,7 +347,7 @@ describe('GET /api/proposal/:id/te_geg_ballots — materialization', () => {
  * `countOnly` and `total` still report the whole election. Getting that wrong
  * would make a keyper stop paging early and tally a prefix of the ballots.
  */
-describe('GET te_geg_ballots — above the page cap', () => {
+describe('GET te_sgp_ballots — above the page cap', () => {
   const BIG =
     '0xbbbb000000000000000000000000000000000000000000000000000000000002';
   const CAP = 1000;
@@ -393,7 +393,7 @@ describe('GET te_geg_ballots — above the page cap', () => {
         mode: 'exact',
         variant: 'A'
       }),
-      te_geg_config: JSON.stringify(committee())
+      te_sgp_config: JSON.stringify(committee())
     });
 
     // One multi-row insert: 1001 round trips would dominate the suite's runtime.
@@ -430,7 +430,7 @@ describe('GET te_geg_ballots — above the page cap', () => {
 
   async function big(query = '') {
     const res = await fetch(
-      `${HOST}/api/proposal/${BIG}/te_geg_ballots${query ? `?${query}` : ''}`
+      `${HOST}/api/proposal/${BIG}/te_sgp_ballots${query ? `?${query}` : ''}`
     );
     expect(res.status).toBe(200);
     return (await res.json()) as any;

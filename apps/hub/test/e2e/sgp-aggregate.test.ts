@@ -24,8 +24,8 @@
 
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'node-fetch';
-import { aggregateDigest } from '../../src/helpers/gegDigests';
 import db from '../../src/helpers/mysql';
+import { aggregateDigest } from '../../src/helpers/sgpDigests';
 
 const HOST = `http://localhost:${process.env.PORT || 3030}`;
 
@@ -101,7 +101,7 @@ async function submit(
 
 async function canonical(proposalId: string) {
   const res = await fetch(
-    `${HOST}/api/proposal/${proposalId}/te_geg_aggregate`
+    `${HOST}/api/proposal/${proposalId}/te_sgp_aggregate`
   );
   return (await res.json()).aggregate;
 }
@@ -153,7 +153,7 @@ async function seed(id: string, endsAt: number, quorum = 2) {
       mode: 'exact',
       variant: 'A'
     }),
-    te_geg_config: JSON.stringify(committee(quorum))
+    te_sgp_config: JSON.stringify(committee(quorum))
   });
 }
 

@@ -1,10 +1,5 @@
 /**
  * Sign as the browser does, verify as ingest does.
- *
- * The parity vectors prove the *message* matches geg's Python. This proves the
- * two halves we own actually meet: a signature produced the way the UI produces
- * one is accepted by `verifyBallotSignature`, and the substitution it exists to
- * stop is refused.
  */
 
 import {
@@ -17,8 +12,8 @@ import {
   eligibilityPublicKey,
   mintAttestation,
   resetIssuer
-} from '../../../src/helpers/gegAttestation';
-import { verifyBallotSignature } from '../../../src/helpers/gegBinding';
+} from '../../../src/helpers/sgpAttestation';
+import { verifyBallotSignature } from '../../../src/helpers/sgpBinding';
 
 const ID = `0x${'f2'.repeat(32)}`;
 const BUDGET = 3;

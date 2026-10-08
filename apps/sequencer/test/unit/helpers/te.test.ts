@@ -1,7 +1,7 @@
 import {
   expectedPseudonym,
   isDustVotingPower,
-  isWithinGegVotingWindow,
+  isWithinSgpVotingWindow,
   verifyTeBallot
 } from '../../../src/helpers/te';
 
@@ -182,12 +182,12 @@ describe('helpers/te', () => {
       }
     );
   });
-  describe('isWithinGegVotingWindow', () => {
+  describe('isWithinSgpVotingWindow', () => {
     const START = 1_000;
     const END = 2_000;
 
     // The end boundary is the whole reason this exists: Snapshot accepts a vote
-    // timestamped exactly at `end`, geg excludes it. Private voting takes geg's.
+    // timestamped exactly at `end`, SGP excludes it. Private voting takes SGP's.
     test.each([
       [START - 1, false],
       [START, true],
@@ -196,7 +196,7 @@ describe('helpers/te', () => {
       [END, false],
       [END + 1, false]
     ])('t=%p within window: %p', (t, expected) => {
-      expect(isWithinGegVotingWindow(t as number, START, END)).toBe(expected);
+      expect(isWithinSgpVotingWindow(t as number, START, END)).toBe(expected);
     });
 
     // Parity with the protocol's `is_voting_open`, asserted rather than assumed:
@@ -204,7 +204,7 @@ describe('helpers/te', () => {
     // would exclude a ballot the verify panel still counts.
     test('matches the protocol half-open predicate across the range', () => {
       for (let t = START - 2; t <= END + 2; t++) {
-        expect(isWithinGegVotingWindow(t, START, END)).toBe(
+        expect(isWithinSgpVotingWindow(t, START, END)).toBe(
           START <= t && t < END
         );
       }

@@ -21,11 +21,11 @@
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'node-fetch';
 import { eligibilityPublicKey } from '../../src/helpers/eligibilityKey';
+import db from '../../src/helpers/mysql';
 import {
   requestDigest,
   requestNoncePayload
-} from '../../src/helpers/gegDigests';
-import db from '../../src/helpers/mysql';
+} from '../../src/helpers/sgpDigests';
 import { seedEligibilityKey } from '../fixtures/eligibilityKey';
 
 const HOST = `http://localhost:${process.env.PORT || 3030}`;
@@ -37,7 +37,7 @@ const KEYPER = new Wallet(`0x${'c3'.repeat(32)}`);
 // fixture where they are the same address cannot tell the two rules apart.
 const AUTHOR = new Wallet(`0x${'e5'.repeat(32)}`);
 
-// Distinct from every other e2e suite's proposal id. `geg-ballots-materialization`
+// Distinct from every other e2e suite's proposal id. `sgp-ballots-materialization`
 // used to share `0xbbbb...0001` with this file, so each suite's setup and teardown
 // deleted the other's row — whichever ran second pulled the ground out from under
 // the first, and which tests failed depended on jest's ordering.
@@ -97,7 +97,7 @@ async function stalledFlag(): Promise<number> {
 }
 
 async function reportedByElectionRead(): Promise<boolean> {
-  const res = await fetch(`${HOST}/api/proposal/${ID}/te_geg_election`);
+  const res = await fetch(`${HOST}/api/proposal/${ID}/te_sgp_election`);
   return (await res.json()).tallyStalled;
 }
 
@@ -205,7 +205,7 @@ describe('POST /api/proposal/:id/te_tally_stalled', () => {
         mode: 'exact',
         variant: 'A'
       }),
-      te_geg_config: JSON.stringify({
+      te_sgp_config: JSON.stringify({
         v: 1,
         keypers: [{ address: KEYPER.address, url: 'https://k1.example' }],
         thresholdT: 1,

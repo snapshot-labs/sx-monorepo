@@ -6,8 +6,8 @@
  * library the endpoint calls — so a transcript mismatch between prover and
  * verifier surfaces here rather than as an unexplained share rejection.
  *
- * The endpoint this guards is now `POST /proposal/:id/te_geg_decryption_share`
- * in `geg.ts` (`verifyShareProofs`). It replaced an identically-seeded check in
+ * The endpoint this guards is now `POST /proposal/:id/te_sgp_decryption_share`
+ * in `sgp.ts` (`verifyShareProofs`). It replaced an identically-seeded check in
  * `te.ts`, deleted with the `SX-TE-*` digests; the transcript construction is
  * unchanged, which is exactly why this test kept its value across the move.
  */

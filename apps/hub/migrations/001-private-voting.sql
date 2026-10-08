@@ -31,7 +31,7 @@ ALTER TABLE proposals
   ADD COLUMN te_keyper_addresses JSON DEFAULT NULL,
   ADD COLUMN te_aggregate JSON DEFAULT NULL,
   ADD COLUMN te_dkg_status VARCHAR(24) DEFAULT NULL,
-  ADD COLUMN te_geg_config JSON DEFAULT NULL,
+  ADD COLUMN te_sgp_config JSON DEFAULT NULL,
   ADD COLUMN te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   -- The coordinator's own account of why it stalled, for an operator to read.
   -- Advisory and deliberately outside the signed `tally_stall` digest: it is a

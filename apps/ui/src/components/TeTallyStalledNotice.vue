@@ -16,7 +16,7 @@
  * send them to restart healthy machines.
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { fetchGegElection, submitTallyResume } from '@/helpers/teStall';
+import { fetchSgpElection, submitTallyResume } from '@/helpers/teStall';
 import { shortenAddress } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
@@ -62,7 +62,7 @@ const isAdmin = computed(
 
 async function refresh() {
   try {
-    const state = await fetchGegElection(props.apiBaseUrl, props.proposal.id);
+    const state = await fetchSgpElection(props.apiBaseUrl, props.proposal.id);
     stalled.value = state.tallyStalled;
     stallReason.value = state.tallyStallReason;
   } catch {

@@ -70,7 +70,7 @@ describe('election id translation', () => {
     hubReplies({ config: {}, cancelled: false });
     await request(app).get(`/elections/${BARE}`);
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_election`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_election`
     );
   });
 
@@ -166,7 +166,7 @@ describe('reads', () => {
     hubReplies({ ballots: [] });
     await request(app).get(`/elections/${BARE}/ballots?start=0&count=0`);
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_ballots`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_ballots`
     );
   });
 
@@ -195,7 +195,7 @@ describe('dkg write path', () => {
       .send({ pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' });
     expect(res.status).toBe(204);
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_dkg`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
     );
   });
 
@@ -273,7 +273,7 @@ describe('dkg write path', () => {
     const res = await request(app).get(`/elections/${BARE}/dkg`);
     expect(res.body).toEqual({ submissions });
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_dkg`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
     );
   });
 });
@@ -347,7 +347,7 @@ describe('the /port read mount', () => {
     hubReplies({ submissions: [] });
     await request(app).get(`/port/elections/${BARE}/dkg`);
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_dkg`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
     );
   });
 
@@ -451,7 +451,7 @@ describe('aggregate', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ aggregate });
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_aggregate`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_aggregate`
     );
   });
 
@@ -493,7 +493,7 @@ describe('decryption shares', () => {
     const res = await request(app).post(`/elections/${BARE}/shares`).send(body);
     expect(res.status).toBe(204);
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_decryption_share`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_decryption_share`
     );
     expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual(body);
   });
@@ -525,7 +525,7 @@ describe('decryption shares', () => {
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ shares });
     expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_geg_decryption_shares`
+      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_decryption_shares`
     );
   });
 

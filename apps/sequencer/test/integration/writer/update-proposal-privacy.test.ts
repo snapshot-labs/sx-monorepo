@@ -7,9 +7,9 @@
  * current value and applied the `shutter-elgamal` lead-time gate, then `action()`
  * fell back to `''` and wrote the proposal public.
  *
- * Nothing in the response said so. The row kept its `te_geg_config`, `te_mpk` and
- * frozen committee while dropping out of `te_geg_elections`, so a key ceremony
- * already in flight had nothing left to finish it, and every subsequent geg read
+ * Nothing in the response said so. The row kept its `te_sgp_config`, `te_mpk` and
+ * frozen committee while dropping out of `te_sgp_elections`, so a key ceremony
+ * already in flight had nothing left to finish it, and every subsequent SGP read
  * answered 400. That is finding L-2 — and combined with L-4 (400 where the port
  * contract expects 404) the coordinator gets a `ValueError` it retries forever
  * rather than the `KeyError` that would let it drop the election and move on.
@@ -95,7 +95,7 @@ async function seed(): Promise<void> {
     // Already through DKG, so the lead-time gate is not what keeps it private —
     // otherwise a fixture could pass by rejecting the edit outright.
     te_mpk: Buffer.alloc(96, 0xab), // VARBINARY(96): the raw G2 point, not hex
-    te_geg_config: committee(),
+    te_sgp_config: committee(),
     te_config: JSON.stringify({
       numCandidates: 3,
       budget: BUDGET,
@@ -128,9 +128,9 @@ function editBody(privacy?: string) {
   };
 }
 
-async function stored(): Promise<{ privacy: string; te_geg_config: unknown }> {
+async function stored(): Promise<{ privacy: string; te_sgp_config: unknown }> {
   const [row] = await db.queryAsync(
-    'SELECT privacy, te_geg_config FROM proposals WHERE id = ?',
+    'SELECT privacy, te_sgp_config FROM proposals WHERE id = ?',
     [ID]
   );
   return row;
@@ -161,7 +161,7 @@ describe('update-proposal: verify() and action() derive privacy identically', ()
     const row = await stored();
     expect({
       privacy: row.privacy,
-      hasCommittee: row.te_geg_config !== null
+      hasCommittee: row.te_sgp_config !== null
     }).toEqual({ privacy: 'shutter-elgamal', hasCommittee: true });
   });
 
@@ -200,7 +200,7 @@ describe('update-proposal: verify() and action() derive privacy identically', ()
   // privacy for it either — the fallback reads the row, it does not default.
   it('leaves a public proposal public when the edit omits privacy', async () => {
     await db.queryAsync(
-      'UPDATE proposals SET privacy = ?, te_geg_config = NULL, te_mpk = NULL WHERE id = ?',
+      'UPDATE proposals SET privacy = ?, te_sgp_config = NULL, te_mpk = NULL WHERE id = ?',
       ['', ID]
     );
     await action(editBody(), 'ipfs2');

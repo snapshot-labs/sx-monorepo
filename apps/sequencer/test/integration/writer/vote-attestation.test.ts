@@ -14,14 +14,14 @@ import {
   initCurves,
   schnorrVerify
 } from '@shutter-network/urban-verified-crypto';
+import db, { sequencerDB } from '../../../src/helpers/mysql';
 import {
   attestationMessage,
   eligibilityPublicKey,
   mintAttestation,
   resetIssuer
-} from '../../../src/helpers/gegAttestation';
-import { verifyBallotSignature } from '../../../src/helpers/gegBinding';
-import db, { sequencerDB } from '../../../src/helpers/mysql';
+} from '../../../src/helpers/sgpAttestation';
+import { verifyBallotSignature } from '../../../src/helpers/sgpBinding';
 import { pseudonymFor } from '../../../src/helpers/teAttestationIssuer';
 import * as scores from '../../../src/scores';
 import { action, verifyBallotCredential } from '../../../src/writer/vote';
@@ -181,7 +181,7 @@ describe('vote: the credential is written with the vote', () => {
       nonce: Number(nonce),
       signature,
       // Opaque to `action()` — it writes the column, it does not check it. The
-      // check is `verify()`'s, and `geg-binding-verify.test.ts` covers the crypto.
+      // check is `verify()`'s, and `sgp-ballot-signature.test.ts` covers the crypto.
       bindingSignature: `0x${'be'.repeat(80)}`
     };
   }
@@ -284,7 +284,7 @@ describe('vote: the credential is written with the vote', () => {
 
   // A quoted number is the L-5 failure class in a new place. `BigInt("10000")`
   // works and `bindingMessage` coerces too, so a string weight verifies here and
-  // is then rejected by every keyper — geg's decoder requires a real integer.
+  // is then rejected by every keyper — SGP's decoder requires a real integer.
   // The columns used to launder this, because MySQL normalised it on the way in;
   // with the credential served straight from `choice`, ingest has to refuse it.
   it.each([

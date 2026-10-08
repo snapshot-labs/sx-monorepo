@@ -1,14 +1,14 @@
 import { keccak256 } from '@ethersproject/keccak256';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { getProposal } from './actions';
-import {
-  GegAttestationError,
-  mintAttestation,
-  verifyAttestation
-} from './gegAttestation';
 import log from './log';
 import db from './mysql';
-import { isDustVotingPower, isWithinGegVotingWindow } from './te';
+import {
+  mintAttestation,
+  SgpAttestationError,
+  verifyAttestation
+} from './sgpAttestation';
+import { isDustVotingPower, isWithinSgpVotingWindow } from './te';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
 import { jsonParse } from './utils';
 
@@ -137,7 +137,7 @@ export async function issueBallotCredential(args: {
 
   // The same half-open window ingest enforces, so a credential is never issued
   // for a ballot that would be refused the moment it is cast.
-  if (!isWithinGegVotingWindow(now, proposal.start, proposal.end)) {
+  if (!isWithinSgpVotingWindow(now, proposal.start, proposal.end)) {
     throw new TeIssueError('voting is not open for this proposal', 422);
   }
 
@@ -195,7 +195,7 @@ export async function issueBallotCredential(args: {
   // voter for an operator's estimate being wrong, so this reports and lets them vote.
   try {
     const bound = parseCommitteeSnapshotLoose(
-      proposal.te_geg_config
+      proposal.te_sgp_config
     )?.maxTotalWeight;
     if (bound) {
       const [row] = await db.queryAsync(
@@ -235,12 +235,12 @@ export async function issueBallotCredential(args: {
         signature: credentialSig
       }))
     ) {
-      throw new GegAttestationError(
+      throw new SgpAttestationError(
         'freshly minted credential failed verification'
       );
     }
   } catch (err: any) {
-    if (err instanceof GegAttestationError) {
+    if (err instanceof SgpAttestationError) {
       log.warn(`[te-issue] cannot mint credential: ${err.message}`);
       throw new TeIssueError(`private voting unavailable: ${err.message}`, 503);
     }

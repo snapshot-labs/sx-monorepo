@@ -1,16 +1,16 @@
 import snapshot from '@snapshot-labs/snapshot.js';
 import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
-import {
-  GegAttestationError,
-  verifyAttestation
-} from '../helpers/gegAttestation';
-import { verifyBallotSignature } from '../helpers/gegBinding';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
 import {
+  SgpAttestationError,
+  verifyAttestation
+} from '../helpers/sgpAttestation';
+import { verifyBallotSignature } from '../helpers/sgpBinding';
+import {
   isDustVotingPower,
-  isWithinGegVotingWindow,
+  isWithinSgpVotingWindow,
   verifyTeBallot
 } from '../helpers/te';
 import { getEligibilityKey } from '../helpers/teEligibility';
@@ -64,10 +64,10 @@ export async function verify(body): Promise<any> {
     }
   } else if (proposal.privacy === 'shutter-elgamal') {
     // The committee re-checks the voting window at tally time against the frozen
-    // config, and its window is half-open where Snapshot's is closed. Adopt geg's
+    // config, and its window is half-open where Snapshot's is closed. Adopt SGP's
     // boundary here so a vote cannot be accepted now and excluded then — see
     // helpers/te.ts for what that costs and why the alternative is worse.
-    if (!isWithinGegVotingWindow(msgTs, proposal.start, proposal.end)) {
+    if (!isWithinSgpVotingWindow(msgTs, proposal.start, proposal.end)) {
       return Promise.reject('not in voting window');
     }
     if (msg.payload.reason) {
@@ -195,7 +195,7 @@ export async function verify(body): Promise<any> {
     try {
       attestation = await verifyBallotCredential(proposal, msg);
     } catch (err: any) {
-      if (err instanceof GegAttestationError) {
+      if (err instanceof SgpAttestationError) {
         log.warn(`[writer] credential rejected: ${err.message}`);
         return Promise.reject(`invalid ballot credential: ${err.message}`);
       }
@@ -226,14 +226,14 @@ export async function verifyBallotCredential(
       : proposal.te_config;
   const budget = Number(teConfig?.budget);
   if (!Number.isInteger(budget) || budget < 1) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       `proposal ${proposal.id} has no usable ballot budget`
     );
   }
   const envelope = jsonParse(JSON.stringify(msg.payload.choice), null);
   const credential = envelope?.attestation;
   if (!credential) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       'ballot carries no credential; request one from /te_attestation first'
     );
   }
@@ -244,26 +244,26 @@ export async function verifyBallotCredential(
   if (
     credential.electionId?.toLowerCase() !== String(proposal.id).toLowerCase()
   ) {
-    throw new GegAttestationError('credential is for a different proposal');
+    throw new SgpAttestationError('credential is for a different proposal');
   }
   if (credential.pseudonym !== envelope.pseudonym) {
-    throw new GegAttestationError('credential does not match this pseudonym');
+    throw new SgpAttestationError('credential does not match this pseudonym');
   }
   if (credential.vk !== envelope.vk) {
-    throw new GegAttestationError('credential does not match this ballot key');
+    throw new SgpAttestationError('credential does not match this ballot key');
   }
 
   // JSON numbers, not strings. The credential is stored verbatim inside `choice`
-  // and served to the committee from there, and geg's decoder requires an integer
+  // and served to the committee from there, and SGP's decoder requires an integer
   // (`envelopes/codecs.py::_int` rejects a str). Coercing would be worse than
   // refusing: `BigInt("10000")` and `bindingMessage` both accept a string, so a
   // quoted weight verifies here and is then rejected by every keyper — the ballot
   // is excluded for a reason that looks nothing like the cause.
   if (!Number.isInteger(credential.weight)) {
-    throw new GegAttestationError('credential weight must be an integer');
+    throw new SgpAttestationError('credential weight must be an integer');
   }
   if (!Number.isInteger(credential.nonce)) {
-    throw new GegAttestationError('credential nonce must be an integer');
+    throw new SgpAttestationError('credential nonce must be an integer');
   }
 
   const weight = BigInt(credential.weight);
@@ -279,7 +279,7 @@ export async function verifyBallotCredential(
     nonce,
     signature: credential.signature
   });
-  if (!ok) throw new GegAttestationError('credential signature is not valid');
+  if (!ok) throw new SgpAttestationError('credential signature is not valid');
 
   // The voter's signature over the ballot — which since the v2 ballot message
   // covers the credential. This is what stops a credential being moved onto a
@@ -287,7 +287,7 @@ export async function verifyBallotCredential(
   // voter endorsed rather than something we asserted. It used to take a second
   // signature of its own; the ballot's own signature does it now.
   if (!(await verifyBallotSignature({ envelope, attestation: credential }))) {
-    throw new GegAttestationError(
+    throw new SgpAttestationError(
       'ballot signature does not cover this credential'
     );
   }

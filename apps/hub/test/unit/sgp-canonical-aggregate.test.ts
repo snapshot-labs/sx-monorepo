@@ -22,8 +22,8 @@
  * that normalised it to something the digest disagreed with.
  */
 
-import { canonicalAggregate } from '../../src/helpers/gegAggregate';
-import { aggregateDigest, GegDigestError } from '../../src/helpers/gegDigests';
+import { canonicalAggregate } from '../../src/helpers/sgpAggregate';
+import { aggregateDigest, SgpDigestError } from '../../src/helpers/sgpDigests';
 
 const ELECTION = `0x${'11'.repeat(32)}`;
 const P96 = `0x${'ab'.repeat(96)}`;
@@ -63,7 +63,7 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
     );
   });
 
-  // Not a string. geg's own decoder (`envelopes/codecs.py:_int`) rejects
+  // Not a string. SGP's own decoder (`envelopes/codecs.py:_int`) rejects
   // anything that is not a Python int, so quoting this field would fail every
   // aggregate read and the committee could not build decryption shares.
   it('keeps the field a JSON number, which the protocol decoder requires', () => {
@@ -82,11 +82,12 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
     );
   });
 
-  // Mirrors `geg.envelopes.codecs`, which reads totalScaledWeight and falls back to
-  // totalAdmittedWeight rather than to 0. On an unscaled election the two are equal
-  // by construction, so the fallback is what lets a payload written before the field
-  // existed hash to the same digest. Defaulting to 0 would be a silent fork.
-  it('defaults a missing scaled weight to the admitted weight, as geg does', () => {
+  // Mirrors `shutter_governance_protocol.envelopes.codecs`, which reads
+  // totalScaledWeight and falls back to totalAdmittedWeight rather than to 0. On an
+  // unscaled election the two are equal by construction, so the fallback is what
+  // lets a payload written before the field existed hash to the same digest.
+  // Defaulting to 0 would be a silent fork.
+  it('defaults a missing scaled weight to the admitted weight, as SGP does', () => {
     const c = canonicalAggregate(envelope(100), ELECTION);
     expect(c.totalScaledWeight).toBe(100);
   });
@@ -113,7 +114,7 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
     ['not a number at all', 'abc']
   ])('refuses a %s weight rather than storing it', (_label, value) => {
     expect(() => canonicalAggregate(envelope(value), ELECTION)).toThrow(
-      GegDigestError
+      SgpDigestError
     );
   });
 
