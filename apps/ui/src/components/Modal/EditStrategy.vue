@@ -129,7 +129,7 @@ function cloneStrategyConfig(config: StrategyConfig): StrategyConfig {
 function isStrategyConfig(config: unknown): config is StrategyConfig {
   if (typeof config !== 'object' || config === null) return false;
 
-  return 'generateParams' in config;
+  return 'address' in config && 'params' in config;
 }
 
 function cloneInitialState(state: any) {

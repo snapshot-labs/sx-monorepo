@@ -91,7 +91,18 @@ function handleStrategySave(value: Record<string, any>) {
         @click="addStrategy(strategy)"
       />
     </div>
-    <div v-else-if="model.type === 'VotingPower'">
+    <div
+      v-else-if="
+        ['VotingPower', 'VotingPowerWithCooldown'].includes(model.type ?? '')
+      "
+    >
+      <p v-if="model.type === 'VotingPowerWithCooldown'" class="mb-3">
+        Each successful proposal restarts the cooldown. After reaching the
+        limit, the author must wait the full cooldown since their last
+        successful proposal. Closing or cancelling proposals does not restore
+        capacity. A zero cooldown disables the limit. The contract checks the
+        limit when you submit.
+      </p>
       <UiEyebrow class="mb-2 font-medium">Included strategies</UiEyebrow>
       <span class="mb-3 inline-block">
         Select strategies that will be used to compute proposal
@@ -102,6 +113,7 @@ function handleStrategySave(value: Record<string, any>) {
         :space-id="spaceId"
         :voting-power-symbol="votingPowerSymbol"
         :available-strategies="availableVotingStrategies"
+        :limit="model.type === 'VotingPowerWithCooldown' ? 128 : undefined"
         :show-test-button="true"
       />
     </div>

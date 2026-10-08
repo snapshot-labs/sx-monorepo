@@ -1,3 +1,4 @@
+import { AbiCoder } from '@ethersproject/abi';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -49,6 +50,34 @@ describe('EthereumSig', () => {
     });
 
     expect(envelope).toMatchSnapshot();
+  });
+
+  it('preserves proposal strategy indices in the uint8 proof ABI used by both power validators', async () => {
+    const envelope = await ethSigClient.propose({
+      signer,
+      data: {
+        space,
+        authenticator,
+        strategies: [0, 127].map(index => ({
+          index,
+          address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202',
+          params: '0x00'
+        })),
+        executionStrategy: { addr: executor, params: '0x00' },
+        metadataUri: 'ipfs://metadata'
+      }
+    });
+    expect(envelope.signatureData!.message.userProposalValidationParams).toBe(
+      new AbiCoder().encode(
+        ['tuple(uint8 index, bytes params)[]'],
+        [
+          [
+            { index: 0, params: '0x00' },
+            { index: 127, params: '0x00' }
+          ]
+        ]
+      )
+    );
   });
 
   it('should create update proposal envelope', async () => {

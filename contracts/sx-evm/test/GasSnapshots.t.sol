@@ -140,7 +140,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
                 NO_UPDATE_UINT32,
                 NO_UPDATE_STRING,
                 NO_UPDATE_STRING,
-                Strategy(address(validationStrategy), abi.encode(TOKEN_AMOUNT, currentVotingStrategies)),
+                Strategy(address(validationStrategy), abi.encode(0, 1, TOKEN_AMOUNT, currentVotingStrategies)),
                 "",
                 NO_UPDATE_ADDRESSES,
                 NO_UPDATE_ADDRESSES,
