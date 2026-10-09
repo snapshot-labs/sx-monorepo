@@ -55,7 +55,7 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | 'inco' | 'none';
+export type Privacy = 'shutter' | 'shutter-elgamal' | 'inco' | 'none';
 export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
@@ -355,6 +355,15 @@ export type Proposal = {
   support_achieved?: boolean | null;
   state: ProposalState;
   privacy: Privacy;
+  te_config?: any;
+  te_mpk?: string | null;
+  te_dkg_status?: string | null;
+  te_committee_pks?: any;
+  te_threshold_t?: number | null;
+  te_threshold_n?: number | null;
+  te_keyper_urls?: any;
+  te_keyper_addresses?: any;
+  te_aggregate?: any;
   plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;

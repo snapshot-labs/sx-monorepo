@@ -11,6 +11,7 @@ export default [
     }
   },
   {
-    ignores: ['**/gql/**']
+    // public/blst.js is emscripten output copied in by scripts/copy-blst.mjs
+    ignores: ['**/gql/**', 'public/blst.js']
   }
 ];

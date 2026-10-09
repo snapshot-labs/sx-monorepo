@@ -19,7 +19,6 @@ export async function verify(body): Promise<any> {
     return Promise.reject('not authorized to archive proposal');
   }
 }
-
 export async function action(body): Promise<void> {
   const msg = jsonParse(body.msg);
   const proposal = await getProposal(msg.space, msg.payload.proposal);
@@ -27,6 +26,10 @@ export async function action(body): Promise<void> {
 
   const queries = `
     DELETE FROM proposals WHERE id = ? LIMIT 1;
+    DELETE FROM te_dkg_submissions WHERE proposal_id = ?;
+    DELETE FROM te_aggregate_submissions WHERE proposal_id = ?;
+    DELETE FROM te_decryption_shares WHERE proposal_id = ?;
+    DELETE FROM te_results WHERE proposal_id = ?;
     UPDATE votes SET cb = ? WHERE proposal = ?;
     UPDATE leaderboard
       SET proposal_count = GREATEST(proposal_count - 1, 0)
@@ -38,6 +41,10 @@ export async function action(body): Promise<void> {
   `;
 
   await db.queryAsync(queries, [
+    id,
+    id,
+    id,
+    id,
     id,
     CB.PENDING_DELETE,
     id,
