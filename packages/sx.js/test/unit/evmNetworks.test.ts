@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   createEvmConfig,
@@ -32,7 +33,8 @@ describe('createStandardConfig', () => {
       },
       ProposalValidations: {
         Vanilla: undefined,
-        VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+        VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311',
+        VotingPowerWithCooldown: '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
       },
       ExecutionStrategies: {
         IncoSimpleQuorumVanilla: undefined,
@@ -106,6 +108,60 @@ describe('createStandardConfig', () => {
     );
     expect(config.ExecutionStrategies.SimpleQuorumAvatar).toBeUndefined();
     expect(config.ExecutionStrategies.SimpleQuorumTimelock).toBeUndefined();
+  });
+});
+
+describe('VotingPowerWithCooldown deployments', () => {
+  it.each([
+    ['eth', 'ethereum'],
+    ['oeth', 'optimism'],
+    ['sep', 'sepolia'],
+    ['matic', 'polygon'],
+    ['arb1', 'arbitrum'],
+    ['base', 'base'],
+    ['mnt', 'mantle'],
+    ['ape', 'apechain'],
+    ['curtis', 'curtis'],
+    ['basesep', 'base-sepolia']
+  ] as const)(
+    'registers %s from its deployment manifest',
+    (network, manifest) => {
+      const deployed = JSON.parse(
+        readFileSync(
+          new URL(
+            `../../../../contracts/sx-evm/deployments/${manifest}.json`,
+            import.meta.url
+          ),
+          'utf8'
+        )
+      );
+      expect(
+        evmNetworks[network].ProposalValidations.VotingPowerWithCooldown
+      ).toBe(
+        deployed.PropositionPowerAndActiveProposalsLimiterValidationStrategy
+      );
+    }
+  );
+
+  it('does not assume a deployment on BNB or a new chain, and supports explicit overrides', () => {
+    for (const chainId of [56, 97, 99999]) {
+      expect(
+        createStandardConfig(chainId, { blockTime: 2 }).ProposalValidations
+          .VotingPowerWithCooldown
+      ).toBeUndefined();
+    }
+    expect(
+      createStandardConfig(1, {
+        blockTime: 12,
+        proposalValidations: { VotingPowerWithCooldown: null }
+      }).ProposalValidations.VotingPowerWithCooldown
+    ).toBeUndefined();
+    expect(
+      createStandardConfig(99999, {
+        blockTime: 2,
+        proposalValidations: { VotingPowerWithCooldown: '0x123' }
+      }).ProposalValidations.VotingPowerWithCooldown
+    ).toBe('0x123');
   });
 });
 

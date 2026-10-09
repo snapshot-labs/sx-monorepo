@@ -71,6 +71,10 @@ ajv.addFormat('ethAddress', {
   validate: ethAddressValidator
 });
 
+ajv.addFormat('uint32', {
+  validate: (value: string) => validateType('uint32', value)
+});
+
 ajv.addFormat('uint256', {
   validate: uint256Validator
 });

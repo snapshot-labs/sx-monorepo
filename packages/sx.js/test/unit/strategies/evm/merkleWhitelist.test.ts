@@ -2,7 +2,9 @@ import { AbiCoder } from '@ethersproject/abi';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { describe, expect, it } from 'vitest';
-import createMerkleWhitelist from '../../../../src/strategies/evm/merkleWhitelist';
+import createMerkleWhitelist, {
+  getEvmMerkleWhitelistRoot
+} from '../../../../src/strategies/evm/merkleWhitelist';
 import { ETH_RPC_URL } from '../../../constants';
 
 describe('merkleWhitelistStrategy', () => {
@@ -25,6 +27,22 @@ describe('merkleWhitelistStrategy', () => {
 
   const abiCoder = new AbiCoder();
   const whitelistParams = abiCoder.encode(['bytes32'], [tree.root]);
+
+  it('reconstructs the root using the contract address/uint96 leaf encoding', () => {
+    expect(
+      getEvmMerkleWhitelistRoot(
+        whitelist.map(([address, votingPower]) => ({
+          address,
+          votingPower: votingPower.toString()
+        }))
+      )
+    ).toBe(tree.root);
+    expect(() =>
+      getEvmMerkleWhitelistRoot([
+        { address: whitelist[0]![0], votingPower: (1n << 96n).toString() }
+      ])
+    ).toThrow();
+  });
 
   it('should return type', () => {
     expect(whitelistStrategy.type).toBe('whitelist');

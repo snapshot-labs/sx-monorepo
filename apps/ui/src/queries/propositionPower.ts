@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
+import { isProposalValidationReady } from '@/networks/evm/proposalValidation';
 import { VotingPower } from '@/networks/types';
 import { Space } from '@/types';
 
@@ -55,6 +56,11 @@ async function getPropositionPower(space: Space, block: number | null) {
     )
   };
 
+  if (!isProposalValidationReady(space)) {
+    vpItem.canPropose = false;
+    return vpItem;
+  }
+
   if (vpItem.canPropose) {
     return vpItem;
   }
@@ -73,7 +79,7 @@ async function getPropositionPower(space: Space, block: number | null) {
     opts
   );
 
-  const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
+  const totalPowers = powers.reduce((acc, b) => acc + b.value, 0n);
 
   vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
 
@@ -86,6 +92,19 @@ export function usePropositionPowerQuery(space: MaybeRefOrGetter<Space>) {
       'propositionPower',
       () => web3.value.account,
       () => toValue(space).id,
+      () => {
+        const current = toValue(space);
+        return [
+          current.network,
+          current.protocol,
+          current.validation_strategy,
+          current.validation_strategy_params,
+          current.proposal_threshold,
+          current.voting_power_validation_strategy_strategies,
+          current.voting_power_validation_strategy_strategies_params,
+          current.voting_power_validation_strategies_parsed_metadata
+        ];
+      },
       null
     ],
     queryFn: async () => getPropositionPower(toValue(space), null),

@@ -59,6 +59,7 @@ import {
   Transaction,
   VoteType
 } from '@/types';
+import { isProposalValidationReady } from './proposalValidation';
 import { EDITOR_APP_NAME } from '../common/constants';
 
 export function createActions(
@@ -373,6 +374,12 @@ export function createActions(
         });
       }
 
+      if (!isProposalValidationReady(space)) {
+        throw new Error(
+          'Proposal validation settings are invalid or not yet indexed. Please try again after the space has synced.'
+        );
+      }
+
       const pinned = await helpers.pin({
         title,
         body,
@@ -430,7 +437,7 @@ export function createActions(
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
-            ].payload
+            ]?.payload ?? null
           );
 
           return {
@@ -1190,6 +1197,7 @@ export function createActions(
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
       const cumulativeDecimals = Math.max(
+        0,
         ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
       );
 
@@ -1208,7 +1216,7 @@ export function createActions(
           }
 
           const strategyMetadata = await parseStrategyMetadata(
-            strategiesMetadata[i].payload
+            strategiesMetadata[i]?.payload ?? null
           );
 
           const value = await strategy.getVotingPower(
@@ -1221,7 +1229,7 @@ export function createActions(
           );
 
           const token = ['comp', 'ozVotes'].includes(strategy.type)
-            ? strategiesParams[i]
+            ? strategiesParams[i].slice(0, 42)
             : undefined;
           return {
             address,

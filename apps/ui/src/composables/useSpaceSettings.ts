@@ -8,6 +8,7 @@ import {
   omit
 } from '@/helpers/utils';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { restoreVotingPowerWithCooldown } from '@/networks/evm/proposalValidation';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 import {
   GeneratedMetadata,
@@ -284,6 +285,15 @@ export function useSpaceSettings(space: Ref<Space>) {
     );
 
     if (!strategy) return null;
+
+    if (strategy.type === 'VotingPowerWithCooldown') {
+      return restoreVotingPowerWithCooldown(
+        strategy,
+        params,
+        network.value.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES,
+        nestedStrategiesMetadata
+      );
+    }
 
     const resolvedParams = strategy.parseParams
       ? await strategy.parseParams(params, null)

@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { filterStrategiesByProtocol } from '@/networks/common/helpers';
+import { StrategyTemplate } from '@/networks/types';
 import { createConstants } from './constants';
 
 describe('EVM Constants', () => {
@@ -14,8 +16,24 @@ describe('EVM Constants', () => {
   it('should include all editor entries for standard networks', () => {
     expect(constants.EDITOR_AUTHENTICATORS).toHaveLength(3);
     expect(constants.EDITOR_VOTING_STRATEGIES).toHaveLength(4);
-    expect(constants.EDITOR_PROPOSAL_VALIDATIONS).toHaveLength(1);
+    expect(constants.EDITOR_PROPOSAL_VALIDATIONS).toHaveLength(2);
     expect(constants.EDITOR_EXECUTION_STRATEGIES).toHaveLength(2);
+  });
+
+  it('offers the combined validator only for the supported Snapshot X protocol', () => {
+    const choices: StrategyTemplate[] = createConstants('basesep', {
+      pin
+    }).EDITOR_PROPOSAL_VALIDATIONS;
+    expect(
+      filterStrategiesByProtocol(choices, 'snapshot-x').some(
+        strategy => strategy.type === 'VotingPowerWithCooldown'
+      )
+    ).toBe(true);
+    expect(
+      filterStrategiesByProtocol(choices, 'snapshot-x-inco').some(
+        strategy => strategy.type === 'VotingPowerWithCooldown'
+      )
+    ).toBe(false);
   });
 
   describe('EDITOR_VOTING_STRATEGIES', () => {

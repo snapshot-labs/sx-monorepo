@@ -17,7 +17,11 @@ export default function createCompStrategy(): Strategy {
       params: string,
       provider: Provider
     ): Promise<bigint> {
-      const compContract = new Contract(params, ICompAbi, provider);
+      const compContract = new Contract(
+        params.slice(0, 42),
+        ICompAbi,
+        provider
+      );
 
       const votingPower =
         block !== null
