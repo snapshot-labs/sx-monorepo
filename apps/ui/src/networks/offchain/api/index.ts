@@ -12,7 +12,11 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses } from '@/helpers/utils';
+import {
+  clone,
+  compareAddresses,
+  getDelegationReadChainId
+} from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -519,7 +523,7 @@ function formatDelegations(
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const basicDelegationStrategy = space.strategies.find(strategy =>
+  const delegateRegistryStrategies = space.strategies.filter(strategy =>
     DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
@@ -542,17 +546,27 @@ function formatDelegations(
     });
   }
 
-  if (basicDelegationStrategy) {
-    const chainId = space.network;
-
+  if (delegateRegistryStrategies.length) {
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
+      // chainIds is the set to read, chainId the default chain to write to
+      // and to link to explorers with.
+      const chainIds = Array.from(
+        new Set([
+          space.network,
+          ...delegateRegistryStrategies.map(strategy =>
+            getDelegationReadChainId(strategy, space.network)
+          )
+        ])
+      );
+
       delegations.push({
         name: DELEGATION_TYPES_NAMES['delegate-registry'],
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
-        chainId
+        chainId: space.network,
+        chainIds
       });
     }
   }
