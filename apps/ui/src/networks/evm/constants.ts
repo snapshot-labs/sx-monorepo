@@ -1,6 +1,6 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
-import { clients, evmNetworks } from '@snapshot-labs/sx';
+import { clients, evmNetworks, ProtocolID } from '@snapshot-labs/sx';
 import {
   APE_GAS_CONFIGS,
   DOCS_URL,
@@ -127,16 +127,21 @@ export function createConstants(
     })
   };
 
+  const avatarProtocols = [
+    config.ExecutionStrategies.SimpleQuorumAvatar && 'snapshot-x',
+    config.ExecutionStrategies.IncoSimpleQuorumAvatar && 'snapshot-x-inco'
+  ].filter(Boolean) as ProtocolID[];
+  const timelockProtocols = [
+    config.ExecutionStrategies.SimpleQuorumTimelock && 'snapshot-x',
+    config.ExecutionStrategies.IncoSimpleQuorumTimelock && 'snapshot-x-inco'
+  ].filter(Boolean) as ProtocolID[];
+
   const SUPPORTED_EXECUTORS: Record<string, boolean> = {
     ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla && {
       SimpleQuorumVanilla: true
     }),
-    ...(config.ExecutionStrategies.SimpleQuorumAvatar && {
-      SimpleQuorumAvatar: true
-    }),
-    ...(config.ExecutionStrategies.SimpleQuorumTimelock && {
-      SimpleQuorumTimelock: true
-    }),
+    ...(avatarProtocols.length > 0 && { SimpleQuorumAvatar: true }),
+    ...(timelockProtocols.length > 0 && { SimpleQuorumTimelock: true }),
     // Governor Bravo
     GovernorBravoTimelock: true,
     // OpenZeppelin
@@ -737,6 +742,125 @@ export function createConstants(
         !([config.Strategies.ApeGas] as string[]).includes(strategy.address)
     );
 
+  const createAvatarExecutionStrategy = (protocols: ProtocolID[]) => ({
+    address: '',
+    protocols,
+    type: 'SimpleQuorumAvatar',
+    name: EXECUTORS.SimpleQuorumAvatar,
+    about:
+      'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
+    icon: IHUserCircle,
+    generateSummary: (params: Record<string, any>) =>
+      `(${params.quorum}, ${shorten(params.contractAddress)})`,
+    deploy: async (
+      client: clients.EvmEthereumTx,
+      web3: Web3Provider,
+      controller: string,
+      spaceAddress: string,
+      params: Record<string, any>
+    ): Promise<{ address: string; txId: string }> => {
+      return client.deployAvatarExecution({
+        signer: web3.getSigner(),
+        params: {
+          controller: params.controller,
+          target: params.contractAddress,
+          spaces: [spaceAddress],
+          quorum: BigInt(params.quorum)
+        }
+      });
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['controller', 'quorum', 'contractAddress'],
+      properties: {
+        controller: {
+          type: 'string',
+          format: 'address',
+          chainId: config.Meta.eip712ChainId,
+          title: 'Controller address',
+          examples: ['0x0000…']
+        },
+        quorum: {
+          type: 'integer',
+          title: 'Quorum',
+          examples: ['1']
+        },
+        contractAddress: {
+          type: 'string',
+          format: 'address',
+          chainId: config.Meta.eip712ChainId,
+          title: 'Safe address',
+          examples: ['0x0000…']
+        }
+      }
+    }
+  });
+
+  const createTimelockExecutionStrategy = (protocols: ProtocolID[]) => ({
+    address: '',
+    protocols,
+    type: 'SimpleQuorumTimelock',
+    name: EXECUTORS.SimpleQuorumTimelock,
+    about:
+      'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
+    icon: IHClock,
+    generateSummary: (params: Record<string, any>) =>
+      `(${params.quorum}, ${params.timelockDelay})`,
+    deploy: async (
+      client: clients.EvmEthereumTx,
+      web3: Web3Provider,
+      controller: string,
+      spaceAddress: string,
+      params: Record<string, any>
+    ): Promise<{ address: string; txId: string }> => {
+      return client.deployTimelockExecution({
+        signer: web3.getSigner(),
+        params: {
+          controller: params.controller,
+          vetoGuardian:
+            params.vetoGuardian || '0x0000000000000000000000000000000000000000',
+          spaces: [spaceAddress],
+          timelockDelay: BigInt(params.timelockDelay),
+          quorum: BigInt(params.quorum)
+        }
+      });
+    },
+    paramsDefinition: {
+      type: 'object',
+      title: 'Params',
+      additionalProperties: false,
+      required: ['controller', 'quorum', 'timelockDelay'],
+      properties: {
+        controller: {
+          type: 'string',
+          format: 'address',
+          chainId: config.Meta.eip712ChainId,
+          title: 'Controller address',
+          examples: ['0x0000…']
+        },
+        quorum: {
+          type: 'integer',
+          title: 'Quorum',
+          examples: ['1']
+        },
+        vetoGuardian: {
+          type: 'string',
+          format: 'address',
+          chainId: config.Meta.eip712ChainId,
+          title: 'Veto guardian address',
+          examples: ['0x0000…']
+        },
+        timelockDelay: {
+          type: 'integer',
+          format: 'duration',
+          title: 'Timelock delay'
+        }
+      }
+    }
+  });
+
   const EDITOR_EXECUTION_STRATEGIES = [
     ...(config.ExecutionStrategies.IncoSimpleQuorumVanilla
       ? [
@@ -752,131 +876,11 @@ export function createConstants(
           }
         ]
       : []),
-    ...(config.ExecutionStrategies.SimpleQuorumAvatar
-      ? [
-          {
-            address: '',
-            protocols: ['snapshot-x' as const],
-            type: 'SimpleQuorumAvatar',
-            name: EXECUTORS.SimpleQuorumAvatar,
-            about:
-              'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
-            icon: IHUserCircle,
-            generateSummary: (params: Record<string, any>) =>
-              `(${params.quorum}, ${shorten(params.contractAddress)})`,
-            deploy: async (
-              client: clients.EvmEthereumTx,
-              web3: Web3Provider,
-              controller: string,
-              spaceAddress: string,
-              params: Record<string, any>
-            ): Promise<{ address: string; txId: string }> => {
-              return client.deployAvatarExecution({
-                signer: web3.getSigner(),
-                params: {
-                  controller: params.controller,
-                  target: params.contractAddress,
-                  spaces: [spaceAddress],
-                  quorum: BigInt(params.quorum)
-                }
-              });
-            },
-            paramsDefinition: {
-              type: 'object',
-              title: 'Params',
-              additionalProperties: false,
-              required: ['controller', 'quorum', 'contractAddress'],
-              properties: {
-                controller: {
-                  type: 'string',
-                  format: 'address',
-                  chainId: config.Meta.eip712ChainId,
-                  title: 'Controller address',
-                  examples: ['0x0000…']
-                },
-                quorum: {
-                  type: 'integer',
-                  title: 'Quorum',
-                  examples: ['1']
-                },
-                contractAddress: {
-                  type: 'string',
-                  format: 'address',
-                  chainId: config.Meta.eip712ChainId,
-                  title: 'Safe address',
-                  examples: ['0x0000…']
-                }
-              }
-            }
-          }
-        ]
+    ...(avatarProtocols.length > 0
+      ? [createAvatarExecutionStrategy(avatarProtocols)]
       : []),
-    ...(config.ExecutionStrategies.SimpleQuorumTimelock
-      ? [
-          {
-            address: '',
-            protocols: ['snapshot-x' as const],
-            type: 'SimpleQuorumTimelock',
-            name: EXECUTORS.SimpleQuorumTimelock,
-            about:
-              'Timelock implementation with a specified delay that queues proposal transactions for execution and includes an optional role to veto queued proposals.',
-            icon: IHClock,
-            generateSummary: (params: Record<string, any>) =>
-              `(${params.quorum}, ${params.timelockDelay})`,
-            deploy: async (
-              client: clients.EvmEthereumTx,
-              web3: Web3Provider,
-              controller: string,
-              spaceAddress: string,
-              params: Record<string, any>
-            ): Promise<{ address: string; txId: string }> => {
-              return client.deployTimelockExecution({
-                signer: web3.getSigner(),
-                params: {
-                  controller: params.controller,
-                  vetoGuardian:
-                    params.vetoGuardian ||
-                    '0x0000000000000000000000000000000000000000',
-                  spaces: [spaceAddress],
-                  timelockDelay: BigInt(params.timelockDelay),
-                  quorum: BigInt(params.quorum)
-                }
-              });
-            },
-            paramsDefinition: {
-              type: 'object',
-              title: 'Params',
-              additionalProperties: false,
-              required: ['controller', 'quorum', 'timelockDelay'],
-              properties: {
-                controller: {
-                  type: 'string',
-                  format: 'address',
-                  chainId: config.Meta.eip712ChainId,
-                  title: 'Controller address',
-                  examples: ['0x0000…']
-                },
-                quorum: {
-                  type: 'integer',
-                  title: 'Quorum',
-                  examples: ['1']
-                },
-                vetoGuardian: {
-                  type: 'string',
-                  format: 'address',
-                  chainId: config.Meta.eip712ChainId,
-                  title: 'Veto guardian address',
-                  examples: ['0x0000…']
-                },
-                timelockDelay: {
-                  type: 'integer',
-                  format: 'duration',
-                  title: 'Timelock delay'
-                }
-              }
-            }
-          }
-        ]
+    ...(timelockProtocols.length > 0
+      ? [createTimelockExecutionStrategy(timelockProtocols)]
       : [])
   ];
 
