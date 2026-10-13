@@ -77,7 +77,7 @@ const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
 
 const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
-  name: 'Split Delegation',
+  name: 'Split delegation',
   apiType: 'split-delegation',
   apiUrl: 'https://split-delegation.snapshot.box',
   contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
