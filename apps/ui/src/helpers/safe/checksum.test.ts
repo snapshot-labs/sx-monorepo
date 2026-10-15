@@ -77,3 +77,13 @@ it('validates checksum in BatchFile', () => {
     )
   );
 });
+
+it('does not mutate the caller-supplied BatchFile', () => {
+  const batchFileWithChecksum = addChecksum(batchFileObject as any);
+  const metaBefore = { ...batchFileWithChecksum.meta };
+
+  validateChecksum(batchFileWithChecksum, metaBefore.checksum);
+
+  expect(batchFileWithChecksum.meta).toEqual(metaBefore);
+  expect(batchFileWithChecksum.meta.checksum).toBe(metaBefore.checksum);
+});

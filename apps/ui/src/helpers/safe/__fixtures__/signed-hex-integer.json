@@ -1,0 +1,34 @@
+{
+  "version": "1.0",
+  "chainId": "1",
+  "createdAt": 1789072306796,
+  "meta": {
+    "name": "negative-bare-hex",
+    "description": "",
+    "txBuilderVersion": "1.19.0",
+    "createdFromSafeAddress": "0x0000000000000000000000000000000000000001",
+    "createdFromOwnerAddress": "",
+    "checksum": "0xaa37e398df8dd1d575a00772186d72dfa6aa57425279f6fe2869b2143c10f81b"
+  },
+  "transactions": [
+    {
+      "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "value": "0",
+      "data": null,
+      "contractMethod": {
+        "name": "setCount",
+        "type": "function",
+        "payable": false,
+        "inputs": [
+          {
+            "name": "count",
+            "type": "int256"
+          }
+        ]
+      },
+      "contractInputsValues": {
+        "count": "-ff"
+      }
+    }
+  ]
+}

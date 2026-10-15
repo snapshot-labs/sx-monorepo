@@ -1,5 +1,5 @@
-import { Transaction } from '@snapshot-labs/sx';
 import { describe, expect, it } from 'vitest';
+import { Transaction } from '@/types';
 import {
   createSafeSnapExecution,
   parseSafeSnapTransaction,
@@ -159,6 +159,60 @@ describe('serializeSafeSnapTransaction', () => {
     const serialized = serializeSafeSnapTransaction(tx);
     expect(parseSafeSnapTransaction(serialized)).toEqual(tx);
   });
+
+  it('preserves a delegatecall operation (e.g. a Fusion swap)', () => {
+    const tx: Transaction = {
+      to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
+      value: '0',
+      data: '0xdeadbeef',
+      salt: '',
+      operation: '1',
+      _type: 'raw',
+      _form: { recipient: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769' }
+    };
+
+    const serialized = serializeSafeSnapTransaction(tx);
+    expect(serialized.operation).toBe('1');
+    expect(parseSafeSnapTransaction(serialized).operation).toBe('1');
+    expect(
+      parseSafeSnapTransaction({ ...serialized, operation: 1 as any }).operation
+    ).toBe('1');
+  });
+
+  // v1 validates '0' | '1' (Plugin.validateTransaction) but its JSON import
+  // stores any value verbatim, and its uint8 encoders disagree on some of
+  // them (solidity.pack wraps -255 to 0x01); refuse rather than guess.
+  it('accepts only a canonical 0/1 operation', () => {
+    const stored = {
+      to: '0x370De82413251A9d204DCEAB50dB2d7ec3Bd1769',
+      value: '0',
+      data: '0xdeadbeef'
+    };
+    const read = (operation: unknown) =>
+      parseSafeSnapTransaction({ ...stored, operation } as any).operation;
+
+    for (const operation of ['1', 1]) {
+      expect(read(operation), JSON.stringify(operation)).toBe('1');
+    }
+    for (const operation of ['0', 0, undefined]) {
+      expect(read(operation), JSON.stringify(operation)).toBeUndefined();
+    }
+    for (const operation of [
+      '',
+      null,
+      true,
+      [1],
+      ['1'],
+      '0x1',
+      '0x01',
+      '01',
+      2,
+      '2',
+      -255
+    ]) {
+      expect(() => read(operation), JSON.stringify(operation)).toThrow();
+    }
+  });
 });
 
 describe('createSafeSnapExecution', () => {
@@ -172,10 +226,11 @@ describe('createSafeSnapExecution', () => {
   });
 
   it('stores a single batch SafeSnap recomputes the hash from', () => {
+    const delegatecall = { ...raw('2'), operation: '1' as const };
     const execution = createSafeSnapExecution(
       1,
       '0x0d70332CEB7F3C94b061cda48327891E3449A9E1',
-      [raw('1'), raw('2')]
+      [raw('1'), delegatecall]
     );
 
     expect(execution.network).toBe('1');
@@ -185,10 +240,12 @@ describe('createSafeSnapExecution', () => {
     // One batch (single array) holding both transactions.
     expect(execution.txs).toHaveLength(1);
     expect(execution.txs[0]).toHaveLength(2);
+    // The writer itself must carry the operation, not just the serializer.
+    expect(execution.txs[0].map(tx => tx.operation)).toEqual(['0', '1']);
     // Read parser round-trips the stored batch.
     expect(execution.txs[0].map(parseSafeSnapTransaction)).toEqual([
       raw('1'),
-      raw('2')
+      delegatecall
     ]);
   });
 

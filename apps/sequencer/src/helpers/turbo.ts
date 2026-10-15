@@ -93,7 +93,10 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
     const data = await response.json();
 
     if (data.errors) {
-      capture(data);
+      capture(
+        new Error(`schnaps-api: ${data.errors.map(e => e.message).join('; ')}`),
+        { extra: { errors: data.errors } }
+      );
       return [];
     }
 

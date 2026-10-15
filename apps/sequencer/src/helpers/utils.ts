@@ -286,7 +286,13 @@ export function captureError(
   context?: any,
   ignoredErrorCodes?: number[]
 ) {
-  if (ignoredErrorCodes?.includes(e.code)) return;
+  if (
+    ignoredErrorCodes?.includes(e.code) ||
+    e?.message?.startsWith('Request timeout after')
+  ) {
+    console.log('[captureError] ignored', e?.message ?? e);
+    return;
+  }
 
   capture(e, context);
 }

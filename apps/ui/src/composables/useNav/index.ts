@@ -1,5 +1,6 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
+import { getUserFacingErrorMessage } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
 import orgProvider from './org';
@@ -61,6 +62,7 @@ function enrichItems(
 function setup() {
   const route = useRoute();
   const notificationsStore = useNotificationsStore();
+  const uiStore = useUiStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
   const { space } = useCurrentSpace();
@@ -93,7 +95,13 @@ function setup() {
       return getNameOwner(spaceOnRoute.value.id, network.chainId as ENSChainId);
     },
     null,
-    { lazy: true }
+    {
+      lazy: true,
+      onError: err => {
+        console.error(err);
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
+      }
+    }
   );
 
   const context = computed<NavContext>(() => ({
