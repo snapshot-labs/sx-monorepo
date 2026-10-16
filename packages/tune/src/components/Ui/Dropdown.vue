@@ -22,7 +22,7 @@ withDefaults(
       :placement="`bottom-${placement}`"
       :offset="Number(gap)"
       strategy="fixed"
-      :shift="{ padding: 8 }"
+      :shift="{ padding: 0 }"
       flip
       portal
       z-index="60"
