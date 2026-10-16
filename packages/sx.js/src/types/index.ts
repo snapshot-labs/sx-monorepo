@@ -14,7 +14,7 @@ export enum Choice {
   Abstain = 2
 }
 
-export type Privacy = 'shutter' | 'none';
+export type Privacy = 'shutter' | 'shutter-elgamal' | 'none';
 
 // NOTE: This is shared between starknet and offchain clients.
 // Maybe we should find a way to unify it more or split it.

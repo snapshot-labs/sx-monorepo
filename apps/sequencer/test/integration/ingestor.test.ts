@@ -200,7 +200,13 @@ describe('ingestor', () => {
 
   it('rejects when the body is too large', async () => {
     const invalidRequest = cloneWithNewMessage({
-      body: ' - - - '.repeat(50000)
+      // Private voting raised it deliberately:
+      // one encrypted ballot's `choice` alone runs ~158 KB, so at 1e5 every private
+      // vote is rejected at ingest. Upstream's 50,000 repeats (~351 KB) sits between
+      // the two thresholds, so it stops triggering the guard here and the test
+      // resolves instead of rejecting. Keep this over 1e6, and if an upstream merge
+      // reverts it, check which threshold `ingestor.ts` is on before "fixing" it.
+      body: ' - - - '.repeat(200000)
     });
 
     await expect(ingestor(invalidRequest)).rejects.toMatch('large');

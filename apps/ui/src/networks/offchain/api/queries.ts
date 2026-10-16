@@ -212,9 +212,29 @@ gql(`
     status
     source
   }
+
+  fragment offchainProposalTeFragment on Proposal {
+    ...offchainProposalFragment
+    te_config
+    te_mpk
+    te_dkg_status
+    te_committee_pks
+    te_threshold_t
+    te_threshold_n
+    te_keyper_urls
+    te_keyper_addresses
+    te_aggregate
+  }
 `);
 
-export const PROPOSAL_QUERY = gql(`
+// The te_* columns exist only in the local private-voting hub schema; a
+// production hub rejects a query naming unknown fields, which would blank every
+// proposal list. Both documents below are static so graphql-codegen can analyse
+// them — the choice is made here at runtime, not by splicing strings into one
+// document, which codegen cannot see through.
+const USE_TE_FIELDS = Boolean((import.meta as any).env?.VITE_LOCAL_HUB_URL);
+
+const PROPOSAL_QUERY_BASE = gql(`
   query Proposal($id: String!) {
     proposal(id: $id) {
       ...offchainProposalFragment
@@ -222,7 +242,19 @@ export const PROPOSAL_QUERY = gql(`
   }
 `);
 
-export const PROPOSALS_QUERY = gql(`
+const PROPOSAL_QUERY_TE = gql(`
+  query ProposalTe($id: String!) {
+    proposal(id: $id) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSAL_QUERY = (
+  USE_TE_FIELDS ? PROPOSAL_QUERY_TE : PROPOSAL_QUERY_BASE
+) as typeof PROPOSAL_QUERY_TE;
+
+const PROPOSALS_QUERY_BASE = gql(`
   query Proposals($first: Int!, $skip: Int!, $where: ProposalWhere) {
     proposals(
       first: $first
@@ -235,6 +267,24 @@ export const PROPOSALS_QUERY = gql(`
     }
   }
 `);
+
+const PROPOSALS_QUERY_TE = gql(`
+  query ProposalsTe($first: Int!, $skip: Int!, $where: ProposalWhere) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: desc
+    ) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSALS_QUERY = (
+  USE_TE_FIELDS ? PROPOSALS_QUERY_TE : PROPOSALS_QUERY_BASE
+) as typeof PROPOSALS_QUERY_TE;
 
 export const SPACES_QUERY = gql(`
   query Spaces($first: Int, $skip: Int, $where: SpaceWhere) {
