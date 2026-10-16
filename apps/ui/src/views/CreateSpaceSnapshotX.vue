@@ -114,6 +114,12 @@ const availableAuthenticators = computed(() =>
     props.protocol
   )
 );
+const availableProposalValidations = computed(() =>
+  filterStrategiesByProtocol(
+    selectedNetwork.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
+    props.protocol
+  )
+);
 const availableExecutionStrategies = computed(() =>
   filterStrategiesByProtocol(
     selectedNetwork.value.constants.EDITOR_EXECUTION_STRATEGIES,
@@ -222,9 +228,7 @@ watch(selectedNetworkId, () => {
           v-else-if="currentStep === 'validations'"
           v-model="validationStrategy"
           :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
-          "
+          :available-strategies="availableProposalValidations"
           :available-voting-strategies="
             selectedNetwork.constants
               .EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES

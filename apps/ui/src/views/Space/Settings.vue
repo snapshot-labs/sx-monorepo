@@ -178,6 +178,12 @@ const activeTab: Ref<Tab['id']> = computed(() => {
   return 'profile';
 });
 const network = computed(() => getNetwork(props.space.network));
+const availableProposalValidations = computed(() =>
+  filterStrategiesByProtocol(
+    network.value.constants.EDITOR_PROPOSAL_VALIDATIONS,
+    props.space.protocol
+  )
+);
 const availableAuthenticators = computed(() =>
   filterStrategiesByProtocol(
     network.value.constants.EDITOR_AUTHENTICATORS,
@@ -224,7 +230,14 @@ const error = computed(() => {
 
   if (!isOffchainNetwork.value) {
     if (!validationStrategy.value) {
-      return 'Proposal validation strategy is required';
+      return 'Proposal validation strategy is missing or unsupported. Select a supported strategy to change it.';
+    }
+
+    if (
+      validationStrategy.value.validate &&
+      !validationStrategy.value.validate(validationStrategy.value.params)
+    ) {
+      return 'Proposal validation settings are invalid';
     }
 
     if (!authenticators.value.length) {
@@ -477,7 +490,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-else
           v-model="validationStrategy"
           :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
+          :available-strategies="availableProposalValidations"
           :available-voting-strategies="
             network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
