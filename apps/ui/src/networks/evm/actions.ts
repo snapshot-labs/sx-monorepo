@@ -66,11 +66,8 @@ export function createActions(
   helpers: NetworkHelpers,
   networkId: NetworkID
 ): NetworkActions {
-  const networkConfig = createEvmConfig(
-    evmNetworks[networkId as keyof typeof evmNetworks]
-  );
-  const { incoProxyFactory, incoMasterSpace } =
-    evmNetworks[networkId as keyof typeof evmNetworks].Meta;
+  const network = evmNetworks[networkId as keyof typeof evmNetworks];
+  const networkConfig = createEvmConfig(network);
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     helpers
@@ -84,15 +81,12 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const { incoProxyFactory, incoMasterSpace } = network.Meta;
   const incoDeployClient =
     incoProxyFactory && incoMasterSpace
       ? new clients.EvmEthereumTx({
           ...clientOpts,
-          networkConfig: {
-            ...networkConfig,
-            proxyFactory: incoProxyFactory,
-            masterSpace: incoMasterSpace
-          }
+          networkConfig: createEvmConfig(network, 'snapshot-x-inco')
         })
       : null;
 

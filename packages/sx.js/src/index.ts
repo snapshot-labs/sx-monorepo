@@ -4,4 +4,5 @@ export * as inco from './inco';
 export { getExecutionData } from './executors';
 export * from './strategies';
 export * from './networks';
+export { buildRegistry } from './registry';
 export * from './types';

@@ -48,7 +48,7 @@ import {
   updateCounter,
   updateScoresTick
 } from '../../../common/utils';
-import { EVMConfig, SnapshotXConfig } from '../../types';
+import { EVMConfig, ImplementationType, SnapshotXConfig } from '../../types';
 import {
   getTimestampFromBlock as _getTimestampFromBlock,
   MULTICALL3_ADDRESS
@@ -78,12 +78,12 @@ export function createWriters(
   const incoMasterSpace = protocolConfig.incoMasterSpace
     ? getAddress(protocolConfig.incoMasterSpace)
     : null;
-  const masterSimpleQuorumTimelock = protocolConfig.masterSimpleQuorumTimelock
-    ? getAddress(protocolConfig.masterSimpleQuorumTimelock)
-    : null;
-  const masterSimpleQuorumAvatar = protocolConfig.masterSimpleQuorumAvatar
-    ? getAddress(protocolConfig.masterSimpleQuorumAvatar)
-    : null;
+  const implementations = new Map<string, ImplementationType>(
+    Object.entries(protocolConfig.implementations).map(([address, type]) => [
+      getAddress(address),
+      type
+    ])
+  );
 
   const handleProxyDeployed: evm.Writer<
     typeof ProxyFactoryAbi,
@@ -96,9 +96,8 @@ export function createWriters(
     const proxyAddress = getAddress(event.args.proxy);
     const implementationAddress = getAddress(event.args.implementation);
 
-    switch (implementationAddress) {
-      case getAddress(protocolConfig.masterSpace):
-      case incoMasterSpace: {
+    switch (implementations.get(implementationAddress)) {
+      case 'Space': {
         const spaceImplementation = new SpaceImplementation(
           proxyAddress,
           config.indexerName
@@ -113,15 +112,10 @@ export function createWriters(
         });
         break;
       }
-      case masterSimpleQuorumTimelock: {
-        const [type, quorum, timelockVetoGuardian, timelockDelay] =
+      case 'SimpleQuorumTimelock': {
+        const [quorum, timelockVetoGuardian, timelockDelay] =
           await client.multicall({
             contracts: [
-              {
-                address: proxyAddress,
-                abi: SimpleQuorumTimelockExecutionStrategyAbi,
-                functionName: 'getStrategyType'
-              },
               {
                 address: proxyAddress,
                 abi: SimpleQuorumTimelockExecutionStrategyAbi,
@@ -148,7 +142,7 @@ export function createWriters(
           config.indexerName
         );
         executionStrategy.address = proxyAddress;
-        executionStrategy.type = type;
+        executionStrategy.type = 'SimpleQuorumTimelock';
         executionStrategy.quorum = quorum.toString();
         executionStrategy.treasury_chain = protocolConfig.chainId;
         executionStrategy.treasury = proxyAddress;
@@ -165,14 +159,9 @@ export function createWriters(
 
         break;
       }
-      case masterSimpleQuorumAvatar: {
-        const [type, quorum, target] = await client.multicall({
+      case 'SimpleQuorumAvatar': {
+        const [quorum, target] = await client.multicall({
           contracts: [
-            {
-              address: proxyAddress,
-              abi: SimpleQuorumAvatarExecutionStrategyAbi,
-              functionName: 'getStrategyType'
-            },
             {
               address: proxyAddress,
               abi: SimpleQuorumAvatarExecutionStrategyAbi,
@@ -194,7 +183,7 @@ export function createWriters(
           config.indexerName
         );
         executionStrategy.address = proxyAddress;
-        executionStrategy.type = type;
+        executionStrategy.type = 'SimpleQuorumAvatar';
         executionStrategy.quorum = quorum.toString();
         executionStrategy.treasury_chain = protocolConfig.chainId;
         executionStrategy.treasury = getAddress(target);
@@ -963,32 +952,27 @@ export function createWriters(
       config.indexerName
     );
 
+    const space = await Space.loadEntity(spaceId, config.indexerName);
     const now = Number(block?.timestamp ?? getCurrentTimestamp());
 
-    if (executionStrategy) {
-      switch (executionStrategy.type) {
-        case 'SimpleQuorumAvatar':
-          proposal.execution_settled = true;
-          proposal.completed = true;
-          proposal.execution_tx = txId;
-          proposal.executed_at = BigInt(now);
-          proposal.executed_at_block_number = BigInt(blockNumber);
-          break;
-        case 'SimpleQuorumTimelock':
-          proposal.execution_time =
-            BigInt(now) + executionStrategy.timelock_delay;
-          break;
-      }
-    }
-
-    const space = await Space.loadEntity(spaceId, config.indexerName);
-
-    if (space?.protocol === 'snapshot-x-inco') {
+    const settle = () => {
       proposal.execution_settled = true;
       proposal.completed = true;
       proposal.execution_tx = txId;
       proposal.executed_at = BigInt(now);
       proposal.executed_at_block_number = BigInt(blockNumber);
+    };
+
+    switch (executionStrategy?.type) {
+      case 'SimpleQuorumAvatar':
+        settle();
+        break;
+      case 'SimpleQuorumTimelock':
+        proposal.execution_time =
+          BigInt(now) + executionStrategy.timelock_delay;
+        break;
+      default:
+        if (space?.protocol === 'snapshot-x-inco') settle();
     }
 
     await proposal.save();

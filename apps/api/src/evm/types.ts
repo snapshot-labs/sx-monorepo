@@ -14,13 +14,16 @@ export type NetworkID =
   | 'curtis'
   | 'basesep';
 
+export type ImplementationType =
+  | 'Space'
+  | 'SimpleQuorumAvatar'
+  | 'SimpleQuorumTimelock';
+
 export type SnapshotXConfig = {
   chainId: number;
   manaRpcUrl: string;
-  masterSpace: string;
   incoMasterSpace: string | null;
-  masterSimpleQuorumAvatar: string | null;
-  masterSimpleQuorumTimelock: string | null;
+  implementations: Record<string, ImplementationType>;
   propositionPowerValidationStrategyAddress: string | null;
   apeGasStrategy: string | null;
   apeGasStrategyDelay: number;
