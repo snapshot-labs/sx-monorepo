@@ -22,7 +22,7 @@ ballots and verifies the totals against the aggregate.
 
 ```
 sx-monorepo (docker compose)         separate projects, separate machines
-  mysql        :3306                   keyper1        :8101
+  mysql        :3306 (host only)       keyper1        :8101
   hub          :3000                   keyper2        :8102
   sequencer    :3001                   keyper3        :8103
   te-data-layer:3002
@@ -146,17 +146,17 @@ before you start:
 
 ### 1c. The UI — `sx-monorepo/apps/ui/.env`
 
+Private voting is off in the UI unless `VITE_TE_ENABLED=true`. Set `VITE_TE_ENABLED=false` to `true` and add the two
+local URLs, leaving the other keys as they are:
+
 ```bash
-cd sx-monorepo/apps/ui
-cat >> .env <<'EOF'
-VITE_HOST=localhost
+VITE_TE_ENABLED=true
 VITE_LOCAL_HUB_URL=http://localhost:3000/graphql
 VITE_LOCAL_SEQUENCER_URL=http://localhost:3001
-# Must match MIN_DKG_LEAD_TIME_S, or the editor lets you pick a start time the
-# sequencer then rejects.
-VITE_MIN_DKG_LEAD_TIME_S=180
-EOF
 ```
+
+`VITE_MIN_DKG_LEAD_TIME_S` (default 180) must match the sequencer's
+`MIN_DKG_LEAD_TIME_S`. If you change one, set the other in this file too.
 
 Other `VITE_*` keys (Alchemy, Infura, Etherscan, WalletConnect) enable chain-data
 features — token balances, ENS, richer wallet options. None are needed here.

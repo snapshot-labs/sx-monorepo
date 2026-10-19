@@ -118,13 +118,16 @@ frozen into `te_sgp_config` along with `scale`:
 | Space's strategies | `V` |
 | --- | --- |
 | All recognised token strategies (`erc20-balance-of`, `erc20-votes`, `erc20-balance-of-delegation`, `erc721`, `erc721-enumerable`) | Sum of `totalSupply()` at the proposal's frozen snapshot block |
-| Anything else (`ticket`, `whitelist`, quadratic, custom …) — even one | `floor(TE_SOLVER_CEILING / budget)` |
+| None of them (`ticket`, `whitelist`, quadratic, custom …) | The fallback: `floor(TE_SOLVER_CEILING / weighted budget)` |
+| A mix of both | The larger of the recognised supply and the fallback |
 
 The fallback is not a guess at the space's voting power; no such number is knowable for a
-`ticket` or `whitelist` space. It is the largest `V` that still leaves `scale = 1`, so a space
-that cannot be measured keeps full precision. There is deliberately no override: a value above
-it forces needless scaling, and one below it forces needless scaling *and* narrows the alarm
-below. `TE_SOLVER_CEILING` is the only honest way to move it.
+`ticket` or `whitelist` space. It is the largest `V` that still leaves `scale = 1` on a weighted
+proposal, so a space that cannot be measured keeps full precision. It uses the weighted budget
+whatever the proposal's type, because the type can be edited after `V` is frozen. On a mixed
+space a supply past the fallback raises `V` with it, so the tally stays solvable. There is
+deliberately no override: a value above it forces needless scaling. `TE_SOLVER_CEILING` is the
+only honest way to move it.
 
 **`scale` is 1 for essentially every real space,** in which case none of this is visible. At the
 default 1e12 ceiling and budget 100, scaling starts above 1e10 whole tokens of total supply.
@@ -153,8 +156,8 @@ losing most of their power* to *everyone losing at most half a unit*.
 | 1e12 (default) | 1 | 995,500 / 69 / 53 / 31 — all in full |
 | 1e6 | 128 | 7,777 / 1 / 0 / 0 — the last two admitted but worth nothing |
 
-**If `V` turns out too low**, the sequencer logs an alarm as attested weight passes it, naming
-`TE_SOLVER_CEILING`. It is an alarm and not a refusal: the tally degrades to a slower one rather
+**If `V` turns out too low**, the sequencer logs an alarm once `budget x ceil(attested / scale)`
+passes the frozen `TE_SOLVER_CEILING`, naming it. It is an alarm and not a refusal: the tally degrades to a slower one rather
 than an impossible one, and blocking a voter over an operator's estimate would be worse.
 
 ---

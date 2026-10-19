@@ -15,8 +15,7 @@
 --                          environment
 --
 --  So a change here needs one of:
---    * a hand-applied ALTER, which is this repo's current practice -- see the
---      "Unknown column 'turbo'" entry in evidence/manual-metamask.md
+--    * a hand-applied ALTER, which is this repo's current practice
 --    * a full reset:  docker compose down && rm -rf mysql-data && docker compose up
 --
 --  The failure mode is deferred, not immediate: a stack looks perfectly healthy
@@ -113,7 +112,6 @@ CREATE TABLE proposals (
   te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
   te_aggregate JSON DEFAULT NULL,
-  te_dkg_status VARCHAR(24) DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,

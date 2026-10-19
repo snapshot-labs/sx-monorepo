@@ -117,50 +117,18 @@ export interface BuildTeWeightedBallotArgs extends CredentialSource {
 }
 
 /**
- * Obtain a credential for this key, then bind the built ballot to it.
- *
- * Ordered deliberately: the credential names `vk`, so the key has to exist
- * before the request, and the binding covers the ballot digest, so the ballot
- * has to exist before the signature. That leaves one network round trip between
- * keygen and ballot construction — and no wallet interaction at all, since the
- * request carries no signature and the binding uses the ballot's ephemeral key.
- */
-
-/**
- * Build the encrypted ballot envelope for a single-choice ballot.
- *
- * Variant A, exact B=1: vote vector is a unit vector of length
- * ``numCandidates`` with a single 1 at ``choice - 1``. The SDK enforces
- * Σvotes == 1 and rejects any vector that does not sum to the budget.
+ * Encrypt, prove and sign a ballot for an already-built votes vector.
  *
  * The ephemeral Schnorr key ``sk`` lives only inside this function and
  * is dropped on return; per the SDK's coercion-resistance contract the
  * randomness ``r_j`` never leaves ``buildBallot`` either.
  */
-export async function buildTeBallotEnvelope(
-  args: BuildTeBallotArgs
+async function buildEnvelope(
+  args: Omit<BuildTeBallotArgs, 'choice'>,
+  votes: bigint[]
 ): Promise<TeBallotEnvelope> {
-  const { voter, proposalId, mpk, config, choice, sequencerUrl, space } = args;
+  const { voter, proposalId, mpk, config, sequencerUrl, space } = args;
   await ensureCurvesInit();
-
-  if (
-    config.variant !== 'A' ||
-    config.mode !== 'exact' ||
-    config.budget !== 1
-  ) {
-    throw new Error(
-      `buildTeBallotEnvelope: only Variant A exact B=1 is supported; got ${JSON.stringify(config)}`
-    );
-  }
-  if (
-    !Number.isInteger(choice) ||
-    choice < 1 ||
-    choice > config.numCandidates
-  ) {
-    throw new Error(
-      `buildTeBallotEnvelope: choice ${choice} out of [1, ${config.numCandidates}]`
-    );
-  }
 
   const electionId = arrayify(proposalId);
   const pseudonym = pseudonymFor(voter, proposalId);
@@ -183,10 +151,6 @@ export async function buildTeBallotEnvelope(
     vk: toHex(vk.toBytes()),
     voter
   });
-
-  // Unit vector for single-choice exact-B=1.
-  const votes: bigint[] = new Array(config.numCandidates).fill(0n);
-  votes[choice - 1] = 1n;
 
   let ballot;
   try {
@@ -225,6 +189,73 @@ export async function buildTeBallotEnvelope(
 }
 
 /**
+ * Build the encrypted ballot envelope for a single-choice ballot.
+ *
+ * Variant A, exact B=1: vote vector is a unit vector of length
+ * ``numCandidates`` with a single 1 at ``choice - 1``. The SDK enforces
+ * Σvotes == 1 and rejects any vector that does not sum to the budget.
+ */
+export async function buildTeBallotEnvelope(
+  args: BuildTeBallotArgs
+): Promise<TeBallotEnvelope> {
+  const { config, choice } = args;
+
+  if (
+    config.variant !== 'A' ||
+    config.mode !== 'exact' ||
+    config.budget !== 1
+  ) {
+    throw new Error(
+      `buildTeBallotEnvelope: only Variant A exact B=1 is supported; got ${JSON.stringify(config)}`
+    );
+  }
+  if (
+    !Number.isInteger(choice) ||
+    choice < 1 ||
+    choice > config.numCandidates
+  ) {
+    throw new Error(
+      `buildTeBallotEnvelope: choice ${choice} out of [1, ${config.numCandidates}]`
+    );
+  }
+
+  const votes: bigint[] = new Array(config.numCandidates).fill(0n);
+  votes[choice - 1] = 1n;
+  return buildEnvelope(args, votes);
+}
+
+/**
+ * A weighted choice as integer votes summing exactly to `budget`.
+ *
+ * Largest-remainder method: each candidate gets the floor of its exact share, and
+ * the units left over go to the largest fractional parts, so the SDK's
+ * `Σvotes == budget` check passes with the least rounding.
+ */
+export function weightedVoteVector(
+  choice: Record<string, number>,
+  budget: number,
+  numCandidates: number
+): number[] {
+  const totalWeight = Object.values(choice).reduce((a, b) => a + b, 0);
+  if (totalWeight <= 0) {
+    throw new Error(
+      'buildTeWeightedBallotEnvelope: choice weights sum to zero'
+    );
+  }
+  const exact = Array.from({ length: numCandidates }, (_, j) => {
+    const w = choice[String(j + 1)] ?? 0;
+    return (w / totalWeight) * budget;
+  });
+  const floors = exact.map(Math.floor);
+  const remaining = budget - floors.reduce((a, b) => a + b, 0);
+  const order = exact
+    .map((v, i) => ({ frac: v - Math.floor(v), i }))
+    .sort((a, b) => b.frac - a.frac);
+  for (let k = 0; k < remaining; k++) floors[order[k].i]++;
+  return floors;
+}
+
+/**
  * Build an encrypted ballot for a weighted-choice proposal.
  *
  * ``choice`` is the Snapshot weighted format: ``{ "1": 60, "2": 40 }`` where
@@ -239,8 +270,7 @@ export async function buildTeBallotEnvelope(
 export async function buildTeWeightedBallotEnvelope(
   args: BuildTeWeightedBallotArgs
 ): Promise<TeBallotEnvelope> {
-  const { voter, proposalId, mpk, config, choice, sequencerUrl, space } = args;
-  await ensureCurvesInit();
+  const { config, choice } = args;
 
   if (config.variant !== 'A' || config.mode !== 'exact') {
     throw new Error(
@@ -248,79 +278,10 @@ export async function buildTeWeightedBallotEnvelope(
     );
   }
 
-  const totalWeight = Object.values(choice).reduce((a, b) => a + b, 0);
-  if (totalWeight <= 0) {
-    throw new Error(
-      'buildTeWeightedBallotEnvelope: choice weights sum to zero'
-    );
-  }
-
-  const budget = config.budget;
-
-  // Largest-remainder method: guarantees Σvotes == budget with minimal rounding error.
-  const exact = Array.from({ length: config.numCandidates }, (_, j) => {
-    const w = choice[String(j + 1)] ?? 0;
-    return (w / totalWeight) * budget;
-  });
-  const floors = exact.map(Math.floor);
-  const remaining = budget - floors.reduce((a, b) => a + b, 0);
-  const order = exact
-    .map((v, i) => ({ frac: v - Math.floor(v), i }))
-    .sort((a, b) => b.frac - a.frac);
-  for (let k = 0; k < remaining; k++) floors[order[k].i]++;
-
-  const votes: bigint[] = floors.map(BigInt);
-
-  const electionId = arrayify(proposalId);
-  const pseudonym = pseudonymFor(voter, proposalId);
-  const mpkBytes = arrayify(mpk);
-
-  const { G2Point } = await import('@shutter-network/urban-verified-crypto');
-  const mpkPoint = G2Point.fromBytes(mpkBytes);
-
-  const { sk, vk } = schnorrKeygen();
-  const vkPoint: G1Point = vk;
-
-  // Before the ballot, because the credential is issued *for* this key and the
-  // weight it carries has to be settled before the voter signs anything.
-  const issued = await requestBallotCredential({
-    sequencerUrl,
-    space,
-    proposalId,
-    vk: toHex(vk.toBytes()),
-    voter
-  });
-
-  let ballot;
-  try {
-    ballot = buildBallot({
-      mpk: mpkPoint,
-      electionId,
-      pseudonym,
-      sk,
-      vk: vkPoint,
-      votes,
-      params: config,
-      attestation: toSdkAttestation(issued.attestation)
-    });
-  } finally {
-    mpkPoint.destroyWasm();
-    vk.destroyWasm();
-  }
-
-  return {
-    electionId: toHex(ballot.electionId),
-    pseudonym: toHex(ballot.pseudonym),
-    vk: toHex(ballot.vk),
-    ciphertexts: ballot.ciphertexts.map(([c1, c2]) => ({
-      c1: toHex(c1),
-      c2: toHex(c2)
-    })),
-    zkProof: toHex(ballot.zkProof),
-    voterSignature: toHex(ballot.voterSignature),
-    // Carried *inside* the envelope, which is Snapshot's `choice`, so the outer
-    // EIP-712 signature covers them too. The committee reads the credential and
-    // the binding from the hub's feed; ingest reads them from here.
-    attestation: issued.attestation
-  };
+  const votes: bigint[] = weightedVoteVector(
+    choice,
+    config.budget,
+    config.numCandidates
+  ).map(BigInt);
+  return buildEnvelope(args, votes);
 }

@@ -1,3 +1,4 @@
+import { IS_TE_ENABLED } from '@/helpers/constants';
 import { gql } from './gql';
 
 gql(`
@@ -221,18 +222,13 @@ gql(`
     te_committee_pks
     te_threshold_t
     te_threshold_n
-    te_keyper_urls
     te_keyper_addresses
-    te_aggregate
   }
 `);
 
-// The te_* columns exist only in the local private-voting hub schema; a
-// production hub rejects a query naming unknown fields, which would blank every
-// proposal list. Both documents below are static so graphql-codegen can analyse
-// them — the choice is made here at runtime, not by splicing strings into one
-// document, which codegen cannot see through.
-const USE_TE_FIELDS = Boolean((import.meta as any).env?.VITE_LOCAL_HUB_URL);
+// A hub without private voting rejects a query naming the te_* fields, which
+// would blank every proposal list, so they are only asked for when enabled.
+// Both documents are static so graphql-codegen can analyse them.
 
 const PROPOSAL_QUERY_BASE = gql(`
   query Proposal($id: String!) {
@@ -251,7 +247,7 @@ const PROPOSAL_QUERY_TE = gql(`
 `);
 
 export const PROPOSAL_QUERY = (
-  USE_TE_FIELDS ? PROPOSAL_QUERY_TE : PROPOSAL_QUERY_BASE
+  IS_TE_ENABLED ? PROPOSAL_QUERY_TE : PROPOSAL_QUERY_BASE
 ) as typeof PROPOSAL_QUERY_TE;
 
 const PROPOSALS_QUERY_BASE = gql(`
@@ -283,7 +279,7 @@ const PROPOSALS_QUERY_TE = gql(`
 `);
 
 export const PROPOSALS_QUERY = (
-  USE_TE_FIELDS ? PROPOSALS_QUERY_TE : PROPOSALS_QUERY_BASE
+  IS_TE_ENABLED ? PROPOSALS_QUERY_TE : PROPOSALS_QUERY_BASE
 ) as typeof PROPOSALS_QUERY_TE;
 
 export const SPACES_QUERY = gql(`

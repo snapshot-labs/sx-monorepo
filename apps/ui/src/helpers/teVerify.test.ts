@@ -1,5 +1,5 @@
 import { G2Point, initCurves } from '@shutter-network/urban-verified-crypto';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { pseudonymFor } from './teBallot';
 import {
   aggregateBallots,
@@ -7,6 +7,7 @@ import {
   AuditPayload,
   BallotsPayload,
   diagnoseTally,
+  fetchBallotsPayload,
   fingerprintHex,
   shortHex,
   verifyTally
@@ -37,7 +38,7 @@ function makeBallotsPayload(
   ballots: AuditBallot[],
   scale?: number | null
 ): BallotsPayload {
-  return { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, scale, ballots };
+  return { scale, ballots };
 }
 
 function makeDummyAggregate(numCandidates = BASE_CONFIG.numCandidates) {
@@ -322,7 +323,7 @@ describe('aggregateBallots: WASM accumulation path', () => {
       makeBallot(i + 1, 1, NUM_CANDIDATES)
     );
     const result = await aggregateBallots(
-      { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, ballots },
+      { ballots },
       makeDummyAggregate(NUM_CANDIDATES)
     );
     expect(result.total).toBe(100);
@@ -333,7 +334,7 @@ describe('aggregateBallots: WASM accumulation path', () => {
       makeBallot(i + 200, 2, NUM_CANDIDATES)
     );
     const result = await aggregateBallots(
-      { te_mpk: G2_GEN_HEX, te_config: BASE_CONFIG, ballots },
+      { ballots },
       makeDummyAggregate(NUM_CANDIDATES)
     );
     expect(result.total).toBe(50);
@@ -589,5 +590,88 @@ describe('diagnoseTally', () => {
     const payload = withShares(2, 2);
     payload.te_result = { totals: [], keyper_indices: [], bsgs_bound: '0' };
     expect(diagnoseTally(payload).kind).toBe('awaiting-coordinator');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// fetchBallotsPayload: reads the committee's paged feed
+// ---------------------------------------------------------------------------
+
+describe('fetchBallotsPayload', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const entry = (seq: number, weight: number) => ({
+    sequenceNumber: seq,
+    submittedAt: 1,
+    ballot: {
+      electionId: PROPOSAL_ID,
+      pseudonym: `0x${String(seq).padStart(64, '0')}`,
+      vk: '0xvk',
+      ciphertexts: [{ c1: '0x01', c2: '0x02' }],
+      zkProof: '0xproof',
+      voterSignature: '0xsig',
+      attestation: { weight, nonce: 1 }
+    }
+  });
+
+  it('reads every page in order and counts each ballot at its signed weight', async () => {
+    const pages: Record<string, any> = {
+      0: { ballots: [entry(0, 100), entry(1, 7)], total: 3 },
+      2: { ballots: [entry(2, 31)], total: 3 }
+    };
+    const fetchMock = vi.fn(async (url: string) => {
+      const start = new URL(url).searchParams.get('start')!;
+      return { ok: true, json: async () => pages[start] } as any;
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const payload = await fetchBallotsPayload(
+      'https://hub.test/api/',
+      PROPOSAL_ID,
+      4
+    );
+
+    expect(fetchMock.mock.calls.map(c => c[0])).toEqual([
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=0`,
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=2`
+    ]);
+    expect(payload.scale).toBe(4);
+    expect(payload.ballots.map(b => [b.sequenceNumber, b.vp])).toEqual([
+      [0, 100],
+      [1, 7],
+      [2, 31]
+    ]);
+    expect(payload.ballots[2].voter).toBe(entry(2, 31).ballot.pseudonym);
+    expect(payload.ballots[2].choice?.ciphertexts).toEqual([
+      { c1: '0x01', c2: '0x02' }
+    ]);
+  });
+
+  it('stops on an empty page rather than asking forever', async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        ({ ok: true, json: async () => ({ ballots: [], total: 5 }) }) as any
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    const payload = await fetchBallotsPayload(
+      'https://hub.test/api',
+      PROPOSAL_ID,
+      1
+    );
+    expect(payload.ballots).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces a hub error', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({ ok: false, status: 503, text: async () => 'retry' }) as any
+      )
+    );
+    await expect(
+      fetchBallotsPayload('https://hub.test/api', PROPOSAL_ID, 1)
+    ).rejects.toThrow('hub 503: retry');
   });
 });

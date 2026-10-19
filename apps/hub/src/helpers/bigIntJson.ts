@@ -24,3 +24,14 @@ const OVERSIZED_INTEGER = /(?<=[:[,]\s*)(\d{16,})(?=\s*[,\]}])/g;
 export function parseJsonPreservingBigInts<T = any>(raw: string): T {
   return JSON.parse(raw.replace(OVERSIZED_INTEGER, '"$1"'));
 }
+
+/**
+ * The writing half: `JSON.stringify`, but a `bigint` is emitted as its exact
+ * digits rather than throwing, so what `parseJsonPreservingBigInts` read can be
+ * stored and served back byte for byte.
+ */
+export function stringifyPreservingBigInts(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    typeof v === 'bigint' ? `__bigint__${v}` : v
+  ).replace(/"__bigint__(\d+)"/g, '$1');
+}

@@ -12,8 +12,7 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import express from 'express';
 import db from './helpers/mysql';
-import { deriveScale } from './helpers/sgpConfig';
-import { sendError } from './helpers/utils';
+import { parseJsonField, sendError } from './helpers/utils';
 
 const router = express.Router();
 
@@ -23,19 +22,6 @@ async function loadProposal(proposalId: string): Promise<any | null> {
     [proposalId]
   );
   return rows[0] || null;
-}
-
-function parseJsonField<T>(value: unknown, fallback: T): T {
-  if (value === null || value === undefined) return fallback;
-  if (typeof value === 'object') return value as T;
-  if (typeof value === 'string') {
-    try {
-      return JSON.parse(value) as T;
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
 }
 
 /**
@@ -142,59 +128,6 @@ router.get('/proposal/:id/te_decryption_shares', async (req, res) => {
         sigma: `0x${r.sigma_hex.toLowerCase()}`,
         proof_e: `0x${r.proof_e_hex.toLowerCase()}`,
         proof_z: `0x${r.proof_z_hex.toLowerCase()}`
-      }))
-    });
-  } catch (err: any) {
-    capture(err);
-    return sendError(res, 'server_error', 500);
-  }
-});
-
-// Every individual encrypted ballot with the voting power it was counted with.
-// The choice envelope never reveals how the voter voted, so exposing it leaks
-// nothing the tally does not already imply, and the voting power is public
-// information — it is shown for every normal Snapshot vote and is independently
-// recomputable from the proposal's strategies. An auditor uses this to recompute
-// the voting-power-weighted homomorphic aggregate and confirm it equals the
-// published one, which is what closes the "did anyone sum the real ballots?" gap.
-router.get('/proposal/:id/te_ballots', async (req, res) => {
-  const proposalId = req.params.id;
-  try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 400);
-    }
-    if (!proposal.te_mpk) {
-      return sendError(res, 'dkg_not_finalized', 400);
-    }
-    const rows = await (db as any).queryAsync(
-      // cb != -3 excludes soft-deleted votes (CB.PENDING_DELETE in sequencer/constants.ts)
-      `SELECT voter, vp, choice FROM votes
-        WHERE proposal = ? AND cb != -3
-        ORDER BY created ASC, id ASC`,
-      [proposalId]
-    );
-    const teConfig = parseJsonField<any>(proposal.te_config, null);
-    // The unit the committee's aggregation counts in. A verifier must apply the same
-    // divisor or its recomputed aggregate will not match, so this travels with the
-    // ballots rather than being inferred.
-    const snapshot = parseJsonField<any>(proposal.te_sgp_config, null);
-    const scale = deriveScale(
-      Number(teConfig?.budget ?? 1),
-      Number(snapshot?.maxTotalWeight ?? 0),
-      Number(snapshot?.solverCeiling ?? Infinity)
-    );
-
-    return res.json({
-      te_mpk: `0x${Buffer.from(proposal.te_mpk).toString('hex')}`,
-      te_config: teConfig,
-      scale,
-      ballots: (rows as any[]).map((r, i) => ({
-        sequenceNumber: i,
-        voter: r.voter,
-        vp: Number(r.vp),
-        choice: parseJsonField<any>(r.choice, null)
       }))
     });
   } catch (err: any) {

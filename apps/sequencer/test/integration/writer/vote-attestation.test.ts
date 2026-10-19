@@ -10,19 +10,19 @@
  */
 
 import {
+  attestationMessage,
   G1Point,
+  G2Point,
   initCurves,
   schnorrVerify
 } from '@shutter-network/urban-verified-crypto';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import {
-  attestationMessage,
   eligibilityPublicKey,
   mintAttestation,
   resetIssuer
 } from '../../../src/helpers/sgpAttestation';
-import { verifyBallotSignature } from '../../../src/helpers/sgpBinding';
-import { pseudonymFor } from '../../../src/helpers/teAttestationIssuer';
+import { expectedPseudonym, verifyTeBallot } from '../../../src/helpers/te';
 import * as scores from '../../../src/scores';
 import { action, verifyBallotCredential } from '../../../src/writer/vote';
 import { castBallot, CastBallotArgs } from '../../fixtures/teBallotBuilder';
@@ -303,12 +303,9 @@ describe('vote: the credential is written with the vote', () => {
         }
       }
     };
-    await expect(
-      verifyBallotCredential(
-        { id, te_config: { numCandidates: 2, budget: 1 } },
-        msg
-      )
-    ).rejects.toThrow(/must be an integer/);
+    expect(() => verifyBallotCredential({ id }, msg.payload.choice)).toThrow(
+      /must be an integer/
+    );
   });
 
   it('stores a plain choice on a public proposal', async () => {
@@ -331,90 +328,70 @@ describe('vote: the credential is written with the vote', () => {
 });
 
 /**
- * The wiring: that `verify()` mints at all, clamps to the ceiling, and does
- * neither for a public proposal.
- *
- * `verifyTeBallot` and `getVp` are stubbed. The ballot crypto and the score
- * lookup are not what is under test here — both are covered elsewhere — and
- * building a real encrypted ballot to reach the minting code would test the SDK
- * rather than this branch.
- */
-/**
- * `verify()` no longer mints — it checks what the voter presented.
- *
- * The clamp, the dust floor and the nonce moved to `/te_attestation`, where they
- * are applied *before* the voter signs (see `teAttestationIssuer.test.ts`). What
- * is left here is the ingest contract: a ballot is accepted only when the
- * issuer's signature authorises the weight **and** the voter's ballot signature ties that
- * credential to this ballot. Either alone leaves the pairing forgeable by
- * whoever assembles it.
+ * Ingest checks the credential through the SDK's `verifyBallot`: the issuer's
+ * signature authorises the weight, and the voter's ballot signature ties that
+ * credential to this ballot. Either alone leaves the pairing forgeable.
  */
 describe('vote verify(): the credential is checked, not minted', () => {
   const ID = `0x${'d1'.repeat(32)}`;
-  const PSEUDO_FOR = (voter: string) => pseudonymFor(voter, ID);
+  let issuerKey: string;
+  let mpkHex: string;
 
   beforeAll(async () => {
     process.env.TE_ELIGIBILITY_PRIVATE_KEY = ISSUER_SK;
     resetIssuer();
     await initCurves();
-    await eligibilityPublicKey();
+    issuerKey = await eligibilityPublicKey();
+    const mpk = G2Point.generator();
+    mpkHex = `0x${Buffer.from(mpk.toBytes()).toString('hex')}`;
+    mpk.destroyWasm();
   }, 60_000);
 
   async function ballotFor(over: Partial<CastBallotArgs> = {}) {
     return castBallot({
       electionId: ID,
-      pseudonym: PSEUDO_FOR(VOTER),
+      pseudonym: expectedPseudonym(VOTER, ID),
       nonce: 1,
       weight: 5,
       ...over
     });
   }
 
+  async function verify(envelope: any, attestation: any) {
+    return verifyTeBallot(
+      {
+        id: ID,
+        te_config: { numCandidates: 3, budget: 3, mode: 'exact', variant: 'A' },
+        te_mpk: mpkHex
+      },
+      VOTER.toLowerCase(),
+      JSON.stringify({ ...envelope, attestation }),
+      issuerKey
+    );
+  }
+
   it('accepts a ballot whose signature covers its credential', async () => {
     const b = await ballotFor();
-    await expect(
-      verifyBallotSignature({
-        envelope: b.envelope,
-        attestation: b.attestation
-      })
-    ).resolves.toBe(true);
+    expect((await verify(b.envelope, b.attestation)).ok).toBe(true);
   }, 60_000);
 
-  // The substitution this check exists to stop: a credential lifted from the
-  // voter's own later ballot onto their earlier one, which is how an assembler
-  // would choose which of their ballots the committee counts. Caught by the
-  // ballot's own signature now that the credential is inside what it covers.
+  // A credential lifted from the voter's own later ballot onto an earlier one,
+  // which is how an assembler would choose which ballot the committee counts.
   it("refuses a credential moved from the voter's other ballot", async () => {
     const first = await ballotFor({ nonce: 1 });
     const second = await ballotFor({ nonce: 2 });
-    await expect(
-      verifyBallotSignature({
-        envelope: first.envelope,
-        attestation: second.attestation
-      })
-    ).resolves.toBe(false);
+    expect((await verify(first.envelope, second.attestation)).ok).toBe(false);
   }, 60_000);
 
-  // A ballot signed over a credential it does not ship with — the forgery built
-  // the way an attacker would build it, not by corrupting bytes afterwards.
   it('refuses a ballot signed over a different credential', async () => {
     const other = await ballotFor({ nonce: 9, weight: 9 });
     const b = await ballotFor({ bindTo: other.attestation });
-    await expect(
-      verifyBallotSignature({
-        envelope: b.envelope,
-        attestation: b.attestation
-      })
-    ).resolves.toBe(false);
+    expect((await verify(b.envelope, b.attestation)).ok).toBe(false);
   }, 60_000);
 
   it('refuses a weight the voter never signed', async () => {
     const b = await ballotFor();
-    await expect(
-      verifyBallotSignature({
-        envelope: b.envelope,
-        attestation: { ...b.attestation, weight: 50 }
-      })
-    ).resolves.toBe(false);
+    const forged = { ...b.attestation, weight: 50 };
+    expect((await verify(b.envelope, forged)).ok).toBe(false);
   }, 60_000);
 });

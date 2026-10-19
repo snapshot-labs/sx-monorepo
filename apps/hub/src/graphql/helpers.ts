@@ -464,7 +464,6 @@ export async function handleRelatedSpaces(
 }
 
 function deriveDkgStatus(proposal: any): string | null {
-  if (proposal.te_dkg_status) return proposal.te_dkg_status;
   if (proposal.privacy !== 'shutter-elgamal') return null;
   if (proposal.te_mpk) return null;
   const now = Math.floor(Date.now() / 1e3);

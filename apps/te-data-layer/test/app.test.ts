@@ -30,6 +30,15 @@ function hubReplies(body: unknown, status = 200): void {
   });
 }
 
+/** A hub reply read as text, for the routes that must not parse it. */
+function hubRepliesRaw(text: string): void {
+  mockFetch.mockResolvedValueOnce({
+    ok: true,
+    status: 200,
+    text: async () => text
+  });
+}
+
 function lastUrl(): string {
   return mockFetch.mock.calls[mockFetch.mock.calls.length - 1][0];
 }
@@ -409,19 +418,19 @@ describe('aggregate', () => {
     expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual(body);
   });
 
-  it('drops anything the port does not define, including a claimed index', async () => {
+  // `totalAdmittedWeight` is a sum of raw voting power and passes 2^53 on
+  // large-supply tokens. It is covered by the keyper's signature, so the body has
+  // to reach the hub as the bytes that arrived. A claimed index rides along
+  // unread: the hub takes the index from the signature, never from the body.
+  it('forwards the body verbatim, keeping an oversized weight exact', async () => {
+    const BIG = '18014398509481985'; // 2^54 + 1: rounds if it passes through a double
     hubReplies({}, 204);
+    const raw = `{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG}},"keyperSig":"0xsig","keyperIndex":3}`;
     await request(app)
       .post(`/elections/${BARE}/aggregate`)
-      .send({
-        aggregate: { admitted: [] },
-        keyperSig: '0xsig',
-        keyperIndex: 3
-      });
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual({
-      aggregate: { admitted: [] },
-      keyperSig: '0xsig'
-    });
+      .set('content-type', 'application/json')
+      .send(raw);
+    expect(mockFetch.mock.calls[0][1].body).toBe(raw);
   });
 
   // 422 is the protocol's voting-window error and 409 its immutability error.
@@ -446,7 +455,7 @@ describe('aggregate', () => {
       exclusions: [{ sequenceNumber: 2, reason: 'INVALID_PROOF' }],
       totalAdmittedWeight: 3
     };
-    hubReplies({ aggregate });
+    hubRepliesRaw(JSON.stringify({ aggregate }));
     const res = await request(app).get(`/elections/${BARE}/aggregate`);
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ aggregate });
@@ -457,15 +466,22 @@ describe('aggregate', () => {
 
   // Absence is a fact the coordinator acts on: no quorum yet means keep asking
   // the committee to derive. It must read as null, never as an error.
+  it('keeps an oversized weight exact on the way back out', async () => {
+    const BIG = '18014398509481985';
+    hubRepliesRaw(`{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG}}}`);
+    const res = await request(app).get(`/elections/${BARE}/aggregate`);
+    expect(res.text).toContain(`"totalAdmittedWeight":${BIG}`);
+  });
+
   it('reports no quorum as null rather than as a failure', async () => {
-    hubReplies({ aggregate: null });
+    hubRepliesRaw('{"aggregate":null}');
     const res = await request(app).get(`/elections/${BARE}/aggregate`);
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ aggregate: null });
   });
 
   it('serves the aggregate on the keyper read mount too', async () => {
-    hubReplies({ aggregate: null });
+    hubRepliesRaw('{"aggregate":null}');
     expect(
       (await request(app).get(`/port/elections/${BARE}/aggregate`)).status
     ).toBe(200);

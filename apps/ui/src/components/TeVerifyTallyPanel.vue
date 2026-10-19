@@ -31,6 +31,8 @@ type Status =
       kind: 'ok';
       tallies: bigint[];
       matches: boolean | null;
+      /** The verified totals, in voting power, equal the proposal's published scores. */
+      scoresAgree: boolean;
       reason: string | null;
       ballots: BallotAggregateResult;
       audit: AuditPayload;
@@ -79,7 +81,11 @@ async function run() {
     const proposalId = props.proposal.proposal_id as string;
     const [payload, ballotsPayload] = await Promise.all([
       fetchAuditPayload(props.apiBaseUrl, proposalId),
-      fetchBallotsPayload(props.apiBaseUrl, proposalId)
+      fetchBallotsPayload(
+        props.apiBaseUrl,
+        proposalId,
+        Number((props.proposal.te_config as any)?.scale ?? 1)
+      )
     ]);
     // Why there is nothing to verify, worked out from public data before doing
     // any work. Whether this is a keyper problem or a coordinator problem decides
@@ -109,10 +115,24 @@ async function run() {
     cancelRun.value = run.cancel;
     const { ballots, tally: result } = await run.result;
 
+    // The results page shows `proposal.scores`, which the sequencer derived from
+    // these same totals. Checking the totals alone would verify numbers nobody is
+    // shown, so the two are compared here.
+    const scores = props.proposal.scores ?? [];
+    const scale = ballotsPayload.scale ?? 1;
+    const scoresAgree =
+      result.tallies.length === scores.length &&
+      result.tallies.every((t, i) => {
+        const a = (Number(t) * scale) / budget.value;
+        const b = Number(scores[i]);
+        return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+      });
+
     status.value = {
       kind: 'ok',
       tallies: result.tallies,
       matches: result.verified,
+      scoresAgree,
       reason: result.reason,
       ballots,
       audit: payload,
@@ -162,7 +182,8 @@ const keyperRows = computed(() => {
     .sort((a, b) => a[0] - b[0])
     .map(([idx, shares]) => ({
       index: idx,
-      address: addresses[idx] || addresses[idx - 1] || null,
+      // Keyper indices are 1-based; the address list is not.
+      address: addresses[idx - 1] ?? null,
       shares
     }));
 });
@@ -216,9 +237,28 @@ const numCandidates = computed(() =>
  */
 const budget = computed(() => (props.proposal.te_config as any)?.budget ?? 1);
 
-/** Displays a recovered raw tally in real vote-count units. */
+/**
+ * Every check passed: the shares verify the totals, the ballots re-sum to the
+ * aggregate the keypers decrypted, every admitted ballot was found, and the totals
+ * are the scores the results page shows.
+ */
+const isFullyVerified = computed(
+  () =>
+    status.value.kind === 'ok' &&
+    status.value.matches === true &&
+    status.value.ballots.aggregateMatches &&
+    status.value.ballots.admittedSetResolved &&
+    status.value.scoresAgree
+);
+
+/**
+ * Displays a recovered raw tally in voting power, as the sequencer converts it
+ * for `proposal.scores`: `raw x scale / budget`.
+ */
 function formatTally(raw: bigint): string {
-  const value = Number(raw) / budget.value;
+  const scale =
+    status.value.kind === 'ok' ? status.value.ballotsPayload.scale ?? 1 : 1;
+  const value = (Number(raw) * scale) / budget.value;
   return budget.value === 1 ? value.toString() : value.toFixed(2);
 }
 
@@ -304,7 +344,7 @@ function downloadBundle() {
         Stop
       </button>
       <span
-        v-if="status.kind === 'ok' && status.matches === true"
+        v-if="isFullyVerified"
         class="text-sm text-skin-success flex items-center gap-1"
       >
         <!-- `shrink-0`: this line wraps at panel width, and a flex item with no
@@ -312,6 +352,13 @@ function downloadBundle() {
              visibly smaller than the identical one below it. -->
         <IH-check-circle class="size-[16px] shrink-0" />
         Published tally verified against the decryption shares.
+      </span>
+      <span
+        v-else-if="status.kind === 'ok' && status.matches === true"
+        class="text-sm text-skin-danger flex items-center gap-1"
+      >
+        <IH-x-circle class="size-[16px] shrink-0" />
+        The decryption shares verify, but not every check below agrees.
       </span>
       <span
         v-else-if="status.kind === 'ok' && status.matches === false"
@@ -409,6 +456,19 @@ function downloadBundle() {
         The published aggregate counts ballots the hub did not return. The two
         do not agree on which ballots exist, so this recomputation is
         incomplete.
+      </span>
+    </div>
+    <div
+      v-if="status.kind === 'ok'"
+      class="text-sm flex items-center gap-1"
+      :class="status.scoresAgree ? 'text-skin-success' : 'text-skin-danger'"
+    >
+      <IH-check-circle v-if="status.scoresAgree" class="size-[16px] shrink-0" />
+      <IH-x-circle v-else class="size-[16px] shrink-0" />
+      <span>
+        The totals
+        {{ status.scoresAgree ? 'match' : 'do NOT match' }}
+        the proposal's published results.
       </span>
     </div>
     <div

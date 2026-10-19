@@ -1,14 +1,13 @@
-import { keccak256 } from '@ethersproject/keccak256';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { getProposal } from './actions';
 import log from './log';
 import db from './mysql';
+import { mintAttestation, SgpAttestationError } from './sgpAttestation';
 import {
-  mintAttestation,
-  SgpAttestationError,
-  verifyAttestation
-} from './sgpAttestation';
-import { isDustVotingPower, isWithinSgpVotingWindow } from './te';
+  expectedPseudonym,
+  isDustVotingPower,
+  isWithinSgpVotingWindow
+} from './te';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
 import { jsonParse } from './utils';
 
@@ -21,21 +20,6 @@ export class TeIssueError extends Error {
   ) {
     super(message);
   }
-}
-
-/**
- * The pseudonym for a voter on a proposal: `keccak(voter ‖ proposalId)`.
- *
- * Derived rather than accepted: the request names a voter, and the pseudonym
- * follows from that address alone, so a caller cannot ask for a credential under
- * a pseudonym unrelated to the address they named. Must stay byte-identical to
- * `apps/ui/src/helpers/teBallot.ts::pseudonymFor` — the ballot carries the
- * browser's copy, and ingest compares both against the authenticated voter.
- */
-export function pseudonymFor(voter: string, proposalId: string): string {
-  const voterBytes = Buffer.from(voter.toLowerCase().replace(/^0x/, ''), 'hex');
-  const idBytes = Buffer.from(proposalId.replace(/^0x/, ''), 'hex');
-  return keccak256(Buffer.concat([voterBytes, idBytes]));
 }
 
 /**
@@ -188,27 +172,32 @@ export async function issueBallotCredential(args: {
 
   // Alarm, not a gate (H9).
   //
-  // `V` is an estimate frozen at creation, and `s` was chosen from it. If real
-  // turnout exceeds it, the tally is sized for a smaller bound than it will actually
-  // face — recoverable by giving the coordinator more memory, but only if someone
+  // `s` was chosen from `V`, an estimate frozen at creation. If real turnout
+  // exceeds it, the tally's search can outgrow what the coordinator was sized to
+  // solve — recoverable by giving the coordinator more memory, but only if someone
   // knows before the tally runs. Refusing the vote instead would disenfranchise a
   // voter for an operator's estimate being wrong, so this reports and lets them vote.
+  //
+  // It checks the search size itself, `budget x ceil(total / s)` against the frozen
+  // ceiling, rather than the total against `V`: a fallback `V` is sized for the
+  // weighted budget, so on other types it sits below what is actually solvable.
   try {
-    const bound = parseCommitteeSnapshotLoose(
+    const ceiling = parseCommitteeSnapshotLoose(
       proposal.te_sgp_config
-    )?.maxTotalWeight;
-    if (bound) {
+    )?.solverCeiling;
+    if (ceiling) {
       const [row] = await db.queryAsync(
         'SELECT COALESCE(SUM(vp), 0) AS total FROM votes WHERE proposal = ?',
         [proposalId]
       );
       const attested = Number(row?.total ?? 0) + Number(weight);
-      if (attested > bound) {
+      const scale = Number(teConfig?.scale) || 1;
+      if (budget * Math.ceil(attested / scale) > ceiling) {
         log.warn(
-          `[te-vpbound] ${proposalId}: attested weight ${attested} has passed the ` +
-            `frozen bound ${bound}. The scale was chosen from that bound, so the ` +
-            `tally may exceed what the coordinator is sized for — raise ` +
-            `TE_SOLVER_CEILING and its memory before the tally runs.`
+          `[te-vpbound] ${proposalId}: attested weight ${attested} at scale ` +
+            `${scale} and budget ${budget} has passed the frozen solver ceiling ` +
+            `${ceiling}, so the tally may exceed what the coordinator is sized ` +
+            `for — raise TE_SOLVER_CEILING and its memory before the tally runs.`
         );
       }
     }
@@ -219,26 +208,20 @@ export async function issueBallotCredential(args: {
     );
   }
 
-  const pseudonym = pseudonymFor(voter, proposalId);
+  // Derived rather than accepted, so a caller cannot ask for a credential under a
+  // pseudonym unrelated to the address they named.
+  const pseudonym = expectedPseudonym(voter, proposalId);
   const nonce = BigInt(await nextRevoteNonce(proposalId, pseudonym));
 
-  const mintArgs = { electionId: proposalId, pseudonym, vk, weight, nonce };
   let credentialSig: string;
   try {
-    credentialSig = await mintAttestation(mintArgs);
-    // Verify what we just signed. Not distrust of our own key: the same rule as
-    // the dust floor and the window — do not hand out what the committee will
-    // drop, or the voter signs a credential that excludes their ballot at tally.
-    if (
-      !(await verifyAttestation({
-        ...mintArgs,
-        signature: credentialSig
-      }))
-    ) {
-      throw new SgpAttestationError(
-        'freshly minted credential failed verification'
-      );
-    }
+    credentialSig = await mintAttestation({
+      electionId: proposalId,
+      pseudonym,
+      vk,
+      weight,
+      nonce
+    });
   } catch (err: any) {
     if (err instanceof SgpAttestationError) {
       log.warn(`[te-issue] cannot mint credential: ${err.message}`);

@@ -129,8 +129,8 @@ export function buildApp(): Express {
     express.json({
       limit: '20mb',
       verify: (req: any, _res, buf) => {
-        // Kept for the one payload whose numbers must not pass through a
-        // double: see the result routes below.
+        // Kept for the payloads whose numbers must not pass through a double:
+        // see the aggregate and result routes below.
         req.rawBody = buf.toString('utf8');
       }
     })
@@ -219,11 +219,12 @@ export function buildApp(): Express {
       const id = toProposalId(electionIdParam(req));
       // Forwarded verbatim, keyper index included in neither: the hub recovers
       // it from the signature over the whole artifact, so a submission can only
-      // ever count for whoever actually derived it.
-      await hubPost(`/api/proposal/${id}/te_aggregate`, {
-        aggregate: req.body?.aggregate,
-        keyperSig: req.body?.keyperSig
-      });
+      // ever count for whoever actually derived it. Raw text, like the result:
+      // `totalAdmittedWeight` can pass 2^53 and is covered by the signature.
+      await hubPostRaw(
+        `/api/proposal/${id}/te_aggregate`,
+        (req as any).rawBody
+      );
       res.status(204).end();
     })
   );
@@ -337,10 +338,11 @@ export function buildApp(): Express {
       // `null` until a quorum of keypers submits the same artifact. That absence
       // is a fact the coordinator acts on — it is how it knows to keep asking the
       // committee to derive — so it must be reported, never 501'd.
-      const { aggregate } = await hubGet<{ aggregate: unknown }>(
-        `/api/proposal/${id}/te_sgp_aggregate`
-      );
-      res.json({ aggregate: aggregate ?? null });
+      // Passed through as text, like the result: its weights are exact integers
+      // that must not round-trip through a double here.
+      res
+        .type('application/json')
+        .send(await hubGetRaw(`/api/proposal/${id}/te_sgp_aggregate`));
     })
   );
 

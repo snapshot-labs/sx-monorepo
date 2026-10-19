@@ -102,34 +102,26 @@ export interface TeCommitteeSnapshot {
 
 export class TeConfigError extends Error {}
 
-/**
- * Ballot-shape limits the protocol enforces on an election config.
- *
- * Every keyper and auditor verifies every ballot, and a ballot's cost is
- * `numCandidates × (budget + 1)` proof branches at roughly 3 ms each. Above the
- * protocol's ceiling a proposal registers cleanly and can then never be tallied,
- * so it has to be refused at creation — the config is frozen at that moment and
- * cannot be edited afterwards.
- */
+// An encrypted tally can only sum votes per choice, which these types need and
+// nothing else. Any other type is refused, including types added later.
+const PRIVATE_VOTE_TYPES = ['single-choice', 'basic', 'weighted'];
+
+// A ballot carries `choices × (budget + 1)` proof branches and every keyper
+// verifies every ballot, so the protocol caps them.
 const MAX_PROOF_BRANCHES = 2500;
 
-/**
- * Reject a proposal whose ballots would be too expensive to verify.
- *
- * Called with the *effective* candidate count and budget: a weighted proposal
- * uses `TE_WEIGHTED_BUDGET`, everything else uses 1. At budget 100 the ceiling
- * allows 24 choices; at budget 1 it allows 1250.
- */
-export function assertBallotShape(numCandidates: number, budget: number): void {
-  const branches = numCandidates * (budget + 1);
-  if (branches > MAX_PROOF_BRANCHES) {
-    throw new TeConfigError(
-      `${numCandidates} choices at budget ${budget} means ${branches} proof ` +
-        `branches per ballot, over the ${MAX_PROOF_BRANCHES} the protocol allows. ` +
-        `Every keyper and auditor verifies every ballot. Reduce the choices, or ` +
-        `lower TE_WEIGHTED_BUDGET (at budget ${budget} the limit is ` +
-        `${Math.floor(MAX_PROOF_BRANCHES / (budget + 1))} choices)`
-    );
+/** Why a proposal cannot use private voting, or undefined when it can. */
+export function getPrivateBallotError(
+  type: string,
+  numChoices: number,
+  weightedBudget: number
+): string | undefined {
+  if (!PRIVATE_VOTE_TYPES.includes(type)) {
+    return `${type} voting is not supported with private voting`;
+  }
+  const budget = type === 'weighted' ? weightedBudget : 1;
+  if (numChoices * (budget + 1) > MAX_PROOF_BRANCHES) {
+    return `private ${type} voting allows at most ${Math.floor(MAX_PROOF_BRANCHES / (budget + 1))} choices`;
   }
 }
 
@@ -306,11 +298,6 @@ export function readTeEnv(env: NodeJS.ProcessEnv = process.env): TeEnv {
     weightedBudget: env.TE_WEIGHTED_BUDGET,
     resultPublisherAddress: env.TE_RESULT_PUBLISHER_ADDRESS
   };
-}
-
-/** True when the deployment is configured to accept private proposals at all. */
-export function isTeConfigured(env: TeEnv = readTeEnv()): boolean {
-  return Boolean(env.keypers?.trim());
 }
 
 function requireAddress(value: string | undefined, name: string): string {

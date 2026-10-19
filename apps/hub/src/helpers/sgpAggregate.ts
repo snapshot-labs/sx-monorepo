@@ -1,6 +1,10 @@
 import { SgpDigestError } from './sgpDigests';
 
-function canonicalWeight(value: unknown): number {
+/**
+ * Kept as a `bigint`: a sum of raw voting power passes 2^53 on large-supply
+ * tokens, and the keyper's signature covers the exact integer.
+ */
+function canonicalWeight(value: unknown): bigint {
   let weight: bigint;
   try {
     weight = BigInt(value as any);
@@ -12,15 +16,17 @@ function canonicalWeight(value: unknown): number {
   if (weight < 0n) {
     throw new SgpDigestError('totalAdmittedWeight: must not be negative');
   }
-  if (weight > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new SgpDigestError(
-      `totalAdmittedWeight: ${weight} exceeds the exactly-representable range; ` +
-        'this body was parsed as a double and no longer matches what was signed'
-    );
-  }
-  return Number(weight);
+  return weight;
 }
 
+/**
+ * Normalise a compressed point to lowercase `0x` hex.
+ *
+ * The quorum rule counts *byte-identical* submissions, so the stored form has to
+ * be canonical. Two keypers that agree on the key but disagree on capitalisation
+ * would otherwise never reach quorum, and the failure would look like disagreement
+ * rather than formatting.
+ */
 export function canonicalPoint(
   value: unknown,
   label: string,

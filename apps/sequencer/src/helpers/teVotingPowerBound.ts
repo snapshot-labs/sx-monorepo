@@ -36,8 +36,8 @@ export interface StrategyLike {
 /** One resolved bound, plus how it was arrived at — the log line needs both. */
 export interface VotingPowerBound {
   value: number;
-  source: 'strategies' | 'fallback';
-  /** Set when `source` is `fallback`: which strategy was not recognised. */
+  source: 'strategies' | 'fallback' | 'mixed';
+  /** Set when `source` is `fallback` or `mixed`: which strategy was not recognised. */
   unrecognised?: string;
 }
 
@@ -94,10 +94,15 @@ async function readSupply(
  * Resolve `V` for a proposal.
  *
  * Voting power is the **sum** across a proposal's strategies, so `V` is the sum of
- * their supplies. If *any* strategy is unrecognised the sum is a lower bound rather
- * than a bound, and the whole proposal falls back to `fallbackValue` — summing only
- * the recognised ones would present an under-estimate as a bound, which is the exact
- * failure this value exists to prevent.
+ * their supplies. If *any* strategy is unrecognised that sum is only a lower bound,
+ * so it is never used on its own:
+ *
+ * - none recognised: `fallbackValue`.
+ * - some recognised (a mixed space): the larger of their supply and
+ *   `fallbackValue`. A small supply keeps the fallback's full precision; a supply
+ *   past it raises `V` with it, so `s` grows and the tally stays solvable instead
+ *   of being sized for the fallback. Adding the two instead would push `V` just
+ *   past the fallback on every mixed space and halve everyone's precision for it.
  *
  * Throws `VotingPowerBoundError` when a recognised strategy cannot be read after
  * `attempts` tries. The caller should refuse to create the proposal: `V` is
@@ -118,15 +123,14 @@ export async function resolveVotingPowerBound(args: {
     return { value: fallbackValue, source: 'fallback', unrecognised: '(none)' };
   }
 
-  for (const s of strategies) {
-    if (!SUPPLY_STRATEGIES[s.name]) {
-      return { value: fallbackValue, source: 'fallback', unrecognised: s.name };
-    }
-    if (typeof s.params?.address !== 'string') {
-      // Recognised by name but missing what the read needs: treat as unrecognised
-      // rather than reaching for a different field and hoping.
-      return { value: fallbackValue, source: 'fallback', unrecognised: s.name };
-    }
+  // Recognised by name but missing what the read needs counts as unrecognised,
+  // rather than reaching for a different field and hoping.
+  const isMeasurable = (s: StrategyLike) =>
+    !!SUPPLY_STRATEGIES[s.name] && typeof s.params?.address === 'string';
+  const unrecognised = strategies.find(s => !isMeasurable(s))?.name;
+  const measurable = strategies.filter(isMeasurable);
+  if (!measurable.length) {
+    return { value: fallbackValue, source: 'fallback', unrecognised };
   }
 
   // One read per distinct (network, address): a proposal listing the same token twice
@@ -134,7 +138,7 @@ export async function resolveVotingPowerBound(args: {
   const seen = new Map<string, number>();
   let total = 0;
 
-  for (const s of strategies) {
+  for (const s of measurable) {
     const network = String(s.network ?? proposalNetwork);
     const address = String(s.params!.address);
     const decimals = SUPPLY_STRATEGIES[s.name]!.decimals
@@ -170,5 +174,12 @@ export async function resolveVotingPowerBound(args: {
     total += supply;
   }
 
+  if (unrecognised) {
+    return {
+      value: Math.max(total, fallbackValue),
+      source: 'mixed',
+      unrecognised
+    };
+  }
   return { value: total, source: 'strategies' };
 }

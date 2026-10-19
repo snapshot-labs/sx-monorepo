@@ -4,8 +4,8 @@
   "private": true,
   "description": "Serves Snapshot's private-voting state over the threshold protocol's data-layer contract, so the keypers and their coordinator can run unmodified.",
   "scripts": {
-    "lint": "bun run lint:nofix --fix",
-    "lint:nofix": "eslint . --ext .ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "bun run lint --fix",
     "typecheck": "tsc --noEmit",
     "dev": "nodemon src/index.ts",
     "build": "tsc",

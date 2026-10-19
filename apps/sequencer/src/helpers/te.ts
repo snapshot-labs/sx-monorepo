@@ -52,6 +52,9 @@ function hexToBytes(hex: string, label: string): Uint8Array {
   return arrayify(hex);
 }
 
+/**
+ * The pseudonym for a voter on a proposal: `keccak(voter ‖ proposalId)`.
+ */
 export function expectedPseudonym(voter: string, proposalId: string): string {
   const voterBytes = arrayify(voter.toLowerCase());
   // proposalId in Snapshot is a 0x-prefixed bytes32-shaped string; we hash

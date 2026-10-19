@@ -22,6 +22,10 @@
  * that normalised it to something the digest disagreed with.
  */
 
+import {
+  parseJsonPreservingBigInts,
+  stringifyPreservingBigInts
+} from '../../src/helpers/bigIntJson';
 import { canonicalAggregate } from '../../src/helpers/sgpAggregate';
 import { aggregateDigest, SgpDigestError } from '../../src/helpers/sgpDigests';
 
@@ -58,8 +62,8 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
     // Same digest — this is the premise, not the conclusion. If it ever stops
     // holding, the two are genuinely different artifacts and MIN() is moot.
     expect(digestOf(ea)).toBe(digestOf(eb));
-    expect(JSON.stringify(canonicalAggregate(ea, ELECTION))).toBe(
-      JSON.stringify(canonicalAggregate(eb, ELECTION))
+    expect(stringifyPreservingBigInts(canonicalAggregate(ea, ELECTION))).toBe(
+      stringifyPreservingBigInts(canonicalAggregate(eb, ELECTION))
     );
   });
 
@@ -67,16 +71,17 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
   // anything that is not a Python int, so quoting this field would fail every
   // aggregate read and the committee could not build decryption shares.
   it('keeps the field a JSON number, which the protocol decoder requires', () => {
-    const c = canonicalAggregate(envelope('100'), ELECTION);
-    expect(typeof c.totalAdmittedWeight).toBe('number');
-    expect(JSON.stringify(c)).toContain('"totalAdmittedWeight":100');
-    expect(JSON.stringify(c)).not.toContain('"100"');
+    const stored = stringifyPreservingBigInts(
+      canonicalAggregate(envelope('100'), ELECTION)
+    );
+    expect(stored).toContain('"totalAdmittedWeight":100');
+    expect(stored).not.toContain('"100"');
   });
 
   it('defaults a missing weight to zero, as the digest does', () => {
     const bare: any = envelope(undefined);
     delete bare.totalAdmittedWeight;
-    expect(canonicalAggregate(bare, ELECTION).totalAdmittedWeight).toBe(0);
+    expect(canonicalAggregate(bare, ELECTION).totalAdmittedWeight).toBe(0n);
     expect(digestOf({ ...bare, totalAdmittedWeight: 0 })).toBe(
       digestOf(envelope(0))
     );
@@ -89,14 +94,14 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
   // Defaulting to 0 would be a silent fork.
   it('defaults a missing scaled weight to the admitted weight, as SGP does', () => {
     const c = canonicalAggregate(envelope(100), ELECTION);
-    expect(c.totalScaledWeight).toBe(100);
+    expect(c.totalScaledWeight).toBe(100n);
   });
 
   it('keeps an explicit scaled weight distinct from the admitted weight', () => {
     const scaled: any = { ...envelope(100), totalScaledWeight: 50 };
     const c = canonicalAggregate(scaled, ELECTION);
-    expect(c.totalScaledWeight).toBe(50);
-    expect(c.totalAdmittedWeight).toBe(100);
+    expect(c.totalScaledWeight).toBe(50n);
+    expect(c.totalAdmittedWeight).toBe(100n);
     expect(digestOf(scaled)).not.toBe(digestOf(envelope(100)));
   });
 
@@ -118,20 +123,22 @@ describe('canonicalAggregate: equal digest implies equal stored text', () => {
     );
   });
 
-  // Above 2^53 the body has already been through `JSON.parse` as a double, so
-  // the digest no longer matches what the keyper signed. Refusing names the
-  // cause; rounding would store a number that is quietly wrong.
-  it('refuses a weight past the exactly-representable range', () => {
-    expect(() =>
-      canonicalAggregate(
-        envelope(BigInt(Number.MAX_SAFE_INTEGER) + 1n),
-        ELECTION
-      )
-    ).toThrow(/exceeds the exactly-representable range/);
-    // The boundary itself is fine.
-    expect(
-      canonicalAggregate(envelope(Number.MAX_SAFE_INTEGER), ELECTION)
-        .totalAdmittedWeight
-    ).toBe(Number.MAX_SAFE_INTEGER);
+  // A sum of raw voting power passes 2^53 on large-supply tokens. 2^54 + 1 is not
+  // representable as a double, so this only passes if nothing on the way rounds it:
+  // read from raw text, canonicalised, stored, and read back.
+  it('keeps a weight past 2^53 exact, from raw text to stored text', () => {
+    const weight = 2n ** 54n + 1n;
+    const raw = `{"aggregate":${stringifyPreservingBigInts(envelope(weight))}}`;
+    expect(raw).toContain(`"totalAdmittedWeight":${weight}`);
+
+    const c = canonicalAggregate(
+      parseJsonPreservingBigInts(raw).aggregate,
+      ELECTION
+    );
+    expect(c.totalAdmittedWeight).toBe(weight);
+    expect(digestOf(c)).toBe(digestOf(envelope(weight)));
+    expect(stringifyPreservingBigInts(c)).toContain(
+      `"totalAdmittedWeight":${weight}`
+    );
   });
 });

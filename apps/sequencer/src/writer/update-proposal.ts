@@ -9,6 +9,7 @@ import {
   buildCommitteeSnapshot,
   committeeColumns,
   frozenWeightedBudget,
+  getPrivateBallotError,
   parseCommitteeSnapshotLoose,
   TeCommitteeSnapshot,
   TeConfigError,
@@ -97,6 +98,22 @@ export async function verify(body): Promise<any> {
   // gate in writer/proposal.ts entirely and leaving a proposal whose key
   // generation cannot possibly finish before voting opens.
   const privacy = effectivePrivacy(space, msg.payload, proposal);
+  if (privacy === 'shutter-elgamal') {
+    let ballotError: string | undefined;
+    try {
+      ballotError = getPrivateBallotError(
+        msg.payload.type,
+        msg.payload.choices.length,
+        // The budget `action` will write: frozen at creation if already private.
+        proposal.te_sgp_config
+          ? frozenWeightedBudget(proposal.te_sgp_config)
+          : weightedBudgetFromEnv()
+      );
+    } catch (err: any) {
+      ballotError = `private voting unavailable: ${err.message}`;
+    }
+    if (ballotError) return Promise.reject(ballotError);
+  }
   if (privacy === 'shutter-elgamal' && !proposal.te_mpk) {
     const now = Math.floor(Date.now() / 1e3);
     if (proposal.start - now < MIN_DKG_LEAD_TIME_S) {
@@ -163,12 +180,9 @@ export async function action(body, ipfs): Promise<void> {
             strategies: spaceSettings?.strategies ?? [],
             proposalNetwork: String(spaceSettings?.network ?? '1'),
             snapshotBlock: Number(existing.snapshot ?? 0),
-            // Sized against the budget this proposal will actually use, matching
-            // `action()` in proposal.ts. A weighted proposal's budget is the
-            // deployment's; a basic one is 1.
-            fallbackValue: votingPowerFallback(
-              msg.payload.type === 'weighted' ? weightedBudgetFromEnv() : 1
-            )
+            // Sized for the weighted budget whatever the type, matching
+            // `action()` in proposal.ts, so a later type edit cannot force scaling.
+            fallbackValue: votingPowerFallback(weightedBudgetFromEnv())
           })
         ).value
       });

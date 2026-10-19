@@ -13,11 +13,10 @@ import { effectivePrivacy } from '../helpers/privacy';
 import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
-  assertBallotShape,
   ballotParamsColumn,
   buildCommitteeSnapshot,
   committeeColumns,
-  readTeEnv,
+  getPrivateBallotError,
   TeConfigError,
   votingPowerFallback,
   weightedBudgetFromEnv
@@ -40,16 +39,21 @@ import {
  * the author retry returns the identical number, whereas guessing low is
  * unrecoverable. The two were conflated in the original plan wording; they are
  * different failures with different right answers.
+ *
+ * The fallback is sized for the weighted budget whatever the type. `V` is frozen
+ * here but `type` stays editable until voting opens, and a fallback sized for
+ * budget 1 forces `s = 128` once the proposal is edited to weighted, which rounds
+ * every small voter to zero.
  */
 async function resolveVotingPowerBoundFor(
   space: any,
-  payload: { snapshot?: string | number; budget?: number }
+  payload: { snapshot?: string | number }
 ) {
   return resolveVotingPowerBound({
     strategies: space?.strategies ?? [],
     proposalNetwork: String(space?.network ?? '1'),
     snapshotBlock: Number(payload?.snapshot ?? 0),
-    fallbackValue: votingPowerFallback(payload?.budget ?? 1)
+    fallbackValue: votingPowerFallback(weightedBudgetFromEnv())
   });
 }
 
@@ -218,6 +222,12 @@ export async function verify(body): Promise<any> {
         `shutter-elgamal proposals must start at least ${MIN_DKG_LEAD_TIME_S}s from now to allow DKG to complete`
       );
     }
+    const ballotError = getPrivateBallotError(
+      msg.payload.type,
+      msg.payload.choices.length,
+      weightedBudgetFromEnv()
+    );
+    if (ballotError) return Promise.reject(ballotError);
     // Build the committee snapshot now, purely to reject a misconfigured
     // deployment while the author is still watching. `action` rebuilds it for
     // the actual write. A committee that fails these checks produces a proposal
@@ -239,15 +249,6 @@ export async function verify(body): Promise<any> {
         // request, so a failure there still reaches the author.
         maxTotalWeight: 1
       });
-      // The ballot's own shape is bounded too, and it depends on this proposal
-      // rather than on the deployment: a weighted proposal encodes one proof
-      // branch per (choice, budget step).
-      assertBallotShape(
-        msg.payload.choices.length,
-        msg.payload.type === 'weighted'
-          ? parseInt(readTeEnv().weightedBudget || '100', 10)
-          : 1
-      );
     } catch (err: any) {
       if (err instanceof TeConfigError) {
         log.warn(`[writer] private voting misconfigured: ${err.message}`);
@@ -460,8 +461,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     // throwing, so every proposal silently took the fallback bound and the author as
     // committee admin.
     const bound = await resolveVotingPowerBoundFor(spaceSettings, {
-      snapshot: String(proposal.snapshot),
-      budget: msg.payload.type === 'weighted' ? weightedBudgetFromEnv() : 1
+      snapshot: String(proposal.snapshot)
     });
     log.info(
       `[te-vpbound] ${proposal.id}: V=${bound.value} via ${bound.source}${

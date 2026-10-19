@@ -66,8 +66,6 @@ services:
       - --max_connections=300
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-    ports:
-      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
@@ -90,7 +88,7 @@ services:
       NETWORK: testnet
       DB_SSL: "false"
       HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
-      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
       # The hub only ever 307-redirects to this, and the party following the
       # redirect is the *browser* — /api/scores/:id is what the UI calls to finalise
       # a closed proposal's scores. So it must be an address the browser can
@@ -139,9 +137,6 @@ services:
       AUTH_SECRET: ${SEQ_AUTH_SECRET}
       WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
       LAST_CB: "1"
-      # Read at proposal creation to freeze the hub's eligibility public key, keeping
-      # the hub's private half the single source of truth.
-      HUB_URL: http://hub:3000
       # The committee, frozen onto each private proposal as it is created. Addresses
       # are configured explicitly and never discovered from a keyper's own /status —
       # discovery let a network attacker substitute an address mid-ceremony.

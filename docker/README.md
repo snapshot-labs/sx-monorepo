@@ -12,7 +12,7 @@ docker compose up -d
 
 | Service         | Port | Role                                                                 |
 | --------------- | ---- | -------------------------------------------------------------------- |
-| `mysql`         | 3306 | `snapshot_hub` + `snapshot_sequencer` (schemas auto-loaded on first boot) |
+| `mysql`         | —    | `snapshot_hub` + `snapshot_sequencer` (schemas auto-loaded on first boot) |
 | `hub`           | 3000 | GraphQL + REST API; stores ballots, committee artifacts and results    |
 | `sequencer`     | 3001 | Vote ingestion, proposal writes, and the scores mirror                 |
 | `te-data-layer` | 3002 | Translator: presents the hub to the private-voting protocol as its data layer |
@@ -103,7 +103,7 @@ explanations. Three settings cause confusing failures if they are wrong:
   HUB_PORT=3010 docker compose up -d
   ```
 
-  Overridable: `HUB_PORT`, `SEQ_PORT`, `MYSQL_PORT`, `TE_DATA_LAYER_PORT`.
+  Overridable: `HUB_PORT`, `SEQ_PORT`, `TE_DATA_LAYER_PORT`.
 
 ## Rebuilding
 

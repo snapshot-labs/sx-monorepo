@@ -3,11 +3,7 @@ import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
-import {
-  SgpAttestationError,
-  verifyAttestation
-} from '../helpers/sgpAttestation';
-import { verifyBallotSignature } from '../helpers/sgpBinding';
+import { SgpAttestationError } from '../helpers/sgpAttestation';
 import {
   isDustVotingPower,
   isWithinSgpVotingWindow,
@@ -81,6 +77,17 @@ export async function verify(body): Promise<any> {
     if (typeof msg.payload.choice !== 'object' || msg.payload.choice === null) {
       return Promise.reject('invalid choice: expected ballot object');
     }
+    try {
+      verifyBallotCredential(proposal, msg.payload.choice);
+    } catch (err: any) {
+      if (err instanceof SgpAttestationError) {
+        log.warn(`[writer] credential rejected: ${err.message}`);
+        return Promise.reject(`invalid ballot credential: ${err.message}`);
+      }
+      throw err;
+    }
+    // Checks the credential's signature and the voter's signature over the
+    // ballot (which covers the credential), as well as the ballot proofs.
     const choiceJson = JSON.stringify(msg.payload.choice);
     const result = await verifyTeBallot(
       proposal,
@@ -177,126 +184,34 @@ export async function verify(body): Promise<any> {
 
   // if (await isLimitReached(msg.space)) return Promise.reject('too much activity, please contact an admin');
 
-  // Verify the credential the voter presented; do not mint one.
-  //
-  // The sequencer used to mint here, from voting power it had just computed.
-  // That put the signature next to the component that made the claim, but it
-  // also meant `weight` and `nonce` were this service's assertions about a voter
-  // who had never seen them — and `nonce` decides which of a voter's ballots the
-  // committee counts. Credentials are now issued up front
-  // (`helpers/teAttestationIssuer`), shown to the voter, and signed by them
-  // together with the ballot. What is left here is checking that.
-  //
-  // Both signatures are required. The issuer's proves the weight was authorised;
-  // the voter's proves *this* ballot was cast with *that* credential. Either one
-  // alone leaves the pairing forgeable by whoever assembles it.
-  let attestation: TeAttestation | null = null;
-  if (proposal.privacy === 'shutter-elgamal') {
-    try {
-      attestation = await verifyBallotCredential(proposal, msg);
-    } catch (err: any) {
-      if (err instanceof SgpAttestationError) {
-        log.warn(`[writer] credential rejected: ${err.message}`);
-        return Promise.reject(`invalid ballot credential: ${err.message}`);
-      }
-      throw err;
-    }
-  }
-
-  return { proposal, vp, attestation };
+  return { proposal, vp };
 }
 
-export interface TeAttestation {
-  weight: number;
-  nonce: number;
-  signature: string;
-}
-
-// Exported for tests: the structural checks here run before any crypto, so
-// they can be exercised without standing up a valid ballot.
-export async function verifyBallotCredential(
-  proposal: any,
-  msg: any
-): Promise<TeAttestation> {
-  // `getProposal` already parses this column, so it arrives as an object;
-  // parsing it again yields the string "[object Object]" and no budget at all.
-  const teConfig =
-    typeof proposal.te_config === 'string'
-      ? jsonParse(proposal.te_config, null)
-      : proposal.te_config;
-  const budget = Number(teConfig?.budget);
-  if (!Number.isInteger(budget) || budget < 1) {
-    throw new SgpAttestationError(
-      `proposal ${proposal.id} has no usable ballot budget`
-    );
-  }
-  const envelope = jsonParse(JSON.stringify(msg.payload.choice), null);
-  const credential = envelope?.attestation;
+/**
+ * The credential checks the SDK's `verifyBallot` does not do. They run before
+ * it, because they are cheap and the proof check is not.
+ */
+export function verifyBallotCredential(proposal: any, choice: any): void {
+  const credential = choice?.attestation;
   if (!credential) {
     throw new SgpAttestationError(
       'ballot carries no credential; request one from /te_attestation first'
     );
   }
-
-  // The credential must name this ballot. Without these the committee would
-  // reject it at tally as INVALID_ATTESTATION, which is a silent loss of a vote
-  // the voter was told had been cast.
+  // The SDK only checks the credential against the ballot's own election id.
   if (
     credential.electionId?.toLowerCase() !== String(proposal.id).toLowerCase()
   ) {
     throw new SgpAttestationError('credential is for a different proposal');
   }
-  if (credential.pseudonym !== envelope.pseudonym) {
-    throw new SgpAttestationError('credential does not match this pseudonym');
-  }
-  if (credential.vk !== envelope.vk) {
-    throw new SgpAttestationError('credential does not match this ballot key');
-  }
-
-  // JSON numbers, not strings. The credential is stored verbatim inside `choice`
-  // and served to the committee from there, and SGP's decoder requires an integer
-  // (`envelopes/codecs.py::_int` rejects a str). Coercing would be worse than
-  // refusing: `BigInt("10000")` and `bindingMessage` both accept a string, so a
-  // quoted weight verifies here and is then rejected by every keyper — the ballot
-  // is excluded for a reason that looks nothing like the cause.
+  // JSON numbers, not strings: the keypers' decoder rejects a quoted integer,
+  // while BigInt() here would accept it and the ballot would be dropped at tally.
   if (!Number.isInteger(credential.weight)) {
     throw new SgpAttestationError('credential weight must be an integer');
   }
   if (!Number.isInteger(credential.nonce)) {
     throw new SgpAttestationError('credential nonce must be an integer');
   }
-
-  const weight = BigInt(credential.weight);
-  const nonce = BigInt(credential.nonce);
-
-  // The issuer's signature: the weight was authorised by us, and is inside the
-  // cap the committee enforces.
-  const ok = await verifyAttestation({
-    electionId: proposal.id,
-    pseudonym: credential.pseudonym,
-    vk: credential.vk,
-    weight,
-    nonce,
-    signature: credential.signature
-  });
-  if (!ok) throw new SgpAttestationError('credential signature is not valid');
-
-  // The voter's signature over the ballot — which since the v2 ballot message
-  // covers the credential. This is what stops a credential being moved onto a
-  // different ballot of the same voter, and what makes the weight something the
-  // voter endorsed rather than something we asserted. It used to take a second
-  // signature of its own; the ballot's own signature does it now.
-  if (!(await verifyBallotSignature({ envelope, attestation: credential }))) {
-    throw new SgpAttestationError(
-      'ballot signature does not cover this credential'
-    );
-  }
-
-  return {
-    weight: Number(weight),
-    nonce: Number(nonce),
-    signature: credential.signature
-  };
 }
 
 export async function action(body, ipfs, receipt, id, context): Promise<void> {

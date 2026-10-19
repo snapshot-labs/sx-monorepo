@@ -33,9 +33,9 @@ refreshSpacesCache();
 
 app.disable('x-powered-by');
 // The raw body is kept because JSON.parse is lossy for integers above 2^53,
-// and one payload carries them: a published tally's totals are sums over
-// weighted ballots. Rounding them would break the signature check on a
-// perfectly valid result — see helpers/bigIntJson.ts.
+// and two payloads carry them: a published tally's totals and an aggregate's
+// total admitted weight are both sums over ballots. Rounding them would break
+// the signature check on a perfectly valid artifact.
 app.use(
   express.json({
     limit: '20mb',

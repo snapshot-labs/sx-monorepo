@@ -80,15 +80,6 @@ describe('derived te_dkg_status', () => {
     }
   );
 
-  // A stored value wins, so a future writer with a more specific diagnosis is not
-  // flattened into the generic "no key in time".
-  it('prefers a stored status over the derived one', () => {
-    expect(
-      formatProposal(proposal({ te_dkg_status: 'halted_complaint' }))
-        .te_dkg_status
-    ).toBe('halted_complaint');
-  });
-
   // The boundary itself. `start` is the instant voting opens: at or before it the
   // ceremony still has time, after it the outcome is fixed.
   it('turns over at start, not before', () => {

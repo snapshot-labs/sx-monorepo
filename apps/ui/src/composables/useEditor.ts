@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/vue-query';
-import { BASIC_CHOICES } from '@/helpers/constants';
+import { BASIC_CHOICES, IS_TE_ENABLED } from '@/helpers/constants';
 import { clone, lsGet, lsSet, omit } from '@/helpers/utils';
 import { getSpaces } from '@/queries/spaces';
 import { Draft, Drafts, Privacy, Proposal, Space, VoteType } from '@/types';
@@ -157,7 +157,9 @@ export function useEditor() {
       spacePrivacies.set(
         id,
         space.privacy === 'any'
-          ? ['none', 'shutter', 'shutter-elgamal']
+          ? IS_TE_ENABLED
+            ? ['none', 'shutter', 'shutter-elgamal']
+            : ['none', 'shutter']
           : [space.privacy]
       );
       spaceDelays.set(id, space.voting_delay);

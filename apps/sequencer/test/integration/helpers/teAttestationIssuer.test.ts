@@ -2,6 +2,7 @@ import { Wallet } from '@ethersproject/wallet';
 import snapshot from '@snapshot-labs/snapshot.js';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import { resetIssuer } from '../../../src/helpers/sgpAttestation';
+import { expectedPseudonym } from '../../../src/helpers/te';
 import * as issuer from '../../../src/helpers/teAttestationIssuer';
 
 function setVp(vp: number) {
@@ -115,9 +116,7 @@ describe('issueBallotCredential', () => {
   // a request field, so it cannot be pointed at an unrelated voter.
   it('derives the pseudonym rather than accepting one', async () => {
     const r = await request();
-    expect(r.attestation.pseudonym).toBe(
-      issuer.pseudonymFor(VOTER.address, ID)
-    );
+    expect(r.attestation.pseudonym).toBe(expectedPseudonym(VOTER.address, ID));
   });
 
   it('gives a different voter a different pseudonym', async () => {
@@ -129,7 +128,7 @@ describe('issueBallotCredential', () => {
       voter: other.address
     });
     expect(r.attestation.pseudonym).not.toBe(
-      issuer.pseudonymFor(VOTER.address, ID)
+      expectedPseudonym(VOTER.address, ID)
     );
   });
 });
@@ -199,7 +198,7 @@ describe('nextRevoteNonce', () => {
   // Concurrency is the whole reason for the LAST_INSERT_ID upsert: two requests
   // handed the same nonce would leave the re-vote ordering undefined.
   it('never hands the same nonce to concurrent requests', async () => {
-    const pseudonym = issuer.pseudonymFor(VOTER.address, ID);
+    const pseudonym = expectedPseudonym(VOTER.address, ID);
     const nonces = await Promise.all(
       Array.from({ length: 8 }, () => issuer.nextRevoteNonce(ID, pseudonym))
     );
@@ -207,7 +206,7 @@ describe('nextRevoteNonce', () => {
   });
 
   it('does not regress across a restart', async () => {
-    const pseudonym = issuer.pseudonymFor(VOTER.address, ID);
+    const pseudonym = expectedPseudonym(VOTER.address, ID);
     await issuer.nextRevoteNonce(ID, pseudonym);
     await issuer.nextRevoteNonce(ID, pseudonym);
     // The counter lives in the database, not in process memory — nothing to
@@ -230,11 +229,9 @@ describe('issueBallotCredential — refusals', () => {
   it('binds the credential to the named voter, not to the caller', async () => {
     const other = new Wallet(`0x${'d0'.repeat(32)}`);
     const r = await request({ voter: other.address });
-    expect(r.attestation.pseudonym).toBe(
-      issuer.pseudonymFor(other.address, ID)
-    );
+    expect(r.attestation.pseudonym).toBe(expectedPseudonym(other.address, ID));
     expect(r.attestation.pseudonym).not.toBe(
-      issuer.pseudonymFor(VOTER.address, ID)
+      expectedPseudonym(VOTER.address, ID)
     );
   });
 

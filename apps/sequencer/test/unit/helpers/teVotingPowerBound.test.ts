@@ -101,25 +101,30 @@ describe('resolveVotingPowerBound', () => {
     expect(r.value).toBe(5000);
   });
 
-  it('falls back for the WHOLE proposal when any strategy is unrecognised', async () => {
-    // Summing only the recognised one would hand back an under-estimate dressed as a
-    // bound — the precise failure V exists to prevent.
-    const r = await resolveVotingPowerBound({
-      ...base,
-      strategies: [
-        {
-          name: 'erc20-balance-of',
-          params: { address: TOKEN_A, decimals: 18 }
-        },
-        { name: 'whitelist', params: {} }
-      ]
-    });
+  const mixed = [
+    { name: 'erc20-balance-of', params: { address: TOKEN_A, decimals: 18 } },
+    { name: 'whitelist', params: {} }
+  ];
+
+  it('keeps the fallback on a mixed space whose supply is below it', async () => {
+    // The supply alone would hand back an under-estimate dressed as a bound — the
+    // precise failure V exists to prevent.
+    const r = await resolveVotingPowerBound({ ...base, strategies: mixed });
     expect(r).toEqual({
       value: 1e12,
-      source: 'fallback',
+      source: 'mixed',
       unrecognised: 'whitelist'
     });
-    expect(calls).toHaveLength(0);
+  });
+
+  it('takes the supply on a mixed space whose supply is past the fallback', async () => {
+    supplies[TOKEN_A] = (10n ** 31n).toString(); // 1e13 tokens at 18dp
+    const r = await resolveVotingPowerBound({ ...base, strategies: mixed });
+    expect(r).toEqual({
+      value: 1e13,
+      source: 'mixed',
+      unrecognised: 'whitelist'
+    });
   });
 
   it('treats a recognised strategy with no address as unrecognised', async () => {

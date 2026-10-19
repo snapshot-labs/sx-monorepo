@@ -17,9 +17,6 @@ const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': LOCAL_HUB_URL || 'https://testnet.hub.snapshot.org/graphql'
 };
-export function getOffchainHubUrl(networkId: NetworkID): string | undefined {
-  return HUB_URLS[networkId];
-}
 export function getOffchainHubApiBase(networkId: NetworkID): string {
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl) throw new Error(`Unknown offchain network ${networkId}`);

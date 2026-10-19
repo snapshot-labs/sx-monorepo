@@ -3,7 +3,8 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   buildTeBallotEnvelope,
   buildTeWeightedBallotEnvelope,
-  pseudonymFor
+  pseudonymFor,
+  weightedVoteVector
 } from './teBallot';
 import * as TeCredential from './teCredential';
 
@@ -207,28 +208,9 @@ describe('buildTeWeightedBallotEnvelope — input validation', () => {
   });
 });
 
-describe('buildTeWeightedBallotEnvelope — largest-remainder vote vector', () => {
-  // These tests verify the vote-vector encoding without running real crypto.
-  // They exercise the proportion → integer mapping that must sum to budget.
-
-  function computeVotes(
-    choice: Record<string, number>,
-    budget: number,
-    numCandidates: number
-  ): number[] {
-    const totalWeight = Object.values(choice).reduce((a, b) => a + b, 0);
-    const exact = Array.from({ length: numCandidates }, (_, j) => {
-      const w = choice[String(j + 1)] ?? 0;
-      return (w / totalWeight) * budget;
-    });
-    const floors = exact.map(Math.floor);
-    const remaining = budget - floors.reduce((a, b) => a + b, 0);
-    const order = exact
-      .map((v, i) => ({ frac: v - Math.floor(v), i }))
-      .sort((a, b) => b.frac - a.frac);
-    for (let k = 0; k < remaining; k++) floors[order[k].i]++;
-    return floors;
-  }
+describe('weightedVoteVector — largest-remainder vote vector', () => {
+  // The real function the weighted builder uses, without running any crypto.
+  const computeVotes = weightedVoteVector;
 
   it('even split: 60/40 sums to budget', () => {
     const votes = computeVotes({ '1': 60, '2': 40 }, 100, 3);

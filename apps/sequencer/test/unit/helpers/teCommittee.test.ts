@@ -7,6 +7,7 @@ import {
   DEFAULT_TE_SOLVER_CEILING,
   deriveScale,
   frozenWeightedBudget,
+  getPrivateBallotError,
   parseKeypers,
   resolveCommittee,
   TeConfigError,
@@ -446,6 +447,29 @@ describe('frozenWeightedBudget / ballotParamsColumn', () => {
     expect(
       JSON.parse(ballotParamsColumn(['a', 'b'], 'basic', 100).te_config).budget
     ).toBe(1);
+  });
+});
+
+describe('getPrivateBallotError', () => {
+  it.each(['single-choice', 'basic', 'weighted'])('accepts %s', type => {
+    expect(getPrivateBallotError(type, 3, 100)).toBeUndefined();
+  });
+
+  it.each(['approval', 'quadratic', 'ranked-choice', 'copeland'])(
+    'refuses %s',
+    type => {
+      expect(getPrivateBallotError(type, 3, 100)).toBe(
+        `${type} voting is not supported with private voting`
+      );
+    }
+  );
+
+  it('caps weighted choices by the proof size', () => {
+    expect(getPrivateBallotError('weighted', 24, 100)).toBeUndefined();
+    expect(getPrivateBallotError('weighted', 30, 100)).toBe(
+      'private weighted voting allows at most 24 choices'
+    );
+    expect(getPrivateBallotError('basic', 30, 100)).toBeUndefined();
   });
 });
 

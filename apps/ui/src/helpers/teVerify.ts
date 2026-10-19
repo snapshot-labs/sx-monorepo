@@ -121,7 +121,7 @@ export interface AuditPayload {
   } | null;
 }
 
-/** One encrypted ballot as served by ``GET /proposal/:id/te_ballots``. */
+/** One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`). */
 export interface AuditBallot {
   /** Position in the committee's order; what `admitted`/`exclusions` refer to. */
   sequenceNumber?: number;
@@ -134,13 +134,10 @@ export interface AuditBallot {
     ciphertexts: Array<{ c1: string; c2: string }>;
     zkProof: string;
     voterSignature: string;
-    wrAttestation?: string;
   } | null;
 }
 
 export interface BallotsPayload {
-  te_mpk: string;
-  te_config: BallotVerifyParams | null;
   /**
    * The unit this proposal's tally counts in; 1 means no scaling.
    *
@@ -226,20 +223,48 @@ export async function fetchAuditPayload(
 }
 
 /**
- * Pull every individual encrypted ballot (+ the voting power it was
- * counted with) from the hub. Same ``/api`` base-URL convention as
- * ``fetchAuditPayload``.
+ * Pull every encrypted ballot from the committee's own feed, page by page.
+ *
+ * The same route, order and sequence numbers the committee tallied from, so
+ * its admitted set and exclusions line up with these ballots by construction.
+ * Pages are capped by size, which is what lets an election of any size be read.
+ * Same ``/api`` base-URL convention as ``fetchAuditPayload``.
+ *
+ * @param scale the proposal's `te_config.scale`, the unit its scores count in
  */
 export async function fetchBallotsPayload(
   apiBaseUrl: string,
-  proposalId: string
+  proposalId: string,
+  scale: number
 ): Promise<BallotsPayload> {
   const url = `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(
     proposalId
-  )}/te_ballots`;
-  const r = await fetch(url, { credentials: 'omit' });
-  if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);
-  return (await r.json()) as BallotsPayload;
+  )}/te_sgp_ballots`;
+  const ballots: AuditBallot[] = [];
+  for (;;) {
+    const r = await fetch(`${url}?start=${ballots.length}`, {
+      credentials: 'omit'
+    });
+    if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);
+    const page = (await r.json()) as { ballots: any[]; total: number };
+    for (const { ballot, sequenceNumber } of page.ballots) {
+      ballots.push({
+        sequenceNumber,
+        voter: ballot.pseudonym,
+        vp: Number(ballot.attestation?.weight ?? 0),
+        choice: {
+          electionId: ballot.electionId,
+          pseudonym: ballot.pseudonym,
+          vk: ballot.vk,
+          ciphertexts: ballot.ciphertexts,
+          zkProof: ballot.zkProof,
+          voterSignature: ballot.voterSignature
+        }
+      });
+    }
+    if (!page.ballots.length || ballots.length >= page.total) break;
+  }
+  return { scale, ballots };
 }
 
 function ctToHex(ct: Ciphertext): { c1: string; c2: string } {

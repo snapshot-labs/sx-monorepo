@@ -361,9 +361,7 @@ export type Proposal = {
   te_committee_pks?: any;
   te_threshold_t?: number | null;
   te_threshold_n?: number | null;
-  te_keyper_urls?: any;
   te_keyper_addresses?: any;
-  te_aggregate?: any;
   plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;

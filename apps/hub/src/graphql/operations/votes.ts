@@ -121,16 +121,28 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
+  // The page is chosen on keys alone, then its rows are read by primary key. A
+  // private ballot's `choice` can pass MySQL's sort buffer on its own (256 KiB by
+  // default), and sorting full rows then fails the whole query.
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
-    SELECT v.* FROM votes v ${indexHint}
+    SELECT v.voter, v.space, v.proposal FROM votes v ${indexHint}
     WHERE v.space NOT IN (SELECT id FROM spaces WHERE deleted = 1)
       AND v.cb != -3 ${queryStr}
     ORDER BY ${orderBy} ${orderDirection}, v.id ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
   try {
-    votes = await db.queryAsync(query, params);
+    const keys = await db.queryAsync(query, params);
+    if (keys.length > 0) {
+      const keyOf = (v: any) => `${v.voter}\0${v.space}\0${v.proposal}`;
+      const rows = await db.queryAsync(
+        'SELECT * FROM votes WHERE (voter, space, proposal) IN (?)',
+        [keys.map(k => [k.voter, k.space, k.proposal])]
+      );
+      const byKey = new Map(rows.map(row => [keyOf(row), row]));
+      votes = keys.map(k => byKey.get(keyOf(k))).filter(Boolean);
+    }
     votes = votes.map(vote => formatVote(vote));
   } catch (err: any) {
     capture(err, { args, context, info });

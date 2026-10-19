@@ -90,7 +90,6 @@ CREATE TABLE proposals (
   te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
   te_aggregate JSON DEFAULT NULL,
-  te_dkg_status VARCHAR(24) DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,

@@ -24,6 +24,7 @@
 
 import { Wallet } from '@ethersproject/wallet';
 import fetch from 'node-fetch';
+import { stringifyPreservingBigInts } from '../../src/helpers/bigIntJson';
 import db from '../../src/helpers/mysql';
 import { aggregateDigest } from '../../src/helpers/sgpDigests';
 
@@ -80,7 +81,7 @@ function artifact(electionId: string, tweak = 0) {
 async function submit(
   proposalId: string,
   wallet: Wallet,
-  aggregate: ReturnType<typeof artifact>
+  aggregate: Record<string, any>
 ) {
   const digest = aggregateDigest({
     electionId: proposalId,
@@ -94,7 +95,8 @@ async function submit(
   const res = await fetch(`${HOST}/api/proposal/${proposalId}/te_aggregate`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ aggregate, keyperSig })
+    // As the keyper's JSON encoder writes it: integers as exact digits.
+    body: stringifyPreservingBigInts({ aggregate, keyperSig })
   });
   return res.status;
 }
@@ -272,5 +274,20 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
 
     // The canonical artifact is unchanged by the attempt.
     expect(await canonical(CLOSED)).toMatchObject({ admitted: [0, 1] });
+  });
+
+  // A sum of raw voting power passes 2^53 on large-supply tokens. 2^54 + 1 is not a
+  // double, so the quorum only forms, and the read only returns these digits, if
+  // nothing between the request body and the response rounds it.
+  it('accepts and serves back a total admitted weight past 2^53 exactly', async () => {
+    const weight = 2n ** 54n + 1n;
+    const big = { ...artifact(CLOSED), totalAdmittedWeight: weight };
+    expect(await submit(CLOSED, KEYPERS[0], big)).toBe(204);
+    expect(await submit(CLOSED, KEYPERS[1], big)).toBe(204);
+
+    const res = await fetch(
+      `${HOST}/api/proposal/${CLOSED}/te_sgp_aggregate`
+    );
+    expect(await res.text()).toContain(`"totalAdmittedWeight":${weight}`);
   });
 });

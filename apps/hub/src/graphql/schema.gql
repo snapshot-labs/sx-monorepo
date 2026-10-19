@@ -683,7 +683,7 @@ type Proposal {
   te_keyper_addresses: Any
   "Threshold-ElGamal homomorphic ciphertext aggregate, persisted at tally start so re-finalization is replayable. Null until tally begins."
   te_aggregate: Any
-  "Threshold-ElGamal DKG status. Null while pending or after success; 'dkg_failed' when all retry attempts are exhausted."
+  "Threshold-ElGamal DKG status, derived on read. Null while pending or after success; 'dkg_failed' when voting has started without a key."
   te_dkg_status: String
   "Whether the proposal has been flagged"
   flagged: Boolean!
