@@ -76,6 +76,9 @@ jest.mock('../../src/helpers/moderation', () => {
 const mockGetSpace = jest.fn((_): any => {
   return spacesGetSpaceFixtures;
 });
+const mockGetProposal = jest.fn((space: string, id: string): any =>
+  jest.requireActual('../../src/helpers/actions').getProposal(space, id)
+);
 jest.mock('../../src/helpers/actions', () => {
   const originalModule = jest.requireActual('../../src/helpers/actions');
 
@@ -83,6 +86,7 @@ jest.mock('../../src/helpers/actions', () => {
     __esModule: true,
     ...originalModule,
     getSpace: (id: string) => mockGetSpace(id),
+    getProposal: (space: string, id: string) => mockGetProposal(space, id),
     getPremiumNetworkIds: () => ['1', '10', '137', '250']
   };
 });
@@ -200,16 +204,49 @@ describe('ingestor', () => {
 
   it('rejects when the body is too large', async () => {
     const invalidRequest = cloneWithNewMessage({
-      // Private voting raised it deliberately:
-      // one encrypted ballot's `choice` alone runs ~158 KB, so at 1e5 every private
-      // vote is rejected at ingest. Upstream's 50,000 repeats (~351 KB) sits between
-      // the two thresholds, so it stops triggering the guard here and the test
-      // resolves instead of rejecting. Keep this over 1e6, and if an upstream merge
-      // reverts it, check which threshold `ingestor.ts` is on before "fixing" it.
-      body: ' - - - '.repeat(200000)
+      body: ' - - - '.repeat(50000)
     });
 
     await expect(ingestor(invalidRequest)).rejects.toMatch('large');
+  });
+
+  // Only a vote on a private proposal may pass upstream's 1e5: its `choice` is
+  // the whole encrypted ballot. Every other message keeps the upstream limit.
+  describe('a vote above the default size limit', () => {
+    const largeVote = (size = 200000) => {
+      const request = cloneDeep(voteRequest);
+      request.body.data.message.reason = 'x'.repeat(size);
+      return request;
+    };
+
+    // The 1e6 check runs before the lookup, so a queued value could be left over.
+    afterEach(() => {
+      mockGetProposal.mockReset();
+      mockGetProposal.mockImplementation((space: string, id: string) =>
+        jest.requireActual('../../src/helpers/actions').getProposal(space, id)
+      );
+    });
+
+    it.each([
+      ['a public proposal', { privacy: '' }],
+      ['an unknown proposal', null]
+    ])('is rejected on %s', async (_label, proposal) => {
+      mockGetProposal.mockResolvedValueOnce(proposal);
+      await expect(ingestor(largeVote())).rejects.toBe('too large message');
+    });
+
+    it('passes the size check on a shutter-elgamal proposal', async () => {
+      mockGetProposal.mockResolvedValueOnce({ privacy: 'shutter-elgamal' });
+      const outcome = await ingestor(largeVote()).catch(err => err);
+      expect(outcome).not.toBe('too large message');
+    });
+
+    it('is rejected above 1e6 even on a shutter-elgamal proposal', async () => {
+      mockGetProposal.mockResolvedValue({ privacy: 'shutter-elgamal' });
+      await expect(ingestor(largeVote(1_100_000))).rejects.toBe(
+        'too large message'
+      );
+    });
   });
 
   describe('when the timestamp is invalid', () => {

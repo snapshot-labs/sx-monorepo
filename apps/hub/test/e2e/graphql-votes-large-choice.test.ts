@@ -2,10 +2,9 @@
  * The `votes` query must serve rows whose `choice` is larger than MySQL's sort
  * buffer.
  *
- * A private ballot is stored whole in `choice`, and one with five or more choices
- * passes 256 KiB, the default `sort_buffer_size`. Sorting full rows then failed
- * the whole query with ER_OUT_OF_SORTMEMORY, so the UI could not list such a vote
- * at all, including showing voters their own.
+ * A private ballot is stored whole in `choice`; with five or more choices it is
+ * above 256 KiB, the default `sort_buffer_size`. Sorting such rows fails with
+ * ER_OUT_OF_SORTMEMORY.
  */
 
 import fetch from 'node-fetch';

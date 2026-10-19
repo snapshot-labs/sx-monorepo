@@ -1,20 +1,15 @@
 /**
- * The hub client, and the status contract this service must preserve.
+ * HTTP client for the hub, the only store behind this service.
  *
- * The protocol's data-layer client maps HTTP status onto typed errors, and its
- * callers branch on those types — a coordinator treats an authorisation failure,
- * an immutability conflict and an out-of-window write completely differently. So
- * status codes here are not cosmetic: collapsing them all to 500 would make the
- * coordinator retry things it should abandon, and abandon things it should retry.
+ * Hub statuses must reach the caller unchanged. The protocol client maps them to
+ * typed errors and the coordinator decides whether to retry or give up based on
+ * them, so turning them all into 500 would break that logic:
  *
  *   404 → unknown election            (the client raises a lookup error)
  *   403 → not authorised to write
  *   409 → append-only violation / already finalised
  *   422 → write outside the permitted window or ordering
  *   400 → malformed request
- *
- * This service holds no keys and owns no storage. Everything it serves comes from
- * the hub, which is the sole store of record.
  */
 
 import fetch from 'node-fetch';
@@ -62,11 +57,8 @@ function hubBase(): string {
 }
 
 /**
- * GET from the hub, surfacing its status as-is.
- *
- * Statuses pass straight through rather than being remapped. The hub already
- * answers 404 for an unknown proposal and 503 when private voting is not
- * configured, and both mean the same thing to the caller as they do here.
+ * GET from the hub, passing its status through unchanged (for example 404 for an
+ * unknown proposal, 503 when private voting is not configured).
  */
 export async function hubGet<T>(path: string): Promise<T> {
   const url = `${hubBase()}${path}`;
@@ -77,8 +69,7 @@ export async function hubGet<T>(path: string): Promise<T> {
       headers: { accept: 'application/json' }
     });
   } catch (err: any) {
-    // The hub being unreachable is not the caller's fault, and it is retryable —
-    // 502 says exactly that, where a 500 would suggest a bug in this service.
+    // 502, not 500: an unreachable hub is retryable and not a bug here.
     logUpstream('GET', path, 502, `unreachable: ${err?.message || err}`);
     throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
   }
@@ -87,7 +78,7 @@ export async function hubGet<T>(path: string): Promise<T> {
   try {
     body = await res.json();
   } catch {
-    // A non-JSON body from an error status is still a usable signal.
+    // On an error status, a non-JSON body still gives a status-only error below.
     if (res.ok) throw new HubError('hub returned a non-JSON body', 502);
   }
 
@@ -104,16 +95,11 @@ export async function hubGet<T>(path: string): Promise<T> {
 }
 
 /**
- * POST to the hub, surfacing its status as-is.
+ * POST to the hub, passing its status through unchanged. The coordinator handles
+ * each differently: a 409 from a quorum race is harmless, while a 403 means a
+ * misconfigured committee and stops the ceremony.
  *
- * Status fidelity matters more on writes than on reads. The protocol's client maps
- * 403 to an authorisation failure, 409 to an append-only violation and 422 to an
- * out-of-window write, and the coordinator's retry policy differs for each: a 409
- * from a quorum race is benign and logged, while a 403 means a misconfigured
- * committee and should stop the ceremony. Collapsing them would make it retry what
- * it should abandon.
- *
- * A 204 carries no body, which is what the port's write methods return.
+ * Returns null for a 204 (no body), which is what the write routes expect.
  */
 export async function hubPost<T>(
   path: string,
@@ -161,13 +147,11 @@ export async function hubPost<T>(
 }
 
 /**
- * POST a body the caller has already serialised, byte for byte.
+ * POST an already-serialised body unchanged.
  *
- * Used for the published tally. Its totals can exceed what a JSON number carries
- * exactly, and they are covered by the publisher's signature — so re-parsing and
- * re-serialising here would round them and break a signature this service is not
- * even a party to. Forwarding the original text keeps this a translator rather
- * than an editor.
+ * Used for the aggregate and the result: their integers can exceed a double's
+ * exact range and are covered by a signature, so re-parsing would round them and
+ * break the signature.
  */
 export async function hubPostRaw(
   path: string,
@@ -217,7 +201,7 @@ export async function hubGetRaw(path: string): Promise<string> {
       headers: { accept: 'application/json' }
     });
   } catch (err: any) {
-    logUpstream('POST', path, 502, `unreachable: ${err?.message || err}`);
+    logUpstream('GET', path, 502, `unreachable: ${err?.message || err}`);
     throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
   }
 

@@ -1,19 +1,14 @@
 <script setup lang="ts">
 /**
- * "This tally stalled", and the admin's way out of it.
+ * Shows a stalled tally and lets an admin retry it.
  *
  * A stall means the keyper committee could not finish the count and the coordinator
- * gave up. It is recoverable but deliberately **not** self-healing: the flag is
- * persisted, so restarting the coordinator does not resume the election. Someone has
- * to look at why it failed and decide to retry — which is exactly what this button
- * is, signed by the one wallet the hub accepts for the clearing direction.
+ * gave up. The flag is stored, so restarting the coordinator does not resume the
+ * tally; an admin must retry it with a wallet signature.
  *
- * On the wording: the hub stores a boolean, not a reason. The coordinator knows
- * whether it gave up because keypers were unreachable, because they derived
- * different aggregates, or because it ran past its deadline, but it does not send
- * that along. So the notice names all three possibilities rather than asserting one
- * — telling an operator "the keypers are offline" when they in fact disagreed would
- * send them to restart healthy machines.
+ * The stall flag does not say which of the three causes happened, so the notice
+ * lists all three. The coordinator's optional reason is shown separately, as its
+ * claim.
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { fetchSgpElection, submitTallyResume } from '@/helpers/teStall';
@@ -30,12 +25,8 @@ const { auth, web3 } = useWeb3();
 
 const stalled = ref(false);
 /**
- * The coordinator's own account of the stall, when it gave one.
- *
- * Unsigned, unlike the stall flag beside it — the hub records it verbatim and
- * nothing verifies it. Rendered as the coordinator's claim rather than as fact,
- * and it drives nothing: the retry button is gated on an admin signature exactly
- * as before, whatever this says.
+ * The coordinator's reason for the stall, if it gave one. It is not signed or
+ * verified, so it is shown as the coordinator's claim and affects nothing else.
  */
 const stallReason = ref<string | null>(null);
 const busy = ref(false);
@@ -66,8 +57,7 @@ async function refresh() {
     stalled.value = state.tallyStalled;
     stallReason.value = state.tallyStallReason;
   } catch {
-    // Transient: the notice is an aid, not a source of truth. Leaving the last
-    // known state in place beats flickering it away on one failed poll.
+    // Keep the last known state rather than hiding the notice on one failed poll.
   }
 }
 
@@ -94,7 +84,7 @@ async function retry() {
 
 onMounted(() => {
   refresh();
-  // So the notice clears itself once the retry lands and the tally completes.
+  // Poll so the notice clears itself once the retried tally completes.
   timer = setInterval(refresh, 15_000);
 });
 
@@ -110,10 +100,8 @@ onBeforeUnmount(() => clearInterval(timer));
       <IH-exclamation class="size-[18px] shrink-0" />
       Tally stalled
     </div>
-    <!-- Deliberately no <p> here. Tune styles the bare element at 22px with its own
-         padding, which beats a size class on this wrapper and made the copy render
-         larger than the sibling result notices. The rest of the app avoids <p> in
-         cards for the same reason. -->
+    <!-- No <p> here: Tune styles bare <p> at 22px with its own padding, which
+         overrides the size class on this wrapper. -->
     <div class="text-skin-text text-base space-y-1">
       <div>
         The keyper committee could not complete this count, so no result has

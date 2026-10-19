@@ -1,23 +1,13 @@
 /**
- * Re-reading a JSON body without losing large integers.
+ * Parses JSON without rounding integers above 2^53.
  *
- * `JSON.parse` maps every number onto a double, so an integer above 2^53 comes
- * back rounded — silently. For most payloads that is harmless. For a published
- * tally it is not: the totals are sums over weighted ballots, they are signed by
- * the result publisher, and the signature is verified by recomputing a digest
- * over those exact integers. A rounded total produces a different digest, so the
- * hub would reject a perfectly valid result and the election could never
- * publish — with an error that points at authorisation rather than at parsing.
+ * Signed tallies and aggregates carry such integers, and a rounded value would
+ * fail the signature check. A reviver cannot help (it already sees a double), so
+ * integers of 16 or more digits are quoted in the raw text before parsing and come
+ * back as strings for `BigInt`. Shorter integers are exact as numbers.
  *
- * There is no reviver hook that can help: by the time a reviver sees a value it
- * is already a double. So the fix is to quote the oversized literals in the raw
- * text before parsing, turning them into strings the caller can hand to
- * `BigInt`. Sixteen digits is the threshold — 2^53 is sixteen digits, and
- * anything shorter is exactly representable.
- *
- * The pattern only matches a run of digits sitting where a JSON *value* can sit
- * (after `:`, `[` or `,`, and before `,`, `]` or `}`), so digits inside a string
- * — every hex field in these payloads is quoted — are left alone.
+ * Only digits in a JSON value position (after `:`, `[` or `,`, before `,`, `]` or
+ * `}`) match, so digits inside strings are left alone.
  */
 const OVERSIZED_INTEGER = /(?<=[:[,]\s*)(\d{16,})(?=\s*[,\]}])/g;
 
@@ -26,9 +16,8 @@ export function parseJsonPreservingBigInts<T = any>(raw: string): T {
 }
 
 /**
- * The writing half: `JSON.stringify`, but a `bigint` is emitted as its exact
- * digits rather than throwing, so what `parseJsonPreservingBigInts` read can be
- * stored and served back byte for byte.
+ * `JSON.stringify` that writes a `bigint` as a plain JSON number instead of
+ * throwing.
  */
 export function stringifyPreservingBigInts(value: unknown): string {
   return JSON.stringify(value, (_key, v) =>

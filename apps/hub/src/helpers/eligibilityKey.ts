@@ -1,24 +1,12 @@
 /**
- * The eligibility public key currently in use, read from the database.
+ * The eligibility public key currently in use, written to the database by the
+ * sequencer at boot.
  *
- * The hub used to hold the eligibility *private* key and mint one credential per
- * ballot on the read path. That moved to the sequencer — the component that
- * computes voting power, and so the one that should sign a claim about it — which
- * also took ~2ms of BLS per ballot off an unauthenticated public GET.
+ * The hub uses it to refuse proposals whose frozen key no longer matches, since a
+ * rotated key would otherwise produce an all-zeros tally that looks valid.
  *
- * What the hub still needs is the *public* half, for exactly one job: refusing to
- * serve a proposal whose frozen key no longer matches the key in use. That check
- * is the only thing standing between a rotated key and a legitimate-looking
- * all-zeros tally, so how the hub learns the key matters.
- *
- * It comes through the database, written by the sequencer at boot.
- *
- * **Deliberately not cached.** An earlier version memoised this for the process
- * lifetime, which was wrong: the hub outlives a sequencer restart, so after a
- * rotation it would keep comparing the old key against the old frozen key,
- * quietly pass, and reintroduce the failure above. This is a single-row primary
- * key lookup once per request, which is not worth a staleness window on a
- * security check.
+ * Not cached: the hub can outlive a sequencer restart that rotates the key, and
+ * this is a cheap single-row lookup.
  */
 
 import db from './mysql';

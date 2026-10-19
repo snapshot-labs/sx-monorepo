@@ -1,19 +1,10 @@
 /**
- * Teach snapshot.js' bundled JSON schemas about the permanent-private
- * ``shutter-elgamal`` privacy value.
+ * Adds `shutter-elgamal` to the `privacy` enums of snapshot.js' bundled space and
+ * proposal schemas, which only allow `''`, `'shutter'` (and `'any'` for spaces).
+ * Without it, `validateSchema` rejects private proposals as "wrong proposal format".
  *
- * The published ``@snapshot-labs/snapshot.js`` space / proposal schemas only
- * allow ``''`` and ``'shutter'`` (and ``'any'`` for spaces) in their
- * ``privacy`` enums. This sequencer adds a third privacy mode,
- * ``shutter-elgamal`` (threshold-ElGamal permanent private voting), which the
- * writer pipeline (``writer/proposal.ts``, ``writer/vote.ts``, ``scores.ts``)
- * already understands. Without this patch, ``validateSchema`` rejects any
- * wallet-signed proposal that opts into permanent privacy with
- * "wrong proposal format".
- *
- * ``snapshot.utils.validateSchema`` calls ``ajv.compile(schema)`` afresh on
- * every invocation, so mutating the in-memory schema objects once at startup
- * is sufficient and recompiles pick up the extended enum. This is idempotent.
+ * `validateSchema` compiles the schema on every call, so patching the objects once
+ * at startup is enough. Safe to call more than once.
  */
 import snapshot from '@snapshot-labs/snapshot.js';
 

@@ -1,28 +1,16 @@
 /**
- * Run an audit off the main thread, with progress and a way out.
+ * Runs a tally check in a Web Worker, with progress updates and `cancel()`.
+ * Cancelling terminates the worker; the check has no side effects to undo.
  *
- * Returns the promise plus a `cancel()`, because an audit is long enough that
- * "wait or reload the page" is not an acceptable pair of options. Cancelling
- * terminates the worker outright: the computation is pure and holds no locks or
- * partial writes, so there is nothing to unwind.
- *
- * Falls back to running on the main thread where `Worker` is unavailable — some
- * test environments, and any browser that fails to construct one. The fallback
- * computes exactly the same answer from the same code; it just blocks while it
- * does, so it is a correctness fallback rather than a supported mode.
+ * If `Worker` is not defined (some test environments), it runs on the main thread
+ * instead. The result is the same, but the page blocks while it runs.
  */
 
 import { verifyAll, VerifyAllResult, VerifyProgress } from './teVerify';
 import { VerifyWorkerMessage, VerifyWorkerRequest } from './teVerifyWorker';
 
-/**
- * Thrown into `result` when `cancel()` is called.
- *
- * A distinct type rather than a plain error, and rather than leaving the promise
- * pending: a caller must be able to tell "the user stopped this" from "the audit
- * failed", because only one of those is worth showing as a problem — and a promise
- * that never settles is a leak the caller cannot clean up after.
- */
+// `result` rejects with this when `cancel()` is called, so callers can tell a
+// cancel from a failed check.
 export class VerifyCancelled extends Error {
   constructor() {
     super('verification cancelled');
@@ -40,9 +28,8 @@ export function runVerify(
   onProgress?: (p: VerifyProgress) => void
 ): VerifyRun {
   if (typeof Worker === 'undefined') {
-    // The fallback owns the thread until it returns, so there is nothing to
-    // interrupt; the flag only stops a late resolve from being reported after the
-    // caller has already moved on.
+    // The main-thread run cannot be interrupted; the flag only turns its result
+    // into `VerifyCancelled` if the caller cancelled meanwhile.
     let cancelled = false;
     return {
       result: verifyAll(request, onProgress).then(r => {
@@ -55,18 +42,14 @@ export function runVerify(
     };
   }
 
-  // `type: 'module'` is required, not preferred: Vite's dev server always serves a
-  // worker entry through its ESM pipeline, so a classic worker there dies with
-  // "Cannot use import statement outside a module" no matter what `build` emits.
+  // `type: 'module'` is required because Vite's dev server serves workers as ES
+  // modules; a classic worker fails there with "Cannot use import statement outside
+  // a module".
   //
-  // The production build still emits an IIFE (Vite's `worker.format` default), so
-  // the two environments genuinely differ in how the SDK loads BLST from
-  // `/blst.js` — an Emscripten glue script that assigns a global and therefore
-  // cannot be `import()`ed. Dev takes the module-worker path (fetch + indirect
-  // eval); production takes `importScripts`. Both are supported and covered by the
-  // SDK's own tests, so the divergence is deliberate rather than an accident: dev
-  // gets a working server, production keeps the CSP-safe path and does not require
-  // `script-src 'unsafe-eval'`.
+  // The production build still emits an IIFE worker (Vite's `worker.format`
+  // default). So the SDK loads BLST from `/blst.js` differently: in dev with fetch +
+  // indirect eval, in production with `importScripts`. This is intended: production
+  // does not need `script-src 'unsafe-eval'` in the CSP.
   const worker = new Worker(new URL('./teVerifyWorker.ts', import.meta.url), {
     type: 'module'
   });

@@ -30,6 +30,8 @@ export async function action(body): Promise<void> {
     DELETE FROM te_aggregate_submissions WHERE proposal_id = ?;
     DELETE FROM te_decryption_shares WHERE proposal_id = ?;
     DELETE FROM te_results WHERE proposal_id = ?;
+    DELETE FROM te_revote_nonces WHERE proposal_id = ?;
+    DELETE FROM te_request_nonces WHERE proposal_id = ?;
     UPDATE votes SET cb = ? WHERE proposal = ?;
     UPDATE leaderboard
       SET proposal_count = GREATEST(proposal_count - 1, 0)
@@ -41,6 +43,8 @@ export async function action(body): Promise<void> {
   `;
 
   await db.queryAsync(queries, [
+    id,
+    id,
     id,
     id,
     id,

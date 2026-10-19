@@ -18,23 +18,10 @@ async function getProposal(id: string): Promise<any | undefined> {
   proposal.scores = JSON.parse(proposal.scores);
   proposal.scores_by_strategy = JSON.parse(proposal.scores_by_strategy);
   proposal.vp_value_by_strategy = JSON.parse(proposal.vp_value_by_strategy);
-  // Threshold-ElGamal columns: NULL when privacy != 'shutter-elgamal' or
-  // before DKG completion. Parse JSON fields and hex-encode the binary mpk
-  // so downstream callers see the same shape as actions.ts/getProposal.
+  // Private-voting columns (NULL on public proposals and before key generation
+  // finishes). Parsed the same way as `getProposal` in actions.ts.
   if (typeof proposal.te_config === 'string') {
     proposal.te_config = JSON.parse(proposal.te_config);
-  }
-  if (typeof proposal.te_committee_pks === 'string') {
-    proposal.te_committee_pks = JSON.parse(proposal.te_committee_pks);
-  }
-  if (typeof proposal.te_keyper_urls === 'string') {
-    proposal.te_keyper_urls = JSON.parse(proposal.te_keyper_urls);
-  }
-  if (typeof proposal.te_aggregate === 'string') {
-    proposal.te_aggregate = JSON.parse(proposal.te_aggregate);
-  }
-  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk)) {
-    proposal.te_mpk = `0x${proposal.te_mpk.toString('hex')}`;
   }
   let proposalState = 'pending';
   const ts = parseInt((Date.now() / 1e3).toFixed());
@@ -147,11 +134,8 @@ export async function updateProposalAndVotes(
 
   if (proposal.privacy === 'shutter-elgamal') {
     if (proposal.state !== 'closed') {
-      // Voting is still open: the tally stays encrypted until close, but the
-      // *number* of ballots cast is public (same as Snapshot's classic
-      // shielded `shutter` mode, which shows a live vote count while hiding
-      // the choices). Keep proposals.votes in sync so the UI doesn't show
-      // "0 votes" while ballots are arriving.
+      // While voting is open only the vote count is updated; it is public, as
+      // in `shutter` mode.
       const [{ n }] = await db.queryAsync(
         'SELECT COUNT(*) AS n FROM votes WHERE proposal = ?',
         [proposal.id]
@@ -257,36 +241,15 @@ export async function updateProposalAndVotes(
 }
 
 /**
- * Threshold-ElGamal tally mirror.
+ * Copies the committee's published result into the proposal's scores. It does
+ * not compute a tally: the keypers aggregate the ballots, the coordinator
+ * decrypts the total and publishes it to the hub's `te_results` table, and this
+ * reads that row. Returns `false` if there is no row yet, so the scheduler
+ * retries. Idempotent.
  *
- * Idempotent. Called by ``updateProposalAndVotes`` once the proposal has closed.
- *
- * **This does not tally anything.** It publishes, in Snapshot's own columns, a
- * result the committee established elsewhere:
- *
- *   1. The keypers build the weighted aggregate themselves from the ballot feed
- *      and post it signed to ``POST /api/proposal/:id/te_aggregate``, which the
- *      hub admits only on a quorum of matching digests (``sgp.ts``).
- *   2. The tally aggregator solves the discrete log — Lagrange over ``t+1``
- *      DLEQ-verified shares, then BSGS within ``budget × Σ(scaled weights)`` —
- *      and the result publisher posts the totals to ``POST /te_result``, which
- *      the hub stores in ``te_results`` behind a signature check.
- *   3. This function reads that row. No row yet means the committee has not
- *      finished: return ``false``, leave ``scores_state`` pending, and let the
- *      next scheduler tick retry.
- *
- * So ``recoverTally`` is never called here, and BSGS never runs in this process.
- * Exactly one party solves the discrete log; everyone downstream — the hub, this
- * function, and the browser audit in ``ui/helpers/teVerify`` — only *checks* what
- * that party published, which is the cheaper half of the same guarantee.
- *
- * The one piece of arithmetic that is ours is the units: ``te_results`` counts in
- * scaled units multiplied by the budget, ``proposals.scores`` in token units,
- * hence ``total × scale / budget`` below.
- *
- * ``scores_by_strategy`` is intentionally empty: per-voter strategy breakdown
- * leaks individual votes through homomorphic isolation, which is the exact
- * privacy property this mode preserves.
+ * `te_results` totals are in scaled units times the budget, so scores are
+ * `total × scale / budget`. `scores_by_strategy` is left empty because a
+ * per-strategy breakdown would reveal information about individual ballots.
  */
 async function runShutterElgamalTally(proposal: any): Promise<boolean> {
   const rows = await db.queryAsync(
@@ -304,11 +267,9 @@ async function runShutterElgamalTally(proposal: any): Promise<boolean> {
   }
 
   const budget = Number(proposal.te_config?.budget ?? 1);
-  // Totals are stored as decimal strings because they can exceed 2^53, where a
-  // JSON number stops being exact. `Number()` here is lossy at that scale and
-  // that is accepted: `scores` is a float column and the published figure is a
-  // presentation of the tally, not the artifact anyone verifies. The exact
-  // integers stay in te_results for an auditor.
+  // Totals are decimal strings because they can exceed 2^53. `Number()` loses
+  // precision there, which is fine for the float `scores` column; the exact
+  // values stay in te_results.
   const scale = Number(proposal.te_config?.scale ?? 1);
   const numericScores = totals.map(t => (Number(t) * scale) / budget);
   const total = numericScores.reduce((a, b) => a + b, 0);
@@ -323,8 +284,6 @@ async function runShutterElgamalTally(proposal: any): Promise<boolean> {
     {
       scores_state: 'final',
       scores: numericScores,
-      // Deliberately empty: a per-strategy breakdown of a private tally would
-      // narrow each ballot down to the strategies that produced it.
       scores_by_strategy: [],
       scores_total: total
     },

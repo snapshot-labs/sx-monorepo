@@ -17,7 +17,10 @@ import {
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
 import { getEligibilityKey } from '../helpers/teEligibility';
-import { resolveVotingPowerBound } from '../helpers/teVotingPowerBound';
+import {
+  resolveVotingPowerBound,
+  VotingPowerBoundError
+} from '../helpers/teVotingPowerBound';
 import { jsonParse, validateChoices } from '../helpers/utils';
 
 const MIN_DKG_LEAD_TIME_S = parseInt(
@@ -92,11 +95,9 @@ export async function verify(body): Promise<any> {
   });
   if (spaceUpdateError) return Promise.reject(spaceUpdateError);
 
-  // An update can turn a public proposal private, and this endpoint has no
-  // lead-time gate of its own. Without the check below, an author could create a
-  // proposal starting in ten seconds and then flip its privacy — bypassing the
-  // gate in writer/proposal.ts entirely and leaving a proposal whose key
-  // generation cannot possibly finish before voting opens.
+  // An update can make a public proposal private, so it needs the same checks as
+  // creation in writer/proposal.ts, including enough lead time for key generation
+  // to finish before voting opens.
   const privacy = effectivePrivacy(space, msg.payload, proposal);
   if (privacy === 'shutter-elgamal') {
     let ballotError: string | undefined;
@@ -104,7 +105,7 @@ export async function verify(body): Promise<any> {
       ballotError = getPrivateBallotError(
         msg.payload.type,
         msg.payload.choices.length,
-        // The budget `action` will write: frozen at creation if already private.
+        // The budget `action` will write: the frozen one if already private.
         proposal.te_sgp_config
           ? frozenWeightedBudget(proposal.te_sgp_config)
           : weightedBudgetFromEnv()
@@ -153,12 +154,26 @@ export async function action(body, ipfs): Promise<void> {
     flagged: +containsFlaggedLinks(msg.payload.body)
   };
 
-  // A proposal that only just became private has no committee snapshot, because
-  // creation took the public path. Write one now so it is not left in a state
-  // where the key ceremony has nothing to run against. An already-private
-  // proposal keeps the snapshot it was created with — the committee is frozen
-  // for its whole life, and re-deriving it here could silently swap the
-  // committee under a proposal mid-ceremony if env changed in between.
+  // A public proposal must not keep any private-voting state, or it would be left
+  // with a key ceremony nothing finishes.
+  if (privacy !== 'shutter-elgamal') {
+    Object.assign(proposal, {
+      te_config: null,
+      te_mpk: null,
+      te_committee_pks: null,
+      te_threshold_t: null,
+      te_threshold_n: null,
+      te_keyper_addresses: null,
+      te_aggregate: null,
+      te_sgp_config: null,
+      te_tally_stalled: 0,
+      te_tally_stall_reason: null
+    });
+  }
+
+  // A proposal that just became private has no committee snapshot yet, so build
+  // one now. An already-private proposal keeps its snapshot: the committee is
+  // fixed for the proposal's life, even if env has changed.
   let frozenSnapshot: TeCommitteeSnapshot | null = null;
   if (privacy === 'shutter-elgamal' && existing && !existing.te_sgp_config) {
     try {
@@ -166,22 +181,20 @@ export async function action(body, ipfs): Promise<void> {
         eligibilityKey: await getEligibilityKey(),
         votingStart: existing.start,
         votingEnd: existing.end,
-        // Same rule the hub applies live: the space's first admin, or the
-        // author when it lists none.
+        // Same rule as the hub: the space's first admin, or the author if none.
         adminAddress:
           (Array.isArray(spaceSettings?.admins)
             ? spaceSettings.admins.find((a: any) => typeof a === 'string' && a)
             : undefined) || existing.author,
-        // A proposal that only just turned private is being registered now, so `V`
-        // is resolved now — against the snapshot block it was *created* with, which
-        // is the block its voting power will be read at.
+        // Resolved at the proposal's snapshot block, where its voting power is
+        // read.
         maxTotalWeight: (
           await resolveVotingPowerBound({
             strategies: spaceSettings?.strategies ?? [],
             proposalNetwork: String(spaceSettings?.network ?? '1'),
             snapshotBlock: Number(existing.snapshot ?? 0),
-            // Sized for the weighted budget whatever the type, matching
-            // `action()` in proposal.ts, so a later type edit cannot force scaling.
+            // Sized for the weighted budget whatever the type, as in proposal.ts,
+            // so a later type change does not force scaling.
             fallbackValue: votingPowerFallback(weightedBudgetFromEnv())
           })
         ).value
@@ -190,7 +203,7 @@ export async function action(body, ipfs): Promise<void> {
       frozenSnapshot = snapshot;
     } catch (err: any) {
       const reason =
-        err instanceof TeConfigError
+        err instanceof TeConfigError || err instanceof VotingPowerBoundError
           ? err.message
           : 'could not reach the eligibility service';
       log.warn(`[writer] private voting unavailable on update: ${reason}`);
@@ -198,11 +211,9 @@ export async function action(body, ipfs): Promise<void> {
     }
   }
 
-  // The ballot's shape follows `choices` and `type`, and both are editable here
-  // until voting opens — so the stored copy has to follow them. A stale one is
-  // not inert: `writer/vote.ts` verifies every incoming ballot against it, so a
-  // proposal edited after creation would reject the very ballots the browser
-  // builds from its own (correct) reading of the same fields.
+  // The ballot params depend on `choices` and `type`, which can be edited here, so
+  // rebuild them. `writer/vote.ts` checks every ballot against them, so stale
+  // params would reject valid ballots.
   if (privacy === 'shutter-elgamal') {
     try {
       const committee =
@@ -212,8 +223,8 @@ export async function action(body, ipfs): Promise<void> {
         frozenWeightedBudget(existing?.te_sgp_config);
       Object.assign(
         proposal,
-        // The snapshot is the authority for both halves: an author editing `type`
-        // changes `budget`, and `scale` has to follow it.
+        // Changing `type` changes `budget`, so `scale` is recomputed from the
+        // snapshot too.
         ballotParamsColumn(
           msg.payload.choices,
           msg.payload.type,

@@ -226,9 +226,9 @@ gql(`
   }
 `);
 
-// A hub without private voting rejects a query naming the te_* fields, which
-// would blank every proposal list, so they are only asked for when enabled.
-// Both documents are static so graphql-codegen can analyse them.
+// A hub without private voting rejects queries that ask for te_* fields, so they
+// are only requested when enabled. Both queries are static so graphql-codegen can
+// read them.
 
 const PROPOSAL_QUERY_BASE = gql(`
   query Proposal($id: String!) {

@@ -22,7 +22,10 @@ import {
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
 import { getEligibilityKey } from '../helpers/teEligibility';
-import { resolveVotingPowerBound } from '../helpers/teVotingPowerBound';
+import {
+  resolveVotingPowerBound,
+  VotingPowerBoundError
+} from '../helpers/teVotingPowerBound';
 import {
   captureError,
   getQuorum,
@@ -33,17 +36,12 @@ import {
 /**
  * Resolve `V` for a space's strategies at a proposal's snapshot block.
  *
- * A read failure is **not** absorbed into the fallback: the fallback exists for
- * strategies we cannot interpret, while an RPC failure means we simply have not
- * looked yet. Since `V` is fixed by the frozen snapshot block, refusing and letting
- * the author retry returns the identical number, whereas guessing low is
- * unrecoverable. The two were conflated in the original plan wording; they are
- * different failures with different right answers.
+ * The fallback is only for strategies that cannot be read as a supply. An RPC
+ * failure throws instead, so the author can retry; the block is fixed, so a
+ * retry gives the same value.
  *
- * The fallback is sized for the weighted budget whatever the type. `V` is frozen
- * here but `type` stays editable until voting opens, and a fallback sized for
- * budget 1 forces `s = 128` once the proposal is edited to weighted, which rounds
- * every small voter to zero.
+ * The fallback is sized for the weighted budget whatever the type, because `V` is
+ * frozen here but `type` can be changed to weighted until voting opens.
  */
 async function resolveVotingPowerBoundFor(
   space: any,
@@ -120,10 +118,8 @@ async function validateSpace(space: any) {
 }
 
 /**
- * The address recorded as the config's admin key: the space's first admin, or the
- * proposal author when the space lists none. Mirrors the fallback the hub applies
- * when it decides who may resume a stalled tally, so the recorded value matches the
- * live rule as it stood at creation.
+ * The config's admin address: the space's first admin, or the author if the space
+ * lists none. Same rule the hub uses to decide who may resume a stalled tally.
  */
 function adminForConfig(space: any, author: string): string {
   const admins = Array.isArray(space?.admins) ? space.admins : [];
@@ -213,8 +209,6 @@ export async function verify(body): Promise<any> {
     return Promise.reject('not allowed to set privacy');
   }
 
-  // No `existing` on creation: a proposal that does not exist yet has no privacy
-  // to preserve, so the chain collapses to the `''` this always used.
   if (effectivePrivacy(space, msg.payload) === 'shutter-elgamal') {
     const now = Math.floor(Date.now() / 1e3);
     if (msg.payload.start - now < MIN_DKG_LEAD_TIME_S) {
@@ -228,25 +222,16 @@ export async function verify(body): Promise<any> {
       weightedBudgetFromEnv()
     );
     if (ballotError) return Promise.reject(ballotError);
-    // Build the committee snapshot now, purely to reject a misconfigured
-    // deployment while the author is still watching. `action` rebuilds it for
-    // the actual write. A committee that fails these checks produces a proposal
-    // whose key generation can never finish, which would otherwise surface
-    // minutes later as an unexplained terminal failure with no author feedback.
+    // Build the committee snapshot only to reject a misconfigured committee with a
+    // clear error. `action` builds the one that is stored.
     try {
       await buildCommitteeSnapshot({
         eligibilityKey: await getEligibilityKey(),
         votingStart: parseInt(msg.payload.start),
         votingEnd: parseInt(msg.payload.end),
         adminAddress: adminForConfig(space, body.address),
-        // A placeholder: `verify` only proves the committee is well-formed, and the
-        // real bound is resolved once in `action`.
-        //
-        // Deliberately *not* resolved here as well. This path is synchronous in
-        // front of the author, and `resolveVotingPowerBound` makes live RPC calls
-        // with retries — putting them here makes proposal validation block on chain
-        // latency, and doubles the reads for no gain. `action` runs inside the same
-        // request, so a failure there still reaches the author.
+        // Placeholder. The real bound needs RPC calls, so it is resolved only once,
+        // in `action`, which runs in the same request.
         maxTotalWeight: 1
       });
     } catch (err: any) {
@@ -450,19 +435,22 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     cb: CB.PENDING_SYNC
   };
 
-  // Freeze the threshold committee onto the row. This is the protocol's single
-  // config write — proposal creation *is* its registration event — so nothing
-  // downstream ever rewrites these columns. `verify` already proved the snapshot
-  // builds, so a throw here is a genuine fault and must abort the insert rather
-  // than leave a private proposal with no committee.
+  // Freeze the committee onto the row; nothing rewrites these columns later.
+  // `verify` already built a snapshot, so an error here is unexpected and aborts
+  // the insert.
   if (privacy === 'shutter-elgamal') {
-    // `spaceSettings`, not `space`: in `action` the latter is `msg.space`, a bare id
-    // string. Reading `.strategies`/`.admins` off it yields undefined rather than
-    // throwing, so every proposal silently took the fallback bound and the author as
-    // committee admin.
-    const bound = await resolveVotingPowerBoundFor(spaceSettings, {
-      snapshot: String(proposal.snapshot)
-    });
+    // `spaceSettings`, not `space`: here `msg.space` is only the space id.
+    let bound;
+    try {
+      bound = await resolveVotingPowerBoundFor(spaceSettings, {
+        snapshot: String(proposal.snapshot)
+      });
+    } catch (err: any) {
+      // A supply read failed every retry; return a readable error, not a 500.
+      if (!(err instanceof VotingPowerBoundError)) throw err;
+      log.warn(`[writer] private voting unavailable: ${err.message}`);
+      return Promise.reject(`private voting unavailable: ${err.message}`);
+    }
     log.info(
       `[te-vpbound] ${proposal.id}: V=${bound.value} via ${bound.source}${
         bound.unrecognised ? ` (unrecognised: ${bound.unrecognised})` : ''
@@ -478,12 +466,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     Object.assign(
       proposal,
       committeeColumns(snapshot),
-      // Without this the proposal has a committee and a key but no ballot shape,
-      // so the browser refuses to build a ballot and ingest refuses to verify
-      // one — a proposal that looks ready and cannot be voted on.
-      //
-      // The budget comes from the snapshot rather than the environment, so the
-      // two copies of it cannot describe different ballots later.
+      // Ballot params, needed to build and verify ballots. The budget comes from
+      // the snapshot, not env, so the two always match.
       ballotParamsColumn(
         msg.payload.choices,
         msg.payload.type,

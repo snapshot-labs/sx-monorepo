@@ -109,7 +109,6 @@ CREATE TABLE proposals (
   te_committee_pks JSON DEFAULT NULL,
   te_threshold_t INT DEFAULT NULL,
   te_threshold_n INT DEFAULT NULL,
-  te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
   te_aggregate JSON DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,

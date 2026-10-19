@@ -71,7 +71,7 @@ key that owns it: the hub and sequencer's own secrets, the coordinator's signing
 and relay token, and the eligibility issuer's key. The file is `chmod 600` and
 gitignored.
 
-**This is the step that used to go wrong.** One address is written in three places —
+**Why one script writes them all.** One address is written in three places —
 `COORDINATOR_SIGNING_KEY` in `.env`, `TE_RESULT_PUBLISHER_ADDRESS` beside it, and
 `COORDINATOR_IDENTITY` in every keyper's env — and when they drift the failure is an
 authorisation error naming neither side, hours later, on a proposal whose ballots are
@@ -84,7 +84,15 @@ this applies to a first run, or after you delete `.env`:
   and use an injected wallet like MetaMask.
 - **`TE_SOLVER_CEILING`** starts at `1e12`, which suits roughly a 0.5 GB coordinator.
   It decides every proposal's `scale`, so it is a statement about your hardware — see
-  the RAM table in `.env.example` before changing it.
+  the RAM table in [Coordinator sizing](README.md#coordinator-sizing--what-a-tally-costs)
+  before changing it.
+
+In a real deployment, also set **`SEQUENCER_PUBLIC_URL`** to the sequencer's public
+URL. The hub redirects `/api/scores/:id` there, and it is the *browser* that follows
+the redirect to finalise a closed proposal's scores. The default,
+`http://localhost:3001`, only works when the browser runs on this machine. A
+container-internal name like `http://sequencer:3001` fails silently in the browser,
+and every closed proposal stays on "Finalizing results".
 
 **`TE_KEYPERS` is carried, not generated.** Those URLs come from the people who
 operate the keypers; the script cannot mint them. Put the URLs they give you in
@@ -146,8 +154,9 @@ before you start:
 
 ### 1c. The UI — `sx-monorepo/apps/ui/.env`
 
-Private voting is off in the UI unless `VITE_TE_ENABLED=true`. Set `VITE_TE_ENABLED=false` to `true` and add the two
-local URLs, leaving the other keys as they are:
+Private voting is off in the UI unless `VITE_TE_ENABLED=true`. Change
+`VITE_TE_ENABLED=false` to `true` and add the two local URLs, leaving the other keys
+as they are:
 
 ```bash
 VITE_TE_ENABLED=true
@@ -235,9 +244,24 @@ done
 docker compose stop
 ```
 
-`stop`, not `down`: MySQL's data and each keyper's encrypted share volume survive,
-so the next start resumes the same elections. Use `down -v` only for a clean slate,
-which permanently destroys every share and therefore every undecrypted tally.
+`stop`, not `down`: MySQL's data and each keyper's encrypted shares survive, so the
+next start resumes the same elections.
+
+**For a clean slate**, run `docker compose down && rm -rf mysql-data` here and delete
+each keyper's state directory. MySQL's data is the `./mysql-data` folder (a bind
+mount, not a volume), so `down -v` does not remove it. A wipe cannot be undone: the
+ballots are encrypted under per-election keys, and without the shares no
+undecrypted tally can ever be recovered. The schemas are loaded again on the next
+start.
+
+**After changing application code**, rebuild: `docker compose build && docker
+compose up -d`. `up` does not rebuild the image, so without the build the containers
+keep running the old code and a fix looks deployed when it is not.
+
+**If a host port is already in use**, override only that one, for example
+`HUB_PORT=3010 docker compose up -d`. The overridable ports are `HUB_PORT`,
+`SEQ_PORT`, `TE_DATA_LAYER_PORT` and `COORDINATOR_PORT`. Containers always reach each
+other on the fixed internal ports.
 
 ---
 
@@ -314,7 +338,7 @@ If you would rather not deal with token balances, swap the `strategies` array fo
 JSON_OBJECT('symbol','TST','value',100)))` — `ticket` gives every wallet the same
 fixed power, so any account can vote. It is not a token strategy, so the sequencer
 cannot read a supply from it and falls back to a derived bound; see
-[Weight scaling](docs/private-voting/README.md#weight-scaling--the-units-a-proposal-counts-in).
+[Weight scaling](README.md#weight-scaling--the-units-a-proposal-counts-in).
 
 ### 3c. Raise the proposal limits
 
@@ -485,8 +509,8 @@ done
 curl -s localhost:8101/status | python3 -m json.tool
 ```
 
-The notice names three possible causes and asserts none, because the flag stored is
-only a boolean. Which one it actually was is in the coordinator's log:
+The notice lists three possible causes and, if the coordinator gave one, shows its
+reason. The full story is in the coordinator's log:
 
 ```bash
 docker logs sx-monorepo-coordinator-1 2>&1 | grep abandoned
@@ -501,19 +525,23 @@ docker logs sx-monorepo-coordinator-1 2>&1 | grep abandoned
 | `Retry tally` missing on a stalled proposal | the connected wallet is not an admin of the proposal's space (step 3 sets that list) |
 | Keypers unreachable from the coordinator | on Linux, `host.docker.internal` needs `--add-host=host.docker.internal:host-gateway` |
 | UI shows no space | step 3 did not run, or you are on the wrong URL — it must be the `s-tn:` prefix |
+| Closed proposal stuck on "Finalizing results" | the browser cannot reach `SEQUENCER_PUBLIC_URL` (step 1a). `curl -sL localhost:3000/api/scores/<id>` should return `{"result":true}` |
+| `TE_KEYPERS entry "…" looks like "address@url"` | `TE_KEYPERS` takes URLs only; addresses are read from each keyper's `/status` |
+| Committee writes rejected as `not_a_registered_keyper` | the signer is not in the proposal's frozen committee — usually a keyper rotated its key after the proposal was created. The frozen config never changes |
+| A fix you made does not take effect | the image was not rebuilt; see "After changing application code" in step 2 |
 
 ## Where to read more
 
-The design reasoning lives next to the code it governs, in the file headers — each
-of these explains not just what it does but which failure it is shaped around:
+The design, security model and sizing are in [README.md](README.md). For the code,
+start with these files:
 
 | File | Covers |
 |---|---|
-| `apps/sequencer/src/helpers/teCommittee.ts` | how a committee is resolved from URLs and frozen onto a proposal, and why addresses are not configured |
-| `apps/hub/src/helpers/sgpDigests.ts` | the write-authorisation digests, and the encoding mistakes that produce valid-looking signatures nobody can verify |
-| `apps/hub/src/te.ts` | the public audit surface, and why the writes moved out of it |
-| `apps/sequencer/src/helpers/teTallyScheduler.ts` | which proposals the tally loop acts on, and the gate that keeps public ones out |
-| `apps/sequencer/src/writer/delete-proposal.ts` | deleting a private proposal, and the committee artifacts that must go with it |
+| `apps/sequencer/src/helpers/teCommittee.ts` | how a committee is resolved from URLs and frozen onto a proposal |
+| `apps/hub/src/helpers/sgpDigests.ts` | the digests keypers and role keys sign their writes over, which must match the protocol byte for byte |
+| `apps/hub/src/te.ts` | the public, read-only audit routes |
+| `apps/sequencer/src/helpers/teTallyScheduler.ts` | how published tallies are copied into the scores of closed private proposals |
+| `apps/sequencer/src/writer/delete-proposal.ts` | deleting a private proposal, and the committee artifacts deleted with it |
 | `apps/ui/src/helpers/sgpRequest.ts` | the digest the admin's retry is signed over |
 
 For the protocol itself — the coordinator, the keypers, and the port contract this

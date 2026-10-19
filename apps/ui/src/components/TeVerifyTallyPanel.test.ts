@@ -5,10 +5,10 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as teVerify from '@/helpers/teVerify';
 import TeVerifyTallyPanel from './TeVerifyTallyPanel.vue';
 
-// The cryptography is not under test here: it is stubbed so each case can hand
-// the panel exactly the verification outcome it should report.
+// The crypto is stubbed so each test can choose the verification result.
 const fetched = vi.hoisted(() => ({ audit: {} as any, ballots: {} as any }));
-const outcome = vi.hoisted(() => ({ value: {} as any }));
+const outcome = vi.hoisted(() => ({ value: {} as any, pending: false }));
+const cancel = vi.hoisted(() => vi.fn());
 
 vi.mock('@/helpers/teVerify', async importOriginal => ({
   ...(await importOriginal<typeof teVerify>()),
@@ -20,8 +20,10 @@ vi.mock('@/helpers/teVerify', async importOriginal => ({
 vi.mock('@/helpers/teVerifyClient', () => ({
   VerifyCancelled: class extends Error {},
   runVerify: () => ({
-    cancel: () => {},
-    result: Promise.resolve(outcome.value)
+    cancel,
+    result: outcome.pending
+      ? new Promise(() => {})
+      : Promise.resolve(outcome.value)
   })
 }));
 
@@ -85,37 +87,37 @@ async function verify(wrapper: ReturnType<typeof setup>) {
 }
 
 describe('TeVerifyTallyPanel', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    outcome.pending = false;
+  });
+
+  // Verified only when the totals check out, agree with the published scores,
+  // the recomputed aggregate matches and every admitted ballot was found.
+  it.each([
+    ['every check agrees', { scores: [64, 0] }, true],
+    ['the totals disagree with the scores', { scores: [0, 64] }, false],
+    [
+      'the recomputed aggregate does not match',
+      { scores: [64, 0], aggregateMatches: false },
+      false
+    ],
+    [
+      'the admitted ballots could not all be resolved',
+      { scores: [64, 0], admittedSetResolved: false },
+      false
+    ]
+  ])('when %s, verified is %s', async (_label, opts, isVerified) => {
+    const wrapper = setup(opts);
+    await verify(wrapper);
+    expect(wrapper.text().includes(VERIFIED)).toBe(isVerified);
+  });
 
   it('shows totals in voting power, applying the scale', async () => {
     const wrapper = setup({ scores: [64, 0] });
     await verify(wrapper);
     expect(wrapper.text()).toContain('64.00');
     expect(wrapper.text()).not.toContain('1.00');
-  });
-
-  it('is not verified when the totals disagree with the published scores', async () => {
-    const wrapper = setup({ scores: [0, 64] });
-    await verify(wrapper);
-    expect(wrapper.text()).not.toContain(VERIFIED);
-  });
-
-  it('is not verified when the recomputed aggregate does not match', async () => {
-    const wrapper = setup({ scores: [64, 0], aggregateMatches: false });
-    await verify(wrapper);
-    expect(wrapper.text()).not.toContain(VERIFIED);
-  });
-
-  it('is not verified when the admitted ballots could not all be resolved', async () => {
-    const wrapper = setup({ scores: [64, 0], admittedSetResolved: false });
-    await verify(wrapper);
-    expect(wrapper.text()).not.toContain(VERIFIED);
-  });
-
-  it('is verified when every check agrees', async () => {
-    const wrapper = setup({ scores: [64, 0] });
-    await verify(wrapper);
-    expect(wrapper.text()).toContain(VERIFIED);
   });
 
   it('names each keyper by its own address', async () => {
@@ -129,5 +131,16 @@ describe('TeVerifyTallyPanel', () => {
     // Keyper indices are 1-based: keyper 1 is ADDRESSES[0], keyper 2 is ADDRESSES[1].
     expect(text).toContain(ADDRESSES[0].slice(0, 6));
     expect(text).not.toContain(ADDRESSES[2].slice(0, 6));
+  });
+
+  // Leaving the page must stop the worker, so verifying again does not start a
+  // second one.
+  it('stops a running verification when the panel is unmounted', async () => {
+    const wrapper = setup({ scores: [64, 0] });
+    outcome.pending = true;
+    await verify(wrapper);
+    expect(cancel).not.toHaveBeenCalled();
+    wrapper.unmount();
+    expect(cancel).toHaveBeenCalledTimes(1);
   });
 });

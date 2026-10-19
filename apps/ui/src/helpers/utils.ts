@@ -631,11 +631,9 @@ export function getChoiceWeight(
   return isNaN(percent) ? 0 : percent;
 }
 
-// For threshold-ElGamal (`shutter-elgamal`) votes the stored `choice` is an
-// encrypted ballot envelope ({ vk, ciphertexts, zkProof, ... }) that is NEVER
-// decrypted at the individual level — only the homomorphic sum is. Render a
-// short, honest preview of the underlying ciphertext instead of trying to map
-// it onto choice labels (which produces "NaN% for undefined").
+// For `shutter-elgamal` votes the stored `choice` is an encrypted ballot envelope
+// ({ vk, ciphertexts, zkProof, ... }). Individual ballots are never decrypted, so
+// show a short preview of the ciphertext instead of choice labels.
 export function getEncryptedChoicePreview(choice: Choice): string {
   const envelope = choice as Record<string, any> | null;
   let hex: string | undefined;

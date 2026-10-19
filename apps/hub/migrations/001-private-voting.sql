@@ -27,7 +27,6 @@ ALTER TABLE proposals
   ADD COLUMN te_committee_pks JSON DEFAULT NULL,
   ADD COLUMN te_threshold_t INT DEFAULT NULL,
   ADD COLUMN te_threshold_n INT DEFAULT NULL,
-  ADD COLUMN te_keyper_urls JSON DEFAULT NULL,
   ADD COLUMN te_keyper_addresses JSON DEFAULT NULL,
   ADD COLUMN te_aggregate JSON DEFAULT NULL,
   ADD COLUMN te_sgp_config JSON DEFAULT NULL,

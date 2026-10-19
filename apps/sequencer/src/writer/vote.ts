@@ -59,21 +59,17 @@ export async function verify(body): Promise<any> {
       return Promise.reject('invalid choice');
     }
   } else if (proposal.privacy === 'shutter-elgamal') {
-    // The committee re-checks the voting window at tally time against the frozen
-    // config, and its window is half-open where Snapshot's is closed. Adopt SGP's
-    // boundary here so a vote cannot be accepted now and excluded then — see
-    // helpers/te.ts for what that costs and why the alternative is worse.
+    // Uses the committee's half-open window (`start <= t < end`), not Snapshot's
+    // closed one, so no vote is accepted here that the tally would exclude.
     if (!isWithinSgpVotingWindow(msgTs, proposal.start, proposal.end)) {
       return Promise.reject('not in voting window');
     }
     if (msg.payload.reason) {
       return Promise.reject('reason not allowed with shutter-elgamal');
     }
-    // The voter ships the encrypted ballot as a JSON object under
-    // ``choice`` (the same shape ``buildBallot`` produces in the SDK,
-    // serialised with all bytes as 0x-hex). Verify it now so we never
-    // persist a ciphertext the tally would later reject. See
-    // helpers/te.ts for the auth model.
+    // `choice` is the encrypted ballot: the SDK's `buildBallot` output with all
+    // bytes as 0x-hex. It is verified now so nothing is stored that the tally
+    // would reject.
     if (typeof msg.payload.choice !== 'object' || msg.payload.choice === null) {
       return Promise.reject('invalid choice: expected ballot object');
     }
@@ -93,9 +89,6 @@ export async function verify(body): Promise<any> {
       proposal,
       body.address.toLowerCase(),
       choiceJson,
-      // The credential is inside the ballot and covered by its signature, so the
-      // issuer's key is needed to check it here rather than a caller-supplied
-      // predicate.
       await getEligibilityKey()
     );
     if (!result.ok) {
@@ -159,10 +152,8 @@ export async function verify(body): Promise<any> {
       { url: scoreAPIUrl }
     );
     if (vp.vp === 0) return Promise.reject('no voting power');
-    // Private ballots are weighted by an integer, so anything under 0.5 would be
-    // counted as zero and dropped from the feed without ever reaching the
-    // committee. Refuse it here so the voter is told, rather than shown a cast
-    // vote that silently does not count.
+    // Private ballots use an integer weight, so voting power under 0.5 would
+    // count as zero and be dropped. Refuse it so the voter is told.
     if (proposal.privacy === 'shutter-elgamal' && isDustVotingPower(vp.vp)) {
       return Promise.reject(
         'voting power too low for a private proposal, must be at least 0.5'
@@ -204,13 +195,18 @@ export function verifyBallotCredential(proposal: any, choice: any): void {
   ) {
     throw new SgpAttestationError('credential is for a different proposal');
   }
-  // JSON numbers, not strings: the keypers' decoder rejects a quoted integer,
-  // while BigInt() here would accept it and the ballot would be dropped at tally.
+  // Must be JSON numbers: the keypers reject a quoted integer, which BigInt()
+  // here would accept.
   if (!Number.isInteger(credential.weight)) {
     throw new SgpAttestationError('credential weight must be an integer');
   }
   if (!Number.isInteger(credential.nonce)) {
     throw new SgpAttestationError('credential nonce must be an integer');
+  }
+  // `scheme` is not signed, and keypers reject a whole page of ballots on any
+  // other value, so one bad vote would stop the tally. Missing means this scheme.
+  if ((credential.scheme ?? 'ATTESTATION_V1') !== 'ATTESTATION_V1') {
+    throw new SgpAttestationError('unsupported credential scheme');
   }
 }
 
@@ -245,10 +241,8 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
     vp_state: vpState,
     vp_value: 0,
     cb: CB.PENDING_COMPUTE
-    // No credential columns. The credential lives inside
-    // `choice`, which is the artifact the EIP-712 signature covers, and the hub's
-    // feed serves them from there. A scalar copy beside it would be a second,
-    // unsigned source for bytes the committee verifies a signature over.
+    // No separate credential columns: the credential is stored inside `choice`,
+    // which the EIP-712 signature covers.
   };
 
   // Check if voter already voted
@@ -256,6 +250,16 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
     'SELECT id, created FROM votes WHERE voter = ? AND proposal = ? AND space = ? ORDER BY created DESC LIMIT 1',
     [voter, proposalId, msg.space]
   );
+
+  // Checked again: verification and pinning can take long enough to pass `end`,
+  // and the committee may have already summed the ballots, so the vote would
+  // never be counted.
+  if (
+    context.proposal.privacy === 'shutter-elgamal' &&
+    Math.floor(Date.now() / 1e3) >= Number(context.proposal.end)
+  ) {
+    return Promise.reject('not in voting window');
+  }
 
   // Reject vote with later timestamp
   if (votes[0]) {
@@ -287,9 +291,6 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
         params.vp,
         params.vp_by_strategy,
         params.vp_state,
-        // `choice` above carries the credential and the binding, so a re-vote
-        // replaces them with the ballot they belong to in one statement — there
-        // is no separate credential to leave stale.
         voter,
         proposalId,
         msg.space,

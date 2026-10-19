@@ -1,40 +1,27 @@
 /**
- * Client-side tally audit.
+ * Checks a private tally in the browser.
  *
- * Fetches the hub's public bytes — encrypted ballots, the committee aggregate,
- * the decryption shares, the proposal's TE configuration — and re-derives the
- * result from them locally, so an auditor confirms the published scores without
- * trusting the party that published them.
+ * Uses the hub's public data (encrypted ballots, the committee's aggregate, the
+ * decryption shares and the proposal's TE config) to confirm the published scores
+ * without trusting whoever published them. Two steps:
  *
- * Two stages, both independent of the committee:
+ *   1. `aggregateBallots` adds up the encrypted ballots, each weighted by its voting
+ *      power, and compares the sum to the aggregate the keypers signed. It also
+ *      computes `derivedBound = budget × Σ(weights it counted)`.
+ *   2. `verifyTally` checks every share's DLEQ proof, combines a quorum of shares
+ *      into τ per candidate, and checks each published total with
+ *      `total · P₂ == τ`.
  *
- *   1. ``aggregateBallots`` re-sums the encrypted ballots (each scaled by its
- *      voting power) and compares the result to the aggregate the keypers signed.
- *      This is the step that ties the tally to ballots actually cast, and it is
- *      also where the client establishes ``derivedBound = budget x Σ(weights it
- *      counted itself)``.
+ * The client never solves the discrete log (it does not call the SDK's
+ * `recoverTally`). The search is O(√bound) in time and memory, and this WASM build
+ * aborts above a bound of about 2.5e9, which a 1,000-voter weighted proposal can
+ * reach. A wrong published total always fails the check.
  *
- *   2. ``verifyTally`` verifies every share's DLEQ proof, Lagrange-combines the
- *      quorum subset into a τ per candidate, and checks each published total by
- *      **multiplication**: `total · P₂ == τ`. See that function for why this is
- *      exactly as conclusive as searching for the discrete log, and why the range
- *      and sum checks around it are load-bearing rather than belt-and-braces.
+ * Everything is in scaled units, so this checks that the committee counted the
+ * ballots correctly, not that the proposal's `scale` was a good choice.
  *
- * **The client never solves the discrete log.** It does not call the SDK's
- * ``recoverTally``, and it deliberately refuses to recover a result the committee
- * has not published: search is O(√bound) in time *and* memory, and this WASM build
- * aborts above bound ~2.5e9 — which a 1,000-voter weighted proposal exceeds. The
- * committee supplies a candidate answer; a wrong one fails with certainty.
- *
- * **What this does not check.** Everything here is in *scaled* units and is
- * self-consistent by construction, so an audit passes whether or not the
- * proposal's `scale` was chosen sensibly. This answers "did the committee tally
- * the ballots honestly?", never "was this proposal configured correctly?" — that
- * belongs to proposal creation (see H12/H13 in the weight-scaling plan).
- *
- * Returned value: the per-candidate integer tallies plus the outcome of each
- * check. Comparison to the proposal's published scores is done by the calling
- * component so the UI can highlight a mismatch in the right place.
+ * The caller compares the tallies to the proposal's published scores, so the UI
+ * can show a mismatch in the right place.
  */
 import { arrayify } from '@ethersproject/bytes';
 import { keccak256 } from '@ethersproject/keccak256';
@@ -61,11 +48,9 @@ function u16BE(n: number): Uint8Array {
 }
 
 /**
- * Deterministic short fingerprint of one or more hex strings (e.g. a master
- * public key, or the concatenation of an aggregate's ciphertexts). Used by the
- * UI's "engine-room" inspector so a human can eyeball that two parties refer to
- * the same cryptographic object without printing 96-byte blobs. This is a
- * display aid only. The trust-bearing checks are the ZK/DLEQ verifications.
+ * Short keccak256 fingerprint of one or more hex strings (for example a master
+ * public key, or an aggregate's ciphertexts), so the UI can show them for visual
+ * comparison. Display only; it is not part of any check.
  */
 export function fingerprintHex(parts: string[]): string {
   const joined = parts.map(p => p.replace(/^0x/, '')).join('');
@@ -107,12 +92,9 @@ export interface AuditPayload {
     proof_z: string;
   }>;
   /**
-   * The committee's published result, or `null` before one exists.
-   *
-   * `totals` are decimal **strings**, deliberately: a tally can exceed 2^53, past
-   * which a JSON number stops being the integer the keypers decrypted, and the
-   * check below is an exact group equality — a value off by one rounding step
-   * fails outright rather than nearly passing.
+   * The committee's published result, or `null` before there is one. `totals` are
+   * decimal strings because a tally can exceed 2^53, which a JSON number cannot
+   * hold exactly.
    */
   te_result?: {
     totals: string[];
@@ -123,7 +105,7 @@ export interface AuditPayload {
 
 /** One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`). */
 export interface AuditBallot {
-  /** Position in the committee's order; what `admitted`/`exclusions` refer to. */
+  /** Position in the committee's order; `admitted` and `exclusions` refer to it. */
   sequenceNumber?: number;
   voter: string;
   vp: number;
@@ -139,11 +121,8 @@ export interface AuditBallot {
 
 export interface BallotsPayload {
   /**
-   * The unit this proposal's tally counts in; 1 means no scaling.
-   *
-   * Applied here exactly as the committee applies it, or the recomputed aggregate
-   * will not match and an honest committee is reported as having published a false
-   * one.
+   * The unit this proposal's tally counts in; 1 means no scaling. Must be applied
+   * exactly as the committee applies it, or the recomputed aggregate will not match.
    */
   scale?: number | null;
   ballots: AuditBallot[];
@@ -153,9 +132,8 @@ export interface BallotAggregateResult {
   /** Total ballots returned by the hub. */
   total: number;
   /**
-   * Ballots that actually contributed weight. Below `total` when a ballot rounds
-   * to zero voting power, and zero for an election nobody voted in — which is a
-   * legitimate outcome, not a failed audit.
+   * Ballots that added weight. Lower than `total` when ballots are not admitted or
+   * round to zero weight; 0 when nobody voted, which is not a failure.
    */
   contributing: number;
   /** Recomputed vp-weighted aggregate equals the published aggregate. */
@@ -163,52 +141,44 @@ export interface BallotAggregateResult {
   exclusions: Array<{ sequenceNumber: number; reason: string }>;
   admittedSetResolved: boolean;
   /**
-   * Ballots whose weight rounds to zero at this proposal's scale: admitted and
-   * recorded, but contributing nothing. Empty unless `scale > 1`, which is itself
-   * rare.
+   * Admitted ballots whose weight rounds to zero at this proposal's scale. Empty
+   * unless `scale > 1`.
    */
   scaledToZero: Array<{ voter: string; vp: number }>;
   /**
-   * Σ of the weights this client actually counted.
-   *
-   * Derived here rather than read from the committee's artifact on purpose: it is
-   * what bounds the published totals, and a bound taken from the same party whose
-   * totals are being checked would check nothing.
+   * Sum of the weights this client counted. It bounds the published totals, so it
+   * must be computed here, not taken from the committee.
    */
   totalWeight: bigint;
 }
 
 /**
- * Compressed encoding of the G2 point at infinity: the compression and infinity
- * bits set, then zeros. It is what a sum over no ciphertexts equals, and what the
- * keypers publish for every candidate in an election with no admitted ballots.
+ * Compressed G2 point at infinity (compression and infinity bits set, then zeros).
+ * This is the sum of no ciphertexts, and what the keypers publish for each
+ * candidate when no ballots were admitted.
  */
 const IDENTITY_G2 = `0x${'c0'.padEnd(192, '0')}`;
 
 export interface VerifyResult {
   /** The committee's published per-candidate totals, as exact integers. */
   tallies: bigint[];
-  /** Whether those totals verify against the aggregate and the decryption shares. */
+  /** Whether the totals match the aggregate and the decryption shares. */
   verified: boolean;
-  /** Why they did not, when `verified` is false; `null` otherwise. */
+  /** The reason when `verified` is false; `null` otherwise. */
   reason: string | null;
-  shareCount: number;
   thresholdMet: boolean;
   /** `budget × Σ(counted weights)`, derived from the ballots this client read. */
   derivedBound: bigint;
   /**
-   * Whether the committee's published `bsgs_bound` equals the locally derived one.
-   * Advisory: the equality check above already establishes the totals. A mismatch
-   * narrows a discrepancy to "published against a different admitted set" instead
-   * of leaving it as a bare disagreement. `null` when no result is published.
+   * Whether the committee's `bsgs_bound` equals `derivedBound`. Informational only:
+   * a mismatch suggests the committee counted a different set of ballots.
    */
   boundMatchesPublished: boolean | null;
 }
 
 /**
- * Pull the public audit payload from the hub. The base URL must end at
- * the ``/api`` prefix (i.e. the same prefix the sequencer's vote ingest
- * uses); the function appends the proposal-specific path.
+ * Fetches the public audit payload from the hub. `apiBaseUrl` must end at the
+ * `/api` prefix (the same one the sequencer's vote ingest uses).
  */
 export async function fetchAuditPayload(
   apiBaseUrl: string,
@@ -223,12 +193,9 @@ export async function fetchAuditPayload(
 }
 
 /**
- * Pull every encrypted ballot from the committee's own feed, page by page.
- *
- * The same route, order and sequence numbers the committee tallied from, so
- * its admitted set and exclusions line up with these ballots by construction.
- * Pages are capped by size, which is what lets an election of any size be read.
- * Same ``/api`` base-URL convention as ``fetchAuditPayload``.
+ * Fetches every encrypted ballot, page by page, from the same feed the committee
+ * tallied from, so the sequence numbers match its `admitted` and `exclusions`.
+ * `apiBaseUrl` is the same as for `fetchAuditPayload`.
  *
  * @param scale the proposal's `te_config.scale`, the unit its scores count in
  */
@@ -276,24 +243,16 @@ function ctToHex(ct: Ciphertext): { c1: string; c2: string } {
 }
 
 /**
- * Trustless-audit step 1: re-aggregate the encrypted ballots and confirm
- * the result matches what the keypers decrypted.
+ * Step 1: adds up the encrypted ballots and checks the sum matches the aggregate
+ * the keypers decrypted.
  *
- * Deliberately does NOT re-run each ballot's zero-knowledge proof or
- * pseudonym binding here: the sequencer already ran that exact check
- * (``verifyBallot``, via ``verifyTeBallot`` in
- * apps/sequencer/src/helpers/te.ts) at cast time, before the ballot was
- * ever persisted -- see apps/sequencer/src/writer/vote.ts's ``verify()``.
- * Repeating it client-side, per ballot, is redundant with that gate and,
- * at real proposal sizes, is what made this step freeze the page (each
- * proof verification is several seconds of BLST pairing work). What this
- * step *can't* skip is the aggregation + comparison: that's the part that
- * actually catches a hub/sequencer lying about the published aggregate.
+ * Each admitted ballot's ciphertexts are added homomorphically, weighted as the
+ * keypers weight them (the credential weight at the proposal's scale), and the
+ * result is compared byte for byte with `expectedAggregate`.
  *
- * For every ballot returned by the hub, this homomorphically accumulates
- * its ciphertexts into a running total (scaled by voting power, the exact
- * weighting the sequencer applied in ``aggregateBallots``), then compares
- * the result to ``expectedAggregate`` byte-for-byte.
+ * Ballot zero-knowledge proofs are not re-checked here. The sequencer checks them
+ * before storing a ballot (`verifyTeBallot` in apps/sequencer/src/helpers/te.ts),
+ * and checking each one in the browser takes seconds per ballot.
  */
 export async function aggregateBallots(
   payload: BallotsPayload,
@@ -317,16 +276,11 @@ export async function aggregateBallots(
       : 1n;
 
   /**
-   * Ballots weighted per multi-scalar multiplication rather than one scalar
-   * multiplication each — the difference between roughly 6 ms per ballot per
-   * candidate and a fraction of that (see the SDK's `crypto/msm.ts`).
-   *
-   * Chunked because the whole point set for a chunk has to be resident at once,
-   * and the WASM heap is a fixed 16 MB. At 256 ballots the live set peaks at
-   * `256 x candidates x 2` points — about 2.9 MB even at the 20-candidate maximum,
-   * which leaves the bucket table and everything else comfortable. Summing chunk
-   * partials is exact: addition is associative, so the total is byte-identical to
-   * weighting and adding every ballot in one pass.
+   * Ballots are weighted with one multi-scalar multiplication per chunk, which is
+   * much faster than one scalar multiplication per ballot (about 6 ms each per
+   * candidate). Chunks keep memory bounded, since the WASM heap is a fixed 16 MB:
+   * 256 ballots × 20 candidates (the maximum) × 2 points is about 2.9 MB. Adding
+   * the chunk sums gives exactly the same result as one pass.
    */
   const CHUNK_BALLOTS = 256;
   const pendingWeights: bigint[] = [];
@@ -380,19 +334,17 @@ export async function aggregateBallots(
       const env = b.choice;
       if (!env) continue;
       if (admitted !== null) {
-        // Without a sequence number there is nothing to match against, so the
-        // ballot cannot be shown to be one the committee counted.
+        // Without a sequence number we cannot tell whether the committee counted it.
         if (typeof b.sequenceNumber !== 'number') continue;
         if (!admitted.has(b.sequenceNumber)) continue;
       }
 
       const raw = BigInt(Math.round(b.vp));
-      // Integer half-up, byte-matching SGP's `(w + s//2) // s`. `Math.round(w/s)`
-      // would agree in JavaScript and disagree in Python at exactly `.5`.
+      // Divide by scale rounding half up, matching SGP's `(w + s//2) // s`.
+      // `Math.round(w/s)` would differ from Python at exactly `.5`.
       const w = scale > 1n ? (raw + scale / 2n) / scale : raw;
       if (raw > 0n && w === 0n) {
-        // Admitted, recorded, and worth nothing at this scale — reported so the
-        // audit panel can say so rather than leaving it to look like an omission.
+        // Reported so the panel can explain the ballot instead of it looking missing.
         scaledToZero.push({ voter: b.voter, vp: b.vp });
       }
       if (w <= 0n) continue;
@@ -414,7 +366,6 @@ export async function aggregateBallots(
     flushChunk();
     onProgress?.(payload.ballots.length, payload.ballots.length);
 
-    // Compare the recomputed aggregate to the published one byte-for-byte.
     let aggregateMatches = true;
     for (let j = 0; j < numCandidates; j++) {
       const want = expectedAggregate.ciphertexts[j];
@@ -451,24 +402,17 @@ export async function aggregateBallots(
 }
 
 /**
- * Why there is no verified tally yet — worked out from public data, not read.
+ * Why there is no verified tally yet, worked out from the public share counts and
+ * whether a result is published:
  *
- * The split that decides what an operator does is **derived, not trusted**: share
- * counts and the presence of a result are public and unforgeable by whoever serves
- * them, because the shares carry DLEQ proofs and the result has to satisfy an
- * equality this client checks itself.
+ *   - `awaiting-shares`: some candidate has fewer than a quorum of shares. A keyper
+ *     problem, not the coordinator's.
+ *   - `awaiting-coordinator`: all shares are there but no result is published. The
+ *     coordinator's problem.
  *
- *   - `awaiting-shares`      — the committee has not produced a quorum. A keyper
- *                              availability problem; chasing the coordinator will
- *                              not help.
- *   - `awaiting-coordinator` — the shares are all there and no result has been
- *                              published. The coordinator's problem.
- *
- * The coordinator's own `tallyStallReason` refines the second case only, and is
- * unsigned — render it as a claim ("the coordinator reports…"), never as fact. It
- * cannot make an unverifiable tally look verifiable, so an unauthenticated hint is
- * an acceptable trade here; that stops being true the moment it gates an automated
- * action rather than a human's attention.
+ * The coordinator's `tallyStallReason` can add detail to the second case. It is not
+ * signed, so show it as the coordinator's claim and never use it to trigger
+ * automatic actions.
  */
 export type TallyDiagnosis =
   | { kind: 'published' }
@@ -496,27 +440,21 @@ export function diagnoseTally(payload: AuditPayload): TallyDiagnosis {
 }
 
 /**
- * Trustless-audit step 2: check the committee's published totals against the
- * aggregate and the decryption shares.
+ * Step 2: checks the committee's published totals against the aggregate and the
+ * decryption shares.
  *
- * **Checked, not re-solved.** Every share's DLEQ is verified here, the quorum
- * subset is Lagrange-combined here, and each published total is multiplied by the
- * generator and compared to the τ this client derived itself. That is exactly as
- * conclusive as searching for the discrete log — it is unique, so only the true
- * total satisfies the equality — and it is the difference between ~6 ms per
- * candidate and a baby-step table this WASM build cannot allocate: `recoverTally`
- * aborts outright somewhere above bound 2.5e9, which a 1,000-voter weighted
- * proposal reaches. The only thing taken from the committee is a candidate answer,
- * and a wrong one fails with certainty.
+ * Verifies every share's DLEQ proof, combines a quorum of shares into τ per
+ * candidate, and checks `total · P₂ == τ`. The discrete log is unique, so only the
+ * true total passes; this takes about 6 ms per candidate, while solving it with
+ * `recoverTally` aborts above a bound of about 2.5e9 in this WASM build.
  *
- * ``derivedBound`` must be `budget × Σ(weights this client counted)` — from
- * ``aggregateBallots``, never from the committee's own artifact. It range-checks
- * the totals, which is what stops a published `T + q` (the same group element as
- * `T`) passing the equality as a nonsense 256-bit integer.
+ * `derivedBound` must be `budget × Σ(weights counted)` from `aggregateBallots`,
+ * never the committee's value. The range check against it stops `T + q` (the same
+ * group element as `T`) from passing as a huge integer.
  *
- * Throws synchronously on shape mismatches (missing aggregate, malformed hex).
- * A tally that simply fails to verify is *not* an exception: it comes back as
- * ``verified: false`` with a reason, so the UI can say which check failed.
+ * Rejects on malformed input, too few shares, or no published result. A tally that
+ * fails the check resolves with `verified: false` and a reason, so the UI can say
+ * which check failed.
  */
 export async function verifyTally(
   proposalId: string,
@@ -547,9 +485,8 @@ export async function verifyTally(
     G2Point.fromBytes(arrayify(hex))
   );
 
-  // Group shares per candidate (0-indexed). Each share's DLEQ bytes
-  // are the concatenation of proof_e || proof_z (32+32). The SDK
-  // ``decodeDLEQ`` accepts that exact layout.
+  // Group shares per candidate (0-indexed). The DLEQ proof is proof_e ‖ proof_z
+  // (32 + 32 bytes), the layout `decodeDLEQ` expects.
   const sharesPerCandidate: PartialDecryption[][] = Array.from(
     { length: numCandidates },
     () => []
@@ -582,23 +519,20 @@ export async function verifyTally(
     const electionIdBytes = arrayify(proposalId);
     const published = payload.te_result;
     if (!published || published.totals.length === 0) {
-      // Nothing to check against. Deliberately not an occasion to solve it here:
-      // recovering a withheld result is an escalation someone chooses, on a machine
-      // sized for it, not something a browser tab does on a page load.
+      // Nothing to check against. Solving for the result is too heavy for a browser.
       throw new Error(
         'The committee has not published a result for this proposal yet, so there ' +
           'is nothing to verify against.'
       );
     }
 
-    // Exact integers, parsed from decimal strings. Anything that has been through a
-    // float is not the number the keypers decrypted once a tally passes 2^53.
+    // Parse from decimal strings so totals above 2^53 stay exact.
     const tallies = published.totals.map(t => BigInt(t));
 
     const { ok, reason } = verifyTallyAgainstTotals({
       ctSums,
       sharesPerCandidate,
-      // SDK boundary: it takes the fault count and combines one more share.
+      // The SDK takes the number of tolerated faults, i.e. quorum - 1.
       threshold: te_threshold_t - 1,
       committeePKs,
       claimedTotals: tallies,
@@ -611,8 +545,7 @@ export async function verifyTally(
       }
     });
 
-    // Advisory only — the equality above already establishes the totals. This just
-    // turns "something disagrees" into "they tallied a different admitted set".
+    // Informational only; the check above already settles the totals.
     let boundMatchesPublished: boolean | null = null;
     try {
       boundMatchesPublished = BigInt(published.bsgs_bound) === derivedBound;
@@ -624,7 +557,6 @@ export async function verifyTally(
       tallies,
       verified: ok,
       reason,
-      shareCount: shares.length,
       thresholdMet,
       derivedBound,
       boundMatchesPublished
@@ -655,24 +587,18 @@ export interface VerifyProgress {
 export interface VerifyAllResult {
   ballots: BallotAggregateResult;
   tally: VerifyResult;
-  /** Derived locally from the ballots — never taken from the committee. */
+  /** Computed from the ballots, never taken from the committee. */
   derivedBound: bigint;
 }
 
 /**
- * Both halves of an audit, in one call: recompute the aggregate from the raw
- * ballots, then check the committee's published totals against it.
+ * Runs both steps: recomputes the aggregate from the ballots, then checks the
+ * published totals. Pure computation on fetched payloads (no network or DOM), so
+ * it can run in `teVerifyWorker.ts` and in Node tests.
  *
- * Exists as a single function so the Web Worker entry point can be a thin
- * wrapper around it (`teVerifyWorker.ts`). Everything here is pure computation
- * over already-fetched payloads — no network, no DOM — which is what makes it
- * both worker-safe and testable in node.
- *
- * `onProgress` is called between chunks. The aggregate phase dominates by a wide
- * margin: at the time of writing each ciphertext costs ~2.8 ms to decompress
- * (the subgroup check inside `G2Point.fromBytes`), so a 1,000-ballot 5-choice
- * proposal spends ~28 s there against ~3 s on the weighted sum and ~2 s on the
- * tally check. That is precisely why this runs off the main thread.
+ * `onProgress` is called between chunks. Most of the time goes to the aggregate
+ * step: decompressing each ciphertext takes about 2.8 ms (the subgroup check in
+ * `G2Point.fromBytes`), so 1,000 ballots with 5 choices take about 28 s.
  */
 export async function verifyAll(
   args: {
@@ -691,9 +617,7 @@ export async function verifyAll(
     (done, total) => onProgress?.({ phase: 'aggregate', done, total })
   );
 
-  // The bound comes from the ballots this client just counted, never from the
-  // committee's own artifact — a bound supplied by the party whose totals are
-  // being checked would check nothing.
+  // Computed from the ballots counted here, never taken from the committee.
   const derivedBound = ballots.totalWeight * BigInt(budget);
 
   onProgress?.({ phase: 'tally', done: 0, total: 1 });
@@ -704,12 +628,10 @@ export async function verifyAll(
 }
 
 /**
- * Assemble a self-contained verification bundle that a third party can
- * re-verify offline (e.g. with the SDK's CLI) without trusting this UI or the
- * hub. It contains the public audit payload (aggregate + decryption shares +
- * committee keys), every encrypted ballot with its zero-knowledge proof, and
- * the results this client computed locally. No secrets are present, only the
- * public bytes anyone can already fetch from the hub.
+ * Builds a bundle that anyone can re-check offline (for example with the SDK's CLI)
+ * without trusting this UI or the hub. It holds the public audit payload, every
+ * encrypted ballot with its proof, and this client's results. It contains only
+ * public data.
  */
 export function buildVerificationBundle(args: {
   proposalId: string;
@@ -740,9 +662,7 @@ export function buildVerificationBundle(args: {
       ballotsTotal: args.ballotResult.total,
       ballotsAggregated: args.ballotResult.contributing,
       aggregateMatches: args.ballotResult.aggregateMatches,
-      // Recorded in the bundle too: a reader reproducing this offline has to
-      // know which ballots were in scope, or they will recompute over all of
-      // them and reach a different answer for a correct election.
+      // Needed offline to know which ballots were counted.
       exclusions: args.ballotResult.exclusions,
       admittedSetResolved: args.ballotResult.admittedSetResolved,
       publishedTallies: args.tallyResult.tallies.map(t => t.toString()),

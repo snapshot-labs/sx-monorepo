@@ -18,8 +18,7 @@ const DEFAULT_ADDRESS_FORMAT: AddressFormat[] = [
 
 export class PublicError extends Error {}
 
-// MySQL VARBINARY columns come back as Buffer; GraphQL exposes them as 0x-hex
-// strings so the UI / SDK can decode them with Buffer.from(s.slice(2), 'hex').
+// MySQL VARBINARY columns come back as Buffer; GraphQL returns them as 0x-hex.
 function bytesToHex(value: unknown): string | null {
   if (value === null || value === undefined) return null;
   if (Buffer.isBuffer(value)) return `0x${value.toString('hex')}`;
@@ -523,12 +522,10 @@ export function formatProposal(proposal) {
   }));
   proposal.privacy = proposal.privacy || '';
   proposal.quorumType = proposal.quorum_type || 'default';
-  // Threshold-ElGamal private voting fields. Off for non shutter-elgamal proposals.
+  // Threshold-ElGamal private voting fields (shutter-elgamal); null when unset.
   proposal.te_config = jsonParse(proposal.te_config, null);
   proposal.te_committee_pks = jsonParse(proposal.te_committee_pks, null);
-  proposal.te_keyper_urls = jsonParse(proposal.te_keyper_urls, null);
   proposal.te_keyper_addresses = jsonParse(proposal.te_keyper_addresses, null);
-  proposal.te_aggregate = jsonParse(proposal.te_aggregate, null);
   proposal.te_mpk = bytesToHex(proposal.te_mpk);
   proposal.te_dkg_status = deriveDkgStatus(proposal);
   const rawFlagged = proposal.flagged;

@@ -1,20 +1,14 @@
 /**
- * Election-id translation.
+ * Election id to Snapshot proposal id.
  *
- * The protocol's client sends an election id as **bare** lowercase hex — it takes
- * the 32-byte value and hex-encodes it, with no prefix. Snapshot stores proposal
- * ids `0x`-prefixed. Both forms are accepted on the way in so a hand-typed request
- * behaves, and the `0x` form is what goes to the hub.
+ * The protocol client puts the 32-byte election id in the path as bare lowercase
+ * hex; Snapshot proposal ids are `0x`-prefixed. Both forms are accepted and the
+ * `0x` form is sent to the hub. A malformed id is rejected with 400 here, rather
+ * than reaching the hub as a confusing 404 or matching another proposal.
  *
- * Validation is strict rather than forgiving. A malformed id must become a clean
- * 400 here, because passing it through would surface as a confusing 404 from the
- * hub — or worse, match a different proposal.
- *
- * Note the asymmetry, which is easy to get backwards: only *path segments* use bare
- * hex. Every byte field inside a JSON body — including an election id in a response
- * — is `0x`-prefixed, because the client decodes those with a decoder that rejects a
- * missing prefix outright. So responses pass ids through untouched; there is no
- * reverse conversion.
+ * Only path segments use bare hex. Byte fields in JSON bodies, including ids in
+ * responses, are `0x`-prefixed (the client rejects them otherwise), so responses
+ * pass ids through unchanged.
  */
 
 export class BadElectionId extends Error {}

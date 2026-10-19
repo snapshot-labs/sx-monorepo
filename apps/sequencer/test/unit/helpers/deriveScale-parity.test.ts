@@ -1,17 +1,15 @@
 /**
  * The sequencer and the hub must derive the same `scale` from the same inputs.
  *
- * The sequencer writes it into `te_config` when a proposal is created or edited,
- * and the hub derives it again for the ballot feed the committee counts from. If
- * the two copies of the rule ever disagree, the committee counts in one unit and
- * `scores.ts` converts in another, and every published score is off by the
- * difference. Nothing else compares them, so this does.
+ * The sequencer writes it into `te_config`, and the hub derives it again for the
+ * ballot feed the committee counts from. If they disagree, every published score
+ * is off by the difference.
  */
 
 import { deriveScale } from '../../../src/helpers/teCommittee';
 
-// Loaded at run time rather than imported: a static import would pull a hub
-// file into the sequencer's typecheck, which only covers this app.
+// Loaded at run time, because a static import would pull a hub file into the
+// sequencer's typecheck.
 const { deriveScale: hubDeriveScale } = jest.requireActual(
   '../../../../hub/src/helpers/sgpConfig'
 ) as { deriveScale: typeof deriveScale };

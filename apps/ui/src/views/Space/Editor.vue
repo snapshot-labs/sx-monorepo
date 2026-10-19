@@ -394,11 +394,9 @@ const defaultVotingDelay = computed(() =>
   isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
-// Shutter-elgamal proposals need a DKG cool-off before voting opens; the
-// sequencer rejects starts closer than MIN_DKG_LEAD_TIME_S. Apply the floor
-// here so both the display and the picker never surface a value the backend
-// would reject. The extra minute covers the time spent signing, which would
-// otherwise push a start set exactly at the floor below it by arrival.
+// Shutter-elgamal proposals need time for DKG before voting opens; the sequencer
+// rejects starts sooner than MIN_DKG_LEAD_TIME_S from now. The display and picker
+// use this floor too. The extra minute allows for the time spent signing.
 const SIGNING_SLACK_S = 60;
 const privateVotingStartFloor = computed(() =>
   isPrivateVoting.value
@@ -412,9 +410,9 @@ const proposalStart = computed(() => {
   return Math.max(base, privateVotingStartFloor.value);
 });
 
-// If the user toggles Private voting ON with an existing draft whose start
-// is already too soon, push it out to the floor so the on-disk value stays
-// in sync with what the picker shows.
+// When private voting is turned on and the draft starts too soon, move the start
+// (and end, keeping the voting period) to the floor so the saved draft matches
+// the picker.
 watch(privateVotingStartFloor, floor => {
   if (!proposal.value || floor === 0) return;
   if ((proposal.value.start ?? 0) < floor) {

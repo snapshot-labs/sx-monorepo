@@ -1,12 +1,7 @@
 /**
- * The public audit surface for a permanently-private proposal.
- *
- * Read-only, unauthenticated, and deliberately so: everything served here is
- * already public by construction. The ballots are permanently encrypted, the
- * decryption shares carry DLEQ proofs meant to be checked by strangers, and the
- * voting power attached to each ballot is the same figure Snapshot shows for any
- * ordinary vote. What the surface buys is the ability for someone who trusts
- * nobody here to recompute the result themselves.
+ * Read-only, unauthenticated audit routes for private (shutter-elgamal) proposals,
+ * so anyone can recompute the result. Everything served is already public:
+ * ballots stay encrypted and decryption shares come with DLEQ proofs.
  */
 
 import { capture } from '@snapshot-labs/snapshot-sentry';
@@ -25,17 +20,10 @@ async function loadProposal(proposalId: string): Promise<any | null> {
 }
 
 /**
- * Present the stored aggregate to the audit surface.
- *
- * The committee's artifact names its ciphertexts `aggregates`; this surface
- * predates it and its readers ask for `ciphertexts` and `num_candidates`. Both
- * sets of keys are emitted so the verify panel keeps working — it reads
- * `aggregate.ciphertexts.length`, so serving only the new names is not a
- * rename, it is a crash.
- *
- * The protocol fields ride along rather than being stripped: `admitted` and
- * `exclusions` let a verifier recompute over exactly the ballots the committee
- * counted, which is a stronger check than the old surface could offer.
+ * The stored aggregate, with `election_id`, `num_candidates` and `ciphertexts`
+ * added next to the committee's `aggregates`, because the UI verify panel reads
+ * those names. `admitted` and `exclusions` are kept so a verifier can recompute
+ * over exactly the ballots the committee counted.
  */
 function auditAggregate(raw: unknown, proposalId: string): any | null {
   const aggregate = parseJsonField<any>(raw, null);
@@ -51,33 +39,9 @@ function auditAggregate(raw: unknown, proposalId: string): any | null {
   };
 }
 
-router.get('/proposal/:id/te_aggregate', async (req, res) => {
-  const proposalId = req.params.id;
-  try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 400);
-    }
-    const aggregate = auditAggregate(proposal.te_aggregate, proposalId);
-    if (!aggregate) return sendError(res, 'aggregate_not_ready', 404);
-    return res.json(aggregate);
-  } catch (err: any) {
-    capture(err);
-    return sendError(res, 'server_error', 500);
-  }
-});
-
-// Every committed decryption share plus the public DKG outputs an auditor needs
-// to check the published result. The shares and their DLEQ proofs are designed
-// to be public, so there is nothing here to authenticate.
-//
-// `te_result` carries the committee's totals as **decimal strings**, which is how
-// `te_results` stores them, and it matters that they stay strings the whole way to
-// the verifier. A tally can exceed 2^53, past which a JSON number is no longer the
-// integer the keypers decrypted — and the check the auditor runs is an exact
-// equality in the group, so a value that is off by one rounding step does not
-// "nearly" verify, it fails.
+// All decryption shares plus the public DKG outputs needed to check the published
+// result. `te_result.totals` are decimal strings, because a tally can exceed 2^53
+// and the verifier needs the exact integers.
 router.get('/proposal/:id/te_decryption_shares', async (req, res) => {
   const proposalId = req.params.id;
   try {

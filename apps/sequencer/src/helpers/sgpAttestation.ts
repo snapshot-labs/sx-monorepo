@@ -26,17 +26,13 @@ interface Issuer {
 
 let issuer: Issuer | null = null;
 
-/** Test seam: drop the memoised issuer so a test can vary the configured key. */
+/** For tests: forget the cached issuer so the configured key can change. */
 export function resetIssuer(): void {
   issuer?.vk.destroyWasm();
   issuer = null;
 }
 
-/**
- * The configured issuer, memoised. The key point is held for the process
- * lifetime rather than rebuilt per request — it is a single WASM allocation and
- * every ballot read needs it.
- */
+/** The issuer from `TE_ELIGIBILITY_PRIVATE_KEY`, built once per process. */
 async function getIssuer(): Promise<Issuer> {
   if (issuer) return issuer;
 
@@ -60,8 +56,8 @@ async function getIssuer(): Promise<Issuer> {
   try {
     keys = schnorrKeygen(sk);
   } catch (err: any) {
-    // schnorrKeygen rejects sk ≡ 0 mod Q, which would make every signature
-    // trivially verifiable under the identity key.
+    // Rejects sk ≡ 0 mod Q, whose public key is the identity and would make
+    // every signature valid.
     throw new SgpAttestationError(
       `TE_ELIGIBILITY_PRIVATE_KEY is not a valid scalar: ${err?.message || err}`
     );

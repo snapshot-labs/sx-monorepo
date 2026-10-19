@@ -1,14 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
 /**
- * The client is plumbing around `verifyAll`, so `verifyAll` is stubbed here and
- * the assertions are about the contract the panel depends on: that cancelling is
- * observable and distinguishable from failure, that a cancelled run never leaves
- * a promise pending, and that progress is forwarded.
+ * `verifyAll` is stubbed. These tests check what the panel relies on: cancel
+ * rejects with `VerifyCancelled` (not a generic error, and never stays pending),
+ * and progress is forwarded.
  *
- * `Worker` is undefined under vitest's node environment, so `runVerify` takes its
- * main-thread fallback path by construction — which is the path these cover. The
- * worker path is exercised in a browser; both call the same `verifyAll`.
+ * `Worker` is undefined in vitest's Node environment, so only the main-thread
+ * path is tested here.
  */
 const verifyAll = vi.fn();
 vi.mock('./teVerify', () => ({
@@ -44,8 +42,7 @@ describe('runVerify — main-thread fallback', () => {
   });
 
   it('rejects with VerifyCancelled — not a generic error — when cancelled', async () => {
-    // The distinction matters: a cancelled audit is a user action, and surfacing
-    // it as a failure would tell someone their tally is suspect when it is not.
+    // A cancel must not be shown as a failed check.
     let finish: (v: unknown) => void = () => {};
     verifyAll.mockReturnValueOnce(new Promise(r => (finish = r)));
     const run = runVerify(request);

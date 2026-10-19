@@ -1,51 +1,31 @@
 /**
- * Mapping a Snapshot proposal onto the threshold protocol's election config.
+ * Builds the threshold protocol's election config from a Snapshot proposal. The
+ * protocol fails to decode a config with any wrongly shaped field, so this is the
+ * only place that builds it.
  *
- * The protocol treats an election's config as a frozen artifact and refuses to
- * decode one whose fields are the wrong shape — a single wrong enum value or key
- * name makes every read fail, which is why this mapping lives in exactly one
- * place. The hub is that place: it already links the crypto SDK, and it is the
- * only process that speaks the protocol's JSON.
+ * Frozen fields (committee, threshold, role keys, voting window) are written by
+ * the sequencer into `proposals.te_sgp_config` at creation (see
+ * apps/sequencer/src/helpers/teCommittee.ts).
  *
- * A config has two halves.
+ * `numCandidates`, `budget`, `mode`, `variant` and `scale` are derived on every
+ * read from `choices` and `type`, which the author can edit until voting starts.
+ * `update-proposal` refuses edits after `start`, so they are fixed while voting.
  *
- * **Frozen** — committee, threshold, role keys, and the voting window. The
- * sequencer writes these into `proposals.te_sgp_config` at proposal creation
- * (see apps/sequencer/src/helpers/teCommittee.ts) and nothing rewrites them.
- *
- * **Derived live** — `numCandidates`, `budget`, `mode`, `variant`. These follow
- * from `choices` and `type`, which an author may edit via `update-proposal` right
- * up until voting opens, so a frozen copy would go stale. Deriving them on every
- * read is safe *because* that endpoint refuses edits once `start` has passed:
- * they are therefore constant across the entire voting window, which is the only
- * window in which they matter. Key generation does not depend on any of them, and
- * no ballot can exist before `start`.
- *
- * Field types worth not guessing at (all confirmed against the protocol's own
- * full-election vector, and all of which raise a decode error if wrong):
- *   - `duplicatePolicy` is the enum *value* `'last-wins'`, not a member name.
- *   - `protocolVersion` is the string `'SHUTTER-VOTE-v1'`, not a number.
- *   - `selfSubmitFee` is a decimal string, not a number (fees exceed 2^53).
+ * Exact field types (a wrong one is a decode error):
+ *   - `duplicatePolicy` is the enum value `'last-wins'`, not a member name.
+ *   - `protocolVersion` is the string `'SHUTTER-VOTE-v1'`.
+ *   - `selfSubmitFee` is a decimal string (fees can exceed 2^53).
  */
 
 /**
- * The unit this proposal's tally counts in.
+ * The divisor applied to every weight so the tally stays solvable.
  *
- * The recovery bound is `budget × Σ(admitted weights)` and BSGS cost grows as its
- * square root, so a token with a very large supply could put a tally out of reach.
- * Dividing every weight by `s` keeps the bound inside what the coordinator can
- * solve while preserving **every ratio in the cap table** — the clamp this replaces
- * instead flattened the top of it, counting a 25,000 holder and a 25,000,000 holder
- * identically.
+ * The tally bound is `budget × Σ(admitted weights)`, and BSGS cost grows with its
+ * square root. Dividing all weights by the same scale keeps the bound under
+ * `solverCeiling` and keeps every voter's share in proportion. Returns the
+ * smallest power of two that fits; usually 1 (no scaling).
  *
- * The smallest power of two that fits, so no proposal loses more precision than its
- * ceiling forces. `1` — no scaling at all — is the answer for essentially every
- * real space: at the default ceiling a space needs `budget × totalSupply > 1e12`
- * before this moves off 1.
- *
- * Derived live rather than frozen, alongside `budget`, because an author may edit
- * `type` until voting opens: flipping weighted → basic changes `budget` by 100×, and
- * a stored `s` would then be 100× too small.
+ * Derived on read, like `budget`, because `type` can be edited until voting starts.
  */
 export function deriveScale(
   budget: number,
@@ -105,12 +85,11 @@ export interface SgpElectionConfig {
 export class SgpConfigError extends Error {}
 
 /**
- * The per-proposal ballot parameters, derived from mutable proposal fields.
+ * Ballot parameters derived from the editable proposal fields.
  *
- * Weighted proposals encode proportional splits as integers summing to
- * `weightedBudget` (60 + 40 = 100); single-choice uses a budget of 1 and the
- * split degenerates to a unit vector. `mode: 'exact'` and `variant: 'A'` are the
- * only combination this deployment supports.
+ * Weighted proposals encode a split as integers summing to `weightedBudget`
+ * (60 + 40 = 100); other types use a budget of 1. Only `mode: 'exact'` with
+ * `variant: 'A'` is supported.
  */
 function deriveBallotParams(
   choices: string[],
@@ -157,12 +136,11 @@ export function parseCommitteeSnapshot(raw: unknown): TeCommitteeSnapshot {
 }
 
 /**
- * Compose the wire config for one proposal.
+ * Builds the wire config for one proposal.
  *
- * `currentEligibilityKey`, when supplied, is asserted against the frozen one. A
- * rotated eligibility key would otherwise invalidate every credential on older
- * proposals — excluding every ballot and producing a tally of zeros with nothing
- * to explain it — so this fails loudly instead.
+ * If `currentEligibilityKey` is given it must equal the frozen key. After a key
+ * rotation every credential on the proposal would fail and the tally would be all
+ * zeros, so this throws instead.
  */
 export function composeElectionConfig(args: {
   proposalId: string;
@@ -190,8 +168,7 @@ export function composeElectionConfig(args: {
     electionId: proposalId,
     ...params,
     weighted: true,
-    // Derived here, not read from the snapshot: `budget` is itself derived live from
-    // the proposal's editable `type`, and `s` has to follow it (see `deriveScale`).
+    // Not frozen: it depends on `budget`, which follows the editable `type`.
     scale: deriveScale(
       params.budget,
       snapshot.maxTotalWeight,
@@ -200,23 +177,18 @@ export function composeElectionConfig(args: {
     duplicatePolicy: 'last-wins',
     votingStart: snapshot.votingStart,
     votingEnd: snapshot.votingEnd,
-    // `t` is the quorum — the number of keypers required, not the number of
-    // faults tolerated — and it means the same thing on both sides of this
-    // boundary, so it passes through unconverted. Keeping one meaning is the
-    // point: a compensating +1 here is exactly how the field came to mean two
-    // different things in the first place.
+    // `t` is the number of keypers required (not faults tolerated) on both sides,
+    // so it is passed through unchanged.
     threshold: { t: snapshot.thresholdT, n: snapshot.thresholdN },
-    // The protocol calls a keyper's write-authorisation identity its signing
-    // key; for this backend that is the member's Ethereum address.
+    // A keyper's signing key is its Ethereum address here.
     keypers: snapshot.keypers.map(k => ({
       signingKey: k.address.toLowerCase(),
       url: k.url
     })),
     eligibilityKey: snapshot.eligibilityKey.toLowerCase(),
     resultPublisherKey: snapshot.resultPublisherAddress.toLowerCase(),
-    // Empty means ballot writes are unauthenticated at the data layer. Correct
-    // here: ballots arrive through the sequencer's own signed-message pipeline,
-    // never through this API.
+    // Empty: the data layer does not authenticate ballot writes, because ballots
+    // only arrive through the sequencer's signed-message pipeline.
     gatewayKeys: [],
     adminKey: snapshot.adminAddress.toLowerCase(),
     protocolVersion: PROTOCOL_VERSION,

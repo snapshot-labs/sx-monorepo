@@ -20,12 +20,8 @@ function canonicalWeight(value: unknown): bigint {
 }
 
 /**
- * Normalise a compressed point to lowercase `0x` hex.
- *
- * The quorum rule counts *byte-identical* submissions, so the stored form has to
- * be canonical. Two keypers that agree on the key but disagree on capitalisation
- * would otherwise never reach quorum, and the failure would look like disagreement
- * rather than formatting.
+ * Normalises a compressed point to lowercase `0x` hex. Quorum counts byte-identical
+ * submissions, so letter case must not make two equal points differ.
  */
 export function canonicalPoint(
   value: unknown,
@@ -79,12 +75,9 @@ export function canonicalAggregate(raw: any, electionId: string) {
     }
   );
   const totalAdmittedWeight = canonicalWeight(raw.totalAdmittedWeight ?? 0);
-  // Mirrors `shutter_governance_protocol.envelopes.codecs`, which reads
-  // `totalScaledWeight` and falls back to `totalAdmittedWeight` when the field is
-  // absent. The fallback is what makes an unscaled election (`scale = 1`, where the
-  // two are equal by construction) decode identically on a payload written before
-  // the field existed. Defaulting to 0 here instead would silently produce a
-  // different digest from the signer's.
+  // Must match `shutter_governance_protocol.envelopes.codecs`: when
+  // `totalScaledWeight` is missing, use `totalAdmittedWeight` (they are equal when
+  // `scale = 1`). Any other default would give a different digest from the signer's.
   const totalScaledWeight = canonicalWeight(
     raw.totalScaledWeight ?? raw.totalAdmittedWeight ?? 0
   );

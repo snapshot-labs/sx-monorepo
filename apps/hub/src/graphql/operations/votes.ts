@@ -121,9 +121,9 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
-  // The page is chosen on keys alone, then its rows are read by primary key. A
-  // private ballot's `choice` can pass MySQL's sort buffer on its own (256 KiB by
-  // default), and sorting full rows then fails the whole query.
+  // Pick the page by keys only, then load the full rows by primary key. A private
+  // ballot's `choice` alone can exceed MySQL's sort buffer (256 KiB by default),
+  // which makes sorting full rows fail.
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.voter, v.space, v.proposal FROM votes v ${indexHint}

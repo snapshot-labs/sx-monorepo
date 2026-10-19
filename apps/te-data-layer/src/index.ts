@@ -4,9 +4,7 @@ import log from './log';
 
 const PORT = Number(process.env.PORT || 3002);
 
-// Fail at startup rather than per request: without a hub there is nothing to
-// translate, and a process that answers 502 to everything is worse than one that
-// refuses to start and says why.
+// Fail at startup rather than answering every request with an error.
 if (!process.env.HUB_URL?.trim()) {
   log.error('HUB_URL is required');
   process.exit(1);

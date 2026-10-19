@@ -1,26 +1,15 @@
 /**
- * Publishing a private tally converts units, and the divisor has to be the one
- * the committee counted in.
+ * Publishing a private tally converts the committee's totals to token units.
  *
- * `te_results.totals_json` is in **scaled units multiplied by the budget**;
- * `proposals.scores` is in token units. The conversion is a single line in
- * `runShutterElgamalTally` — `total * scale / budget` — and it is the only
- * arithmetic this service contributes to a private result. Everything else it
- * merely mirrors.
- *
- * It had no coverage at all: the one suite that imports `scores.ts` mocks
- * `updateProposalAndVotes` outright. So a wrong `scale` published a wrong number
- * with no test failing anywhere, and because the shape of the result is entirely
- * ordinary — right number of candidates, plausible magnitudes, `scores_state`
- * final — nothing downstream looks wrong either. A proposal simply reports a
- * fraction of its real support and can miss a quorum it actually met.
+ * `te_results.totals_json` is in scaled units times the budget; `proposals.scores`
+ * is in token units. `runShutterElgamalTally` converts with
+ * `total * scale / budget`. A wrong `scale` publishes a plausible but wrong
+ * result, so these tests check the conversion directly.
  */
 
 import db, { sequencerDB } from '../../src/helpers/mysql';
 import { updateProposalAndVotes } from '../../src/scores';
-
-const AUTHOR = '0xFC01614d28595d9ea5963daD9f44C0E0F0fE10f0';
-const SPACE = 'test.eth';
+import { insertProposal } from '../fixtures/proposal';
 
 /** A closed private proposal plus the committee's published totals. */
 async function seed(args: {
@@ -28,17 +17,14 @@ async function seed(args: {
   scale: number | undefined;
   budget: number;
   totals: string[];
-  choices?: string[];
 }): Promise<void> {
   const { id, scale, budget, totals } = args;
-  const choices = args.choices ?? ['For', 'Against', 'Abstain'];
+  const choices = ['For', 'Against', 'Abstain'];
   const now = Math.floor(Date.now() / 1e3);
 
-  await db.queryAsync('DELETE FROM proposals WHERE id = ?', [id]);
   await db.queryAsync('DELETE FROM te_results WHERE proposal_id = ?', [id]);
 
-  // `scale` absent entirely is a real state: every proposal created before the
-  // column carried one, and `?? 1` is what reads them.
+  // Older proposals have no `scale` in `te_config`; it is read as 1.
   const teConfig: Record<string, unknown> = {
     numCandidates: choices.length,
     budget,
@@ -47,35 +33,15 @@ async function seed(args: {
   };
   if (scale !== undefined) teConfig.scale = scale;
 
-  await db.queryAsync('INSERT INTO proposals SET ?', {
+  await insertProposal({
     id,
-    ipfs: `bafkreiscores${id.slice(2, 10)}`,
-    author: AUTHOR,
     created: now - 7200,
-    space: SPACE,
-    network: '1',
-    symbol: '',
     type: 'weighted',
-    strategies: '[]',
-    validation: '{}',
-    plugins: '{}',
     title: 'closed private proposal',
-    body: '',
-    discussion: '',
     choices: JSON.stringify(choices),
     start: now - 3600,
     end: now - 60, // closed
-    quorum: 0,
     privacy: 'shutter-elgamal',
-    snapshot: 1,
-    app: '',
-    scores: '[]',
-    scores_by_strategy: '[]',
-    scores_state: 'pending',
-    scores_total: 0,
-    scores_updated: 0,
-    vp_value_by_strategy: '[]',
-    votes: 0,
     te_config: JSON.stringify(teConfig)
   });
 
@@ -122,74 +88,59 @@ describe('scores: a private tally is published in token units', () => {
   });
 
   /**
-   * The live run of 2026-09-21: V = 1,011,123 TST, ceiling 2e6, budget 100, so
-   * scale 64. One voter held 53 VP, which scales to 1 unit and fills the budget
-   * for its choice; another held 31, which rounds to zero and moves nothing.
-   * The committee returned ["100","0","0"] and the proposal published [64,0,0].
-   *
-   * With scale read as 1 the same election publishes [1,0,0] — a 64x
-   * under-report, and the exact failure the reviewer described.
+   * Scaled: V = 1,011,123, ceiling 2e6 and budget 100 give scale 64. A voter
+   * with 53 VP counts as 1 unit and puts the whole budget on one choice, so the
+   * committee returns ["100","0","0"] and the proposal must publish [64,0,0].
+   * Reading the scale as 1 would publish [1,0,0].
+   * Older proposals have no `scale`, which is read as 1. A basic proposal has
+   * budget 1, so only the scale applies.
    */
-  it('multiplies the committee total by the scale it counted in', async () => {
-    await seed({
-      id: IDS.scaled,
-      scale: 64,
-      budget: 100,
-      totals: ['100', '0', '0']
-    });
-    await updateProposalAndVotes(IDS.scaled);
+  it.each([
+    [
+      'multiplies the total by the scale',
+      IDS.scaled,
+      64,
+      100,
+      ['100', '0', '0'],
+      [64, 0, 0]
+    ],
+    [
+      'is an identity at scale 1',
+      IDS.unscaled,
+      1,
+      100,
+      ['9500', '400', '100'],
+      [95, 4, 1]
+    ],
+    [
+      'treats a missing scale as 1',
+      IDS.missing,
+      undefined,
+      100,
+      ['9500', '400', '100'],
+      [95, 4, 1]
+    ],
+    [
+      'has no budget divisor on a basic proposal',
+      IDS.basic,
+      8,
+      1,
+      ['12', '5', '0'],
+      [96, 40, 0]
+    ]
+  ])('%s', async (_label, id, scale, budget, totals, expected) => {
+    await seed({ id, scale, budget, totals });
+    await updateProposalAndVotes(id);
 
-    const { scores, total, state } = await published(IDS.scaled);
-    expect(scores).toEqual([64, 0, 0]);
-    expect(total).toBe(64);
+    const { scores, total, state } = await published(id);
+    expect(scores).toEqual(expected);
+    expect(total).toBe(expected.reduce((a, b) => a + b, 0));
     expect(state).toBe('final');
-  });
-
-  it('is an identity on an unscaled proposal', async () => {
-    await seed({
-      id: IDS.unscaled,
-      scale: 1,
-      budget: 100,
-      totals: ['9500', '400', '100']
-    });
-    await updateProposalAndVotes(IDS.unscaled);
-
-    // scale 1: the budget divisor alone converts back to token units.
-    expect((await published(IDS.unscaled)).scores).toEqual([95, 4, 1]);
-  });
-
-  it('treats a proposal with no scale as unscaled', async () => {
-    await seed({
-      id: IDS.missing,
-      scale: undefined,
-      budget: 100,
-      totals: ['9500', '400', '100']
-    });
-    await updateProposalAndVotes(IDS.missing);
-
-    expect((await published(IDS.missing)).scores).toEqual([95, 4, 1]);
-  });
-
-  // A basic proposal has budget 1, so the whole ballot is one unit and the scale
-  // is the only conversion left.
-  it('applies the scale with no budget divisor on a basic proposal', async () => {
-    await seed({
-      id: IDS.basic,
-      scale: 8,
-      budget: 1,
-      totals: ['12', '5', '0'],
-      choices: ['Yes', 'No', 'Abstain']
-    });
-    await updateProposalAndVotes(IDS.basic);
-
-    expect((await published(IDS.basic)).scores).toEqual([96, 40, 0]);
   });
 
   /**
    * No `te_results` row means the committee has not finished, not that the tally
-   * is zero. Publishing zeros here would be indistinguishable from a real
-   * unanimous abstention, and `scores_state: 'final'` would stop the scheduler
-   * ever retrying.
+   * is zero. Publishing zeros as `final` would stop the scheduler from retrying.
    */
   it('leaves the proposal pending when the committee has not published', async () => {
     await seed({

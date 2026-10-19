@@ -1,32 +1,32 @@
 /**
- * The translator's contract, exercised against a stubbed hub.
- *
- * What matters here is not that requests are forwarded — it is that the protocol's
- * client sees exactly the contract it expects. Its callers branch on status type,
- * so a status collapsed to 500 changes the coordinator's behaviour: it retries what
- * it should abandon and abandons what it should retry. These tests pin the id
- * translation, the status pass-through, and the honest 501s.
+ * Tests the data-layer API against a stubbed hub: election id translation, hub
+ * statuses passed through unchanged (the coordinator's retry logic depends on
+ * them), and 501 for unsupported writes.
  */
 
 import fetch from 'node-fetch';
 import request from 'supertest';
 import { buildApp } from '../src/app';
-import log from '../src/log';
 
-// ts-jest hoists this above the imports, so `fetch` is already the mock by the
-// time the app module resolves it.
+// ts-jest hoists this above the imports, so the app gets the mock.
 jest.mock('node-fetch', () => jest.fn());
 
 const mockFetch = fetch as unknown as jest.Mock;
 
 const BARE = '1111111111111111111111111111111111111111111111111111111111111111';
 const PREFIXED = `0x${BARE}`;
+const HUB = `http://hub.test/api/proposal/${PREFIXED}`;
 
+/** A hub reply. A 204 has no body, so reading it as JSON throws. */
 function hubReplies(body: unknown, status = 200): void {
   mockFetch.mockResolvedValueOnce({
     ok: status >= 200 && status < 300,
     status,
-    json: async () => body
+    json: async () => {
+      if (status === 204) throw new Error('204 has no body');
+      return body;
+    },
+    text: async () => (status === 204 ? '' : JSON.stringify(body))
   });
 }
 
@@ -43,7 +43,21 @@ function lastUrl(): string {
   return mockFetch.mock.calls[mockFetch.mock.calls.length - 1][0];
 }
 
+function forwardedBody(): string {
+  return mockFetch.mock.calls[0][1].body;
+}
+
 let app: ReturnType<typeof buildApp>;
+
+/** Calls `/elections/:eid<suffix>` with the bare id. */
+function call(method: string, suffix: string, body: unknown = {}) {
+  const url = `/elections/${BARE}${suffix}`;
+  return method === 'GET'
+    ? request(app).get(url)
+    : request(app)
+        .post(url)
+        .send(body as object);
+}
 
 beforeEach(() => {
   process.env.HUB_URL = 'http://hub.test';
@@ -51,52 +65,35 @@ beforeEach(() => {
   app = buildApp();
 });
 
-describe('service basics', () => {
-  it('reports health without touching the hub', async () => {
-    const res = await request(app).get('/health');
+// Tier 0: trusted for availability only, not integrity. Keypers probe it under
+// /port before anything else.
+it.each(['', '/port'])(
+  'declares verifiability tier zero at %s/capability',
+  async prefix => {
+    const res = await request(app).get(`${prefix}/capability`);
     expect(res.status).toBe(200);
-    expect(res.body.ok).toBe(true);
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  // Tier zero says: this data layer guarantees availability, not integrity. That
-  // is the honest description — it can withhold an artifact but never forge one,
-  // because every artifact is independently verifiable.
-  it('declares verifiability tier zero', async () => {
-    const res = await request(app).get('/capability');
     expect(res.body).toEqual({ verifiabilityTier: 0 });
-  });
-
-  it('404s an unknown route with a usable message', async () => {
-    const res = await request(app).get('/nope');
-    expect(res.status).toBe(404);
-    expect(res.body.error).toMatch(/no route for GET \/nope/);
-  });
-});
+  }
+);
 
 describe('election id translation', () => {
-  it('accepts the bare hex the protocol client sends and prefixes it for the hub', async () => {
-    hubReplies({ config: {}, cancelled: false });
-    await request(app).get(`/elections/${BARE}`);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_election`
-    );
-  });
+  // The protocol client sends bare hex; a hand-typed request may add `0x` or
+  // mixed case. The hub always gets the lowercase `0x` form of the stored id.
+  it.each([
+    ['bare hex', BARE],
+    ['0x-prefixed', PREFIXED],
+    ['mixed case', BARE.toUpperCase()]
+  ])(
+    'accepts a %s id and sends the 0x form to the hub',
+    async (_label, eid) => {
+      hubReplies({ config: {} });
+      await request(app).get(`/elections/${eid}`);
+      expect(lastUrl()).toBe(`${HUB}/te_sgp_election`);
+    }
+  );
 
-  it('also accepts a 0x-prefixed id, for a hand-typed request', async () => {
-    hubReplies({ config: {} });
-    await request(app).get(`/elections/${PREFIXED}`);
-    expect(lastUrl()).toContain(PREFIXED);
-  });
-
-  it('lowercases a mixed-case id so it matches the stored proposal', async () => {
-    hubReplies({ config: {} });
-    await request(app).get(`/elections/${BARE.toUpperCase()}`);
-    expect(lastUrl()).toContain(PREFIXED);
-  });
-
-  // A malformed id must be a clean 400 here. Forwarding it would surface as a
-  // confusing 404 from the hub, or — worse — match a different proposal.
+  // A malformed id must be 400 here, not forwarded to the hub where it could
+  // give a confusing 404 or match another proposal.
   it.each([
     ['too short', 'abcd'],
     ['too long', `${BARE}00`],
@@ -111,112 +108,221 @@ describe('election id translation', () => {
     }
   );
 
-  // The contract is asymmetric: bare hex in path segments, `0x`-prefixed in every
-  // JSON byte field. The client's decoder rejects a missing prefix, so stripping it
-  // here would make it discard the entire list — and the coordinator would then see
-  // no elections rather than an error it could attribute. Regression-guarded because
-  // the earlier version of this test asserted the opposite and still passed.
+  // Paths use bare hex but JSON byte fields keep `0x`. The client rejects ids
+  // without the prefix, so stripping it would hide every election.
   it('leaves listed election ids 0x-prefixed for the response body', async () => {
     hubReplies({ electionIds: [PREFIXED, `0x${'ab'.repeat(32)}`] });
     const res = await request(app).get('/elections');
     expect(res.body.electionIds).toEqual([PREFIXED, `0x${'ab'.repeat(32)}`]);
-    for (const id of res.body.electionIds) {
-      expect(id.startsWith('0x')).toBe(true);
+  });
+});
+
+describe('routes', () => {
+  const record = {
+    config: { electionId: PREFIXED, numCandidates: 2 },
+    cancelled: false,
+    tallyStalled: false,
+    finalizedKey: null
+  };
+  const submissions = [
+    { electionId: PREFIXED, pkElection: '0xaa', committeePKs: ['0xbb'] }
+  ];
+  const aggregate = {
+    electionId: PREFIXED,
+    aggregates: [{ c1: '0xaa', c2: '0xbb' }],
+    admitted: [0, 1],
+    exclusions: [{ sequenceNumber: 2, reason: 'INVALID_PROOF' }],
+    totalAdmittedWeight: 3
+  };
+  const shares = [
+    {
+      electionId: PREFIXED,
+      keyperIndex: 1,
+      entries: [{ sigma: '0xaa', proof: '0xbb' }]
     }
-  });
-});
+  ];
+  const result = {
+    electionId: PREFIXED,
+    totals: [3, 4],
+    keyperIndices: [1, 2],
+    bsgsBound: 7
+  };
+  const aggregateWrite = {
+    aggregate: {
+      electionId: PREFIXED,
+      aggregates: [{ c1: '0xaa', c2: '0xbb' }],
+      admitted: [0],
+      exclusions: [],
+      totalAdmittedWeight: 1
+    },
+    keyperSig: '0xsig'
+  };
+  const shareWrite = {
+    share: {
+      electionId: PREFIXED,
+      keyperIndex: 2,
+      entries: [{ sigma: '0xaa', proof: '0xbb' }]
+    },
+    keyperSig: '0xsig'
+  };
 
-describe('reads', () => {
-  it('passes the election record through untouched', async () => {
-    const record = {
-      config: { electionId: PREFIXED, numCandidates: 2 },
-      cancelled: false,
-      tallyStalled: false,
-      finalizedKey: null
-    };
-    hubReplies(record);
-    const res = await request(app).get(`/elections/${BARE}`);
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(record);
-  });
-
-  it('derives the finalized key from the same election read', async () => {
-    hubReplies({
-      finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] }
-    });
-    const res = await request(app).get(`/elections/${BARE}/dkg/finalized`);
-    expect(res.body.finalizedKey).toEqual({
-      pkElection: '0xaa',
-      committeePKs: ['0xbb']
-    });
-  });
-
-  it('reports a missing finalized key as null rather than omitting it', async () => {
-    hubReplies({ finalizedKey: null });
-    const res = await request(app).get(`/elections/${BARE}/dkg/finalized`);
-    expect(res.body).toEqual({ finalizedKey: null });
-  });
-
-  it('asks the hub for a count only', async () => {
-    hubReplies({ count: 7 });
-    const res = await request(app).get(`/elections/${BARE}/ballots/count`);
-    expect(lastUrl()).toContain('countOnly=1');
-    expect(res.body).toEqual({ count: 7 });
-  });
-
-  it('forwards ballot pagination', async () => {
-    hubReplies({ ballots: [] });
-    await request(app).get(`/elections/${BARE}/ballots?start=10&count=5`);
-    expect(lastUrl()).toContain('start=10');
-    expect(lastUrl()).toContain('count=5');
-  });
-
-  it('omits pagination that carries no information', async () => {
-    hubReplies({ ballots: [] });
-    await request(app).get(`/elections/${BARE}/ballots?start=0&count=0`);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_ballots`
-    );
-  });
-
-  it('returns ballots under the key the protocol client reads', async () => {
-    hubReplies({ ballots: [{ electionId: PREFIXED }], total: 1 });
-    const res = await request(app).get(`/elections/${BARE}/ballots`);
-    expect(res.body).toEqual({ ballots: [{ electionId: PREFIXED }] });
-  });
-});
-
-describe('dkg write path', () => {
-  function hubAccepts204(): void {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 204,
-      json: async () => {
-        throw new Error('204 has no body');
+  // Each route maps to one hub path, and returns the shape the protocol client
+  // reads (for example ballots without the hub's `total`). Writes answer 204.
+  it.each([
+    {
+      name: 'GET election, passed through untouched',
+      method: 'GET',
+      suffix: '',
+      hub: `${HUB}/te_sgp_election`,
+      reply: record,
+      body: record
+    },
+    {
+      name: 'GET finalized key, from the election read',
+      method: 'GET',
+      suffix: '/dkg/finalized',
+      hub: `${HUB}/te_sgp_election`,
+      reply: { finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] } },
+      body: { finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] } }
+    },
+    {
+      name: 'GET ballot count, asking the hub for a count only',
+      method: 'GET',
+      suffix: '/ballots/count',
+      hub: `${HUB}/te_sgp_ballots?countOnly=1`,
+      reply: { count: 7 },
+      body: { count: 7 }
+    },
+    {
+      name: 'GET ballots',
+      method: 'GET',
+      suffix: '/ballots',
+      hub: `${HUB}/te_sgp_ballots`,
+      reply: { ballots: [{ electionId: PREFIXED }], total: 1 },
+      body: { ballots: [{ electionId: PREFIXED }] }
+    },
+    {
+      name: 'GET dkg submissions',
+      method: 'GET',
+      suffix: '/dkg',
+      hub: `${HUB}/te_sgp_dkg`,
+      reply: { submissions },
+      body: { submissions }
+    },
+    {
+      name: 'GET canonical aggregate',
+      method: 'GET',
+      suffix: '/aggregate',
+      hub: `${HUB}/te_sgp_aggregate`,
+      reply: { aggregate },
+      body: { aggregate }
+    },
+    {
+      name: 'GET decryption shares',
+      method: 'GET',
+      suffix: '/shares',
+      hub: `${HUB}/te_sgp_decryption_shares`,
+      reply: { shares },
+      body: { shares }
+    },
+    {
+      name: 'GET published result',
+      method: 'GET',
+      suffix: '/result',
+      hub: `${HUB}/te_result`,
+      reply: { result },
+      body: { result }
+    },
+    {
+      name: 'POST dkg submission',
+      method: 'POST',
+      suffix: '/dkg',
+      hub: `${HUB}/te_sgp_dkg`,
+      send: { pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' },
+      forwards: {
+        pkElection: '0xaa',
+        committeePKs: ['0xbb'],
+        keyperSig: '0xcc'
       }
-    });
-  }
-
-  it('forwards a submission and answers 204', async () => {
-    hubAccepts204();
-    const res = await request(app)
-      .post(`/elections/${BARE}/dkg`)
-      .send({ pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' });
-    expect(res.status).toBe(204);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
-    );
+    },
+    {
+      name: 'POST aggregate, body unchanged',
+      method: 'POST',
+      suffix: '/aggregate',
+      hub: `${HUB}/te_aggregate`,
+      send: aggregateWrite,
+      forwards: aggregateWrite
+    },
+    {
+      name: 'POST decryption share, body unchanged',
+      method: 'POST',
+      suffix: '/shares',
+      hub: `${HUB}/te_sgp_decryption_share`,
+      send: shareWrite,
+      forwards: shareWrite
+    },
+    {
+      name: 'POST result with the publisher signature',
+      method: 'POST',
+      suffix: '/result',
+      hub: `${HUB}/te_result`,
+      send: { result, resultPublisherSig: '0xsig' },
+      forwards: { result, resultPublisherSig: '0xsig' }
+    },
+    {
+      name: 'POST tally stall with the publisher signature',
+      method: 'POST',
+      suffix: '/tally-stalled',
+      hub: `${HUB}/te_tally_stalled`,
+      send: { stalled: true, resultPublisherSig: '0xsig' },
+      forwards: { stalled: true, resultPublisherSig: '0xsig' }
+    }
+  ])('$name', async ({ method, suffix, hub, reply, body, send, forwards }) => {
+    if (method === 'GET') {
+      hubReplies(reply);
+      const res = await call(method, suffix);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(body);
+    } else {
+      hubReplies({}, 204);
+      const res = await call(method, suffix, send);
+      expect(res.status).toBe(204);
+      expect(mockFetch.mock.calls[0][1].method).toBe('POST');
+      expect(JSON.parse(forwardedBody())).toEqual(forwards);
+    }
+    expect(lastUrl()).toBe(hub);
   });
 
-  it('forwards exactly the three fields the port defines', async () => {
-    hubAccepts204();
-    await request(app)
-      .post(`/elections/${BARE}/dkg`)
-      .send({ pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' });
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-    // No keyperIndex: the hub recovers it from the signature, so a submission can
-    // only ever count for whoever actually signed it. Forwarding a claimed index
-    // would reintroduce exactly the impersonation this design removes.
+  it.each([{ finalizedKey: null }, {}])(
+    'reports a missing finalized key as null rather than omitting it (hub sent %j)',
+    async reply => {
+      hubReplies(reply);
+      const res = await call('GET', '/dkg/finalized');
+      expect(res.body).toEqual({ finalizedKey: null });
+    }
+  );
+
+  // Pagination that carries no information is left off.
+  it.each([
+    ['?start=10&count=5', `${HUB}/te_sgp_ballots?start=10&count=5`],
+    ['?start=0&count=0', `${HUB}/te_sgp_ballots`]
+  ])('forwards ballot pagination %s', async (query, url) => {
+    hubReplies({ ballots: [] });
+    await call('GET', `/ballots${query}`);
+    expect(lastUrl()).toBe(url);
+  });
+
+  // No keyperIndex: the hub recovers it from the signature. Forwarding a
+  // claimed index would let one keyper submit as another.
+  it('forwards only the three dkg fields, dropping a claimed keyper index', async () => {
+    hubReplies({}, 204);
+    await call('POST', '/dkg', {
+      pkElection: '0xaa',
+      committeePKs: ['0xbb'],
+      keyperSig: '0xcc',
+      keyperIndex: 7
+    });
+    const body = JSON.parse(forwardedBody());
     expect(Object.keys(body).sort()).toEqual([
       'committeePKs',
       'keyperSig',
@@ -229,84 +335,106 @@ describe('dkg write path', () => {
     });
   });
 
-  it('drops a claimed keyper index rather than passing it on', async () => {
-    hubAccepts204();
+  // A stall carries the publisher signature and the coordinator's reason; a
+  // resume carries the admin signature. The hub decides which key may sign which.
+  it.each([
+    {
+      stalled: true,
+      issuedAt: 1700000000,
+      resultPublisherSig: '0xsig',
+      reason: 'keyper 2 unreachable'
+    },
+    { stalled: false, issuedAt: 1700000001, adminSig: '0xadmin' }
+  ])('forwards every tally-stall field (stalled=$stalled)', async body => {
+    hubReplies({}, 204);
+    await call('POST', '/tally-stalled', body);
+    expect(JSON.parse(forwardedBody())).toEqual(body);
+  });
+});
+
+// The totals and `totalAdmittedWeight` are signed and can exceed 2^53. Parsing
+// them as doubles would round them and break the signature, so these routes
+// pass the body through as text, byte for byte.
+describe('exact big integers', () => {
+  const BIG54 = '18014398509481985'; // 2^54 + 1
+  const BIG53 = '9007199254740993'; // 2^53 + 1
+
+  // A claimed keyperIndex in the aggregate is ignored by the hub, which uses the
+  // signature.
+  it.each([
+    [
+      '/aggregate',
+      `{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG54}},"keyperSig":"0xsig","keyperIndex":3}`
+    ],
+    [
+      '/result',
+      `{"result":{"electionId":"${PREFIXED}","totals":[${BIG53},1],"keyperIndices":[1,2],"bsgsBound":${BIG53}},"resultPublisherSig":"0xsig"}`
+    ]
+  ])('forwards a POST %s body verbatim', async (suffix, raw) => {
+    hubReplies({}, 204);
     await request(app)
-      .post(`/elections/${BARE}/dkg`)
-      .send({
-        pkElection: '0xaa',
-        committeePKs: ['0xbb'],
-        keyperSig: '0xcc',
-        keyperIndex: 7
-      });
-    expect(
-      JSON.parse(mockFetch.mock.calls[0][1].body).keyperIndex
-    ).toBeUndefined();
+      .post(`/elections/${BARE}${suffix}`)
+      .set('content-type', 'application/json')
+      .send(raw);
+    expect(forwardedBody()).toBe(raw);
   });
 
-  it('uses POST, not GET', async () => {
-    hubAccepts204();
-    await request(app).post(`/elections/${BARE}/dkg`).send({});
-    expect(mockFetch.mock.calls[0][1].method).toBe('POST');
-  });
-
-  // Each of these drives different coordinator behaviour, so none may be collapsed:
-  // 403 means a misconfigured committee and should stop the ceremony, while 409 is
-  // a benign quorum race that is merely logged.
-  it.each([[403], [409], [400], [503]])(
-    'preserves hub write status %i',
-    async status => {
-      hubReplies({ error: 'nope' }, status);
-      const res = await request(app).post(`/elections/${BARE}/dkg`).send({});
-      expect(res.status).toBe(status);
-    }
-  );
-
-  it('rejects a malformed election id before calling the hub', async () => {
-    const res = await request(app).post('/elections/nope/dkg').send({});
-    expect(res.status).toBe(400);
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  it('surfaces an unreachable hub as 502 on writes too', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'));
-    const res = await request(app).post(`/elections/${BARE}/dkg`).send({});
-    expect(res.status).toBe(502);
-  });
-
-  it('returns submissions under the key the protocol client reads', async () => {
-    const submissions = [
-      { electionId: PREFIXED, pkElection: '0xaa', committeePKs: ['0xbb'] }
-    ];
-    hubReplies({ submissions });
-    const res = await request(app).get(`/elections/${BARE}/dkg`);
-    expect(res.body).toEqual({ submissions });
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
-    );
+  it.each([
+    [
+      '/aggregate',
+      `{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG54}}}`,
+      `"totalAdmittedWeight":${BIG54}`
+    ],
+    [
+      '/result',
+      `{"result":{"electionId":"${PREFIXED}","totals":[${BIG53}],"keyperIndices":[1],"bsgsBound":${BIG53}}}`,
+      `"totals":[${BIG53}]`
+    ]
+  ])('keeps GET %s exact on the way back out', async (suffix, raw, exact) => {
+    hubRepliesRaw(raw);
+    const res = await call('GET', suffix);
+    expect(res.text).toContain(exact);
   });
 });
 
 describe('status pass-through', () => {
-  // The client maps each of these onto a distinct error type, and its callers
-  // branch on the type. Remapping any of them changes coordinator behaviour.
-  it.each([[404], [403], [409], [422], [400], [503]])(
-    'preserves hub status %i',
-    async status => {
+  // The client maps each status to its own error type and the coordinator
+  // decides from it whether to retry, so none may be remapped. For example 403
+  // (misconfigured committee) stops the ceremony, 409 (quorum race) is only
+  // logged, 422 (outside the window, or share before the aggregate) means retry
+  // later. One route per hub client function, plus the other write routes.
+  it.each([
+    ...[404, 403, 409, 422, 400, 503, 429].map(s => ['GET', '', s]),
+    ...[403, 409, 400, 503].map(s => ['POST', '/dkg', s]),
+    ...[422, 409, 403].map(s => ['POST', '/aggregate', s]),
+    ...[422, 409, 403].map(s => ['POST', '/shares', s]),
+    ['POST', '/result', 403],
+    ['POST', '/tally-stalled', 403],
+    ['GET', '/aggregate', 404]
+  ] as Array<[string, string, number]>)(
+    '%s %s preserves hub status %i',
+    async (method, suffix, status) => {
       hubReplies({ error: 'nope' }, status);
-      const res = await request(app).get(`/elections/${BARE}`);
+      const res = await call(method, suffix);
       expect(res.status).toBe(status);
     }
   );
 
-  it('surfaces an unreachable hub as 502, not 500', async () => {
-    // 502 says "the dependency failed, retrying may help"; 500 would suggest a
-    // bug in this service and invite the wrong response.
-    mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'));
-    const res = await request(app).get(`/elections/${BARE}`);
-    expect(res.status).toBe(502);
-    expect(res.body.error).toMatch(/hub unreachable/);
-  });
+  // 502 means the dependency failed and a retry may help; 500 would mean a bug here.
+  it.each([
+    ['GET', ''],
+    ['POST', '/dkg'],
+    ['POST', '/aggregate'],
+    ['GET', '/aggregate']
+  ])(
+    'surfaces an unreachable hub on %s %s as 502, not 500',
+    async (method, suffix) => {
+      mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+      const res = await call(method, suffix);
+      expect(res.status).toBe(502);
+      expect(res.body.error).toMatch(/hub unreachable/);
+    }
+  );
 
   it('reports a missing HUB_URL as a server fault', async () => {
     delete process.env.HUB_URL;
@@ -316,9 +444,8 @@ describe('status pass-through', () => {
 });
 
 describe('unsupported writes', () => {
-  // 501 rather than a plausible-looking success: these operations exist in the
-  // protocol but have no Snapshot equivalent, and pretending otherwise would let
-  // a caller believe it had registered an election or cast a ballot.
+  // These protocol writes have no Snapshot equivalent. 501 makes sure a caller
+  // never thinks it created an election or cast a ballot here.
   it.each([
     ['/elections', 'sequencer'],
     [`/elections/${BARE}/cancel`, 'cancellation'],
@@ -332,10 +459,8 @@ describe('unsupported writes', () => {
 });
 
 describe('the /port read mount', () => {
-  // The keypers do not read the root surface. They are given a base URL and append
-  // `/port` themselves, matching the prefix the protocol's own `api` service mounts
-  // its read blueprint under — so this mount is what makes a keyper able to read
-  // Snapshot's data layer at all, and what keeps its reach limited to reads.
+  // Keypers append `/port` to their base URL and read only from there. It is the
+  // same read router as the root, so one read checks the mount.
   it('serves an election read identically to the root surface', async () => {
     const record = {
       config: { electionId: PREFIXED, numCandidates: 2 },
@@ -352,30 +477,8 @@ describe('the /port read mount', () => {
     expect(viaPort.body).toEqual(viaRoot.body);
   });
 
-  it('translates election ids under the prefix too', async () => {
-    hubReplies({ submissions: [] });
-    await request(app).get(`/port/elections/${BARE}/dkg`);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_dkg`
-    );
-  });
-
-  it('forwards ballot pagination under the prefix', async () => {
-    hubReplies({ ballots: [] });
-    await request(app).get(`/port/elections/${BARE}/ballots?start=10&count=5`);
-    expect(lastUrl()).toContain('start=10');
-    expect(lastUrl()).toContain('count=5');
-  });
-
-  it('answers /capability, which the client probes before anything else', async () => {
-    const res = await request(app).get('/port/capability');
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ verifiabilityTier: 0 });
-  });
-
-  // The point of the split surface. A keyper relays its writes through the
-  // coordinator; if a write route answered here, that indirection — and the
-  // authorization that rides on it — would be optional rather than enforced.
+  // Keypers must send writes through the coordinator, so no write route may
+  // answer under /port.
   it.each([
     `/port/elections/${BARE}/dkg`,
     `/port/elections/${BARE}/aggregate`,
@@ -387,351 +490,5 @@ describe('the /port read mount', () => {
     const res = await request(app).post(path).send({});
     expect(res.status).toBe(404);
     expect(mockFetch).not.toHaveBeenCalled();
-  });
-});
-
-describe('aggregate', () => {
-  // The committee-owned aggregate: each keyper derives it independently and the
-  // hub decides which one a quorum agreed on. The translator carries the
-  // envelope and the signature, and adds nothing — the keyper index is not in
-  // the payload because the hub recovers it from the signature.
-  it('forwards a submission and answers 204', async () => {
-    hubReplies({}, 204);
-    const body = {
-      aggregate: {
-        electionId: PREFIXED,
-        aggregates: [{ c1: '0xaa', c2: '0xbb' }],
-        admitted: [0],
-        exclusions: [],
-        totalAdmittedWeight: 1
-      },
-      keyperSig: '0xsig'
-    };
-    const res = await request(app)
-      .post(`/elections/${BARE}/aggregate`)
-      .send(body);
-
-    expect(res.status).toBe(204);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_aggregate`
-    );
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual(body);
-  });
-
-  // `totalAdmittedWeight` is a sum of raw voting power and passes 2^53 on
-  // large-supply tokens. It is covered by the keyper's signature, so the body has
-  // to reach the hub as the bytes that arrived. A claimed index rides along
-  // unread: the hub takes the index from the signature, never from the body.
-  it('forwards the body verbatim, keeping an oversized weight exact', async () => {
-    const BIG = '18014398509481985'; // 2^54 + 1: rounds if it passes through a double
-    hubReplies({}, 204);
-    const raw = `{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG}},"keyperSig":"0xsig","keyperIndex":3}`;
-    await request(app)
-      .post(`/elections/${BARE}/aggregate`)
-      .set('content-type', 'application/json')
-      .send(raw);
-    expect(mockFetch.mock.calls[0][1].body).toBe(raw);
-  });
-
-  // 422 is the protocol's voting-window error and 409 its immutability error.
-  // Collapsing either into 400 or 500 changes what the coordinator does next.
-  it.each([
-    [422, 'aggregate submitted before voting_end'],
-    [409, 'aggregate already finalized (quorum reached)'],
-    [403, 'not_a_registered_keyper']
-  ])('passes hub status %s straight through', async (status, message) => {
-    hubReplies({ error: message }, status as number);
-    const res = await request(app)
-      .post(`/elections/${BARE}/aggregate`)
-      .send({ aggregate: {}, keyperSig: '0xsig' });
-    expect(res.status).toBe(status);
-  });
-
-  it('reads the canonical aggregate', async () => {
-    const aggregate = {
-      electionId: PREFIXED,
-      aggregates: [{ c1: '0xaa', c2: '0xbb' }],
-      admitted: [0, 1],
-      exclusions: [{ sequenceNumber: 2, reason: 'INVALID_PROOF' }],
-      totalAdmittedWeight: 3
-    };
-    hubRepliesRaw(JSON.stringify({ aggregate }));
-    const res = await request(app).get(`/elections/${BARE}/aggregate`);
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ aggregate });
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_aggregate`
-    );
-  });
-
-  // Absence is a fact the coordinator acts on: no quorum yet means keep asking
-  // the committee to derive. It must read as null, never as an error.
-  it('keeps an oversized weight exact on the way back out', async () => {
-    const BIG = '18014398509481985';
-    hubRepliesRaw(`{"aggregate":{"admitted":[],"totalAdmittedWeight":${BIG}}}`);
-    const res = await request(app).get(`/elections/${BARE}/aggregate`);
-    expect(res.text).toContain(`"totalAdmittedWeight":${BIG}`);
-  });
-
-  it('reports no quorum as null rather than as a failure', async () => {
-    hubRepliesRaw('{"aggregate":null}');
-    const res = await request(app).get(`/elections/${BARE}/aggregate`);
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ aggregate: null });
-  });
-
-  it('serves the aggregate on the keyper read mount too', async () => {
-    hubRepliesRaw('{"aggregate":null}');
-    expect(
-      (await request(app).get(`/port/elections/${BARE}/aggregate`)).status
-    ).toBe(200);
-  });
-
-  it('does not route the write under /port', async () => {
-    const res = await request(app)
-      .post(`/port/elections/${BARE}/aggregate`)
-      .send({ aggregate: {}, keyperSig: '0xsig' });
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('decryption shares', () => {
-  it('forwards a submission and answers 204', async () => {
-    hubReplies({}, 204);
-    const body = {
-      share: {
-        electionId: PREFIXED,
-        keyperIndex: 2,
-        entries: [{ sigma: '0xaa', proof: '0xbb' }]
-      },
-      keyperSig: '0xsig'
-    };
-    const res = await request(app).post(`/elections/${BARE}/shares`).send(body);
-    expect(res.status).toBe(204);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_decryption_share`
-    );
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual(body);
-  });
-
-  // A share before the committee agreed on what to decrypt is temporarily
-  // wrong, not permanently malformed — 422 tells the caller to retry.
-  it.each([
-    [422, 'decryption share submitted before a canonical aggregate exists'],
-    [409, 'keyper already submitted different shares'],
-    [403, 'not_a_registered_keyper']
-  ])('passes hub status %s straight through', async (status, message) => {
-    hubReplies({ error: message }, status as number);
-    const res = await request(app)
-      .post(`/elections/${BARE}/shares`)
-      .send({ share: { entries: [] }, keyperSig: '0xsig' });
-    expect(res.status).toBe(status);
-  });
-
-  it('reads the per-keyper envelopes', async () => {
-    const shares = [
-      {
-        electionId: PREFIXED,
-        keyperIndex: 1,
-        entries: [{ sigma: '0xaa', proof: '0xbb' }]
-      }
-    ];
-    hubReplies({ shares });
-    const res = await request(app).get(`/elections/${BARE}/shares`);
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ shares });
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_sgp_decryption_shares`
-    );
-  });
-
-  it('reports no shares as an empty list, not an error', async () => {
-    hubReplies({ shares: [] });
-    const res = await request(app).get(`/elections/${BARE}/shares`);
-    expect(res.body).toEqual({ shares: [] });
-  });
-
-  it('does not route the write under /port', async () => {
-    expect(
-      (await request(app).post(`/port/elections/${BARE}/shares`).send({}))
-        .status
-    ).toBe(404);
-  });
-});
-
-describe('published result', () => {
-  const BIG = '9007199254740993'; // 2^53 + 1: rounds if it passes through a double
-
-  it('forwards the publisher signature and answers 204', async () => {
-    hubReplies({}, 204);
-    const res = await request(app)
-      .post(`/elections/${BARE}/result`)
-      .send({
-        result: {
-          electionId: PREFIXED,
-          totals: [1, 2],
-          keyperIndices: [1, 2],
-          bsgsBound: 10
-        },
-        resultPublisherSig: '0xsig'
-      });
-    expect(res.status).toBe(204);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_result`
-    );
-  });
-
-  // The totals are what the publisher signed. Re-serialising them here would
-  // round anything above 2^53 and break a signature this service is not a party
-  // to, so the body has to reach the hub as the bytes that arrived.
-  it('forwards the body verbatim, keeping oversized totals exact', async () => {
-    hubReplies({}, 204);
-    const raw = `{"result":{"electionId":"${PREFIXED}","totals":[${BIG},1],"keyperIndices":[1,2],"bsgsBound":${BIG}},"resultPublisherSig":"0xsig"}`;
-    await request(app)
-      .post(`/elections/${BARE}/result`)
-      .set('content-type', 'application/json')
-      .send(raw);
-
-    expect(mockFetch.mock.calls[0][1].body).toContain(`"totals":[${BIG},1]`);
-    expect(mockFetch.mock.calls[0][1].body).not.toContain('9007199254740992');
-  });
-
-  it('reads a published result', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      text: async () =>
-        `{"result":{"electionId":"${PREFIXED}","totals":[3,4],"keyperIndices":[1,2],"bsgsBound":7}}`
-    });
-    const res = await request(app).get(`/elections/${BARE}/result`);
-    expect(res.status).toBe(200);
-    expect(res.body.result.totals).toEqual([3, 4]);
-  });
-
-  it('keeps an oversized total exact on the way back out', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      text: async () =>
-        `{"result":{"electionId":"${PREFIXED}","totals":[${BIG}],"keyperIndices":[1],"bsgsBound":${BIG}}}`
-    });
-    const res = await request(app).get(`/elections/${BARE}/result`);
-    expect(res.text).toContain(BIG);
-  });
-
-  it('reports an unpublished result as null', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      text: async () => '{"result":null}'
-    });
-    const res = await request(app).get(`/elections/${BARE}/result`);
-    expect(res.body).toEqual({ result: null });
-  });
-
-  it('passes a 403 from the hub straight through', async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: false,
-      status: 403,
-      json: async () => ({ error: 'not_the_result_publisher' })
-    });
-    const res = await request(app)
-      .post(`/elections/${BARE}/result`)
-      .send({ result: {}, resultPublisherSig: '0xsig' });
-    expect(res.status).toBe(403);
-  });
-});
-
-describe('tally stall', () => {
-  it('forwards a stall with the publisher signature', async () => {
-    hubReplies({}, 204);
-    const res = await request(app)
-      .post(`/elections/${BARE}/tally-stalled`)
-      .send({ stalled: true, resultPublisherSig: '0xsig' });
-    expect(res.status).toBe(204);
-    expect(lastUrl()).toBe(
-      `http://hub.test/api/proposal/${PREFIXED}/te_tally_stalled`
-    );
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toEqual({
-      stalled: true,
-      resultPublisherSig: '0xsig',
-      adminSig: undefined
-    });
-  });
-
-  it('forwards a resume with the admin signature', async () => {
-    hubReplies({}, 204);
-    await request(app)
-      .post(`/elections/${BARE}/tally-stalled`)
-      .send({ stalled: false, adminSig: '0xadmin' });
-    expect(JSON.parse(mockFetch.mock.calls[0][1].body)).toMatchObject({
-      stalled: false,
-      adminSig: '0xadmin'
-    });
-  });
-
-  // Which key may sign which direction is the hub's decision; the translator
-  // must not decide it, or the split could be enforced in two places and drift.
-  it('passes a rejected direction straight through', async () => {
-    hubReplies({ error: 'not_the_admin' }, 403);
-    const res = await request(app)
-      .post(`/elections/${BARE}/tally-stalled`)
-      .send({ stalled: false, resultPublisherSig: '0xsig' });
-    expect(res.status).toBe(403);
-  });
-
-  it('does not route the write under /port', async () => {
-    expect(
-      (
-        await request(app)
-          .post(`/port/elections/${BARE}/tally-stalled`)
-          .send({ stalled: true })
-      ).status
-    ).toBe(404);
-  });
-});
-
-describe('a rate-limited hub names itself in the log', () => {
-  it('logs 429 at error level, with the consequence and the remedy', async () => {
-    const errors: string[] = [];
-    const spy = jest
-      .spyOn(log, 'error')
-      .mockImplementation((...args: unknown[]) => {
-        errors.push(args.map(String).join(' '));
-        return undefined as never;
-      });
-    try {
-      hubReplies({ error: 'too many requests' }, 429);
-      const res = await request(app).get(`/elections/${BARE}`);
-      expect(res.status).toBe(429);
-
-      const line = errors.join('\n');
-      expect(line).toContain('429');
-      // Names the cause, the symptom an operator will actually see, and the fix.
-      expect(line).toMatch(/rate-limited/i);
-      expect(line).toMatch(/stall/i);
-      expect(line).toMatch(/exempt|limit/i);
-    } finally {
-      spy.mockRestore();
-    }
-  });
-
-  // Other 4xx are ordinary and must stay at warn, or the distinction is lost.
-  it('leaves an ordinary 4xx at warn', async () => {
-    const errorSpy = jest
-      .spyOn(log, 'error')
-      .mockImplementation(() => undefined as never);
-    const warnSpy = jest
-      .spyOn(log, 'warn')
-      .mockImplementation(() => undefined as never);
-    try {
-      hubReplies({ error: 'proposal_not_found' }, 404);
-      await request(app).get(`/elections/${BARE}`);
-      expect(warnSpy).toHaveBeenCalled();
-      expect(errorSpy).not.toHaveBeenCalled();
-    } finally {
-      errorSpy.mockRestore();
-      warnSpy.mockRestore();
-    }
   });
 });

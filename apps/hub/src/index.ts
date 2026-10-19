@@ -32,15 +32,15 @@ const { stop: stopMetrics } = initMetrics(app);
 refreshSpacesCache();
 
 app.disable('x-powered-by');
-// The raw body is kept because JSON.parse is lossy for integers above 2^53,
-// and two payloads carry them: a published tally's totals and an aggregate's
-// total admitted weight are both sums over ballots. Rounding them would break
-// the signature check on a perfectly valid artifact.
+// Keep the raw body for the te_result and te_aggregate routes: their totals can
+// exceed 2^53, and JSON.parse would round them and break the signature check.
+// Other routes skip it to avoid holding a second copy of every body.
+const RAW_BODY_ROUTE = /\/proposal\/[^/]+\/te_(result|aggregate)(\?|$)/;
 app.use(
   express.json({
     limit: '20mb',
     verify: (req: any, _res, buf) => {
-      req.rawBody = buf.toString('utf8');
+      if (RAW_BODY_ROUTE.test(req.url)) req.rawBody = buf.toString('utf8');
     }
   })
 );
