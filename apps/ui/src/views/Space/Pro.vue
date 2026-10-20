@@ -26,7 +26,7 @@ type Feature = {
 };
 type SubscriptionLength = 'monthly' | 'yearly';
 
-const CALENDLY = 'https://calendly.com/snapshot-labs/pro-plan';
+const CALENDLY = 'https://calendly.com/bonustrack';
 
 const DATE_FORMAT = 'D MMM YYYY';
 
