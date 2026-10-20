@@ -2,7 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
-import { DOCS_URL } from '@/helpers/constants';
+import { CALENDLY_URL, DOCS_URL } from '@/helpers/constants';
 import { _n, _t } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
@@ -25,8 +25,6 @@ type Feature = {
   [key in TierPlan | string]: string | number | boolean | Component;
 };
 type SubscriptionLength = 'monthly' | 'yearly';
-
-const CALENDLY = 'https://calendly.com/bonustrack';
 
 const DATE_FORMAT = 'D MMM YYYY';
 
@@ -384,7 +382,7 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div v-if="!subscription?.hasActiveSubscription">
-          <AppLink :to="CALENDLY">
+          <AppLink :to="CALENDLY_URL">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </AppLink>
@@ -481,7 +479,7 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <AppLink :to="CALENDLY">
+          <AppLink :to="CALENDLY_URL">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </AppLink>
