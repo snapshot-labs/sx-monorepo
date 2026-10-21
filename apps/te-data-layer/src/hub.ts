@@ -12,7 +12,6 @@
  *   400 → malformed request
  */
 
-import fetch from 'node-fetch';
 import log from './log';
 
 export class HubError extends Error {
@@ -57,101 +56,76 @@ function hubBase(): string {
 }
 
 /**
- * GET from the hub, passing its status through unchanged (for example 404 for an
- * unknown proposal, 503 when private voting is not configured).
+ * Sends one request to the hub and returns the response body as text. The hub's
+ * status is passed through unchanged with its error message (for example 404 for
+ * an unknown proposal, 503 when private voting is not configured), so the
+ * coordinator can handle each case. An unreachable or slow hub is a 502.
  */
-export async function hubGet<T>(path: string): Promise<T> {
+async function forward(
+  method: 'GET' | 'POST',
+  path: string,
+  body?: string
+): Promise<string> {
   const url = `${hubBase()}${path}`;
-  let res;
+  let res: Response;
+  let text: string;
   try {
     res = await fetch(url, {
-      timeout: TIMEOUT_MS,
-      headers: { accept: 'application/json' }
+      method,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+      headers:
+        body === undefined
+          ? { accept: 'application/json' }
+          : { 'content-type': 'application/json', accept: 'application/json' },
+      body
     });
+    text = await res.text();
   } catch (err: any) {
     // 502, not 500: an unreachable hub is retryable and not a bug here.
-    logUpstream('GET', path, 502, `unreachable: ${err?.message || err}`);
+    logUpstream(method, path, 502, `unreachable: ${err?.message || err}`);
     throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
   }
 
-  let body: any = null;
-  try {
-    body = await res.json();
-  } catch {
-    // On an error status, a non-JSON body still gives a status-only error below.
-    if (res.ok) throw new HubError('hub returned a non-JSON body', 502);
-  }
-
   if (!res.ok) {
-    const detail =
-      body?.error || body?.message || `hub responded ${res.status}`;
-    logUpstream('GET', path, res.status, detail);
-    throw new HubError(
-      body?.error || body?.message || `hub responded ${res.status}`,
-      res.status
-    );
+    let detail = `hub responded ${res.status}`;
+    try {
+      const parsed = JSON.parse(text);
+      detail = parsed?.error || parsed?.message || detail;
+    } catch {
+      // A non-JSON error body still gives a status-only error.
+    }
+    logUpstream(method, path, res.status, detail);
+    throw new HubError(detail, res.status);
   }
-  return body as T;
+  return text;
 }
 
-/**
- * POST to the hub, passing its status through unchanged. The coordinator handles
- * each differently: a 409 from a quorum race is harmless, while a 403 means a
- * misconfigured committee and stops the ceremony.
- *
- * Returns null for a 204 (no body), which is what the write routes expect.
- */
+export async function hubGet<T>(path: string): Promise<T> {
+  const text = await forward('GET', path);
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new HubError('hub returned a non-JSON body', 502);
+  }
+}
+
+/** Returns null for an empty or non-JSON reply, such as the writes' 204. */
 export async function hubPost<T>(
   path: string,
   payload: unknown
 ): Promise<T | null> {
-  const url = `${hubBase()}${path}`;
-  let res;
+  const text = await forward('POST', path, JSON.stringify(payload));
   try {
-    res = await fetch(url, {
-      method: 'POST',
-      timeout: TIMEOUT_MS,
-      headers: {
-        'content-type': 'application/json',
-        accept: 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch (err: any) {
-    logUpstream('POST', path, 502, `unreachable: ${err?.message || err}`);
-    throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
-  }
-
-  if (res.status === 204) return null;
-
-  let body: any = null;
-  try {
-    body = await res.json();
+    return text ? (JSON.parse(text) as T) : null;
   } catch {
-    if (res.ok) return null;
+    return null;
   }
-
-  if (!res.ok) {
-    logUpstream(
-      'POST',
-      path,
-      res.status,
-      body?.error || body?.message || `hub responded ${res.status}`
-    );
-    throw new HubError(
-      body?.error || body?.message || `hub responded ${res.status}`,
-      res.status
-    );
-  }
-  return body as T;
 }
 
 /**
- * POST an already-serialised body unchanged.
- *
- * Used for the aggregate and the result: their integers can exceed a double's
- * exact range and are covered by a signature, so re-parsing would round them and
- * break the signature.
+ * POST an already-serialised body unchanged, and GET a reply as text. Used for the
+ * aggregate and the result: their integers can exceed a double's exact range and
+ * are covered by a signature, so re-parsing would round them and break it.
  */
 export async function hubPostRaw(
   path: string,
@@ -160,69 +134,10 @@ export async function hubPostRaw(
   if (typeof rawBody !== 'string') {
     throw new HubError('missing request body', 400);
   }
-  const url = `${hubBase()}${path}`;
-  let res;
-  try {
-    res = await fetch(url, {
-      method: 'POST',
-      timeout: TIMEOUT_MS,
-      headers: {
-        'content-type': 'application/json',
-        accept: 'application/json'
-      },
-      body: rawBody
-    });
-  } catch (err: any) {
-    logUpstream('POST', path, 502, `unreachable: ${err?.message || err}`);
-    throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
-  }
-
-  if (res.status === 204 || res.ok) return null;
-
-  let body: any = null;
-  try {
-    body = await res.json();
-  } catch {
-    /* fall through to the status-only error */
-  }
-  throw new HubError(
-    body?.error || body?.message || `hub responded ${res.status}`,
-    res.status
-  );
+  await forward('POST', path, rawBody);
+  return null;
 }
 
-/** GET a response as text, for the same precision reason as `hubPostRaw`. */
-export async function hubGetRaw(path: string): Promise<string> {
-  const url = `${hubBase()}${path}`;
-  let res;
-  try {
-    res = await fetch(url, {
-      timeout: TIMEOUT_MS,
-      headers: { accept: 'application/json' }
-    });
-  } catch (err: any) {
-    logUpstream('GET', path, 502, `unreachable: ${err?.message || err}`);
-    throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
-  }
-
-  const text = await res.text();
-  if (!res.ok) {
-    let body: any = null;
-    try {
-      body = JSON.parse(text);
-    } catch {
-      /* status-only error */
-    }
-    logUpstream(
-      'GET',
-      path,
-      res.status,
-      body?.error || body?.message || `hub responded ${res.status}`
-    );
-    throw new HubError(
-      body?.error || body?.message || `hub responded ${res.status}`,
-      res.status
-    );
-  }
-  return text;
+export function hubGetRaw(path: string): Promise<string> {
+  return forward('GET', path);
 }

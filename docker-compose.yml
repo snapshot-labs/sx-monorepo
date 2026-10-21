@@ -1,26 +1,12 @@
-# Snapshot's half of private voting: MySQL, hub, sequencer, the te-data-layer
-# translator, and the Shutter Governance Protocol (SGP) coordinator, which runs a
-# published image. The keypers are not part of this stack: each one is run by its
-# own operator. Setup and troubleshooting: docs/private-voting/DEPLOYMENT_SETUP.md.
-#
-#   python3 scripts/sgp/gen-env.py --write     # or: cp .env.example .env
-#   mkdir -p mysql-data
-#   docker compose up -d --build
-#
-# COORDINATOR_SIGNING_KEY and COORDINATOR_API_TOKEN must be set, or compose starts no
-# service at all. Without TE_KEYPERS and TE_ELIGIBILITY_PRIVATE_KEY the stack runs,
-# but private proposals cannot be created.
+# Snapshot's half of private voting: MySQL, hub, sequencer, te-data-layer and the
+# protocol's coordinator. Keypers run elsewhere. Setup: docs/private-voting/DEPLOYMENT_SETUP.md.
 #
 # Who points where:
 #   coordinator → SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL → te-data-layer root   reads + writes; sole writer
+#   coordinator → keyper URLs frozen in each proposal                               runs the key ceremony and tally
 #   keyper      → SHUTTER_GOVERNANCE_PROTOCOL_API_URL        → te-data-layer /port  reads only; appends /port
 #   keyper      → COORDINATOR_URL                            → coordinator :8400    keyper writes relay here
-#   sequencer   → TE_KEYPERS                                 → each keyper's URL, frozen into the proposal
-#
-# The coordinator reaches the translator over this compose network. Keypers run in
-# other compose projects (other machines in production) and come in through the
-# host. The URLs in TE_KEYPERS are dialled from inside the coordinator's container,
-# so on one machine they are host.docker.internal:810N, not localhost.
+#   sequencer   → TE_KEYPERS                                 → each keyper's /status when a proposal is created
 
 services:
   mysql:
@@ -53,8 +39,7 @@ services:
       DB_SSL: "false"
       HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
       SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
-      # The hub redirects /api/scores/:id here and the *browser* follows it, so this
-      # must be a URL the browser can reach, not http://sequencer:3001.
+      # Followed by the browser (scores redirect), so not http://sequencer:3001.
       SEQUENCER_URL: "${SEQUENCER_PUBLIC_URL:-http://localhost:${SEQ_PORT:-3001}}"
       STAMP_URL: https://stamp.fyi
       SCORE_API_URL: https://score.snapshot.org
@@ -97,31 +82,20 @@ services:
       AUTH_SECRET: ${SEQ_AUTH_SECRET}
       WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
       LAST_CB: "1"
-      # Keyper URLs only. Each keyper's address is read from its /status when a
-      # private proposal is created, and frozen into it.
       TE_KEYPERS: "${TE_KEYPERS:-}"
-      # The quorum: t of n keypers act together. Must be a majority (2t > n),
-      # so a committee of 3 needs 2.
       TE_THRESHOLD_T: "${TE_THRESHOLD_T:-2}"
-      # Denominator for weighted vote splits: 100 means percentages.
       TE_WEIGHTED_BUDGET: "${TE_WEIGHTED_BUDGET:-100}"
-      # The coordinator's address; the hub accepts a result signed by no other key.
       TE_RESULT_PUBLISHER_ADDRESS: "${TE_RESULT_PUBLISHER_ADDRESS:-}"
       TE_ELIGIBILITY_PRIVATE_KEY: "${TE_ELIGIBILITY_PRIVATE_KEY:-}"
-      # A private proposal must open at least this far ahead, so the key ceremony
-      # can finish before voting starts.
       MIN_DKG_LEAD_TIME_S: "${MIN_DKG_LEAD_TIME_S:-180}"
-      # The largest tally search the coordinator can solve; it sets each proposal's
-      # `scale`. Size it to the coordinator's RAM: docs/private-voting/README.md
-      # ("Coordinator sizing").
       TE_SOLVER_CEILING: "${TE_SOLVER_CEILING:-1e12}"
-      # Worker threads that check private ballots (seconds of CPU each). Empty
-      # means one per CPU core, minus one.
       TE_VERIFY_WORKERS: "${TE_VERIFY_WORKERS:-}"
-      # How often the sequencer copies published results into proposal scores.
       TE_TALLY_POLL_MS: "${TE_TALLY_POLL_MS:-5000}"
     ports:
       - "${SEQ_PORT:-3001}:3001"
+    extra_hosts:
+      # Reads each keyper's /status; for keypers on this host.
+      - "host.docker.internal:host-gateway"
     depends_on:
       mysql:
         condition: service_healthy
@@ -136,10 +110,8 @@ services:
       PORT: "3002"
       HUB_URL: http://hub:3000
       LOG_LEVEL: "${TE_DATA_LAYER_LOG_LEVEL:-info}"
-      # How long the translator waits for the hub before answering 502.
       HUB_TIMEOUT_MS: "${HUB_TIMEOUT_MS:-10000}"
     ports:
-      # Published: the keypers read from it from outside this stack.
       - "${TE_DATA_LAYER_PORT:-3002}:3002"
     depends_on:
       hub:
@@ -155,36 +127,25 @@ services:
       retries: 20
     restart: unless-stopped
 
-  # The protocol's coordinator: it drives the DKG, relays the keypers' signed writes
-  # to the translator (it is the data layer's sole writer), and publishes the result.
-  #
-  # Fail-closed on its two secrets: unset, and compose refuses to start anything.
   coordinator:
     image: ${SHUTTER_GOVERNANCE_PROTOCOL_IMAGE:-ghcr.io/shutter-network/shutter-governance-protocol:0.1.0}
     command: ["python", "-m", "shutter_governance_protocol.services.coordinator"]
     environment:
       SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER: database
-      # The translator's root, which includes write routes. Only the coordinator uses
-      # it; keypers get the read-only /port mount.
+      # The root includes write routes; keypers get only the read-only /port mount.
       SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL: ${SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL:-http://te-data-layer:3002}
-      # Signs the published result. Its address must equal TE_RESULT_PUBLISHER_ADDRESS.
       COORDINATOR_SIGNING_KEY: ${COORDINATOR_SIGNING_KEY:?set COORDINATOR_SIGNING_KEY (secp256k1 key; its address is the result publisher)}
-      # Bearer token for the write relay. Fail-closed: unset means no keyper can write.
       COORDINATOR_API_TOKEN: ${COORDINATOR_API_TOKEN:?set COORDINATOR_API_TOKEN (relay bearer token)}
       COORDINATOR_PORT: "8400"
-      # Seconds between polls: how soon a new proposal starts its DKG and how fast a
-      # tally advances.
       COORDINATOR_POLL_S: ${COORDINATOR_POLL_S:-30.0}
-      # Holds the per-keyper tokens, so a restart reuses them.
+      # Per-keyper tokens, reused after a restart.
       COORDINATOR_STATE_DIR: /coordinator-state
     ports:
-      # Published: the keypers send their writes here from outside this stack.
       - "${COORDINATOR_PORT:-8400}:8400"
     volumes:
       - ./coordinator-state:/coordinator-state
     extra_hosts:
-      # Lets keypers on this host be reached as host.docker.internal; harmless in
-      # production, where they have real URLs.
+      # For keypers on this host; unused when they have real URLs.
       - "host.docker.internal:host-gateway"
     depends_on:
       te-data-layer:

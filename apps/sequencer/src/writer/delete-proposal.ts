@@ -19,6 +19,7 @@ export async function verify(body): Promise<any> {
     return Promise.reject('not authorized to archive proposal');
   }
 }
+
 export async function action(body): Promise<void> {
   const msg = jsonParse(body.msg);
   const proposal = await getProposal(msg.space, msg.payload.proposal);

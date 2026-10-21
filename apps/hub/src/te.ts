@@ -48,7 +48,7 @@ router.get('/proposal/:id/te_decryption_shares', async (req, res) => {
     const proposal = await loadProposal(proposalId);
     if (!proposal) return sendError(res, 'proposal_not_found', 404);
     if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 400);
+      return sendError(res, 'proposal_not_private', 404);
     }
     if (!proposal.te_mpk) {
       return sendError(res, 'dkg_not_finalized', 400);

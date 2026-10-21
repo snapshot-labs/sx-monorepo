@@ -8,9 +8,7 @@
 **/coverage
 **/test-results
 **/playwright-report
-.engine-room-shots
 *.log
-.keyper*.log
 **/.env
 **/.env.*
 !**/.env.example

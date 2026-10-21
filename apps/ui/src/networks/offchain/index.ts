@@ -9,9 +9,7 @@ import { createApi } from './api';
 import * as constants from './constants';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
 
-const LOCAL_HUB_URL = (import.meta as any).env?.VITE_LOCAL_HUB_URL as
-  | string
-  | undefined;
+const LOCAL_HUB_URL: string | undefined = import.meta.env.VITE_LOCAL_HUB_URL;
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',

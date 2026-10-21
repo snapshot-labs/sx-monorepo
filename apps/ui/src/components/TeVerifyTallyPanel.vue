@@ -9,12 +9,12 @@ import {
   fetchAuditPayload,
   fetchBallotsPayload,
   fingerprintHex,
-  shortHex,
   TallyDiagnosis,
   VerifyProgress,
   VerifyResult
 } from '@/helpers/teVerify';
 import { runVerify, VerifyCancelled } from '@/helpers/teVerifyClient';
+import { shortenAddress } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -594,7 +594,7 @@ function downloadBundle() {
                   v-if="row.address"
                   class="font-mono text-skin-text truncate"
                 >
-                  {{ shortHex(row.address) }}
+                  {{ shortenAddress(row.address) }}
                 </span>
               </span>
               <span class="text-skin-text shrink-0">

@@ -9,7 +9,12 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
-import { effectivePrivacy } from '../helpers/privacy';
+import {
+  adminForConfig,
+  buildProposalSnapshot,
+  effectivePrivacy,
+  leadTimeError
+} from '../helpers/privacy';
 import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
@@ -18,14 +23,10 @@ import {
   committeeColumns,
   getPrivateBallotError,
   TeConfigError,
-  votingPowerFallback,
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
 import { getEligibilityKey } from '../helpers/teEligibility';
-import {
-  resolveVotingPowerBound,
-  VotingPowerBoundError
-} from '../helpers/teVotingPowerBound';
+import { VotingPowerBoundError } from '../helpers/teVotingPowerBound';
 import {
   captureError,
   getQuorum,
@@ -33,33 +34,7 @@ import {
   validateChoices
 } from '../helpers/utils';
 
-/**
- * Resolve `V` for a space's strategies at a proposal's snapshot block.
- *
- * The fallback is only for strategies that cannot be read as a supply. An RPC
- * failure throws instead, so the author can retry; the block is fixed, so a
- * retry gives the same value.
- *
- * The fallback is sized for the weighted budget whatever the type, because `V` is
- * frozen here but `type` can be changed to weighted until voting opens.
- */
-async function resolveVotingPowerBoundFor(
-  space: any,
-  payload: { snapshot?: string | number }
-) {
-  return resolveVotingPowerBound({
-    strategies: space?.strategies ?? [],
-    proposalNetwork: String(space?.network ?? '1'),
-    snapshotBlock: Number(payload?.snapshot ?? 0),
-    fallbackValue: votingPowerFallback(weightedBudgetFromEnv())
-  });
-}
-
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
-const MIN_DKG_LEAD_TIME_S = parseInt(
-  process.env.MIN_DKG_LEAD_TIME_S || '180',
-  10
-);
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -115,16 +90,6 @@ async function validateSpace(space: any) {
   }
 
   await validateSpaceSettings(space);
-}
-
-/**
- * The config's admin address: the space's first admin, or the author if the space
- * lists none. Same rule the hub uses to decide who may resume a stalled tally.
- */
-function adminForConfig(space: any, author: string): string {
-  const admins = Array.isArray(space?.admins) ? space.admins : [];
-  const first = admins.find((a: any) => typeof a === 'string' && a);
-  return first || author;
 }
 
 export async function verify(body): Promise<any> {
@@ -210,12 +175,8 @@ export async function verify(body): Promise<any> {
   }
 
   if (effectivePrivacy(space, msg.payload) === 'shutter-elgamal') {
-    const now = Math.floor(Date.now() / 1e3);
-    if (msg.payload.start - now < MIN_DKG_LEAD_TIME_S) {
-      return Promise.reject(
-        `shutter-elgamal proposals must start at least ${MIN_DKG_LEAD_TIME_S}s from now to allow DKG to complete`
-      );
-    }
+    const leadError = leadTimeError(msg.payload.start);
+    if (leadError) return Promise.reject(leadError);
     const ballotError = getPrivateBallotError(
       msg.payload.type,
       msg.payload.choices.length,
@@ -440,10 +401,16 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   // the insert.
   if (privacy === 'shutter-elgamal') {
     // `spaceSettings`, not `space`: here `msg.space` is only the space id.
-    let bound;
+    let snapshot;
     try {
-      bound = await resolveVotingPowerBoundFor(spaceSettings, {
-        snapshot: String(proposal.snapshot)
+      snapshot = await buildProposalSnapshot({
+        proposalId: proposal.id,
+        space: spaceSettings,
+        author: proposal.author,
+        start: proposal.start,
+        end: proposal.end,
+        snapshotBlock: Number(proposal.snapshot ?? 0),
+        eligibilityKey: await getEligibilityKey()
       });
     } catch (err: any) {
       // A supply read failed every retry; return a readable error, not a 500.
@@ -451,18 +418,6 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
       log.warn(`[writer] private voting unavailable: ${err.message}`);
       return Promise.reject(`private voting unavailable: ${err.message}`);
     }
-    log.info(
-      `[te-vpbound] ${proposal.id}: V=${bound.value} via ${bound.source}${
-        bound.unrecognised ? ` (unrecognised: ${bound.unrecognised})` : ''
-      }`
-    );
-    const snapshot = await buildCommitteeSnapshot({
-      eligibilityKey: await getEligibilityKey(),
-      votingStart: proposal.start,
-      votingEnd: proposal.end,
-      adminAddress: adminForConfig(spaceSettings, proposal.author),
-      maxTotalWeight: bound.value
-    });
     Object.assign(
       proposal,
       committeeColumns(snapshot),

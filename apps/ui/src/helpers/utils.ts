@@ -635,26 +635,8 @@ export function getChoiceWeight(
 // ({ vk, ciphertexts, zkProof, ... }). Individual ballots are never decrypted, so
 // show a short preview of the ciphertext instead of choice labels.
 export function getEncryptedChoicePreview(choice: Choice): string {
-  const envelope = choice as Record<string, any> | null;
-  let hex: string | undefined;
-
-  if (envelope && typeof envelope === 'object') {
-    const ciphertexts = envelope.ciphertexts;
-    if (Array.isArray(ciphertexts) && ciphertexts.length) {
-      const first = ciphertexts[0];
-      hex = typeof first === 'string' ? first : first?.c1 ?? first?.c2;
-    }
-    if (!hex && typeof envelope.vk === 'string') hex = envelope.vk;
-  }
-
-  if (!hex) {
-    try {
-      hex = JSON.stringify(choice);
-    } catch {
-      hex = String(choice);
-    }
-  }
-
+  const hex: string =
+    (choice as any)?.ciphertexts?.[0]?.c1 ?? JSON.stringify(choice) ?? '';
   if (hex.length <= 24) return hex;
   return `${hex.slice(0, 14)}…${hex.slice(-8)}`;
 }

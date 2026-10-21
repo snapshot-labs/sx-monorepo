@@ -69,19 +69,16 @@ afterAll(async () => {
 });
 
 describe('POST /api/proposal/:id/te_sgp_dkg', () => {
-  async function submitDkg(wallet: Wallet, pkElection = MPK) {
+  async function submitDkg(
+    wallet: Wallet,
+    pkElection = MPK,
+    committeePKs = COMMITTEE
+  ) {
+    const dkg = { pkElection, committeePKs };
     const keyperSig = await wallet.signMessage(
-      dkgResultDigest({
-        electionId: DKG_ID,
-        pkElection,
-        committeePKs: COMMITTEE
-      })
+      dkgResultDigest({ electionId: DKG_ID, ...dkg })
     );
-    return postJson(DKG_ID, 'te_sgp_dkg', {
-      pkElection,
-      committeePKs: COMMITTEE,
-      keyperSig
-    });
+    return postJson(DKG_ID, 'te_sgp_dkg', { ...dkg, keyperSig });
   }
 
   async function electionKey(): Promise<string | null> {
@@ -92,25 +89,9 @@ describe('POST /api/proposal/:id/te_sgp_dkg', () => {
     return row.mpk ? `0x${row.mpk.toLowerCase()}` : null;
   }
 
-  it('refuses a submission from outside the committee', async () => {
+  it('refuses an outsider and a committee of the wrong size', async () => {
     expect(await submitDkg(OUTSIDER)).toBe(403);
-  });
-
-  it('refuses a committee of the wrong size', async () => {
-    const keyperSig = await KEYPERS[0].signMessage(
-      dkgResultDigest({
-        electionId: DKG_ID,
-        pkElection: MPK,
-        committeePKs: COMMITTEE.slice(0, 2)
-      })
-    );
-    expect(
-      await postJson(DKG_ID, 'te_sgp_dkg', {
-        pkElection: MPK,
-        committeePKs: COMMITTEE.slice(0, 2),
-        keyperSig
-      })
-    ).toBe(400);
+    expect(await submitDkg(KEYPERS[0], MPK, COMMITTEE.slice(0, 2))).toBe(400);
   });
 
   it('sets the election key only once a quorum submits the same one', async () => {
@@ -165,17 +146,10 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
   async function submit(
     proposalId: string,
     wallet: Wallet,
-    aggregate: Record<string, any>
+    aggregate: Omit<Parameters<typeof aggregateDigest>[0], 'electionId'>
   ) {
     const keyperSig = await wallet.signMessage(
-      aggregateDigest({
-        electionId: proposalId,
-        aggregates: aggregate.aggregates,
-        admitted: aggregate.admitted,
-        exclusions: aggregate.exclusions,
-        totalAdmittedWeight: aggregate.totalAdmittedWeight,
-        totalScaledWeight: aggregate.totalScaledWeight
-      })
+      aggregateDigest({ ...aggregate, electionId: proposalId })
     );
     // Like the keyper's JSON encoder: integers written as exact digits.
     return postJson(
@@ -211,12 +185,9 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
     );
   });
 
-  it('refuses an aggregate over a ballot set that is still open', async () => {
+  it('refuses an open ballot set and a submission from outside the committee', async () => {
     expect(await submit(OPEN, KEYPERS[0], artifact(OPEN))).toBe(422);
     expect(await canonical(OPEN)).toBeNull();
-  });
-
-  it('refuses a submission from outside the committee', async () => {
     expect(await submit(CLOSED, OUTSIDER, artifact(CLOSED))).toBe(403);
     expect(await canonical(CLOSED)).toBeNull();
   });
@@ -228,8 +199,7 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
 
     expect(await submit(CLOSED, KEYPERS[1], artifact(CLOSED))).toBe(204);
 
-    const agg = await canonical(CLOSED);
-    expect(agg).toMatchObject({
+    expect(await canonical(CLOSED)).toMatchObject({
       admitted: [0, 1],
       exclusions: [],
       totalAdmittedWeight: 2,
@@ -476,8 +446,8 @@ describe('POST /api/proposal/:id/te_result', () => {
   // Above 2^53, so a total rounded through a double would fail the signature.
   const TOTALS = [2n ** 54n + 1n, 0n, 7n];
 
-  /** A result body as raw text, so totals past 2^53 reach the hub exactly. */
-  async function resultBody(wallet: Wallet, totals: bigint[]) {
+  /** Posts a result as raw text, so totals past 2^53 reach the hub exactly. */
+  async function postResult(wallet: Wallet, totals: bigint[]) {
     const result = { totals, keyperIndices: [1, 2], bsgsBound: 1000n };
     const sig = await wallet.signMessage(
       requestDigest(
@@ -486,45 +456,24 @@ describe('POST /api/proposal/:id/te_result', () => {
         resultDigest({ electionId: RESULT_ID, ...result })
       )
     );
-    return (
+    return postJson(
+      RESULT_ID,
+      'te_result',
       `{"result":{"electionId":"${RESULT_ID}","totals":[${totals.join(',')}],` +
-      `"keyperIndices":[1,2],"bsgsBound":1000},"resultPublisherSig":"${sig}"}`
+        `"keyperIndices":[1,2],"bsgsBound":1000},"resultPublisherSig":"${sig}"}`
     );
   }
 
-  it('refuses a result not signed by the result publisher', async () => {
-    expect(
-      await postJson(RESULT_ID, 'te_result', await resultBody(OUTSIDER, TOTALS))
-    ).toBe(403);
-  });
+  it('publishes only the signed totals, once, exactly as signed', async () => {
+    expect(await postResult(OUTSIDER, TOTALS)).toBe(403);
 
-  it('publishes the totals exactly as signed', async () => {
-    expect(
-      await postJson(
-        RESULT_ID,
-        'te_result',
-        await resultBody(PUBLISHER, TOTALS)
-      )
-    ).toBe(204);
+    expect(await postResult(PUBLISHER, TOTALS)).toBe(204);
     const res = await fetch(`${HOST}/api/proposal/${RESULT_ID}/te_result`);
     expect(await res.text()).toContain(`"totals":[${TOTALS.join(',')}]`);
-  });
 
-  it('accepts an identical resend and refuses a different result', async () => {
-    expect(
-      await postJson(
-        RESULT_ID,
-        'te_result',
-        await resultBody(PUBLISHER, TOTALS)
-      )
-    ).toBe(204);
-    expect(
-      await postJson(
-        RESULT_ID,
-        'te_result',
-        await resultBody(PUBLISHER, [1n, 2n, 3n])
-      )
-    ).toBe(409);
+    // An identical resend is accepted; a different result is refused.
+    expect(await postResult(PUBLISHER, TOTALS)).toBe(204);
+    expect(await postResult(PUBLISHER, [1n, 2n, 3n])).toBe(409);
   });
 
   // The digest reads "0x05" as 5, so it must be stored as 5: a bare `0x05` in
@@ -549,7 +498,6 @@ describe('POST /api/proposal/:id/te_result', () => {
       })
     ).toBe(204);
     const res = await fetch(`${HOST}/api/proposal/${HEX_RESULT_ID}/te_result`);
-    const body = JSON.parse(await res.text());
-    expect(body.result.totals).toEqual([5, 0]);
+    expect((await res.json()).result.totals).toEqual([5, 0]);
   });
 });

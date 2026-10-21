@@ -26,6 +26,8 @@
  * smallest power of two that fits; usually 1 (no scaling).
  *
  * Derived on read, like `budget`, because `type` can be edited until voting starts.
+ *
+ * @public Exported for the sequencer's `deriveScale-parity.test.ts`.
  */
 export function deriveScale(
   budget: number,

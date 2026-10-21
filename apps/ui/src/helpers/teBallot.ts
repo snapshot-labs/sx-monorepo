@@ -12,6 +12,7 @@ import {
   BallotVerifyParams,
   buildBallot,
   G1Point,
+  G2Point,
   initCurves,
   schnorrKeygen
 } from '@shutter-network/urban-verified-crypto';
@@ -60,10 +61,6 @@ export interface TeBallotEnvelope {
    * EIP-712 vote signature, because the envelope is sent as the vote's `choice`.
    */
   attestation: BallotCredential;
-}
-
-function toHex(bytes: Uint8Array): string {
-  return hexlify(bytes);
 }
 
 /**
@@ -119,7 +116,6 @@ async function buildEnvelope(
   const pseudonym = pseudonymFor(voter, proposalId);
   const mpkBytes = arrayify(mpk);
 
-  const { G2Point } = await import('@shutter-network/urban-verified-crypto');
   const mpkPoint = G2Point.fromBytes(mpkBytes);
 
   const { sk, vk } = schnorrKeygen();
@@ -130,7 +126,7 @@ async function buildEnvelope(
     sequencerUrl,
     space,
     proposalId,
-    vk: toHex(vk.toBytes()),
+    vk: hexlify(vk.toBytes()),
     voter
   });
 
@@ -153,15 +149,15 @@ async function buildEnvelope(
   }
 
   return {
-    electionId: toHex(ballot.electionId),
-    pseudonym: toHex(ballot.pseudonym),
-    vk: toHex(ballot.vk),
+    electionId: hexlify(ballot.electionId),
+    pseudonym: hexlify(ballot.pseudonym),
+    vk: hexlify(ballot.vk),
     ciphertexts: ballot.ciphertexts.map(([c1, c2]) => ({
-      c1: toHex(c1),
-      c2: toHex(c2)
+      c1: hexlify(c1),
+      c2: hexlify(c2)
     })),
-    zkProof: toHex(ballot.zkProof),
-    voterSignature: toHex(ballot.voterSignature),
+    zkProof: hexlify(ballot.zkProof),
+    voterSignature: hexlify(ballot.voterSignature),
     // Inside the envelope, so the EIP-712 vote signature covers it too.
     attestation: issued.attestation
   };

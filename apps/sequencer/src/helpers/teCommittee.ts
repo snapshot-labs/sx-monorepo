@@ -14,24 +14,17 @@
  * `apps/hub/src/helpers/sgpConfig.ts`, so the wire format is defined in one place.
  */
 
-import { keccak256 } from '@ethersproject/keccak256';
-import { toUtf8Bytes } from '@ethersproject/strings';
+import snapshot from '@snapshot-labs/snapshot.js';
 import fetch from 'node-fetch';
 import log from './log';
 
 /**
- * EIP-55 checksum of an already-validated address. Written here because the
- * sequencer does not depend on `@ethersproject/address`. The checksummed form is
- * required: the hub compares committee addresses against `getAddress()` output.
+ * EIP-55 checksum of an already-validated address; the hub compares committee
+ * addresses against `getAddress()` output. Lowercased first, so a mixed-case
+ * address with a wrong checksum is re-checksummed rather than rejected.
  */
 function toChecksumAddress(address: string): string {
-  const lower = address.toLowerCase().slice(2);
-  const hash = keccak256(toUtf8Bytes(lower)).slice(2);
-  let out = '0x';
-  for (let i = 0; i < lower.length; i++) {
-    out += parseInt(hash[i], 16) >= 8 ? lower[i].toUpperCase() : lower[i];
-  }
-  return out;
+  return snapshot.utils.getFormattedAddress(address.toLowerCase(), 'evm');
 }
 
 /** One committee member: the address that signs its writes, and where to reach it. */
@@ -107,8 +100,8 @@ export function getPrivateBallotError(
  * solve. It depends on the coordinator's hardware, so it is set here, not by SGP.
  *
  * Cost is about `2√bound × 11 µs` of time and `218 B × √bound` of memory (see
- * `shutter-governance-protocol/COORDINATOR_SIZING.md`): 1e12 is about 21 s and
- * 220 MB, and quadrupling the bound doubles both. The default suits a 1 GB
+ * `shutter-governance-protocol/COORDINATOR_SIZING.md`): 1e12 is about 22 s and
+ * 220 MB, and quadrupling the bound doubles both. The default suits a 0.5 GB
  * coordinator. Raise it only together with memory; `recover_result` refuses a
  * bound that is too large.
  */

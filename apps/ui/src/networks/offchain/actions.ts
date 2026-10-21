@@ -67,9 +67,8 @@ export function createActions(
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
-  const sequencerUrl = (import.meta as any).env?.VITE_LOCAL_SEQUENCER_URL as
-    | string
-    | undefined;
+  const sequencerUrl: string | undefined = import.meta.env
+    .VITE_LOCAL_SEQUENCER_URL;
   const client = new clients.OffchainEthereumSig({
     networkConfig,
     ...(sequencerUrl ? { sequencerUrl } : {})

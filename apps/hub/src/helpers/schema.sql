@@ -1,37 +1,3 @@
--- ===========================================================================
---  READ THIS BEFORE ADDING OR CHANGING A COLUMN
---
---  Editing this file does NOT migrate an existing database.
---
---  It is loaded by docker/mysql-init/00-init.sh, which is a
---  docker-entrypoint-initdb.d script: it runs only when the MySQL data
---  directory is empty. Since mysql-data/ is a persistent bind mount, any stack
---  that has booted even once will never see a change made here.
---
---  Applies automatically:  test databases -- test/setupDb.ts drops and recreates
---                          from this file on every run
---                          a genuinely fresh stack with an empty mysql-data/
---  Does NOT apply:         every already-running stack, and every deployed
---                          environment
---
---  So a change here needs one of:
---    * a hand-applied ALTER, which is this repo's current practice
---    * a full reset:  docker compose down && rm -rf mysql-data && docker compose up
---
---  The failure mode is deferred, not immediate: a stack looks perfectly healthy
---  until the first request touches the missing column, then returns a 500 that
---  says nothing about schema drift. If you add a column, say so in the PR body.
---
---  There is no migration mechanism for hub or the sequencer today. One is
---  planned but deliberately deferred; apps/mana already uses knex migrations if
---  you want the pattern. The plan, the intended migration files, and the MySQL 8
---  specifics that bite -- ADD COLUMN IF NOT EXISTS does not exist, and
---  ALGORITHM=INSTANT should be stated explicitly.
---
---  NOTE: apps/sequencer/test/schema.sql keeps its own copy of the proposals
---  table for the sequencer's tests. The two have drifted before. Change both.
--- ===========================================================================
-
 CREATE TABLE spaces (
   id VARCHAR(64) NOT NULL,
   name VARCHAR(64) NOT NULL,
@@ -179,9 +145,7 @@ CREATE TABLE te_decryption_shares (
   proof_e VARBINARY(32) NOT NULL,
   proof_z VARBINARY(32) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index, candidate),
-  INDEX idx_te_shares_proposal (proposal_id),
-  INDEX idx_te_shares_posted (posted_at)
+  PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
 -- Pre-finalisation DKG submissions: one row per (proposal, keyper). The hub

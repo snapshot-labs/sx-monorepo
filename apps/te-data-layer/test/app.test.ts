@@ -4,14 +4,12 @@
  * them), and 501 for unsupported writes.
  */
 
-import fetch from 'node-fetch';
 import request from 'supertest';
 import { buildApp } from '../src/app';
 
-// ts-jest hoists this above the imports, so the app gets the mock.
-jest.mock('node-fetch', () => jest.fn());
-
-const mockFetch = fetch as unknown as jest.Mock;
+// The app calls the global fetch, so stub it for every test.
+const mockFetch = jest.fn();
+global.fetch = mockFetch as unknown as typeof fetch;
 
 const BARE = '1111111111111111111111111111111111111111111111111111111111111111';
 const PREFIXED = `0x${BARE}`;
@@ -46,6 +44,13 @@ function lastUrl(): string {
 function forwardedBody(): string {
   return mockFetch.mock.calls[0][1].body;
 }
+
+const record = {
+  config: { electionId: PREFIXED, numCandidates: 2 },
+  cancelled: false,
+  tallyStalled: false,
+  finalizedKey: null
+};
 
 let app: ReturnType<typeof buildApp>;
 
@@ -118,12 +123,6 @@ describe('election id translation', () => {
 });
 
 describe('routes', () => {
-  const record = {
-    config: { electionId: PREFIXED, numCandidates: 2 },
-    cancelled: false,
-    tallyStalled: false,
-    finalizedKey: null
-  };
   const submissions = [
     { electionId: PREFIXED, pkElection: '0xaa', committeePKs: ['0xbb'] }
   ];
@@ -167,31 +166,29 @@ describe('routes', () => {
   };
 
   // Each route maps to one hub path, and returns the shape the protocol client
-  // reads (for example ballots without the hub's `total`). Writes answer 204.
+  // reads (for example ballots without the hub's `total`). Writes answer 204
+  // and forward their body unchanged. `body` defaults to the hub's `reply`.
   it.each([
     {
       name: 'GET election, passed through untouched',
       method: 'GET',
       suffix: '',
       hub: `${HUB}/te_sgp_election`,
-      reply: record,
-      body: record
+      reply: record
     },
     {
       name: 'GET finalized key, from the election read',
       method: 'GET',
       suffix: '/dkg/finalized',
       hub: `${HUB}/te_sgp_election`,
-      reply: { finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] } },
-      body: { finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] } }
+      reply: { finalizedKey: { pkElection: '0xaa', committeePKs: ['0xbb'] } }
     },
     {
       name: 'GET ballot count, asking the hub for a count only',
       method: 'GET',
       suffix: '/ballots/count',
       hub: `${HUB}/te_sgp_ballots?countOnly=1`,
-      reply: { count: 7 },
-      body: { count: 7 }
+      reply: { count: 7 }
     },
     {
       name: 'GET ballots',
@@ -206,89 +203,76 @@ describe('routes', () => {
       method: 'GET',
       suffix: '/dkg',
       hub: `${HUB}/te_sgp_dkg`,
-      reply: { submissions },
-      body: { submissions }
+      reply: { submissions }
     },
     {
       name: 'GET canonical aggregate',
       method: 'GET',
       suffix: '/aggregate',
       hub: `${HUB}/te_sgp_aggregate`,
-      reply: { aggregate },
-      body: { aggregate }
+      reply: { aggregate }
     },
     {
       name: 'GET decryption shares',
       method: 'GET',
       suffix: '/shares',
       hub: `${HUB}/te_sgp_decryption_shares`,
-      reply: { shares },
-      body: { shares }
+      reply: { shares }
     },
     {
       name: 'GET published result',
       method: 'GET',
       suffix: '/result',
       hub: `${HUB}/te_result`,
-      reply: { result },
-      body: { result }
+      reply: { result }
     },
     {
       name: 'POST dkg submission',
       method: 'POST',
       suffix: '/dkg',
       hub: `${HUB}/te_sgp_dkg`,
-      send: { pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' },
-      forwards: {
-        pkElection: '0xaa',
-        committeePKs: ['0xbb'],
-        keyperSig: '0xcc'
-      }
+      send: { pkElection: '0xaa', committeePKs: ['0xbb'], keyperSig: '0xcc' }
     },
     {
       name: 'POST aggregate, body unchanged',
       method: 'POST',
       suffix: '/aggregate',
       hub: `${HUB}/te_aggregate`,
-      send: aggregateWrite,
-      forwards: aggregateWrite
+      send: aggregateWrite
     },
     {
       name: 'POST decryption share, body unchanged',
       method: 'POST',
       suffix: '/shares',
       hub: `${HUB}/te_sgp_decryption_share`,
-      send: shareWrite,
-      forwards: shareWrite
+      send: shareWrite
     },
     {
       name: 'POST result with the publisher signature',
       method: 'POST',
       suffix: '/result',
       hub: `${HUB}/te_result`,
-      send: { result, resultPublisherSig: '0xsig' },
-      forwards: { result, resultPublisherSig: '0xsig' }
+      send: { result, resultPublisherSig: '0xsig' }
     },
     {
       name: 'POST tally stall with the publisher signature',
       method: 'POST',
       suffix: '/tally-stalled',
       hub: `${HUB}/te_tally_stalled`,
-      send: { stalled: true, resultPublisherSig: '0xsig' },
-      forwards: { stalled: true, resultPublisherSig: '0xsig' }
+      send: { stalled: true, resultPublisherSig: '0xsig' }
     }
-  ])('$name', async ({ method, suffix, hub, reply, body, send, forwards }) => {
+  ])('$name', async ({ method, suffix, hub, reply, body, send }) => {
     if (method === 'GET') {
       hubReplies(reply);
       const res = await call(method, suffix);
       expect(res.status).toBe(200);
-      expect(res.body).toEqual(body);
+      expect(res.body).toEqual(body ?? reply);
     } else {
       hubReplies({}, 204);
       const res = await call(method, suffix, send);
       expect(res.status).toBe(204);
       expect(mockFetch.mock.calls[0][1].method).toBe('POST');
-      expect(JSON.parse(forwardedBody())).toEqual(forwards);
+      expect(JSON.parse(forwardedBody())).toEqual(send);
     }
     expect(lastUrl()).toBe(hub);
   });
@@ -462,12 +446,6 @@ describe('the /port read mount', () => {
   // Keypers append `/port` to their base URL and read only from there. It is the
   // same read router as the root, so one read checks the mount.
   it('serves an election read identically to the root surface', async () => {
-    const record = {
-      config: { electionId: PREFIXED, numCandidates: 2 },
-      cancelled: false,
-      tallyStalled: false,
-      finalizedKey: null
-    };
     hubReplies(record);
     const viaPort = await request(app).get(`/port/elections/${BARE}`);
     hubReplies(record);
@@ -479,14 +457,11 @@ describe('the /port read mount', () => {
 
   // Keypers must send writes through the coordinator, so no write route may
   // answer under /port.
-  it.each([
-    `/port/elections/${BARE}/dkg`,
-    `/port/elections/${BARE}/aggregate`,
-    `/port/elections/${BARE}/shares`,
-    `/port/elections/${BARE}/result`,
-    `/port/elections/${BARE}/tally-stalled`,
-    `/port/elections/${BARE}/ballots`
-  ])('does not route the write %s', async path => {
+  it.each(
+    ['dkg', 'aggregate', 'shares', 'result', 'tally-stalled', 'ballots'].map(
+      w => `/port/elections/${BARE}/${w}`
+    )
+  )('does not route the write %s', async path => {
     const res = await request(app).post(path).send({});
     expect(res.status).toBe(404);
     expect(mockFetch).not.toHaveBeenCalled();

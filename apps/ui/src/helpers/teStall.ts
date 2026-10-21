@@ -4,6 +4,7 @@
  */
 
 import { requestDigest, requestNoncePayload } from './sgpRequest';
+import { endpoint } from './teVerify';
 
 /** The fields of the hub's SGP election state that the stall UI needs. */
 export type SgpElectionState = {
@@ -15,14 +16,6 @@ export type SgpElectionState = {
    */
   tallyStallReason: string | null;
 };
-
-function endpoint(
-  apiBaseUrl: string,
-  proposalId: string,
-  route: string
-): string {
-  return `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(proposalId)}/${route}`;
-}
 
 export async function fetchSgpElection(
   apiBaseUrl: string,

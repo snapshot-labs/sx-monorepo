@@ -14,7 +14,7 @@
  * byte array, not its hex string), which is what the hub's `verifyMessage` expects.
  */
 
-import { arrayify } from '@ethersproject/bytes';
+import { arrayify, concat } from '@ethersproject/bytes';
 import { keccak256 } from '@ethersproject/keccak256';
 
 const REQUEST_DST = new TextEncoder().encode(
@@ -25,17 +25,6 @@ function u32BE(n: number): Uint8Array {
   const b = new Uint8Array(4);
   new DataView(b.buffer).setUint32(0, n, false);
   return b;
-}
-
-function concatBytes(parts: Uint8Array[]): Uint8Array {
-  const total = parts.reduce((n, p) => n + p.length, 0);
-  const out = new Uint8Array(total);
-  let at = 0;
-  for (const p of parts) {
-    out.set(p, at);
-    at += p.length;
-  }
-  return out;
 }
 
 /**
@@ -70,7 +59,7 @@ export function requestDigest(
     );
   }
   const opBytes = new TextEncoder().encode(op);
-  const packed = concatBytes([
+  const packed = concat([
     REQUEST_DST,
     u32BE(opBytes.length),
     opBytes,

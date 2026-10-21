@@ -3,30 +3,24 @@ import { getProposal, getSpace } from '../helpers/actions';
 import log from '../helpers/log';
 import { containsFlaggedLinks } from '../helpers/moderation';
 import db from '../helpers/mysql';
-import { effectivePrivacy } from '../helpers/privacy';
+import {
+  buildProposalSnapshot,
+  effectivePrivacy,
+  leadTimeError
+} from '../helpers/privacy';
 import {
   ballotParamsColumn,
-  buildCommitteeSnapshot,
   committeeColumns,
   frozenWeightedBudget,
   getPrivateBallotError,
   parseCommitteeSnapshotLoose,
   TeCommitteeSnapshot,
   TeConfigError,
-  votingPowerFallback,
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
 import { getEligibilityKey } from '../helpers/teEligibility';
-import {
-  resolveVotingPowerBound,
-  VotingPowerBoundError
-} from '../helpers/teVotingPowerBound';
+import { VotingPowerBoundError } from '../helpers/teVotingPowerBound';
 import { jsonParse, validateChoices } from '../helpers/utils';
-
-const MIN_DKG_LEAD_TIME_S = parseInt(
-  process.env.MIN_DKG_LEAD_TIME_S || '180',
-  10
-);
 
 // We don't need most of the checks used https://github.com/snapshot-labs/snapshot-sequencer/blob/89992b49c96fedbbbe33b42041c9cbe5a82449dd/src/writer/proposal.ts#L62
 // because we assume that those checks were already done during the proposal creation
@@ -116,12 +110,8 @@ export async function verify(body): Promise<any> {
     if (ballotError) return Promise.reject(ballotError);
   }
   if (privacy === 'shutter-elgamal' && !proposal.te_mpk) {
-    const now = Math.floor(Date.now() / 1e3);
-    if (proposal.start - now < MIN_DKG_LEAD_TIME_S) {
-      return Promise.reject(
-        `shutter-elgamal proposals must start at least ${MIN_DKG_LEAD_TIME_S}s from now to allow DKG to complete`
-      );
-    }
+    const leadError = leadTimeError(proposal.start);
+    if (leadError) return Promise.reject(leadError);
   }
 
   return Promise.resolve(proposal);
@@ -177,27 +167,14 @@ export async function action(body, ipfs): Promise<void> {
   let frozenSnapshot: TeCommitteeSnapshot | null = null;
   if (privacy === 'shutter-elgamal' && existing && !existing.te_sgp_config) {
     try {
-      const snapshot = await buildCommitteeSnapshot({
-        eligibilityKey: await getEligibilityKey(),
-        votingStart: existing.start,
-        votingEnd: existing.end,
-        // Same rule as the hub: the space's first admin, or the author if none.
-        adminAddress:
-          (Array.isArray(spaceSettings?.admins)
-            ? spaceSettings.admins.find((a: any) => typeof a === 'string' && a)
-            : undefined) || existing.author,
-        // Resolved at the proposal's snapshot block, where its voting power is
-        // read.
-        maxTotalWeight: (
-          await resolveVotingPowerBound({
-            strategies: spaceSettings?.strategies ?? [],
-            proposalNetwork: String(spaceSettings?.network ?? '1'),
-            snapshotBlock: Number(existing.snapshot ?? 0),
-            // Sized for the weighted budget whatever the type, as in proposal.ts,
-            // so a later type change does not force scaling.
-            fallbackValue: votingPowerFallback(weightedBudgetFromEnv())
-          })
-        ).value
+      const snapshot = await buildProposalSnapshot({
+        proposalId: existing.id,
+        space: spaceSettings,
+        author: existing.author,
+        start: existing.start,
+        end: existing.end,
+        snapshotBlock: Number(existing.snapshot ?? 0),
+        eligibilityKey: await getEligibilityKey()
       });
       Object.assign(proposal, committeeColumns(snapshot));
       frozenSnapshot = snapshot;

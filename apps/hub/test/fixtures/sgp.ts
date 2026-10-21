@@ -8,7 +8,7 @@ export const HOST = `http://localhost:${process.env.PORT || 3030}`;
  * Eligibility public key used by the e2e fixtures. A fixed value: the tests only
  * need the key in the proposal config to match the published one.
  */
-export const ELIGIBILITY_KEY = `0x${'ab'.repeat(48)}`;
+const ELIGIBILITY_KEY = `0x${'ab'.repeat(48)}`;
 
 // Fixed keys, so each signature recovers to a known committee index.
 export const KEYPERS = [

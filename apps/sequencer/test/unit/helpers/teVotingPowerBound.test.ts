@@ -17,23 +17,28 @@ jest.mock('../../../src/helpers/provider', () => ({
   getProvider: () => ({ __mock: true })
 }));
 
-jest.mock('@ethersproject/contracts', () => ({
-  Contract: class {
-    constructor(public address: string) {}
-    async totalSupply() {
-      calls.push(this.address.toLowerCase());
-      if (failuresLeft > 0) {
-        failuresLeft--;
-        throw new Error('rpc down');
+jest.mock('@snapshot-labs/snapshot.js', () => {
+  const originalModule = jest.requireActual('@snapshot-labs/snapshot.js');
+
+  return {
+    ...originalModule,
+    utils: {
+      ...originalModule.utils,
+      call: async (_provider: unknown, _abi: unknown, [address]: string[]) => {
+        calls.push(address.toLowerCase());
+        if (failuresLeft > 0) {
+          failuresLeft--;
+          throw new Error('rpc down');
+        }
+        const v = supplies[address.toLowerCase()];
+        if (v === undefined) {
+          throw new Error(`no supply stubbed for ${address}`);
+        }
+        return { toString: () => v };
       }
-      const v = supplies[this.address.toLowerCase()];
-      if (v === undefined) {
-        throw new Error(`no supply stubbed for ${this.address}`);
-      }
-      return { toString: () => v };
     }
-  }
-}));
+  };
+});
 
 const TOKEN_A = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const TOKEN_B = '0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';

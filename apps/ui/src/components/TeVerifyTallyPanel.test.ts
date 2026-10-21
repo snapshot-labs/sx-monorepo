@@ -3,6 +3,7 @@ import { createTune } from '@snapshot-labs/tune';
 import { flushPromises, mount } from '@vue/test-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as teVerify from '@/helpers/teVerify';
+import { shortenAddress } from '@/helpers/utils';
 import TeVerifyTallyPanel from './TeVerifyTallyPanel.vue';
 
 // The crypto is stubbed so each test can choose the verification result.
@@ -129,8 +130,8 @@ describe('TeVerifyTallyPanel', () => {
     await detail!.trigger('click');
     const text = wrapper.html();
     // Keyper indices are 1-based: keyper 1 is ADDRESSES[0], keyper 2 is ADDRESSES[1].
-    expect(text).toContain(ADDRESSES[0].slice(0, 6));
-    expect(text).not.toContain(ADDRESSES[2].slice(0, 6));
+    expect(text).toContain(shortenAddress(ADDRESSES[0]));
+    expect(text).not.toContain(shortenAddress(ADDRESSES[2]));
   });
 
   // Leaving the page must stop the worker, so verifying again does not start a

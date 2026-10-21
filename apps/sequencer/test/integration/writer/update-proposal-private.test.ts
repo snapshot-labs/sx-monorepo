@@ -117,8 +117,8 @@ const PUBLIC = {
   te_config: null
 };
 
-/** An edit payload; leave `privacy` out to omit the key entirely. */
-function editBody(over: { privacy?: string } = {}) {
+/** A signed-message envelope for proposal `ID`, with the given payload fields. */
+function message(payload: Record<string, unknown>) {
   return {
     address: AUTHOR,
     msg: JSON.stringify({
@@ -126,17 +126,19 @@ function editBody(over: { privacy?: string } = {}) {
       timestamp: String(now()),
       payload: {
         proposal: ID,
-        name: 'after the edit',
         body: '',
         discussion: '',
         choices: ['A', 'B', 'C'],
-        type: 'weighted',
         metadata: {},
-        ...over
+        ...payload
       }
     })
   };
 }
+
+/** An edit payload; leave `privacy` out to omit the key entirely. */
+const editBody = (over: { privacy?: string } = {}) =>
+  message({ name: 'after the edit', type: 'weighted', ...over });
 
 async function stored(): Promise<Record<string, any>> {
   const [row] = await db.queryAsync('SELECT * FROM proposals WHERE id = ?', [
@@ -224,12 +226,11 @@ describe('update-proposal: the DKG lead-time gate', () => {
   ])('%s', async (_label, privacy, opensIn, keyed, rejected) => {
     const start = now() + opensIn;
     await seed({
+      ...PUBLIC,
       privacy,
       start,
       end: start + 600,
-      te_mpk: keyed ? Buffer.alloc(96, 1) : null,
-      te_sgp_config: null,
-      te_config: null
+      te_mpk: keyed ? Buffer.alloc(96, 1) : null
     });
     expect(await rejectedByLeadTimeGate()).toBe(rejected);
   });
@@ -319,35 +320,22 @@ describe('update-proposal: a type edit on a fallback space keeps full precision'
     await db.queryAsync('DELETE FROM proposals WHERE id = ?', [ID]);
   });
 
-  function message(type: string) {
-    return {
-      address: AUTHOR,
-      msg: JSON.stringify({
-        space: SPACE,
-        timestamp: String(now()),
-        payload: {
-          proposal: ID,
-          name: `private ${type}`,
-          body: '',
-          discussion: '',
-          choices: ['A', 'B', 'C'],
-          type,
-          start: now() + 3600,
-          end: now() + 7200,
-          snapshot: 1,
-          privacy: 'shutter-elgamal',
-          metadata: {},
-          app: ''
-        }
-      })
-    };
-  }
+  const create = (type: string) =>
+    message({
+      name: `private ${type}`,
+      type,
+      start: now() + 3600,
+      end: now() + 7200,
+      snapshot: 1,
+      privacy: 'shutter-elgamal',
+      app: ''
+    });
 
   it('single-choice edited to weighted keeps scale 1', async () => {
-    await createAction(message('single-choice'), 'ipfs1', 'receipt', ID);
+    await createAction(create('single-choice'), 'ipfs1', 'receipt', ID);
     expect((await stored()).te_config.scale).toBe(1);
 
-    await updateAction(message('weighted'), 'ipfs2');
+    await updateAction(create('weighted'), 'ipfs2');
     expect((await stored()).te_config.scale).toBe(1);
   });
 
@@ -360,7 +348,7 @@ describe('update-proposal: a type edit on a fallback space keeps full precision'
         new bound.VotingPowerBoundError('could not read totalSupply')
       );
     await expect(
-      createAction(message('single-choice'), 'ipfs1', 'receipt', ID)
+      createAction(create('single-choice'), 'ipfs1', 'receipt', ID)
     ).rejects.toBe('private voting unavailable: could not read totalSupply');
   });
 });

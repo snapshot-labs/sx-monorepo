@@ -72,15 +72,50 @@ const REQUEST_FRESHNESS_S = 300;
 /** How many proposals one `list` response may name. */
 const LIST_LIMIT = 500;
 
-async function loadProposal(proposalId: string): Promise<any | null> {
-  const rows = await (db as any).queryAsync(
+/** Loads a private proposal, or answers 404 and returns null. */
+async function loadProposal(proposalId: string, res: any): Promise<any | null> {
+  const [proposal] = await (db as any).queryAsync(
     `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
-            te_committee_pks, te_sgp_config, te_config, te_aggregate,
-            te_tally_stalled, te_tally_stall_reason
+            te_committee_pks, te_sgp_config, te_config, te_tally_stalled,
+            te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
     [proposalId]
   );
-  return rows[0] || null;
+  if (!proposal) {
+    sendError(res, 'proposal_not_found', 404);
+    return null;
+  }
+  if (proposal.privacy !== 'shutter-elgamal') {
+    sendError(res, 'proposal_not_private', 404);
+    return null;
+  }
+  return proposal;
+}
+
+/** The proposal's frozen committee, or answers 503 and returns null. */
+function committeeFor(
+  proposal: any,
+  res: any
+): ReturnType<typeof parseCommitteeSnapshot> | null {
+  try {
+    return parseCommitteeSnapshot(proposal.te_sgp_config);
+  } catch (err: any) {
+    // Without a committee no write can be authorised.
+    log.error(`[sgp] ${proposal.id}: ${err.message}`);
+    sendError(res, 'committee_not_configured', 503);
+    return null;
+  }
+}
+
+/** The signer's 0-based position in the committee, or -1 for a non-member. */
+function keyperIndexOf(
+  snapshot: ReturnType<typeof parseCommitteeSnapshot>,
+  signer: string | null
+): number {
+  if (!signer) return -1;
+  return snapshot.keypers.findIndex(
+    k => k.address.toLowerCase() === signer.toLowerCase()
+  );
 }
 
 /**
@@ -118,11 +153,8 @@ router.get('/te_sgp_elections', async (req, res) => {
 router.get('/proposal/:id/te_sgp_election', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     let config;
     try {
@@ -205,11 +237,8 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
 router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const start = Math.max(
       0,
@@ -390,20 +419,11 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
 router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      // Without a committee the submission cannot be authorised.
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const { pkElection, committeePKs, keyperSig } = req.body || {};
     let pkCanon: string;
@@ -444,11 +464,7 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
       return sendError(res, err?.message || 'bad_request', 400);
     }
 
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer!.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
       log.warn(
         `[sgp] ${proposalId}: DKG submission from non-member ${signer ?? 'unrecoverable'}`
@@ -655,19 +671,11 @@ async function submitAggregate(
 router.post('/proposal/:id/te_aggregate', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     // The protocol client treats 422 as a voting-window error and retries later
     // (a 400 would never be retried).
@@ -712,11 +720,7 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
     }
 
     const signer = recoverDigestSigner(digest, keyperSig);
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
       log.warn(
         `[sgp] ${proposalId}: aggregate from non-member ${signer ?? 'unrecoverable'}`
@@ -767,19 +771,11 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
 router.get('/proposal/:id/te_sgp_aggregate', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const canonical = await canonicalAggregateFor(proposalId, snapshot);
 
@@ -884,19 +880,11 @@ async function verifyShareProofs(
 router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     if (Math.floor(Date.now() / 1000) < Number(proposal.end)) {
       return sendError(
@@ -944,11 +932,7 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
     }
 
     const signer = recoverDigestSigner(digest, keyperSig);
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
       log.warn(
         `[sgp] ${proposalId}: decryption share from non-member ${signer ?? 'unrecoverable'}`
@@ -1064,11 +1048,8 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
 router.get('/proposal/:id/te_sgp_decryption_shares', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const choices = parseJsonField<string[]>(proposal.choices, []);
     const rows = await (db as any).queryAsync(
@@ -1119,19 +1100,11 @@ router.get('/proposal/:id/te_sgp_decryption_shares', async (req, res) => {
 router.post('/proposal/:id/te_result', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     // Re-parse the raw body: totals can exceed 2^53, and `req.body` has already
     // rounded them.
@@ -1234,11 +1207,8 @@ router.post('/proposal/:id/te_result', async (req, res) => {
 router.get('/proposal/:id/te_result', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const rows = await (db as any).queryAsync(
       'SELECT totals_json, keyper_indices, bsgs_bound FROM te_results WHERE proposal_id = ? LIMIT 1',
@@ -1292,19 +1262,11 @@ async function resumeAuthorities(proposal: any): Promise<string[]> {
 router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const stalled = req.body?.stalled;
     const sig = req.body?.resultPublisherSig ?? req.body?.adminSig;
@@ -1408,11 +1370,8 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
 router.get('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
     const rows = await (db as any).queryAsync(
       `SELECT keyper_index, mpk_hex, committee_pks_hex, signature
          FROM te_dkg_submissions WHERE proposal_id = ? ORDER BY keyper_index`,

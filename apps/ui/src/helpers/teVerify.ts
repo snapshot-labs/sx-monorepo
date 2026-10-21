@@ -23,7 +23,7 @@
  * The caller compares the tallies to the proposal's published scores, so the UI
  * can show a mismatch in the right place.
  */
-import { arrayify } from '@ethersproject/bytes';
+import { arrayify, hexlify } from '@ethersproject/bytes';
 import { keccak256 } from '@ethersproject/keccak256';
 import {
   addCt,
@@ -58,16 +58,13 @@ export function fingerprintHex(parts: string[]): string {
   return `${digest.slice(0, 8)}…${digest.slice(-8)}`;
 }
 
-/** Shorten a long hex string to `0x1234…cdef` for compact display. */
-export function shortHex(
-  hex: string | undefined | null,
-  lead = 6,
-  tail = 6
+/** The hub URL of one private-voting route for a proposal. */
+export function endpoint(
+  apiBaseUrl: string,
+  proposalId: string,
+  route: string
 ): string {
-  if (!hex) return '-';
-  const s = hex.startsWith('0x') ? hex : `0x${hex}`;
-  if (s.length <= 2 + lead + tail + 1) return s;
-  return `${s.slice(0, 2 + lead)}…${s.slice(-tail)}`;
+  return `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(proposalId)}/${route}`;
 }
 
 export interface AuditPayload {
@@ -184,9 +181,7 @@ export async function fetchAuditPayload(
   apiBaseUrl: string,
   proposalId: string
 ): Promise<AuditPayload> {
-  const url = `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(
-    proposalId
-  )}/te_decryption_shares`;
+  const url = endpoint(apiBaseUrl, proposalId, 'te_decryption_shares');
   const r = await fetch(url, { credentials: 'omit' });
   if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);
   return (await r.json()) as AuditPayload;
@@ -204,9 +199,7 @@ export async function fetchBallotsPayload(
   proposalId: string,
   scale: number
 ): Promise<BallotsPayload> {
-  const url = `${apiBaseUrl.replace(/\/$/, '')}/proposal/${encodeURIComponent(
-    proposalId
-  )}/te_sgp_ballots`;
+  const url = endpoint(apiBaseUrl, proposalId, 'te_sgp_ballots');
   const ballots: AuditBallot[] = [];
   for (;;) {
     const r = await fetch(`${url}?start=${ballots.length}`, {
@@ -235,11 +228,7 @@ export async function fetchBallotsPayload(
 }
 
 function ctToHex(ct: Ciphertext): { c1: string; c2: string } {
-  const toHex = (b: Uint8Array) =>
-    `0x${Array.from(b)
-      .map(x => x.toString(16).padStart(2, '0'))
-      .join('')}`;
-  return { c1: toHex(ct.c1.toBytes()), c2: toHex(ct.c2.toBytes()) };
+  return { c1: hexlify(ct.c1.toBytes()), c2: hexlify(ct.c2.toBytes()) };
 }
 
 /**

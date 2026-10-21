@@ -1,17 +1,5 @@
--- ===========================================================================
---  Test-only schema for the sequencer suite. Recreated from scratch by
---  test/setupDb.ts on every run, so a change here needs no migration.
---
---  It carries its own copy of the proposals table, which must stay in step with
---  apps/hub/src/helpers/schema.sql -- the sequencer writes proposals that the
---  hub reads. The two have already drifted twice: this copy was missing
---  te_dkg_status while the hub had it, and later te_tally_stalled, which means
---  the suite was passing against a shape production did not have.
---
---  If you add a column to the hub schema, add it here too, and read the header
---  of that file for why a change there does not reach a running database.
--- ===========================================================================
-
+-- The te_* columns and tables must match apps/hub/src/helpers/schema.sql: the
+-- sequencer writes rows that the hub reads.
 CREATE TABLE spaces (
   id VARCHAR(64) NOT NULL,
   name VARCHAR(64) NOT NULL,
@@ -157,9 +145,7 @@ CREATE TABLE te_decryption_shares (
   proof_e VARBINARY(32) NOT NULL,
   proof_z VARBINARY(32) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index, candidate),
-  INDEX idx_te_shares_proposal (proposal_id),
-  INDEX idx_te_shares_posted (posted_at)
+  PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
 -- Pre-finalisation DKG submissions: see apps/hub/src/helpers/schema.sql.

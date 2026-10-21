@@ -50,9 +50,7 @@ CREATE TABLE te_decryption_shares (
   proof_e VARBINARY(32) NOT NULL,
   proof_z VARBINARY(32) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index, candidate),
-  INDEX idx_te_shares_proposal (proposal_id),
-  INDEX idx_te_shares_posted (posted_at)
+  PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
 CREATE TABLE te_dkg_submissions (

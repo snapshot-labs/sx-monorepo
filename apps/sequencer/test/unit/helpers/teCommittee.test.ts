@@ -55,10 +55,9 @@ function env(overrides: Partial<TeEnv> = {}): TeEnv {
 
 const window = { votingStart: 1_770_000_000, votingEnd: 1_770_086_400 };
 
-function build(
-  overrides: Partial<TeEnv> = {},
-  args: Partial<Parameters<typeof buildCommitteeSnapshot>[0]> = {}
-) {
+type BuildArgs = Partial<Parameters<typeof buildCommitteeSnapshot>[0]>;
+
+function build(overrides: Partial<TeEnv> = {}, args: BuildArgs = {}) {
   return buildCommitteeSnapshot({
     maxTotalWeight: 1e6,
     env: env(overrides),
@@ -69,6 +68,11 @@ function build(
     ...args
   });
 }
+
+const savedEnv = { ...process.env };
+afterEach(() => {
+  process.env = { ...savedEnv };
+});
 
 beforeEach(() => {
   clearCommitteeCache();
@@ -163,58 +167,53 @@ describe('buildCommitteeSnapshot', () => {
   // A minority quorum cannot decide agreement: with t = 1 of 3, two keypers could
   // each publish a different result and both would meet the quorum.
   it.each([
-    ['a quorum larger than n (4)', { thresholdT: '4' }, {}, /1 <= t <= n/],
-    ['a quorum larger than n (9)', { thresholdT: '9' }, {}, /1 <= t <= n/],
-    ['a quorum of zero', { thresholdT: '0' }, {}, /1 <= t <= n/],
-    ['a negative quorum', { thresholdT: '-1' }, {}, /1 <= t <= n/],
+    ['a quorum larger than n (4)', { thresholdT: '4' }, /1 <= t <= n/],
+    ['a quorum larger than n (9)', { thresholdT: '9' }, /1 <= t <= n/],
+    ['a quorum of zero', { thresholdT: '0' }, /1 <= t <= n/],
+    ['a negative quorum', { thresholdT: '-1' }, /1 <= t <= n/],
     [
       'a quorum that is not a majority',
       { thresholdT: '1' },
-      {},
       /not a majority.*use t >= 2/
     ],
-    [
-      'a non-integer threshold',
-      { thresholdT: '1.5' },
-      {},
-      /must be an integer/
-    ],
-    ['an unconfigured committee', { keypers: undefined }, {}, /TE_KEYPERS/],
+    ['a non-integer threshold', { thresholdT: '1.5' }, /must be an integer/],
+    ['an unconfigured committee', { keypers: undefined }, /TE_KEYPERS/],
     [
       'a missing result publisher',
       { resultPublisherAddress: undefined },
-      {},
       /TE_RESULT_PUBLISHER_ADDRESS/
     ],
     [
       'a non-address role key',
       { resultPublisherAddress: 'not-an-address' },
-      {},
       /not an address/
     ],
     // A budget below 1 would make every split zero.
-    ['a weighted budget below 1', { weightedBudget: '0' }, {}, />= 1/],
+    ['a weighted budget below 1', { weightedBudget: '0' }, />= 1/],
     [
       'a malformed eligibility key',
       {},
-      { eligibilityKey: '0xdeadbeef' },
-      /compressed G1/
+      /compressed G1/,
+      { eligibilityKey: '0xdeadbeef' }
     ],
     [
       'a window that ends before it starts',
       {},
-      { votingStart: 200, votingEnd: 100 },
-      /must be after/
+      /must be after/,
+      { votingStart: 200, votingEnd: 100 }
     ],
     [
       'a window that ends when it starts',
       {},
-      { votingStart: 100, votingEnd: 100 },
-      /must be after/
+      /must be after/,
+      { votingStart: 100, votingEnd: 100 }
     ]
-  ])('rejects %s', async (_label, envOverride, args, message) => {
-    await expect(build(envOverride, args)).rejects.toThrow(message);
-  });
+  ] as [string, Partial<TeEnv>, RegExp, BuildArgs?][])(
+    'rejects %s',
+    async (_label, envOverride, message, args = {}) => {
+      await expect(build(envOverride, args)).rejects.toThrow(message);
+    }
+  );
 
   // Two URLs with the same key are one operator, who could meet a quorum of 2
   // alone. Detected from the resolved addresses.
@@ -359,12 +358,9 @@ describe('getPrivateBallotError', () => {
 });
 
 describe('teSolverCeiling', () => {
-  /**
-   * The largest search this deployment's coordinator can solve. It depends on the
-   * hardware (see `shutter-governance-protocol/COORDINATOR_SIZING.md`). Bad values
-   * must be rejected: a NaN ceiling would disable the guard and the tally would
-   * never finish.
-   */
+  // The largest search the coordinator can solve (hardware-dependent, see
+  // `shutter-governance-protocol/COORDINATOR_SIZING.md`). A NaN ceiling would
+  // disable the guard and the tally would never finish.
   it.each([
     [undefined, DEFAULT_TE_SOLVER_CEILING],
     ['   ', DEFAULT_TE_SOLVER_CEILING],
@@ -385,10 +381,8 @@ describe('teSolverCeiling', () => {
 });
 
 describe('ballotParamsColumn carries the scale', () => {
-  /**
-   * The pre-signing notice that tells a voter what their power will count as reads
-   * `te_config.scale`. Without it, a scaled proposal would show "no scaling".
-   */
+  // The pre-signing notice reads `te_config.scale`; without it a scaled
+  // proposal would show "no scaling".
   const parse = (r: { te_config: string }) => JSON.parse(r.te_config);
 
   // A proposal with no frozen bound is not scaled, so 1 is correct there.
@@ -421,11 +415,6 @@ describe('ballotParamsColumn carries the scale', () => {
 });
 
 describe('votingPowerFallback', () => {
-  const saved = { ...process.env };
-  afterEach(() => {
-    process.env = { ...saved };
-  });
-
   // For a space whose strategies give no bound, the fallback must be the largest V
   // that still leaves the tally unscaled. A flat 1e12 at budget 100 would force
   // s = 128 and count a 25,000-power holder as 195.
@@ -447,11 +436,6 @@ describe('votingPowerFallback', () => {
 });
 
 describe('weightedBudgetFromEnv', () => {
-  const saved = { ...process.env };
-  afterEach(() => {
-    process.env = { ...saved };
-  });
-
   it('reads the deployment budget and rejects nonsense', () => {
     process.env.TE_WEIGHTED_BUDGET = '50';
     expect(weightedBudgetFromEnv()).toBe(50);

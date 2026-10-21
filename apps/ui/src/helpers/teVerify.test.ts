@@ -19,8 +19,7 @@ const BASE_CONFIG = {
   variant: 'A' as const
 };
 
-// Set in beforeAll once WASM is ready. Not used in describe-scope literals
-// because describe callbacks run at module-evaluation time (before beforeAll).
+// Set in beforeAll once WASM is ready, so only read it inside test callbacks.
 let G2_GEN_HEX = '';
 
 beforeAll(async () => {
@@ -30,24 +29,20 @@ beforeAll(async () => {
   gen.destroyWasm();
 });
 
-// Factories rather than module-level constants so G2_GEN_HEX is read at call
-// time (inside it() callbacks), not at describe-evaluation time.
+const ciphertexts = (hex: string, n = BASE_CONFIG.numCandidates) =>
+  Array.from({ length: n }, () => ({ c1: hex, c2: hex }));
+
+const aggregateOf = (hex: string, n = BASE_CONFIG.numCandidates) => ({
+  election_id: PROPOSAL_ID,
+  num_candidates: n,
+  ciphertexts: ciphertexts(hex, n)
+});
+
 function makeBallotsPayload(
   ballots: AuditBallot[],
   scale?: number | null
 ): BallotsPayload {
   return { scale, ballots };
-}
-
-function makeDummyAggregate(numCandidates = BASE_CONFIG.numCandidates) {
-  return {
-    election_id: PROPOSAL_ID,
-    num_candidates: numCandidates,
-    ciphertexts: Array.from({ length: numCandidates }, () => ({
-      c1: '0x01',
-      c2: '0x01'
-    }))
-  };
 }
 
 function makeAuditPayload(overrides: Partial<AuditPayload> = {}): AuditPayload {
@@ -58,14 +53,7 @@ function makeAuditPayload(overrides: Partial<AuditPayload> = {}): AuditPayload {
     te_threshold_t: 0,
     te_threshold_n: 1,
     te_keyper_addresses: [`0x${'11'.repeat(20)}`],
-    aggregate: {
-      election_id: PROPOSAL_ID,
-      num_candidates: BASE_CONFIG.numCandidates,
-      ciphertexts: Array.from({ length: BASE_CONFIG.numCandidates }, () => ({
-        c1: G2_GEN_HEX,
-        c2: G2_GEN_HEX
-      }))
-    },
+    aggregate: aggregateOf(G2_GEN_HEX),
     shares: [],
     ...overrides
   };
@@ -86,19 +74,13 @@ function makeBallot(
       electionId: PROPOSAL_ID,
       pseudonym,
       vk: `0x${'00'.repeat(48)}`,
-      ciphertexts: Array.from({ length: numCandidates }, () => ({
-        c1: G2_GEN_HEX,
-        c2: G2_GEN_HEX
-      })),
+      ciphertexts: ciphertexts(G2_GEN_HEX, numCandidates),
       zkProof: '0x',
       voterSignature: `0x${'00'.repeat(80)}`
     }
   };
 }
 
-// ---------------------------------------------------------------------------
-// Input guards
-// ---------------------------------------------------------------------------
 // Every case below fails before the bound is used, so any value works.
 const ANY_BOUND = 0n;
 
@@ -125,11 +107,8 @@ describe('input guards', () => {
         verifyTally(
           PROPOSAL_ID,
           makeAuditPayload({
-            aggregate: {
-              election_id: PROPOSAL_ID,
-              num_candidates: 5, // says 5 but ciphertexts has 3
-              ciphertexts: makeAuditPayload().aggregate.ciphertexts
-            }
+            // says 5 but ciphertexts has 3
+            aggregate: { ...aggregateOf(G2_GEN_HEX), num_candidates: 5 }
           }),
           ANY_BOUND
         ),
@@ -162,12 +141,8 @@ describe('input guards', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// aggregateBallots
-//
-// aggregateBallots does not re-check ballot proofs (the sequencer does that), so
+// aggregateBallots does not re-check ballot proofs (the sequencer does), so
 // these tests only cover aggregating and comparing.
-// ---------------------------------------------------------------------------
 describe('aggregateBallots', () => {
   // Both fixtures default to the G2 generator, so a single vp=1 ballot
   // reproduces the published aggregate. Scale 1 means no scaling.
@@ -189,21 +164,10 @@ describe('aggregateBallots', () => {
   describe('an election with no votes', () => {
     const IDENTITY = `0x${'c0'.padEnd(192, '0')}`;
 
-    function emptyAggregate(numCandidates = BASE_CONFIG.numCandidates) {
-      return {
-        election_id: PROPOSAL_ID,
-        num_candidates: numCandidates,
-        ciphertexts: Array.from({ length: numCandidates }, () => ({
-          c1: IDENTITY,
-          c2: IDENTITY
-        }))
-      };
-    }
-
     it('verifies an empty aggregate against no ballots', async () => {
       const result = await aggregateBallots(
         makeBallotsPayload([]),
-        emptyAggregate()
+        aggregateOf(IDENTITY)
       );
       expect(result.total).toBe(0);
       expect(result.contributing).toBe(0);
@@ -215,7 +179,7 @@ describe('aggregateBallots', () => {
     it('rejects a non-empty aggregate when no ballots were served', async () => {
       const result = await aggregateBallots(
         makeBallotsPayload([]),
-        makeDummyAggregate()
+        aggregateOf('0x01')
       );
       expect(result.contributing).toBe(0);
       expect(result.aggregateMatches).toBe(false);
@@ -224,7 +188,7 @@ describe('aggregateBallots', () => {
     it('treats an all-dust election as empty, since no ballot carries weight', async () => {
       const result = await aggregateBallots(
         makeBallotsPayload([makeBallot(1, 0), makeBallot(2, 0)]),
-        emptyAggregate()
+        aggregateOf(IDENTITY)
       );
       expect(result.total).toBe(2); // the ballots exist...
       expect(result.contributing).toBe(0); // ...but none of them counted
@@ -273,11 +237,7 @@ describe('aggregateBallots', () => {
       makeBallotsPayload(
         Array.from({ length: COUNT }, (_, i) => makeBallot(i + 1, 1, 1))
       ),
-      {
-        election_id: PROPOSAL_ID,
-        num_candidates: 1,
-        ciphertexts: [{ c1: hex, c2: hex }]
-      }
+      aggregateOf(hex, 1)
     );
     expect(result.contributing).toBe(COUNT);
     expect(result.aggregateMatches).toBe(true);
@@ -285,14 +245,7 @@ describe('aggregateBallots', () => {
 });
 
 describe('aggregateBallots: the committee admitted set', () => {
-  const generatorAggregate = () => ({
-    election_id: PROPOSAL_ID,
-    num_candidates: BASE_CONFIG.numCandidates,
-    ciphertexts: Array.from({ length: BASE_CONFIG.numCandidates }, () => ({
-      c1: G2_GEN_HEX,
-      c2: G2_GEN_HEX
-    }))
-  });
+  const generatorAggregate = () => aggregateOf(G2_GEN_HEX);
 
   const seq = (b: AuditBallot, sequenceNumber: number) => ({
     ...b,
@@ -356,10 +309,7 @@ describe('aggregateBallots: the committee admitted set', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// diagnoseTally: whether the keypers or the coordinator are behind, worked out
-// from public share counts
-// ---------------------------------------------------------------------------
+// diagnoseTally: uses public share counts to tell who is behind.
 describe('diagnoseTally', () => {
   const withShares = (
     perCandidate: number,
@@ -410,10 +360,7 @@ describe('diagnoseTally', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// fetchBallotsPayload: reads the committee's paged feed
-// ---------------------------------------------------------------------------
-
+// fetchBallotsPayload: reads the committee's paged feed.
 describe('fetchBallotsPayload', () => {
   afterEach(() => vi.unstubAllGlobals());
 

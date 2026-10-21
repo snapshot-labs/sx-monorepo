@@ -1,6 +1,6 @@
-import { Contract } from '@ethersproject/contracts';
+import snapshot from '@snapshot-labs/snapshot.js';
 import log from './log';
-import { EvmProvider, getProvider } from './provider';
+import { getProvider } from './provider';
 
 /** ERC-20/721 `totalSupply()` only. */
 const TOTAL_SUPPLY_ABI = ['function totalSupply() view returns (uint256)'];
@@ -69,15 +69,13 @@ async function readSupply(
   block: number,
   decimals: number
 ): Promise<number> {
-  // getProvider can also return a Starknet provider; this is an EVM read (same
-  // cast as turbo.ts).
-  const contract = new Contract(
-    address,
-    TOTAL_SUPPLY_ABI,
-    getProvider(network) as EvmProvider
-  );
   const raw = await withTimeout<{ toString(): string }>(
-    contract.totalSupply({ blockTag: block }),
+    snapshot.utils.call(
+      getProvider(network),
+      TOTAL_SUPPLY_ABI,
+      [address, 'totalSupply'],
+      { blockTag: block }
+    ),
     READ_TIMEOUT_MS,
     `totalSupply(${address}@${network})`
   );
