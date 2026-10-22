@@ -73,6 +73,15 @@ function spawn(slot?: Slot): Slot {
 
 export function verifyBallotInWorker(job: Job): Promise<VerifyResult> {
   if (!slots) slots = Array.from({ length: poolSize() }, () => spawn());
+  // At most two checks per worker, running or waiting, so an accepted ballot waits
+  // about two checks at most; past that, refuse at once instead of queueing.
+  const inFlight = slots.reduce((n, s) => n + s.pending.size, 0);
+  if (inFlight >= 2 * slots.length) {
+    return Promise.resolve({
+      ok: false,
+      reason: 'sequencer_busy'
+    } as VerifyResult);
+  }
   const slot = slots.reduce((a, b) =>
     b.pending.size < a.pending.size ? b : a
   );

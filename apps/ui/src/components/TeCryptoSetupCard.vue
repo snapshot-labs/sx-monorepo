@@ -66,7 +66,7 @@ const mpkFingerprint = computed(() =>
           class="w-full max-w-[300px] mx-auto"
           fill="none"
           role="img"
-          :aria-label="`Three keypers jointly form one shared key (${diagramThreshold} threshold); the hub stores only sealed ballots.`"
+          :aria-label="`The keypers jointly form one shared key (${diagramThreshold} threshold); the hub stores only sealed ballots.`"
         >
           <!-- connectors: keypers -> shared key -->
           <g

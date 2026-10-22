@@ -282,6 +282,8 @@ export function useProposalScoresTicksQuery(
 
       if (offchainNetworks.includes(p.network)) {
         if (
+          // Private choices are never decrypted, so there is nothing to chart.
+          p.privacy === 'shutter-elgamal' ||
           p.type !== 'basic' ||
           (p.privacy !== 'none' && !p.completed) ||
           p.vote_count > SCORES_TICKS_MAX_VOTES

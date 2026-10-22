@@ -49,12 +49,6 @@ describe('helpers/te', () => {
         'proposal_dkg_not_finalized'
       ],
       ['malformed JSON', {}, 'not json', 'choice_not_json_envelope'],
-      ...[undefined, null, 'not an object'].map(attestation => [
-        `no credential (${attestation})`,
-        {},
-        JSON.stringify({ pseudonym: wrongPseudonym, attestation }),
-        'ballot_carries_no_credential'
-      ]),
       [
         'pseudonym mismatch',
         {},

@@ -21,14 +21,7 @@ export class PublicError extends Error {}
 // MySQL VARBINARY columns come back as Buffer; GraphQL returns them as 0x-hex.
 function bytesToHex(value: unknown): string | null {
   if (value === null || value === undefined) return null;
-  if (Buffer.isBuffer(value)) return `0x${value.toString('hex')}`;
-  if (value instanceof Uint8Array) {
-    return `0x${Buffer.from(value).toString('hex')}`;
-  }
-  if (typeof value === 'string') {
-    return value.startsWith('0x') ? value : `0x${value}`;
-  }
-  return null;
+  return Buffer.isBuffer(value) ? `0x${value.toString('hex')}` : null;
 }
 
 const ARG_LIMITS = {

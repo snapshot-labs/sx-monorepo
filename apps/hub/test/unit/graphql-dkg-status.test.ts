@@ -37,7 +37,6 @@ function proposal(overrides: Record<string, any> = {}) {
     te_config: null,
     te_committee_pks: null,
     te_keyper_addresses: null,
-    te_aggregate: null,
     te_dkg_status: null,
     start: NOW - 60,
     end: NOW + 60,

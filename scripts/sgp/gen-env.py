@@ -119,14 +119,15 @@ def main() -> int:
             return normalize_key(existing)
         return "0x" + secrets.token_hex(32)
 
-    def carry(name: str, mint=None) -> str:
+    def carry(name: str, mint=None, valid=None) -> str:
         """A value this script does not own, kept from the existing `.env`.
 
         Never rotated, even under `--rotate`: rotating the sequencer's relayer key
-        would invalidate every receipt it has signed.
+        would invalidate every receipt it has signed. A value that fails `valid`,
+        such as the `0x...` placeholder from `.env.example`, is replaced.
         """
         existing = sx_env.get(name, "").strip()
-        if existing:
+        if existing and (valid is None or valid(existing)):
             return existing
         return mint() if mint else ""
 
@@ -147,7 +148,9 @@ def main() -> int:
 
     # The eligibility issuer signs on G1; any 32-byte scalar works as its secret.
     eligibility_sk = key("eligibility", sx_env.get("TE_ELIGIBILITY_PRIVATE_KEY", ""))
-    seq_relayer = carry("SEQ_RELAYER_PK", lambda: "0x" + secrets.token_hex(32))
+    seq_relayer = carry(
+        "SEQ_RELAYER_PK", lambda: "0x" + secrets.token_hex(32), valid=HEX32.fullmatch
+    )
     # Set by the operator to match the coordinator's hardware, so kept on a re-run.
     solver_ceiling = carry("TE_SOLVER_CEILING") or "1e12"
     # Received from the keyper operators, not minted here.

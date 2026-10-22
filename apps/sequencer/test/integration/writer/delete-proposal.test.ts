@@ -1,5 +1,5 @@
 /**
- * Deleting a private proposal also deletes its private-voting rows.
+ * Deleting a proposal with a committee also deletes its private-voting rows.
  */
 
 import * as actionHelper from '../../../src/helpers/actions';
@@ -23,13 +23,25 @@ describe('delete-proposal: private proposals', () => {
   });
 
   // There are no foreign keys, so nothing cascades: the writer must delete these
-  // rows itself.
-  it('removes the committee artifacts along with the proposal', async () => {
+  // rows itself. A private proposal made public keeps its committee, so its rows
+  // must go too.
+  it.each([
+    ['a private proposal', 'shutter-elgamal'],
+    ['a private proposal later made public', '']
+  ])('removes the committee artifacts of %s', async (_label, privacy) => {
+    // The delete decrements the author's leaderboard count, which errors below
+    // zero, so start each case without a row left by another suite.
+    await db.queryAsync(
+      'DELETE FROM leaderboard WHERE space = ? AND user = ?',
+      [SPACE, AUTHOR]
+    );
     await insertProposal({
       id: ID,
+      author: AUTHOR,
       start: 1_600_000_000,
       end: 1_600_000_100,
-      privacy: 'shutter-elgamal',
+      privacy,
+      te_sgp_config: '{}',
       scores_state: 'final'
     });
     await db.queryAsync('INSERT INTO te_results SET ?', {

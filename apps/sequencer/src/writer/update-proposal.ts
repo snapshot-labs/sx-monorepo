@@ -144,23 +144,6 @@ export async function action(body, ipfs): Promise<void> {
     flagged: +containsFlaggedLinks(msg.payload.body)
   };
 
-  // A public proposal must not keep any private-voting state, or it would be left
-  // with a key ceremony nothing finishes.
-  if (privacy !== 'shutter-elgamal') {
-    Object.assign(proposal, {
-      te_config: null,
-      te_mpk: null,
-      te_committee_pks: null,
-      te_threshold_t: null,
-      te_threshold_n: null,
-      te_keyper_addresses: null,
-      te_aggregate: null,
-      te_sgp_config: null,
-      te_tally_stalled: 0,
-      te_tally_stall_reason: null
-    });
-  }
-
   // A proposal that just became private has no committee snapshot yet, so build
   // one now. An already-private proposal keeps its snapshot: the committee is
   // fixed for the proposal's life, even if env has changed.

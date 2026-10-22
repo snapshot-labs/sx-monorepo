@@ -396,11 +396,13 @@ describe('status pass-through', () => {
     ['POST', '/tally-stalled', 403],
     ['GET', '/aggregate', 404]
   ] as Array<[string, string, number]>)(
-    '%s %s preserves hub status %i',
+    '%s %s preserves hub status %i and reason',
     async (method, suffix, status) => {
-      hubReplies({ error: 'nope' }, status);
+      // The body the hub's `sendError` sends.
+      hubReplies({ error: 'unauthorized', error_description: 'nope' }, status);
       const res = await call(method, suffix);
       expect(res.status).toBe(status);
+      expect(res.body.error).toBe('nope');
     }
   );
 

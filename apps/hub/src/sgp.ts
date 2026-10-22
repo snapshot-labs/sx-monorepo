@@ -124,7 +124,8 @@ function keyperIndexOf(
  * with a key until their scores are final.
  *
  * A proposal with no key after voting starts has failed DKG (`dkg_failed` in
- * GraphQL) and is left out, so failed ones cannot push new ones past the limit.
+ * GraphQL) and is left out, and so is a stalled tally until an admin resumes it,
+ * so neither can push new ones past the limit.
  */
 router.get('/te_sgp_elections', async (req, res) => {
   try {
@@ -135,6 +136,7 @@ router.get('/te_sgp_elections', async (req, res) => {
           AND te_sgp_config IS NOT NULL
           AND (te_mpk IS NOT NULL OR start >= ?)
           AND (scores_state IS NULL OR scores_state != 'final')
+          AND te_tally_stalled = 0
         ORDER BY te_mpk IS NULL DESC, start ASC
         LIMIT ?`,
       [now, LIST_LIMIT]
@@ -286,14 +288,15 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     const limit =
       rawCount > 0 ? Math.min(rawCount, MAX_BALLOT_PAGE) : MAX_BALLOT_PAGE;
 
-    // Choose the page on keys only. No index covers `(created, id)` for a
-    // proposal, so MySQL sorts, and this keeps envelopes out of the sort.
+    // Choose the page on keys only, so envelopes are not read for skipped rows.
+    // `space` lets MySQL read the votes in order from the
+    // (space, proposal, created, id) index instead of sorting them all per page.
     const keys = await (db as any).queryAsync(
       `SELECT id FROM votes
-        WHERE proposal = ? AND cb != -3
+        WHERE space = ? AND proposal = ? AND cb != -3
         ORDER BY created ASC, id ASC
         LIMIT ? OFFSET ?`,
-      [proposalId, limit, start]
+      [proposal.space, proposalId, limit, start]
     );
     if (!keys.length) return res.json({ ballots: [], total: Number(total) });
 
@@ -542,10 +545,10 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
  * Returns `'split'` if two different aggregates each reached quorum; callers
  * answer 409 instead of picking one.
  *
- * Read from the signed submissions, not `proposals.te_aggregate`. Returned as the
- * stored JSON text so weights above 2^53 stay exact.
+ * Read from the signed submissions. Returned as the stored JSON text so weights
+ * above 2^53 stay exact.
  */
-async function canonicalAggregateFor(
+export async function canonicalAggregateFor(
   proposalId: string,
   snapshot: { thresholdT: number }
 ): Promise<string | null | 'split'> {
@@ -582,10 +585,16 @@ async function submitAggregate(
   }
 ): Promise<{ status: number; error?: string }> {
   const { proposalId, keyperIndex, digestHex, required } = args;
-  const [{ frozen }] = await connection.queryAsync(
-    'SELECT te_aggregate IS NOT NULL AS frozen FROM proposals WHERE id = ? FOR UPDATE',
+  // Locks the proposal row so concurrent submissions are counted one at a time.
+  await connection.queryAsync(
+    'SELECT id FROM proposals WHERE id = ? FOR UPDATE',
     [proposalId]
   );
+  const before = await connection.queryAsync(
+    'SELECT COUNT(*) AS c FROM te_aggregate_submissions WHERE proposal_id = ? GROUP BY digest',
+    [proposalId]
+  );
+  const frozen = before.some((g: any) => Number(g.c) >= required);
 
   const existing = await connection.queryAsync(
     'SELECT digest FROM te_aggregate_submissions WHERE proposal_id = ? AND keyper_index = ? LIMIT 1',
@@ -594,7 +603,7 @@ async function submitAggregate(
   if (existing[0]?.digest === digestHex) {
     return { status: 204 }; // idempotent resend of this keyper's own row
   }
-  if (existing[0] && Number(frozen)) {
+  if (existing[0] && frozen) {
     log.warn(
       `[sgp] ${proposalId}: keyper ${keyperIndex} changed its aggregate after the quorum`
     );
@@ -638,14 +647,6 @@ async function submitAggregate(
   }
 
   if (reached.length === 1) {
-    const winner = await connection.queryAsync(
-      'SELECT aggregate_json FROM te_aggregate_submissions WHERE proposal_id = ? AND digest = ? LIMIT 1',
-      [proposalId, reached[0].digest]
-    );
-    await connection.queryAsync(
-      'UPDATE proposals SET te_aggregate = ? WHERE id = ? AND te_aggregate IS NULL',
-      [winner[0].aggregate_json, proposalId]
-    );
     log.info(
       `[sgp] ${proposalId}: aggregate canonical at ${reached[0].c}/${required} matching submissions`
     );
@@ -765,8 +766,8 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
 /**
  * The canonical aggregate, or null while the committee has not agreed on one.
  *
- * Read from the signed submissions, not `proposals.te_aggregate`, so only an
- * aggregate the keypers signed is ever served.
+ * Read from the signed submissions, so only an aggregate the keypers signed is
+ * ever served.
  */
 router.get('/proposal/:id/te_sgp_aggregate', async (req, res) => {
   const proposalId = req.params.id;
@@ -1323,6 +1324,19 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
         stalled ? 'not_the_result_publisher' : 'not_the_admin',
         403
       );
+    }
+    // As in the protocol's own store: a tally can only stall after voting ends
+    // and before its result is published. A late stall would otherwise stop the
+    // published result from reaching the scores until an admin resumes.
+    if (stalled) {
+      if (now < proposal.end) {
+        return sendError(res, 'voting has not ended', 422);
+      }
+      const [published] = await (db as any).queryAsync(
+        'SELECT 1 FROM te_results WHERE proposal_id = ? LIMIT 1',
+        [proposalId]
+      );
+      if (published) return sendError(res, 'result already published', 409);
     }
 
     try {

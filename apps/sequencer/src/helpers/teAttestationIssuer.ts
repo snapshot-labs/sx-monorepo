@@ -9,7 +9,6 @@ import {
   isWithinSgpVotingWindow
 } from './te';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
-import { jsonParse } from './utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 
@@ -116,10 +115,8 @@ export async function issueBallotCredential(args: {
     throw new TeIssueError('voting is not open for this proposal', 422);
   }
 
-  const teConfig =
-    typeof proposal.te_config === 'string'
-      ? jsonParse(proposal.te_config, null)
-      : proposal.te_config;
+  // Already parsed by getProposal.
+  const teConfig = proposal.te_config;
   const budget = Number(teConfig?.budget);
   if (!Number.isInteger(budget) || budget < 1) {
     throw new TeIssueError('proposal has no usable ballot budget', 503);

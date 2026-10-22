@@ -12,13 +12,15 @@ jest.mock('../../../src/helpers/actions', () => ({
 }));
 
 const mockGetVp = jest.fn();
+const mockValidate = jest.fn();
 jest.mock('@snapshot-labs/snapshot.js', () => {
   const original = jest.requireActual('@snapshot-labs/snapshot.js');
   return {
     ...original,
     utils: {
       ...original.utils,
-      getVp: (...args: any[]) => mockGetVp(...args)
+      getVp: (...args: any[]) => mockGetVp(...args),
+      validate: (...args: any[]) => mockValidate(...args)
     }
   };
 });
@@ -93,6 +95,7 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue({ vp: 10, vp_by_strategy: [10], vp_state: 'final' });
   mockVerifyTeBallot.mockReset().mockResolvedValue({ ok: true });
+  mockValidate.mockReset().mockResolvedValue(true);
 });
 
 describe('writer/vote', () => {
@@ -128,15 +131,16 @@ describe('writer/vote', () => {
         }
       );
 
-      it('rejects a ballot the full check refuses', async () => {
-        mockVerifyTeBallot.mockResolvedValue({
-          ok: false,
-          reason: 'invalid_proof'
-        });
-        await expect(verify(body(ballot()))).rejects.toBe(
-          'invalid private ballot: invalid_proof'
-        );
-      });
+      it.each([
+        ['invalid_proof', 'invalid private ballot: invalid_proof'],
+        ['sequencer_busy', 'sequencer busy, please try again in a moment']
+      ])(
+        'rejects a ballot the full check refuses (%s)',
+        async (reason, msg) => {
+          mockVerifyTeBallot.mockResolvedValue({ ok: false, reason });
+          await expect(verify(body(ballot()))).rejects.toBe(msg);
+        }
+      );
 
       it.each([
         [
@@ -148,6 +152,11 @@ describe('writer/vote', () => {
         [
           'a credential for another proposal',
           ballot({ electionId: `0x${'00'.repeat(32)}` }),
+          'different proposal'
+        ],
+        [
+          'a non-string credential election id',
+          ballot({ electionId: 1 }),
           'different proposal'
         ],
         [
@@ -174,11 +183,29 @@ describe('writer/vote', () => {
         }
       );
 
-      it('rejects voting power below 0.5', async () => {
+      // The ballot check takes 10-80 s of worker time, so the cheaper checks
+      // must refuse these votes before it runs.
+      it('rejects a voter who fails validation before the full check', async () => {
+        mockGetProposal.mockResolvedValue(
+          proposal({
+            privacy: 'shutter-elgamal',
+            type: 'weighted',
+            validation: { name: 'passport-gated', params: {} }
+          })
+        );
+        mockValidate.mockResolvedValue(false);
+        await expect(verify(body(ballot()))).rejects.toBe(
+          'failed vote validation'
+        );
+        expect(mockVerifyTeBallot).not.toHaveBeenCalled();
+      });
+
+      it('rejects voting power below 0.5 before the full check', async () => {
         mockGetVp.mockResolvedValue({ vp: 0.4, vp_by_strategy: [0.4] });
         await expect(verify(body(ballot()))).rejects.toMatch(
           'voting power too low'
         );
+        expect(mockVerifyTeBallot).not.toHaveBeenCalled();
       });
 
       it('rejects a vote timestamped exactly at proposal.end', async () => {

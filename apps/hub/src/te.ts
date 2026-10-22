@@ -8,12 +8,13 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import express from 'express';
 import db from './helpers/mysql';
 import { parseJsonField, sendError } from './helpers/utils';
+import { canonicalAggregateFor } from './sgp';
 
 const router = express.Router();
 
 async function loadProposal(proposalId: string): Promise<any | null> {
   const rows = await (db as any).queryAsync(
-    'SELECT id, privacy, te_mpk, te_config, te_sgp_config, te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n, te_aggregate FROM proposals WHERE id = ? LIMIT 1',
+    'SELECT id, privacy, te_mpk, te_config, te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n FROM proposals WHERE id = ? LIMIT 1',
     [proposalId]
   );
   return rows[0] || null;
@@ -53,7 +54,13 @@ router.get('/proposal/:id/te_decryption_shares', async (req, res) => {
     if (!proposal.te_mpk) {
       return sendError(res, 'dkg_not_finalized', 400);
     }
-    const aggregate = auditAggregate(proposal.te_aggregate, proposalId);
+    const canonical = await canonicalAggregateFor(proposalId, {
+      thresholdT: Number(proposal.te_threshold_t)
+    });
+    const aggregate = auditAggregate(
+      canonical === 'split' ? null : canonical,
+      proposalId
+    );
     const rows = await (db as any).queryAsync(
       'SELECT keyper_index, candidate, HEX(sigma) AS sigma_hex, HEX(proof_e) AS proof_e_hex, HEX(proof_z) AS proof_z_hex FROM te_decryption_shares WHERE proposal_id = ? ORDER BY candidate, keyper_index',
       [proposalId]

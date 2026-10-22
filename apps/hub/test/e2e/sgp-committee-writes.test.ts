@@ -179,10 +179,6 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
       'DELETE FROM te_aggregate_submissions WHERE proposal_id = ?',
       [CLOSED]
     );
-    await db.queryAsync(
-      'UPDATE proposals SET te_aggregate = NULL WHERE id = ?',
-      [CLOSED]
-    );
   });
 
   it('refuses an open ballot set and a submission from outside the committee', async () => {

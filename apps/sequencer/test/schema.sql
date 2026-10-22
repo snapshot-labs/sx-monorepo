@@ -76,7 +76,6 @@ CREATE TABLE proposals (
   te_threshold_t INT DEFAULT NULL,
   te_threshold_n INT DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
-  te_aggregate JSON DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
@@ -132,11 +131,6 @@ CREATE TABLE votes (
   INDEX idx_votes_on_cb_proposal (cb, proposal)
 );
 
--- Threshold-ElGamal partial decryption shares posted by keypers after the
--- voting window closes. The tally worker reads these, runs verifyDecryptionShare
--- on each, Lagrange-combines `t+1` valid shares per candidate, and recovers
--- the per-candidate plaintext total via baby-step giant-step.
--- Append-only: PRIMARY KEY enforces one share per (proposal, keyper, candidate).
 CREATE TABLE te_decryption_shares (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -148,7 +142,6 @@ CREATE TABLE te_decryption_shares (
   PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
--- Pre-finalisation DKG submissions: see apps/hub/src/helpers/schema.sql.
 CREATE TABLE te_dkg_submissions (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -298,11 +291,7 @@ CREATE TABLE messages (
   INDEX receipt (receipt)
 );
 
---  Two more of the committee's artifacts. The sequencer does not write these -- the
---  hub does -- but it DELETEs them when a proposal is deleted, so they must exist
---  here or that path throws only in tests. te_dkg_submissions and
---  te_decryption_shares are already declared above. Copied from
---  apps/hub/src/helpers/schema.sql; keep them in step.
+-- The remaining te_* tables: the sequencer deletes from them with a proposal.
 
 CREATE TABLE te_aggregate_submissions (
   proposal_id VARCHAR(66) NOT NULL,
@@ -327,8 +316,7 @@ CREATE TABLE te_request_nonces (
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
   accepted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, op, issued_at),
-  INDEX idx_te_nonce_accepted (accepted_at)
+  PRIMARY KEY (proposal_id, op, issued_at)
 );
 
 

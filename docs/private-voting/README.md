@@ -107,10 +107,10 @@ A voter with voting power `vp` is counted `w = round(vp)` times: their ciphertex
 | Parameter | Value |
 | --- | --- |
 | Curve | BLS12-381 (ElGamal in G₂, Schnorr in G₁) |
-| Threshold | `t = 2, n = 3`. `t` is the **quorum**: the number of keypers that must act together |
+| Threshold | Set per deployment: `t` is `TE_THRESHOLD_T` and `n` is the number of `TE_KEYPERS`; the local setup uses `t = 2, n = 3`. `t` is the **quorum**: the number of keypers that must act together |
 | Ballot variant | Variant A, exact budget `B = 1` (single choice, basic) or `B = TE_WEIGHTED_BUDGET`, default 100 (weighted) |
 | DKG | Feldman verifiable secret sharing |
-| Write authorisation | `SHUTTER-GOVERNANCE-PROTOCOL-DKG-RESULT-v1`, `SHUTTER-GOVERNANCE-PROTOCOL-AGGREGATE-v1`, `SHUTTER-GOVERNANCE-PROTOCOL-DECRYPT-SHARE-v1`, `SHUTTER-GOVERNANCE-PROTOCOL-RESULT-v1`, wrapped in `SHUTTER-GOVERNANCE-PROTOCOL-REQUEST-v1` |
+| Write authorisation | Keypers sign the `SHUTTER-GOVERNANCE-PROTOCOL-DKG-RESULT-v1`, `-AGGREGATE-v1` and `-DECRYPT-SHARE-v1` digests directly. The result publisher signs the `-RESULT-v1` digest wrapped in `SHUTTER-GOVERNANCE-PROTOCOL-REQUEST-v1` (op `result`). Stall and resume requests sign `-REQUEST-v1` with op `tally_stall` or `tally_resume` |
 
 ### Weight scaling — the units a proposal counts in
 
@@ -163,7 +163,8 @@ zero in two different ways:
 | 1e6 | 128 | 7,777 / 1 / 0 / 0, the last two admitted but worth nothing |
 
 **If `V` turns out too low**, the sequencer logs an alarm that names `TE_SOLVER_CEILING` once
-`budget x ceil(credential weight / scale)` passes it. It does not refuse votes: the tally gets
+`budget x ceil(total weight / scale)` passes it, where the total is the weight of the votes so far
+plus the credential being issued. It does not refuse votes: the tally gets
 slower, but stays possible.
 
 ---
@@ -313,7 +314,9 @@ removed from the committee before the next proposal.
 - **Two keyper URLs must not report the same address.** A committee of "3" that is really 2 keys
   would let one operator meet `t = 2`. The sequencer refuses it.
 - **Editing is allowed until `start`**, including inside the DKG lead time once the key exists. An
-  edit cannot change `start`.
+  edit cannot change `start`. Making a private proposal public keeps its committee and key, unused;
+  making it private again reuses them, because the keypers refuse a second key ceremony for the same
+  proposal.
 - **Private voting closes one second before public voting.** The protocol's window is half-open
   (`start <= t < end`), while Snapshot's includes `end`. A private vote timestamped exactly at `end`
   is refused, because the committee would exclude it and "Verify tally" would then report the whole

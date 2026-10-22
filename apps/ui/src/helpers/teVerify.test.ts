@@ -1,6 +1,5 @@
 import { G2Point, initCurves } from '@shutter-network/urban-verified-crypto';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { pseudonymFor } from './teBallot';
 import {
   aggregateBallots,
   AuditBallot,
@@ -64,20 +63,10 @@ function makeBallot(
   vp: number,
   numCandidates = BASE_CONFIG.numCandidates
 ): AuditBallot {
-  const voter = `0x${index.toString(16).padStart(40, '0')}`;
-  const pseudonymBytes = pseudonymFor(voter, PROPOSAL_ID);
-  const pseudonym = `0x${Buffer.from(pseudonymBytes).toString('hex')}`;
   return {
-    voter,
+    voter: `0x${index.toString(16).padStart(40, '0')}`,
     vp,
-    choice: {
-      electionId: PROPOSAL_ID,
-      pseudonym,
-      vk: `0x${'00'.repeat(48)}`,
-      ciphertexts: ciphertexts(G2_GEN_HEX, numCandidates),
-      zkProof: '0x',
-      voterSignature: `0x${'00'.repeat(80)}`
-    }
+    choice: { ciphertexts: ciphertexts(G2_GEN_HEX, numCandidates) }
   };
 }
 
@@ -406,9 +395,10 @@ describe('fetchBallotsPayload', () => {
       [2, 31]
     ]);
     expect(payload.ballots[2].voter).toBe(entry(2, 31).ballot.pseudonym);
-    expect(payload.ballots[2].choice?.ciphertexts).toEqual([
-      { c1: '0x01', c2: '0x02' }
-    ]);
+    // Only the ciphertexts are kept; the proof and signatures are dropped.
+    expect(payload.ballots[2].choice).toEqual({
+      ciphertexts: [{ c1: '0x01', c2: '0x02' }]
+    });
   });
 
   it('stops on an empty page rather than asking forever', async () => {

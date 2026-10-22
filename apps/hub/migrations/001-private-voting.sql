@@ -1,25 +1,13 @@
--- Private voting (privacy='shutter-elgamal') schema, for a database created
--- before this feature. New databases get all of it from src/helpers/schema.sql;
--- this file is what an existing deployment applies.
+-- Private voting (privacy='shutter-elgamal') schema for an existing database. New
+-- databases get the same schema from src/helpers/schema.sql.
 --
--- Ordering matters only in that the ALTER touches a live table and the CREATEs do
--- not. Run the ALTER first, confirm it was instant, then create the tables.
+-- Run it once: MySQL 8 has no ADD COLUMN IF NOT EXISTS, so a second run fails at
+-- the first column and changes nothing.
 --
--- Not idempotent: MySQL 8 has no ADD COLUMN IF NOT EXISTS, so a second run fails
--- on the first duplicate column and creates nothing further. That is intentional
--- — it is a loud signal that the migration already ran, not a reason to edit it.
---
--- ON THE ALTER
---
--- Only `proposals` is altered; `proposals` is large in production, 
--- so every column added below is nullable, or NOT NULL with
--- a default, and all of them qualify for MySQL 8's INSTANT algorithm:
--- metadata only, no table rebuild, regardless of row count.
---
--- ALGORITHM=INSTANT is named explicitly so the statement ERRORS if any column is
--- rejected for it, rather than silently rebuilding a table with tens of millions
--- of rows. If it does error, do not simply drop the clause — work out which
--- column is at fault first.
+-- The ALTER only adds nullable or defaulted columns, so it runs as
+-- ALGORITHM=INSTANT (metadata only, no rebuild of the large `proposals` table).
+-- The clause is explicit so MySQL errors instead of rebuilding the table; if it
+-- errors, find the column at fault rather than removing the clause.
 
 ALTER TABLE proposals
   ADD COLUMN te_config JSON DEFAULT NULL,
@@ -28,20 +16,14 @@ ALTER TABLE proposals
   ADD COLUMN te_threshold_t INT DEFAULT NULL,
   ADD COLUMN te_threshold_n INT DEFAULT NULL,
   ADD COLUMN te_keyper_addresses JSON DEFAULT NULL,
-  ADD COLUMN te_aggregate JSON DEFAULT NULL,
   ADD COLUMN te_sgp_config JSON DEFAULT NULL,
   ADD COLUMN te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
-  -- The coordinator's own account of why it stalled, for an operator to read.
-  -- Advisory and deliberately outside the signed `tally_stall` digest: it is a
-  -- hint, not an artifact. It cannot make an unverifiable tally look verifiable,
-  -- and the split an operator acts on -- keyper problem vs coordinator problem --
-  -- is derived client-side from public share counts (`diagnoseTally`), not read
-  -- from here. If it ever gates an automated action it must be signed first.
+  -- The coordinator's reason for a stall, if it sends one. Unsigned: shown to an
+  -- admin, never used to trigger an automated action.
   ADD COLUMN te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
   ALGORITHM=INSTANT;
 
-
--- Append-only: PRIMARY KEY enforces one share per (proposal, keyper, candidate).
+-- The tables below are described in src/helpers/schema.sql.
 CREATE TABLE te_decryption_shares (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -92,20 +74,13 @@ CREATE TABLE te_eligibility_key (
   updated BIGINT NOT NULL
 );
 
--- Stall/resume request nonces, for replay rejection. The signer
--- binds a timestamp, and this table makes each one usable exactly once.
---
--- Rows outside the acceptance window are pruned on write; the freshness check
--- already rejects them, so they are only kept to bound a replay inside it.
 CREATE TABLE te_request_nonces (
   proposal_id VARCHAR(66) NOT NULL,
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
   accepted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, op, issued_at),
-  INDEX idx_te_nonce_accepted (accepted_at)
+  PRIMARY KEY (proposal_id, op, issued_at)
 );
-
 
 CREATE TABLE te_revote_nonces (
   proposal_id VARCHAR(66) NOT NULL,

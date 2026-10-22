@@ -82,18 +82,8 @@ export async function verify(body): Promise<any> {
       }
       throw err;
     }
-    // Checks the credential's signature and the voter's signature over the
-    // ballot (which covers the credential), as well as the ballot proofs.
-    const choiceJson = JSON.stringify(msg.payload.choice);
-    const result = await verifyTeBallot(
-      proposal,
-      body.address.toLowerCase(),
-      choiceJson,
-      await getEligibilityKey()
-    );
-    if (!result.ok) {
-      return Promise.reject(`invalid private ballot: ${result.reason}`);
-    }
+    // The ballot proofs are checked at the end of verify(), after the cheaper
+    // validation and voting-power checks.
   } else {
     if (
       !snapshot.utils.voting[proposal.type].isValidChoice(
@@ -175,6 +165,25 @@ export async function verify(body): Promise<any> {
 
   // if (await isLimitReached(msg.space)) return Promise.reject('too much activity, please contact an admin');
 
+  // Checks the credential's signature and the voter's signature over the ballot
+  // (which covers the credential), as well as the ballot proofs. It takes 10-80 s
+  // of worker time, so it runs last: a vote that fails validation or has no
+  // voting power is refused without it.
+  if (proposal.privacy === 'shutter-elgamal') {
+    const result = await verifyTeBallot(
+      proposal,
+      body.address.toLowerCase(),
+      JSON.stringify(msg.payload.choice),
+      await getEligibilityKey()
+    );
+    if (!result.ok) {
+      if (result.reason === 'sequencer_busy') {
+        return Promise.reject('sequencer busy, please try again in a moment');
+      }
+      return Promise.reject(`invalid private ballot: ${result.reason}`);
+    }
+  }
+
   return { proposal, vp };
 }
 
@@ -191,7 +200,8 @@ export function verifyBallotCredential(proposal: any, choice: any): void {
   }
   // The SDK only checks the credential against the ballot's own election id.
   if (
-    credential.electionId?.toLowerCase() !== String(proposal.id).toLowerCase()
+    typeof credential.electionId !== 'string' ||
+    credential.electionId.toLowerCase() !== String(proposal.id).toLowerCase()
   ) {
     throw new SgpAttestationError('credential is for a different proposal');
   }

@@ -14,21 +14,10 @@ import log from './log';
 import db from './mysql';
 import { eligibilityPublicKey, SgpAttestationError } from './sgpAttestation';
 
-export class TeEligibilityError extends Error {}
+export { eligibilityPublicKey as getEligibilityKey } from './sgpAttestation';
 
 /** For tests: resets the cached issuer in `sgpAttestation`. */
 export { resetIssuer as resetEligibilityKeyCache } from './sgpAttestation';
-
-export async function getEligibilityKey(): Promise<string> {
-  try {
-    return await eligibilityPublicKey();
-  } catch (err: any) {
-    if (err instanceof SgpAttestationError) {
-      throw new TeEligibilityError(err.message);
-    }
-    throw err;
-  }
-}
 
 /**
  * Write the current public key to the shared database, so the hub can refuse to

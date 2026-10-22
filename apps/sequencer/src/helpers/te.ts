@@ -86,12 +86,8 @@ export async function verifyTeBallot(
     return { ok: false, reason: 'choice_not_json_envelope' };
   }
 
-  // A ballot without a credential would also fail the signature check; refusing it
-  // here gives a clearer reason.
+  // vote.ts has already refused a ballot without a credential.
   const att = (envelope as any).attestation;
-  if (!att || typeof att !== 'object') {
-    return { ok: false, reason: 'ballot_carries_no_credential' };
-  }
 
   // Checked before the expensive proof verification.
   const expected = expectedPseudonym(voter, proposal.id);

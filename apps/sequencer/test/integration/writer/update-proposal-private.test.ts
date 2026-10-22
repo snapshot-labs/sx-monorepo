@@ -238,8 +238,7 @@ describe('update-proposal: the DKG lead-time gate', () => {
 
 describe('update-proposal: privacy on edit', () => {
   // Omitting `privacy` means "keep the current value"; `privacy: ''` means "make
-  // it public". A private row written as public while keeping its committee would
-  // never finish its key ceremony or tally.
+  // it public".
   beforeEach(async () => {
     useSpace({ privacy: 'any' });
     await seed();
@@ -254,19 +253,24 @@ describe('update-proposal: privacy on edit', () => {
     }).toEqual({ privacy: 'shutter-elgamal', hasCommittee: true });
   });
 
-  // Going public must also clear the committee, key and ballot config.
-  it('honours an explicit request to go public and clears the private-voting columns', async () => {
+  // The committee and key are kept when going public, so going private again
+  // reuses them. A second key ceremony for the same proposal would be refused by
+  // the keypers and the hub, and the proposal could never be voted on.
+  it('keeps the committee and key through private -> public -> private', async () => {
+    const before = await stored();
     await updateAction(editBody({ privacy: '' }), 'ipfs2');
-    const [row] = await db.queryAsync(
-      'SELECT privacy, te_sgp_config, te_mpk, te_config, te_keyper_addresses FROM proposals WHERE id = ?',
-      [ID]
-    );
-    expect(row).toEqual({
-      privacy: '',
-      te_sgp_config: null,
-      te_mpk: null,
-      te_config: null,
-      te_keyper_addresses: null
+    expect((await stored()).privacy).toBe('');
+
+    await updateAction(editBody({ privacy: 'shutter-elgamal' }), 'ipfs3');
+    const after = await stored();
+    expect({
+      privacy: after.privacy,
+      te_mpk: after.te_mpk,
+      te_sgp_config: after.te_sgp_config
+    }).toEqual({
+      privacy: 'shutter-elgamal',
+      te_mpk: before.te_mpk,
+      te_sgp_config: before.te_sgp_config
     });
   });
 

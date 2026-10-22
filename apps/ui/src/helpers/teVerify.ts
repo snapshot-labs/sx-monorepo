@@ -100,19 +100,18 @@ export interface AuditPayload {
   } | null;
 }
 
-/** One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`). */
+/**
+ * One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`).
+ * Only the ciphertexts are kept: proofs are not re-checked here and are most of a
+ * ballot's size.
+ */
 export interface AuditBallot {
   /** Position in the committee's order; `admitted` and `exclusions` refer to it. */
   sequenceNumber?: number;
   voter: string;
   vp: number;
   choice: {
-    electionId: string;
-    pseudonym: string;
-    vk: string;
     ciphertexts: Array<{ c1: string; c2: string }>;
-    zkProof: string;
-    voterSignature: string;
   } | null;
 }
 
@@ -212,14 +211,7 @@ export async function fetchBallotsPayload(
         sequenceNumber,
         voter: ballot.pseudonym,
         vp: Number(ballot.attestation?.weight ?? 0),
-        choice: {
-          electionId: ballot.electionId,
-          pseudonym: ballot.pseudonym,
-          vk: ballot.vk,
-          ciphertexts: ballot.ciphertexts,
-          zkProof: ballot.zkProof,
-          voterSignature: ballot.voterSignature
-        }
+        choice: { ciphertexts: ballot.ciphertexts }
       });
     }
     if (!page.ballots.length || ballots.length >= page.total) break;

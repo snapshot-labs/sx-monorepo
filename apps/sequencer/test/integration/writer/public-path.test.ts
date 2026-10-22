@@ -41,8 +41,7 @@ const TE_COLUMNS = [
   'te_committee_pks',
   'te_keyper_addresses',
   'te_threshold_t',
-  'te_threshold_n',
-  'te_aggregate'
+  'te_threshold_n'
 ];
 
 describe('D14: public voting is untouched by private voting', () => {

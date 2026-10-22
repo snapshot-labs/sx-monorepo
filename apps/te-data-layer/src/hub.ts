@@ -90,7 +90,10 @@ async function forward(
     let detail = `hub responded ${res.status}`;
     try {
       const parsed = JSON.parse(text);
-      detail = parsed?.error || parsed?.message || detail;
+      // The hub's `sendError` puts the reason in `error_description`; its
+      // `error` is always 'unauthorized'.
+      detail =
+        parsed?.error_description || parsed?.message || parsed?.error || detail;
     } catch {
       // A non-JSON error body still gives a status-only error.
     }
@@ -109,17 +112,9 @@ export async function hubGet<T>(path: string): Promise<T> {
   }
 }
 
-/** Returns null for an empty or non-JSON reply, such as the writes' 204. */
-export async function hubPost<T>(
-  path: string,
-  payload: unknown
-): Promise<T | null> {
-  const text = await forward('POST', path, JSON.stringify(payload));
-  try {
-    return text ? (JSON.parse(text) as T) : null;
-  } catch {
-    return null;
-  }
+/** The hub's reply body is not used: the writes answer 204. */
+export async function hubPost(path: string, payload: unknown): Promise<void> {
+  await forward('POST', path, JSON.stringify(payload));
 }
 
 /**

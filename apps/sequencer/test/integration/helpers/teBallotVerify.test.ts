@@ -111,6 +111,29 @@ describe('private ballot verification: the worker pool', () => {
     ]);
     expect(results.map(r => r.ok)).toEqual([true, false, true]);
   }, 120_000);
+
+  // At most two checks per worker: a third ballot for one worker is refused at
+  // once instead of waiting in an unlimited queue.
+  it('refuses a ballot when every worker already has two checks', async () => {
+    await closeBallotPool();
+    process.env.TE_VERIFY_WORKERS = '1';
+    try {
+      const choice = await poolBallot();
+      const results = await Promise.all([
+        check(choice),
+        check(choice),
+        check(choice)
+      ]);
+      expect(results.map(r => (r.ok ? 'ok' : r.reason))).toEqual([
+        'ok',
+        'ok',
+        'sequencer_busy'
+      ]);
+    } finally {
+      delete process.env.TE_VERIFY_WORKERS;
+      await closeBallotPool();
+    }
+  }, 120_000);
 });
 
 describe('private ballot verification: the credential is checked, not minted', () => {

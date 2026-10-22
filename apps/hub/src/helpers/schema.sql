@@ -68,15 +68,13 @@ CREATE TABLE proposals (
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
-  -- Threshold-ElGamal private voting (privacy='shutter-elgamal').
-  -- All te_* columns are NULL when privacy is not 'shutter-elgamal';
+  -- Private voting (privacy='shutter-elgamal'). A proposal made public keeps these values.
   te_config JSON DEFAULT NULL,
   te_mpk VARBINARY(96) DEFAULT NULL,
   te_committee_pks JSON DEFAULT NULL,
   te_threshold_t INT DEFAULT NULL,
   te_threshold_n INT DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
-  te_aggregate JSON DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
@@ -132,11 +130,8 @@ CREATE TABLE votes (
   INDEX idx_votes_on_cb_proposal (cb, proposal)
 );
 
--- Threshold-ElGamal partial decryption shares posted by keypers after the
--- voting window closes. The tally worker reads these, runs verifyDecryptionShare
--- on each, Lagrange-combines `t+1` valid shares per candidate, and recovers
--- the per-candidate plaintext total via baby-step giant-step.
--- Append-only: PRIMARY KEY enforces one share per (proposal, keyper, candidate).
+-- Each keyper's partial decryption of each candidate's total, with its DLEQ proof.
+-- One row per proposal, keyper and candidate, never replaced.
 CREATE TABLE te_decryption_shares (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -148,10 +143,8 @@ CREATE TABLE te_decryption_shares (
   PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
--- Pre-finalisation DKG submissions: one row per (proposal, keyper). The hub
--- finalises te_mpk + te_committee_pks on the proposal row once at least
--- t+1 keypers post identical (mpk, committee_pks_hex) tuples here. Keyper
--- changes its mind = 409 conflict (handled in apps/hub/src/te.ts).
+-- Each keyper's key-ceremony result. The hub sets te_mpk once a quorum submits
+-- the same key (in sgp.ts). A keyper that changes its result gets 409.
 CREATE TABLE te_dkg_submissions (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -164,14 +157,8 @@ CREATE TABLE te_dkg_submissions (
   INDEX idx_te_dkg_match (proposal_id, mpk_hex(64))
 );
 
--- The published tally. Written once, by the result publisher named in the
--- election's frozen config, and mirrored into proposals.scores by the sequencer.
---
--- totals_json holds the per-candidate integers as JSON *strings* rather than
--- numbers: they are sums over weighted ballots and can exceed 2^53, where a
--- JSON number stops being exact. They are also what the publisher's signature
--- covers, so a rounded value here would not just display wrong, it would fail
--- to verify.
+-- The published tally, signed by the proposal's result publisher; written once.
+-- totals_json holds decimal strings: totals can exceed 2^53 and are signed.
 CREATE TABLE te_results (
   proposal_id VARCHAR(66) NOT NULL PRIMARY KEY,
   totals_json TEXT NOT NULL,
@@ -181,22 +168,9 @@ CREATE TABLE te_results (
   posted_at BIGINT NOT NULL
 );
 
--- Per-keyper aggregate submissions. The aggregate is committee-owned: each
--- member derives it independently from the same ballots and the same config,
--- and the one that a quorum submits *byte-identically* becomes canonical
--- (promoted into proposals.te_aggregate). A single writer could otherwise
--- isolate a ballot and nobody would be able to tell.
---
--- Unlike te_dkg_submissions this is deliberately NOT append-only: a keyper may
--- overwrite its own row until the quorum finalises. The aggregate is a
--- deterministic re-derivation, so a member that submitted a stale one must be
--- able to re-converge with the rest — the coordinator explicitly asks the
--- committee to re-derive when it sees submissions that do not agree. After the
--- quorum, the row set is frozen and a change is a 409.
---
--- digest is stored alongside the JSON because it is what the quorum counts on
--- (cheap and indexed), while the JSON is what an auditor reads to see exactly
--- what each keyper claimed when a quorum *fails* to form.
+-- Each keyper's aggregate (the weighted sum of the ballots). The one a quorum
+-- submits byte-identically is the canonical aggregate. A keyper may replace its
+-- row until then; after that a change is a 409.
 CREATE TABLE te_aggregate_submissions (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -209,29 +183,22 @@ CREATE TABLE te_aggregate_submissions (
   INDEX idx_te_agg_match (proposal_id, digest)
 );
 
--- The eligibility public key currently in use, published by the sequencer.
---
--- The sequencer holds the private half and mints one credential per private
--- ballot; the hub needs the public half for one job: refusing to serve a
--- proposal whose frozen key no longer matches the key in use, which is what
--- stops a rotated key producing a legitimate-looking all-zeros tally.
---
--- Written on every sequencer boot. Rotating the key means changing an
--- environment variable, which means a restart, so this row cannot lag reality.
--- One row, enforced by a fixed primary key.
+-- The sequencer's current eligibility public key, written on every sequencer
+-- start. The hub refuses to serve a proposal whose frozen key no longer matches.
 CREATE TABLE te_eligibility_key (
   id TINYINT NOT NULL PRIMARY KEY,
   public_key VARCHAR(100) NOT NULL,
   updated BIGINT NOT NULL
 );
 
+-- Makes each signed stall or resume request usable once. Rows older than the
+-- acceptance window are pruned on write.
 CREATE TABLE te_request_nonces (
   proposal_id VARCHAR(66) NOT NULL,
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
   accepted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, op, issued_at),
-  INDEX idx_te_nonce_accepted (accepted_at)
+  PRIMARY KEY (proposal_id, op, issued_at)
 );
 
 CREATE TABLE follows (
@@ -349,16 +316,8 @@ CREATE TABLE networks (
   INDEX premium (premium)
 );
 
--- The re-vote counter the eligibility credential carries.
---
--- The committee ranks a voter's duplicate ballots by (nonce, sequenceNumber), so
--- this is what decides which of their ballots is counted. It has to be strictly
--- increasing per (proposal, pseudonym) and it has to survive a restart: a
--- regression would let a stale ballot outrank a genuine re-vote.
---
--- A counter rather than the issuance timestamp, because credentials are now
--- minted before the vote is cast and two requests in the same second — a
--- double-click — would otherwise share a nonce and leave the ordering undefined.
+-- The re-vote counter carried in each credential, per (proposal, pseudonym). It
+-- decides which of a voter's ballots counts, so it must only increase.
 CREATE TABLE te_revote_nonces (
   proposal_id VARCHAR(66) NOT NULL,
   pseudonym VARCHAR(66) NOT NULL,

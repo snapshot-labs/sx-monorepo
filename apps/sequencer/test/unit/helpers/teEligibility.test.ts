@@ -5,10 +5,10 @@
  * the tally is all zeros.
  */
 
+import { SgpAttestationError } from '../../../src/helpers/sgpAttestation';
 import {
   getEligibilityKey,
-  resetEligibilityKeyCache,
-  TeEligibilityError
+  resetEligibilityKeyCache
 } from '../../../src/helpers/teEligibility';
 
 const SK = '0x0000000000000000000000000000000000000000000000000000000000002a2a';
@@ -38,6 +38,6 @@ describe('getEligibilityKey', () => {
     if (value === undefined) delete process.env.TE_ELIGIBILITY_PRIVATE_KEY;
     else process.env.TE_ELIGIBILITY_PRIVATE_KEY = value;
     resetEligibilityKeyCache();
-    await expect(getEligibilityKey()).rejects.toThrow(TeEligibilityError);
+    await expect(getEligibilityKey()).rejects.toThrow(SgpAttestationError);
   });
 });
