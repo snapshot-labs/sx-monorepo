@@ -19,6 +19,21 @@ import {
 } from '../helpers/utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
+const START_TOLERANCE = 300;
+
+// A proposal starting in the past (e.g. a Safe signature confirmed late) is
+// restarted from now, so it always gets its voting delay and full duration
+export function getProposalTimeline(
+  payload: { start: number; end: number },
+  votingDelay = 0,
+  now = Math.floor(Date.now() / 1e3)
+) {
+  const { start, end } = payload;
+  if (start >= now - START_TOLERANCE) return { start, end };
+
+  const newStart = now + votingDelay;
+  return { start: newStart, end: newStart + end - start };
+}
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -115,11 +130,6 @@ export async function verify(body): Promise<any> {
     return Promise.reject('wrong proposal format');
   }
 
-  const tsInt = (Date.now() / 1e3).toFixed();
-  if (msg.payload.end <= tsInt) {
-    return Promise.reject('proposal end date must be in the future');
-  }
-
   const isChoicesValid = validateChoices({
     type: msg.payload.type,
     choices: msg.payload.choices
@@ -127,8 +137,6 @@ export async function verify(body): Promise<any> {
   if (!isChoicesValid) {
     return Promise.reject('wrong choices for basic type voting');
   }
-
-  // if (msg.payload.start < created) return Promise.reject('invalid start date');
 
   if (space.voting?.delay) {
     const isValidDelay = msg.payload.start === created + space.voting.delay;
@@ -286,7 +294,12 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const spaceSettings = await getSpace(space);
 
   const author = body.address;
-  const created = parseInt(msg.timestamp);
+  const created = Math.floor(Date.now() / 1e3);
+  const { start, end } = getProposalTimeline(
+    msg.payload,
+    spaceSettings.voting?.delay,
+    created
+  );
   const metadata = msg.payload.metadata || {};
   const strategies = JSON.stringify(spaceSettings.strategies);
   const validation = JSON.stringify(spaceSettings.voteValidation || {});
@@ -330,8 +343,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     labels: msg.payload.labels?.length
       ? JSON.stringify(msg.payload.labels)
       : null,
-    start: parseInt(msg.payload.start || '0'),
-    end: parseInt(msg.payload.end || '0'),
+    start,
+    end,
     quorum,
     quorum_type: (quorum && spaceSettings.voting?.quorumType) || '',
     privacy,

@@ -135,6 +135,36 @@ describe('writer/proposal', () => {
   msg.payload.end = Math.floor(Date.now() / 1000) + 60;
   input.msg = JSON.stringify(msg);
 
+  describe('getProposalTimeline()', () => {
+    const now = 1_000_000_000;
+    const duration = 3600;
+
+    it.each([
+      ['in the future', now + 60],
+      ['now', now],
+      ['in the past within the tolerance', now - 300]
+    ])('keeps the timeline when the start is %s', (_, start) => {
+      const payload = { start, end: start + duration };
+      expect(writer.getProposalTimeline(payload, 0, now)).toEqual(payload);
+    });
+
+    it('restarts the proposal from now when the start is in the past', () => {
+      const payload = { start: now - 301, end: now + 60 };
+      expect(writer.getProposalTimeline(payload, 0, now)).toEqual({
+        start: now,
+        end: now + 361
+      });
+    });
+
+    it('restarts the proposal after the voting delay when the start is in the past', () => {
+      const payload = { start: now - 3 * duration, end: now - 2 * duration };
+      expect(writer.getProposalTimeline(payload, 60, now)).toEqual({
+        start: now + 60,
+        end: now + 60 + duration
+      });
+    });
+  });
+
   describe('verify()', () => {
     describe('when the schema is invalid', () => {
       const msg = JSON.parse(input.msg);
@@ -462,16 +492,6 @@ describe('writer/proposal', () => {
       await expect(
         writer.verify({ ...input, msg: JSON.stringify(msg) })
       ).rejects.toMatch('proposal snapshot must be after network start');
-    });
-
-    it('rejects if the end period is in the past', async () => {
-      expect.assertions(1);
-      const msg = JSON.parse(input.msg);
-      msg.payload.end = Math.floor(Date.now() / 1000) - 60 * 5;
-
-      await expect(
-        writer.verify({ ...input, msg: JSON.stringify(msg) })
-      ).rejects.toMatch('proposal end date must be in the future');
     });
 
     it.each([
