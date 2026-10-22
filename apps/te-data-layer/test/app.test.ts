@@ -469,3 +469,34 @@ describe('the /port read mount', () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 });
+
+// A rate-limited hub lets a request with an API key through. All committee traffic
+// reaches the hub from this one service, so the key must go on every request.
+describe('hub API key', () => {
+  afterEach(() => {
+    delete process.env.HUB_API_KEY;
+  });
+
+  it.each([
+    ['GET', '', {}],
+    ['POST', '/dkg', { pkElection: '0x', committeePKs: [], keyperSig: '0x' }]
+  ] as Array<[string, string, object]>)(
+    'sends it on a %s %s when set, and nothing when not',
+    async (method, suffix, body) => {
+      process.env.HUB_API_KEY = 'key-for-the-hub';
+      hubReplies({}, 200);
+      await call(method, suffix, body);
+      expect(mockFetch.mock.calls[0][1].headers['x-api-key']).toBe(
+        'key-for-the-hub'
+      );
+
+      delete process.env.HUB_API_KEY;
+      mockFetch.mockReset();
+      hubReplies({}, 200);
+      await call(method, suffix, body);
+      expect(mockFetch.mock.calls[0][1].headers).not.toHaveProperty(
+        'x-api-key'
+      );
+    }
+  );
+});

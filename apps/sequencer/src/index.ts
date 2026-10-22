@@ -18,7 +18,7 @@ import {
   run as refreshStrategies,
   stop as stopStrategies
 } from './helpers/strategies';
-import { publishEligibilityKey } from './helpers/teEligibility';
+import { refreezeEligibilityKey } from './helpers/teEligibility';
 import { startTeTallyScheduler } from './helpers/teTallyScheduler';
 import { trackTurboStatuses } from './helpers/turbo';
 import refreshVotesVpValue from './helpers/votesVpValue';
@@ -26,7 +26,9 @@ import refreshVotesVpValue from './helpers/votesVpValue';
 const app = express();
 
 async function startServer() {
-  patchPrivacySchemas();
+  // Only where private voting is configured: elsewhere a space set to it could
+  // not create any proposal.
+  if (process.env.TE_KEYPERS) patchPrivacySchemas();
   refreshModeration();
   refreshProposalsVpValue();
   refreshProposalsScoresValue();
@@ -38,9 +40,7 @@ async function startServer() {
 
   initMetrics(app);
   trackTurboStatuses();
-  // Before the scheduler, so a tally cannot read a key row this boot has not
-  // written yet.
-  await publishEligibilityKey();
+  await refreezeEligibilityKey();
   startTeTallyScheduler();
 
   app.disable('x-powered-by');

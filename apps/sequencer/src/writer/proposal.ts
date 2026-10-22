@@ -202,7 +202,7 @@ export async function verify(body): Promise<any> {
       }
       log.warn(`[writer] eligibility key unavailable: ${err?.message || err}`);
       return Promise.reject(
-        'private voting unavailable: could not reach the eligibility service'
+        `private voting unavailable: ${err?.message || err}`
       );
     }
   }

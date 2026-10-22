@@ -34,9 +34,13 @@ jest.mock('../../../src/helpers/te', () => ({
   verifyTeBallot: (...args: any[]) => mockVerifyTeBallot(...args)
 }));
 
+const mockIsKeyRotated = jest.fn();
 jest.mock('../../../src/helpers/teEligibility', () => ({
   __esModule: true,
-  getEligibilityKey: jest.fn(async () => `0x${'aa'.repeat(48)}`)
+  KEY_ROTATED_MESSAGE: jest.requireActual('../../../src/helpers/teEligibility')
+    .KEY_ROTATED_MESSAGE,
+  getEligibilityKey: jest.fn(async () => `0x${'aa'.repeat(48)}`),
+  isEligibilityKeyRotated: (...args: any[]) => mockIsKeyRotated(...args)
 }));
 
 function proposal(extra: Record<string, unknown> = {}) {
@@ -96,6 +100,7 @@ beforeEach(() => {
     .mockResolvedValue({ vp: 10, vp_by_strategy: [10], vp_state: 'final' });
   mockVerifyTeBallot.mockReset().mockResolvedValue({ ok: true });
   mockValidate.mockReset().mockResolvedValue(true);
+  mockIsKeyRotated.mockReset().mockResolvedValue(false);
 });
 
 describe('writer/vote', () => {
@@ -133,7 +138,11 @@ describe('writer/vote', () => {
 
       it.each([
         ['invalid_proof', 'invalid private ballot: invalid_proof'],
-        ['sequencer_busy', 'sequencer busy, please try again in a moment']
+        ['sequencer_busy', 'sequencer busy, please try again in a moment'],
+        [
+          'verifier_unavailable',
+          'could not check the private ballot, please try again in a moment'
+        ]
       ])(
         'rejects a ballot the full check refuses (%s)',
         async (reason, msg) => {
@@ -196,6 +205,16 @@ describe('writer/vote', () => {
         mockValidate.mockResolvedValue(false);
         await expect(verify(body(ballot()))).rejects.toBe(
           'failed vote validation'
+        );
+        expect(mockVerifyTeBallot).not.toHaveBeenCalled();
+      });
+
+      // Its credentials would not verify against the frozen key, so the vote could
+      // never count. Ballots cast before the rotation still do.
+      it('rejects a vote once the eligibility key was rotated', async () => {
+        mockIsKeyRotated.mockResolvedValue(true);
+        await expect(verify(body(ballot()))).rejects.toBe(
+          "this proposal's eligibility key was rotated; it can no longer accept votes"
         );
         expect(mockVerifyTeBallot).not.toHaveBeenCalled();
       });

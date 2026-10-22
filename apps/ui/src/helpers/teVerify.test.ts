@@ -32,7 +32,6 @@ const ciphertexts = (hex: string, n = BASE_CONFIG.numCandidates) =>
   Array.from({ length: n }, () => ({ c1: hex, c2: hex }));
 
 const aggregateOf = (hex: string, n = BASE_CONFIG.numCandidates) => ({
-  election_id: PROPOSAL_ID,
   num_candidates: n,
   ciphertexts: ciphertexts(hex, n)
 });

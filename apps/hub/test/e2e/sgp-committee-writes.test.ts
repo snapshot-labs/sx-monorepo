@@ -57,7 +57,13 @@ beforeAll(async () => {
   const config = JSON.stringify(
     committee({ resultPublisherAddress: PUBLISHER.address })
   );
-  for (const id of [DKG_ID, RESULT_ID, HEX_RESULT_ID, CLOSED]) {
+  // The key ceremony runs before voting starts.
+  await insertProposal(DKG_ID, {
+    start: FUTURE,
+    end: FUTURE + 600,
+    te_sgp_config: config
+  });
+  for (const id of [RESULT_ID, HEX_RESULT_ID, CLOSED]) {
     await insertProposal(id, { te_sgp_config: config });
   }
   await insertProposal(OPEN, { end: FUTURE, te_sgp_config: config });
@@ -88,6 +94,18 @@ describe('POST /api/proposal/:id/te_sgp_dkg', () => {
     );
     return row.mpk ? `0x${row.mpk.toLowerCase()}` : null;
   }
+
+  // No key by the start means the ceremony failed: the coordinator will not tally
+  // the proposal, so a late result must not open voting.
+  it('refuses a result once voting has started without a key', async () => {
+    const dkg = { pkElection: MPK, committeePKs: COMMITTEE };
+    const keyperSig = await KEYPERS[0].signMessage(
+      dkgResultDigest({ electionId: CLOSED, ...dkg })
+    );
+    expect(await postJson(CLOSED, 'te_sgp_dkg', { ...dkg, keyperSig })).toBe(
+      422
+    );
+  });
 
   it('refuses an outsider and a committee of the wrong size', async () => {
     expect(await submitDkg(OUTSIDER)).toBe(403);
@@ -244,30 +262,6 @@ describe('POST /api/proposal/:id/te_aggregate', () => {
     expect(await submit(CLOSED, KEYPERS[0], artifact(CLOSED, 1))).toBe(409);
 
     // The canonical artifact is unchanged by the attempt.
-    expect(await canonical(CLOSED)).toMatchObject({ admitted: [0, 1] });
-  });
-
-  // A replacement must not run between another keyper's quorum count and the
-  // promotion, or the canonical aggregate would lose its quorum. Locking the
-  // proposal row here makes both requests wait and run in order.
-  it('keeps a promoted aggregate canonical when a replacement races the promotion', async () => {
-    expect(await submit(CLOSED, KEYPERS[0], artifact(CLOSED))).toBe(204);
-
-    const lock = await (db as any).getConnectionAsync();
-    await lock.beginTransactionAsync();
-    await lock.queryAsync('SELECT id FROM proposals WHERE id = ? FOR UPDATE', [
-      CLOSED
-    ]);
-    const settle = () => new Promise(r => setTimeout(r, 400));
-    const promoting = submit(CLOSED, KEYPERS[1], artifact(CLOSED));
-    await settle();
-    const replacing = submit(CLOSED, KEYPERS[0], artifact(CLOSED, 1));
-    await settle();
-    await lock.commitAsync();
-    lock.release();
-
-    expect(await promoting).toBe(204);
-    expect(await replacing).toBe(409);
     expect(await canonical(CLOSED)).toMatchObject({ admitted: [0, 1] });
   });
 

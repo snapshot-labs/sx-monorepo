@@ -55,7 +55,12 @@ const status = ref<Status>({ kind: 'idle' });
 /** Set while a run is in flight, so the user can stop it. */
 const cancelRun = ref<(() => void) | null>(null);
 // Stop the worker when leaving the page, so a later run does not start a second one.
-onBeforeUnmount(() => cancelRun.value?.());
+// A run still downloading has no worker yet; the flag keeps it from starting one.
+let isUnmounted = false;
+onBeforeUnmount(() => {
+  isUnmounted = true;
+  cancelRun.value?.();
+});
 /**
  * Button label while working. Progress is shown in ballots, because the aggregate
  * step takes most of the time; the tally check takes a couple of seconds.
@@ -83,6 +88,7 @@ async function run() {
         Number((props.proposal.te_config as any)?.scale ?? 1)
       )
     ]);
+    if (isUnmounted) return;
     // If there is no result yet, show whether keypers or the coordinator are behind.
     const diagnosis = diagnoseTally(payload);
     if (diagnosis.kind !== 'published') {
@@ -553,11 +559,8 @@ function downloadBundle() {
               >2</span
             >
             Threshold decryption
-            <IH-check-circle
-              v-if="status.tally.thresholdMet"
-              class="size-[15px] text-skin-success"
-            />
-            <IH-x-circle v-else class="size-[15px] text-skin-danger" />
+            <!-- Reached only when every candidate has a quorum of shares. -->
+            <IH-check-circle class="size-[15px] text-skin-success" />
           </div>
           <div class="text-xs text-skin-text mt-1">
             Only the combined total is decrypted, and only when at least

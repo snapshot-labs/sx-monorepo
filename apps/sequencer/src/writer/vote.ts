@@ -9,7 +9,11 @@ import {
   isWithinSgpVotingWindow,
   verifyTeBallot
 } from '../helpers/te';
-import { getEligibilityKey } from '../helpers/teEligibility';
+import {
+  getEligibilityKey,
+  isEligibilityKeyRotated,
+  KEY_ROTATED_MESSAGE
+} from '../helpers/teEligibility';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
 import { updateProposalAndVotes } from '../scores';
 
@@ -72,6 +76,9 @@ export async function verify(body): Promise<any> {
     // would reject.
     if (typeof msg.payload.choice !== 'object' || msg.payload.choice === null) {
       return Promise.reject('invalid choice: expected ballot object');
+    }
+    if (await isEligibilityKeyRotated(proposal)) {
+      return Promise.reject(KEY_ROTATED_MESSAGE);
     }
     try {
       verifyBallotCredential(proposal, msg.payload.choice);
@@ -166,9 +173,10 @@ export async function verify(body): Promise<any> {
   // if (await isLimitReached(msg.space)) return Promise.reject('too much activity, please contact an admin');
 
   // Checks the credential's signature and the voter's signature over the ballot
-  // (which covers the credential), as well as the ballot proofs. It takes 10-80 s
-  // of worker time, so it runs last: a vote that fails validation or has no
-  // voting power is refused without it.
+  // (which covers the credential), as well as the ballot proofs. It takes about
+  // 26 ms of worker time per proof branch (8 s for a 3-choice weighted ballot,
+  // about 50 s at the 19-choice limit), so it runs last: a vote that fails
+  // validation or has no voting power is refused without it.
   if (proposal.privacy === 'shutter-elgamal') {
     const result = await verifyTeBallot(
       proposal,
@@ -179,6 +187,11 @@ export async function verify(body): Promise<any> {
     if (!result.ok) {
       if (result.reason === 'sequencer_busy') {
         return Promise.reject('sequencer busy, please try again in a moment');
+      }
+      if (result.reason === 'verifier_unavailable') {
+        return Promise.reject(
+          'could not check the private ballot, please try again in a moment'
+        );
       }
       return Promise.reject(`invalid private ballot: ${result.reason}`);
     }

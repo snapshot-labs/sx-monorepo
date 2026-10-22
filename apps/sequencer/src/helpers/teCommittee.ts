@@ -42,7 +42,10 @@ export interface TeCommitteeSnapshot {
   thresholdT: number;
   /** Committee size. Always `keypers.length`; stored so reads need no derivation. */
   thresholdN: number;
-  /** Compressed G1 eligibility public key, fetched from the hub at creation. */
+  /**
+   * Compressed G1 eligibility public key, derived at creation from the
+   * sequencer's `TE_ELIGIBILITY_PRIVATE_KEY`.
+   */
   eligibilityKey: string;
   /** Address allowed to publish the result and mark a tally stalled. */
   resultPublisherAddress: string;
@@ -358,9 +361,11 @@ export async function buildCommitteeSnapshot(args: {
  * Parse a stored snapshot without validating it; returns null if it is missing or
  * malformed. Used by `ballotParamsColumn`, which then falls back to `scale: 1`.
  */
-export function parseCommitteeSnapshotLoose(
-  teSgpConfig: unknown
-): { maxTotalWeight?: number; solverCeiling?: number } | null {
+export function parseCommitteeSnapshotLoose(teSgpConfig: unknown): {
+  maxTotalWeight?: number;
+  solverCeiling?: number;
+  eligibilityKey?: string;
+} | null {
   try {
     const snapshot =
       typeof teSgpConfig === 'string'
@@ -399,9 +404,6 @@ export function weightedBudgetFromEnv(): number {
  *
  * It is not configurable: a larger value forces scaling, which divides every
  * voter's power for no reason. To allow more, raise `TE_SOLVER_CEILING`.
- *
- * `V` is also the ingest alarm threshold, so the alarm fires when accumulated
- * weight reaches what the coordinator can solve.
  */
 export function votingPowerFallback(budget: number): number {
   return Math.max(1, Math.floor(teSolverCeiling() / Math.max(1, budget)));

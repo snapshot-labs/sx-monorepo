@@ -8,33 +8,21 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import express from 'express';
 import db from './helpers/mysql';
 import { parseJsonField, sendError } from './helpers/utils';
-import { canonicalAggregateFor } from './sgp';
+import { canonicalAggregateFor, loadProposal } from './sgp';
 
 const router = express.Router();
 
-async function loadProposal(proposalId: string): Promise<any | null> {
-  const rows = await (db as any).queryAsync(
-    'SELECT id, privacy, te_mpk, te_config, te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n FROM proposals WHERE id = ? LIMIT 1',
-    [proposalId]
-  );
-  return rows[0] || null;
-}
-
 /**
- * The stored aggregate, with `election_id`, `num_candidates` and `ciphertexts`
- * added next to the committee's `aggregates`, because the UI verify panel reads
- * those names. `admitted` and `exclusions` are kept so a verifier can recompute
- * over exactly the ballots the committee counted.
+ * The canonical aggregate, with `num_candidates` and `ciphertexts` added next to
+ * the committee's `aggregates`, because the UI verify panel reads those names.
+ * `admitted` and `exclusions` are kept so a verifier can recompute over exactly
+ * the ballots the committee counted.
  */
-function auditAggregate(raw: unknown, proposalId: string): any | null {
+function auditAggregate(raw: unknown): any | null {
   const aggregate = parseJsonField<any>(raw, null);
   if (!aggregate) return null;
-  if (!Array.isArray(aggregate.aggregates) || aggregate.ciphertexts) {
-    return aggregate;
-  }
   return {
     ...aggregate,
-    election_id: aggregate.electionId ?? proposalId,
     num_candidates: aggregate.aggregates.length,
     ciphertexts: aggregate.aggregates
   };
@@ -46,21 +34,15 @@ function auditAggregate(raw: unknown, proposalId: string): any | null {
 router.get('/proposal/:id/te_decryption_shares', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
     if (!proposal.te_mpk) {
       return sendError(res, 'dkg_not_finalized', 400);
     }
     const canonical = await canonicalAggregateFor(proposalId, {
       thresholdT: Number(proposal.te_threshold_t)
     });
-    const aggregate = auditAggregate(
-      canonical === 'split' ? null : canonical,
-      proposalId
-    );
+    const aggregate = auditAggregate(canonical === 'split' ? null : canonical);
     const rows = await (db as any).queryAsync(
       'SELECT keyper_index, candidate, HEX(sigma) AS sigma_hex, HEX(proof_e) AS proof_e_hex, HEX(proof_z) AS proof_z_hex FROM te_decryption_shares WHERE proposal_id = ? ORDER BY candidate, keyper_index',
       [proposalId]

@@ -19,8 +19,7 @@ import {
   committee,
   HOST,
   insertProposal,
-  postJson,
-  seedEligibilityKey
+  postJson
 } from '../fixtures/sgp';
 
 const PUBLISHER = new Wallet(`0x${'a1'.repeat(32)}`);
@@ -117,11 +116,8 @@ async function upsertSpace(addresses: string[]): Promise<void> {
 
 describe('POST /api/proposal/:id/te_tally_stalled', () => {
   beforeAll(async () => {
-    // The election read returns 503 unless the config's eligibility key matches
-    // the published one, so publish it here rather than rely on another suite.
     // Cleanup also clears this proposal's spent nonces, so a second run seconds
     // later does not reuse timestamps that are already spent.
-    await seedEligibilityKey();
     await insertProposal(ID, {
       author: AUTHOR.address,
       space: SPACE,

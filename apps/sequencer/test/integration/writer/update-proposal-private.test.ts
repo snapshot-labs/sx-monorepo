@@ -183,6 +183,33 @@ describe('update-proposal: the ballot budget is frozen, not live', () => {
   });
 });
 
+// An encrypted tally can only sum votes per choice, and a ballot must fit the
+// sequencer's 1 MB message limit. An edit must not get around either.
+describe('update-proposal: private ballot limits on edit', () => {
+  beforeEach(() => useSpace({}));
+
+  it.each([
+    [
+      'a vote type the tally cannot count',
+      { type: 'approval' },
+      'not supported'
+    ],
+    [
+      'more weighted choices than a ballot can carry',
+      {
+        type: 'weighted',
+        choices: Array.from({ length: 30 }, (_, i) => `C${i}`)
+      },
+      'allows at most'
+    ]
+  ])('refuses %s', async (_label, payload, reason) => {
+    await seed();
+    await expect(
+      verify(message({ name: 'after the edit', ...payload }))
+    ).rejects.toMatch(reason);
+  });
+});
+
 describe('update-proposal: the DKG lead-time gate', () => {
   // A private proposal needs its key before voting opens. This also stops an
   // author from creating a public proposal that opens in seconds and then making

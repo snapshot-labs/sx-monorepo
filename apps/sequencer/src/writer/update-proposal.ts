@@ -165,7 +165,7 @@ export async function action(body, ipfs): Promise<void> {
       const reason =
         err instanceof TeConfigError || err instanceof VotingPowerBoundError
           ? err.message
-          : 'could not reach the eligibility service';
+          : err?.message || String(err);
       log.warn(`[writer] private voting unavailable on update: ${reason}`);
       return Promise.reject(`private voting unavailable: ${reason}`);
     }

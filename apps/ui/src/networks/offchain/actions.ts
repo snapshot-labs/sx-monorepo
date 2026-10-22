@@ -232,15 +232,20 @@ export function createActions(
             'proposal does not yet have a finalised threshold key; try again once the keypers have completed DKG'
           );
         }
+        const { buildTeBallotEnvelope, buildTeWeightedBallotEnvelope } =
+          await import('@/helpers/teBallot');
+        const source = {
+          sequencerUrl: client.sequencerUrl,
+          space: proposal.space.id,
+          voter: account,
+          proposalId: proposal.proposal_id as string,
+          mpk: proposal.te_mpk,
+          config: proposal.te_config
+        };
+        // A single choice is a number; a weighted one maps choices to weights.
         if (typeof sdkChoice === 'number') {
-          const { buildTeBallotEnvelope } = await import('@/helpers/teBallot');
           sdkChoice = await buildTeBallotEnvelope({
-            sequencerUrl: client.sequencerUrl,
-            space: proposal.space.id,
-            voter: account,
-            proposalId: proposal.proposal_id as string,
-            mpk: proposal.te_mpk,
-            config: proposal.te_config,
+            ...source,
             choice: sdkChoice
           });
         } else if (
@@ -248,16 +253,8 @@ export function createActions(
           typeof sdkChoice === 'object' &&
           !Array.isArray(sdkChoice)
         ) {
-          const { buildTeWeightedBallotEnvelope } = await import(
-            '@/helpers/teBallot'
-          );
           sdkChoice = await buildTeWeightedBallotEnvelope({
-            sequencerUrl: client.sequencerUrl,
-            space: proposal.space.id,
-            voter: account,
-            proposalId: proposal.proposal_id as string,
-            mpk: proposal.te_mpk,
-            config: proposal.te_config,
+            ...source,
             choice: sdkChoice as Record<string, number>
           });
         } else {

@@ -26,13 +26,11 @@ describe('runVerify — main-thread fallback', () => {
   it('passes the result through when the run completes', async () => {
     verifyAll.mockResolvedValueOnce({
       ballots: 'B',
-      tally: 'T',
-      derivedBound: 7n
+      tally: 'T'
     });
     await expect(runVerify(request).result).resolves.toEqual({
       ballots: 'B',
-      tally: 'T',
-      derivedBound: 7n
+      tally: 'T'
     });
   });
 
@@ -47,7 +45,7 @@ describe('runVerify — main-thread fallback', () => {
     verifyAll.mockReturnValueOnce(new Promise(r => (finish = r)));
     const run = runVerify(request);
     run.cancel();
-    finish({ ballots: 'B', tally: 'T', derivedBound: 1n });
+    finish({ ballots: 'B', tally: 'T' });
     await expect(run.result).rejects.toBeInstanceOf(VerifyCancelled);
   });
 
@@ -56,7 +54,7 @@ describe('runVerify — main-thread fallback', () => {
     verifyAll.mockReturnValueOnce(new Promise(r => (finish = r)));
     const run = runVerify(request);
     run.cancel();
-    finish({ ballots: 'B', tally: 'T', derivedBound: 1n });
+    finish({ ballots: 'B', tally: 'T' });
     const settled = await Promise.race([
       run.result.then(
         () => 'resolved',
@@ -72,7 +70,7 @@ describe('runVerify — main-thread fallback', () => {
     verifyAll.mockImplementationOnce(async (_req: any, cb: any) => {
       cb({ phase: 'aggregate', done: 128, total: 256 });
       cb({ phase: 'tally', done: 1, total: 1 });
-      return { ballots: 'B', tally: 'T', derivedBound: 1n };
+      return { ballots: 'B', tally: 'T' };
     });
     await runVerify(request, onProgress).result;
     expect(onProgress).toHaveBeenCalledTimes(2);

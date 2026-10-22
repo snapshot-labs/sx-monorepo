@@ -16,7 +16,6 @@
  * equivalent for answer 501 (see `UNSUPPORTED`).
  */
 
-import cors from 'cors';
 import express, { Express, Request, Response, Router } from 'express';
 import { BadElectionId, toProposalId } from './eid';
 import { HubError, hubGet, hubGetRaw, hubPost, hubPostRaw } from './hub';
@@ -116,9 +115,6 @@ export function buildApp(): Express {
       }
     })
   );
-  // Reads are public: the data layer is trusted for availability only, and every
-  // artifact it serves can be verified independently.
-  app.use(cors({ maxAge: 86400 }));
   app.use(accessLog);
 
   app.get('/health', (req, res) => {

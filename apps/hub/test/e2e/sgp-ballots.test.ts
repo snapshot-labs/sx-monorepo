@@ -12,12 +12,7 @@
 
 import fetch from 'node-fetch';
 import db from '../../src/helpers/mysql';
-import {
-  cleanup,
-  HOST,
-  insertProposal,
-  seedEligibilityKey
-} from '../fixtures/sgp';
+import { cleanup, HOST, insertProposal } from '../fixtures/sgp';
 
 const MiB = 1024 * 1024;
 
@@ -87,12 +82,6 @@ async function read(proposal: string, query = ''): Promise<any> {
 }
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i);
-
-beforeAll(async () => {
-  // The route returns 503 unless the published eligibility key matches the one
-  // in the committee config.
-  await seedEligibilityKey();
-});
 
 // At file level: closing the pool in a describe's afterAll would break the next
 // describe.

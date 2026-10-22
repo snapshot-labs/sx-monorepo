@@ -4,10 +4,7 @@ import db from '../../src/helpers/mysql';
 
 export const HOST = `http://localhost:${process.env.PORT || 3030}`;
 
-/**
- * Eligibility public key used by the e2e fixtures. A fixed value: the tests only
- * need the key in the proposal config to match the published one.
- */
+/** The eligibility public key frozen in the fixtures' committee config. */
 const ELIGIBILITY_KEY = `0x${'ab'.repeat(48)}`;
 
 // Fixed keys, so each signature recovers to a known committee index.
@@ -16,20 +13,6 @@ export const KEYPERS = [
   new Wallet(`0x${'22'.repeat(32)}`),
   new Wallet(`0x${'33'.repeat(32)}`)
 ];
-
-/**
- * Publishes the eligibility key, as the sequencer would.
- *
- * `eligibilityPublicKey()` reads this row, so every suite that reads ballots or
- * the election must call this first. Safe to call more than once.
- */
-export async function seedEligibilityKey(): Promise<void> {
-  await db.queryAsync(
-    `INSERT INTO te_eligibility_key (id, public_key, updated) VALUES (1, ?, ?)
-       ON DUPLICATE KEY UPDATE public_key = VALUES(public_key)`,
-    [ELIGIBILITY_KEY, 1]
-  );
-}
 
 /** A 2-of-3 committee of `KEYPERS`, as stored in `te_sgp_config`. */
 export function committee(overrides: Record<string, any> = {}) {

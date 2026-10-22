@@ -10,6 +10,7 @@ import TeVerifyTallyPanel from './TeVerifyTallyPanel.vue';
 const fetched = vi.hoisted(() => ({ audit: {} as any, ballots: {} as any }));
 const outcome = vi.hoisted(() => ({ value: {} as any, pending: false }));
 const cancel = vi.hoisted(() => vi.fn());
+const startRun = vi.hoisted(() => vi.fn());
 
 vi.mock('@/helpers/teVerify', async importOriginal => ({
   ...(await importOriginal<typeof teVerify>()),
@@ -20,12 +21,15 @@ vi.mock('@/helpers/teVerify', async importOriginal => ({
 
 vi.mock('@/helpers/teVerifyClient', () => ({
   VerifyCancelled: class extends Error {},
-  runVerify: () => ({
-    cancel,
-    result: outcome.pending
-      ? new Promise(() => {})
-      : Promise.resolve(outcome.value)
-  })
+  runVerify: () => {
+    startRun();
+    return {
+      cancel,
+      result: outcome.pending
+        ? new Promise(() => {})
+        : Promise.resolve(outcome.value)
+    };
+  }
 }));
 
 const ADDRESSES = [
@@ -143,5 +147,24 @@ describe('TeVerifyTallyPanel', () => {
     expect(cancel).not.toHaveBeenCalled();
     wrapper.unmount();
     expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  // Leaving while the ballots are still downloading must not start a worker
+  // afterwards: nothing could stop it.
+  it('does not start a verification after the panel is unmounted mid-download', async () => {
+    const wrapper = setup({ scores: [64, 0] });
+    startRun.mockClear();
+    let release!: (audit: any) => void;
+    vi.mocked(teVerify.fetchAuditPayload).mockImplementationOnce(
+      () => new Promise(resolve => (release = resolve))
+    );
+    const button = wrapper
+      .findAll('button')
+      .find(b => b.text() === 'Verify tally');
+    await button!.trigger('click');
+    wrapper.unmount();
+    release(fetched.audit);
+    await flushPromises();
+    expect(startRun).not.toHaveBeenCalled();
   });
 });

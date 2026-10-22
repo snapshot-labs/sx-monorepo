@@ -18,10 +18,6 @@ import {
   parseJsonPreservingBigInts,
   stringifyPreservingBigInts
 } from './helpers/bigIntJson';
-import {
-  EligibilityKeyError,
-  eligibilityPublicKey
-} from './helpers/eligibilityKey';
 import log from './helpers/log';
 import db from './helpers/mysql';
 import { canonicalAggregate, canonicalPoint } from './helpers/sgpAggregate';
@@ -72,12 +68,18 @@ const REQUEST_FRESHNESS_S = 300;
 /** How many proposals one `list` response may name. */
 const LIST_LIMIT = 500;
 
+/** `0x`-hex as bytes. */
+const hex = (v: unknown) => Buffer.from(String(v).replace(/^0x/, ''), 'hex');
+
 /** Loads a private proposal, or answers 404 and returns null. */
-async function loadProposal(proposalId: string, res: any): Promise<any | null> {
+export async function loadProposal(
+  proposalId: string,
+  res: any
+): Promise<any | null> {
   const [proposal] = await (db as any).queryAsync(
     `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
-            te_committee_pks, te_sgp_config, te_config, te_tally_stalled,
-            te_tally_stall_reason
+            te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n,
+            te_sgp_config, te_config, te_tally_stalled, te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
     [proposalId]
   );
@@ -164,11 +166,10 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
         proposalId,
         choices: parseJsonField<string[]>(proposal.choices, []),
         type: proposal.type,
-        snapshot: parseCommitteeSnapshot(proposal.te_sgp_config),
-        currentEligibilityKey: await eligibilityPublicKey()
+        snapshot: parseCommitteeSnapshot(proposal.te_sgp_config)
       });
     } catch (err: any) {
-      if (err instanceof SgpConfigError || err instanceof EligibilityKeyError) {
+      if (err instanceof SgpConfigError) {
         log.error(`[sgp] ${proposalId}: ${err.message}`);
         return sendError(res, err.message, 503);
       }
@@ -248,34 +249,6 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     const rawCount = parseInt(String(req.query.count ?? '0'), 10);
     const countOnly = req.query.countOnly === '1';
-
-    // Refuse a proposal whose frozen eligibility key has been rotated: every
-    // credential on it would fail and the tally would be all zeros. Checked
-    // before reading any rows.
-    try {
-      const snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-      const currentEligibilityKey = await eligibilityPublicKey();
-      if (
-        currentEligibilityKey.toLowerCase() !==
-        snapshot.eligibilityKey.toLowerCase()
-      ) {
-        log.error(
-          `[sgp] ${proposalId}: eligibility key rotated since this proposal was created`
-        );
-        return sendError(
-          res,
-          'frozen eligibility key does not match the hub key in use; ' +
-            'the key was rotated and credentials on this proposal can no longer verify',
-          503
-        );
-      }
-    } catch (err: any) {
-      if (err instanceof SgpConfigError) {
-        log.error(`[sgp] ${proposalId}: ${err.message}`);
-        return sendError(res, err.message, 500);
-      }
-      throw err;
-    }
 
     // cb != -3 excludes soft-deleted votes (CB.PENDING_DELETE in the sequencer).
     // A plain COUNT, so `countOnly` reads no envelopes.
@@ -427,6 +400,18 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
 
     const snapshot = committeeFor(proposal, res);
     if (!snapshot) return;
+
+    // No key by the start means the key ceremony failed, for good: the coordinator
+    // stops working on the proposal then and will not run its tally. A key that
+    // arrived later would open voting for ballots nobody counts. Once a key is
+    // stored, a keyper may still resend its matching result.
+    if (!proposal.te_mpk && Math.floor(Date.now() / 1000) >= proposal.start) {
+      return sendError(
+        res,
+        'voting has started without a key; the key ceremony failed',
+        422
+      );
+    }
 
     const { pkElection, committeePKs, keyperSig } = req.body || {};
     let pkCanon: string;
@@ -661,8 +646,8 @@ async function submitAggregate(
 
 /**
  * One keyper's aggregate. Once `thresholdT` keypers submit the same one, it is
- * stored as the proposal's aggregate. These rules match the protocol's reference
- * store:
+ * the proposal's canonical aggregate (`canonicalAggregateFor`). These rules match
+ * the protocol's reference store:
  *
  *   - 422 before voting ends.
  *   - A keyper may replace its aggregate until quorum is reached (the coordinator
@@ -819,7 +804,6 @@ async function verifyShareProofs(
   pkHex: string
 ): Promise<number | null> {
   await ensureCurves();
-  const hex = (v: string) => Buffer.from(String(v).replace(/^0x/, ''), 'hex');
 
   for (let candidate = 0; candidate < entries.length; candidate++) {
     let c1: G2Point | null = null;
@@ -1008,8 +992,6 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
     // One INSERT for all candidates, so the shares are stored all or nothing and
     // a retry is not mistaken for different shares.
     const now = Math.floor(Date.now() / 1000);
-    const hex = (v: unknown) =>
-      Buffer.from(String(v).replace(/^0x/, ''), 'hex');
     const rows = entries.map((entry: any, candidate: number) => {
       const proof = hex(entry.proof);
       return [

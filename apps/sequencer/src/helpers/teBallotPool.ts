@@ -6,13 +6,15 @@ import {
   BallotVerifyParams,
   VerifyResult
 } from '@shutter-network/urban-verified-crypto';
+import log from './log';
 
 /**
  * A pool of worker threads for `verifyBallot`, so checking a private ballot does
  * not block the thread that serves requests.
  *
  * Each worker checks one ballot at a time; a job goes to the worker with the
- * fewest waiting. A worker that crashes fails only its own jobs and is replaced.
+ * fewest waiting. A worker that crashes fails only its own jobs, and a new one
+ * starts when the next job is given to its slot.
  */
 
 interface Job {
@@ -23,7 +25,8 @@ interface Job {
 }
 
 interface Slot {
-  worker: Worker;
+  /** `null` until a job needs it, and after a crash. */
+  worker: Worker | null;
   pending: Map<
     number,
     { resolve: (r: VerifyResult) => void; reject: (e: Error) => void }
@@ -44,35 +47,42 @@ function poolSize(): number {
   return Math.max(1, availableParallelism() - 1);
 }
 
-function spawn(slot?: Slot): Slot {
+function spawn(slot: Slot): Worker {
   const worker = new Worker(WORKER_FILE);
   // Never keeps the process alive on its own.
   worker.unref();
-  const filled: Slot = slot ?? { worker, pending: new Map() };
-  filled.worker = worker;
+  slot.worker = worker;
 
   worker.on('message', ({ id, result, error }) => {
-    const job = filled.pending.get(id);
+    const job = slot.pending.get(id);
     if (!job) return;
-    filled.pending.delete(id);
+    slot.pending.delete(id);
     if (error !== undefined) job.reject(new Error(error));
     else job.resolve(result);
   });
+  // Not restarted here: a worker that cannot start (a missing file, WASM that
+  // will not load) would otherwise be restarted in a loop, forever.
   const fail = (err: Error) => {
-    if (filled.worker !== worker) return;
-    for (const job of filled.pending.values()) job.reject(err);
-    filled.pending.clear();
-    spawn(filled);
+    if (slot.worker !== worker) return;
+    slot.worker = null;
+    log.error(`[te-pool] ballot verifier stopped: ${err.message}`);
+    for (const job of slot.pending.values()) job.reject(err);
+    slot.pending.clear();
   };
   worker.on('error', fail);
   worker.on('exit', code => {
     if (code !== 0) fail(new Error(`ballot verifier exited with code ${code}`));
   });
-  return filled;
+  return worker;
 }
 
 export function verifyBallotInWorker(job: Job): Promise<VerifyResult> {
-  if (!slots) slots = Array.from({ length: poolSize() }, () => spawn());
+  if (!slots) {
+    slots = Array.from({ length: poolSize() }, () => ({
+      worker: null,
+      pending: new Map()
+    }));
+  }
   // At most two checks per worker, running or waiting, so an accepted ballot waits
   // about two checks at most; past that, refuse at once instead of queueing.
   const inFlight = slots.reduce((n, s) => n + s.pending.size, 0);
@@ -85,16 +95,24 @@ export function verifyBallotInWorker(job: Job): Promise<VerifyResult> {
   const slot = slots.reduce((a, b) =>
     b.pending.size < a.pending.size ? b : a
   );
+  const worker = slot.worker ?? spawn(slot);
   const id = nextId++;
   return new Promise((resolve, reject) => {
     slot.pending.set(id, { resolve, reject });
-    slot.worker.postMessage({ id, ...job });
+    worker.postMessage({ id, ...job });
   });
 }
 
 /** For tests: stop every worker; the next call starts a new pool. */
 export async function closeBallotPool(): Promise<void> {
-  const current = slots;
+  const current = slots ?? [];
   slots = null;
-  await Promise.all((current ?? []).map(s => s.worker.terminate()));
+  await Promise.all(
+    current.map(slot => {
+      // Emptied first, so the exit is not treated as a crash.
+      const worker = slot.worker;
+      slot.worker = null;
+      return worker?.terminate();
+    })
+  );
 }

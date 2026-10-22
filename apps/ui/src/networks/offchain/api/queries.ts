@@ -219,7 +219,6 @@ gql(`
     te_config
     te_mpk
     te_dkg_status
-    te_committee_pks
     te_threshold_t
     te_threshold_n
     te_keyper_addresses

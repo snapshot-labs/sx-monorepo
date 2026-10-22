@@ -140,29 +140,17 @@ export function parseCommitteeSnapshot(raw: unknown): TeCommitteeSnapshot {
 /**
  * Builds the wire config for one proposal.
  *
- * If `currentEligibilityKey` is given it must equal the frozen key. After a key
- * rotation every credential on the proposal would fail and the tally would be all
- * zeros, so this throws instead.
+ * It carries the frozen eligibility key, not the current one: after a rotation the
+ * sequencer accepts no more votes on the proposal, and every ballot already cast
+ * still verifies against the frozen key, so the proposal is tallied as usual.
  */
 export function composeElectionConfig(args: {
   proposalId: string;
   choices: string[];
   type: string | null | undefined;
   snapshot: TeCommitteeSnapshot;
-  currentEligibilityKey?: string;
 }): SgpElectionConfig {
   const { proposalId, choices, type, snapshot } = args;
-
-  if (
-    args.currentEligibilityKey &&
-    args.currentEligibilityKey.toLowerCase() !==
-      snapshot.eligibilityKey.toLowerCase()
-  ) {
-    throw new SgpConfigError(
-      'frozen eligibility key does not match the hub key in use; ' +
-        'the key was rotated and credentials on this proposal can no longer verify'
-    );
-  }
 
   const params = deriveBallotParams(choices, type, snapshot.weightedBudget);
 

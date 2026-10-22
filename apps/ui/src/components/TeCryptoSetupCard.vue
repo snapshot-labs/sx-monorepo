@@ -18,20 +18,12 @@ const keyperAddresses = computed<string[]>(() =>
     : []
 );
 
-const thresholdLabel = computed(() => {
+/** The threshold as "2-of-3" or, for the diagram, "2 of 3"; "?" when unknown. */
+function threshold(separator: string): string {
   const t = props.proposal.te_threshold_t;
   const n = props.proposal.te_threshold_n;
-  if (t == null || n == null) return '?';
-  return `${t}-of-${n}`;
-});
-
-// Same threshold rendered for the diagram badge, e.g. "2 of 3".
-const diagramThreshold = computed(() => {
-  const t = props.proposal.te_threshold_t;
-  const n = props.proposal.te_threshold_n;
-  if (t == null || n == null) return '?';
-  return `${t} of ${n}`;
-});
+  return t == null || n == null ? '?' : `${t}${separator}${n}`;
+}
 
 const keyperCount = computed(
   () => props.proposal.te_threshold_n ?? keyperAddresses.value.length
@@ -51,7 +43,9 @@ const mpkFingerprint = computed(() =>
     >
       <IH-key class="size-[18px] shrink-0" />
       <span class="grow text-left">Cryptographic setup</span>
-      <span class="font-mono text-sm text-skin-text">{{ thresholdLabel }}</span>
+      <span class="font-mono text-sm text-skin-text">{{
+        threshold('-of-')
+      }}</span>
       <IH-chevron-right
         class="size-[16px] shrink-0 transition-transform"
         :class="{ 'rotate-90': open }"
@@ -66,7 +60,7 @@ const mpkFingerprint = computed(() =>
           class="w-full max-w-[300px] mx-auto"
           fill="none"
           role="img"
-          :aria-label="`The keypers jointly form one shared key (${diagramThreshold} threshold); the hub stores only sealed ballots.`"
+          :aria-label="`The keypers jointly form one shared key (${threshold(' of ')} threshold); the hub stores only sealed ballots.`"
         >
           <!-- connectors: keypers -> shared key -->
           <g
@@ -135,7 +129,7 @@ const mpkFingerprint = computed(() =>
               text-anchor="middle"
               font-weight="600"
             >
-              {{ diagramThreshold }}
+              {{ threshold(' of ') }}
             </text>
           </g>
 
@@ -222,7 +216,7 @@ const mpkFingerprint = computed(() =>
       <div class="text-sm space-y-1">
         <div class="flex justify-between">
           <span class="text-skin-text">Decryption threshold</span>
-          <span class="font-mono">{{ thresholdLabel }}</span>
+          <span class="font-mono">{{ threshold('-of-') }}</span>
         </div>
         <div class="flex justify-between">
           <span class="text-skin-text">Keypers</span>

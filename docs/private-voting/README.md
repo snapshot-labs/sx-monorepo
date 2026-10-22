@@ -226,6 +226,14 @@ admitted, at about 2.7 ms per proof branch and `choices x (budget + 1)` branches
 admit and 23 seconds to tally**. Ballot count, choices and budget limit an election long before
 voting power does.
 
+**The sequencer's check is about 10 times slower.** Before storing a private ballot, the sequencer
+checks the same proofs with the JavaScript SDK, at about 26 ms per branch: about 8 s for a 3-choice
+weighted ballot at budget 100, and about 50 s for 19 choices. It runs one check per worker
+(`TE_VERIFY_WORKERS`, default: CPU cores minus one), and answers "sequencer busy" once every worker
+has two checks running or waiting. So it accepts about `60 × workers ÷ seconds per ballot` private
+ballots a minute. Size the workers for the busiest minute you expect, usually just before voting
+closes.
+
 ---
 
 ## Lifecycle of a proposal
