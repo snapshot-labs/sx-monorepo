@@ -58,15 +58,10 @@ const discussion = computed(() => {
 const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
 
 /**
- * What a private proposal will actually count this voter as.
- *
- * Private voting counts in whole numbers and caps them, so voting power is not
- * used as given — and until now the voter only found out afterwards: the clamp
- * appeared in the verify panel once the tally was published, and the floor
- * appeared as a rejection *after* they had chosen and signed. Surfacing it beside
- * their voting power turns both into something they know before committing.
- *
- * Advisory only; the sequencer is what enforces either rule.
+ * How a private proposal will count this voter, shown next to their voting power
+ * before they vote. `null` when it is counted as held. Private voting counts whole
+ * numbers and may scale weights (see `teVoteWeight`). Advisory only; the sequencer
+ * enforces the rules.
  */
 const teWeightNotice = computed(() => {
   if (proposal.value?.privacy !== 'shutter-elgamal') return null;
@@ -75,8 +70,7 @@ const teWeightNotice = computed(() => {
   const vp = totalVotingPower(votingPower.value);
   if (vp === null) return null;
 
-  // `scale` rides on the proposal's frozen TE config; absent means 1, i.e. no
-  // scaling, which is the case for essentially every space.
+  // `scale` comes from the proposal's TE config; missing means 1 (no scaling).
   const scale = Number((proposal.value as any).te_config?.scale ?? 1);
   const result = teVoteWeight(vp, scale);
   return result.kind === 'ok' ? null : result;
@@ -348,9 +342,8 @@ watchEffect(() => {
                   </div>
                 </IndicatorVotingPower>
                 <!--
-                  Private voting counts whole numbers and caps them, so say so
-                  before the voter picks choices and signs rather than after.
-                  Advisory: the sequencer enforces both rules at ingest.
+                  Warn before the voter signs if private voting will count less
+                  than their voting power. The sequencer enforces the rules.
                 -->
                 <div
                   v-if="teWeightNotice"

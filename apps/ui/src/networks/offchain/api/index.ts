@@ -92,16 +92,17 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
 const SCORES_TICKS_LIMIT = 1000;
 export const SCORES_TICKS_MAX_VOTES = 4000;
 
-function getProposalState(
+export function getProposalState(
   networkId: NetworkID,
   proposal: ApiProposal
 ): ProposalState {
   if (proposal.state === 'closed') {
-    // Outcome is undefined until the tally worker sets scores_state='final'.
-    // Notably, shutter-elgamal proposals hold placeholder zero scores while
-    // keyper decryption shares are still pending; reading pass/fail off
-    // those zeros here would incorrectly flag the proposal as 'rejected'.
-    if (proposal.scores_state !== 'final') {
+    // A private proposal holds placeholder zero scores until the committee's
+    // tally lands; reading pass/fail off those zeros would flag it 'rejected'.
+    if (
+      proposal.privacy === 'shutter-elgamal' &&
+      proposal.scores_state !== 'final'
+    ) {
       return 'closed';
     }
 
@@ -501,9 +502,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     te_committee_pks: proposal.te_committee_pks ?? undefined,
     te_threshold_t: proposal.te_threshold_t ?? null,
     te_threshold_n: proposal.te_threshold_n ?? null,
-    te_keyper_urls: proposal.te_keyper_urls ?? undefined,
     te_keyper_addresses: proposal.te_keyper_addresses ?? undefined,
-    te_aggregate: proposal.te_aggregate ?? undefined,
     flagged: proposal.flagged,
     flag_code: proposal.flagCode,
     plugins: proposal.plugins,

@@ -11,11 +11,14 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
-// Minimum number of seconds between "now" and the start of a shutter-elgamal
-// proposal's voting window. Gives the keyper committee time to run DKG and
-// publish the master public key before ballots start flowing in. Must be
-// >= the sequencer's MIN_DKG_LEAD_TIME_S (default 180); override via
-// VITE_MIN_DKG_LEAD_TIME_S if the backend value diverges.
+// Enables permanent private voting (shutter-elgamal). Only turn it on when the hub
+// serves the te_* proposal fields.
+export const IS_TE_ENABLED = import.meta.env.VITE_TE_ENABLED === 'true';
+
+// Minimum seconds from now to the start of a shutter-elgamal proposal, so the
+// keypers can run DKG and publish the public key first. Must be >= the
+// sequencer's MIN_DKG_LEAD_TIME_S (default 180); set VITE_MIN_DKG_LEAD_TIME_S if
+// the sequencer uses a different value.
 export const MIN_DKG_LEAD_TIME_S = Number(
   import.meta.env.VITE_MIN_DKG_LEAD_TIME_S ?? 180
 );
@@ -178,6 +181,7 @@ export const PRIVACY_TYPES_INFO: Record<
       'Choices are encrypted and only the aggregate tally is ever published. ' +
       'Powered by threshold-ElGamal homomorphic tallying, with the decryption ' +
       'key split across independent keypers. ' +
+      'Supports single choice, basic and weighted voting. ' +
       'Voting power counts in full, and holdings below 0.5 cannot vote.',
     isAlpha: true
   },

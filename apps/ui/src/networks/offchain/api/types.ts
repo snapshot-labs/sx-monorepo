@@ -75,11 +75,9 @@ export type ApiSpace = Override<
   }
 >;
 
-// Based on the *Te* fragment, which spreads `offchainProposalFragment` and adds
-// the nine te_* columns — so this stays a superset of upstream's shape. Against a
-// production hub those columns are simply absent at runtime; every consumer
-// guards with a falsy check (see `queries.ts` for why the document is picked at
-// runtime rather than spliced).
+// Uses the Te fragment, which extends `offchainProposalFragment` with the te_*
+// fields. When private voting is disabled those fields are not fetched, so code
+// must handle them being missing (see `queries.ts`).
 export type ApiProposal = Override<
   OffchainProposalTeFragmentFragment,
   {

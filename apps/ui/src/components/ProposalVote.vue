@@ -89,8 +89,8 @@ const dkgFailed = computed(
   () => isShutterElgamal.value && props.proposal.te_dkg_status === 'dkg_failed'
 );
 
-// DKG still running — no key yet and not permanently failed.
-// Includes pending: with MIN_DKG_LEAD_TIME, DKG runs before the proposal starts.
+// DKG still running: no key yet and not failed. Includes `pending`, because DKG
+// runs before the proposal starts.
 const dkgInProgress = computed(
   () =>
     isShutterElgamal.value &&

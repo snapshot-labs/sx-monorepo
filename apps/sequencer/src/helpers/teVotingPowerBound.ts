@@ -1,21 +1,18 @@
-import { Contract } from '@ethersproject/contracts';
+import snapshot from '@snapshot-labs/snapshot.js';
 import log from './log';
-import { EvmProvider, getProvider } from './provider';
+import { getProvider } from './provider';
 
-/** Minimal ERC-20/721 fragment — `totalSupply()` is all this needs. */
+/** ERC-20/721 `totalSupply()` only. */
 const TOTAL_SUPPLY_ABI = ['function totalSupply() view returns (uint256)'];
 
 /**
- * How each known strategy yields a supply.
+ * Strategies whose total supply bounds their voting power. An explicit list,
+ * because `params.address` means different things in different strategies and
+ * reading the wrong contract would give a wrong `V` that nothing detects. Other
+ * strategies use the fallback.
  *
- * An explicit allowlist rather than a heuristic over `params`. `params.address` means
- * different things in different strategies, so a heuristic that reads the wrong
- * contract produces a confidently wrong `V` that is indistinguishable from a right
- * one — and wrong-low is the direction nothing catches. An unrecognised strategy is
- * meant to be recognisable as such, and degrades to the fallback below.
- *
- * `decimals: true` means the on-chain supply is scaled by `10^params.decimals` and
- * must be normalised to the whole-token units voting power is expressed in.
+ * `decimals: true`: the on-chain supply is divided by `10^params.decimals` to get
+ * whole tokens, the unit voting power uses.
  */
 const SUPPLY_STRATEGIES: Record<string, { decimals: boolean }> = {
   'erc20-balance-of': { decimals: true },
@@ -33,11 +30,11 @@ export interface StrategyLike {
   params?: Record<string, any>;
 }
 
-/** One resolved bound, plus how it was arrived at — the log line needs both. */
+/** A resolved bound and where it came from (for logging). */
 export interface VotingPowerBound {
   value: number;
-  source: 'strategies' | 'fallback';
-  /** Set when `source` is `fallback`: which strategy was not recognised. */
+  source: 'strategies' | 'fallback' | 'mixed';
+  /** Set when `source` is `fallback` or `mixed`: which strategy was not recognised. */
   unrecognised?: string;
 }
 
@@ -72,37 +69,34 @@ async function readSupply(
   block: number,
   decimals: number
 ): Promise<number> {
-  // Upstream now types getProvider as EvmProvider | StarknetProvider; this is an
-  // ERC-20 totalSupply read, so narrow it the way upstream does in turbo.ts.
-  const contract = new Contract(
-    address,
-    TOTAL_SUPPLY_ABI,
-    getProvider(network) as EvmProvider
-  );
   const raw = await withTimeout<{ toString(): string }>(
-    contract.totalSupply({ blockTag: block }),
+    snapshot.utils.call(
+      getProvider(network),
+      TOTAL_SUPPLY_ABI,
+      [address, 'totalSupply'],
+      { blockTag: block }
+    ),
     READ_TIMEOUT_MS,
     `totalSupply(${address}@${network})`
   );
-  // Whole units, as a float. Precision beyond 2^53 does not matter here and is not
-  // wanted: `V` is a conservative bound feeding a power-of-two `s`, so being a few
-  // parts per quadrillion high is free, and being exact buys nothing.
+  // Whole tokens as a float. Losing precision above 2^53 is fine for an upper
+  // bound that only picks a power-of-two `s`.
   return Number(raw.toString()) / 10 ** decimals;
 }
 
 /**
- * Resolve `V` for a proposal.
+ * Resolve `V`, the upper bound on a proposal's total voting power: the sum of the
+ * supplies of its strategies.
  *
- * Voting power is the **sum** across a proposal's strategies, so `V` is the sum of
- * their supplies. If *any* strategy is unrecognised the sum is a lower bound rather
- * than a bound, and the whole proposal falls back to `fallbackValue` — summing only
- * the recognised ones would present an under-estimate as a bound, which is the exact
- * failure this value exists to prevent.
+ * - No recognised strategy: `fallbackValue`.
+ * - Some recognised, some not: the larger of their supply and `fallbackValue`
+ *   (not the sum, which would push every mixed space just over the fallback and
+ *   double `s`).
  *
- * Throws `VotingPowerBoundError` when a recognised strategy cannot be read after
- * `attempts` tries. The caller should refuse to create the proposal: `V` is
- * deterministic, so retrying later costs nothing but time, whereas guessing low is
- * unrecoverable.
+ * Throws `VotingPowerBoundError` if a recognised strategy cannot be read after
+ * `attempts` tries. The caller should refuse the proposal: the value is fixed by
+ * the snapshot block, so a later retry gives the same answer, while guessing too
+ * low cannot be fixed later.
  */
 export async function resolveVotingPowerBound(args: {
   strategies: StrategyLike[];
@@ -118,23 +112,21 @@ export async function resolveVotingPowerBound(args: {
     return { value: fallbackValue, source: 'fallback', unrecognised: '(none)' };
   }
 
-  for (const s of strategies) {
-    if (!SUPPLY_STRATEGIES[s.name]) {
-      return { value: fallbackValue, source: 'fallback', unrecognised: s.name };
-    }
-    if (typeof s.params?.address !== 'string') {
-      // Recognised by name but missing what the read needs: treat as unrecognised
-      // rather than reaching for a different field and hoping.
-      return { value: fallbackValue, source: 'fallback', unrecognised: s.name };
-    }
+  // A known strategy without `params.address` counts as unrecognised.
+  const isMeasurable = (s: StrategyLike) =>
+    !!SUPPLY_STRATEGIES[s.name] && typeof s.params?.address === 'string';
+  const unrecognised = strategies.find(s => !isMeasurable(s))?.name;
+  const measurable = strategies.filter(isMeasurable);
+  if (!measurable.length) {
+    return { value: fallbackValue, source: 'fallback', unrecognised };
   }
 
-  // One read per distinct (network, address): a proposal listing the same token twice
-  // should not pay for it twice, and the block is fixed so the answer cannot differ.
+  // Each (network, address, decimals) is read once; the block is fixed, so the
+  // answer is the same.
   const seen = new Map<string, number>();
   let total = 0;
 
-  for (const s of strategies) {
+  for (const s of measurable) {
     const network = String(s.network ?? proposalNetwork);
     const address = String(s.params!.address);
     const decimals = SUPPLY_STRATEGIES[s.name]!.decimals
@@ -170,5 +162,12 @@ export async function resolveVotingPowerBound(args: {
     total += supply;
   }
 
+  if (unrecognised) {
+    return {
+      value: Math.max(total, fallbackValue),
+      source: 'mixed',
+      unrecognised
+    };
+  }
   return { value: total, source: 'strategies' };
 }

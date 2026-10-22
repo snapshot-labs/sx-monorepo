@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { fingerprintHex, shortHex } from '@/helpers/teVerify';
+import { fingerprintHex } from '@/helpers/teVerify';
+import { shortenAddress } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
@@ -65,7 +66,7 @@ const mpkFingerprint = computed(() =>
           class="w-full max-w-[300px] mx-auto"
           fill="none"
           role="img"
-          :aria-label="`Three keypers jointly form one shared key (${diagramThreshold} threshold); the hub stores only sealed ballots.`"
+          :aria-label="`The keypers jointly form one shared key (${diagramThreshold} threshold); the hub stores only sealed ballots.`"
         >
           <!-- connectors: keypers -> shared key -->
           <g
@@ -245,7 +246,7 @@ const mpkFingerprint = computed(() =>
             <IH-key class="size-[14px] shrink-0" />
             Keyper {{ i + 1 }}
           </span>
-          <span class="font-mono truncate">{{ shortHex(addr) }}</span>
+          <span class="font-mono truncate">{{ shortenAddress(addr) }}</span>
         </li>
       </ul>
     </div>

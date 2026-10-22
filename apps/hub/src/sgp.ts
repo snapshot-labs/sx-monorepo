@@ -1,15 +1,9 @@
 /**
- * Read endpoints serving Snapshot state in the threshold protocol's own shapes.
+ * Endpoints that serve Snapshot data in the threshold protocol's (SGP) shapes, for
+ * the keypers and coordinator via te-data-layer. Reads are public. Keyper and
+ * role-key writes are authorised by their signatures.
  *
- * The keypers and their coordinator run from a separate codebase and speak one
- * fixed data-layer contract. A translator service maps that contract onto these
- * endpoints; this router is where Snapshot's schema is turned into the protocol's
- * artifacts. Everything here is a read — the protocol treats the data layer as
- * trusted for availability only, so all of it is public and unauthenticated.
- *
- * Kept separate from `te.ts` on purpose: that router serves the browser's audit
- * panel and the legacy write paths, and its shapes are load-bearing for the UI.
- * Mixing the two would make it unclear which shape may change.
+ * Kept separate from `te.ts`, whose shapes are used by the UI audit panel.
  */
 
 import {
@@ -20,7 +14,10 @@ import {
 } from '@shutter-network/urban-verified-crypto';
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import express from 'express';
-import { parseJsonPreservingBigInts } from './helpers/bigIntJson';
+import {
+  parseJsonPreservingBigInts,
+  stringifyPreservingBigInts
+} from './helpers/bigIntJson';
 import {
   EligibilityKeyError,
   eligibilityPublicKey
@@ -35,7 +32,6 @@ import {
 } from './helpers/sgpConfig';
 import {
   aggregateDigest,
-  aggregateDigestPreScale,
   decryptionShareDigest,
   dkgResultDigest,
   recoverDigestSigner,
@@ -44,79 +40,106 @@ import {
   resultDigest,
   SgpDigestError
 } from './helpers/sgpDigests';
-import { sendError } from './helpers/utils';
+import { parseJsonField, sendError } from './helpers/utils';
 
 const router = express.Router();
 
 /**
- * Largest ballot page this route will serve.
- *
- * Matches the protocol's own `BALLOT_PAGE` and the reference data layer's
- * `MAX_BALLOT_PAGE`, so a conforming keyper never sees a short page. A client
- * asking for more gets one anyway: `read_all_ballots` advances by the number of
- * rows it received, so truncation costs an extra request and nothing else.
+ * Largest ballot page, in rows. Matches the protocol's `BALLOT_PAGE` and the
+ * reference data layer's `MAX_BALLOT_PAGE`. A client asking for more gets a short
+ * page; its read loop advances by the rows received.
  */
 const MAX_BALLOT_PAGE = 1000;
 
 /**
- * How far a stall/resume request's `issuedAt` may sit from the hub's clock.
+ * Largest ballot page, in stored envelope bytes. Matches the reference data
+ * layer's `MAX_BALLOT_PAGE_BYTES`.
  *
- * Wide enough that ordinary clock skew between the coordinator, a voter's browser
- * and the hub never rejects an honest request; narrow enough that a captured
- * signature stops being useful long before the next admin retry, which is the
- * replay this bounds.
+ * An envelope is ~120-160 KB at budget 100 and over 1 MB at the
+ * `MAX_PROOF_BRANCHES` limit, so 1000 rows would be too large to build and forward
+ * within te-data-layer's 10 s timeout. A page always has at least one ballot, so
+ * a single envelope above the cap is still served.
+ */
+const MAX_BALLOT_PAGE_BYTES = 8 * 1024 * 1024;
+
+/**
+ * How far (in seconds) a stall/resume request's `issuedAt` may be from the hub's
+ * clock. Allows normal clock skew while limiting how long a captured signature can
+ * be replayed.
  */
 const REQUEST_FRESHNESS_S = 300;
 
 /** How many proposals one `list` response may name. */
 const LIST_LIMIT = 500;
 
-function parseJsonField<T>(value: unknown, fallback: T): T {
-  if (value === null || value === undefined) return fallback;
-  if (typeof value === 'object') return value as T;
-  if (typeof value === 'string') {
-    try {
-      return JSON.parse(value) as T;
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
-}
-
-async function loadProposal(proposalId: string): Promise<any | null> {
-  const rows = await (db as any).queryAsync(
+/** Loads a private proposal, or answers 404 and returns null. */
+async function loadProposal(proposalId: string, res: any): Promise<any | null> {
+  const [proposal] = await (db as any).queryAsync(
     `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
-            te_committee_pks, te_sgp_config, te_config, te_aggregate,
-            te_dkg_status, te_tally_stalled, te_tally_stall_reason
+            te_committee_pks, te_sgp_config, te_config, te_tally_stalled,
+            te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
     [proposalId]
   );
-  return rows[0] || null;
+  if (!proposal) {
+    sendError(res, 'proposal_not_found', 404);
+    return null;
+  }
+  if (proposal.privacy !== 'shutter-elgamal') {
+    sendError(res, 'proposal_not_private', 404);
+    return null;
+  }
+  return proposal;
+}
+
+/** The proposal's frozen committee, or answers 503 and returns null. */
+function committeeFor(
+  proposal: any,
+  res: any
+): ReturnType<typeof parseCommitteeSnapshot> | null {
+  try {
+    return parseCommitteeSnapshot(proposal.te_sgp_config);
+  } catch (err: any) {
+    // Without a committee no write can be authorised.
+    log.error(`[sgp] ${proposal.id}: ${err.message}`);
+    sendError(res, 'committee_not_configured', 503);
+    return null;
+  }
+}
+
+/** The signer's 0-based position in the committee, or -1 for a non-member. */
+function keyperIndexOf(
+  snapshot: ReturnType<typeof parseCommitteeSnapshot>,
+  signer: string | null
+): number {
+  if (!signer) return -1;
+  return snapshot.keypers.findIndex(
+    k => k.address.toLowerCase() === signer.toLowerCase()
+  );
 }
 
 /**
- * Proposals the coordinator could still act on.
+ * Proposals the coordinator can still act on, not the full history (it polls this
+ * and reads each entry). Lists proposals awaiting key generation first, then those
+ * with a key until their scores are final.
  *
- * Deliberately not the full history. The coordinator polls this on an interval
- * and then reads each entry, so returning every private proposal ever created
- * would make each tick cost O(history). It only ever acts on proposals awaiting
- * key generation or awaiting a tally, which is exactly what this filter keeps.
- *
- * The trade-off is that an auditor cannot enumerate history through here and must
- * be given proposal ids. The per-proposal reads remain complete and public.
+ * A proposal with no key after voting starts has failed DKG (`dkg_failed` in
+ * GraphQL) and is left out, and so is a stalled tally until an admin resumes it,
+ * so neither can push new ones past the limit.
  */
 router.get('/te_sgp_elections', async (req, res) => {
   try {
+    const now = Math.floor(Date.now() / 1e3);
     const rows = await (db as any).queryAsync(
       `SELECT id FROM proposals
         WHERE privacy = 'shutter-elgamal'
           AND te_sgp_config IS NOT NULL
-          AND (te_dkg_status IS NULL OR te_dkg_status = '')
+          AND (te_mpk IS NOT NULL OR start >= ?)
           AND (scores_state IS NULL OR scores_state != 'final')
-        ORDER BY start ASC
+          AND te_tally_stalled = 0
+        ORDER BY te_mpk IS NULL DESC, start ASC
         LIMIT ?`,
-      [LIST_LIMIT]
+      [now, LIST_LIMIT]
     );
     return res.json({ electionIds: (rows as any[]).map(r => r.id) });
   } catch (err: any) {
@@ -126,19 +149,14 @@ router.get('/te_sgp_elections', async (req, res) => {
 });
 
 /**
- * One election: its config plus the facts the protocol derives state from.
- *
- * `cancelled` is always false — Snapshot has no proposal cancellation, and
- * deletion removes the row entirely, which surfaces as a 404 instead.
+ * One election: its config plus the state the protocol needs. `cancelled` is
+ * always false: Snapshot has no cancellation, and a deleted proposal is a 404.
  */
 router.get('/proposal/:id/te_sgp_election', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     let config;
     try {
@@ -177,8 +195,7 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
       proposal.te_committee_pks,
       null
     );
-    // A finalized key exists only once the committee reached its quorum, which is
-    // the same moment te_mpk was written.
+    // te_mpk is written when the committee reaches quorum on the DKG result.
     const finalizedKey =
       proposal.te_mpk && committeePks?.length
         ? {
@@ -190,13 +207,10 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
     return res.json({
       config,
       cancelled: false,
-      // Drives the coordinator's state machine: a stalled election is one it
-      // has given up driving, and it will not resume until this clears.
+      // The coordinator does not drive a stalled election until this clears.
       tallyStalled: Boolean(proposal.te_tally_stalled),
-      // The coordinator's own account, passed through unverified and labelled as
-      // such by the UI. Advisory: the flag above is signed, this is not, and the
-      // keyper-vs-coordinator split an operator actually acts on is derived
-      // client-side from share counts (see teVerify's `diagnoseTally`).
+      // The coordinator's explanation, unsigned and unverified; the UI shows it
+      // as such. The UI's own diagnosis comes from share counts (`diagnoseTally`).
       tallyStallReason: proposal.te_tally_stall_reason ?? null,
       finalizedKey
     });
@@ -208,41 +222,25 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
 });
 
 /**
- * Every stored ballot as a protocol ballot envelope, each carrying a freshly
- * minted eligibility credential.
+ * Stored ballots as protocol ballot envelopes, one page at a time.
  *
- * **Ordering.** The protocol requires a stable total order with monotonic
- * sequence numbers, because a ballot's admission is expressed *as* its sequence
- * number inside an artifact every keyper must produce byte-identically. Snapshot's
- * votes table has no monotonic column and a re-vote updates its row in place, so
- * the order is `(created, id)` and the sequence number is the row's index in it.
- * That is deterministic, and stable by the time it matters: keypers only read
- * ballots after voting has closed, when no row can change again.
+ * Ordering: ballots are ordered by `(created, id)` and a ballot's sequence number
+ * is its index in that order. Keypers refer to ballots by sequence number in a
+ * signed artifact, so the order must be stable; it is, because keypers read only
+ * after voting has closed.
  *
- * **Dust** no longer reaches here. A voter with `0 < vp < 0.5` rounds to weight 0,
- * which the protocol rejects outright; the sequencer refuses such a vote at ingest
- * (see `isDustVotingPower`) rather than storing a ballot this route would have to
- * drop. Nothing is silently omitted, so every stored ballot is emitted and every
- * sequence number is accounted for.
+ * Every stored ballot is served. Votes with weight 0 (`0 < vp < 0.5`) are refused
+ * by the sequencer at ingest (`isDustVotingPower`), so none are dropped here.
  *
- * **Paging is done in SQL, and capped.** A private envelope is around 120 KB — the
- * budget-100 OR-proof dominates — so reading a whole election to serve one page
- * meant hundreds of megabytes crossing the connection for a request that returns a
- * fraction of it, and `countOnly` paid the same cost to return a single integer.
- * The window is now chosen by a keys-only query and only those rows have their
- * envelopes read, which keeps the cost proportional to what is served rather than
- * to the size of the election. `MAX_BALLOT_PAGE` matches the protocol's own
- * `BALLOT_PAGE`, and a client asking for more gets a short page, which its read
- * loop already handles by advancing on the length it received.
+ * Paging: the page is chosen by a keys-only query and only its envelopes (~120 KB
+ * each) are read. A page holds at most `MAX_BALLOT_PAGE` rows and stops at
+ * `MAX_BALLOT_PAGE_BYTES`.
  */
 router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const start = Math.max(
       0,
@@ -251,16 +249,11 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     const rawCount = parseInt(String(req.query.count ?? '0'), 10);
     const countOnly = req.query.countOnly === '1';
 
-    // The weight is no longer computed here — the sequencer clamped and signed
-    // it at ingest. What this block still does is refuse to serve a proposal
-    // whose frozen eligibility key has been superseded, because every credential
-    // on it would fail verification and the tally would read as all zeros.
-    //
-    // It runs before any read: there is no point paying for rows this request is
-    // about to refuse to serve.
+    // Refuse a proposal whose frozen eligibility key has been rotated: every
+    // credential on it would fail and the tally would be all zeros. Checked
+    // before reading any rows.
     try {
       const snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-      // Refuse to serve credentials minted under a superseded key.
       const currentEligibilityKey = await eligibilityPublicKey();
       if (
         currentEligibilityKey.toLowerCase() !==
@@ -285,9 +278,7 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     }
 
     // cb != -3 excludes soft-deleted votes (CB.PENDING_DELETE in the sequencer).
-    // Counting is a count: it must not read an envelope. The committee asks for
-    // this before every tally, so reading the election to return one integer was
-    // the most wasteful call the route served.
+    // A plain COUNT, so `countOnly` reads no envelopes.
     const [{ total }] = await (db as any).queryAsync(
       'SELECT COUNT(*) AS total FROM votes WHERE proposal = ? AND cb != -3',
       [proposalId]
@@ -297,43 +288,64 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     const limit =
       rawCount > 0 ? Math.min(rawCount, MAX_BALLOT_PAGE) : MAX_BALLOT_PAGE;
 
-    // Two queries rather than one, deliberately. Ordering by `(created, id)`
-    // cannot use an index here — the only index leading with `proposal` orders by
-    // `vp` — so MySQL sorts, and whether it drags 120 KB envelopes through that
-    // sort is left to the optimiser. Choosing the window on keys alone removes
-    // the question: the sort touches small rows, and only the page's envelopes
-    // are ever read.
+    // Choose the page on keys only, so envelopes are not read for skipped rows.
+    // `space` lets MySQL read the votes in order from the
+    // (space, proposal, created, id) index instead of sorting them all per page.
     const keys = await (db as any).queryAsync(
       `SELECT id FROM votes
-        WHERE proposal = ? AND cb != -3
+        WHERE space = ? AND proposal = ? AND cb != -3
         ORDER BY created ASC, id ASC
         LIMIT ? OFFSET ?`,
-      [proposalId, limit, start]
+      [proposal.space, proposalId, limit, start]
     );
     if (!keys.length) return res.json({ ballots: [], total: Number(total) });
 
-    // Ordering must match the sequence-number derivation above exactly, in both
-    // queries — the sequence number is a position in this order, and the
-    // committee expresses admission and exclusion in those numbers.
-    const rows = await (db as any).queryAsync(
-      `SELECT id, choice, created
+    // Cut the page at MAX_BALLOT_PAGE_BYTES (by JSON_STORAGE_SIZE) before reading
+    // any envelope. It keeps a prefix of `keys`, so `start + i` stays correct.
+    const sizes = await (db as any).queryAsync(
+      `SELECT id, JSON_STORAGE_SIZE(choice) AS size
          FROM votes
-        WHERE proposal = ? AND id IN (?)
-        ORDER BY created ASC, id ASC`,
+        WHERE proposal = ? AND id IN (?)`,
       [proposalId, (keys as any[]).map(k => k.id)]
     );
+    const sizeOf = new Map<string, number>(
+      (sizes as any[]).map(r => [r.id, Number(r.size)])
+    );
+    let pageBytes = 0;
+    let take = 0;
+    for (const k of keys as any[]) {
+      const size = sizeOf.get(k.id) ?? 0;
+      if (take > 0 && pageBytes + size > MAX_BALLOT_PAGE_BYTES) break;
+      pageBytes += size;
+      take++;
+    }
+    const pageKeys = (keys as any[]).slice(0, take);
+
+    // Put envelopes in `pageKeys` order in JS, not with ORDER BY: MySQL cannot
+    // sort a row larger than `sort_buffer_size` (256 KiB by default), and one
+    // envelope can be (e.g. five choices at budget 100).
+    const fetched = await (db as any).queryAsync(
+      `SELECT id, choice, created
+         FROM votes
+        WHERE proposal = ? AND id IN (?)`,
+      [proposalId, pageKeys.map(k => k.id)]
+    );
+    const byId = new Map<string, any>((fetched as any[]).map(r => [r.id, r]));
+    const rows = pageKeys.map(k => byId.get(k.id));
+    if (rows.some(r => r === undefined)) {
+      // A vote in the window was deleted between the two queries. Serving the
+      // rest would renumber what follows it, so ask the reader to retry.
+      return sendError(res, 'ballot list changed while reading; retry', 503);
+    }
 
     const ballots: any[] = [];
-    for (let i = 0; i < (rows as any[]).length; i++) {
-      const row = (rows as any[])[i];
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
       // Position in the total order, not in this page.
       const seq = start + i;
       const envelope = parseJsonField<any>(row.choice, null);
-      // A hard failure, not a skip. Skipping renumbers every ballot after it,
-      // so the committee's admitted set would point at the wrong ballots — and
-      // a silently dropped vote is the failure the ingest checks exist to
-      // prevent. Ingest verifies the envelope before storing it, so this cannot
-      // fire without something having corrupted the row.
+      // Fail instead of skipping: a skip would renumber every later ballot.
+      // Ingest checks the envelope, so this means the row is corrupt.
       if (!envelope?.ciphertexts) {
         log.error(`[sgp] ${proposalId}: vote ${row.id} has no ballot envelope`);
         return sendError(
@@ -361,12 +373,8 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
           500
         );
       }
-      // Storage metadata rides *alongside* the envelope, never inside it: the
-      // envelope is the voter-signed artifact, so adding a field to it would
-      // break the signature it carries. The committee reads `sequenceNumber`
-      // from out here — it is the identifier the admitted set and the exclusion
-      // list are expressed in, so a ballot emitted without one is a ballot the
-      // aggregate cannot refer to.
+      // `sequenceNumber` and `submittedAt` go next to the ballot, not inside it:
+      // the ballot is signed by the voter, so adding fields would break that.
       ballots.push({
         ballot: {
           electionId: proposalId,
@@ -375,9 +383,8 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
           ciphertexts: envelope.ciphertexts,
           zkProof: envelope.zkProof,
           voterSignature: envelope.voterSignature,
-          // Emitted as the voter signed it — literally, since `voterSignature`
-          // above covers these bytes. `scheme` is carried through rather than
-          // asserted here, so the committee sees what the voter committed to.
+          // Passed through as signed (`voterSignature` covers it), including
+          // `scheme`.
           attestation: {
             scheme: credential.scheme ?? 'ATTESTATION_V1',
             electionId: credential.electionId,
@@ -402,50 +409,24 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
 });
 
 /**
- * Normalise a compressed point to lowercase `0x` hex.
- *
- * The quorum rule counts *byte-identical* submissions, so the stored form has to
- * be canonical. Two keypers that agree on the key but disagree on capitalisation
- * would otherwise never reach quorum, and the failure would look like disagreement
- * rather than formatting.
- */
-
-/**
  * A keyper's DKG result.
  *
- * The keyper index is **recovered from the signature**, never taken from the
- * request. A claimed index would let any member submit on behalf of another and
- * occupy its slot in the quorum; recovering it means a submission can only ever
- * count for whoever actually signed it.
+ * The keyper index comes from the recovered signer, never from the request, so a
+ * member cannot submit for another.
  *
- * The key is published once `t + 1` distinct members have submitted a
- * byte-identical `(pkElection, committeePKs)` pair. Honest keypers derive the same
- * pair from the same ceremony, so a divergent one simply never reaches quorum
- * rather than needing to be adjudicated.
- *
- * Submissions are recorded even after finalisation. Re-submitting the same values
- * is idempotent; submitting different ones is a conflict, because a keyper that
- * signed two different results for one election is evidence worth keeping rather
- * than a race to smooth over.
+ * The key is published once `thresholdT` members have submitted the same
+ * `(pkElection, committeePKs)`. Submissions are kept after that too. Resending
+ * the same values is a no-op; sending different ones is a 409, and the first
+ * submission is kept.
  */
 router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      // No committee means there is nothing to authorise against. Refuse loudly
-      // rather than storing an unverifiable submission.
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const { pkElection, committeePKs, keyperSig } = req.body || {};
     let pkCanon: string;
@@ -486,51 +467,46 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
       return sendError(res, err?.message || 'bad_request', 400);
     }
 
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer!.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
       log.warn(
         `[sgp] ${proposalId}: DKG submission from non-member ${signer ?? 'unrecoverable'}`
       );
-      // 403 is what the protocol's client maps to an authorisation error; a 401
-      // here would be read as a transport problem and retried.
+      // The protocol client treats 403 as an authorisation error (401 would be
+      // retried).
       return sendError(res, 'not_a_registered_keyper', 403);
     }
     const keyperIndex = index + 1; // committee indices are 1-based
 
     const committeeJson = JSON.stringify(committeeCanon);
-    const existing = await (db as any).queryAsync(
+    // INSERT IGNORE, then compare with the stored row: the first submission wins,
+    // and two concurrent submissions from one keyper cannot both insert.
+    await (db as any).queryAsync(
+      `INSERT IGNORE INTO te_dkg_submissions
+         (proposal_id, keyper_index, keyper_address, mpk_hex, committee_pks_hex, signature, posted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        proposalId,
+        keyperIndex,
+        signer,
+        pkCanon,
+        committeeJson,
+        keyperSig,
+        Math.floor(Date.now() / 1000)
+      ]
+    );
+    const [stored] = await (db as any).queryAsync(
       'SELECT mpk_hex, committee_pks_hex FROM te_dkg_submissions WHERE proposal_id = ? AND keyper_index = ? LIMIT 1',
       [proposalId, keyperIndex]
     );
-    if (existing[0]) {
-      if (
-        existing[0].mpk_hex !== pkCanon ||
-        existing[0].committee_pks_hex !== committeeJson
-      ) {
-        log.warn(
-          `[sgp] ${proposalId}: keyper ${keyperIndex} changed its DKG submission`
-        );
-        return sendError(res, 'keyper_changed_submission', 409);
-      }
-    } else {
-      await (db as any).queryAsync(
-        `INSERT INTO te_dkg_submissions
-           (proposal_id, keyper_index, keyper_address, mpk_hex, committee_pks_hex, signature, posted_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [
-          proposalId,
-          keyperIndex,
-          signer,
-          pkCanon,
-          committeeJson,
-          keyperSig,
-          Math.floor(Date.now() / 1000)
-        ]
+    if (
+      stored.mpk_hex !== pkCanon ||
+      stored.committee_pks_hex !== committeeJson
+    ) {
+      log.warn(
+        `[sgp] ${proposalId}: keyper ${keyperIndex} changed its DKG submission`
       );
+      return sendError(res, 'keyper_changed_submission', 409);
     }
 
     const [{ c: matching }] = await (db as any).queryAsync(
@@ -540,8 +516,7 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
     const required = snapshot.thresholdT;
 
     if (Number(matching) >= required) {
-      // `WHERE te_mpk IS NULL` makes finalisation atomic: concurrent submissions
-      // race harmlessly because only the first UPDATE matches.
+      // `te_mpk IS NULL` means only the first concurrent UPDATE takes effect.
       await (db as any).queryAsync(
         'UPDATE proposals SET te_mpk = UNHEX(?), te_committee_pks = ? WHERE id = ? AND te_mpk IS NULL',
         [pkCanon.slice(2), committeeJson, proposalId]
@@ -567,17 +542,16 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
 /**
  * The aggregate a quorum of the committee agreed on, or `null` while none has.
  *
- * Returns the string `'split'` for the case that must never be smoothed over:
- * two distinct artifacts each reaching the quorum. Picking either would make the
- * tally depend on row order, so callers surface it as a 409.
+ * Returns `'split'` if two different aggregates each reached quorum; callers
+ * answer 409 instead of picking one.
  *
- * Resolved from the signed submissions rather than `proposals.te_aggregate`,
- * which the superseded single-writer tally path also writes.
+ * Read from the signed submissions. Returned as the stored JSON text so weights
+ * above 2^53 stay exact.
  */
-async function canonicalAggregateFor(
+export async function canonicalAggregateFor(
   proposalId: string,
   snapshot: { thresholdT: number }
-): Promise<any | null | 'split'> {
+): Promise<string | null | 'split'> {
   const groups = await (db as any).queryAsync(
     `SELECT digest, COUNT(*) AS c, MIN(aggregate_json) AS aggregate_json
        FROM te_aggregate_submissions
@@ -588,53 +562,140 @@ async function canonicalAggregateFor(
   const reached = groups.filter((g: any) => Number(g.c) >= snapshot.thresholdT);
   if (reached.length > 1) return 'split';
   if (reached.length === 0) return null;
-  return parseJsonField<any>(reached[0].aggregate_json, null);
+  return String(reached[0].aggregate_json);
 }
 
 /**
- * One keyper's aggregate, and the quorum rule that makes one of them canonical.
+ * One keyper's aggregate submission, inside the caller's transaction.
  *
- * Three behaviours here are the protocol's, not choices — they mirror its own
- * reference store, and diverging from any of them strands an election:
+ * Locks the proposal row first, so submissions for one proposal run one at a time.
+ * Returns the HTTP outcome instead of sending it, so the caller can close the
+ * transaction first.
+ */
+async function submitAggregate(
+  connection: any,
+  args: {
+    proposalId: string;
+    keyperIndex: number;
+    signer: string;
+    keyperSig: string;
+    digestHex: string;
+    aggregateJson: string;
+    required: number;
+  }
+): Promise<{ status: number; error?: string }> {
+  const { proposalId, keyperIndex, digestHex, required } = args;
+  // Locks the proposal row so concurrent submissions are counted one at a time.
+  await connection.queryAsync(
+    'SELECT id FROM proposals WHERE id = ? FOR UPDATE',
+    [proposalId]
+  );
+  const before = await connection.queryAsync(
+    'SELECT COUNT(*) AS c FROM te_aggregate_submissions WHERE proposal_id = ? GROUP BY digest',
+    [proposalId]
+  );
+  const frozen = before.some((g: any) => Number(g.c) >= required);
+
+  const existing = await connection.queryAsync(
+    'SELECT digest FROM te_aggregate_submissions WHERE proposal_id = ? AND keyper_index = ? LIMIT 1',
+    [proposalId, keyperIndex]
+  );
+  if (existing[0]?.digest === digestHex) {
+    return { status: 204 }; // idempotent resend of this keyper's own row
+  }
+  if (existing[0] && frozen) {
+    log.warn(
+      `[sgp] ${proposalId}: keyper ${keyperIndex} changed its aggregate after the quorum`
+    );
+    return {
+      status: 409,
+      error: 'aggregate already finalized (quorum reached)'
+    };
+  }
+
+  await connection.queryAsync(
+    `INSERT INTO te_aggregate_submissions
+       (proposal_id, keyper_index, keyper_address, aggregate_json, digest, signature, posted_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       aggregate_json = VALUES(aggregate_json),
+       digest = VALUES(digest),
+       signature = VALUES(signature),
+       posted_at = VALUES(posted_at)`,
+    [
+      proposalId,
+      keyperIndex,
+      args.signer,
+      args.aggregateJson,
+      digestHex,
+      args.keyperSig,
+      Math.floor(Date.now() / 1000)
+    ]
+  );
+
+  const groups = await connection.queryAsync(
+    'SELECT digest, COUNT(*) AS c FROM te_aggregate_submissions WHERE proposal_id = ? GROUP BY digest',
+    [proposalId]
+  );
+  const reached = groups.filter((g: any) => Number(g.c) >= required);
+
+  if (reached.length > 1) {
+    log.error(
+      `[sgp] ${proposalId}: ${reached.length} distinct aggregates each reached the quorum of ${required}`
+    );
+    return { status: 409, error: 'aggregate: split quorum' };
+  }
+
+  if (reached.length === 1) {
+    log.info(
+      `[sgp] ${proposalId}: aggregate canonical at ${reached[0].c}/${required} matching submissions`
+    );
+  } else {
+    const mine = groups.find((g: any) => g.digest === digestHex);
+    log.info(
+      `[sgp] ${proposalId}: aggregate submission ${mine?.c ?? 1}/${required} from keyper ${keyperIndex}`
+    );
+  }
+  return { status: 204 };
+}
+
+/**
+ * One keyper's aggregate. Once `thresholdT` keypers submit the same one, it is
+ * stored as the proposal's aggregate. These rules match the protocol's reference
+ * store:
  *
- *   **422 before voting closes.** An aggregate over a still-open ballot set is
- *   meaningless, and accepting one would let a keyper fix the tally early.
- *
- *   **Mutable until the quorum forms.** Unlike the one-shot DKG result, the
- *   aggregate is a deterministic re-derivation, so a keyper that submitted a
- *   stale one must be able to replace it — the coordinator explicitly asks the
- *   committee to re-derive when their submissions disagree. Rejecting a change
- *   would freeze that disagreement permanently. After the quorum, the set is
- *   frozen and a change is a 409.
- *
- *   **A split quorum is a 409, not a winner.** If two distinct aggregates each
- *   reach the quorum, returning either one would make the tally depend on row
- *   order. That is a committee failure and is surfaced as one.
+ *   - 422 before voting ends.
+ *   - A keyper may replace its aggregate until quorum is reached (the coordinator
+ *     asks keypers to recompute when they disagree); after that a change is a 409.
+ *   - If two different aggregates both reach quorum, the answer is 409.
  */
 router.post('/proposal/:id/te_aggregate', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
-    // 422 is what the protocol's client maps to its voting-window error; a 400
-    // would be read as a malformed request and never retried.
+    // The protocol client treats 422 as a voting-window error and retries later
+    // (a 400 would never be retried).
     if (Math.floor(Date.now() / 1000) < Number(proposal.end)) {
       return sendError(res, 'aggregate submitted before voting_end', 422);
     }
 
-    const { aggregate, keyperSig } = req.body || {};
+    // Re-parse the raw body: the weight totals can exceed 2^53, and `req.body`
+    // has already rounded them.
+    let body: any = req.body;
+    if (typeof (req as any).rawBody === 'string') {
+      try {
+        body = parseJsonPreservingBigInts((req as any).rawBody);
+      } catch {
+        return sendError(res, 'malformed json', 400);
+      }
+    }
+
+    const { aggregate, keyperSig } = body || {};
     let canonical;
     try {
       canonical = canonicalAggregate(aggregate, proposalId);
@@ -660,44 +721,8 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
     }
 
     const signer = recoverDigestSigner(digest, keyperSig);
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
-      // Before blaming the roster, check whether this signature verifies under the
-      // pre-scale tuple. A shape mismatch recovers to a valid-looking address that
-      // is in no roster, so the two failures are indistinguishable from the signer
-      // alone — and the roster is the misleading one to name.
-      let preScaleSigner: string | null = null;
-      try {
-        preScaleSigner = recoverDigestSigner(
-          aggregateDigestPreScale({
-            electionId: proposalId,
-            aggregates: canonical.aggregates,
-            admitted: canonical.admitted,
-            exclusions: canonical.exclusions,
-            totalAdmittedWeight: canonical.totalAdmittedWeight
-          }),
-          keyperSig
-        );
-      } catch {
-        preScaleSigner = null;
-      }
-      const preScaleMember =
-        preScaleSigner &&
-        snapshot.keypers.some(
-          k => k.address.toLowerCase() === preScaleSigner!.toLowerCase()
-        );
-      if (preScaleMember) {
-        log.warn(
-          `[sgp] ${proposalId}: aggregate from ${preScaleSigner} signed under the ` +
-            `pre-scale digest format (4-field tally tuple); this keyper is running a ` +
-            `build from before weight scaling`
-        );
-        return sendError(res, 'aggregate_pre_scale_digest', 409);
-      }
       log.warn(
         `[sgp] ${proposalId}: aggregate from non-member ${signer ?? 'unrecoverable'}`
       );
@@ -705,82 +730,32 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
     }
     const keyperIndex = index + 1; // committee indices are 1-based
     const digestHex = `0x${digest.toString('hex')}`;
-    const aggregateJson = JSON.stringify(canonical);
 
-    const existing = await (db as any).queryAsync(
-      'SELECT digest FROM te_aggregate_submissions WHERE proposal_id = ? AND keyper_index = ? LIMIT 1',
-      [proposalId, keyperIndex]
-    );
-    if (existing[0]?.digest === digestHex) {
-      return res.status(204).end(); // idempotent resend of this keyper's own row
-    }
-    if (existing[0] && proposal.te_aggregate) {
-      log.warn(
-        `[sgp] ${proposalId}: keyper ${keyperIndex} changed its aggregate after the quorum`
-      );
-      return sendError(
-        res,
-        'aggregate already finalized (quorum reached)',
-        409
-      );
-    }
-
-    await (db as any).queryAsync(
-      `INSERT INTO te_aggregate_submissions
-         (proposal_id, keyper_index, keyper_address, aggregate_json, digest, signature, posted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE
-         aggregate_json = VALUES(aggregate_json),
-         digest = VALUES(digest),
-         signature = VALUES(signature),
-         posted_at = VALUES(posted_at)`,
-      [
+    // The freeze check, write, quorum count and promotion run in one
+    // transaction. Otherwise a keyper replacing its row between another keyper's
+    // count and promotion could leave a promoted aggregate without a quorum.
+    const connection = await (db as any).getConnectionAsync();
+    let outcome: { status: number; error?: string };
+    try {
+      await connection.beginTransactionAsync();
+      outcome = await submitAggregate(connection, {
         proposalId,
         keyperIndex,
-        signer,
-        aggregateJson,
-        digestHex,
+        signer: signer!,
         keyperSig,
-        Math.floor(Date.now() / 1000)
-      ]
-    );
-
-    const groups = await (db as any).queryAsync(
-      'SELECT digest, COUNT(*) AS c FROM te_aggregate_submissions WHERE proposal_id = ? GROUP BY digest',
-      [proposalId]
-    );
-    const required = snapshot.thresholdT;
-    const reached = groups.filter((g: any) => Number(g.c) >= required);
-
-    if (reached.length > 1) {
-      log.error(
-        `[sgp] ${proposalId}: ${reached.length} distinct aggregates each reached the quorum of ${required}`
-      );
-      return sendError(res, 'aggregate: split quorum', 409);
+        digestHex,
+        aggregateJson: stringifyPreservingBigInts(canonical),
+        required: snapshot.thresholdT
+      });
+      await connection.commitAsync();
+    } catch (err) {
+      await connection.rollbackAsync().catch(() => undefined);
+      throw err;
+    } finally {
+      connection.release();
     }
-
-    if (reached.length === 1) {
-      // `WHERE te_aggregate IS NULL` makes promotion atomic: concurrent
-      // submissions race harmlessly because only the first UPDATE matches.
-      const winner = await (db as any).queryAsync(
-        'SELECT aggregate_json FROM te_aggregate_submissions WHERE proposal_id = ? AND digest = ? LIMIT 1',
-        [proposalId, reached[0].digest]
-      );
-      await (db as any).queryAsync(
-        'UPDATE proposals SET te_aggregate = ? WHERE id = ? AND te_aggregate IS NULL',
-        [winner[0].aggregate_json, proposalId]
-      );
-      log.info(
-        `[sgp] ${proposalId}: aggregate canonical at ${reached[0].c}/${required} matching submissions`
-      );
-    } else {
-      const mine = groups.find((g: any) => g.digest === digestHex);
-      log.info(
-        `[sgp] ${proposalId}: aggregate submission ${mine?.c ?? 1}/${required} from keyper ${keyperIndex}`
-      );
-    }
-
-    return res.status(204).end();
+    if (outcome.error) return sendError(res, outcome.error, outcome.status);
+    return res.status(outcome.status).end();
   } catch (err: any) {
     log.error(`[sgp] te_aggregate ${proposalId}: ${err?.message || err}`);
     capture(err);
@@ -791,35 +766,20 @@ router.post('/proposal/:id/te_aggregate', async (req, res) => {
 /**
  * The canonical aggregate, or null while the committee has not agreed on one.
  *
- * Resolved from the submissions rather than read back from
- * `proposals.te_aggregate`. That column is also written by the superseded
- * single-writer tally path, whose artifact is a bare ciphertext sum with no
- * admitted set, no exclusions and no total weight — serving it here would hand
- * the committee something that only looks like an aggregate, and the protocol
- * would either fail to decode it or, worse, act on a tally nobody signed.
- * Resolving from the signed submissions cannot be polluted that way.
+ * Read from the signed submissions, so only an aggregate the keypers signed is
+ * ever served.
  */
 router.get('/proposal/:id/te_sgp_aggregate', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const canonical = await canonicalAggregateFor(proposalId, snapshot);
 
-    // Two artifacts at quorum is a committee failure, not a tie to break:
-    // returning either would make the tally depend on row order.
     if (canonical === 'split') {
       log.error(
         `[sgp] ${proposalId}: distinct aggregates each reached the quorum`
@@ -827,7 +787,9 @@ router.get('/proposal/:id/te_sgp_aggregate', async (req, res) => {
       return sendError(res, 'aggregate: split quorum', 409);
     }
 
-    return res.json({ aggregate: canonical });
+    return res
+      .type('application/json')
+      .send(`{"aggregate":${canonical ?? 'null'}}`);
   } catch (err: any) {
     log.error(`[sgp] te_sgp_aggregate ${proposalId}: ${err?.message || err}`);
     capture(err);
@@ -844,28 +806,20 @@ function ensureCurves(): Promise<void> {
 }
 
 /**
- * Check a keyper's DLEQ proofs before storing its shares.
- *
- * Storage is append-only, so an unverified share would be permanent: the first
- * one recorded is the one every later recovery uses. A bad proof caught here is
- * a 400 the keyper can act on; the same proof stored and discovered later is an
- * election that cannot be tallied and cannot be corrected.
- *
- * This duplicates a check the committee also performs — deliberately. It is the
- * one place the hub can independently confirm that what it is about to keep
- * forever actually decrypts the aggregate it agreed on.
+ * Checks a keyper's DLEQ proofs against the canonical aggregate before its shares
+ * are stored. Shares cannot be replaced once stored, so a bad one is rejected here
+ * (400) instead. Returns the index of the first failing candidate, or null if
+ * all proofs verify.
  */
 async function verifyShareProofs(
   proposalId: string,
   keyperIndex: number,
   entries: Array<{ sigma: string; proof: string }>,
   aggregates: Array<{ c1: string; c2: string }>,
-  committeePKs: string[]
+  pkHex: string
 ): Promise<number | null> {
   await ensureCurves();
   const hex = (v: string) => Buffer.from(String(v).replace(/^0x/, ''), 'hex');
-  const pkHex = committeePKs[keyperIndex - 1];
-  if (!pkHex) return -1; // no published key for this member
 
   for (let candidate = 0; candidate < entries.length; candidate++) {
     let c1: G2Point | null = null;
@@ -914,45 +868,24 @@ async function verifyShareProofs(
 /**
  * One keyper's decryption shares — its partial decryption of every candidate.
  *
- * Ordering is the whole point of the two window checks. A share is a partial
- * decryption *of a specific ciphertext*, so it is meaningless until the
- * committee has agreed which ciphertext that is:
+ * Shares decrypt the canonical aggregate, so they are refused with 422 (retry
+ * later) before voting ends or before a canonical aggregate exists.
  *
- *   - before voting closes there is no final ballot set;
- *   - before a canonical aggregate exists there is no agreed sum to decrypt,
- *     and a share computed against a candidate aggregate that later loses the
- *     quorum would be silently wrong rather than visibly rejected.
+ * Shares are permanent: resending the same ones is a no-op, and different ones
+ * from the same keyper are a 409.
  *
- * Both answer 422 — the protocol's voting-window error — because the condition
- * is temporary and the caller should retry, unlike a 400.
- *
- * Shares are append-only: unlike the aggregate, a share is not a re-derivable
- * artifact the committee converges on, and `INSERT IGNORE` semantics mean the
- * first one stored is permanent — so a second, different submission from the
- * same keyper is a 409 rather than an overwrite.
- *
- * The envelope is per keyper across all candidates; storage is per (keyper,
- * candidate), which is what the existing audit surface and the legacy verifier
- * read. The split happens here rather than in the translator because the
- * signature covers the whole entries list: only a party holding the complete
- * envelope can verify it.
+ * The request holds one keyper's shares for all candidates and is signed as a
+ * whole; it is stored as one row per (keyper, candidate), which the audit routes
+ * read.
  */
 router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     if (Math.floor(Date.now() / 1000) < Number(proposal.end)) {
       return sendError(
@@ -962,17 +895,18 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
       );
     }
 
-    const canonical = await canonicalAggregateFor(proposalId, snapshot);
-    if (canonical === 'split') {
+    const canonicalJson = await canonicalAggregateFor(proposalId, snapshot);
+    if (canonicalJson === 'split') {
       return sendError(res, 'aggregate: split quorum', 409);
     }
-    if (!canonical) {
+    if (!canonicalJson) {
       return sendError(
         res,
         'decryption share submitted before a canonical aggregate exists',
         422
       );
     }
+    const canonical = parseJsonPreservingBigInts(canonicalJson);
 
     const { share, keyperSig } = req.body || {};
     if (typeof keyperSig !== 'string') {
@@ -983,8 +917,7 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
       return sendError(res, 'share.entries: expected a non-empty array', 400);
     }
     if (entries.length !== canonical.aggregates.length) {
-      // A short entries list decodes to a shorter tuple and would silently
-      // corrupt recovery for the candidates it omits.
+      // One entry per candidate; a short list would break recovery.
       return sendError(
         res,
         `share.entries: expected ${canonical.aggregates.length} entries, got ${entries.length}`,
@@ -1000,11 +933,7 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
     }
 
     const signer = recoverDigestSigner(digest, keyperSig);
-    const index = signer
-      ? snapshot.keypers.findIndex(
-          k => k.address.toLowerCase() === signer.toLowerCase()
-        )
-      : -1;
+    const index = keyperIndexOf(snapshot, signer);
     if (index === -1) {
       log.warn(
         `[sgp] ${proposalId}: decryption share from non-member ${signer ?? 'unrecoverable'}`
@@ -1013,8 +942,7 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
     }
     const keyperIndex = index + 1;
 
-    // The envelope names its own index; the signature decides. A mismatch means
-    // a keyper is claiming someone else's slot in the committee.
+    // The signer decides the index; a different claimed index is refused.
     if (
       share.keyperIndex !== undefined &&
       Number(share.keyperIndex) !== keyperIndex
@@ -1056,12 +984,19 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
       proposal.te_committee_pks,
       []
     );
+    const pkHex = committeePKs[keyperIndex - 1];
+    if (!pkHex) {
+      log.error(
+        `[sgp] ${proposalId}: keyper ${keyperIndex} has no key in the published committee`
+      );
+      return sendError(res, 'keyper has no published key', 400);
+    }
     const badCandidate = await verifyShareProofs(
       proposalId,
       keyperIndex,
       entries,
       canonical.aggregates,
-      committeePKs
+      pkHex
     );
     if (badCandidate !== null) {
       log.error(
@@ -1070,28 +1005,29 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
       return sendError(res, 'invalid_dleq_proof', 400);
     }
 
+    // One INSERT for all candidates, so the shares are stored all or nothing and
+    // a retry is not mistaken for different shares.
     const now = Math.floor(Date.now() / 1000);
-    for (let candidate = 0; candidate < entries.length; candidate++) {
-      const sigma = String(entries[candidate].sigma || '').replace(/^0x/, '');
-      const proof = String(entries[candidate].proof || '').replace(/^0x/, '');
-      if (sigma.length !== 192 || proof.length !== 128) {
-        return sendError(res, `entries[${candidate}]: malformed`, 400);
-      }
-      await (db as any).queryAsync(
-        `INSERT IGNORE INTO te_decryption_shares
-           (proposal_id, keyper_index, candidate, sigma, proof_e, proof_z, posted_at)
-         VALUES (?, ?, ?, UNHEX(?), UNHEX(?), UNHEX(?), ?)`,
-        [
-          proposalId,
-          keyperIndex,
-          candidate,
-          sigma,
-          proof.slice(0, 64),
-          proof.slice(64),
-          now
-        ]
-      );
-    }
+    const hex = (v: unknown) =>
+      Buffer.from(String(v).replace(/^0x/, ''), 'hex');
+    const rows = entries.map((entry: any, candidate: number) => {
+      const proof = hex(entry.proof);
+      return [
+        proposalId,
+        keyperIndex,
+        candidate,
+        hex(entry.sigma),
+        proof.subarray(0, 32),
+        proof.subarray(32),
+        now
+      ];
+    });
+    await (db as any).queryAsync(
+      `INSERT IGNORE INTO te_decryption_shares
+         (proposal_id, keyper_index, candidate, sigma, proof_e, proof_z, posted_at)
+       VALUES ?`,
+      [rows]
+    );
 
     log.info(
       `[sgp] ${proposalId}: decryption shares from keyper ${keyperIndex} (${entries.length} candidates)`
@@ -1107,19 +1043,14 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
 });
 
 /**
- * Every keyper's shares, grouped back into the per-keyper envelopes the port
- * defines. A keyper missing an entry for any candidate is omitted entirely: a
- * partial envelope decodes to a shorter tuple and would corrupt recovery rather
- * than fail it.
+ * Every keyper's shares, grouped per keyper. A keyper missing any candidate is
+ * left out, since a partial set would break recovery.
  */
 router.get('/proposal/:id/te_sgp_decryption_shares', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const choices = parseJsonField<string[]>(proposal.choices, []);
     const rows = await (db as any).queryAsync(
@@ -1162,41 +1093,22 @@ router.get('/proposal/:id/te_sgp_decryption_shares', async (req, res) => {
 /**
  * The published tally, signed by the result publisher.
  *
- * Authorisation differs from every other write here: this one is not a
- * committee member but the single `resultPublisherKey` frozen into the config —
- * the coordinator that recovered the totals. Recovery itself is not re-done
- * here; what the hub guarantees is that the artifact it stores is the one that
- * key signed, over these exact numbers.
+ * Must be signed by the config's `resultPublisherKey` (the coordinator), over these
+ * exact totals. The hub does not recompute the result.
  *
- * The signature binds the totals (upstream
- * `SHUTTER-GOVERNANCE-PROTOCOL-RESULT-v1`). An earlier form signed only (operation,
- * election), which meant one captured signature authorised *any* totals for that
- * proposal — so this route deliberately fails closed on a digest mismatch rather
- * than trusting the caller's identity alone.
- *
- * Write-once: a result is the terminal artifact of an election, and a second
- * one would mean two different published outcomes. Identical resends are a
- * no-op so a coordinator retry after a dropped response is not an error.
+ * Write-once: an identical resend is a no-op (204), a different result is a 409.
  */
 router.post('/proposal/:id/te_result', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
-    // Re-read the body from the raw text: totals routinely exceed 2^53, and the
-    // parsed copy express handed us has already rounded them.
+    // Re-parse the raw body: totals can exceed 2^53, and `req.body` has already
+    // rounded them.
     let body: any = req.body;
     if (typeof (req as any).rawBody === 'string') {
       try {
@@ -1212,10 +1124,8 @@ router.post('/proposal/:id/te_result', async (req, res) => {
       return sendError(res, 'resultPublisherSig: expected a string', 400);
     }
 
-    // The publisher signs the *operation*, with the artifact digest as its
-    // payload — not the artifact digest on its own. Verifying the inner digest
-    // alone recovers a valid-looking address that simply is not the publisher's,
-    // so the failure reads as "signed by a stranger" rather than as a mismatch.
+    // The publisher signs the `result` operation with `resultDigest` as payload,
+    // not `resultDigest` on its own.
     let digest: Buffer;
     try {
       digest = requestDigest(
@@ -1243,11 +1153,15 @@ router.post('/proposal/:id/te_result', async (req, res) => {
       return sendError(res, 'not_the_result_publisher', 403);
     }
 
-    const totalsJson = JSON.stringify(result.totals.map((t: any) => String(t)));
-    const indicesJson = JSON.stringify(
-      result.keyperIndices.map((k: any) => Number(k))
+    // Store decimal digits (e.g. "0x05" becomes "5"): GET writes totals into the
+    // JSON as bare numbers, so hex would make it invalid.
+    const totalsJson = JSON.stringify(
+      result.totals.map((t: any) => BigInt(t).toString())
     );
-    const bsgsBound = String(result.bsgsBound);
+    const indicesJson = JSON.stringify(
+      result.keyperIndices.map((k: any) => Number(BigInt(k)))
+    );
+    const bsgsBound = BigInt(result.bsgsBound).toString();
 
     const existing = await (db as any).queryAsync(
       'SELECT totals_json, keyper_indices, bsgs_bound FROM te_results WHERE proposal_id = ? LIMIT 1',
@@ -1288,19 +1202,14 @@ router.post('/proposal/:id/te_result', async (req, res) => {
 /**
  * The published tally, or null.
  *
- * Totals are emitted as JSON *numbers* because that is what the protocol's codec
- * decodes — but they are stored as strings, so anything above 2^53 is written
- * into the response text from the stored decimal rather than round-tripped
- * through a double.
+ * The protocol's codec expects totals as JSON numbers. They are written into the
+ * response text from the stored decimal strings, so values above 2^53 stay exact.
  */
 router.get('/proposal/:id/te_result', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
     const rows = await (db as any).queryAsync(
       'SELECT totals_json, keyper_indices, bsgs_bound FROM te_results WHERE proposal_id = ? LIMIT 1',
@@ -1324,31 +1233,8 @@ router.get('/proposal/:id/te_result', async (req, res) => {
 });
 
 /**
- * Mark a tally stalled, or clear it — two different writes wearing one route.
- *
- * The authorisation is **direction-split**, and that split is the whole design:
- *
- *   - `stalled: true` may only be signed by the `resultPublisherKey` — the
- *     coordinator, the one party that knows it has exhausted its attempts;
- *   - `stalled: false` may only be signed by one of the proposal's space admins
- *     (or its author, when the space lists none) — see `resumeAuthorities`.
- *
- * If the coordinator could clear a stall, a restart would clear it: its retry
- * budget lives in memory, so a fresh process sees a stalled election, tries
- * again, and stalls again — an election looping quietly forever instead of
- * waiting for a human. Requiring a different identity to resume makes "someone
- * looked at this" a precondition rather than a hope.
- *
- * Both directions sign the same operation wrapper the result write uses, with
- * the direction encoded in the op name (`tally_stall` / `tally_resume`) and an
- * empty payload — so a stall signature cannot be replayed as a resume.
- */
-/**
- * Who may clear a stalled tally: the proposal's **space admins**, live.
- *
- * Falls back to the proposal's author when a space lists no admins, so a stall is
- * never unrecoverable. Moderators are excluded: retrying is operational rather than
- * moderation.
+ * Who may clear a stalled tally: the space's current admins, or the proposal's
+ * author if the space has none. Moderators may not.
  */
 async function resumeAuthorities(proposal: any): Promise<string[]> {
   const rows = await (db as any).queryAsync(
@@ -1362,31 +1248,34 @@ async function resumeAuthorities(proposal: any): Promise<string[]> {
   return list.length ? list : [proposal.author].filter(Boolean);
 }
 
+/**
+ * Marks a tally stalled or clears it.
+ *
+ *   - `stalled: true` must be signed by the `resultPublisherKey` (the coordinator).
+ *   - `stalled: false` must be signed by a space admin (see `resumeAuthorities`).
+ *
+ * The coordinator cannot resume, so a stalled election waits for a person instead
+ * of retrying forever after each coordinator restart.
+ *
+ * Both sign `requestDigest` with op `tally_stall` or `tally_resume` and the
+ * `issuedAt` nonce as payload, so a stall signature cannot be used as a resume.
+ */
 router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
 
-    let snapshot;
-    try {
-      snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-    } catch (err: any) {
-      log.error(`[sgp] ${proposalId}: ${err.message}`);
-      return sendError(res, 'committee_not_configured', 503);
-    }
+    const snapshot = committeeFor(proposal, res);
+    if (!snapshot) return;
 
     const stalled = req.body?.stalled;
     const sig = req.body?.resultPublisherSig ?? req.body?.adminSig;
     if (typeof stalled !== 'boolean') {
       return sendError(res, 'stalled: expected a boolean', 400);
     }
-    // Optional, unsigned, and truncated rather than rejected on length: a stall
-    // must never fail to record because its explanation was malformed. The flag is
-    // what carries authority; this only tells an operator where to look.
+    // Optional and unsigned. Truncated to 200 chars instead of rejected, so a bad
+    // reason never stops a stall from being recorded.
     const rawReason = req.body?.reason;
     const reason =
       stalled && typeof rawReason === 'string' && rawReason.trim()
@@ -1401,10 +1290,8 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
       ? [snapshot.resultPublisherAddress]
       : await resumeAuthorities(proposal);
 
-    // The signature must say *when* it was made, and that timestamp must be
-    // recent and unused. Without it the digest binds only the operation and the
-    // election, so one observed stall stays valid forever — replayed after each
-    // admin retry, it keeps a confidential tally from ever completing.
+    // The signed `issuedAt` must be recent and unused, so an observed stall
+    // cannot be replayed after each admin resume.
     const issuedAt = req.body?.issuedAt;
     if (!Number.isInteger(issuedAt) || issuedAt < 0) {
       return sendError(res, 'issuedAt: expected a unix timestamp', 400);
@@ -1438,6 +1325,19 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
         403
       );
     }
+    // As in the protocol's own store: a tally can only stall after voting ends
+    // and before its result is published. A late stall would otherwise stop the
+    // published result from reaching the scores until an admin resumes.
+    if (stalled) {
+      if (now < proposal.end) {
+        return sendError(res, 'voting has not ended', 422);
+      }
+      const [published] = await (db as any).queryAsync(
+        'SELECT 1 FROM te_results WHERE proposal_id = ? LIMIT 1',
+        [proposalId]
+      );
+      if (published) return sendError(res, 'result already published', 409);
+    }
 
     try {
       await (db as any).queryAsync(
@@ -1458,17 +1358,15 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
       }
       throw err;
     }
-    // Nothing outside the window can be accepted again, so only rows that could
-    // still be replayed are worth keeping.
+    // Nonces older than the window can never be accepted again.
     await (db as any).queryAsync(
-      'DELETE FROM te_request_nonces WHERE accepted_at < ?',
+      'DELETE FROM te_request_nonces WHERE issued_at < ?',
       [now - REQUEST_FRESHNESS_S]
     );
 
     await (db as any).queryAsync(
       'UPDATE proposals SET te_tally_stalled = ?, te_tally_stall_reason = ? WHERE id = ? LIMIT 1',
-      // Resume clears the reason with the flag: a stale explanation attached to a
-      // running tally is worse than none.
+      // Resume also clears the reason.
       [stalled ? 1 : 0, reason, proposalId]
     );
     log.info(
@@ -1486,11 +1384,8 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
 router.get('/proposal/:id/te_sgp_dkg', async (req, res) => {
   const proposalId = req.params.id;
   try {
-    const proposal = await loadProposal(proposalId);
-    if (!proposal) return sendError(res, 'proposal_not_found', 404);
-    if (proposal.privacy !== 'shutter-elgamal') {
-      return sendError(res, 'proposal_not_private', 404);
-    }
+    const proposal = await loadProposal(proposalId, res);
+    if (!proposal) return;
     const rows = await (db as any).queryAsync(
       `SELECT keyper_index, mpk_hex, committee_pks_hex, signature
          FROM te_dkg_submissions WHERE proposal_id = ? ORDER BY keyper_index`,

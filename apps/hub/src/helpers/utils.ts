@@ -8,6 +8,23 @@ export function jsonParse(input, fallback?) {
   }
 }
 
+/**
+ * A JSON column's value, whether the driver returned it parsed or as text.
+ * Unlike `jsonParse`, an already-parsed object is returned as is.
+ */
+export function parseJsonField<T>(value: unknown, fallback: T): T {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'object') return value as T;
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
 export function sendError(res, description, status = 500) {
   return res.status(status).json({
     error: 'unauthorized',

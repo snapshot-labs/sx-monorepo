@@ -78,6 +78,11 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@snapshot-labs/sx']
   },
+  // The verify worker is started as a module; the default 'iife' build loses
+  // viem's keccak256 setup, so "Verify tally" fails in production builds.
+  worker: {
+    format: 'es'
+  },
   build: {
     target: 'esnext',
     commonjsOptions: {

@@ -1,20 +1,12 @@
 /**
- * Auto-tally scheduler for permanent-private (``shutter-elgamal``) proposals.
+ * Copies published tallies into the scores of closed private (`shutter-elgamal`)
+ * proposals.
  *
- * The base sequencer only recomputes scores when a vote arrives or when
- * something explicitly hits ``GET /scores/:id``. For threshold-ElGamal
- * proposals the final tally can only run *after* the proposal closes, and a
- * closed proposal may receive no further votes — so without a scheduler the
- * result would never be finalised unless an operator manually poked the
- * endpoint.
- *
- * This loop periodically finds closed ``shutter-elgamal`` proposals whose
- * scores are not yet final and whose DKG has completed (``te_mpk`` present),
- * and calls ``updateProposalAndVotes``. That worker is idempotent: it
- * recomputes the homomorphic aggregate, nudges the keypers to publish their
- * decryption shares, and — once enough shares are in — recovers and persists
- * the final tally. Ticks that find shares still missing simply return and the
- * next tick retries.
+ * Scores are normally recomputed when a vote arrives, but a closed proposal gets
+ * no more votes. The keyper committee computes the tally and the coordinator
+ * publishes it to the hub; every few seconds this loop finds closed private
+ * proposals that have a result but no final scores, and calls the idempotent
+ * `updateProposalAndVotes`.
  */
 import log from './log';
 import db from './mysql';
@@ -25,16 +17,10 @@ const POLL_INTERVAL_MS = Number(process.env.TE_TALLY_POLL_MS || 5000);
 const inFlight = new Set<string>();
 
 /**
- * Which proposals this loop will act on.
+ * The proposals this loop acts on. Exported so tests check this exact query; a
+ * public proposal must never be selected.
  *
- * Exported so the backward-compatibility test can assert against the *real*
- * predicate rather than a copy of it. `privacy = 'shutter-elgamal'` is the D14
- * gate: a public proposal must never be picked up here, and a test that
- * re-typed this SQL would keep passing if the gate were dropped.
- *
- * A stalled tally is one the committee could not complete; polling it every few
- * seconds produces noise, not progress. It re-enters the moment an admin clears
- * the flag.
+ * Stalled tallies are skipped until an admin clears the flag.
  */
 export function selectTallyCandidates(ts: number): Promise<{ id: string }[]> {
   return db.queryAsync(
@@ -44,6 +30,7 @@ export function selectTallyCandidates(ts: number): Promise<{ id: string }[]> {
           AND end < ?
           AND te_mpk IS NOT NULL
           AND te_tally_stalled = 0
+          AND EXISTS (SELECT 1 FROM te_results r WHERE r.proposal_id = proposals.id)
         ORDER BY end ASC
         LIMIT 25`,
     [ts]

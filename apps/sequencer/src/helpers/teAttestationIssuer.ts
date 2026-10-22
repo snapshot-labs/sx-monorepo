@@ -1,16 +1,14 @@
-import { keccak256 } from '@ethersproject/keccak256';
 import snapshot from '@snapshot-labs/snapshot.js';
 import { getProposal } from './actions';
 import log from './log';
 import db from './mysql';
+import { mintAttestation, SgpAttestationError } from './sgpAttestation';
 import {
-  mintAttestation,
-  SgpAttestationError,
-  verifyAttestation
-} from './sgpAttestation';
-import { isDustVotingPower, isWithinSgpVotingWindow } from './te';
+  expectedPseudonym,
+  isDustVotingPower,
+  isWithinSgpVotingWindow
+} from './te';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
-import { jsonParse } from './utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 
@@ -24,35 +22,12 @@ export class TeIssueError extends Error {
 }
 
 /**
- * The pseudonym for a voter on a proposal: `keccak(voter ‖ proposalId)`.
+ * The next re-vote counter for this voter on this proposal. It is stored in the
+ * database and only ever increases, because the committee ranks a voter's ballots
+ * by `(nonce, sequenceNumber)` to pick the latest.
  *
- * Derived rather than accepted: the request names a voter, and the pseudonym
- * follows from that address alone, so a caller cannot ask for a credential under
- * a pseudonym unrelated to the address they named. Must stay byte-identical to
- * `apps/ui/src/helpers/teBallot.ts::pseudonymFor` — the ballot carries the
- * browser's copy, and ingest compares both against the authenticated voter.
- */
-export function pseudonymFor(voter: string, proposalId: string): string {
-  const voterBytes = Buffer.from(voter.toLowerCase().replace(/^0x/, ''), 'hex');
-  const idBytes = Buffer.from(proposalId.replace(/^0x/, ''), 'hex');
-  return keccak256(Buffer.concat([voterBytes, idBytes]));
-}
-
-/**
- * The next re-vote counter for this voter on this proposal.
- *
- * Strictly increasing and durable, because the committee ranks a voter's
- * duplicate ballots by `(nonce, sequenceNumber)`: a counter that regressed after
- * a restart would let a stale ballot outrank a genuine re-vote.
- *
- * `LAST_INSERT_ID(last + 1)` is MySQL's atomic read-modify-write, but it reports
- * through *session* state — so the read-back has to happen on the same
- * connection as the write. Going through the pool for both statements does not:
- * the SELECT can land on another connection and return some other request's
- * value, or none. That is not a rare interleaving either. Eight concurrent
- * callers returned three distinct nonces before this took a connection of its
- * own, which in production is several voters sharing a nonce and a re-vote order
- * that depends on which ballot the tally happens to see first.
+ * `LAST_INSERT_ID(last + 1)` is an atomic increment, but its value is per
+ * connection, so both statements must run on the same connection, not the pool.
  */
 export async function nextRevoteNonce(
   proposalId: string,
@@ -70,8 +45,8 @@ export async function nextRevoteNonce(
     const [row] = await connection.queryAsync(
       'SELECT LAST_INSERT_ID() AS n, ROW_COUNT() AS affected'
     );
-    // A first insert does not set LAST_INSERT_ID from the expression — only the
-    // UPDATE branch does — so `affected === 1` means "row created", nonce 1.
+    // Only the UPDATE branch sets LAST_INSERT_ID, so `affected === 1` means the
+    // row was just created and the nonce is 1.
     return Number(row?.affected) === 1 ? 1 : Number(row?.n);
   } finally {
     connection.release();
@@ -90,7 +65,7 @@ export interface IssuedCredential {
 
 export interface IssueResult {
   attestation: IssuedCredential;
-  /** What the voter actually holds, before the cap — shown so the clamp is visible. */
+  /** The voter's voting power before rounding to the integer `weight`. */
   votingPower: number;
 }
 
@@ -121,8 +96,7 @@ export async function issueBallotCredential(args: {
 
   const now = Math.floor(Date.now() / 1000);
 
-  // Keyed on (space, id) like every other read here; a mismatched space simply
-  // does not resolve, which is the same answer as an unknown proposal.
+  // A proposal from a different space is not found, same as an unknown id.
   const proposal = await getProposal(space, proposalId);
   if (!proposal) throw new TeIssueError('unknown proposal', 404);
   if (proposal.privacy !== 'shutter-elgamal') {
@@ -135,16 +109,14 @@ export async function issueBallotCredential(args: {
     );
   }
 
-  // The same half-open window ingest enforces, so a credential is never issued
-  // for a ballot that would be refused the moment it is cast.
+  // Same window check as ingest, so no credential is issued for a ballot that
+  // ingest would refuse.
   if (!isWithinSgpVotingWindow(now, proposal.start, proposal.end)) {
     throw new TeIssueError('voting is not open for this proposal', 422);
   }
 
-  const teConfig =
-    typeof proposal.te_config === 'string'
-      ? jsonParse(proposal.te_config, null)
-      : proposal.te_config;
+  // Already parsed by getProposal.
+  const teConfig = proposal.te_config;
   const budget = Number(teConfig?.budget);
   if (!Number.isInteger(budget) || budget < 1) {
     throw new TeIssueError('proposal has no usable ballot budget', 503);
@@ -167,9 +139,8 @@ export async function issueBallotCredential(args: {
   }
 
   if (!vp || vp.vp === 0) throw new TeIssueError('no voting power', 403);
-  // Both rules move here from ingest, because they decide the weight and the
-  // weight is about to be signed. Refusing dust at issuance also means the voter
-  // is told before they are asked for a second signature, rather than after.
+  // Checked here, before the weight is signed, so the voter learns of it before
+  // being asked for a second signature.
   if (isDustVotingPower(vp.vp)) {
     throw new TeIssueError(
       'voting power too low for a private proposal, must be at least 0.5',
@@ -177,38 +148,42 @@ export async function issueBallotCredential(args: {
     );
   }
 
-  // The credential carries voting power **as held**, not capped.
-  //
-  // This used to clamp at `floor(1e6 / budget)` — 10,000 at the default weighted
-  // budget — so a holder of 25,000 and one of 25,000,000 voted identically, which
-  // flattened the top of every cap table it touched. Keeping the tally computable is
-  // now the scale factor's job (`scale` in the election config), and scaling divides
-  // everyone rather than truncating some, so every ratio survives.
+  // The weight is the full voting power, not capped. Keeping the tally solvable is
+  // done by `scale` in the election config, which divides everyone equally.
   const weight = BigInt(Math.round(vp.vp));
+  // The weight is sent as a JSON number, which is not exact above 2^53 (and from
+  // 1e21 is written as `1e+21`, which keypers drop). Refused before the voter signs.
+  if (weight > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new TeIssueError(
+      'voting power too large for a private ballot (above 2^53)',
+      422
+    );
+  }
 
-  // Alarm, not a gate (H9).
+  // Warning only; the vote is still allowed. `s` was chosen from the voting power
+  // bound frozen at creation, and if turnout exceeds it the tally may need more
+  // coordinator memory than planned. This logs a warning so an operator can fix it
+  // before the tally runs.
   //
-  // `V` is an estimate frozen at creation, and `s` was chosen from it. If real
-  // turnout exceeds it, the tally is sized for a smaller bound than it will actually
-  // face — recoverable by giving the coordinator more memory, but only if someone
-  // knows before the tally runs. Refusing the vote instead would disenfranchise a
-  // voter for an operator's estimate being wrong, so this reports and lets them vote.
+  // It compares `budget × ceil(total / s)` with the frozen ceiling, not the total
+  // with `V`, because a fallback `V` is too low for non-weighted types.
   try {
-    const bound = parseCommitteeSnapshotLoose(
+    const ceiling = parseCommitteeSnapshotLoose(
       proposal.te_sgp_config
-    )?.maxTotalWeight;
-    if (bound) {
+    )?.solverCeiling;
+    if (ceiling) {
       const [row] = await db.queryAsync(
         'SELECT COALESCE(SUM(vp), 0) AS total FROM votes WHERE proposal = ?',
         [proposalId]
       );
       const attested = Number(row?.total ?? 0) + Number(weight);
-      if (attested > bound) {
+      const scale = Number(teConfig?.scale) || 1;
+      if (budget * Math.ceil(attested / scale) > ceiling) {
         log.warn(
-          `[te-vpbound] ${proposalId}: attested weight ${attested} has passed the ` +
-            `frozen bound ${bound}. The scale was chosen from that bound, so the ` +
-            `tally may exceed what the coordinator is sized for — raise ` +
-            `TE_SOLVER_CEILING and its memory before the tally runs.`
+          `[te-vpbound] ${proposalId}: attested weight ${attested} at scale ` +
+            `${scale} and budget ${budget} has passed the frozen solver ceiling ` +
+            `${ceiling}, so the tally may exceed what the coordinator is sized ` +
+            `for — raise TE_SOLVER_CEILING and its memory before the tally runs.`
         );
       }
     }
@@ -219,26 +194,20 @@ export async function issueBallotCredential(args: {
     );
   }
 
-  const pseudonym = pseudonymFor(voter, proposalId);
+  // Derived from the address, not taken from the request, so a caller cannot pick
+  // an unrelated pseudonym.
+  const pseudonym = expectedPseudonym(voter, proposalId);
   const nonce = BigInt(await nextRevoteNonce(proposalId, pseudonym));
 
-  const mintArgs = { electionId: proposalId, pseudonym, vk, weight, nonce };
   let credentialSig: string;
   try {
-    credentialSig = await mintAttestation(mintArgs);
-    // Verify what we just signed. Not distrust of our own key: the same rule as
-    // the dust floor and the window — do not hand out what the committee will
-    // drop, or the voter signs a credential that excludes their ballot at tally.
-    if (
-      !(await verifyAttestation({
-        ...mintArgs,
-        signature: credentialSig
-      }))
-    ) {
-      throw new SgpAttestationError(
-        'freshly minted credential failed verification'
-      );
-    }
+    credentialSig = await mintAttestation({
+      electionId: proposalId,
+      pseudonym,
+      vk,
+      weight,
+      nonce
+    });
   } catch (err: any) {
     if (err instanceof SgpAttestationError) {
       log.warn(`[te-issue] cannot mint credential: ${err.message}`);

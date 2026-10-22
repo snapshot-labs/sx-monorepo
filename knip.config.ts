@@ -22,7 +22,7 @@ const config: KnipConfig = {
       entry: ['src/index.ts']
     },
     'apps/mana': {
-      entry: ['src/index.ts', 'src/db.ts', 'knexfile.ts', 'migrations/*.ts'],
+      entry: ['src/index.ts', 'knexfile.ts', 'migrations/*.ts'],
       knex: false,
       ignoreDependencies: ['pg']
     },

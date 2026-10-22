@@ -1,22 +1,12 @@
 /**
- * Web Worker entry point for a private-tally audit.
+ * Web Worker that runs `verifyAll` for the "Verify tally" panel.
  *
- * A thin wrapper over `verifyAll` and nothing else: no fetching, no policy, no
- * duplicated crypto. The payloads arrive already fetched so this module never
- * touches the network, which keeps the trust story identical to running it on the
- * main thread — the same code verifies the same bytes, just not on the thread
- * that paints.
+ * A check can take tens of seconds, so it runs off the main thread: the page stays
+ * responsive and the user can cancel it. The payloads arrive already fetched; this
+ * worker makes no network requests.
  *
- * It exists because the work is genuinely long. Decompressing one ciphertext
- * costs ~2.8 ms in this WASM build, and a 1,000-ballot 5-choice proposal has
- * 10,000 of them, so an audit is tens of seconds of solid computation. On the main
- * thread that is a frozen tab with no way out; here it is a progress bar the user
- * can cancel by terminating the worker.
- *
- * Messages out are either `{ type: 'progress' }` or exactly one terminal
- * `{ type: 'done' }` / `{ type: 'error' }`. `bigint` survives structured cloning,
- * so tallies cross the boundary as exact integers rather than being stringified
- * and re-parsed — which matters, because a tally can exceed 2^53.
+ * It sends `progress` messages, then exactly one `done` or `error`. Tallies are
+ * sent as `bigint`, so totals above 2^53 stay exact.
  */
 
 import {

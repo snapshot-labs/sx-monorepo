@@ -5,6 +5,7 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { IS_TE_ENABLED } from '@/helpers/constants';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { SCORES_TICKS_MAX_VOTES } from '@/networks/offchain/api';
@@ -254,6 +255,7 @@ export function useProposalQuery(
     refetchInterval: data => {
       const p = data.state.data;
       if (
+        IS_TE_ENABLED &&
         p?.privacy === 'shutter-elgamal' &&
         ['pending', 'active'].includes(p?.state) &&
         !p?.te_mpk &&
@@ -280,6 +282,8 @@ export function useProposalScoresTicksQuery(
 
       if (offchainNetworks.includes(p.network)) {
         if (
+          // Private choices are never decrypted, so there is nothing to chart.
+          p.privacy === 'shutter-elgamal' ||
           p.type !== 'basic' ||
           (p.privacy !== 'none' && !p.completed) ||
           p.vote_count > SCORES_TICKS_MAX_VOTES

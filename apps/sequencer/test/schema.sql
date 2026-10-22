@@ -1,17 +1,5 @@
--- ===========================================================================
---  Test-only schema for the sequencer suite. Recreated from scratch by
---  test/setupDb.ts on every run, so a change here needs no migration.
---
---  It carries its own copy of the proposals table, which must stay in step with
---  apps/hub/src/helpers/schema.sql -- the sequencer writes proposals that the
---  hub reads. The two have already drifted twice: this copy was missing
---  te_dkg_status while the hub had it, and later te_tally_stalled, which means
---  the suite was passing against a shape production did not have.
---
---  If you add a column to the hub schema, add it here too, and read the header
---  of that file for why a change there does not reach a running database.
--- ===========================================================================
-
+-- The te_* columns and tables must match apps/hub/src/helpers/schema.sql: the
+-- sequencer writes rows that the hub reads.
 CREATE TABLE spaces (
   id VARCHAR(64) NOT NULL,
   name VARCHAR(64) NOT NULL,
@@ -87,10 +75,7 @@ CREATE TABLE proposals (
   te_committee_pks JSON DEFAULT NULL,
   te_threshold_t INT DEFAULT NULL,
   te_threshold_n INT DEFAULT NULL,
-  te_keyper_urls JSON DEFAULT NULL,
   te_keyper_addresses JSON DEFAULT NULL,
-  te_aggregate JSON DEFAULT NULL,
-  te_dkg_status VARCHAR(24) DEFAULT NULL,
   te_sgp_config JSON DEFAULT NULL,
   te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
   te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
@@ -146,11 +131,6 @@ CREATE TABLE votes (
   INDEX idx_votes_on_cb_proposal (cb, proposal)
 );
 
--- Threshold-ElGamal partial decryption shares posted by keypers after the
--- voting window closes. The tally worker reads these, runs verifyDecryptionShare
--- on each, Lagrange-combines `t+1` valid shares per candidate, and recovers
--- the per-candidate plaintext total via baby-step giant-step.
--- Append-only: PRIMARY KEY enforces one share per (proposal, keyper, candidate).
 CREATE TABLE te_decryption_shares (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -159,12 +139,9 @@ CREATE TABLE te_decryption_shares (
   proof_e VARBINARY(32) NOT NULL,
   proof_z VARBINARY(32) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index, candidate),
-  INDEX idx_te_shares_proposal (proposal_id),
-  INDEX idx_te_shares_posted (posted_at)
+  PRIMARY KEY (proposal_id, keyper_index, candidate)
 );
 
--- Pre-finalisation DKG submissions: see apps/hub/src/helpers/schema.sql.
 CREATE TABLE te_dkg_submissions (
   proposal_id VARCHAR(66) NOT NULL,
   keyper_index INT NOT NULL,
@@ -314,11 +291,7 @@ CREATE TABLE messages (
   INDEX receipt (receipt)
 );
 
---  Two more of the committee's artifacts. The sequencer does not write these -- the
---  hub does -- but it DELETEs them when a proposal is deleted, so they must exist
---  here or that path throws only in tests. te_dkg_submissions and
---  te_decryption_shares are already declared above. Copied from
---  apps/hub/src/helpers/schema.sql; keep them in step.
+-- The remaining te_* tables: the sequencer deletes from them with a proposal.
 
 CREATE TABLE te_aggregate_submissions (
   proposal_id VARCHAR(66) NOT NULL,
@@ -343,8 +316,7 @@ CREATE TABLE te_request_nonces (
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
   accepted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, op, issued_at),
-  INDEX idx_te_nonce_accepted (accepted_at)
+  PRIMARY KEY (proposal_id, op, issued_at)
 );
 
 

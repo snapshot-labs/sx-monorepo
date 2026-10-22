@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
+import { IS_TE_ENABLED, PRIVACY_TYPES_INFO } from '@/helpers/constants';
 import { SpacePrivacy } from '@/types';
 
-const votingTypes: SpacePrivacy[] = [
-  'any',
-  'shutter',
-  'shutter-elgamal',
-  'none'
-];
+const votingTypes: SpacePrivacy[] = IS_TE_ENABLED
+  ? ['any', 'shutter', 'shutter-elgamal', 'none']
+  : ['any', 'shutter', 'none'];
 
 defineProps<{
   open: boolean;

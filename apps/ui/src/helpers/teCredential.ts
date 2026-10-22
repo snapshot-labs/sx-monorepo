@@ -10,24 +10,15 @@ export interface BallotCredential {
 
 export interface IssuedCredentialResponse {
   attestation: BallotCredential;
-  /** Voting power as held, for display beside the scaled figure. */
-  votingPower: number;
 }
 
 /**
- * Ask the sequencer for a credential for this ballot key.
+ * Asks the sequencer for a credential for this ballot key.
  *
- * No signature: the request names the voter and proves nothing, because a
- * credential is worthless to anyone else. Ingest derives the pseudonym from the
- * EIP-712-authenticated voter and refuses any envelope that disagrees, so a
- * credential naming this address can only be spent by a vote this address signs.
- * Requiring a `personal_sign` here was tried and removed — it added a second
- * wallet prompt to every private vote and bought no integrity the pseudonym check
- * does not already give.
- *
- * The voter cannot vote at all if this fails — a real availability change from
- * minting at ingest, and the reason the error is surfaced verbatim rather than
- * folded into a generic failure.
+ * The request is not signed. A credential is only usable by the named voter: the
+ * sequencer derives the pseudonym from the EIP-712-signed voter and rejects any
+ * envelope that does not match. If this fails the user cannot vote, so the
+ * sequencer's error is passed through as-is.
  */
 export async function requestBallotCredential(args: {
   sequencerUrl: string;

@@ -8,9 +8,8 @@ import log from './log';
 const connectionLimit = parseInt(process.env.CONNECTION_LIMIT || '25');
 log.info(`[mysql] connection limit ${connectionLimit}`);
 
-// TLS is enabled by default for non-localhost hosts. Set DB_SSL=false to
-// disable it entirely, which is required when connecting to a plaintext
-// MySQL instance over a private network (e.g. another Docker container).
+// TLS is on by default (certificates checked except for localhost). Set
+// DB_SSL=false to turn it off, e.g. for a plaintext MySQL in another container.
 const sslEnabled = process.env.DB_SSL !== 'false';
 const sslFor = (host: string) =>
   sslEnabled ? { rejectUnauthorized: host !== 'localhost' } : undefined;

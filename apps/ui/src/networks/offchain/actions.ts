@@ -67,9 +67,8 @@ export function createActions(
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
-  const sequencerUrl = (import.meta as any).env?.VITE_LOCAL_SEQUENCER_URL as
-    | string
-    | undefined;
+  const sequencerUrl: string | undefined = import.meta.env
+    .VITE_LOCAL_SEQUENCER_URL;
   const client = new clients.OffchainEthereumSig({
     networkConfig,
     ...(sequencerUrl ? { sequencerUrl } : {})
@@ -225,11 +224,9 @@ export function createActions(
       let sdkChoice: any = getSdkChoice(proposal.type, choice);
       let voteReason = reason;
       if (proposal.privacy === 'shutter-elgamal') {
-        // Permanent-private voting: the on-the-wire ``choice`` is the
-        // SDK ballot envelope (object), not the candidate index. The
-        // sequencer's writer/vote.ts re-runs ``verifyBallot`` against the
-        // proposal's ``te_mpk`` before persisting. Reasons are not
-        // supported in private mode — the hub rejects them.
+        // Private voting: `choice` is sent as the encrypted ballot envelope, not the
+        // choice index. The sequencer verifies it against `te_mpk` before storing
+        // it. Reasons are not allowed (the hub rejects them), so it is cleared.
         if (!proposal.te_mpk || !proposal.te_config) {
           throw new Error(
             'proposal does not yet have a finalised threshold key; try again once the keypers have completed DKG'
@@ -269,9 +266,8 @@ export function createActions(
         voteReason = '';
       }
 
-      // Upstream maps `inco` to 'none' here on purpose: Inco encrypts onchain, so
-      // the offchain envelope carries no privacy. `shutter-elgamal` must NOT be
-      // flattened that way — the sequencer branches on it in writer/vote.ts.
+      // Other values (such as `inco`, which encrypts onchain) map to 'none'.
+      // `shutter-elgamal` must be kept: the sequencer's writer/vote.ts branches on it.
       const privacy: 'shutter' | 'shutter-elgamal' | 'none' =
         proposal.privacy === 'shutter'
           ? 'shutter'

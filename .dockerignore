@@ -8,10 +8,11 @@
 **/coverage
 **/test-results
 **/playwright-report
-.engine-room-shots
 *.log
-.keyper*.log
 **/.env
 **/.env.*
 !**/.env.example
 **/.DS_Store
+# Bind-mounted runtime state: the live database and the coordinator's keyper tokens.
+mysql-data
+coordinator-state

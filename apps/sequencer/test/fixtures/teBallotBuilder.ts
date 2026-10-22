@@ -14,8 +14,6 @@ export interface CastBallotArgs {
   weight?: number;
   numCandidates?: number;
   budget?: number;
-  /** Sign the binding over a *different* credential — the substitution attack. */
-  bindTo?: any;
 }
 
 /** One ballot plus a credential for it, built exactly as the browser would. */
@@ -53,10 +51,6 @@ export async function castBallot(opts: CastBallotArgs) {
     signature: Buffer.from(a.signature.slice(2), 'hex')
   });
 
-  // `bindTo` signs over a credential other than the one shipped — the forged
-  // pairing, built the way an attacker would rather than by corrupting bytes after
-  // the fact. Under v1 that needed a separate binding signature; now it just means
-  // the ballot was signed over a different credential than it carries.
   const built = buildBallot({
     mpk,
     electionId: Buffer.from(ID.slice(2), 'hex'),
@@ -72,7 +66,7 @@ export async function castBallot(opts: CastBallotArgs) {
       mode: 'exact',
       variant: 'A'
     },
-    attestation: toSdk((opts.bindTo as any) ?? attestation)
+    attestation: toSdk(attestation)
   });
 
   const envelope = {

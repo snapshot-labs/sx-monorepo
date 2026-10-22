@@ -1,6 +1,10 @@
 import { SgpDigestError } from './sgpDigests';
 
-function canonicalWeight(value: unknown): number {
+/**
+ * Kept as a `bigint`: a sum of raw voting power passes 2^53 on large-supply
+ * tokens, and the keyper's signature covers the exact integer.
+ */
+function canonicalWeight(value: unknown): bigint {
   let weight: bigint;
   try {
     weight = BigInt(value as any);
@@ -12,15 +16,13 @@ function canonicalWeight(value: unknown): number {
   if (weight < 0n) {
     throw new SgpDigestError('totalAdmittedWeight: must not be negative');
   }
-  if (weight > BigInt(Number.MAX_SAFE_INTEGER)) {
-    throw new SgpDigestError(
-      `totalAdmittedWeight: ${weight} exceeds the exactly-representable range; ` +
-        'this body was parsed as a double and no longer matches what was signed'
-    );
-  }
-  return Number(weight);
+  return weight;
 }
 
+/**
+ * Normalises a compressed point to lowercase `0x` hex. Quorum counts byte-identical
+ * submissions, so letter case must not make two equal points differ.
+ */
 export function canonicalPoint(
   value: unknown,
   label: string,
@@ -73,12 +75,9 @@ export function canonicalAggregate(raw: any, electionId: string) {
     }
   );
   const totalAdmittedWeight = canonicalWeight(raw.totalAdmittedWeight ?? 0);
-  // Mirrors `shutter_governance_protocol.envelopes.codecs`, which reads
-  // `totalScaledWeight` and falls back to `totalAdmittedWeight` when the field is
-  // absent. The fallback is what makes an unscaled election (`scale = 1`, where the
-  // two are equal by construction) decode identically on a payload written before
-  // the field existed. Defaulting to 0 here instead would silently produce a
-  // different digest from the signer's.
+  // Must match `shutter_governance_protocol.envelopes.codecs`: when
+  // `totalScaledWeight` is missing, use `totalAdmittedWeight` (they are equal when
+  // `scale = 1`). Any other default would give a different digest from the signer's.
   const totalScaledWeight = canonicalWeight(
     raw.totalScaledWeight ?? raw.totalAdmittedWeight ?? 0
   );

@@ -16,6 +16,10 @@ import relayer, { issueReceipt } from './helpers/relayer';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
 
+const MAX_MESSAGE_SIZE = 1e5;
+/** Only for a vote on a `shutter-elgamal` proposal; see the size check below. */
+const MAX_PRIVATE_VOTE_SIZE = 1e6;
+
 const NETWORK_METADATA = {
   evm: {
     name: 'snapshot',
@@ -66,9 +70,11 @@ export default async function ingestor(req) {
     const underTs = (ts - under).toFixed();
     const { domain, message, types } = body.data;
 
-    // Deliberately 1e6, not upstream's 1e5: a single threshold-ElGamal ballot's
-    // `choice` runs ~158 KB, so at 1e5 every private vote is rejected at ingest.
-    if (JSON.stringify(body).length > 1e6) {
+    // The limit is 1e5, except for votes on private proposals, whose `choice` is
+    // the whole encrypted ballot (~158 KB at three choices). That case is checked
+    // below, once the message type is known.
+    const messageSize = JSON.stringify(body).length;
+    if (messageSize > MAX_PRIVATE_VOTE_SIZE) {
       return Promise.reject('too large message');
     }
 
@@ -95,6 +101,16 @@ export default async function ingestor(req) {
       return Promise.reject('wrong types');
     }
     type = hashTypes[hash];
+
+    if (messageSize > MAX_MESSAGE_SIZE) {
+      const isVote = ['vote', 'vote-array', 'vote-string'].includes(type);
+      const proposal = isVote
+        ? await getProposal(message.space, message.proposal)
+        : null;
+      if (proposal?.privacy !== 'shutter-elgamal') {
+        return Promise.reject('too large message');
+      }
+    }
 
     try {
       if (

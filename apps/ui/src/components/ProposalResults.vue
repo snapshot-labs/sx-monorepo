@@ -375,6 +375,7 @@ onMounted(() => {
       proposal.privacy === 'shutter-elgamal' &&
       proposal.state === 'closed' &&
       !proposal.completed &&
+      !dkgFailed &&
       withDetails &&
       offchainNetworks.includes(proposal.network)
     "

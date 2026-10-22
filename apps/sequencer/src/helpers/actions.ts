@@ -128,7 +128,7 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo_expiration, hibernated FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]
@@ -143,7 +143,8 @@ export async function getSpace(
     verified: spaces[0].verified === 1,
     flagged: spaces[0].flagged === 1,
     hibernated: spaces[0].hibernated === 1,
-    turbo: spaces[0].turbo_expiration > Date.now() / 1e3
+    turbo:
+      spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3
   };
 }
 

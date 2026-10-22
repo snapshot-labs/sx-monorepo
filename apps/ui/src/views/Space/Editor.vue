@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
   BASIC_CHOICES,
   DOCS_URL,
+  IS_TE_ENABLED,
   MIN_DKG_LEAD_TIME_S,
+  PRIVACY_TYPES_INFO,
   VERIFIED_URL
 } from '@/helpers/constants';
 import { networks } from '@/helpers/networks';
@@ -16,7 +19,7 @@ import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
-import { Contact, Space, Transaction, VoteType } from '@/types';
+import { Contact, Privacy, Space, Transaction, VoteType } from '@/types';
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -105,50 +108,28 @@ const isPrivateVoting = computed(
   () => proposal.value?.privacy === 'shutter-elgamal'
 );
 
-/**
- * The "?" beside the private-voting switch.
- *
- * It names the 0.5 floor because that is the one way private voting refuses a
- * voter the public path would have accepted, and this switch is the last point
- * at which the author can choose a mode where it does not apply.
- *
- * The per-voter ceiling it used to name is gone: voting power is counted as
- * held, and keeping the tally computable is the scale factor's job instead (see
- * `teVoteWeight`). Scaling is a proposal-level fact resolved at creation, not a
- * mode the author picks here, so it is surfaced on the proposal rather than in
- * this tooltip.
- */
-const privateVotingTooltip = computed(
-  () =>
-    'Permanent private voting. Each ballot is encrypted in your browser with ' +
-    'threshold ElGamal and tallied homomorphically, so individual votes stay ' +
-    'private forever. A committee of keypers publishes proven decryption shares ' +
-    'to reveal only the final result.\n\n' +
-    'Voting power counts in full — there is no per-voter cap. Holdings below 0.5 ' +
-    'are rejected upfront.'
-);
-
 const privacy = computed({
   get() {
-    return isPrivateVoting.value;
+    return proposal.value?.privacy === 'shutter';
   },
   set(value) {
     if (proposal.value) {
-      proposal.value.privacy = value ? 'shutter-elgamal' : 'none';
+      proposal.value.privacy = value ? 'shutter' : 'none';
     }
   }
 });
 
-// Phase 9. Ranked-choice ballots cannot be privately tallied: any
-// homomorphic / threshold-decryption scheme that hides individual
-// ballots also hides the rank ordering needed for IRV/Borda. We block
-// the combination at the editor level. The hub also rejects it on
-// proposal create as a defence-in-depth.
-const rankedChoicePrivacyConflict = computed(
+// With permanent private voting enabled, the shielded-voting switch becomes a
+// three-way choice so spaces set to "any" keep classic Shutter.
+const PRIVACY_OPTIONS: Privacy[] = ['none', 'shutter', 'shutter-elgamal'];
+
+// An encrypted tally can only sum votes per choice, so other types are refused
+// here and by the sequencer.
+const PRIVATE_VOTING_TYPES = ['single-choice', 'basic', 'weighted'];
+const hasPrivateVotingTypeConflict = computed(
   () =>
-    proposal.value?.type === 'ranked-choice' &&
-    proposal.value?.privacy !== 'none' &&
-    proposal.value?.privacy !== undefined
+    isPrivateVoting.value &&
+    !PRIVATE_VOTING_TYPES.includes(proposal.value?.type ?? '')
 );
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
@@ -369,7 +350,7 @@ const canSubmit = computed(() => {
     unsupportedPremiumStrategiesList.value.length ||
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
-    rankedChoicePrivacyConflict.value ||
+    hasPrivateVotingTypeConflict.value ||
     isMissingExecution.value
   ) {
     return false;
@@ -413,12 +394,14 @@ const defaultVotingDelay = computed(() =>
   isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
-// Shutter-elgamal proposals need a DKG cool-off before voting opens; the
-// sequencer rejects starts closer than MIN_DKG_LEAD_TIME_S. Apply the floor
-// here so both the display and the picker never surface a value the backend
-// would reject.
+// Shutter-elgamal proposals need time for DKG before voting opens; the sequencer
+// rejects starts sooner than MIN_DKG_LEAD_TIME_S from now. The display and picker
+// use this floor too. The extra minute allows for the time spent signing.
+const SIGNING_SLACK_S = 60;
 const privateVotingStartFloor = computed(() =>
-  isPrivateVoting.value ? unixTimestamp.value + MIN_DKG_LEAD_TIME_S : 0
+  isPrivateVoting.value
+    ? unixTimestamp.value + MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S
+    : 0
 );
 
 const proposalStart = computed(() => {
@@ -427,9 +410,9 @@ const proposalStart = computed(() => {
   return Math.max(base, privateVotingStartFloor.value);
 });
 
-// If the user toggles Private voting ON with an existing draft whose start
-// is already too soon, push it out to the floor so the on-disk value stays
-// in sync with what the picker shows.
+// When private voting is turned on and the draft starts too soon, move the start
+// (and end, keeping the voting period) to the floor so the saved draft matches
+// the picker.
 watch(privateVotingStartFloor, floor => {
   if (!proposal.value || floor === 0) return;
   if ((proposal.value.start ?? 0) < floor) {
@@ -977,24 +960,56 @@ watchEffect(() => {
               </template>
             </UiInputArray>
           </div>
-          <UiSwitch
-            v-if="
-              isOffchainSpace &&
-              space.privacy === 'any' &&
-              proposal.type !== 'ranked-choice'
-            "
-            v-model="privacy"
-            title="Private voting"
-            :tooltip="privateVotingTooltip"
-          />
+          <template v-if="isOffchainSpace && space.privacy === 'any'">
+            <RadioGroup
+              v-if="IS_TE_ENABLED && proposal.privacy"
+              v-model="proposal.privacy"
+              class="space-y-2"
+            >
+              <RadioGroupLabel class="s-label">Privacy</RadioGroupLabel>
+              <RadioGroupOption
+                v-for="id in PRIVACY_OPTIONS"
+                :key="id"
+                v-slot="{ checked }"
+                :value="id"
+                class="flex items-center gap-2 cursor-pointer focus:outline-none"
+              >
+                <span
+                  :class="
+                    checked ? 'border-skin-primary' : 'border-skin-border'
+                  "
+                  class="flex justify-center items-center size-[18px] shrink-0 rounded-full border-2"
+                >
+                  <span
+                    v-if="checked"
+                    class="size-2 rounded-full bg-skin-primary"
+                  />
+                </span>
+                <span class="text-skin-link flex items-center gap-1">
+                  {{ PRIVACY_TYPES_INFO[id].label }}
+                  <UiTooltip
+                    v-if="PRIVACY_TYPES_INFO[id].description"
+                    :title="PRIVACY_TYPES_INFO[id].description"
+                  >
+                    <IH-question-mark-circle class="shrink-0" />
+                  </UiTooltip>
+                </span>
+              </RadioGroupOption>
+            </RadioGroup>
+            <UiSwitch
+              v-else
+              v-model="privacy"
+              title="Shielded voting"
+              tooltip="Choices will be encrypted and only visible once the voting period is over."
+            />
+          </template>
           <UiAlert
-            v-if="rankedChoicePrivacyConflict"
+            v-if="hasPrivateVotingTypeConflict"
             type="error"
             class="!my-0"
           >
-            Ranked-choice voting requires access to individual ballots and is
-            not compatible with permanent private voting. Switch the voting type
-            or disable private voting before submitting.
+            Permanent private voting supports only single choice, basic and
+            weighted voting. Change the voting type before submitting.
           </UiAlert>
           <EditorLabels
             v-if="space.labels?.length"

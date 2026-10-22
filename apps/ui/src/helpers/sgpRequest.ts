@@ -1,25 +1,20 @@
 /**
- * The digest an authorised protocol request is signed over, ported for the browser.
+ * Browser copy of the digest that signed protocol requests are signed over.
  *
- * This is a byte-exact mirror of the hub's `helpers/sgpDigests.ts` `requestDigest`
- * and of SGP's `shutter_governance_protocol.core.authz.request_digest`. It lives
- * here rather than being imported because the hub's copy is a Node module built
- * around `Buffer`, and this is the only piece of it the UI needs: the admin's
- * "retry" is the one protocol write a human signs in a wallet.
+ * Must match the hub's `requestDigest` in `helpers/sgpDigests.ts` and SGP's
+ * `shutter_governance_protocol.core.authz.request_digest` byte for byte. The hub's
+ * version uses Node's `Buffer`, so it is not imported. The UI only needs it for
+ * the admin "retry" action, which is signed in the wallet.
  *
- * Each field is **length-framed** — a 4-byte big-endian length, then the bytes —
- * under a domain-separation tag. The framing is what makes the operation name part
- * of the signature rather than a parameter beside it, so a signature taken for
- * `tally_stall` cannot be presented as a `tally_resume`. An earlier encoding joined
- * the fields with `|`, under which `("tally", "_resume…")` and `("tally_resume", …)`
- * hashed equal and shared a signature.
+ * Each field is written as a 4-byte big-endian length followed by its bytes, after
+ * a domain-separation tag. This keeps field boundaries unambiguous, so a signature
+ * for `tally_stall` cannot be reused as a `tally_resume`.
  *
- * The digest is signed as raw bytes under EIP-191 (`signMessage` over the 32-byte
- * array, *not* over its hex string), which is what the hub's `verifyMessage`
- * expects.
+ * The 32-byte digest is signed as raw bytes with EIP-191 (`signMessage` on the
+ * byte array, not its hex string), which is what the hub's `verifyMessage` expects.
  */
 
-import { arrayify } from '@ethersproject/bytes';
+import { arrayify, concat } from '@ethersproject/bytes';
 import { keccak256 } from '@ethersproject/keccak256';
 
 const REQUEST_DST = new TextEncoder().encode(
@@ -32,22 +27,10 @@ function u32BE(n: number): Uint8Array {
   return b;
 }
 
-function concatBytes(parts: Uint8Array[]): Uint8Array {
-  const total = parts.reduce((n, p) => n + p.length, 0);
-  const out = new Uint8Array(total);
-  let at = 0;
-  for (const p of parts) {
-    out.set(p, at);
-    at += p.length;
-  }
-  return out;
-}
-
 /**
- * The freshness term a stall/resume request carries as its payload.
- *
- * Eight bytes, big-endian, unsigned seconds. Byte-exact with the hub's
- * `requestNoncePayload` and SGP's `request_nonce_payload`.
+ * Payload for a stall/resume request: the issue time in seconds, as an unsigned
+ * 8-byte big-endian integer. Must match the hub's `requestNoncePayload` and SGP's
+ * `request_nonce_payload`.
  */
 export function requestNoncePayload(issuedAt: number): Uint8Array {
   if (!Number.isInteger(issuedAt) || issuedAt < 0) {
@@ -61,9 +44,8 @@ export function requestNoncePayload(issuedAt: number): Uint8Array {
 /**
  * `keccak256(DST ‖ len|op ‖ len|electionId ‖ len|payload)` as raw bytes.
  *
- * `electionId` is the Snapshot proposal id, which the protocol reads as the 32-byte
- * election id. A wrong-sized id is rejected rather than padded: the hub enforces the
- * same, and silently accepting one would produce a digest no verifier reproduces.
+ * `electionId` is the Snapshot proposal id, used as the 32-byte election id. An id
+ * of any other size throws instead of being padded, as the hub does too.
  */
 export function requestDigest(
   op: string,
@@ -77,7 +59,7 @@ export function requestDigest(
     );
   }
   const opBytes = new TextEncoder().encode(op);
-  const packed = concatBytes([
+  const packed = concat([
     REQUEST_DST,
     u32BE(opBytes.length),
     opBytes,

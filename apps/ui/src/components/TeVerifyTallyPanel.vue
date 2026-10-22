@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import {
   AuditPayload,
   BallotAggregateResult,
@@ -9,12 +9,12 @@ import {
   fetchAuditPayload,
   fetchBallotsPayload,
   fingerprintHex,
-  shortHex,
   TallyDiagnosis,
   VerifyProgress,
   VerifyResult
 } from '@/helpers/teVerify';
 import { runVerify, VerifyCancelled } from '@/helpers/teVerifyClient';
+import { shortenAddress } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -30,7 +30,9 @@ type Status =
   | {
       kind: 'ok';
       tallies: bigint[];
-      matches: boolean | null;
+      matches: boolean;
+      /** The totals, in voting power, equal the proposal's published scores. */
+      scoresAgree: boolean;
       reason: string | null;
       ballots: BallotAggregateResult;
       audit: AuditPayload;
@@ -38,13 +40,10 @@ type Status =
       tally: VerifyResult;
     }
   /**
-   * No verified tally yet, and why — derived from public share counts rather than
-   * taken from anyone's word.
-   *
-   * This panel only renders once the proposal is `completed`, so reaching here
-   * means the published state and the committee's artifacts disagree. The
-   * coordinator's own stall explanation lives in `TeTallyStalledNotice`, which is
-   * what renders in the *not*-completed case; the two are mutually exclusive.
+   * No published tally yet, with the reason from `diagnoseTally`. This panel only
+   * shows for `completed` proposals, so this means the proposal state and the
+   * committee's data disagree. Before completion, `TeTallyStalledNotice` shows
+   * instead.
    */
   | {
       kind: 'pending';
@@ -55,12 +54,11 @@ type Status =
 const status = ref<Status>({ kind: 'idle' });
 /** Set while a run is in flight, so the user can stop it. */
 const cancelRun = ref<(() => void) | null>(null);
+// Stop the worker when leaving the page, so a later run does not start a second one.
+onBeforeUnmount(() => cancelRun.value?.());
 /**
- * What the button says while working.
- *
- * The aggregate phase is the long one and its cost is proportional to ballots, so
- * showing ballots-done is the only honest progress signal available — the tally
- * check that follows is a couple of seconds regardless of size.
+ * Button label while working. Progress is shown in ballots, because the aggregate
+ * step takes most of the time; the tally check takes a couple of seconds.
  */
 const verifyingLabel = computed(() => {
   if (status.value.kind !== 'verifying') return 'Verifying...';
@@ -79,11 +77,13 @@ async function run() {
     const proposalId = props.proposal.proposal_id as string;
     const [payload, ballotsPayload] = await Promise.all([
       fetchAuditPayload(props.apiBaseUrl, proposalId),
-      fetchBallotsPayload(props.apiBaseUrl, proposalId)
+      fetchBallotsPayload(
+        props.apiBaseUrl,
+        proposalId,
+        Number((props.proposal.te_config as any)?.scale ?? 1)
+      )
     ]);
-    // Why there is nothing to verify, worked out from public data before doing
-    // any work. Whether this is a keyper problem or a coordinator problem decides
-    // what an operator does next, and it is derivable, so it is derived.
+    // If there is no result yet, show whether keypers or the coordinator are behind.
     const diagnosis = diagnoseTally(payload);
     if (diagnosis.kind !== 'published') {
       status.value = { kind: 'pending', diagnosis };
@@ -91,13 +91,8 @@ async function run() {
     }
 
     status.value = { kind: 'verifying', progress: null };
-    // Off the main thread: an audit is tens of seconds of solid computation
-    // (~2.8 ms per ciphertext just to decompress), which on the main thread is a
-    // frozen tab. Ballots are already verifyBallot-checked by the sequencer at
-    // ingestion (apps/sequencer/src/writer/vote.ts's verify()), so this
-    // re-aggregates the already-trusted ciphertexts and compares against the
-    // published aggregate -- see aggregateBallots's docstring for why the
-    // per-ballot proof is not re-checked here.
+    // Runs in a worker: the check can take tens of seconds, which would freeze the
+    // tab on the main thread.
     const run = runVerify(
       { proposalId, payload, ballotsPayload, budget: budget.value },
       progress => {
@@ -109,10 +104,22 @@ async function run() {
     cancelRun.value = run.cancel;
     const { ballots, tally: result } = await run.result;
 
+    // Also compare with `proposal.scores`, the numbers the results page shows.
+    const scores = props.proposal.scores ?? [];
+    const scale = ballotsPayload.scale ?? 1;
+    const scoresAgree =
+      result.tallies.length === scores.length &&
+      result.tallies.every((t, i) => {
+        const a = (Number(t) * scale) / budget.value;
+        const b = Number(scores[i]);
+        return Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
+      });
+
     status.value = {
       kind: 'ok',
       tallies: result.tallies,
       matches: result.verified,
+      scoresAgree,
       reason: result.reason,
       ballots,
       audit: payload,
@@ -120,7 +127,7 @@ async function run() {
       tally: result
     };
   } catch (err: any) {
-    // Stopping deliberately is not a failure to report as one.
+    // A cancel is not an error.
     status.value =
       err instanceof VerifyCancelled
         ? { kind: 'idle' }
@@ -162,16 +169,15 @@ const keyperRows = computed(() => {
     .sort((a, b) => a[0] - b[0])
     .map(([idx, shares]) => ({
       index: idx,
-      address: addresses[idx] || addresses[idx - 1] || null,
+      // Keyper indices are 1-based; the address list is not.
+      address: addresses[idx - 1] ?? null,
       shares
     }));
 });
 
 /**
- * Ballots that were admitted but round to zero at this proposal's scale.
- *
- * Reported rather than left silent: they are in the admitted set and in no exclusion
- * list, so without this they look like ballots that simply vanished.
+ * Admitted ballots that round to zero at this proposal's scale. Shown so they do
+ * not look like missing ballots.
  */
 const scaledToZeroSummary = computed(() => {
   if (status.value.kind !== 'ok') return null;
@@ -207,18 +213,33 @@ const numCandidates = computed(() =>
 );
 
 /**
- * Budget the committee tallies in -- e.g. budget=100 for a
- * weighted proposal means the raw recovered integer is the vote count
- * scaled by 100 (see verifyTally's own scaling against publishedScores),
- * so it has to be divided back down to read as an actual vote count.
- * budget=1 for simple single-choice voting, where the raw value already
- * is the vote count.
+ * The proposal's ballot budget. Raw tallies are multiplied by it (for example 100
+ * for weighted voting), so they are divided by it for display. It is 1 for
+ * single-choice voting.
  */
 const budget = computed(() => (props.proposal.te_config as any)?.budget ?? 1);
 
-/** Displays a recovered raw tally in real vote-count units. */
+/**
+ * Every check passed: the totals verify, the ballots add up to the aggregate, every
+ * admitted ballot was found, and the totals match the shown scores.
+ */
+const isFullyVerified = computed(
+  () =>
+    status.value.kind === 'ok' &&
+    status.value.matches === true &&
+    status.value.ballots.aggregateMatches &&
+    status.value.ballots.admittedSetResolved &&
+    status.value.scoresAgree
+);
+
+/**
+ * Converts a raw tally to voting power the same way the sequencer does for
+ * `proposal.scores`: `raw × scale / budget`.
+ */
 function formatTally(raw: bigint): string {
-  const value = Number(raw) / budget.value;
+  const scale =
+    status.value.kind === 'ok' ? status.value.ballotsPayload.scale ?? 1 : 1;
+  const value = (Number(raw) * scale) / budget.value;
   return budget.value === 1 ? value.toString() : value.toFixed(2);
 }
 
@@ -304,14 +325,19 @@ function downloadBundle() {
         Stop
       </button>
       <span
-        v-if="status.kind === 'ok' && status.matches === true"
+        v-if="isFullyVerified"
         class="text-sm text-skin-success flex items-center gap-1"
       >
-        <!-- `shrink-0`: this line wraps at panel width, and a flex item with no
-             shrink guard gets compressed along the main axis, so the tick renders
-             visibly smaller than the identical one below it. -->
+        <!-- `shrink-0` stops the icon shrinking when this line wraps. -->
         <IH-check-circle class="size-[16px] shrink-0" />
         Published tally verified against the decryption shares.
+      </span>
+      <span
+        v-else-if="status.kind === 'ok' && status.matches === true"
+        class="text-sm text-skin-danger flex items-center gap-1"
+      >
+        <IH-x-circle class="size-[16px] shrink-0" />
+        The decryption shares verify, but not every check below agrees.
       </span>
       <span
         v-else-if="status.kind === 'ok' && status.matches === false"
@@ -324,13 +350,6 @@ function downloadBundle() {
             status.reason
           }}</span>
         </span>
-      </span>
-      <span
-        v-else-if="status.kind === 'ok'"
-        class="text-sm text-skin-link flex items-center gap-1"
-      >
-        <IH-check-circle class="size-[16px] shrink-0" />
-        Shares verified; published totals available below.
       </span>
       <span
         v-else-if="status.kind === 'pending'"
@@ -372,10 +391,8 @@ function downloadBundle() {
         class="size-[16px] shrink-0"
       />
       <IH-x-circle v-else class="size-[16px] shrink-0" />
-      <!-- An election nobody voted in is a legitimate outcome, and the committee
-           publishes an empty (identity) aggregate for it. Reporting that as a
-           recomputed "match" is technically true but reads as though something was
-           verified, so say plainly that there was nothing to verify. -->
+      <!-- With no votes, the committee publishes an empty (identity) aggregate.
+           Say so plainly instead of reporting a "match". -->
       <span
         v-if="
           status.ballots.contributing === 0 && status.ballots.aggregateMatches
@@ -383,9 +400,8 @@ function downloadBundle() {
       >
         No votes were cast; the published aggregate is empty, as expected.
       </span>
-      <!-- No ballots, yet a non-empty aggregate: the hub is serving a ballot list
-           that cannot produce what was published. This is the case the empty-set
-           comparison exists to catch, so it must not read as reassurance. -->
+      <!-- No counted ballots but a non-empty aggregate: the ballot list served by
+           the hub cannot produce the published aggregate. -->
       <span v-else-if="status.ballots.contributing === 0">
         No votes were cast, but the published aggregate is NOT empty.
       </span>
@@ -397,9 +413,8 @@ function downloadBundle() {
         the one the keypers decrypted.
       </span>
     </div>
-    <!-- The committee named an admitted ballot the hub did not serve. Not a sum
-         that disagrees — two views of the election that disagree about which
-         ballots exist — so it is said separately and in stronger terms. -->
+    <!-- The committee admitted a ballot the hub did not return, so the hub and
+         the committee disagree on which ballots exist. -->
     <div
       v-if="status.kind === 'ok' && !status.ballots.admittedSetResolved"
       class="text-sm text-skin-danger flex items-center gap-1"
@@ -409,6 +424,19 @@ function downloadBundle() {
         The published aggregate counts ballots the hub did not return. The two
         do not agree on which ballots exist, so this recomputation is
         incomplete.
+      </span>
+    </div>
+    <div
+      v-if="status.kind === 'ok'"
+      class="text-sm flex items-center gap-1"
+      :class="status.scoresAgree ? 'text-skin-success' : 'text-skin-danger'"
+    >
+      <IH-check-circle v-if="status.scoresAgree" class="size-[16px] shrink-0" />
+      <IH-x-circle v-else class="size-[16px] shrink-0" />
+      <span>
+        The totals
+        {{ status.scoresAgree ? 'match' : 'do NOT match' }}
+        the proposal's published results.
       </span>
     </div>
     <div
@@ -566,7 +594,7 @@ function downloadBundle() {
                   v-if="row.address"
                   class="font-mono text-skin-text truncate"
                 >
-                  {{ shortHex(row.address) }}
+                  {{ shortenAddress(row.address) }}
                 </span>
               </span>
               <span class="text-skin-text shrink-0">
