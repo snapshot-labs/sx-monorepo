@@ -20,6 +20,18 @@ import {
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 
+// The start can't be earlier than the voting delay from now (e.g. a Safe
+// signature confirmed late), the end follows the voting period when set
+export function getProposalTimeline(
+  payload: { start: number; end: number },
+  voting?: { delay?: number; period?: number },
+  now = Math.floor(Date.now() / 1e3)
+) {
+  const start = Math.max(payload.start, now + (voting?.delay || 0));
+  const end = voting?.period ? start + voting.period : payload.end;
+  return { start, end };
+}
+
 export const getProposalsCount = async (space, author) => {
   const query = `
   SELECT
@@ -115,11 +127,6 @@ export async function verify(body): Promise<any> {
     return Promise.reject('wrong proposal format');
   }
 
-  const tsInt = (Date.now() / 1e3).toFixed();
-  if (msg.payload.end <= tsInt) {
-    return Promise.reject('proposal end date must be in the future');
-  }
-
   const isChoicesValid = validateChoices({
     type: msg.payload.type,
     choices: msg.payload.choices
@@ -127,8 +134,6 @@ export async function verify(body): Promise<any> {
   if (!isChoicesValid) {
     return Promise.reject('wrong choices for basic type voting');
   }
-
-  // if (msg.payload.start < created) return Promise.reject('invalid start date');
 
   if (space.voting?.delay) {
     const isValidDelay = msg.payload.start === created + space.voting.delay;
@@ -139,6 +144,11 @@ export async function verify(body): Promise<any> {
     const isValidPeriod =
       msg.payload.end - msg.payload.start === space.voting.period;
     if (!isValidPeriod) return Promise.reject('invalid voting period');
+  }
+
+  const { start, end } = getProposalTimeline(msg.payload, space.voting);
+  if (end <= start) {
+    return Promise.reject('proposal end date must be in the future');
   }
 
   if (space.voting?.type) {
@@ -286,7 +296,12 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const spaceSettings = await getSpace(space);
 
   const author = body.address;
-  const created = parseInt(msg.timestamp);
+  const created = Math.floor(Date.now() / 1e3);
+  const { start, end } = getProposalTimeline(
+    msg.payload,
+    spaceSettings.voting,
+    created
+  );
   const metadata = msg.payload.metadata || {};
   const strategies = JSON.stringify(spaceSettings.strategies);
   const validation = JSON.stringify(spaceSettings.voteValidation || {});
@@ -330,8 +345,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     labels: msg.payload.labels?.length
       ? JSON.stringify(msg.payload.labels)
       : null,
-    start: parseInt(msg.payload.start || '0'),
-    end: parseInt(msg.payload.end || '0'),
+    start,
+    end,
     quorum,
     quorum_type: (quorum && spaceSettings.voting?.quorumType) || '',
     privacy,
