@@ -19,20 +19,17 @@ import {
 } from '../helpers/utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
-const START_TOLERANCE = 300;
 
-// A proposal starting in the past (e.g. a Safe signature confirmed late) is
-// restarted from now, so it always gets its voting delay and full duration
+// The start can't be earlier than the voting delay from now (e.g. a Safe
+// signature confirmed late), the end follows the voting period when set
 export function getProposalTimeline(
   payload: { start: number; end: number },
-  votingDelay = 0,
+  voting?: { delay?: number; period?: number },
   now = Math.floor(Date.now() / 1e3)
 ) {
-  const { start, end } = payload;
-  if (start >= now - START_TOLERANCE) return { start, end };
-
-  const newStart = now + votingDelay;
-  return { start: newStart, end: newStart + end - start };
+  const start = Math.max(payload.start, now + (voting?.delay || 0));
+  const end = voting?.period ? start + voting.period : payload.end;
+  return { start, end };
 }
 
 export const getProposalsCount = async (space, author) => {
@@ -147,6 +144,11 @@ export async function verify(body): Promise<any> {
     const isValidPeriod =
       msg.payload.end - msg.payload.start === space.voting.period;
     if (!isValidPeriod) return Promise.reject('invalid voting period');
+  }
+
+  const { start, end } = getProposalTimeline(msg.payload, space.voting);
+  if (end <= start) {
+    return Promise.reject('proposal end date must be in the future');
   }
 
   if (space.voting?.type) {
@@ -297,7 +299,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const created = Math.floor(Date.now() / 1e3);
   const { start, end } = getProposalTimeline(
     msg.payload,
-    spaceSettings.voting?.delay,
+    spaceSettings.voting,
     created
   );
   const metadata = msg.payload.metadata || {};
