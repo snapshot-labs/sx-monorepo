@@ -1,5 +1,5 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { offchainNetworks } from '@/networks';
+import { explorePageProtocols, offchainNetworks } from '@/networks';
 import { NavConfig, NavContext, NavItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
@@ -130,7 +130,10 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
   items.settings = {
     name: 'Settings',
     icon: IHCog,
-    link: { name: 'space-settings', params: { tab: 'profile' } }
+    link: { name: 'space-settings', params: { tab: 'profile' } },
+    hidden: explorePageProtocols.governor.protocols?.includes(
+      context.space?.protocol ?? ''
+    )
   };
 
   return { items };

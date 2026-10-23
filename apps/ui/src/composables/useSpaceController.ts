@@ -16,7 +16,7 @@ export function useSpaceController(space: MaybeRefOrGetter<Space | null>) {
   const queryClient = useQueryClient();
   const { web3 } = useWeb3();
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: SPACE_CONTROLLER_KEY(space),
     queryFn: async () => {
       const spaceValue = toValue(space);
@@ -39,6 +39,7 @@ export function useSpaceController(space: MaybeRefOrGetter<Space | null>) {
   return {
     controller,
     isController,
+    isLoading,
     invalidateController: () =>
       queryClient.invalidateQueries({
         queryKey: SPACE_CONTROLLER_KEY(space)
