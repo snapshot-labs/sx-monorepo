@@ -69,7 +69,8 @@ export function proposalRow(id: string, overrides: Record<string, any> = {}) {
       numCandidates: 2,
       budget: 100,
       mode: 'exact',
-      variant: 'A'
+      variant: 'A',
+      scale: 1
     }),
     te_sgp_config: JSON.stringify(committee()),
     ...overrides

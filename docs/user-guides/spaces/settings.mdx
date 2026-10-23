@@ -87,7 +87,7 @@ To enable it, select **Shutter** in the **Privacy** dropdown on the Voting tab.
 
 Permanent private voting keeps every ballot encrypted: only the aggregate tally is ever published, and the backend never sees how anyone voted. It is powered by threshold-ElGamal homomorphic tallying, with the decryption key split across several independent keypers so that no single one can open anything. Privacy rests on those keypers not colluding: enough of them acting together (the deployment's threshold, for example two of three) could decrypt individual choices.
 
-To enable it, select **Permanent private voting** in the **Privacy** dropdown on the Voting tab.
+To enable it, select **Permanent private voting** in the **Privacy** dropdown on the Voting tab. The space's voting delay must be 0 or at least 4 minutes: the DKG needs at least 3 minutes to set up the proposal's key before voting starts.
 
 ## Delegations
 

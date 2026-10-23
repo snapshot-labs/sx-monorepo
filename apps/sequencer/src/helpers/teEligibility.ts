@@ -15,8 +15,6 @@ import db from './mysql';
 import { eligibilityPublicKey, SgpAttestationError } from './sgpAttestation';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
 
-export { eligibilityPublicKey as getEligibilityKey } from './sgpAttestation';
-
 export const KEY_ROTATED_MESSAGE =
   "this proposal's eligibility key was rotated; it can no longer accept votes";
 

@@ -101,8 +101,8 @@ export interface AuditPayload {
 
 /**
  * One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`).
- * Only the ciphertexts are kept: proofs are not re-checked here and are most of a
- * ballot's size.
+ * Only the ciphertexts are fetched: proofs are not re-checked here and are most of
+ * a ballot's size.
  */
 export interface AuditBallot {
   /** Position in the committee's order; `admitted` and `exclusions` refer to it. */
@@ -199,7 +199,7 @@ export async function fetchBallotsPayload(
   const url = endpoint(apiBaseUrl, proposalId, 'te_sgp_ballots');
   const ballots: AuditBallot[] = [];
   for (;;) {
-    const r = await fetch(`${url}?start=${ballots.length}`, {
+    const r = await fetch(`${url}?fields=ciphertexts&start=${ballots.length}`, {
       credentials: 'omit'
     });
     if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);
@@ -602,8 +602,8 @@ export async function verifyAll(
 /**
  * Builds a bundle that anyone can re-check offline (for example with the SDK's CLI)
  * without trusting this UI or the hub. It holds the public audit payload, every
- * encrypted ballot with its proof, and this client's results. It contains only
- * public data.
+ * encrypted ballot's ciphertexts (not its proofs) and this client's results. It
+ * contains only public data.
  */
 export function buildVerificationBundle(args: {
   proposalId: string;

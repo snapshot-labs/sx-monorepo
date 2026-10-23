@@ -119,3 +119,37 @@ describe('a non-private proposal is not an election', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('GET te_sgp_election — ballot parameters', () => {
+  // The committee must count with the values the sequencer checked every ballot
+  // against, which it keeps in `te_config`.
+  const SCALED = id(9101);
+  const INCOMPLETE = id(9102);
+  const ballot = { numCandidates: 2, budget: 100, mode: 'exact', variant: 'A' };
+
+  beforeAll(async () => {
+    for (const [proposalId, teConfig] of [
+      [SCALED, { ...ballot, scale: 4 }],
+      [INCOMPLETE, ballot]
+    ] as const) {
+      await db.queryAsync(
+        'INSERT INTO proposals SET ?',
+        proposalRow(proposalId, { te_config: JSON.stringify(teConfig) })
+      );
+    }
+  });
+
+  it('serves them from te_config', async () => {
+    const res = await fetch(`${HOST}/api/proposal/${SCALED}/te_sgp_election`);
+    expect(res.status).toBe(200);
+    const { config } = (await res.json()) as any;
+    expect(config).toMatchObject({ ...ballot, scale: 4 });
+  });
+
+  it('refuses an incomplete te_config instead of guessing', async () => {
+    const res = await fetch(
+      `${HOST}/api/proposal/${INCOMPLETE}/te_sgp_election`
+    );
+    expect(res.status).toBe(503);
+  });
+});

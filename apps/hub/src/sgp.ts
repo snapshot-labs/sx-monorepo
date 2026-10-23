@@ -164,8 +164,7 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
     try {
       config = composeElectionConfig({
         proposalId,
-        choices: parseJsonField<string[]>(proposal.choices, []),
-        type: proposal.type,
+        ballot: parseJsonField<any>(proposal.te_config, null),
         snapshot: parseCommitteeSnapshot(proposal.te_sgp_config)
       });
     } catch (err: any) {
@@ -174,22 +173,6 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
         return sendError(res, err.message, 503);
       }
       throw err;
-    }
-
-    const ingestConfig = parseJsonField<any>(proposal.te_config, null);
-    const ingestBudget = Number(ingestConfig?.budget);
-    if (ingestBudget !== config.budget) {
-      log.error(
-        `[sgp] ${proposalId}: ballot budget disagrees — te_config says ${ingestConfig?.budget}, ` +
-          `the committee config says ${config.budget}`
-      );
-      return sendError(
-        res,
-        `ballot budget mismatch: ballots are built to ${ingestConfig?.budget} but the ` +
-          `committee would verify against ${config.budget}; every ballot would be ` +
-          'rejected as INVALID_PROOF',
-        500
-      );
     }
 
     const committeePks = parseJsonField<string[] | null>(
@@ -249,6 +232,12 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     const rawCount = parseInt(String(req.query.count ?? '0'), 10);
     const countOnly = req.query.countOnly === '1';
+    // "Verify tally" needs only the ciphertexts. Dropping the proof, almost all of
+    // a ballot, in MySQL lets a page hold the full row limit.
+    const ballotDoc =
+      req.query.fields === 'ciphertexts'
+        ? "JSON_REMOVE(choice, '$.zkProof')"
+        : 'choice';
 
     // cb != -3 excludes soft-deleted votes (CB.PENDING_DELETE in the sequencer).
     // A plain COUNT, so `countOnly` reads no envelopes.
@@ -273,43 +262,43 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     if (!keys.length) return res.json({ ballots: [], total: Number(total) });
 
-    // Cut the page at MAX_BALLOT_PAGE_BYTES (by JSON_STORAGE_SIZE) before reading
-    // any envelope. It keeps a prefix of `keys`, so `start + i` stays correct.
-    const sizes = await (db as any).queryAsync(
-      `SELECT id, JSON_STORAGE_SIZE(choice) AS size
-         FROM votes
-        WHERE proposal = ? AND id IN (?)`,
-      [proposalId, (keys as any[]).map(k => k.id)]
+    // A large ballot is stored off-page, so measuring its size loads all of it.
+    // Only the first is measured up front, to estimate how many fit in
+    // MAX_BALLOT_PAGE_BYTES: a proposal's ballots all have the same shape. The
+    // page is then cut on each ballot's real size, so a wrong estimate only
+    // shortens it. Both keep a prefix of `keys`, so `start + i` stays correct.
+    const [first] = await (db as any).queryAsync(
+      `SELECT JSON_STORAGE_SIZE(${ballotDoc}) AS size FROM votes WHERE proposal = ? AND id = ?`,
+      [proposalId, keys[0].id]
     );
-    const sizeOf = new Map<string, number>(
-      (sizes as any[]).map(r => [r.id, Number(r.size)])
-    );
-    let pageBytes = 0;
-    let take = 0;
-    for (const k of keys as any[]) {
-      const size = sizeOf.get(k.id) ?? 0;
-      if (take > 0 && pageBytes + size > MAX_BALLOT_PAGE_BYTES) break;
-      pageBytes += size;
-      take++;
-    }
-    const pageKeys = (keys as any[]).slice(0, take);
+    const fits = Math.floor(MAX_BALLOT_PAGE_BYTES / Number(first?.size || 1));
+    const pageKeys = (keys as any[]).slice(0, Math.max(1, fits));
 
     // Put envelopes in `pageKeys` order in JS, not with ORDER BY: MySQL cannot
     // sort a row larger than `sort_buffer_size` (256 KiB by default), and one
     // envelope can be (e.g. five choices at budget 100).
     const fetched = await (db as any).queryAsync(
-      `SELECT id, choice, created
+      `SELECT id, ${ballotDoc} AS choice, created, JSON_STORAGE_SIZE(${ballotDoc}) AS size
          FROM votes
         WHERE proposal = ? AND id IN (?)`,
       [proposalId, pageKeys.map(k => k.id)]
     );
     const byId = new Map<string, any>((fetched as any[]).map(r => [r.id, r]));
-    const rows = pageKeys.map(k => byId.get(k.id));
-    if (rows.some(r => r === undefined)) {
-      // A vote in the window was deleted between the two queries. Serving the
-      // rest would renumber what follows it, so ask the reader to retry.
+    const fetchedRows = pageKeys.map(k => byId.get(k.id));
+    if (!first || fetchedRows.some(r => r === undefined)) {
+      // A vote in the window was deleted between the queries. Serving the rest
+      // would renumber what follows it, so ask the reader to retry.
       return sendError(res, 'ballot list changed while reading; retry', 503);
     }
+    let pageBytes = 0;
+    let take = 0;
+    for (const row of fetchedRows) {
+      const size = Number(row.size);
+      if (take > 0 && pageBytes + size > MAX_BALLOT_PAGE_BYTES) break;
+      pageBytes += size;
+      take++;
+    }
+    const rows = fetchedRows.slice(0, take);
 
     const ballots: any[] = [];
     for (let i = 0; i < rows.length; i++) {

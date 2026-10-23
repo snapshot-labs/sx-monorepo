@@ -7,8 +7,9 @@
  * the sequencer into `proposals.te_sgp_config` at creation (see
  * apps/sequencer/src/helpers/teCommittee.ts).
  *
- * `numCandidates`, `budget`, `mode`, `variant` and `scale` are derived on every
- * read from `choices` and `type`, which the author can edit until voting starts.
+ * `numCandidates`, `budget`, `mode`, `variant` and `scale` come from
+ * `proposals.te_config`, which the sequencer rewrites on every create and edit and
+ * checks every ballot against, so the committee counts with the same values.
  * `update-proposal` refuses edits after `start`, so they are fixed while voting.
  *
  * Exact field types (a wrong one is a decode error):
@@ -16,30 +17,6 @@
  *   - `protocolVersion` is the string `'SHUTTER-VOTE-v1'`.
  *   - `selfSubmitFee` is a decimal string (fees can exceed 2^53).
  */
-
-/**
- * The divisor applied to every weight so the tally stays solvable.
- *
- * The tally bound is `budget × Σ(admitted weights)`, and BSGS cost grows with its
- * square root. Dividing all weights by the same scale keeps the bound under
- * `solverCeiling` and keeps every voter's share in proportion. Returns the
- * smallest power of two that fits; usually 1 (no scaling).
- *
- * Derived on read, like `budget`, because `type` can be edited until voting starts.
- *
- * @public Exported for the sequencer's `deriveScale-parity.test.ts`.
- */
-export function deriveScale(
-  budget: number,
-  maxTotalWeight: number,
-  solverCeiling: number
-): number {
-  let scale = 1;
-  while (budget * Math.ceil(maxTotalWeight / scale) > solverCeiling) {
-    scale *= 2;
-  }
-  return scale;
-}
 
 const PROTOCOL_VERSION = 'SHUTTER-VOTE-v1';
 
@@ -86,27 +63,26 @@ export interface SgpElectionConfig {
 
 export class SgpConfigError extends Error {}
 
-/**
- * Ballot parameters derived from the editable proposal fields.
- *
- * Weighted proposals encode a split as integers summing to `weightedBudget`
- * (60 + 40 = 100); other types use a budget of 1. Only `mode: 'exact'` with
- * `variant: 'A'` is supported.
- */
-function deriveBallotParams(
-  choices: string[],
-  type: string | null | undefined,
-  weightedBudget: number
-): { numCandidates: number; budget: number; mode: 'exact'; variant: 'A' } {
-  if (!Array.isArray(choices) || choices.length === 0) {
-    throw new SgpConfigError('proposal has no choices');
+/** The ballot parameters from `te_config`. Only `exact` with variant `A` exists. */
+function ballotParams(ballot: any): {
+  numCandidates: number;
+  budget: number;
+  mode: 'exact';
+  variant: 'A';
+  scale: number;
+} {
+  const isPositiveInt = (v: unknown) => Number.isInteger(v) && Number(v) >= 1;
+  if (
+    !isPositiveInt(ballot?.numCandidates) ||
+    !isPositiveInt(ballot?.budget) ||
+    !isPositiveInt(ballot?.scale) ||
+    ballot.mode !== 'exact' ||
+    ballot.variant !== 'A'
+  ) {
+    throw new SgpConfigError('te_config is missing or incomplete');
   }
-  return {
-    numCandidates: choices.length,
-    budget: type === 'weighted' ? weightedBudget : 1,
-    mode: 'exact',
-    variant: 'A'
-  };
+  const { numCandidates, budget, mode, variant, scale } = ballot;
+  return { numCandidates, budget, mode, variant, scale };
 }
 
 export function parseCommitteeSnapshot(raw: unknown): TeCommitteeSnapshot {
@@ -146,24 +122,17 @@ export function parseCommitteeSnapshot(raw: unknown): TeCommitteeSnapshot {
  */
 export function composeElectionConfig(args: {
   proposalId: string;
-  choices: string[];
-  type: string | null | undefined;
+  ballot: unknown;
   snapshot: TeCommitteeSnapshot;
 }): SgpElectionConfig {
-  const { proposalId, choices, type, snapshot } = args;
-
-  const params = deriveBallotParams(choices, type, snapshot.weightedBudget);
+  const { proposalId, snapshot } = args;
+  const { scale, ...params } = ballotParams(args.ballot);
 
   return {
     electionId: proposalId,
     ...params,
     weighted: true,
-    // Not frozen: it depends on `budget`, which follows the editable `type`.
-    scale: deriveScale(
-      params.budget,
-      snapshot.maxTotalWeight,
-      snapshot.solverCeiling
-    ),
+    scale,
     duplicatePolicy: 'last-wins',
     votingStart: snapshot.votingStart,
     votingEnd: snapshot.votingEnd,

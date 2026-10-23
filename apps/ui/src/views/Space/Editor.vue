@@ -351,6 +351,7 @@ const canSubmit = computed(() => {
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
     hasPrivateVotingTypeConflict.value ||
+    hasPrivateVotingDelayConflict.value ||
     isMissingExecution.value
   ) {
     return false;
@@ -399,6 +400,15 @@ const defaultVotingDelay = computed(() =>
 // use this floor too. The extra minute allows for the time spent signing. Not on
 // an edit: it does not send `start`, so moving it would only show a wrong date.
 const SIGNING_SLACK_S = 60;
+// A space with a voting delay fixes the start at `created + delay`, so a delay
+// shorter than the floor leaves no start the sequencer accepts.
+const MIN_PRIVATE_VOTING_DELAY_S = MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S;
+const hasPrivateVotingDelayConflict = computed(
+  () =>
+    isPrivateVoting.value &&
+    props.space.voting_delay > 0 &&
+    props.space.voting_delay < MIN_PRIVATE_VOTING_DELAY_S
+);
 const privateVotingStartFloor = computed(() =>
   isPrivateVoting.value && !proposal.value?.originalProposal
     ? unixTimestamp.value + MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S
@@ -1012,6 +1022,14 @@ watchEffect(() => {
           >
             Permanent private voting supports only single choice, basic and
             weighted voting. Change the voting type before submitting.
+          </UiAlert>
+          <UiAlert
+            v-if="hasPrivateVotingDelayConflict"
+            type="error"
+            class="!my-0"
+          >
+            Permanent private voting needs this space's voting delay to be 0 or
+            at least {{ Math.ceil(MIN_PRIVATE_VOTING_DELAY_S / 60) }} minutes.
           </UiAlert>
           <EditorLabels
             v-if="space.labels?.length"

@@ -384,8 +384,8 @@ describe('fetchBallotsPayload', () => {
     );
 
     expect(fetchMock.mock.calls.map(c => c[0])).toEqual([
-      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=0`,
-      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=2`
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?fields=ciphertexts&start=0`,
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?fields=ciphertexts&start=2`
     ]);
     expect(payload.scale).toBe(4);
     expect(payload.ballots.map(b => [b.sequenceNumber, b.vp])).toEqual([

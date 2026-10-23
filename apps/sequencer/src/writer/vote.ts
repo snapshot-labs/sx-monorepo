@@ -3,14 +3,16 @@ import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
-import { SgpAttestationError } from '../helpers/sgpAttestation';
+import {
+  eligibilityPublicKey,
+  SgpAttestationError
+} from '../helpers/sgpAttestation';
 import {
   isDustVotingPower,
   isWithinSgpVotingWindow,
   verifyTeBallot
 } from '../helpers/te';
 import {
-  getEligibilityKey,
   isEligibilityKeyRotated,
   KEY_ROTATED_MESSAGE
 } from '../helpers/teEligibility';
@@ -182,7 +184,7 @@ export async function verify(body): Promise<any> {
       proposal,
       body.address.toLowerCase(),
       JSON.stringify(msg.payload.choice),
-      await getEligibilityKey()
+      await eligibilityPublicKey()
     );
     if (!result.ok) {
       if (result.reason === 'sequencer_busy') {

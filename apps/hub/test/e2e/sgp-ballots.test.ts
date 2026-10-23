@@ -285,4 +285,74 @@ describe('GET te_sgp_ballots — byte cap', () => {
     // The last page holds only the envelope above the cap.
     expect(pageRows).toEqual([2, 2, 1, 1]);
   });
+
+  // "Verify tally" needs only the ciphertexts, so it asks for the ballots without
+  // their proofs, which are almost all of each ballot.
+  it('serves ballots without proofs, all on one page, when asked', async () => {
+    const full = await read(HUGE, 'start=0&count=1000');
+    const { ballots } = await read(
+      HUGE,
+      'start=0&count=1000&fields=ciphertexts'
+    );
+    expect(ballots.map((b: any) => b.sequenceNumber)).toEqual(
+      range(SIZES.length)
+    );
+    expect(ballots.every((b: any) => b.ballot.zkProof === undefined)).toBe(
+      true
+    );
+    expect(ballots[0].ballot.ciphertexts).toEqual(
+      full.ballots[0].ballot.ciphertexts
+    );
+    expect(ballots[0].ballot.attestation).toEqual(
+      full.ballots[0].ballot.attestation
+    );
+  });
+});
+
+/**
+ * A large ballot is stored off-page, so measuring its size loads all of it. A
+ * page of 300 KB ballots holds about 27, so measuring the whole 1000-row window
+ * would read every ballot in it to serve those 27.
+ */
+describe('GET te_sgp_ballots — reads only what it serves', () => {
+  const WIDE =
+    '0xbbbe000000000000000000000000000000000000000000000000000000000004';
+  const N = 200;
+
+  beforeAll(async () => {
+    await insertProposal(WIDE);
+    for (let i = 0; i < N; i++) {
+      await db.queryAsync(
+        'INSERT INTO votes SET ?',
+        voteRow(WIDE, i, {
+          choice: JSON.stringify(envelope(WIDE, i, 300_000))
+        })
+      );
+    }
+  }, 120_000);
+
+  afterAll(() => cleanup(WIDE));
+
+  // InnoDB pages read for any reason, cached or not. The counter covers the whole
+  // server, so the page is read once first: MySQL's own work after the inserts
+  // above (purge, statistics) is then done and not counted.
+  async function pagesRead(): Promise<number> {
+    const [row] = await db.queryAsync(
+      "SHOW GLOBAL STATUS LIKE 'Innodb_buffer_pool_read_requests'"
+    );
+    return Number(row.Value);
+  }
+
+  it('does not load the ballots of the window it does not serve', async () => {
+    await read(WIDE, 'start=0&count=1000');
+    const before = await pagesRead();
+    const { ballots } = await read(WIDE, 'start=0&count=1000');
+    const touched = (await pagesRead()) - before;
+
+    expect(ballots.length).toBeGreaterThan(20);
+    expect(ballots.length).toBeLessThan(N);
+    // The page itself is about 8 MiB, about 600 pages of 16 KiB. Measuring all
+    // 200 ballots would add about 3,800.
+    expect(touched).toBeLessThan(2000);
+  });
 });

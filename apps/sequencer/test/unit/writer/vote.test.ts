@@ -34,12 +34,17 @@ jest.mock('../../../src/helpers/te', () => ({
   verifyTeBallot: (...args: any[]) => mockVerifyTeBallot(...args)
 }));
 
+jest.mock('../../../src/helpers/sgpAttestation', () => ({
+  __esModule: true,
+  ...jest.requireActual('../../../src/helpers/sgpAttestation'),
+  eligibilityPublicKey: jest.fn(async () => `0x${'aa'.repeat(48)}`)
+}));
+
 const mockIsKeyRotated = jest.fn();
 jest.mock('../../../src/helpers/teEligibility', () => ({
   __esModule: true,
   KEY_ROTATED_MESSAGE: jest.requireActual('../../../src/helpers/teEligibility')
     .KEY_ROTATED_MESSAGE,
-  getEligibilityKey: jest.fn(async () => `0x${'aa'.repeat(48)}`),
   isEligibilityKeyRotated: (...args: any[]) => mockIsKeyRotated(...args)
 }));
 

@@ -432,3 +432,26 @@ describe('Safe import editor context', () => {
     }
   );
 });
+
+describe('private voting and the space voting delay', () => {
+  // The sequencer needs the start at least MIN_DKG_LEAD_TIME_S ahead when the
+  // message arrives, and a space with a voting delay forces `start = created +
+  // delay`, so a short delay can never be accepted.
+  it.each([
+    [120, true],
+    [210, true],
+    [0, false],
+    [3600, false]
+  ])('with a delay of %ss, refuses to submit: %s', async (delay, isRefused) => {
+    proposals['eth:test:a'].privacy = 'shutter-elgamal';
+    const wrapper = shallowMount(Editor, {
+      props: { space: { ...space, voting_delay: delay } as Space },
+      global: { renderStubDefaultSlot: true, directives: { tippy: () => {} } }
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    expect(wrapper.text().includes("this space's voting delay")).toBe(
+      isRefused
+    );
+  });
+});

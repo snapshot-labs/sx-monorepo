@@ -6,17 +6,15 @@
  */
 
 import {
+  eligibilityPublicKey,
   resetIssuer,
   SgpAttestationError
 } from '../../../src/helpers/sgpAttestation';
-import {
-  getEligibilityKey,
-  isEligibilityKeyRotated
-} from '../../../src/helpers/teEligibility';
+import { isEligibilityKeyRotated } from '../../../src/helpers/teEligibility';
 
 const SK = '0x0000000000000000000000000000000000000000000000000000000000002a2a';
 
-describe('getEligibilityKey', () => {
+describe('eligibilityPublicKey', () => {
   afterEach(() => {
     delete process.env.TE_ELIGIBILITY_PRIVATE_KEY;
     resetIssuer();
@@ -25,7 +23,7 @@ describe('getEligibilityKey', () => {
   it('returns a 48-byte compressed G1 key', async () => {
     process.env.TE_ELIGIBILITY_PRIVATE_KEY = SK;
     resetIssuer();
-    await expect(getEligibilityKey()).resolves.toMatch(/^0x[0-9a-f]{96}$/);
+    await expect(eligibilityPublicKey()).resolves.toMatch(/^0x[0-9a-f]{96}$/);
   });
 
   // Throwing makes proposal creation fail, instead of freezing a placeholder key
@@ -41,7 +39,7 @@ describe('getEligibilityKey', () => {
     if (value === undefined) delete process.env.TE_ELIGIBILITY_PRIVATE_KEY;
     else process.env.TE_ELIGIBILITY_PRIVATE_KEY = value;
     resetIssuer();
-    await expect(getEligibilityKey()).rejects.toThrow(SgpAttestationError);
+    await expect(eligibilityPublicKey()).rejects.toThrow(SgpAttestationError);
   });
 });
 
@@ -60,7 +58,7 @@ describe('isEligibilityKeyRotated', () => {
   });
 
   it('is false while the frozen key is the key in use', async () => {
-    const current = await getEligibilityKey();
+    const current = await eligibilityPublicKey();
     expect(await isEligibilityKeyRotated(frozenOn(current.toUpperCase()))).toBe(
       false
     );

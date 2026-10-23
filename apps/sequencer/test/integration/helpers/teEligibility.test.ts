@@ -5,11 +5,11 @@
  */
 
 import db, { sequencerDB } from '../../../src/helpers/mysql';
-import { resetIssuer } from '../../../src/helpers/sgpAttestation';
 import {
-  getEligibilityKey,
-  refreezeEligibilityKey
-} from '../../../src/helpers/teEligibility';
+  eligibilityPublicKey,
+  resetIssuer
+} from '../../../src/helpers/sgpAttestation';
+import { refreezeEligibilityKey } from '../../../src/helpers/teEligibility';
 import { insertProposal } from '../../fixtures/proposal';
 
 const OLD_KEY = `0x${'cd'.repeat(48)}`;
@@ -72,7 +72,7 @@ afterAll(async () => {
 
 describe('refreezeEligibilityKey', () => {
   it('moves only the proposals that have not started, and keeps the rest of the committee', async () => {
-    const current = (await getEligibilityKey()).toLowerCase();
+    const current = (await eligibilityPublicKey()).toLowerCase();
 
     expect(await refreezeEligibilityKey(NOW)).toBe(2);
     expect(await frozenKey(PENDING)).toEqual({ key: current, t: 2 });

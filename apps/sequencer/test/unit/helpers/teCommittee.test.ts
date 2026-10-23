@@ -335,8 +335,9 @@ describe('frozenWeightedBudget', () => {
 });
 
 describe('getPrivateBallotError', () => {
-  // At budget 100, 19 choices is the largest ballot that fits the sequencer's
-  // 1 MB limit for a private vote; 20 would be created and could never be voted on.
+  // A proposal whose ballot cannot fit the sequencer's 1 MB limit for a private
+  // vote would be created and could never be voted on. At budget 100 that is 20
+  // choices; at budget 1 it is 690, which turbo spaces allow.
   it.each([
     ['single-choice', 3, undefined],
     ['basic', 3, undefined],
@@ -348,7 +349,9 @@ describe('getPrivateBallotError', () => {
     ]),
     ['weighted', 19, undefined],
     ['weighted', 20, 'private weighted voting allows at most 19 choices'],
-    ['basic', 30, undefined]
+    ['basic', 30, undefined],
+    ['single-choice', 689, undefined],
+    ['basic', 690, 'private basic voting allows at most 689 choices']
   ] as [string, number, string | undefined][])(
     '%s with %p choices: %p',
     (type, numChoices, expected) => {

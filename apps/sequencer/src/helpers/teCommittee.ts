@@ -6,9 +6,10 @@
  * `TE_THRESHOLD_T`); changing env must not alter proposals whose key generation
  * already ran against the old committee.
  *
- * `numCandidates`, `budget`, `mode` and `variant` are not stored here: they come
- * from `choices` and `type`, which the author can edit until `start`, so the hub
- * derives them on each read.
+ * `numCandidates`, `budget`, `mode`, `variant` and `scale` are not stored here:
+ * they follow `choices` and `type`, which the author can edit until `start`, so
+ * they go into `te_config` (`ballotParamsColumn`), rewritten on every edit, and
+ * the hub serves them from there.
  *
  * This is sx's own shape, not the protocol's JSON format. The hub converts it in
  * `apps/hub/src/helpers/sgpConfig.ts`, so the wire format is defined in one place.
@@ -78,10 +79,19 @@ export class TeConfigError extends Error {}
 // nothing else. Any other type is refused, including types added later.
 const PRIVATE_VOTE_TYPES = ['single-choice', 'basic', 'weighted'];
 
-// A ballot carries `choices × (budget + 1)` proof branches of about 516 bytes
-// each. 2000 keeps a ballot under the sequencer's 1 MB body limit (at budget 100:
-// 19 choices, ~994 KB).
+// A ballot carries `choices × (budget + 1)` proof branches, and checking each takes
+// about 26 ms, so this bounds the check time.
 const MAX_PROOF_BRANCHES = 2000;
+
+/** The request body limit for a vote on a private proposal (see the ingestor). */
+export const MAX_PRIVATE_VOTE_SIZE = 1e6;
+
+// A private vote's request body, measured on SDK ballots: 512 characters per proof
+// branch, 422 more per choice for its ciphertexts and JSON, and under 3,000 for the
+// rest of the message. At budget 100 that is 19 choices (~994 KB).
+const BRANCH_CHARS = 512;
+const CHOICE_CHARS = 422;
+const VOTE_OVERHEAD_CHARS = 3000;
 
 /** Why a proposal cannot use private voting, or undefined when it can. */
 export function getPrivateBallotError(
@@ -93,8 +103,13 @@ export function getPrivateBallotError(
     return `${type} voting is not supported with private voting`;
   }
   const budget = type === 'weighted' ? weightedBudget : 1;
-  if (numChoices * (budget + 1) > MAX_PROOF_BRANCHES) {
-    return `private ${type} voting allows at most ${Math.floor(MAX_PROOF_BRANCHES / (budget + 1))} choices`;
+  const perChoice = (budget + 1) * BRANCH_CHARS + CHOICE_CHARS;
+  const maxChoices = Math.min(
+    Math.floor(MAX_PROOF_BRANCHES / (budget + 1)),
+    Math.floor((MAX_PRIVATE_VOTE_SIZE - VOTE_OVERHEAD_CHARS) / perChoice)
+  );
+  if (numChoices > maxChoices) {
+    return `private ${type} voting allows at most ${maxChoices} choices`;
   }
 }
 
@@ -409,6 +424,12 @@ export function votingPowerFallback(budget: number): number {
   return Math.max(1, Math.floor(teSolverCeiling() / Math.max(1, budget)));
 }
 
+/**
+ * The divisor applied to every weight so the tally stays solvable: the tally bound
+ * is `budget × Σ(admitted weights)`, and dividing every weight by the same scale
+ * keeps it under `solverCeiling` while keeping each voter's share in proportion.
+ * The smallest power of two that fits; usually 1.
+ */
 export function deriveScale(
   budget: number,
   maxTotalWeight: number,
@@ -447,9 +468,8 @@ export function ballotParamsColumn(
 
 /**
  * The columns written with a private proposal. `te_sgp_config` is the source of
- * truth; the other three are copies for the UI and for the hub's write check, which
- * reads `te_keyper_addresses[keyper_index - 1]`. Regenerate them from the snapshot;
- * never edit them by hand.
+ * truth; the other three are copies the hub serves to the UI (GraphQL and the Verify
+ * payload). Regenerate them from the snapshot; never edit them by hand.
  */
 export function committeeColumns(snapshot: TeCommitteeSnapshot): {
   te_sgp_config: string;

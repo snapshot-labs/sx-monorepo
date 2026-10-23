@@ -11,7 +11,11 @@ import {
 
 const supplies: Record<string, string> = {};
 let calls: string[] = [];
+let blockTags: Record<string, unknown> = {};
 let failuresLeft = 0;
+
+// The block on each chain at the moment of the proposal's snapshot block.
+const BLOCKS_BY_NETWORK: Record<string, number> = { '42161': 300000000 };
 
 jest.mock('../../../src/helpers/provider', () => ({
   getProvider: () => ({ __mock: true })
@@ -24,8 +28,23 @@ jest.mock('@snapshot-labs/snapshot.js', () => {
     ...originalModule,
     utils: {
       ...originalModule.utils,
-      call: async (_provider: unknown, _abi: unknown, [address]: string[]) => {
+      getSnapshots: async (
+        network: string,
+        block: number,
+        _provider: unknown,
+        networks: string[]
+      ) =>
+        Object.fromEntries(
+          networks.map(n => [n, n === network ? block : BLOCKS_BY_NETWORK[n]])
+        ),
+      call: async (
+        _provider: unknown,
+        _abi: unknown,
+        [address]: string[],
+        options: { blockTag: unknown }
+      ) => {
         calls.push(address.toLowerCase());
+        blockTags[address.toLowerCase()] = options.blockTag;
         if (failuresLeft > 0) {
           failuresLeft--;
           throw new Error('rpc down');
@@ -51,6 +70,7 @@ const base = {
 
 beforeEach(() => {
   calls = [];
+  blockTags = {};
   failuresLeft = 0;
   supplies[TOKEN_A] = (10n ** 24n).toString(); // 1e24 wei = 1e6 tokens at 18dp
   supplies[TOKEN_B] = (10n ** 21n).toString(); // 1e21 wei = 1e3 tokens at 18dp
@@ -101,6 +121,20 @@ describe('resolveVotingPowerBound', () => {
     expect(r.value).toBe(2e6 + 1e3);
     expect(r.source).toBe('strategies');
     expect(calls).toHaveLength(2);
+  });
+
+  // Block numbers differ per chain: Arbitrum's are far ahead of mainnet's. Reading
+  // a token on another chain at the proposal chain's block number asks for a block
+  // that does not exist yet, or one from years ago.
+  it("reads a token on another chain at that chain's block", async () => {
+    await resolveVotingPowerBound({
+      ...base,
+      strategies: [erc20(), { ...erc20(TOKEN_B), network: '42161' }]
+    });
+    expect(blockTags).toEqual({
+      [TOKEN_A]: base.snapshotBlock,
+      [TOKEN_B]: BLOCKS_BY_NETWORK['42161']
+    });
   });
 
   // The supply alone would be an under-estimate, since the whitelist adds power.

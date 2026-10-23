@@ -671,8 +671,6 @@ type Proposal {
   te_config: Any
   "Threshold-ElGamal joint public key as 0x-prefixed hex of compressed G2 (96 bytes). Null until DKG completes."
   te_mpk: String
-  "Threshold-ElGamal committee public keys as a JSON array of 0x-prefixed hex compressed-G2 strings."
-  te_committee_pks: Any
   "Threshold-ElGamal reconstruction threshold (minimum honest keypers needed to decrypt the tally)."
   te_threshold_t: Int
   "Threshold-ElGamal committee size."

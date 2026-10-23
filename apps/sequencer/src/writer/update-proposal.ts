@@ -8,6 +8,7 @@ import {
   effectivePrivacy,
   leadTimeError
 } from '../helpers/privacy';
+import { eligibilityPublicKey } from '../helpers/sgpAttestation';
 import {
   ballotParamsColumn,
   committeeColumns,
@@ -18,7 +19,6 @@ import {
   TeConfigError,
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
-import { getEligibilityKey } from '../helpers/teEligibility';
 import { VotingPowerBoundError } from '../helpers/teVotingPowerBound';
 import { jsonParse, validateChoices } from '../helpers/utils';
 
@@ -152,12 +152,17 @@ export async function action(body, ipfs): Promise<void> {
     try {
       const snapshot = await buildProposalSnapshot({
         proposalId: existing.id,
-        space: spaceSettings,
+        // Votes count with the network and strategies frozen on the proposal.
+        space: {
+          ...spaceSettings,
+          network: existing.network,
+          strategies: existing.strategies
+        },
         author: existing.author,
         start: existing.start,
         end: existing.end,
         snapshotBlock: Number(existing.snapshot ?? 0),
-        eligibilityKey: await getEligibilityKey()
+        eligibilityKey: await eligibilityPublicKey()
       });
       Object.assign(proposal, committeeColumns(snapshot));
       frozenSnapshot = snapshot;

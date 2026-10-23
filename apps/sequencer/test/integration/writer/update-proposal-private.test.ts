@@ -25,9 +25,10 @@ jest.mock('../../../src/helpers/moderation', () => ({
   containsFlaggedLinks: () => false
 }));
 
-jest.mock('../../../src/helpers/teEligibility', () => ({
+jest.mock('../../../src/helpers/sgpAttestation', () => ({
   __esModule: true,
-  getEligibilityKey: jest.fn(async () => `0x${'aa'.repeat(48)}`)
+  ...jest.requireActual('../../../src/helpers/sgpAttestation'),
+  eligibilityPublicKey: jest.fn(async () => `0x${'aa'.repeat(48)}`)
 }));
 
 // Mocked so no keypers are contacted. The snapshot keeps the `V` it is given, and
@@ -335,6 +336,36 @@ describe('update-proposal: a public -> private edit adopts the new scale', () =>
     expect(row.te_config.scale).toBe(128);
     expect(row.te_config.budget).toBe(BUDGET);
     expect(row.te_sgp_config.weightedBudget).toBe(BUDGET);
+  });
+
+  // Votes count with the proposal's own network and strategies, frozen when it
+  // was created, so `V` must be sized from those, not from space settings that
+  // changed since.
+  it('sizes V from the proposal, not from the space settings now', async () => {
+    const created = [
+      { name: 'erc20-balance-of', network: '1', params: { address: '0x01' } }
+    ];
+    await seed({
+      ...PUBLIC,
+      network: '1',
+      strategies: JSON.stringify(created)
+    });
+    useSpace(
+      { privacy: 'any' },
+      {
+        network: '42161',
+        strategies: [{ name: 'erc20-votes', params: { address: '0x02' } }]
+      }
+    );
+    const spy = jest
+      .spyOn(bound, 'resolveVotingPowerBound')
+      .mockResolvedValueOnce({ value: 1_000_000, source: 'test' } as any);
+
+    await updateAction(editBody({ privacy: 'shutter-elgamal' }), 'ipfs2');
+
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ proposalNetwork: '1', strategies: created })
+    );
   });
 });
 
