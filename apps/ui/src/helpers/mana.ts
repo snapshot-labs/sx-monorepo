@@ -117,3 +117,21 @@ export async function getRelayerInfo(
     return null;
   }
 }
+
+/**
+ * Dedicated account of an offchain space, funded by its members. One address
+ * per space, shared across EVM chains. The balance is read on the given provider.
+ */
+export async function getSpaceCredits(
+  space: string,
+  network: NetworkID,
+  provider: Provider
+): Promise<{ address: string; balance: number } | null> {
+  const res = await fetch(
+    `${MANA_URL}/eth_rpc/relayers/spaces/${network}:${space}`
+  );
+  const { address } = await res.json();
+  if (!address) return null;
+
+  return { address, balance: await fetchGasBalance(provider, address, false) };
+}

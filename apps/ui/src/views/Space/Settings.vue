@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
 import SpaceBilling from '@/components/SpaceBilling.vue';
+import SpaceCredits from '@/components/SpaceCredits.vue';
 import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
@@ -101,6 +102,7 @@ type Tab = {
     | 'whitelabel'
     | 'advanced'
     | 'billing'
+    | 'credits'
     | 'controller';
   visible: boolean;
 };
@@ -162,6 +164,10 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'billing',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'credits',
         visible: isOffchainNetwork.value
       },
       {
@@ -636,6 +642,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </UiContainerSettings>
       <SpaceBilling v-if="activeTab === 'billing'" :space="space" />
+      <UiContainerSettings
+        v-if="activeTab === 'credits'"
+        title="Credits"
+        description="Funds deposited to this space's dedicated account."
+      >
+        <SpaceCredits :space="space" />
+      </UiContainerSettings>
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"
