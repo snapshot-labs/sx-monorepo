@@ -23,16 +23,20 @@ export async function trackTurboStatuses() {
 
   while (true) {
     // Step 1: Query all the spaces from the schnaps-api
-    let spaces = await getSpacesExpirationDates();
+    const spaces = await getSpacesExpirationDates();
 
-    spaces = spaces
-      .filter(space => space.id.startsWith(NETWORK_PREFIX))
-      .map(space => {
-        return { ...space, id: space.id.replace(NETWORK_PREFIX, '') };
-      });
+    // A space can have one row per payment source (onchain, Stripe): keep the latest
+    const latest = new Map<string, number>();
+    for (const { id, turbo_expiration } of spaces) {
+      if (!id.startsWith(NETWORK_PREFIX)) continue;
+      const key = id.slice(NETWORK_PREFIX.length);
+      latest.set(key, Math.max(latest.get(key) ?? 0, turbo_expiration));
+    }
 
     // Step 2: Update the turbo status of the spaces in the database
-    updateTurboStatuses(spaces);
+    updateTurboStatuses(
+      [...latest].map(([id, turbo_expiration]) => ({ id, turbo_expiration }))
+    );
 
     // Sleep for a while before running the loop again
     await snapshot.utils.sleep(RUN_INTERVAL);
