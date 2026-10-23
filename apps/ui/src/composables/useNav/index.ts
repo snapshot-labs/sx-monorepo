@@ -1,7 +1,4 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
-import { ENSChainId, getNameOwner } from '@/helpers/ens';
-import { getUserFacingErrorMessage } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
 import orgProvider from './org';
 import settingsProvider from './settings';
@@ -50,7 +47,7 @@ function enrichItems(
           ...item,
           hidden: item.hidden ?? false,
           link: item.link ?? { name: `${routeName}-${key}` },
-          isActive: key === activeKey
+          isActive: item.isActive || key === activeKey
         }
       ])
       .filter(([, item]) => !item.hidden)
@@ -62,7 +59,6 @@ function enrichItems(
 function setup() {
   const route = useRoute();
   const notificationsStore = useNotificationsStore();
-  const uiStore = useUiStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
   const { space } = useCurrentSpace();
@@ -78,40 +74,12 @@ function setup() {
     currentRouteName.value === 'space' ? space.value : null
   );
 
-  const { isController } = useSpaceController(spaceOnRoute);
-
-  const ensOwner = computedAsync(
-    async () => {
-      if (
-        !web3.value.account ||
-        isController.value ||
-        !spaceOnRoute.value ||
-        !offchainNetworks.includes(spaceOnRoute.value.network)
-      ) {
-        return null;
-      }
-
-      const network = getNetwork(spaceOnRoute.value.network);
-      return getNameOwner(spaceOnRoute.value.id, network.chainId as ENSChainId);
-    },
-    null,
-    {
-      lazy: true,
-      onError: err => {
-        console.error(err);
-        uiStore.addNotification('error', getUserFacingErrorMessage(err));
-      }
-    }
-  );
-
   const context = computed<NavContext>(() => ({
     route,
     account: web3.value.account,
     unreadCount: notificationsStore.unreadNotificationsCount,
     isWhiteLabel: isWhiteLabel.value,
     space: spaceOnRoute.value,
-    isController: isController.value,
-    ensOwner: ensOwner.value,
     organization: organization.value
   }));
 

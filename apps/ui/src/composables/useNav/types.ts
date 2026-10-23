@@ -26,8 +26,6 @@ export type NavContext = {
   unreadCount: number;
   isWhiteLabel: boolean;
   space: Space | null;
-  isController: boolean;
-  ensOwner: string | null;
   organization: Organization | null;
 };
 

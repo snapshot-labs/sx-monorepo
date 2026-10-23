@@ -1,5 +1,4 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { compareAddresses } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { NavConfig, NavContext, NavItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -77,7 +76,7 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
         name: 'Settings',
         icon: IHArrowLongLeft,
         link: { name: 'space-overview' },
-        activeRoute: { prefix: 'space-settings' }
+        isActive: true
       },
       ...tabItems,
       snapshotPro: {
@@ -87,22 +86,6 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
       }
     }
   };
-}
-
-function canSeeSettings(context: NavContext): boolean {
-  const isOwner =
-    context.ensOwner && compareAddresses(context.ensOwner, context.account);
-  if (context.isController || isOwner) return true;
-
-  if (context.space?.additionalRawData?.type === 'offchain') {
-    const admins = context.space.additionalRawData.admins.map(admin =>
-      admin.toLowerCase()
-    );
-
-    return admins.includes(context.account.toLowerCase());
-  }
-
-  return false;
 }
 
 function getSpaceMainConfig(context: NavContext): NavConfig {
@@ -144,13 +127,11 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
     };
   }
 
-  if (canSeeSettings(context)) {
-    items.settings = {
-      name: 'Settings',
-      icon: IHCog,
-      link: { name: 'space-settings', params: { tab: 'profile' } }
-    };
-  }
+  items.settings = {
+    name: 'Settings',
+    icon: IHCog,
+    link: { name: 'space-settings', params: { tab: 'profile' } }
+  };
 
   return { items };
 }
@@ -162,7 +143,7 @@ export default {
   getConfig(context: NavContext): NavConfig | null {
     if (!context.space) return null;
 
-    if (context.route.name === 'space-settings') {
+    if (['space-settings', 'space-pro'].includes(String(context.route.name))) {
       return getSpaceSettingsConfig(context);
     }
     return getSpaceMainConfig(context);
