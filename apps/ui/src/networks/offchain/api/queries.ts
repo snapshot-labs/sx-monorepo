@@ -12,6 +12,7 @@ gql(`
     followersCount
     activeProposals
     turbo
+    credits_parsed
     verified
   }
 
@@ -20,6 +21,7 @@ gql(`
     verified
     turbo
     turboExpiration
+    credits_parsed
     admins
     members
     name
