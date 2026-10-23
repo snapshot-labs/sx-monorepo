@@ -4,6 +4,7 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { uniq } from 'lodash';
 import { CB } from '../constants';
 import { getPremiumNetworkIds, getSpace } from '../helpers/actions';
+import { chargeProposal, refundProposal } from '../helpers/credits';
 import log from '../helpers/log';
 import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
@@ -286,9 +287,17 @@ export async function verify(body): Promise<any> {
   if (msg.payload.choices.length > choicesLimit) {
     return Promise.reject(`number of choices can not exceed ${choicesLimit}`);
   }
+
+  return { plus: !!space.plus };
 }
 
-export async function action(body, ipfs, receipt, id): Promise<void> {
+export async function action(
+  body,
+  ipfs,
+  receipt,
+  id,
+  context?: { plus: boolean }
+): Promise<void> {
   const msg = jsonParse(body.msg);
   const space = msg.space;
 
@@ -327,6 +336,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     }
   }
 
+  const credits = context?.plus ? 1 : 0;
   const proposal = {
     id,
     ipfs,
@@ -362,7 +372,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     votes: 0,
     validation,
     flagged: +containsFlaggedLinks(msg.payload.body),
-    cb: CB.PENDING_SYNC
+    cb: CB.PENDING_SYNC,
+    credits
   };
 
   const query = `
@@ -373,5 +384,12 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     UPDATE spaces SET proposal_count = proposal_count + 1 WHERE id = ?;
   `;
 
-  await db.queryAsync(query, [proposal, space, author, space]);
+  // A Snapshot Plus proposal is paid right before it's stored
+  if (credits) await chargeProposal(space);
+  try {
+    await db.queryAsync(query, [proposal, space, author, space]);
+  } catch (err) {
+    if (credits) await refundProposal(space);
+    throw err;
+  }
 }

@@ -99,7 +99,9 @@ export function formatSpace({
   flagged,
   hibernated,
   skinSettings,
-  created
+  created,
+  credits_deposited = null,
+  credits_spent = 0
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
   const space = {
@@ -167,6 +169,11 @@ export function formatSpace({
   space.hibernated = hibernated;
   space.turbo = new Date((turboExpiration || 0) * 1000) > new Date();
   space.turboExpiration = turboExpiration ?? 0;
+  // Snapshot Plus balance in gwei, negative when owed, null when not loaded
+  space.credits =
+    credits_deposited === null
+      ? null
+      : String(credits_deposited - credits_spent);
   space.rank = spaceMetadata?.rank ?? null;
 
   // always return parent and children in child node format

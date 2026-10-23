@@ -1,6 +1,7 @@
 import snapshot from '@snapshot-labs/snapshot.js';
 import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
+import { SUBSCRIBED, VOTE_FEE } from '../helpers/credits';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
@@ -213,9 +214,20 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
         INSERT INTO leaderboard (space, user, vote_count, last_vote, vp_value)
           VALUES(?, ?, 1, ?, 0)
           ON DUPLICATE KEY UPDATE vote_count = vote_count + 1, last_vote = ?;
-        UPDATE spaces SET vote_count = vote_count + 1 WHERE id = ?;
+        UPDATE spaces SET vote_count = vote_count + 1,
+          credits_spent = credits_spent + IF(${SUBSCRIBED}, 0, ?)
+          WHERE id = ?;
       `,
-      [params, msg.space, voter, created, created, msg.space]
+      [
+        params,
+        msg.space,
+        voter,
+        created,
+        created,
+        // New votes on a Snapshot Plus proposal are charged, even into a negative balance
+        context.proposal.credits ? VOTE_FEE : 0,
+        msg.space
+      ]
     );
   }
 

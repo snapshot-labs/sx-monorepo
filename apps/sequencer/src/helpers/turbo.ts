@@ -7,7 +7,10 @@ import { fetchWithKeepAlive } from './utils';
 type Space = {
   id: string;
   turbo_expiration: number;
+  credits: string; // Snapshot Plus deposits, in gwei
 };
+
+type SpaceStatus = { id: string; turbo_expiration: number; credits: number };
 
 const SCHNAPS_API_URL = process.env.SCHNAPS_API_URL;
 const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
@@ -25,48 +28,54 @@ export async function trackTurboStatuses() {
     // Step 1: Query all the spaces from the schnaps-api
     const spaces = await getSpacesExpirationDates();
 
-    // A space can have one row per payment source (onchain, Stripe): keep the latest
-    const latest = new Map<string, number>();
-    for (const { id, turbo_expiration } of spaces) {
+    // A space can have one row per payment source (onchain, Stripe): keep the
+    // latest expiration, and the credits, which only onchain payments add
+    const latest = new Map<string, SpaceStatus>();
+    for (const { id, turbo_expiration, credits } of spaces) {
       if (!id.startsWith(NETWORK_PREFIX)) continue;
       const key = id.slice(NETWORK_PREFIX.length);
-      latest.set(key, Math.max(latest.get(key) ?? 0, turbo_expiration));
+      const prev = latest.get(key);
+      latest.set(key, {
+        id: key,
+        turbo_expiration: Math.max(
+          prev?.turbo_expiration ?? 0,
+          turbo_expiration
+        ),
+        credits: Math.max(prev?.credits ?? 0, Number(credits))
+      });
     }
 
-    // Step 2: Update the turbo status of the spaces in the database
-    updateTurboStatuses(
-      [...latest].map(([id, turbo_expiration]) => ({ id, turbo_expiration }))
-    );
+    // Step 2: Update the turbo status and credits of the spaces in the database
+    await updateTurboStatuses([...latest.values()]).catch(capture);
 
     // Sleep for a while before running the loop again
     await snapshot.utils.sleep(RUN_INTERVAL);
   }
 }
 
-async function updateTurboStatuses(
-  spaces: { id: string; turbo_expiration: number }[]
-) {
+export async function updateTurboStatuses(spaces: SpaceStatus[]) {
   if (spaces.length === 0) return;
 
-  // Sync `turbo_expiration` for each space
+  // Sync `turbo_expiration` and `credits_deposited` for each space
+  const cases = spaces.map(() => `WHEN ? THEN ?`).join(' ');
   const query = `
     UPDATE spaces
     SET
-      turbo_expiration = CASE id
-        ${spaces.map(() => `WHEN ? THEN ?`).join(' ')}
-      END
+      turbo_expiration = CASE id ${cases} END,
+      credits_deposited = CASE id ${cases} END
     WHERE id IN (?);
   `;
 
-  // Flatten `spaces` array: [id1, expiration1, id2, expiration2, ..., now, id1, id2, ...]
-  const params: (string | string[] | number)[] = spaces.flatMap(
-    ({ id, turbo_expiration }) => [id, turbo_expiration]
-  );
+  // Flatten `spaces` array: [id1, expiration1, ..., id1, credits1, ..., [id1, ...]]
+  const params: (string | string[] | number)[] = [
+    ...spaces.flatMap(({ id, turbo_expiration }) => [id, turbo_expiration]),
+    ...spaces.flatMap(({ id, credits }) => [id, credits])
+  ];
 
   // Append `id`s again for the `WHERE IN (...)` clause
   params.push(spaces.map(space => space.id));
 
-  await db.query(query, params);
+  await db.queryAsync(query, params);
 }
 
 // TODO: adds pagination to handle large number of spaces
@@ -80,6 +89,7 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
       spaces {
         id
         turbo_expiration
+        credits
       }
     }
   `;

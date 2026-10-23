@@ -1,4 +1,5 @@
 import snapshot from '@snapshot-labs/snapshot.js';
+import { PLUS } from './credits';
 import db from './mysql';
 import { DEFAULT_NETWORK_ID, jsonParse, NETWORK_ID_WHITELIST } from './utils';
 
@@ -122,7 +123,7 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, ${PLUS} AS plus FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]
@@ -137,8 +138,12 @@ export async function getSpace(
     verified: spaces[0].verified === 1,
     flagged: spaces[0].flagged === 1,
     hibernated: spaces[0].hibernated === 1,
+    // Snapshot Plus spaces get every Pro limit and feature
     turbo:
-      spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3
+      spaces[0].turbo === 1 ||
+      spaces[0].turbo_expiration > Date.now() / 1e3 ||
+      spaces[0].plus === 1,
+    plus: spaces[0].plus === 1
   };
 }
 
