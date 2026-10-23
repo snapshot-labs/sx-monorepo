@@ -29,15 +29,6 @@ export const Turbo: Story = {
   }
 };
 
-export const Plus: Story = {
-  args: {
-    verified: false,
-    turbo: true,
-    flagged: false,
-    plus: true
-  }
-};
-
 export const Flagged: Story = {
   args: {
     verified: false,

@@ -19,9 +19,9 @@ const badgeLabel = computed(() => {
   <UiTooltip v-if="badgeLabel" :title="badgeLabel">
     <IS-badge-check
       v-if="turbo"
-      :class="plus ? 'text-[#a7adb5]' : 'text-[#e2b719]'"
+      :class="plus ? 'text-[#2394ea]' : 'text-[#e2b719]'"
     />
-    <IS-badge-check v-else-if="verified" class="text-[#2394ea]" />
+    <IS-badge-check v-else-if="verified" class="text-skin-link" />
     <IS-exclamation-circle v-else-if="flagged" class="text-skin-danger" />
   </UiTooltip>
 </template>
