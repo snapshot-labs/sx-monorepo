@@ -7,6 +7,7 @@ import {
   buildWhereQuery,
   checkLimits,
   formatProposal,
+  formatSkinSettings,
   formatSpace,
   formatVote
 } from '../helpers';
@@ -143,8 +144,9 @@ async function query(parent, args, context?, info?) {
       .map(vote => vote.space.id)
       .filter((v, i, a) => a.indexOf(v) === i);
     const query = `
-      SELECT * FROM spaces
-      WHERE id IN (?) AND settings IS NOT NULL AND deleted = 0
+      SELECT s.*, skins.*, s.id AS id FROM spaces s
+      LEFT JOIN skins ON s.id = skins.id
+      WHERE s.id IN (?) AND s.settings IS NOT NULL AND s.deleted = 0
     `;
     try {
       let spaces = await db.queryAsync(query, [spaceIds]);
@@ -153,6 +155,7 @@ async function query(parent, args, context?, info?) {
         spaces.map(space => [
           space.id,
           formatSpace({
+            skinSettings: formatSkinSettings(space),
             turboExpiration: space.turbo_expiration,
             ...space
           })
