@@ -781,6 +781,14 @@ export function isPlusSpace(space: {
   );
 }
 
+// What a Snapshot Plus balance pays for, e.g. "≈ 7 proposals or 153 votes"
+export function formatPlusUsage(credits: number) {
+  // The epsilon absorbs float error, e.g. 0.0012 / 0.0004 = 2.9999999999999996
+  const proposals = Math.floor(credits / SNAPSHOT_PLUS_FEES.proposal + 1e-9);
+  const votes = Math.floor(credits / SNAPSHOT_PLUS_FEES.vote + 1e-9);
+  return `≈ ${proposals} proposal${proposals === 1 ? '' : 's'} or ${votes} votes`;
+}
+
 export function isUserAbortError(err: any) {
   return (
     ['ACTION_REJECTED', 4001, 113].includes(err.code) ||

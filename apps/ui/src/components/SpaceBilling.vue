@@ -41,7 +41,7 @@ async function openPortal(paymentId: string) {
     <UiContainerSettings
       class="px-4 pt-4"
       title="Billing"
-      description="Manage your subscription and view billing information."
+      description="Your plan, credits and payment history."
     >
       <UiEyebrow class="mb-3 font-medium">Current plan</UiEyebrow>
       <SpaceBillingPlan

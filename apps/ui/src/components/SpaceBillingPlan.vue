@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
 import { PRO_MONTHLY_PRICES, SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
-import { _n, _rt } from '@/helpers/utils';
+import { _n, _rt, formatPlusUsage } from '@/helpers/utils';
 import { Space } from '@/types';
 
 type Plan = 'basic' | 'plus' | 'pro';
@@ -11,6 +11,9 @@ const PLAN_NAMES: Record<Plan, string> = {
   plus: 'Plus',
   pro: 'Pro'
 };
+
+const PRO_PRICE = `$${PRO_MONTHLY_PRICES.monthly} / month or $${(PRO_MONTHLY_PRICES.yearly * 12).toLocaleString('en-US')} / year`;
+const PLUS_PRICES = `${SNAPSHOT_PLUS_FEES.proposal} ETH / proposal · ${SNAPSHOT_PLUS_FEES.vote} ETH / vote`;
 
 const props = defineProps<{ space: Space }>();
 
@@ -51,18 +54,15 @@ const card = computed(() => {
       detail: expiration.value
         ? _rt(props.space.turbo_expiration)
         : 'Unknown expiration date',
-      footer: `Subscription · $${PRO_MONTHLY_PRICES.monthly} a month, or $${PRO_MONTHLY_PRICES.yearly} a month billed yearly`
+      footer: `Subscription · ${PRO_PRICE}`
     };
   }
 
   if (currentPlan.value === 'plus') {
-    const proposals = Math.floor(credits.value / SNAPSHOT_PLUS_FEES.proposal);
-    const votes = Math.floor(credits.value / SNAPSHOT_PLUS_FEES.vote);
-
     return {
       value: balance.value,
-      detail: `≈ ${proposals} proposal${proposals === 1 ? '' : 's'} or ${votes} votes left`,
-      footer: `Pay per use · ${SNAPSHOT_PLUS_FEES.proposal} ETH per proposal · ${SNAPSHOT_PLUS_FEES.vote} ETH per vote`
+      detail: `${formatPlusUsage(credits.value)} left`,
+      footer: `Pay per use · ${PLUS_PRICES}`
     };
   }
 
@@ -72,11 +72,9 @@ const card = computed(() => {
 const summaries = computed<Record<Plan, string>>(() => ({
   basic: 'Free',
   plus: !credits.value
-    ? 'Pay per use'
-    : `Pay per use · ${balance.value}${credits.value < 0 ? ' owed' : ''}`,
-  pro: hasProEnded.value
-    ? `Ended ${expiration.value}`
-    : `$${PRO_MONTHLY_PRICES.monthly} a month`
+    ? PLUS_PRICES
+    : `${balance.value}${credits.value < 0 ? ' owed' : ''} · ${PLUS_PRICES}`,
+  pro: hasProEnded.value ? `Ended ${expiration.value}` : PRO_PRICE
 }));
 </script>
 
@@ -147,7 +145,7 @@ const summaries = computed<Record<Plan, string>>(() => ({
             class="font-semibold text-skin-heading"
             v-text="PLAN_NAMES[plan]"
           />
-          · {{ summaries[plan] }}
+          <span class="text-sm"> · {{ summaries[plan] }}</span>
         </div>
         <button
           v-if="plan === 'plus'"

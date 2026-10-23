@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { normalize } from 'viem/ens';
 import { SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
+import { _n, formatPlusUsage } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { Connector } from '@/networks/types';
@@ -75,6 +76,14 @@ const isSpaceSupported = computed(() => {
 
 // An owed balance is paid back first
 const credits = computed(() => props.space.credits ?? 0);
+const estimate = computed(() => {
+  if (!form.value.amount) return '';
+
+  const total = credits.value + Number(form.value.amount);
+  const balance = _n(total, 'standard', { maximumFractionDigits: 6 });
+
+  return `New balance ${balance} ETH ${formatPlusUsage(total)}`;
+});
 const minimumForPlus = computed(() =>
   Number((SNAPSHOT_PLUS_FEES.proposal - credits.value).toFixed(6))
 );
@@ -126,7 +135,8 @@ watch(
         :error="formErrors"
         :definition="definition"
       />
-      <p v-if="credits < 0" class="text-sm">
+      <p v-if="estimate" class="text-sm" v-text="estimate" />
+      <p v-else-if="credits < 0" class="text-sm">
         {{ -credits }} ETH is owed. Add at least {{ minimumForPlus }} ETH to
         turn Plus on.
       </p>
