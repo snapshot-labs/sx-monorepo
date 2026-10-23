@@ -543,7 +543,7 @@ type Space {
   turbo: Boolean!
   "Unix timestamp when turbo mode expires"
   turboExpiration: Int!
-  "Snapshot Plus balance in gwei, negative when owed"
+  "Snapshot Plus balance in gwei, negative when owed. Null on spaces nested in other entities"
   credits: String
   "Ranking score"
   rank: Float

@@ -1,7 +1,6 @@
 import snapshot from '@snapshot-labs/snapshot.js';
-import { CB } from '../constants';
+import { CB, VOTE_FEE } from '../constants';
 import { getProposal } from '../helpers/actions';
-import { SUBSCRIBED, VOTE_FEE } from '../helpers/credits';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
@@ -215,7 +214,8 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
           VALUES(?, ?, 1, ?, 0)
           ON DUPLICATE KEY UPDATE vote_count = vote_count + 1, last_vote = ?;
         UPDATE spaces SET vote_count = vote_count + 1,
-          credits_spent = credits_spent + IF(${SUBSCRIBED}, 0, ?)
+          credits_spent = credits_spent +
+            IF(turbo = 1 OR turbo_expiration > UNIX_TIMESTAMP(), 0, ?)
           WHERE id = ?;
       `,
       [

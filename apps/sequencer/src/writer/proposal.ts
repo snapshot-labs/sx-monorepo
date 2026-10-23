@@ -2,9 +2,8 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { uniq } from 'lodash';
-import { CB } from '../constants';
+import { CB, PROPOSAL_FEE } from '../constants';
 import { getPremiumNetworkIds, getSpace } from '../helpers/actions';
-import { chargeProposal, refundProposal } from '../helpers/credits';
 import log from '../helpers/log';
 import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
@@ -381,15 +380,17 @@ export async function action(
     INSERT INTO leaderboard (space, user, proposal_count)
       VALUES(?, ?, 1)
       ON DUPLICATE KEY UPDATE proposal_count = proposal_count + 1;
-    UPDATE spaces SET proposal_count = proposal_count + 1 WHERE id = ?;
+    UPDATE spaces SET proposal_count = proposal_count + 1,
+      credits_spent = credits_spent + ? WHERE id = ?;
   `;
 
-  // A Snapshot Plus proposal is paid right before it's stored
-  if (credits) await chargeProposal(space);
-  try {
-    await db.queryAsync(query, [proposal, space, author, space]);
-  } catch (err) {
-    if (credits) await refundProposal(space);
-    throw err;
-  }
+  // A proposal created on Snapshot Plus is charged, even into a negative
+  // balance. Nothing runs after a failed insert, so it is never charged twice
+  await db.queryAsync(query, [
+    proposal,
+    space,
+    author,
+    credits ? PROPOSAL_FEE : 0,
+    space
+  ]);
 }

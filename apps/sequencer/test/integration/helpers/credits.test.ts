@@ -1,11 +1,7 @@
+import { PROPOSAL_FEE, VOTE_FEE } from '../../../src/constants';
 import { getSpace } from '../../../src/helpers/actions';
-import {
-  chargeProposal,
-  PROPOSAL_FEE,
-  VOTE_FEE
-} from '../../../src/helpers/credits';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
-import { updateTurboStatuses } from '../../../src/helpers/turbo';
+import { mergeSpaces, updateTurboStatuses } from '../../../src/helpers/turbo';
 import { action as proposalAction } from '../../../src/writer/proposal';
 import { action as voteAction } from '../../../src/writer/vote';
 import input from '../../fixtures/writer-payload/proposal.json';
@@ -71,14 +67,18 @@ function vote(
 }
 
 describe('Snapshot Plus credits', () => {
-  afterEach(async () => {
+  // Before each test too, so rows left by an interrupted run can't interfere
+  async function cleanup() {
     await db.queryAsync('DELETE FROM spaces WHERE id = ?', [SPACE]);
     await db.queryAsync('DELETE FROM proposals WHERE space = ?', [SPACE]);
     await db.queryAsync('DELETE FROM votes WHERE space = ?', [SPACE]);
     await db.queryAsync('DELETE FROM leaderboard WHERE space = ?', [SPACE]);
-  });
+  }
+
+  beforeEach(cleanup);
 
   afterAll(async () => {
+    await cleanup();
     await db.endAsync();
     await sequencerDB.endAsync();
   });
@@ -115,17 +115,21 @@ describe('Snapshot Plus credits', () => {
   });
 
   describe('proposals', () => {
+    async function getProposal(id: string) {
+      const [proposal] = await db.queryAsync(
+        'SELECT credits FROM proposals WHERE id = ?',
+        [id]
+      );
+      return proposal;
+    }
+
     it('charges a Plus proposal and flags it', async () => {
       await setSpace({ credits_deposited: PROPOSAL_FEE });
       await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-1', {
         plus: true
       });
 
-      const [proposal] = await db.queryAsync(
-        'SELECT credits FROM proposals WHERE id = ?',
-        ['0xplus-1']
-      );
-      expect(proposal.credits).toBe(1);
+      expect((await getProposal('0xplus-1')).credits).toBe(1);
       expect(await getCredits()).toEqual({
         credits_deposited: PROPOSAL_FEE,
         credits_spent: PROPOSAL_FEE
@@ -137,54 +141,35 @@ describe('Snapshot Plus credits', () => {
       await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-2', {
         plus: false
       });
+      await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-3');
 
-      const [proposal] = await db.queryAsync(
-        'SELECT credits FROM proposals WHERE id = ?',
-        ['0xplus-2']
-      );
-      expect(proposal.credits).toBe(0);
+      expect((await getProposal('0xplus-2')).credits).toBe(0);
+      expect((await getProposal('0xplus-3')).credits).toBe(0);
       expect((await getCredits()).credits_spent).toBe(0);
     });
 
-    it('rejects a Plus proposal once the balance no longer covers it', async () => {
+    it('charges a proposal checked as Plus even if the balance ran out since', async () => {
       await setSpace({ credits_deposited: PROPOSAL_FEE, credits_spent: 1 });
-      await expect(
-        proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-3', {
-          plus: true
-        })
-      ).rejects.toBe('not enough Snapshot Plus credits');
-      expect(
-        await db.queryAsync('SELECT id FROM proposals WHERE id = ?', [
-          '0xplus-3'
-        ])
-      ).toHaveLength(0);
+      await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-4', {
+        plus: true
+      });
+
+      expect((await getProposal('0xplus-4')).credits).toBe(1);
+      expect((await getCredits()).credits_spent).toBe(PROPOSAL_FEE + 1);
     });
 
-    it('refunds the charge when the proposal cannot be stored', async () => {
+    it('does not charge a proposal that cannot be stored', async () => {
       await setSpace({ credits_deposited: 2 * PROPOSAL_FEE });
-      await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-4', {
+      await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-5', {
         plus: true
       });
       // Same id again: the insert fails on the primary key
       await expect(
-        proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-4', {
+        proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-5', {
           plus: true
         })
       ).rejects.toBeTruthy();
-      expect((await getCredits()).credits_spent).toBe(PROPOSAL_FEE);
-    });
 
-    it('lets only one of two concurrent proposals spend a balance that covers one', async () => {
-      await setSpace({ credits_deposited: PROPOSAL_FEE });
-      const results = await Promise.allSettled([
-        chargeProposal(SPACE),
-        chargeProposal(SPACE)
-      ]);
-
-      expect(results.map(r => r.status).sort()).toEqual([
-        'fulfilled',
-        'rejected'
-      ]);
       expect((await getCredits()).credits_spent).toBe(PROPOSAL_FEE);
     });
   });
@@ -225,22 +210,79 @@ describe('Snapshot Plus credits', () => {
     });
   });
 
+  describe('mergeSpaces()', () => {
+    it('keeps the latest expiration and the onchain credits of each space', () => {
+      expect(
+        mergeSpaces([
+          { id: 's:a.eth', turbo_expiration: 100, credits: '5000' },
+          { id: 's:a.eth', turbo_expiration: 200, credits: '0' }, // Stripe
+          { id: 's:A.ETH', turbo_expiration: 50, credits: '0' },
+          { id: 's-tn:a.eth', turbo_expiration: 900, credits: '9000' },
+          { id: 's:b.eth', turbo_expiration: 0, credits: 'bad' }
+        ])
+      ).toEqual([
+        { id: 'a.eth', turbo_expiration: 200, credits: 5000 },
+        { id: 'b.eth', turbo_expiration: 0, credits: 0 }
+      ]);
+    });
+  });
+
   describe('updateTurboStatuses()', () => {
-    it('copies the expiration and the deposits from schnaps-api', async () => {
+    const OTHER = 'plus-other.eth';
+
+    afterEach(async () => {
+      await db.queryAsync('DELETE FROM spaces WHERE id = ?', [OTHER]);
+    });
+
+    it('copies the expiration and the deposits of each space', async () => {
       await setSpace({ credits_deposited: 0, credits_spent: VOTE_FEE });
+      await db.queryAsync('INSERT INTO spaces SET ?', {
+        id: OTHER,
+        name: 'Other',
+        settings,
+        created: now(),
+        updated: now()
+      });
       await updateTurboStatuses([
+        { id: OTHER, turbo_expiration: 5678, credits: 7 },
         { id: SPACE, turbo_expiration: 1234, credits: 3 * PROPOSAL_FEE }
       ]);
 
-      const [space] = await db.queryAsync(
-        'SELECT turbo_expiration, credits_deposited, credits_spent FROM spaces WHERE id = ?',
-        [SPACE]
+      const rows = await db.queryAsync(
+        'SELECT id, turbo_expiration, credits_deposited, credits_spent FROM spaces WHERE id IN (?) ORDER BY id',
+        [[SPACE, OTHER]]
       );
-      expect(space).toEqual({
-        turbo_expiration: 1234,
-        credits_deposited: 3 * PROPOSAL_FEE,
-        credits_spent: VOTE_FEE
-      });
+      expect(rows).toEqual([
+        {
+          id: SPACE,
+          turbo_expiration: 1234,
+          credits_deposited: 3 * PROPOSAL_FEE,
+          credits_spent: VOTE_FEE
+        },
+        {
+          id: OTHER,
+          turbo_expiration: 5678,
+          credits_deposited: 7,
+          credits_spent: 0
+        }
+      ]);
+    });
+
+    it('never lets a look-alike id overwrite a space', async () => {
+      await setSpace({ credits_deposited: PROPOSAL_FEE, turbo_expiration: 99 });
+      // Same row for the column's collation, but not the same space
+      await updateTurboStatuses([
+        { id: 'plus-crédits.eth', turbo_expiration: 0, credits: 0 }
+      ]);
+
+      expect(
+        (
+          await db.queryAsync(
+            'SELECT turbo_expiration, credits_deposited FROM spaces WHERE id = ?',
+            [SPACE]
+          )
+        )[0]
+      ).toEqual({ turbo_expiration: 99, credits_deposited: PROPOSAL_FEE });
     });
   });
 });

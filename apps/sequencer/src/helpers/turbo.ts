@@ -16,6 +16,7 @@ const SCHNAPS_API_URL = process.env.SCHNAPS_API_URL;
 const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
 const EVM_INDEXER = process.env.NETWORK === 'mainnet' ? 'eth' : 'sep';
 const RUN_INTERVAL = 10 * 1e3; // 10 seconds
+const MAX_SPACES = 10_000;
 
 // DEFAULT_NETWORK is always an EVM chain, and block.number below is ethers-only.
 const provider = getProvider(process.env.DEFAULT_NETWORK ?? '1') as EvmProvider;
@@ -28,41 +29,44 @@ export async function trackTurboStatuses() {
     // Step 1: Query all the spaces from the schnaps-api
     const spaces = await getSpacesExpirationDates();
 
-    // A space can have one row per payment source (onchain, Stripe): keep the
-    // latest expiration, and the credits, which only onchain payments add
-    const latest = new Map<string, SpaceStatus>();
-    for (const { id, turbo_expiration, credits } of spaces) {
-      if (!id.startsWith(NETWORK_PREFIX)) continue;
-      const key = id.slice(NETWORK_PREFIX.length);
-      const prev = latest.get(key);
-      latest.set(key, {
-        id: key,
-        turbo_expiration: Math.max(
-          prev?.turbo_expiration ?? 0,
-          turbo_expiration
-        ),
-        credits: Math.max(prev?.credits ?? 0, Number(credits))
-      });
-    }
-
     // Step 2: Update the turbo status and credits of the spaces in the database
-    await updateTurboStatuses([...latest.values()]).catch(capture);
+    await updateTurboStatuses(mergeSpaces(spaces)).catch(capture);
 
     // Sleep for a while before running the loop again
     await snapshot.utils.sleep(RUN_INTERVAL);
   }
 }
 
+// A space can have one row per payment source (onchain, Stripe), and Pro
+// payments can name it in any case: keep the latest expiration, and the
+// credits, which only onchain payments add
+export function mergeSpaces(spaces: Space[]): SpaceStatus[] {
+  const merged = new Map<string, SpaceStatus>();
+  for (const { id, turbo_expiration, credits } of spaces) {
+    if (!id.startsWith(NETWORK_PREFIX)) continue;
+    const key = id.slice(NETWORK_PREFIX.length).toLowerCase();
+    const prev = merged.get(key);
+    merged.set(key, {
+      id: key,
+      turbo_expiration: Math.max(prev?.turbo_expiration ?? 0, turbo_expiration),
+      credits: Math.max(prev?.credits ?? 0, Number(credits) || 0)
+    });
+  }
+  return [...merged.values()];
+}
+
 export async function updateTurboStatuses(spaces: SpaceStatus[]) {
   if (spaces.length === 0) return;
 
-  // Sync `turbo_expiration` and `credits_deposited` for each space
+  // Sync `turbo_expiration` and `credits_deposited` for each space. Ids are
+  // matched exactly: the column may compare ids ignoring case or accents, so a
+  // look-alike id must not overwrite another space
   const cases = spaces.map(() => `WHEN ? THEN ?`).join(' ');
   const query = `
     UPDATE spaces
     SET
-      turbo_expiration = CASE id ${cases} END,
-      credits_deposited = CASE id ${cases} END
+      turbo_expiration = CASE CAST(id AS BINARY) ${cases} ELSE turbo_expiration END,
+      credits_deposited = CASE CAST(id AS BINARY) ${cases} ELSE credits_deposited END
     WHERE id IN (?);
   `;
 
@@ -78,7 +82,6 @@ export async function updateTurboStatuses(spaces: SpaceStatus[]) {
   await db.queryAsync(query, params);
 }
 
-// TODO: adds pagination to handle large number of spaces
 async function getSpacesExpirationDates(): Promise<Space[]> {
   const query = `
     query GetSpaces {
@@ -86,7 +89,7 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
         id
         value
       }
-      spaces {
+      spaces(first: ${MAX_SPACES}) {
         id
         turbo_expiration
         credits
@@ -125,6 +128,10 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
     if (block.number - Number(data.data._metadata.value) > 10) {
       console.log('Schnaps API is outdated. Skipping update.');
       return [];
+    }
+
+    if (data.data.spaces.length === MAX_SPACES) {
+      capture(new Error('schnaps-api: spaces list truncated, add pagination'));
     }
 
     return data.data.spaces;

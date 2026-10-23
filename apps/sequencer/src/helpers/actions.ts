@@ -1,5 +1,5 @@
 import snapshot from '@snapshot-labs/snapshot.js';
-import { PLUS } from './credits';
+import { PROPOSAL_FEE } from '../constants';
 import db from './mysql';
 import { DEFAULT_NETWORK_ID, jsonParse, NETWORK_ID_WHITELIST } from './utils';
 
@@ -123,13 +123,20 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, ${PLUS} AS plus FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]
   ]);
 
   if (!spaces[0]) return false;
+
+  const isPro =
+    spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3;
+  // Snapshot Plus: no subscription, and a balance that covers a proposal
+  const isPlus =
+    !isPro &&
+    spaces[0].credits_deposited - spaces[0].credits_spent >= PROPOSAL_FEE;
 
   return {
     ...jsonParse(spaces[0].settings, {}),
@@ -139,11 +146,8 @@ export async function getSpace(
     flagged: spaces[0].flagged === 1,
     hibernated: spaces[0].hibernated === 1,
     // Snapshot Plus spaces get every Pro limit and feature
-    turbo:
-      spaces[0].turbo === 1 ||
-      spaces[0].turbo_expiration > Date.now() / 1e3 ||
-      spaces[0].plus === 1,
-    plus: spaces[0].plus === 1
+    turbo: isPro || isPlus,
+    plus: isPlus
   };
 }
 
