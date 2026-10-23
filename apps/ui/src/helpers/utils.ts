@@ -17,7 +17,8 @@ import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
   MAX_FILE_SIZE_BYTES,
-  MAX_SYMBOL_LENGTH
+  MAX_SYMBOL_LENGTH,
+  SNAPSHOT_PLUS_FEES
 } from './constants';
 import { getProvider } from './provider';
 import { getOwner } from './stamp';
@@ -768,6 +769,16 @@ export function prettyConcat(options: string[], connector = 'or') {
   return uniqOptions.length > 1
     ? `${uniqOptions.slice(0, -1).join(', ')}${uniqOptions.length > 2 ? ',' : ''} ${connector} ${uniqOptions.slice(-1)}`
     : uniqOptions[0];
+}
+
+// Snapshot Plus: no Pro subscription, and credits that cover a proposal
+export function isPlusSpace(space: {
+  turbo: boolean;
+  credits_parsed: number | null;
+}) {
+  return (
+    !space.turbo && (space.credits_parsed ?? 0) >= SNAPSHOT_PLUS_FEES.proposal
+  );
 }
 
 export function isUserAbortError(err: any) {

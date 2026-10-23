@@ -5,6 +5,7 @@ import { expect, it } from 'vitest';
 import BadgeSpace from './BadgeSpace.vue';
 
 const TURBO_CLASS = 'text-[#e2b719]';
+const PLUS_CLASS = 'text-[#a7adb5]';
 const VERIFIED_CLASS = 'text-[#2394ea]';
 const FLAGGED_CLASS = 'text-skin-danger';
 
@@ -49,4 +50,18 @@ it('should use flagged color if flagged', () => {
   });
 
   expect(wrapper.element.children[0].classList.toString()).toBe(FLAGGED_CLASS);
+});
+
+it('should use plus color when pro comes from Snapshot Plus', () => {
+  const wrapper = mount(BadgeSpace, {
+    props: {
+      verified: true,
+      turbo: true,
+      flagged: false,
+      plus: true
+    },
+    global: GLOBAL
+  });
+
+  expect(wrapper.element.children[0].classList.toString()).toBe(PLUS_CLASS);
 });

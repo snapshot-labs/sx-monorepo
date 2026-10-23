@@ -11,6 +11,7 @@ import {
   getSpaceController,
   getStampUrl,
   getUserFacingErrorMessage,
+  isPlusSpace,
   replaceNamePlaceholder,
   uniqBy
 } from './utils';
@@ -485,6 +486,22 @@ describe('utils', () => {
           type: 'string'
         }
       });
+    });
+  });
+  describe('isPlusSpace', () => {
+    it('is on while credits cover a proposal', () => {
+      expect(isPlusSpace({ turbo: false, credits_parsed: 0.008 })).toBe(true);
+      expect(isPlusSpace({ turbo: false, credits_parsed: 1.5 })).toBe(true);
+    });
+
+    it('is off below one proposal, when owed or without credits', () => {
+      expect(isPlusSpace({ turbo: false, credits_parsed: 0.0079 })).toBe(false);
+      expect(isPlusSpace({ turbo: false, credits_parsed: -0.04 })).toBe(false);
+      expect(isPlusSpace({ turbo: false, credits_parsed: null })).toBe(false);
+    });
+
+    it('is off while a Pro subscription is active', () => {
+      expect(isPlusSpace({ turbo: true, credits_parsed: 1 })).toBe(false);
     });
   });
 });

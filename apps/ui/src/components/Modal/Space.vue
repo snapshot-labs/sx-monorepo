@@ -69,6 +69,7 @@ watch(
               <UiBadgeSpace
                 :verified="space.verified"
                 :turbo="space.turbo"
+                :plus="space.plus"
                 :flagged="space.additionalRawData?.flagged || false"
                 class="shrink-0"
               />

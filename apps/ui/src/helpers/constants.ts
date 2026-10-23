@@ -25,6 +25,11 @@ export const DOCS_URL = 'https://docs.snapshot.box';
 
 export const CALENDLY_URL = 'https://calendly.com/bonustrack';
 
+export const PRO_MONTHLY_PRICES = { monthly: 600, yearly: 500 } as const;
+
+// Snapshot Plus fees, in ETH. Plus is on while the balance covers a proposal
+export const SNAPSHOT_PLUS_FEES = { proposal: 0.008, vote: 0.0004 };
+
 export const VERIFIED_URL = `${DOCS_URL}/user-guides/spaces/get-verified`;
 
 export const EVM_EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
