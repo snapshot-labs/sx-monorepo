@@ -244,8 +244,8 @@ describe('GET te_sgp_ballots — above the page cap', () => {
 });
 
 /**
- * A page is also limited by bytes (~8 MiB). An envelope is over 1 MB at
- * `MAX_PROOF_BRANCHES`, so a 1000-row page could miss te-data-layer's 10 s hub
+ * A page is also limited by bytes (~8 MiB). An envelope can be up to 1 MB, so a
+ * 1000-row page could miss te-data-layer's 10 s hub
  * timeout. MySQL also cannot sort rows above `sort_buffer_size` (256 KiB by
  * default), and these rows are far above it.
  */

@@ -401,11 +401,13 @@ const defaultVotingDelay = computed(() =>
 // an edit: it does not send `start`, so moving it would only show a wrong date.
 const SIGNING_SLACK_S = 60;
 // A space with a voting delay fixes the start at `created + delay`, so a delay
-// shorter than the floor leaves no start the sequencer accepts.
+// shorter than the floor leaves no start the sequencer accepts. Not on an edit,
+// which keeps its start.
 const MIN_PRIVATE_VOTING_DELAY_S = MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S;
 const hasPrivateVotingDelayConflict = computed(
   () =>
     isPrivateVoting.value &&
+    !proposal.value?.originalProposal &&
     props.space.voting_delay > 0 &&
     props.space.voting_delay < MIN_PRIVATE_VOTING_DELAY_S
 );

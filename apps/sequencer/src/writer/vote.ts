@@ -202,6 +202,35 @@ export async function verify(body): Promise<any> {
   return { proposal, vp };
 }
 
+// The fields a ballot, its credential and each ciphertext may carry. The SDK
+// ignores any other field, but the whole choice is stored, so an extra one could
+// pad every ballot to the 1 MB vote limit; the hub's ballot feed relies on all of
+// a proposal's ballots having the same size.
+const BALLOT_FIELDS = [
+  'electionId',
+  'pseudonym',
+  'vk',
+  'ciphertexts',
+  'zkProof',
+  'voterSignature',
+  'attestation'
+];
+const CREDENTIAL_FIELDS = [
+  'scheme',
+  'electionId',
+  'pseudonym',
+  'vk',
+  'weight',
+  'nonce',
+  'signature'
+];
+const CIPHERTEXT_FIELDS = ['c1', 'c2'];
+
+function refuseUnknownFields(value: any, allowed: string[]): void {
+  const extra = Object.keys(value ?? {}).find(key => !allowed.includes(key));
+  if (extra) throw new SgpAttestationError(`unexpected field ${extra}`);
+}
+
 /**
  * The credential checks the SDK's `verifyBallot` does not do. They run before
  * it, because they are cheap and the proof check is not.
@@ -232,6 +261,13 @@ export function verifyBallotCredential(proposal: any, choice: any): void {
   // other value, so one bad vote would stop the tally. Missing means this scheme.
   if ((credential.scheme ?? 'ATTESTATION_V1') !== 'ATTESTATION_V1') {
     throw new SgpAttestationError('unsupported credential scheme');
+  }
+  refuseUnknownFields(choice, BALLOT_FIELDS);
+  refuseUnknownFields(credential, CREDENTIAL_FIELDS);
+  for (const ciphertext of Array.isArray(choice.ciphertexts)
+    ? choice.ciphertexts
+    : []) {
+    refuseUnknownFields(ciphertext, CIPHERTEXT_FIELDS);
   }
 }
 

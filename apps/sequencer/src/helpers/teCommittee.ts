@@ -79,16 +79,13 @@ export class TeConfigError extends Error {}
 // nothing else. Any other type is refused, including types added later.
 const PRIVATE_VOTE_TYPES = ['single-choice', 'basic', 'weighted'];
 
-// A ballot carries `choices × (budget + 1)` proof branches, and checking each takes
-// about 26 ms, so this bounds the check time.
-const MAX_PROOF_BRANCHES = 2000;
-
 /** The request body limit for a vote on a private proposal (see the ingestor). */
 export const MAX_PRIVATE_VOTE_SIZE = 1e6;
 
 // A private vote's request body, measured on SDK ballots: 512 characters per proof
 // branch, 422 more per choice for its ciphertexts and JSON, and under 3,000 for the
-// rest of the message. At budget 100 that is 19 choices (~994 KB).
+// rest of the message. At budget 100 that is 19 choices (~994 KB). It also bounds
+// the check time: under 2,000 proof branches, at about 26 ms each.
 const BRANCH_CHARS = 512;
 const CHOICE_CHARS = 422;
 const VOTE_OVERHEAD_CHARS = 3000;
@@ -104,9 +101,8 @@ export function getPrivateBallotError(
   }
   const budget = type === 'weighted' ? weightedBudget : 1;
   const perChoice = (budget + 1) * BRANCH_CHARS + CHOICE_CHARS;
-  const maxChoices = Math.min(
-    Math.floor(MAX_PROOF_BRANCHES / (budget + 1)),
-    Math.floor((MAX_PRIVATE_VOTE_SIZE - VOTE_OVERHEAD_CHARS) / perChoice)
+  const maxChoices = Math.floor(
+    (MAX_PRIVATE_VOTE_SIZE - VOTE_OVERHEAD_CHARS) / perChoice
   );
   if (numChoices > maxChoices) {
     return `private ${type} voting allows at most ${maxChoices} choices`;

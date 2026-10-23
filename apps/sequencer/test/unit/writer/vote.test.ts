@@ -188,6 +188,28 @@ describe('writer/vote', () => {
           'an unsupported credential scheme',
           ballot({ scheme: 'BROKEN' }),
           'unsupported credential scheme'
+        ],
+        // The full check ignores fields it does not know, but the whole choice is
+        // stored, so an extra field could pad a ballot to the 1 MB vote limit.
+        [
+          'an extra field on the ballot',
+          { choice: { ...ballot().choice, pad: 'x' } },
+          'unexpected field pad'
+        ],
+        [
+          'an extra field on the credential',
+          ballot({ pad: 'x' }),
+          'unexpected field pad'
+        ],
+        [
+          'an extra field on a ciphertext',
+          {
+            choice: {
+              ...ballot().choice,
+              ciphertexts: [{ c1: '0x', c2: '0x', pad: 'x' }]
+            }
+          },
+          'unexpected field pad'
         ]
       ])(
         'rejects %s before the full check',

@@ -70,7 +70,6 @@ CREATE TABLE te_request_nonces (
   proposal_id VARCHAR(66) NOT NULL,
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
-  accepted_at BIGINT NOT NULL,
   PRIMARY KEY (proposal_id, op, issued_at)
 );
 

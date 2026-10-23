@@ -87,11 +87,12 @@ Do not change the coordinator key once private proposals exist. Every existing
 proposal has its address frozen on it, and every keyper has it pinned, so a new key
 breaks every election in flight.
 
-Changing `TE_ELIGIBILITY_PRIVATE_KEY` is safe. It takes effect when the sequencer
-restarts, and at that point every private proposal that has not started moves to the
-new key, so its voting works normally. A proposal already open accepts no more votes,
-because its credentials would no longer match the key frozen on it. Votes cast before
-the change still count, and those proposals are tallied as usual.
+Change `TE_ELIGIBILITY_PRIVATE_KEY` only when no private proposal is open or waiting
+to start. It takes effect when the sequencer restarts. Every private proposal keeps
+the key frozen on it when it was created, so after the change every proposal created
+before it accepts no more votes, including one that has not started yet: it opens,
+then refuses every voter. Votes cast before the change still count, and those
+proposals are tallied as usual. Proposals created after the change use the new key.
 
 Two values can stay as they are at first:
 
@@ -125,6 +126,14 @@ API key issued by Snapshot for that hub
 ([API keys](https://docs.snapshot.box/tools/api/api-keys)): the hub checks it, and
 answers every request with an unknown key with 401. The hub in this compose file has
 no rate limit, so leave it unset here.
+
+**With `HUB_API_KEY` set, restrict who can reach te-data-layer.** te-data-layer sends
+the key with every request it forwards, and it has no authentication or rate limit of
+its own. So anyone who can reach port 3002 reads the hub without the hub's per-IP
+limit and uses up the key's quota. Once the quota is spent, the keypers get 429 again
+and the tally stalls. Only the keypers need port 3002 from outside; the coordinator
+reaches it on the compose network. Allow only the keypers' IPs (a firewall rule, or an
+allow-list in a reverse proxy), or put a per-IP rate limit in front of it.
 
 `.env.example` is the annotated reference for every variable.
 
@@ -401,6 +410,12 @@ INSERT IGNORE INTO options (name, value) VALUES
 EOF
 echo "space ready"
 ```
+
+Private proposals have a lower choice limit of their own, whatever `choices_limit`
+says, because every ballot must fit the 1 MB limit for a private vote: at most **19
+choices for weighted voting** (at the default `TE_WEIGHTED_BUDGET` of 100) and 689 for
+single-choice and basic. The editor does not check it, so a larger private proposal is
+refused by the sequencer only after the author has signed it.
 
 ---
 

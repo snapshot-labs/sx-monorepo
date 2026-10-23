@@ -168,7 +168,7 @@ export interface BuildTeWeightedBallotArgs extends BallotSource {
 
 /**
  * Encrypts, proves and signs a ballot for the given votes. The voter's one-time
- * key `sk` exists only inside this function.
+ * key `sk` exists only here and in the worker that builds the ballot.
  */
 async function buildEnvelope(
   args: BallotSource,

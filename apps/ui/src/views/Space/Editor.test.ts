@@ -454,4 +454,25 @@ describe('private voting and the space voting delay', () => {
       isRefused
     );
   });
+
+  // An edit does not send `start`, and the sequencer has no delay rule for edits,
+  // so a short delay set after the proposal was created must not lock its author out.
+  it('allows editing a private proposal after the delay was shortened', async () => {
+    Object.assign(proposals['eth:test:a'], {
+      privacy: 'shutter-elgamal',
+      originalProposal: {
+        proposal_id: 'p1',
+        plugins: {},
+        executions: [],
+        space: {}
+      }
+    });
+    const wrapper = shallowMount(Editor, {
+      props: { space: { ...space, voting_delay: 120 } as Space },
+      global: { renderStubDefaultSlot: true, directives: { tippy: () => {} } }
+    });
+    wrappers.push(wrapper);
+    await flushPromises();
+    expect(wrapper.text()).not.toContain("this space's voting delay");
+  });
 });

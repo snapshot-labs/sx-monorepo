@@ -51,8 +51,8 @@ const MAX_BALLOT_PAGE = 1000;
  * Largest ballot page, in stored envelope bytes. Matches the reference data
  * layer's `MAX_BALLOT_PAGE_BYTES`.
  *
- * An envelope is ~120-160 KB at budget 100 and over 1 MB at the
- * `MAX_PROOF_BRANCHES` limit, so 1000 rows would be too large to build and forward
+ * An envelope is ~120-160 KB at budget 100 and up to 1 MB at the largest private
+ * ballot the sequencer accepts, so 1000 rows would be too large to build and forward
  * within te-data-layer's 10 s timeout. A page always has at least one ballot, so
  * a single envelope above the cap is still served.
  */
@@ -77,7 +77,7 @@ export async function loadProposal(
   res: any
 ): Promise<any | null> {
   const [proposal] = await (db as any).queryAsync(
-    `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
+    `SELECT id, privacy, choices, start, end, author, space, te_mpk,
             te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n,
             te_sgp_config, te_config, te_tally_stalled, te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
@@ -285,7 +285,7 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     const byId = new Map<string, any>((fetched as any[]).map(r => [r.id, r]));
     const fetchedRows = pageKeys.map(k => byId.get(k.id));
-    if (!first || fetchedRows.some(r => r === undefined)) {
+    if (fetchedRows.some(r => r === undefined)) {
       // A vote in the window was deleted between the queries. Serving the rest
       // would renumber what follows it, so ask the reader to retry.
       return sendError(res, 'ballot list changed while reading; retry', 503);
@@ -1312,9 +1312,8 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
 
     try {
       await (db as any).queryAsync(
-        `INSERT INTO te_request_nonces (proposal_id, op, issued_at, accepted_at)
-         VALUES (?, ?, ?, ?)`,
-        [proposalId, op, issuedAt, now]
+        'INSERT INTO te_request_nonces (proposal_id, op, issued_at) VALUES (?, ?, ?)',
+        [proposalId, op, issuedAt]
       );
     } catch (err: any) {
       if (err?.code === 'ER_DUP_ENTRY') {
