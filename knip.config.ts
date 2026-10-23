@@ -31,6 +31,9 @@ const config: KnipConfig = {
       entry: ['src/**/*.ts', 'scripts/**/*.ts'],
       ignoreDependencies: ['ajv']
     },
+    'apps/te-data-layer': {
+      ignoreDependencies: ['ts-node']
+    },
     'apps/ui': {
       entry: [
         'src/main.ts',
@@ -40,7 +43,8 @@ const config: KnipConfig = {
         'forge.config.js'
       ],
       vite: false,
-      ignore: ['src/assets/styles/highlightjs/**'],
+      // public/blst.js is a runtime-served asset copied from the SDK
+      ignore: ['src/assets/styles/highlightjs/**', 'public/blst.js'],
       ignoreDependencies: [
         '@iconify-json/heroicons-solid',
         '@electron-forge/maker-dmg',

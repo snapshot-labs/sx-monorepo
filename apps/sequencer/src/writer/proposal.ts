@@ -9,8 +9,24 @@ import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
 import { getLimits, getSpaceType } from '../helpers/options';
+import {
+  adminForConfig,
+  buildProposalSnapshot,
+  effectivePrivacy,
+  leadTimeError
+} from '../helpers/privacy';
 import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
+import {
+  ballotParamsColumn,
+  buildCommitteeSnapshot,
+  committeeColumns,
+  getPrivateBallotError,
+  TeConfigError,
+  weightedBudgetFromEnv
+} from '../helpers/teCommittee';
+import { getEligibilityKey } from '../helpers/teEligibility';
+import { VotingPowerBoundError } from '../helpers/teVotingPowerBound';
 import {
   captureError,
   getQuorum,
@@ -168,6 +184,39 @@ export async function verify(body): Promise<any> {
     return Promise.reject('not allowed to set privacy');
   }
 
+  if (effectivePrivacy(space, msg.payload) === 'shutter-elgamal') {
+    const leadError = leadTimeError(msg.payload.start);
+    if (leadError) return Promise.reject(leadError);
+    const ballotError = getPrivateBallotError(
+      msg.payload.type,
+      msg.payload.choices.length,
+      weightedBudgetFromEnv()
+    );
+    if (ballotError) return Promise.reject(ballotError);
+    // Build the committee snapshot only to reject a misconfigured committee with a
+    // clear error. `action` builds the one that is stored.
+    try {
+      await buildCommitteeSnapshot({
+        eligibilityKey: await getEligibilityKey(),
+        votingStart: parseInt(msg.payload.start),
+        votingEnd: parseInt(msg.payload.end),
+        adminAddress: adminForConfig(space, body.address),
+        // Placeholder. The real bound needs RPC calls, so it is resolved only once,
+        // in `action`, which runs in the same request.
+        maxTotalWeight: 1
+      });
+    } catch (err: any) {
+      if (err instanceof TeConfigError) {
+        log.warn(`[writer] private voting misconfigured: ${err.message}`);
+        return Promise.reject(`private voting unavailable: ${err.message}`);
+      }
+      log.warn(`[writer] eligibility key unavailable: ${err?.message || err}`);
+      return Promise.reject(
+        'private voting unavailable: could not reach the eligibility service'
+      );
+    }
+  }
+
   try {
     if (await isMalicious(msg.payload, space.id)) {
       return Promise.reject('invalid proposal content');
@@ -308,10 +357,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const plugins = JSON.stringify(metadata.plugins || {});
   const spaceNetwork = spaceSettings.network;
   const proposalSnapshot = parseInt(msg.payload.snapshot || '0');
-  let privacy = spaceSettings.voting?.privacy ?? 'any';
-  if (privacy === 'any') {
-    privacy = msg.payload.privacy ?? '';
-  }
+  const privacy = effectivePrivacy(spaceSettings, msg.payload);
 
   let quorum = spaceSettings.voting?.quorum || 0;
   if (!quorum && spaceSettings.plugins?.quorum) {
@@ -364,6 +410,42 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     flagged: +containsFlaggedLinks(msg.payload.body),
     cb: CB.PENDING_SYNC
   };
+
+  // Freeze the committee onto the row; nothing rewrites these columns later.
+  // `verify` already built a snapshot, so an error here is unexpected and aborts
+  // the insert.
+  if (privacy === 'shutter-elgamal') {
+    // `spaceSettings`, not `space`: here `msg.space` is only the space id.
+    let snapshot;
+    try {
+      snapshot = await buildProposalSnapshot({
+        proposalId: proposal.id,
+        space: spaceSettings,
+        author: proposal.author,
+        start: proposal.start,
+        end: proposal.end,
+        snapshotBlock: Number(proposal.snapshot ?? 0),
+        eligibilityKey: await getEligibilityKey()
+      });
+    } catch (err: any) {
+      // A supply read failed every retry; return a readable error, not a 500.
+      if (!(err instanceof VotingPowerBoundError)) throw err;
+      log.warn(`[writer] private voting unavailable: ${err.message}`);
+      return Promise.reject(`private voting unavailable: ${err.message}`);
+    }
+    Object.assign(
+      proposal,
+      committeeColumns(snapshot),
+      // Ballot params, needed to build and verify ballots. The budget comes from
+      // the snapshot, not env, so the two always match.
+      ballotParamsColumn(
+        msg.payload.choices,
+        msg.payload.type,
+        snapshot.weightedBudget,
+        snapshot
+      )
+    );
+  }
 
   const query = `
     INSERT INTO proposals SET ?;

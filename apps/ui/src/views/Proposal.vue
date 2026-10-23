@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { DOCS_URL, FLAGS } from '@/helpers/constants';
 import { loadSingleTopic, TopicWithPosts } from '@/helpers/discourse';
+import { teVoteWeight, totalVotingPower } from '@/helpers/teVoteWeight';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -55,6 +56,25 @@ const discussion = computed(() => {
 });
 
 const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
+
+/**
+ * How a private proposal will count this voter, shown next to their voting power
+ * before they vote. `null` when it is counted as held. Private voting counts whole
+ * numbers and may scale weights (see `teVoteWeight`). Advisory only; the sequencer
+ * enforces the rules.
+ */
+const teWeightNotice = computed(() => {
+  if (proposal.value?.privacy !== 'shutter-elgamal') return null;
+  if (isVotingPowerPending.value || isVotingPowerError.value) return null;
+
+  const vp = totalVotingPower(votingPower.value);
+  if (vp === null) return null;
+
+  // `scale` comes from the proposal's TE config; missing means 1 (no scaling).
+  const scale = Number((proposal.value as any).te_config?.scale ?? 1);
+  const result = teVoteWeight(vp, scale);
+  return result.kind === 'ok' ? null : result;
+});
 
 const currentVote = computed(
   () =>
@@ -321,6 +341,45 @@ watchEffect(() => {
                     </AppLink>
                   </div>
                 </IndicatorVotingPower>
+                <!--
+                  Warn before the voter signs if private voting will count less
+                  than their voting power. The sequencer enforces the rules.
+                -->
+                <div
+                  v-if="teWeightNotice"
+                  class="flex gap-2 rounded-lg border px-3 py-2 text-[13px] leading-snug"
+                  :class="
+                    teWeightNotice.kind === 'dust'
+                      ? 'border-skin-danger/30 text-skin-danger'
+                      : 'border-skin-border text-skin-text'
+                  "
+                >
+                  <IH-exclamation-circle
+                    class="mt-[3px] size-[14px] shrink-0"
+                  />
+                  <span v-if="teWeightNotice.kind === 'dust'">
+                    <b>You can't vote on this proposal.</b> Private voting needs
+                    at least 0.5 voting power.
+                  </span>
+                  <span v-else-if="teWeightNotice.kind === 'zero-scaled'">
+                    <b>Your vote would not move this tally.</b> This proposal
+                    counts in units of
+                    <b
+                      class="text-skin-link"
+                      v-text="teWeightNotice.scale.toLocaleString()"
+                    />, and your voting power rounds to zero at that size. Your
+                    ballot will still be recorded.
+                  </span>
+                  <span v-else>
+                    Counted as
+                    <b
+                      class="text-skin-link"
+                      v-text="teWeightNotice.counted.toLocaleString()"
+                    />. This proposal counts in units of
+                    <b v-text="teWeightNotice.scale.toLocaleString()" />, so
+                    every voter's power is divided by the same amount.
+                  </span>
+                </div>
                 <ProposalVote
                   v-if="proposal"
                   :proposal="proposal"

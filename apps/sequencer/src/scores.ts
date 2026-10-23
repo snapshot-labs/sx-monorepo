@@ -18,6 +18,11 @@ async function getProposal(id: string): Promise<any | undefined> {
   proposal.scores = JSON.parse(proposal.scores);
   proposal.scores_by_strategy = JSON.parse(proposal.scores_by_strategy);
   proposal.vp_value_by_strategy = JSON.parse(proposal.vp_value_by_strategy);
+  // Private-voting columns (NULL on public proposals and before key generation
+  // finishes). Parsed the same way as `getProposal` in actions.ts.
+  if (typeof proposal.te_config === 'string') {
+    proposal.te_config = JSON.parse(proposal.te_config);
+  }
   let proposalState = 'pending';
   const ts = parseInt((Date.now() / 1e3).toFixed());
   if (ts > proposal.start) proposalState = 'active';
@@ -127,6 +132,24 @@ export async function updateProposalAndVotes(
     return true;
   }
 
+  if (proposal.privacy === 'shutter-elgamal') {
+    if (proposal.state !== 'closed') {
+      // While voting is open only the vote count is updated; it is public, as
+      // in `shutter` mode.
+      const [{ n }] = await db.queryAsync(
+        'SELECT COUNT(*) AS n FROM votes WHERE proposal = ?',
+        [proposal.id]
+      );
+      await db.queryAsync(
+        'UPDATE proposals SET votes = ? WHERE id = ? LIMIT 1',
+        [n, proposal.id]
+      );
+      return true;
+    }
+    const finalised = await runShutterElgamalTally(proposal);
+    return finalised;
+  }
+
   const ts = Number((Date.now() / 1e3).toFixed());
 
   // Delay computation of final scores, to allow time for last minute votes to finish
@@ -219,4 +242,59 @@ export async function updateProposalAndVotes(
     delete pendingRequests[proposalId];
     throw err;
   }
+}
+
+/**
+ * Copies the committee's published result into the proposal's scores. It does
+ * not compute a tally: the keypers aggregate the ballots, the coordinator
+ * decrypts the total and publishes it to the hub's `te_results` table, and this
+ * reads that row. Returns `false` if there is no row yet, so the scheduler
+ * retries. Idempotent.
+ *
+ * `te_results` totals are in scaled units times the budget, so scores are
+ * `total × scale / budget`. `scores_by_strategy` is left empty because a
+ * per-strategy breakdown would reveal information about individual ballots.
+ */
+async function runShutterElgamalTally(proposal: any): Promise<boolean> {
+  const rows = await db.queryAsync(
+    'SELECT totals_json FROM te_results WHERE proposal_id = ? LIMIT 1',
+    [proposal.id]
+  );
+  if (!rows[0]) return false;
+
+  let totals: string[];
+  try {
+    totals = JSON.parse(rows[0].totals_json);
+  } catch (err: any) {
+    log.warn(`[te-tally] ${proposal.id} unreadable result: ${err.message}`);
+    return false;
+  }
+
+  const budget = Number(proposal.te_config?.budget ?? 1);
+  // Totals are decimal strings because they can exceed 2^53. `Number()` loses
+  // precision there, which is fine for the float `scores` column; the exact
+  // values stay in te_results.
+  const scale = Number(proposal.te_config?.scale ?? 1);
+  const numericScores = totals.map(t => (Number(t) * scale) / budget);
+  const total = numericScores.reduce((a, b) => a + b, 0);
+
+  const [{ n }] = await db.queryAsync(
+    'SELECT COUNT(*) AS n FROM votes WHERE proposal = ?',
+    [proposal.id]
+  );
+
+  await updateProposalScores(
+    proposal,
+    {
+      scores_state: 'final',
+      scores: numericScores,
+      scores_by_strategy: [],
+      scores_total: total
+    },
+    n
+  );
+  log.info(
+    `[te-tally] ${proposal.id} mirrored published result; scores=${JSON.stringify(numericScores)}`
+  );
+  return true;
 }

@@ -631,6 +631,16 @@ export function getChoiceWeight(
   return isNaN(percent) ? 0 : percent;
 }
 
+// For `shutter-elgamal` votes the stored `choice` is an encrypted ballot envelope
+// ({ vk, ciphertexts, zkProof, ... }). Individual ballots are never decrypted, so
+// show a short preview of the ciphertext instead of choice labels.
+export function getEncryptedChoicePreview(choice: Choice): string {
+  const hex: string =
+    (choice as any)?.ciphertexts?.[0]?.c1 ?? JSON.stringify(choice) ?? '';
+  if (hex.length <= 24) return hex;
+  return `${hex.slice(0, 14)}…${hex.slice(-8)}`;
+}
+
 export function getChoiceText(availableChoices: string[], choice: Choice) {
   if (typeof choice === 'string') {
     const basicChoices = {

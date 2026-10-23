@@ -67,8 +67,11 @@ export function createActions(
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
+  const sequencerUrl: string | undefined = import.meta.env
+    .VITE_LOCAL_SEQUENCER_URL;
   const client = new clients.OffchainEthereumSig({
-    networkConfig
+    networkConfig,
+    ...(sequencerUrl ? { sequencerUrl } : {})
   });
   const starknetSigClient = new clients.OffchainStarknetSig({
     networkConfig: STARKNET_CONFIGS[chainId]
@@ -120,7 +123,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy: privacy === 'shutter' ? 'shutter' : '',
+        privacy: privacy === 'none' ? '' : privacy,
         labels,
         start,
         end: min_end,
@@ -163,7 +166,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy: privacy === 'shutter' ? 'shutter' : '',
+        privacy: privacy === 'none' ? '' : privacy,
         labels,
         plugins: JSON.stringify(plugins),
         from: account
@@ -218,19 +221,70 @@ export function createActions(
     ): Promise<any> {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
-      const privacy: 'shutter' | 'none' =
-        proposal.privacy === 'shutter' ? 'shutter' : 'none';
+      let sdkChoice: any = getSdkChoice(proposal.type, choice);
+      let voteReason = reason;
+      if (proposal.privacy === 'shutter-elgamal') {
+        // Private voting: `choice` is sent as the encrypted ballot envelope, not the
+        // choice index. The sequencer verifies it against `te_mpk` before storing
+        // it. Reasons are not allowed (the hub rejects them), so it is cleared.
+        if (!proposal.te_mpk || !proposal.te_config) {
+          throw new Error(
+            'proposal does not yet have a finalised threshold key; try again once the keypers have completed DKG'
+          );
+        }
+        if (typeof sdkChoice === 'number') {
+          const { buildTeBallotEnvelope } = await import('@/helpers/teBallot');
+          sdkChoice = await buildTeBallotEnvelope({
+            sequencerUrl: client.sequencerUrl,
+            space: proposal.space.id,
+            voter: account,
+            proposalId: proposal.proposal_id as string,
+            mpk: proposal.te_mpk,
+            config: proposal.te_config,
+            choice: sdkChoice
+          });
+        } else if (
+          sdkChoice !== null &&
+          typeof sdkChoice === 'object' &&
+          !Array.isArray(sdkChoice)
+        ) {
+          const { buildTeWeightedBallotEnvelope } = await import(
+            '@/helpers/teBallot'
+          );
+          sdkChoice = await buildTeWeightedBallotEnvelope({
+            sequencerUrl: client.sequencerUrl,
+            space: proposal.space.id,
+            voter: account,
+            proposalId: proposal.proposal_id as string,
+            mpk: proposal.te_mpk,
+            config: proposal.te_config,
+            choice: sdkChoice as Record<string, number>
+          });
+        } else {
+          throw new Error('shutter-elgamal does not support this vote type');
+        }
+        voteReason = '';
+      }
+
+      // Other values (such as `inco`, which encrypts onchain) map to 'none'.
+      // `shutter-elgamal` must be kept: the sequencer's writer/vote.ts branches on it.
+      const privacy: 'shutter' | 'shutter-elgamal' | 'none' =
+        proposal.privacy === 'shutter'
+          ? 'shutter'
+          : proposal.privacy === 'shutter-elgamal'
+            ? 'shutter-elgamal'
+            : 'none';
 
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
         type: proposal.type,
-        choice: getSdkChoice(proposal.type, choice),
+        choice: sdkChoice,
         authenticator: '',
         strategies: [],
         metadataUri: '',
         privacy,
-        reason,
+        reason: voteReason,
         app: app || EDITOR_APP_NAME,
         from: account
       };

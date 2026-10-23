@@ -12,6 +12,8 @@ import initMetrics from './helpers/metrics';
 import { closeDatabase } from './helpers/mysql';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
+import sgp from './sgp';
+import te from './te';
 import './helpers/strategies';
 
 /** Heartbeat — one log line every 30s. A missing tick = the process is
@@ -30,13 +32,26 @@ const { stop: stopMetrics } = initMetrics(app);
 refreshSpacesCache();
 
 app.disable('x-powered-by');
-app.use(express.json({ limit: '20mb' }));
+// Keep the raw body for the te_result and te_aggregate routes: their totals can
+// exceed 2^53, and JSON.parse would round them and break the signature check.
+// Other routes skip it to avoid holding a second copy of every body.
+const RAW_BODY_ROUTE = /\/proposal\/[^/]+\/te_(result|aggregate)(\?|$)/;
+app.use(
+  express.json({
+    limit: '20mb',
+    verify: (req: any, _res, buf) => {
+      if (RAW_BODY_ROUTE.test(req.url)) req.rawBody = buf.toString('utf8');
+    }
+  })
+);
 app.use(express.urlencoded({ limit: '20mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.set('trust proxy', 1);
 app.use(checkKeycard, rateLimit);
 app.use('/api', api);
 app.use('/api/eip4824', eip4824);
+app.use('/api', te);
+app.use('/api', sgp);
 app.use('/graphql', graphql);
 
 fallbackLogger(app);

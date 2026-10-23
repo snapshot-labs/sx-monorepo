@@ -1,0 +1,6 @@
+# BLST WASM artifacts copied from @shutter-network/urban-verified-crypto at
+# install time by scripts/copy-blst.mjs. Do not commit: they belong to the
+# pinned package version, and a stale committed copy would silently disagree
+# with the crypto the app is actually running.
+blst.js
+blst.wasm

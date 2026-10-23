@@ -102,6 +102,12 @@ export async function getProposal(space, id) {
   proposal.choices = jsonParse(proposal.choices);
   proposal.vp_value_by_strategy = jsonParse(proposal.vp_value_by_strategy, []);
 
+  // Threshold-ElGamal columns. Always present (NULL on non-private proposals).
+  proposal.te_config = jsonParse(proposal.te_config, null);
+  if (proposal.te_mpk && Buffer.isBuffer(proposal.te_mpk)) {
+    proposal.te_mpk = `0x${proposal.te_mpk.toString('hex')}`;
+  }
+
   return proposal;
 }
 

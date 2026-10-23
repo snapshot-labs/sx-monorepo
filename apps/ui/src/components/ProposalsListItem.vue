@@ -56,6 +56,12 @@ function handleAcceptTerms() {
       </ProposalsListItemHeading>
       <div class="hidden md:block">
         <ProposalVote :proposal="proposal">
+          <template #dkg-failed>
+            <div class="flex items-center gap-1.5 text-red-500 text-sm py-1">
+              <IH-x-circle class="shrink-0 size-[14px]" />
+              <span>Encryption setup failed</span>
+            </div>
+          </template>
           <template #wrong-safe-network><div /></template>
           <template #unsupported><div /></template>
           <template #waiting><div /></template>

@@ -68,6 +68,16 @@ CREATE TABLE proposals (
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
+  -- Private voting (privacy='shutter-elgamal'). A proposal made public keeps these values.
+  te_config JSON DEFAULT NULL,
+  te_mpk VARBINARY(96) DEFAULT NULL,
+  te_committee_pks JSON DEFAULT NULL,
+  te_threshold_t INT DEFAULT NULL,
+  te_threshold_n INT DEFAULT NULL,
+  te_keyper_addresses JSON DEFAULT NULL,
+  te_sgp_config JSON DEFAULT NULL,
+  te_tally_stalled TINYINT(1) NOT NULL DEFAULT 0,
+  te_tally_stall_reason VARCHAR(200) DEFAULT NULL,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),
@@ -118,6 +128,77 @@ CREATE TABLE votes (
   INDEX idx_votes_on_vp_value (vp_value),
   INDEX idx_votes_on_space_created_desc_id (space, created DESC, id),
   INDEX idx_votes_on_cb_proposal (cb, proposal)
+);
+
+-- Each keyper's partial decryption of each candidate's total, with its DLEQ proof.
+-- One row per proposal, keyper and candidate, never replaced.
+CREATE TABLE te_decryption_shares (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  candidate INT NOT NULL,
+  sigma VARBINARY(96) NOT NULL,
+  proof_e VARBINARY(32) NOT NULL,
+  proof_z VARBINARY(32) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index, candidate)
+);
+
+-- Each keyper's key-ceremony result. The hub sets te_mpk once a quorum submits
+-- the same key (in sgp.ts). A keyper that changes its result gets 409.
+CREATE TABLE te_dkg_submissions (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  keyper_address VARCHAR(42) NOT NULL,
+  mpk_hex VARCHAR(200) NOT NULL,
+  committee_pks_hex MEDIUMTEXT NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index),
+  INDEX idx_te_dkg_match (proposal_id, mpk_hex(64))
+);
+
+-- The published tally, signed by the proposal's result publisher; written once.
+-- totals_json holds decimal strings: totals can exceed 2^53 and are signed.
+CREATE TABLE te_results (
+  proposal_id VARCHAR(66) NOT NULL PRIMARY KEY,
+  totals_json TEXT NOT NULL,
+  keyper_indices TEXT NOT NULL,
+  bsgs_bound VARCHAR(80) NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL
+);
+
+-- Each keyper's aggregate (the weighted sum of the ballots). The one a quorum
+-- submits byte-identically is the canonical aggregate. A keyper may replace its
+-- row until then; after that a change is a 409.
+CREATE TABLE te_aggregate_submissions (
+  proposal_id VARCHAR(66) NOT NULL,
+  keyper_index INT NOT NULL,
+  keyper_address VARCHAR(42) NOT NULL,
+  aggregate_json MEDIUMTEXT NOT NULL,
+  digest VARCHAR(66) NOT NULL,
+  signature VARCHAR(200) NOT NULL,
+  posted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, keyper_index),
+  INDEX idx_te_agg_match (proposal_id, digest)
+);
+
+-- The sequencer's current eligibility public key, written on every sequencer
+-- start. The hub refuses to serve a proposal whose frozen key no longer matches.
+CREATE TABLE te_eligibility_key (
+  id TINYINT NOT NULL PRIMARY KEY,
+  public_key VARCHAR(100) NOT NULL,
+  updated BIGINT NOT NULL
+);
+
+-- Makes each signed stall or resume request usable once. Rows older than the
+-- acceptance window are pruned on write.
+CREATE TABLE te_request_nonces (
+  proposal_id VARCHAR(66) NOT NULL,
+  op VARCHAR(32) NOT NULL,
+  issued_at BIGINT NOT NULL,
+  accepted_at BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, op, issued_at)
 );
 
 CREATE TABLE follows (
@@ -234,3 +315,14 @@ CREATE TABLE networks (
   PRIMARY KEY (id),
   INDEX premium (premium)
 );
+
+-- The re-vote counter carried in each credential, per (proposal, pseudonym). It
+-- decides which of a voter's ballots counts, so it must only increase.
+CREATE TABLE te_revote_nonces (
+  proposal_id VARCHAR(66) NOT NULL,
+  pseudonym VARCHAR(66) NOT NULL,
+  last BIGINT NOT NULL,
+  updated BIGINT NOT NULL,
+  PRIMARY KEY (proposal_id, pseudonym)
+);
+

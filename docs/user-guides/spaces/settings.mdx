@@ -81,6 +81,14 @@ To enable it, select **Shutter** in the **Privacy** dropdown on the Voting tab.
 
 ![](/images/283.png)
 
+### Permanent private voting
+
+<Info>**Alpha** — Permanent private voting is currently in alpha.</Info>
+
+Permanent private voting keeps every ballot encrypted: only the aggregate tally is ever published, and the backend never sees how anyone voted. It is powered by threshold-ElGamal homomorphic tallying, with the decryption key split across several independent keypers so that no single one can open anything. Privacy rests on those keypers not colluding: enough of them acting together (the deployment's threshold, for example two of three) could decrypt individual choices.
+
+To enable it, select **Permanent private voting** in the **Privacy** dropdown on the Voting tab.
+
 ## Delegations
 
 Set a custom delegation contract to enable delegate discovery for your space.

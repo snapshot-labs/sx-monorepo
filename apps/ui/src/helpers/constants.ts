@@ -11,6 +11,18 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+// Enables permanent private voting (shutter-elgamal). Only turn it on when the hub
+// serves the te_* proposal fields.
+export const IS_TE_ENABLED = import.meta.env.VITE_TE_ENABLED === 'true';
+
+// Minimum seconds from now to the start of a shutter-elgamal proposal, so the
+// keypers can run DKG and publish the public key first. Must be >= the
+// sequencer's MIN_DKG_LEAD_TIME_S (default 180); set VITE_MIN_DKG_LEAD_TIME_S if
+// the sequencer uses a different value.
+export const MIN_DKG_LEAD_TIME_S = Number(
+  import.meta.env.VITE_MIN_DKG_LEAD_TIME_S ?? 180
+);
+
 export const API_URL =
   import.meta.env.VITE_API_URL ?? 'https://api.snapshot.box';
 export const API_TESTNET_URL =
@@ -155,7 +167,7 @@ export const VOTING_TYPES_INFO: Record<
 
 export const PRIVACY_TYPES_INFO: Record<
   SpacePrivacy,
-  { label: string; description?: string }
+  { label: string; description?: string; isAlpha?: boolean }
 > = {
   none: {
     label: 'No privacy'
@@ -164,6 +176,16 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  },
+  'shutter-elgamal': {
+    label: 'Permanent private voting',
+    description:
+      'Choices are encrypted and only the aggregate tally is ever published. ' +
+      'Powered by threshold-ElGamal homomorphic tallying, with the decryption ' +
+      'key split across independent keypers. ' +
+      'Supports single choice, basic and weighted voting. ' +
+      'Voting power counts in full, and holdings below 0.5 cannot vote.',
+    isAlpha: true
   },
   inco: {
     label: 'Confidential voting',

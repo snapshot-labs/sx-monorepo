@@ -1,0 +1,153 @@
+# Snapshot's half of private voting: MySQL, hub, sequencer, te-data-layer and the
+# protocol's coordinator. Keypers run elsewhere. Setup: docs/private-voting/DEPLOYMENT_SETUP.md.
+#
+# Who points where:
+#   coordinator → SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL → te-data-layer root   reads + writes; sole writer
+#   coordinator → keyper URLs frozen in each proposal                               runs the key ceremony and tally
+#   keyper      → SHUTTER_GOVERNANCE_PROTOCOL_API_URL        → te-data-layer /port  reads only; appends /port
+#   keyper      → COORDINATOR_URL                            → coordinator :8400    keyper writes relay here
+#   sequencer   → TE_KEYPERS                                 → each keyper's /status when a proposal is created
+
+services:
+  mysql:
+    image: mysql:8.0
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --max_connections=300
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+      - ./apps/hub/src/helpers/schema.sql:/schema/hub-schema.sql:ro
+      - ./apps/sequencer/src/helpers/schema.sql:/schema/sequencer-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  hub:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    image: sx-backend:local
+    command: ["bun", "run", "apps/hub/src/index.ts"]
+    environment:
+      PORT: "3000"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      # Followed by the browser (scores redirect), so not http://sequencer:3001.
+      SEQUENCER_URL: "${SEQUENCER_PUBLIC_URL:-http://localhost:${SEQ_PORT:-3001}}"
+      STAMP_URL: https://stamp.fyi
+      SCORE_API_URL: https://score.snapshot.org
+      SIDEKICK_URL: https://sh5.co
+      KEYCARD_URL: ""
+      RATE_LIMIT_DATABASE_URL: ""
+    ports:
+      - "${HUB_PORT:-3000}:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "const r = await fetch('http://localhost:3000/api'); process.exit(r.ok ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  sequencer:
+    image: sx-backend:local
+    command: ["bun", "run", "apps/sequencer/src/index.ts"]
+    environment:
+      PORT: "3001"
+      NETWORK: testnet
+      DB_SSL: "false"
+      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      RELAYER_PK: ${SEQ_RELAYER_PK:-}
+      DEFAULT_NETWORK: "11155111"
+      SHUTTER_URL: ""
+      SIDEKICK_URL: https://sh5.co
+      SCORE_API_URL: https://score.snapshot.org
+      SCHNAPS_API_URL: https://schnaps.snapshot.box
+      BROVIDER_URL: https://rpc.snapshot.org
+      OVERLORD_URL: https://overlord.snapshot.box
+      AUTH_SECRET: ${SEQ_AUTH_SECRET}
+      WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
+      LAST_CB: "1"
+      TE_KEYPERS: "${TE_KEYPERS:-}"
+      TE_THRESHOLD_T: "${TE_THRESHOLD_T:-2}"
+      TE_WEIGHTED_BUDGET: "${TE_WEIGHTED_BUDGET:-100}"
+      TE_RESULT_PUBLISHER_ADDRESS: "${TE_RESULT_PUBLISHER_ADDRESS:-}"
+      TE_ELIGIBILITY_PRIVATE_KEY: "${TE_ELIGIBILITY_PRIVATE_KEY:-}"
+      MIN_DKG_LEAD_TIME_S: "${MIN_DKG_LEAD_TIME_S:-180}"
+      TE_SOLVER_CEILING: "${TE_SOLVER_CEILING:-1e12}"
+      TE_VERIFY_WORKERS: "${TE_VERIFY_WORKERS:-}"
+      TE_TALLY_POLL_MS: "${TE_TALLY_POLL_MS:-5000}"
+    ports:
+      - "${SEQ_PORT:-3001}:3001"
+    extra_hosts:
+      # Reads each keyper's /status; for keypers on this host.
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      hub:
+        condition: service_started
+    restart: unless-stopped
+
+  te-data-layer:
+    image: sx-backend:local
+    command: ["bun", "run", "apps/te-data-layer/src/index.ts"]
+    environment:
+      PORT: "3002"
+      HUB_URL: http://hub:3000
+      LOG_LEVEL: "${TE_DATA_LAYER_LOG_LEVEL:-info}"
+      HUB_TIMEOUT_MS: "${HUB_TIMEOUT_MS:-10000}"
+    ports:
+      - "${TE_DATA_LAYER_PORT:-3002}:3002"
+    depends_on:
+      hub:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "const r = await fetch('http://localhost:3002/health'); process.exit(r.ok ? 0 : 1)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  coordinator:
+    image: ${SHUTTER_GOVERNANCE_PROTOCOL_IMAGE:-ghcr.io/shutter-network/shutter-governance-protocol:0.1.0}
+    command: ["python", "-m", "shutter_governance_protocol.services.coordinator"]
+    environment:
+      SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER: database
+      # The root includes write routes; keypers get only the read-only /port mount.
+      SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL: ${SHUTTER_GOVERNANCE_PROTOCOL_DATA_LAYER_URL:-http://te-data-layer:3002}
+      COORDINATOR_SIGNING_KEY: ${COORDINATOR_SIGNING_KEY:?set COORDINATOR_SIGNING_KEY (secp256k1 key; its address is the result publisher)}
+      COORDINATOR_API_TOKEN: ${COORDINATOR_API_TOKEN:?set COORDINATOR_API_TOKEN (relay bearer token)}
+      COORDINATOR_PORT: "8400"
+      COORDINATOR_POLL_S: ${COORDINATOR_POLL_S:-30.0}
+      # Per-keyper tokens, reused after a restart.
+      COORDINATOR_STATE_DIR: /coordinator-state
+    ports:
+      - "${COORDINATOR_PORT:-8400}:8400"
+    volumes:
+      - ./coordinator-state:/coordinator-state
+    extra_hosts:
+      # For keypers on this host; unused when they have real URLs.
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      te-data-layer:
+        condition: service_healthy
+    restart: unless-stopped

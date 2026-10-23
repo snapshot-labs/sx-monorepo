@@ -8,6 +8,12 @@ import log from './log';
 const connectionLimit = parseInt(process.env.CONNECTION_LIMIT || '25');
 log.info(`[mysql] connection limit ${connectionLimit}`);
 
+// TLS is on by default (certificates checked except for localhost). Set
+// DB_SSL=false to turn it off, e.g. for a plaintext MySQL in another container.
+const sslEnabled = process.env.DB_SSL !== 'false';
+const sslFor = (host: string) =>
+  sslEnabled ? { rejectUnauthorized: host !== 'localhost' } : undefined;
+
 // @ts-ignore
 const hubConfig = parse(process.env.HUB_DATABASE_URL);
 hubConfig.connectionLimit = connectionLimit;
@@ -19,7 +25,7 @@ hubConfig.connectTimeout = 60e3;
 hubConfig.acquireTimeout = 60e3;
 hubConfig.timeout = 60e3;
 hubConfig.charset = 'utf8mb4';
-hubConfig.ssl = { rejectUnauthorized: hubConfig.host !== 'localhost' };
+hubConfig.ssl = sslFor(hubConfig.host);
 
 const hubDB = mysql.createPool(hubConfig);
 
@@ -34,9 +40,7 @@ sequencerConfig.connectTimeout = 60e3;
 sequencerConfig.acquireTimeout = 60e3;
 sequencerConfig.timeout = 60e3;
 sequencerConfig.charset = 'utf8mb4';
-sequencerConfig.ssl = {
-  rejectUnauthorized: sequencerConfig.host !== 'localhost'
-};
+sequencerConfig.ssl = sslFor(sequencerConfig.host);
 
 const sequencerDB = mysql.createPool(sequencerConfig);
 

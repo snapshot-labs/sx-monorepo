@@ -1,3 +1,4 @@
+import { IS_TE_ENABLED } from '@/helpers/constants';
 import { gql } from './gql';
 
 gql(`
@@ -212,9 +213,24 @@ gql(`
     status
     source
   }
+
+  fragment offchainProposalTeFragment on Proposal {
+    ...offchainProposalFragment
+    te_config
+    te_mpk
+    te_dkg_status
+    te_committee_pks
+    te_threshold_t
+    te_threshold_n
+    te_keyper_addresses
+  }
 `);
 
-export const PROPOSAL_QUERY = gql(`
+// A hub without private voting rejects queries that ask for te_* fields, so they
+// are only requested when enabled. Both queries are static so graphql-codegen can
+// read them.
+
+const PROPOSAL_QUERY_BASE = gql(`
   query Proposal($id: String!) {
     proposal(id: $id) {
       ...offchainProposalFragment
@@ -222,7 +238,19 @@ export const PROPOSAL_QUERY = gql(`
   }
 `);
 
-export const PROPOSALS_QUERY = gql(`
+const PROPOSAL_QUERY_TE = gql(`
+  query ProposalTe($id: String!) {
+    proposal(id: $id) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSAL_QUERY = (
+  IS_TE_ENABLED ? PROPOSAL_QUERY_TE : PROPOSAL_QUERY_BASE
+) as typeof PROPOSAL_QUERY_TE;
+
+const PROPOSALS_QUERY_BASE = gql(`
   query Proposals($first: Int!, $skip: Int!, $where: ProposalWhere) {
     proposals(
       first: $first
@@ -235,6 +263,24 @@ export const PROPOSALS_QUERY = gql(`
     }
   }
 `);
+
+const PROPOSALS_QUERY_TE = gql(`
+  query ProposalsTe($first: Int!, $skip: Int!, $where: ProposalWhere) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: desc
+    ) {
+      ...offchainProposalTeFragment
+    }
+  }
+`);
+
+export const PROPOSALS_QUERY = (
+  IS_TE_ENABLED ? PROPOSALS_QUERY_TE : PROPOSALS_QUERY_BASE
+) as typeof PROPOSALS_QUERY_TE;
 
 export const SPACES_QUERY = gql(`
   query Spaces($first: Int, $skip: Int, $where: SpaceWhere) {

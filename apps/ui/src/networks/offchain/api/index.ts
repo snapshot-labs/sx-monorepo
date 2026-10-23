@@ -92,11 +92,20 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
 const SCORES_TICKS_LIMIT = 1000;
 export const SCORES_TICKS_MAX_VOTES = 4000;
 
-function getProposalState(
+export function getProposalState(
   networkId: NetworkID,
   proposal: ApiProposal
 ): ProposalState {
   if (proposal.state === 'closed') {
+    // A private proposal holds placeholder zero scores until the committee's
+    // tally lands; reading pass/fail off those zeros would flag it 'rejected'.
+    if (
+      proposal.privacy === 'shutter-elgamal' &&
+      proposal.scores_state !== 'final'
+    ) {
+      return 'closed';
+    }
+
     if (proposal.type !== 'basic') {
       return 'closed';
     }
@@ -487,6 +496,13 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     executed_at: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
+    te_config: proposal.te_config ?? undefined,
+    te_mpk: proposal.te_mpk ?? null,
+    te_dkg_status: proposal.te_dkg_status ?? null,
+    te_committee_pks: proposal.te_committee_pks ?? undefined,
+    te_threshold_t: proposal.te_threshold_t ?? null,
+    te_threshold_n: proposal.te_threshold_n ?? null,
+    te_keyper_addresses: proposal.te_keyper_addresses ?? undefined,
     flagged: proposal.flagged,
     flag_code: proposal.flagCode,
     plugins: proposal.plugins,

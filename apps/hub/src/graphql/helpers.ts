@@ -18,6 +18,12 @@ const DEFAULT_ADDRESS_FORMAT: AddressFormat[] = [
 
 export class PublicError extends Error {}
 
+// MySQL VARBINARY columns come back as Buffer; GraphQL returns them as 0x-hex.
+function bytesToHex(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  return Buffer.isBuffer(value) ? `0x${value.toString('hex')}` : null;
+}
+
 const ARG_LIMITS = {
   default: {
     first: 1000,
@@ -449,6 +455,13 @@ export async function handleRelatedSpaces(
   return spaces;
 }
 
+function deriveDkgStatus(proposal: any): string | null {
+  if (proposal.privacy !== 'shutter-elgamal') return null;
+  if (proposal.te_mpk) return null;
+  const now = Math.floor(Date.now() / 1e3);
+  return now > Number(proposal.start) ? 'dkg_failed' : null;
+}
+
 export function formatUser(user) {
   const profile = jsonParse(user.profile, {});
   delete user.profile;
@@ -502,6 +515,12 @@ export function formatProposal(proposal) {
   }));
   proposal.privacy = proposal.privacy || '';
   proposal.quorumType = proposal.quorum_type || 'default';
+  // Threshold-ElGamal private voting fields (shutter-elgamal); null when unset.
+  proposal.te_config = jsonParse(proposal.te_config, null);
+  proposal.te_committee_pks = jsonParse(proposal.te_committee_pks, null);
+  proposal.te_keyper_addresses = jsonParse(proposal.te_keyper_addresses, null);
+  proposal.te_mpk = bytesToHex(proposal.te_mpk);
+  proposal.te_dkg_status = deriveDkgStatus(proposal);
   const rawFlagged = proposal.flagged;
   proposal.flagCode = rawFlagged;
   proposal.flagged = rawFlagged > 0;
