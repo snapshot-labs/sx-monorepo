@@ -169,11 +169,12 @@ export function formatSpace({
   space.hibernated = hibernated;
   space.turbo = new Date((turboExpiration || 0) * 1000) > new Date();
   space.turboExpiration = turboExpiration ?? 0;
-  // Snapshot Plus balance in gwei, negative when owed, null when not loaded
+  // Snapshot Plus balance, stored in gwei, negative when owed, null when not loaded
+  const credits =
+    credits_deposited === null ? null : credits_deposited - credits_spent;
   space.credits =
-    credits_deposited === null
-      ? null
-      : String(credits_deposited - credits_spent);
+    credits === null ? null : (BigInt(credits) * 1_000_000_000n).toString(); // wei
+  space.credits_parsed = credits === null ? null : credits / 1e9; // ETH
   space.rank = spaceMetadata?.rank ?? null;
 
   // always return parent and children in child node format

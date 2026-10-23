@@ -39,9 +39,9 @@ async function getCredits() {
   return space;
 }
 
-function proposalInput() {
+function proposalInput(space = SPACE) {
   const msg = JSON.parse(input.msg);
-  msg.space = SPACE;
+  msg.space = space;
   return { ...input, msg: JSON.stringify(msg) };
 }
 
@@ -49,12 +49,13 @@ function vote(
   voter: string,
   proposal: string,
   credits: number,
-  timestamp = now()
+  timestamp = now(),
+  space = SPACE
 ) {
   const body = {
     address: voter,
     msg: JSON.stringify({
-      space: SPACE,
+      space,
       timestamp,
       payload: { proposal, choice: 1, reason: '', app: '', metadata: {} }
     })
@@ -70,9 +71,10 @@ describe('Snapshot Plus credits', () => {
   // Before each test too, so rows left by an interrupted run can't interfere
   async function cleanup() {
     await db.queryAsync('DELETE FROM spaces WHERE id = ?', [SPACE]);
-    await db.queryAsync('DELETE FROM proposals WHERE space = ?', [SPACE]);
-    await db.queryAsync('DELETE FROM votes WHERE space = ?', [SPACE]);
-    await db.queryAsync('DELETE FROM leaderboard WHERE space = ?', [SPACE]);
+    const spaces = [SPACE, SPACE.toUpperCase()];
+    await db.queryAsync('DELETE FROM proposals WHERE space IN (?)', [spaces]);
+    await db.queryAsync('DELETE FROM votes WHERE space IN (?)', [spaces]);
+    await db.queryAsync('DELETE FROM leaderboard WHERE space IN (?)', [spaces]);
   }
 
   beforeEach(cleanup);
@@ -158,6 +160,19 @@ describe('Snapshot Plus credits', () => {
       expect((await getCredits()).credits_spent).toBe(PROPOSAL_FEE + 1);
     });
 
+    it('charges the space when the message spells its id in another case', async () => {
+      await setSpace({ credits_deposited: PROPOSAL_FEE });
+      await proposalAction(
+        proposalInput(SPACE.toUpperCase()),
+        'ipfs',
+        'receipt',
+        '0xplus-6',
+        { plus: true }
+      );
+
+      expect((await getCredits()).credits_spent).toBe(PROPOSAL_FEE);
+    });
+
     it('does not charge a proposal that cannot be stored', async () => {
       await setSpace({ credits_deposited: 2 * PROPOSAL_FEE });
       await proposalAction(proposalInput(), 'ipfs', 'receipt', '0xplus-5', {
@@ -182,6 +197,13 @@ describe('Snapshot Plus credits', () => {
 
       const { credits_deposited, credits_spent } = await getCredits();
       expect(credits_deposited - credits_spent).toBe(-2 * VOTE_FEE);
+    });
+
+    it('charges the space when the vote spells its id in another case', async () => {
+      await setSpace({ credits_deposited: PROPOSAL_FEE });
+      await vote('0xA1', '0xplus-p', 1, now(), SPACE.toUpperCase());
+
+      expect((await getCredits()).credits_spent).toBe(VOTE_FEE);
     });
 
     it('does not charge a re-vote', async () => {

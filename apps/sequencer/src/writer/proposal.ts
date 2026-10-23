@@ -391,6 +391,7 @@ export async function action(
     space,
     author,
     credits ? PROPOSAL_FEE : 0,
-    space
+    // Space ids are stored lowercase, and the column is case-sensitive
+    space.toLowerCase()
   ]);
 }

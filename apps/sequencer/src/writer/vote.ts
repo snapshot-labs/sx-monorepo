@@ -226,7 +226,8 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
         created,
         // New votes on a Snapshot Plus proposal are charged, even into a negative balance
         context.proposal.credits ? VOTE_FEE : 0,
-        msg.space
+        // Space ids are stored lowercase, and the column is case-sensitive
+        msg.space.toLowerCase()
       ]
     );
   }

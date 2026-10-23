@@ -59,8 +59,8 @@ export async function updateTurboStatuses(spaces: SpaceStatus[]) {
   if (spaces.length === 0) return;
 
   // Sync `turbo_expiration` and `credits_deposited` for each space. Ids are
-  // matched exactly: the column may compare ids ignoring case or accents, so a
-  // look-alike id must not overwrite another space
+  // matched exactly, whatever the column collation, so a look-alike id can
+  // never overwrite another space
   const cases = spaces.map(() => `WHEN ? THEN ?`).join(' ');
   const query = `
     UPDATE spaces
