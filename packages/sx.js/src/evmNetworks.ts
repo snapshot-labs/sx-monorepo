@@ -30,6 +30,7 @@ type Overrides = {
   proposalValidations?: {
     Vanilla?: string;
     VotingPower?: AddressOverride;
+    VotingPowerWithCooldown?: AddressOverride;
   };
   executionStrategies?: {
     IncoSimpleQuorumVanilla?: string;
@@ -40,7 +41,7 @@ type Overrides = {
 
 function resolveAddress(
   override: AddressOverride | undefined,
-  defaultAddress: string
+  defaultAddress: string | undefined
 ): string | undefined {
   if (override === null) return undefined;
 
@@ -110,6 +111,15 @@ export function createStandardConfig(
       VotingPower: resolveAddress(
         proposalValidations.VotingPower,
         '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+      ),
+      // Only chains with a deployment in contracts/sx-evm/deployments.
+      VotingPowerWithCooldown: resolveAddress(
+        proposalValidations.VotingPowerWithCooldown,
+        [1, 10, 11155111, 137, 42161, 8453, 5000, 33139, 33111, 84532].includes(
+          eip712ChainId
+        )
+          ? '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
+          : undefined
       )
     },
     ExecutionStrategies: {

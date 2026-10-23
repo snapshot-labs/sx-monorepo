@@ -3,6 +3,7 @@ import {
   ContractFunctionRevertedError,
   ContractFunctionZeroDataError,
   decodeAbiParameters,
+  encodeAbiParameters,
   getAddress,
   parseAbi,
   parseAbiParameters,
@@ -41,20 +42,49 @@ export async function updateProposalValidationStrategy(
 
   space.validation_strategy = strategyAddress;
   space.validation_strategy_params = validationStrategyParams;
+  space.proposal_threshold = '0';
   space.voting_power_validation_strategy_strategies = [];
   space.voting_power_validation_strategy_strategies_params = [];
   space.voting_power_validation_strategy_metadata = metadataUri;
 
-  if (
-    protocolConfig.propositionPowerValidationStrategyAddress !== null &&
+  const isVotingPowerWithCooldown =
+    protocolConfig.propositionPowerWithCooldownValidationStrategyAddress !==
+      null &&
     strategyAddress ===
-      getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
+      getAddress(
+        protocolConfig.propositionPowerWithCooldownValidationStrategyAddress
+      );
+
+  if (
+    isVotingPowerWithCooldown ||
+    (protocolConfig.propositionPowerValidationStrategyAddress !== null &&
+      strategyAddress ===
+        getAddress(protocolConfig.propositionPowerValidationStrategyAddress))
   ) {
     try {
-      const [threshold, strategies] = decodeAbiParameters(
-        parseAbiParameters('uint256, (address,bytes)[]'),
-        validationStrategyParams as `0x${string}`
-      );
+      const [threshold, strategies] = isVotingPowerWithCooldown
+        ? (() => {
+            const abi = parseAbiParameters(
+              'uint256, uint256, uint256, (address,bytes)[]'
+            );
+            const decoded = decodeAbiParameters(
+              abi,
+              validationStrategyParams as `0x${string}`
+            );
+            // Do not interpret the old two-field layout as four fields via overlapping offsets.
+            if (
+              !validationStrategyParams
+                .toLowerCase()
+                .startsWith(encodeAbiParameters(abi, decoded).toLowerCase())
+            ) {
+              throw new Error('Invalid voting power with cooldown encoding');
+            }
+            return [decoded[2], decoded[3]] as const;
+          })()
+        : decodeAbiParameters(
+            parseAbiParameters('uint256, (address,bytes)[]'),
+            validationStrategyParams as `0x${string}`
+          );
 
       space.proposal_threshold = threshold.toString();
       space.voting_power_validation_strategy_strategies = strategies.map(

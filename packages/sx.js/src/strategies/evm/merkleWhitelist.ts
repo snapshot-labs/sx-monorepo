@@ -14,6 +14,13 @@ type Entry = {
   votingPower: string;
 };
 
+export function getEvmMerkleWhitelistRoot(entries: Entry[]): string {
+  return StandardMerkleTree.of(
+    entries.map(entry => [entry.address, BigInt(entry.votingPower)]),
+    ['address', 'uint96']
+  ).root;
+}
+
 function getProofForVoter(
   tree: StandardMerkleTree<[string, bigint]>,
   voter: string

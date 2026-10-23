@@ -17,7 +17,7 @@ export default function createOzVotesStrategy(): Strategy {
       params: string,
       provider: Provider
     ): Promise<bigint> {
-      const votesContract = new Contract(params, IVotes, provider);
+      const votesContract = new Contract(params.slice(0, 42), IVotes, provider);
 
       const votingPower =
         block !== null
