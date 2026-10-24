@@ -7,3 +7,7 @@ export const CB = {
   INELIGIBLE: -10, // Payload format, can not compute
   ERROR_SYNC: -11 // Strategy value sync error, waiting for retry
 };
+
+// Snapshot Plus fees, in gwei
+export const PROPOSAL_FEE = 8_000_000; // 0.008 ETH
+export const VOTE_FEE = 400_000; // 0.0004 ETH

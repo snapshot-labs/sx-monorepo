@@ -5,6 +5,7 @@ const props = withDefaults(
     isModified: boolean;
     saving: boolean;
     saveLabel?: string;
+    readOnlyMessage?: string;
   }>(),
   {
     saveLabel: 'Save'
@@ -16,21 +17,26 @@ defineEmits<{
   (e: 'reset'): void;
 }>();
 
-const hasMessage = computed(() => props.error || props.isModified);
+const message = computed(
+  () =>
+    props.readOnlyMessage ||
+    props.error ||
+    (props.isModified ? 'You have unsaved changes' : null)
+);
 </script>
 
 <template>
   <UiToolbarBottom>
     <div
       class="px-4 py-3 flex flex-col xs:flex-row items-center"
-      :class="hasMessage ? 'justify-between' : 'justify-end'"
+      :class="message ? 'justify-between' : 'justify-end'"
     >
       <h4
-        v-if="hasMessage"
+        v-if="message"
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
-        :class="{ 'text-skin-danger': error }"
+        :class="{ 'text-skin-danger': error && !readOnlyMessage }"
       >
-        {{ error || 'You have unsaved changes' }}
+        {{ message }}
       </h4>
       <div class="flex space-x-3">
         <button
@@ -42,7 +48,7 @@ const hasMessage = computed(() => props.error || props.isModified);
           Reset
         </button>
         <UiButton
-          v-if="!error"
+          v-if="!error && !readOnlyMessage"
           :loading="saving"
           primary
           @click="$emit('save')"
