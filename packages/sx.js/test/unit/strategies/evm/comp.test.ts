@@ -11,6 +11,10 @@ describe('compStrategy', () => {
   beforeAll(() => {
     vi.mock('@ethersproject/contracts', () => ({
       Contract: class {
+        constructor(address: string) {
+          expect(address).toBe('0x6Fd821e79cDf212aD8b06C59B28FE8C2185291d4');
+        }
+
         async getPriorVotes(voterAddress: string, block: number) {
           if (
             voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
@@ -49,6 +53,18 @@ describe('compStrategy', () => {
   });
 
   describe('getVotingPower', () => {
+    it('uses the first 20 parameter bytes like the Solidity strategy', async () => {
+      expect(
+        await compStrategy.getVotingPower(
+          '0x0c2De612982Efd102803161fc7C74CcA15Db932c',
+          '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe',
+          null,
+          null,
+          `${params}0000`,
+          provider
+        )
+      ).toBe(300000000n);
+    });
     it('should compute voting power for user with delegated tokens at specific timestamp', async () => {
       const votingPower = await compStrategy.getVotingPower(
         '0x0c2De612982Efd102803161fc7C74CcA15Db932c',

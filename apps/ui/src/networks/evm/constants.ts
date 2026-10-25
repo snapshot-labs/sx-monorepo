@@ -10,6 +10,12 @@ import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
+import {
+  cooldownProperties,
+  decodeVotingPowerWithCooldown,
+  hasValidCooldownParams,
+  VOTING_POWER_WITH_COOLDOWN_ABI
+} from './proposalValidation';
 import { EVM_CONNECTORS } from '../common/constants';
 import { AuthenticatorSupportInfo, StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
@@ -164,6 +170,10 @@ export function createConstants(
     }),
     ...(config.ProposalValidations.VotingPower && {
       [config.ProposalValidations.VotingPower]: 'Voting power'
+    }),
+    ...(config.ProposalValidations.VotingPowerWithCooldown && {
+      [config.ProposalValidations.VotingPowerWithCooldown]:
+        'Voting power with cooldown'
     })
   };
 
@@ -264,86 +274,128 @@ export function createConstants(
           }
         ]
       : []),
-    ...(config.ProposalValidations.VotingPower
-      ? [
-          {
-            address: config.ProposalValidations.VotingPower,
-            type: 'VotingPower',
-            name: 'Voting power',
-            icon: IHLightningBolt,
-            validate: (params: Record<string, any>) => {
-              return params?.strategies?.length > 0;
-            },
-            generateSummary: (params: Record<string, any>) =>
-              `(${params.threshold})`,
-            generateParams: async (params: Record<string, any>) => {
-              const abiCoder = new AbiCoder();
-
-              const strategies = await Promise.all(
-                params.strategies.map(async (strategy: StrategyConfig) => {
-                  return {
-                    addr: strategy.address,
-                    params: strategy.generateParams
-                      ? (await strategy.generateParams(strategy.params))[0]
-                      : '0x00'
-                  };
-                })
-              );
-
-              return [
-                abiCoder.encode(
-                  ['uint256', 'tuple(address addr, bytes params)[]'],
-                  [params.threshold, strategies]
-                )
-              ];
-            },
-            generateMetadata: async (params: Record<string, any>) => {
-              const strategiesMetadata = await Promise.all(
-                params.strategies.map(async (strategy: StrategyConfig) => {
-                  if (!strategy.generateMetadata) return;
-
-                  const metadata = await strategy.generateMetadata(
-                    strategy.params
+    ...[
+      { address: config.ProposalValidations.VotingPower, withCooldown: false },
+      {
+        address: config.ProposalValidations.VotingPowerWithCooldown,
+        withCooldown: true
+      }
+    ].flatMap(({ address, withCooldown }) =>
+      address
+        ? [
+            {
+              address,
+              ...(withCooldown && { protocols: ['snapshot-x' as const] }),
+              type: withCooldown ? 'VotingPowerWithCooldown' : 'VotingPower',
+              name: withCooldown
+                ? 'Voting power with cooldown'
+                : 'Voting power',
+              icon: IHLightningBolt,
+              validate: (params: Record<string, unknown>) =>
+                Array.isArray(params?.strategies) &&
+                params.strategies.length > 0 &&
+                (!withCooldown ||
+                  (params.strategies.length <= 128 &&
+                    hasValidCooldownParams(params))),
+              generateSummary: (params: Record<string, unknown>) =>
+                withCooldown
+                  ? `(${params.threshold}, limit ${params.maxActiveProposals}, ${params.cooldown}s cooldown)`
+                  : `(${params.threshold})`,
+              generateParams: async (params: Record<string, unknown>) => {
+                if (
+                  withCooldown &&
+                  (!hasValidCooldownParams(params) ||
+                    !Array.isArray(params.strategies) ||
+                    !params.strategies.length ||
+                    params.strategies.length > 128)
+                ) {
+                  throw new Error(
+                    'Invalid voting power with cooldown settings'
                   );
-                  const pinned = await pin(metadata);
+                }
+                const strategies = await Promise.all(
+                  (params.strategies as StrategyConfig[]).map(
+                    async strategy => ({
+                      addr: strategy.address,
+                      params: strategy.generateParams
+                        ? (await strategy.generateParams(strategy.params))[0]
+                        : '0x00'
+                    })
+                  )
+                );
 
-                  return `ipfs://${pinned.cid}`;
-                })
-              );
+                return [
+                  new AbiCoder().encode(
+                    withCooldown
+                      ? VOTING_POWER_WITH_COOLDOWN_ABI
+                      : ['uint256', 'tuple(address addr, bytes params)[]'],
+                    withCooldown
+                      ? [
+                          params.cooldown,
+                          params.maxActiveProposals,
+                          params.threshold,
+                          strategies
+                        ]
+                      : [params.threshold, strategies]
+                  )
+                ];
+              },
+              generateMetadata: async (params: Record<string, unknown>) => ({
+                strategies_metadata: await Promise.all(
+                  (params.strategies as StrategyConfig[]).map(
+                    async strategy => {
+                      if (!strategy.generateMetadata) return '';
 
-              return {
-                strategies_metadata: strategiesMetadata
-              };
-            },
-            parseParams: async (params: string) => {
-              const abiCoder = new AbiCoder();
-
-              return {
-                threshold: abiCoder
-                  .decode(
-                    ['uint256', 'tuple(address addr, bytes params)[]'],
-                    params
-                  )[0]
-                  .toString()
-              };
-            },
-            paramsDefinition: {
-              type: 'object',
-              title: 'Params',
-              additionalProperties: false,
-              required: ['threshold'],
-              properties: {
-                threshold: {
-                  type: 'string',
-                  format: 'uint256',
-                  title: 'Proposal threshold',
-                  examples: ['1']
+                      const metadata = await strategy.generateMetadata(
+                        strategy.params
+                      );
+                      const pinned = await pin(metadata);
+                      return `ipfs://${pinned.cid}`;
+                    }
+                  )
+                )
+              }),
+              parseParams: async (params: string) => {
+                if (withCooldown) {
+                  const { cooldown, maxActiveProposals, threshold } =
+                    decodeVotingPowerWithCooldown(params);
+                  return { cooldown, maxActiveProposals, threshold };
+                }
+                return {
+                  threshold: new AbiCoder()
+                    .decode(
+                      ['uint256', 'tuple(address addr, bytes params)[]'],
+                      params
+                    )[0]
+                    .toString()
+                };
+              },
+              paramsDefinition: {
+                type: 'object',
+                title: 'Params',
+                additionalProperties: false,
+                required: withCooldown
+                  ? ['threshold', 'cooldown', 'maxActiveProposals']
+                  : ['threshold'],
+                properties: {
+                  threshold: {
+                    type: 'string',
+                    format: 'uint256',
+                    title: 'Proposal threshold',
+                    examples: ['1'],
+                    ...(withCooldown && {
+                      pattern: '^[0-9]+$',
+                      description:
+                        'Minimum proposal power in raw strategy units, before decimals. Zero removes the voting-power requirement.'
+                    })
+                  },
+                  ...(withCooldown && cooldownProperties)
                 }
               }
             }
-          }
-        ]
-      : [])
+          ]
+        : []
+    )
   ];
 
   const EDITOR_VOTING_STRATEGIES = [
