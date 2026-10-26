@@ -9,5 +9,5 @@ export const CB = {
 };
 
 // Snapshot Plus fees, in gwei
-export const PROPOSAL_FEE = 8_000_000; // 0.008 ETH
-export const VOTE_FEE = 400_000; // 0.0004 ETH
+export const PROPOSAL_FEE = 10_000_000; // 0.01 ETH
+export const VOTE_FEE = 200_000; // 0.0002 ETH

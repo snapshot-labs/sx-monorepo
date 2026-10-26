@@ -5,7 +5,7 @@ import { expect, it } from 'vitest';
 import BadgeSpace from './BadgeSpace.vue';
 
 const TURBO_CLASS = 'text-[#e2b719]';
-const VERIFIED_CLASS = 'text-[#2394ea]';
+const VERIFIED_CLASS = 'text-skin-link';
 const FLAGGED_CLASS = 'text-skin-danger';
 
 const GLOBAL = {

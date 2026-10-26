@@ -225,7 +225,8 @@ export function useSpaceAlerts(
       });
     }
 
-    if (isProJustExpired.value) {
+    // A space that moved to Snapshot Plus keeps its Pro features
+    if (isProJustExpired.value && !space.value.plus) {
       alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
 
