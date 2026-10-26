@@ -121,6 +121,22 @@ export async function resolveVotingPowerBound(args: {
     return { value: fallbackValue, source: 'fallback', unrecognised };
   }
 
+  // `snapshotBlock` is a block on the proposal's chain. A strategy on another chain
+  // is read at that chain's block from the same moment, as for quorum (utils.ts).
+  let blocks: Record<string, number>;
+  try {
+    blocks = await snapshot.utils.getSnapshots(
+      proposalNetwork,
+      snapshotBlock,
+      getProvider(proposalNetwork),
+      measurable.map(s => String(s.network ?? proposalNetwork))
+    );
+  } catch (err: any) {
+    throw new VotingPowerBoundError(
+      `could not find the snapshot block on each strategy's network: ${err?.message || err}`
+    );
+  }
+
   // Each (network, address, decimals) is read once; the block is fixed, so the
   // answer is the same.
   const seen = new Map<string, number>();
@@ -128,6 +144,7 @@ export async function resolveVotingPowerBound(args: {
 
   for (const s of measurable) {
     const network = String(s.network ?? proposalNetwork);
+    const block = blocks[network];
     const address = String(s.params!.address);
     const decimals = SUPPLY_STRATEGIES[s.name]!.decimals
       ? Number(s.params!.decimals ?? 18)
@@ -139,12 +156,12 @@ export async function resolveVotingPowerBound(args: {
       let lastErr: any;
       for (let attempt = 1; attempt <= attempts; attempt++) {
         try {
-          supply = await readSupply(address, network, snapshotBlock, decimals);
+          supply = await readSupply(address, network, block, decimals);
           break;
         } catch (err: any) {
           lastErr = err;
           log.warn(
-            `[te-vpbound] totalSupply ${address}@${network} block ${snapshotBlock} ` +
+            `[te-vpbound] totalSupply ${address}@${network} block ${block} ` +
               `attempt ${attempt}/${attempts} failed: ${err?.message || err}`
           );
         }
@@ -152,7 +169,7 @@ export async function resolveVotingPowerBound(args: {
       if (supply === undefined) {
         throw new VotingPowerBoundError(
           `could not read totalSupply for ${address} on network ${network} at block ` +
-            `${snapshotBlock} after ${attempts} attempts: ${lastErr?.message || lastErr}. ` +
+            `${block} after ${attempts} attempts: ${lastErr?.message || lastErr}. ` +
             `The value is fixed by the snapshot block, so retrying later returns the ` +
             `same number — the proposal is refused rather than sized from a guess.`
         );

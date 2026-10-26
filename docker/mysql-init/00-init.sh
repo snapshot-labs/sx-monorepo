@@ -13,21 +13,20 @@
 # there is no duplicated DDL to drift.
 set -euo pipefail
 
-PWARG=()
-if [ -n "${MYSQL_ROOT_PASSWORD:-}" ]; then
-  PWARG=(-p"${MYSQL_ROOT_PASSWORD}")
-fi
+# docker-compose.yml requires MYSQL_ROOT_PASSWORD; MYSQL_PWD keeps it off the
+# command line.
+export MYSQL_PWD="${MYSQL_ROOT_PASSWORD}"
 
 echo "[mysql-init] creating databases"
-mysql -uroot "${PWARG[@]}" <<'SQL'
+mysql -uroot <<'SQL'
 CREATE DATABASE IF NOT EXISTS snapshot_hub CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE DATABASE IF NOT EXISTS snapshot_sequencer CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 SQL
 
 echo "[mysql-init] loading hub schema into snapshot_hub"
-mysql -uroot "${PWARG[@]}" snapshot_hub < /schema/hub-schema.sql
+mysql -uroot snapshot_hub < /schema/hub-schema.sql
 
 echo "[mysql-init] loading sequencer schema into snapshot_sequencer"
-mysql -uroot "${PWARG[@]}" snapshot_sequencer < /schema/sequencer-schema.sql
+mysql -uroot snapshot_sequencer < /schema/sequencer-schema.sql
 
 echo "[mysql-init] done"

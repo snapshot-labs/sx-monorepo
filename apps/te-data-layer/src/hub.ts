@@ -45,7 +45,13 @@ function logUpstream(
   else log.warn(line);
 }
 
-const TIMEOUT_MS = Number(process.env.HUB_TIMEOUT_MS || 10000);
+function hubTimeoutMs(): number {
+  const ms = Number(process.env.HUB_TIMEOUT_MS || 10000);
+  if (!(ms > 0)) {
+    throw new HubError('HUB_TIMEOUT_MS must be a number of milliseconds', 500);
+  }
+  return ms;
+}
 
 function hubBase(): string {
   const url = process.env.HUB_URL;
@@ -67,16 +73,26 @@ async function forward(
   body?: string
 ): Promise<string> {
   const url = `${hubBase()}${path}`;
+  const timeoutMs = hubTimeoutMs();
   let res: Response;
   let text: string;
   try {
     res = await fetch(url, {
       method,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      headers:
-        body === undefined
-          ? { accept: 'application/json' }
-          : { 'content-type': 'application/json', accept: 'application/json' },
+      signal: AbortSignal.timeout(timeoutMs),
+      // A hub without this release redirects unknown routes to `/api`; followed,
+      // that answers 200 with the wrong body. Its private-voting routes never redirect.
+      redirect: 'manual',
+      headers: {
+        accept: 'application/json',
+        ...(body === undefined ? {} : { 'content-type': 'application/json' }),
+        // A hub with rate limiting allows each IP 100 requests a minute unless the
+        // request carries an API key. Every keyper's and the coordinator's request
+        // reaches the hub from this one service, so a large tally needs the key.
+        ...(process.env.HUB_API_KEY
+          ? { 'x-api-key': process.env.HUB_API_KEY }
+          : {})
+      },
       body
     });
     text = await res.text();
@@ -86,6 +102,12 @@ async function forward(
     throw new HubError(`hub unreachable: ${err?.message || err}`, 502);
   }
 
+  if (res.status >= 300 && res.status < 400) {
+    const detail =
+      'the hub redirected this request; does HUB_URL point at a hub running this release?';
+    logUpstream(method, path, 502, detail);
+    throw new HubError(detail, 502);
+  }
   if (!res.ok) {
     let detail = `hub responded ${res.status}`;
     try {

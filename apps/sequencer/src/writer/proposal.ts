@@ -16,6 +16,7 @@ import {
   leadTimeError
 } from '../helpers/privacy';
 import { getProvider } from '../helpers/provider';
+import { eligibilityPublicKey } from '../helpers/sgpAttestation';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
   ballotParamsColumn,
@@ -25,7 +26,6 @@ import {
   TeConfigError,
   weightedBudgetFromEnv
 } from '../helpers/teCommittee';
-import { getEligibilityKey } from '../helpers/teEligibility';
 import { VotingPowerBoundError } from '../helpers/teVotingPowerBound';
 import {
   captureError,
@@ -187,7 +187,7 @@ export async function verify(body): Promise<any> {
     // clear error. `action` builds the one that is stored.
     try {
       await buildCommitteeSnapshot({
-        eligibilityKey: await getEligibilityKey(),
+        eligibilityKey: await eligibilityPublicKey(),
         votingStart: parseInt(msg.payload.start),
         votingEnd: parseInt(msg.payload.end),
         adminAddress: adminForConfig(space, body.address),
@@ -202,7 +202,7 @@ export async function verify(body): Promise<any> {
       }
       log.warn(`[writer] eligibility key unavailable: ${err?.message || err}`);
       return Promise.reject(
-        'private voting unavailable: could not reach the eligibility service'
+        `private voting unavailable: ${err?.message || err}`
       );
     }
   }
@@ -410,7 +410,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
         start: proposal.start,
         end: proposal.end,
         snapshotBlock: Number(proposal.snapshot ?? 0),
-        eligibilityKey: await getEligibilityKey()
+        eligibilityKey: await eligibilityPublicKey()
       });
     } catch (err: any) {
       // A supply read failed every retry; return a readable error, not a 500.

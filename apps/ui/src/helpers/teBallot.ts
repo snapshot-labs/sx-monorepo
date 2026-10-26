@@ -2,16 +2,17 @@
  * Builds the encrypted ballot for a private (shutter-elgamal) vote.
  *
  * Requests a credential from the sequencer, then uses the SDK's `buildBallot` to
- * encrypt, prove and sign the vote. The result is sent as the vote's `choice`;
- * the sequencer decodes it in `apps/sequencer/src/helpers/te.ts`.
+ * encrypt, prove and sign the vote, in a Web Worker (`teBallotWorker.ts`). The
+ * result is sent as the vote's `choice`; the sequencer decodes it in
+ * `apps/sequencer/src/helpers/te.ts`.
  */
 import { arrayify, hexlify } from '@ethersproject/bytes';
 import { keccak256 } from '@ethersproject/keccak256';
 import {
   Attestation,
+  BallotInputs,
   BallotVerifyParams,
   buildBallot,
-  G1Point,
   G2Point,
   initCurves,
   schnorrKeygen
@@ -20,17 +21,14 @@ import { BallotCredential, requestBallotCredential } from './teCredential';
 
 let curvesReady: Promise<void> | null = null;
 
-/**
- * Converts the sequencer's credential (hex strings) to the SDK's format. `nonce`
- * defaults to 1 for credentials from an older sequencer.
- */
+/** Converts the sequencer's credential (hex strings) to the SDK's format. */
 function toSdkAttestation(c: BallotCredential): Attestation {
   return {
     electionId: arrayify(c.electionId),
     pseudonym: arrayify(c.pseudonym),
     vk: arrayify(c.vk),
     weight: BigInt(c.weight),
-    nonce: BigInt(c.nonce ?? 1),
+    nonce: BigInt(c.nonce),
     signature: arrayify(c.signature)
   };
 }
@@ -47,6 +45,74 @@ export function ensureCurvesInit(): Promise<void> {
     });
   }
   return curvesReady as Promise<void>;
+}
+
+/** What building a ballot needs. All of it passes to a worker unchanged. */
+export interface BallotBuildRequest {
+  mpk: Uint8Array;
+  electionId: Uint8Array;
+  pseudonym: Uint8Array;
+  /** The voter's one-time secret key; `vk` is derived from it again. */
+  sk: bigint;
+  votes: bigint[];
+  params: BallotVerifyParams;
+  attestation: Attestation;
+}
+
+export type BallotWorkerMessage =
+  | { type: 'done'; ballot: BallotInputs }
+  | { type: 'error'; message: string };
+
+/** Runs the SDK's `buildBallot`, in the ballot worker or, without one, here. */
+export async function buildBallotFromRequest(
+  req: BallotBuildRequest
+): Promise<BallotInputs> {
+  await ensureCurvesInit();
+  const mpk = G2Point.fromBytes(req.mpk);
+  const { vk } = schnorrKeygen(req.sk);
+  try {
+    return buildBallot({
+      mpk,
+      electionId: req.electionId,
+      pseudonym: req.pseudonym,
+      sk: req.sk,
+      vk,
+      votes: req.votes,
+      params: req.params,
+      // Part of what the voter signs.
+      attestation: req.attestation
+    });
+  } finally {
+    mpk.destroyWasm();
+    vk.destroyWasm();
+  }
+}
+
+/**
+ * Builds the ballot in a Web Worker, because a weighted ballot takes seconds to
+ * tens of seconds and would freeze the page. Without `Worker` (tests), it runs
+ * on this thread.
+ */
+function buildBallotInWorker(req: BallotBuildRequest): Promise<BallotInputs> {
+  if (typeof Worker === 'undefined') return buildBallotFromRequest(req);
+
+  // `type: 'module'`, and built as one (`worker.format` in vite.config.ts).
+  const worker = new Worker(new URL('./teBallotWorker.ts', import.meta.url), {
+    type: 'module'
+  });
+  return new Promise<BallotInputs>((resolve, reject) => {
+    worker.onmessage = (event: MessageEvent<BallotWorkerMessage>) => {
+      worker.terminate();
+      const msg = event.data;
+      if (msg.type === 'done') resolve(msg.ballot);
+      else reject(new Error(msg.message));
+    };
+    worker.onerror = err => {
+      worker.terminate();
+      reject(new Error(err.message || 'ballot worker failed'));
+    };
+    worker.postMessage(req);
+  });
 }
 
 export interface TeBallotEnvelope {
@@ -83,30 +149,29 @@ export interface CredentialSource {
   space: string;
 }
 
-export interface BuildTeBallotArgs extends CredentialSource {
+interface BallotSource extends CredentialSource {
   voter: string;
   proposalId: string; // 0x-prefixed bytes32
   mpk: string; // 0x-prefixed compressed G2 (96 bytes)
   config: BallotVerifyParams; // proposal.te_config
+}
+
+export interface BuildTeBallotArgs extends BallotSource {
   /** 1-based candidate index the user clicked. */
   choice: number;
 }
 
-export interface BuildTeWeightedBallotArgs extends CredentialSource {
-  voter: string;
-  proposalId: string; // 0x-prefixed bytes32
-  mpk: string; // 0x-prefixed compressed G2 (96 bytes)
-  config: BallotVerifyParams; // proposal.te_config
+export interface BuildTeWeightedBallotArgs extends BallotSource {
   /** Snapshot weighted choice: 1-based candidate index (as string) → weight. */
   choice: Record<string, number>;
 }
 
 /**
  * Encrypts, proves and signs a ballot for the given votes. The voter's one-time
- * key `sk` exists only inside this function.
+ * key `sk` exists only here and in the worker that builds the ballot.
  */
 async function buildEnvelope(
-  args: Omit<BuildTeBallotArgs, 'choice'>,
+  args: BallotSource,
   votes: bigint[]
 ): Promise<TeBallotEnvelope> {
   const { voter, proposalId, mpk, config, sequencerUrl, space } = args;
@@ -115,38 +180,33 @@ async function buildEnvelope(
   const electionId = arrayify(proposalId);
   const pseudonym = pseudonymFor(voter, proposalId);
   const mpkBytes = arrayify(mpk);
-
-  const mpkPoint = G2Point.fromBytes(mpkBytes);
+  // Decoded only to refuse a bad key before a credential is requested.
+  G2Point.fromBytes(mpkBytes).destroyWasm();
 
   const { sk, vk } = schnorrKeygen();
-  const vkPoint: G1Point = vk;
+  const vkHex = hexlify(vk.toBytes());
+  vk.destroyWasm();
 
   // The credential is issued for this key, so request it before building the ballot.
   const issued = await requestBallotCredential({
     sequencerUrl,
     space,
     proposalId,
-    vk: hexlify(vk.toBytes()),
+    vk: vkHex,
     voter
   });
 
-  let ballot;
-  try {
-    ballot = buildBallot({
-      mpk: mpkPoint,
-      electionId,
-      pseudonym,
-      sk,
-      vk: vkPoint,
-      votes,
-      params: config,
-      // Part of what the voter signs.
-      attestation: toSdkAttestation(issued.attestation)
-    });
-  } finally {
-    mpkPoint.destroyWasm();
-    vk.destroyWasm();
-  }
+  const ballot = await buildBallotInWorker({
+    mpk: mpkBytes,
+    electionId,
+    pseudonym,
+    sk,
+    votes,
+    // A plain copy: the proposal's config may be a reactive proxy, which cannot
+    // be posted to a worker.
+    params: { ...config },
+    attestation: toSdkAttestation(issued.attestation)
+  });
 
   return {
     electionId: hexlify(ballot.electionId),

@@ -173,7 +173,7 @@ const dkgInProgress = computed(
       <div v-if="showBallotInfo" class="text-sm text-skin-text mt-1 pl-[22px]">
         Your choice was encrypted to this proposal's threshold key before it was
         sent. The server only ever stores the ciphertext above, never your
-        selection, and it stays sealed until voting closes.
+        selection, and it is never decrypted on its own; only the total is.
       </div>
     </div>
   </slot>

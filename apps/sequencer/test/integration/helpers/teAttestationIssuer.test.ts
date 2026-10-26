@@ -188,6 +188,15 @@ describe('issueBallotCredential — refusals', () => {
         end: Math.floor(Date.now() / 1e3) - 3600
       },
       422
+    ],
+    [
+      'a proposal whose eligibility key was rotated',
+      {
+        te_sgp_config: JSON.stringify({
+          eligibilityKey: `0x${'cd'.repeat(48)}`
+        })
+      },
+      409
     ]
   ])('refuses %s', async (_label, over, expected) => {
     await seed(over);

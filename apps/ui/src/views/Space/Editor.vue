@@ -351,6 +351,7 @@ const canSubmit = computed(() => {
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
     hasPrivateVotingTypeConflict.value ||
+    hasPrivateVotingDelayConflict.value ||
     isMissingExecution.value
   ) {
     return false;
@@ -396,10 +397,22 @@ const defaultVotingDelay = computed(() =>
 
 // Shutter-elgamal proposals need time for DKG before voting opens; the sequencer
 // rejects starts sooner than MIN_DKG_LEAD_TIME_S from now. The display and picker
-// use this floor too. The extra minute allows for the time spent signing.
+// use this floor too. The extra minute allows for the time spent signing. Not on
+// an edit: it does not send `start`, so moving it would only show a wrong date.
 const SIGNING_SLACK_S = 60;
+// A space with a voting delay fixes the start at `created + delay`, so a delay
+// shorter than the floor leaves no start the sequencer accepts. Not on an edit,
+// which keeps its start.
+const MIN_PRIVATE_VOTING_DELAY_S = MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S;
+const hasPrivateVotingDelayConflict = computed(
+  () =>
+    isPrivateVoting.value &&
+    !proposal.value?.originalProposal &&
+    props.space.voting_delay > 0 &&
+    props.space.voting_delay < MIN_PRIVATE_VOTING_DELAY_S
+);
 const privateVotingStartFloor = computed(() =>
-  isPrivateVoting.value
+  isPrivateVoting.value && !proposal.value?.originalProposal
     ? unixTimestamp.value + MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S
     : 0
 );
@@ -412,10 +425,11 @@ const proposalStart = computed(() => {
 
 // When private voting is turned on and the draft starts too soon, move the start
 // (and end, keeping the voting period) to the floor so the saved draft matches
-// the picker.
+// the picker. An unset start is left alone: `proposalStart` applies the floor,
+// and in a space with a voting delay the start must stay `now + delay`.
 watch(privateVotingStartFloor, floor => {
   if (!proposal.value || floor === 0) return;
-  if ((proposal.value.start ?? 0) < floor) {
+  if (proposal.value.start != null && proposal.value.start < floor) {
     const originalPeriod =
       proposal.value.min_end != null && proposal.value.start != null
         ? proposal.value.min_end - proposal.value.start
@@ -1010,6 +1024,14 @@ watchEffect(() => {
           >
             Permanent private voting supports only single choice, basic and
             weighted voting. Change the voting type before submitting.
+          </UiAlert>
+          <UiAlert
+            v-if="hasPrivateVotingDelayConflict"
+            type="error"
+            class="!my-0"
+          >
+            Permanent private voting needs this space's voting delay to be 0 or
+            at least {{ Math.ceil(MIN_PRIVATE_VOTING_DELAY_S / 60) }} minutes.
           </UiAlert>
           <EditorLabels
             v-if="space.labels?.length"

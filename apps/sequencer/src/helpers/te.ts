@@ -134,12 +134,19 @@ export async function verifyTeBallot(
 
   // The SDK also verifies the credential against the issuer's key. Runs in a
   // worker thread because it takes seconds of CPU per ballot.
-  return verifyBallotInWorker({
+  const job = {
     inputs,
     params: proposal.te_config,
     mpk,
     eligibilityKey: hexToBytes(eligibilityKey, 'eligibilityKey')
-  });
+  };
+  try {
+    return await verifyBallotInWorker(job);
+  } catch {
+    // A worker crashed or could not start; the pool has logged why. Answered as a
+    // result, so the voter gets a message instead of an empty error.
+    return { ok: false, reason: 'verifier_unavailable' };
+  }
 }
 
 /**

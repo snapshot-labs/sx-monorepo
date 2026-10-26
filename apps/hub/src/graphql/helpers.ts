@@ -517,7 +517,6 @@ export function formatProposal(proposal) {
   proposal.quorumType = proposal.quorum_type || 'default';
   // Threshold-ElGamal private voting fields (shutter-elgamal); null when unset.
   proposal.te_config = jsonParse(proposal.te_config, null);
-  proposal.te_committee_pks = jsonParse(proposal.te_committee_pks, null);
   proposal.te_keyper_addresses = jsonParse(proposal.te_keyper_addresses, null);
   proposal.te_mpk = bytesToHex(proposal.te_mpk);
   proposal.te_dkg_status = deriveDkgStatus(proposal);

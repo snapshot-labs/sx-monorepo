@@ -75,7 +75,6 @@ export interface AuditPayload {
   te_threshold_n: number;
   te_keyper_addresses: string[];
   aggregate: {
-    election_id: string;
     num_candidates: number;
     ciphertexts: Array<{ c1: string; c2: string }>;
     admitted?: number[];
@@ -102,8 +101,8 @@ export interface AuditPayload {
 
 /**
  * One encrypted ballot, read from the committee's own feed (`te_sgp_ballots`).
- * Only the ciphertexts are kept: proofs are not re-checked here and are most of a
- * ballot's size.
+ * Only the ciphertexts are fetched: proofs are not re-checked here and are most of
+ * a ballot's size.
  */
 export interface AuditBallot {
   /** Position in the committee's order; `admitted` and `exclusions` refer to it. */
@@ -162,7 +161,6 @@ export interface VerifyResult {
   verified: boolean;
   /** The reason when `verified` is false; `null` otherwise. */
   reason: string | null;
-  thresholdMet: boolean;
   /** `budget × Σ(counted weights)`, derived from the ballots this client read. */
   derivedBound: bigint;
   /**
@@ -201,7 +199,7 @@ export async function fetchBallotsPayload(
   const url = endpoint(apiBaseUrl, proposalId, 'te_sgp_ballots');
   const ballots: AuditBallot[] = [];
   for (;;) {
-    const r = await fetch(`${url}?start=${ballots.length}`, {
+    const r = await fetch(`${url}?fields=ciphertexts&start=${ballots.length}`, {
       credentials: 'omit'
     });
     if (!r.ok) throw new Error(`hub ${r.status}: ${await r.text()}`);
@@ -486,12 +484,8 @@ export async function verifyTally(
   }
   // te_threshold_t is the quorum: the number of keypers required, not the number
   // of faults tolerated.
-  const thresholdMet = sharesPerCandidate.every(
-    arr => arr.length >= te_threshold_t
-  );
-
   try {
-    if (!thresholdMet) {
+    if (!sharesPerCandidate.every(arr => arr.length >= te_threshold_t)) {
       throw new Error(
         `not enough decryption shares per candidate (need t=${te_threshold_t})`
       );
@@ -538,7 +532,6 @@ export async function verifyTally(
       tallies,
       verified: ok,
       reason,
-      thresholdMet,
       derivedBound,
       boundMatchesPublished
     };
@@ -568,8 +561,6 @@ export interface VerifyProgress {
 export interface VerifyAllResult {
   ballots: BallotAggregateResult;
   tally: VerifyResult;
-  /** Computed from the ballots, never taken from the committee. */
-  derivedBound: bigint;
 }
 
 /**
@@ -605,14 +596,14 @@ export async function verifyAll(
   const tally = await verifyTally(proposalId, payload, derivedBound);
   onProgress?.({ phase: 'tally', done: 1, total: 1 });
 
-  return { ballots, tally, derivedBound };
+  return { ballots, tally };
 }
 
 /**
  * Builds a bundle that anyone can re-check offline (for example with the SDK's CLI)
  * without trusting this UI or the hub. It holds the public audit payload, every
- * encrypted ballot with its proof, and this client's results. It contains only
- * public data.
+ * encrypted ballot's ciphertexts (not its proofs) and this client's results. It
+ * contains only public data.
  */
 export function buildVerificationBundle(args: {
   proposalId: string;
@@ -647,7 +638,6 @@ export function buildVerificationBundle(args: {
       exclusions: args.ballotResult.exclusions,
       admittedSetResolved: args.ballotResult.admittedSetResolved,
       publishedTallies: args.tallyResult.tallies.map(t => t.toString()),
-      thresholdMet: args.tallyResult.thresholdMet,
       talliesVerified: args.tallyResult.verified,
       failureReason: args.tallyResult.reason,
       derivedBound: args.tallyResult.derivedBound.toString(),

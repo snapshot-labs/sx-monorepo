@@ -1,6 +1,7 @@
 import { G2Point, initCurves } from '@shutter-network/urban-verified-crypto';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
+  buildBallotFromRequest,
   buildTeBallotEnvelope,
   buildTeWeightedBallotEnvelope,
   pseudonymFor,
@@ -199,4 +200,47 @@ describe('buildTeWeightedBallotEnvelope — envelope shape (real crypto)', () =>
     },
     CRYPTO_TIMEOUT
   );
+});
+
+// Building a weighted ballot takes seconds, so it must not run on the page's
+// thread. A stand-in for `Worker` records what the page sends and runs the real
+// build, as the ballot worker does.
+describe('buildTeBallotEnvelope — in a worker', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('builds the ballot in the ballot worker, for the key the credential names', async () => {
+    const sent: { url: string; request: any }[] = [];
+    class StandInWorker {
+      onmessage: ((event: { data: any }) => void) | null = null;
+      onerror: ((err: any) => void) | null = null;
+      constructor(private url: URL) {}
+      postMessage(request: any) {
+        sent.push({ url: String(this.url), request });
+        buildBallotFromRequest(request).then(ballot =>
+          this.onmessage?.({ data: { type: 'done', ballot } })
+        );
+      }
+
+      terminate() {}
+    }
+    vi.stubGlobal('Worker', StandInWorker);
+
+    const envelope = await buildTeBallotEnvelope({
+      sequencerUrl: 'http://sequencer.invalid/api',
+      space: 'test.eth',
+      voter: `0x${'11'.repeat(20)}`,
+      proposalId: `0x${'22'.repeat(32)}`,
+      mpk: VALID_MPK,
+      config: { variant: 'A', mode: 'exact', budget: 1, numCandidates: 3 },
+      choice: 2
+    });
+
+    expect(sent).toHaveLength(1);
+    expect(sent[0].url).toMatch(/teBallotWorker\.ts$/);
+    expect(sent[0].request.votes).toEqual([0n, 1n, 0n]);
+    // The worker derives `vk` from the secret key it was sent; it must be the key
+    // the credential was issued for.
+    expect(envelope.vk).toBe(envelope.attestation.vk);
+    expect(envelope.ciphertexts).toHaveLength(3);
+  });
 });

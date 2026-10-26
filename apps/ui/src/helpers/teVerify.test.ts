@@ -32,7 +32,6 @@ const ciphertexts = (hex: string, n = BASE_CONFIG.numCandidates) =>
   Array.from({ length: n }, () => ({ c1: hex, c2: hex }));
 
 const aggregateOf = (hex: string, n = BASE_CONFIG.numCandidates) => ({
-  election_id: PROPOSAL_ID,
   num_candidates: n,
   ciphertexts: ciphertexts(hex, n)
 });
@@ -385,8 +384,8 @@ describe('fetchBallotsPayload', () => {
     );
 
     expect(fetchMock.mock.calls.map(c => c[0])).toEqual([
-      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=0`,
-      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?start=2`
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?fields=ciphertexts&start=0`,
+      `https://hub.test/api/proposal/${PROPOSAL_ID}/te_sgp_ballots?fields=ciphertexts&start=2`
     ]);
     expect(payload.scale).toBe(4);
     expect(payload.ballots.map(b => [b.sequenceNumber, b.vp])).toEqual([

@@ -18,6 +18,7 @@ import {
   expectedPseudonym,
   verifyTeBallot
 } from '../../../src/helpers/te';
+import * as pool from '../../../src/helpers/teBallotPool';
 import { closeBallotPool } from '../../../src/helpers/teBallotPool';
 import { castBallot, CastBallotArgs } from '../../fixtures/teBallotBuilder';
 
@@ -133,6 +134,19 @@ describe('private ballot verification: the worker pool', () => {
       delete process.env.TE_VERIFY_WORKERS;
       await closeBallotPool();
     }
+  }, 120_000);
+
+  // A worker that crashes (or cannot start) rejects its ballot; the voter must get
+  // a reason, not an empty error.
+  it('reports a crashed check as a result, not an error', async () => {
+    const choice = await poolBallot();
+    jest
+      .spyOn(pool, 'verifyBallotInWorker')
+      .mockRejectedValueOnce(new Error('ballot verifier exited with code 1'));
+    expect(await check(choice)).toEqual({
+      ok: false,
+      reason: 'verifier_unavailable'
+    });
   }, 120_000);
 });
 

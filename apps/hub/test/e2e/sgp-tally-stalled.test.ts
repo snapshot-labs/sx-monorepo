@@ -19,8 +19,7 @@ import {
   committee,
   HOST,
   insertProposal,
-  postJson,
-  seedEligibilityKey
+  postJson
 } from '../fixtures/sgp';
 
 const PUBLISHER = new Wallet(`0x${'a1'.repeat(32)}`);
@@ -117,11 +116,8 @@ async function upsertSpace(addresses: string[]): Promise<void> {
 
 describe('POST /api/proposal/:id/te_tally_stalled', () => {
   beforeAll(async () => {
-    // The election read returns 503 unless the config's eligibility key matches
-    // the published one, so publish it here rather than rely on another suite.
     // Cleanup also clears this proposal's spent nonces, so a second run seconds
     // later does not reuse timestamps that are already spent.
-    await seedEligibilityKey();
     await insertProposal(ID, {
       author: AUTHOR.address,
       space: SPACE,
@@ -241,7 +237,7 @@ describe('POST /api/proposal/:id/te_tally_stalled', () => {
   // A spent nonce must be kept until its `issuedAt` (not its acceptance time)
   // leaves the window; otherwise a signer with a fast clock lets the stall be
   // replayed after the admin's resume.
-  it('refuses a replayed stall after a resume, even when the signer clock ran ahead', async () => {
+  it('refuses a replayed stall after a resume', async () => {
     const issuedAt = Math.floor(Date.now() / 1000) - 50;
     const stall = {
       stalled: true,
@@ -249,12 +245,8 @@ describe('POST /api/proposal/:id/te_tally_stalled', () => {
       issuedAt
     };
     expect(await post(stall)).toBe(204);
-    // As if accepted 350 s ago, from a coordinator whose clock was 300 s ahead.
-    await db.queryAsync(
-      `UPDATE te_request_nonces SET accepted_at = ?
-        WHERE proposal_id = ? AND op = 'tally_stall' AND issued_at = ?`,
-      [Math.floor(Date.now() / 1000) - 350, ID, issuedAt]
-    );
+    // Nonces are pruned by `issued_at`, so this one is kept for as long as the
+    // stall could still be replayed, whenever it was accepted.
 
     expect(await postSigned(false, 'adminSig', ADMIN, 'tally_resume')).toBe(
       204

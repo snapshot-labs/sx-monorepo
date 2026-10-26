@@ -9,6 +9,7 @@ import {
   isWithinSgpVotingWindow
 } from './te';
 import { parseCommitteeSnapshotLoose } from './teCommittee';
+import { isEligibilityKeyRotated, KEY_ROTATED_MESSAGE } from './teEligibility';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
 
@@ -113,6 +114,9 @@ export async function issueBallotCredential(args: {
   // ingest would refuse.
   if (!isWithinSgpVotingWindow(now, proposal.start, proposal.end)) {
     throw new TeIssueError('voting is not open for this proposal', 422);
+  }
+  if (await isEligibilityKeyRotated(proposal)) {
+    throw new TeIssueError(KEY_ROTATED_MESSAGE, 409);
   }
 
   // Already parsed by getProposal.

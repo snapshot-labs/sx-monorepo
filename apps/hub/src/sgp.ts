@@ -18,10 +18,6 @@ import {
   parseJsonPreservingBigInts,
   stringifyPreservingBigInts
 } from './helpers/bigIntJson';
-import {
-  EligibilityKeyError,
-  eligibilityPublicKey
-} from './helpers/eligibilityKey';
 import log from './helpers/log';
 import db from './helpers/mysql';
 import { canonicalAggregate, canonicalPoint } from './helpers/sgpAggregate';
@@ -55,8 +51,8 @@ const MAX_BALLOT_PAGE = 1000;
  * Largest ballot page, in stored envelope bytes. Matches the reference data
  * layer's `MAX_BALLOT_PAGE_BYTES`.
  *
- * An envelope is ~120-160 KB at budget 100 and over 1 MB at the
- * `MAX_PROOF_BRANCHES` limit, so 1000 rows would be too large to build and forward
+ * An envelope is ~120-160 KB at budget 100 and up to 1 MB at the largest private
+ * ballot the sequencer accepts, so 1000 rows would be too large to build and forward
  * within te-data-layer's 10 s timeout. A page always has at least one ballot, so
  * a single envelope above the cap is still served.
  */
@@ -72,12 +68,18 @@ const REQUEST_FRESHNESS_S = 300;
 /** How many proposals one `list` response may name. */
 const LIST_LIMIT = 500;
 
+/** `0x`-hex as bytes. */
+const hex = (v: unknown) => Buffer.from(String(v).replace(/^0x/, ''), 'hex');
+
 /** Loads a private proposal, or answers 404 and returns null. */
-async function loadProposal(proposalId: string, res: any): Promise<any | null> {
+export async function loadProposal(
+  proposalId: string,
+  res: any
+): Promise<any | null> {
   const [proposal] = await (db as any).queryAsync(
-    `SELECT id, privacy, type, choices, start, end, author, space, te_mpk,
-            te_committee_pks, te_sgp_config, te_config, te_tally_stalled,
-            te_tally_stall_reason
+    `SELECT id, privacy, choices, start, end, author, space, te_mpk,
+            te_committee_pks, te_keyper_addresses, te_threshold_t, te_threshold_n,
+            te_sgp_config, te_config, te_tally_stalled, te_tally_stall_reason
        FROM proposals WHERE id = ? LIMIT 1`,
     [proposalId]
   );
@@ -162,33 +164,15 @@ router.get('/proposal/:id/te_sgp_election', async (req, res) => {
     try {
       config = composeElectionConfig({
         proposalId,
-        choices: parseJsonField<string[]>(proposal.choices, []),
-        type: proposal.type,
-        snapshot: parseCommitteeSnapshot(proposal.te_sgp_config),
-        currentEligibilityKey: await eligibilityPublicKey()
+        ballot: parseJsonField<any>(proposal.te_config, null),
+        snapshot: parseCommitteeSnapshot(proposal.te_sgp_config)
       });
     } catch (err: any) {
-      if (err instanceof SgpConfigError || err instanceof EligibilityKeyError) {
+      if (err instanceof SgpConfigError) {
         log.error(`[sgp] ${proposalId}: ${err.message}`);
         return sendError(res, err.message, 503);
       }
       throw err;
-    }
-
-    const ingestConfig = parseJsonField<any>(proposal.te_config, null);
-    const ingestBudget = Number(ingestConfig?.budget);
-    if (ingestBudget !== config.budget) {
-      log.error(
-        `[sgp] ${proposalId}: ballot budget disagrees — te_config says ${ingestConfig?.budget}, ` +
-          `the committee config says ${config.budget}`
-      );
-      return sendError(
-        res,
-        `ballot budget mismatch: ballots are built to ${ingestConfig?.budget} but the ` +
-          `committee would verify against ${config.budget}; every ballot would be ` +
-          'rejected as INVALID_PROOF',
-        500
-      );
     }
 
     const committeePks = parseJsonField<string[] | null>(
@@ -248,34 +232,12 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     const rawCount = parseInt(String(req.query.count ?? '0'), 10);
     const countOnly = req.query.countOnly === '1';
-
-    // Refuse a proposal whose frozen eligibility key has been rotated: every
-    // credential on it would fail and the tally would be all zeros. Checked
-    // before reading any rows.
-    try {
-      const snapshot = parseCommitteeSnapshot(proposal.te_sgp_config);
-      const currentEligibilityKey = await eligibilityPublicKey();
-      if (
-        currentEligibilityKey.toLowerCase() !==
-        snapshot.eligibilityKey.toLowerCase()
-      ) {
-        log.error(
-          `[sgp] ${proposalId}: eligibility key rotated since this proposal was created`
-        );
-        return sendError(
-          res,
-          'frozen eligibility key does not match the hub key in use; ' +
-            'the key was rotated and credentials on this proposal can no longer verify',
-          503
-        );
-      }
-    } catch (err: any) {
-      if (err instanceof SgpConfigError) {
-        log.error(`[sgp] ${proposalId}: ${err.message}`);
-        return sendError(res, err.message, 500);
-      }
-      throw err;
-    }
+    // "Verify tally" needs only the ciphertexts. Dropping the proof, almost all of
+    // a ballot, in MySQL lets a page hold the full row limit.
+    const ballotDoc =
+      req.query.fields === 'ciphertexts'
+        ? "JSON_REMOVE(choice, '$.zkProof')"
+        : 'choice';
 
     // cb != -3 excludes soft-deleted votes (CB.PENDING_DELETE in the sequencer).
     // A plain COUNT, so `countOnly` reads no envelopes.
@@ -300,43 +262,43 @@ router.get('/proposal/:id/te_sgp_ballots', async (req, res) => {
     );
     if (!keys.length) return res.json({ ballots: [], total: Number(total) });
 
-    // Cut the page at MAX_BALLOT_PAGE_BYTES (by JSON_STORAGE_SIZE) before reading
-    // any envelope. It keeps a prefix of `keys`, so `start + i` stays correct.
-    const sizes = await (db as any).queryAsync(
-      `SELECT id, JSON_STORAGE_SIZE(choice) AS size
-         FROM votes
-        WHERE proposal = ? AND id IN (?)`,
-      [proposalId, (keys as any[]).map(k => k.id)]
+    // A large ballot is stored off-page, so measuring its size loads all of it.
+    // Only the first is measured up front, to estimate how many fit in
+    // MAX_BALLOT_PAGE_BYTES: a proposal's ballots all have the same shape. The
+    // page is then cut on each ballot's real size, so a wrong estimate only
+    // shortens it. Both keep a prefix of `keys`, so `start + i` stays correct.
+    const [first] = await (db as any).queryAsync(
+      `SELECT JSON_STORAGE_SIZE(${ballotDoc}) AS size FROM votes WHERE proposal = ? AND id = ?`,
+      [proposalId, keys[0].id]
     );
-    const sizeOf = new Map<string, number>(
-      (sizes as any[]).map(r => [r.id, Number(r.size)])
-    );
-    let pageBytes = 0;
-    let take = 0;
-    for (const k of keys as any[]) {
-      const size = sizeOf.get(k.id) ?? 0;
-      if (take > 0 && pageBytes + size > MAX_BALLOT_PAGE_BYTES) break;
-      pageBytes += size;
-      take++;
-    }
-    const pageKeys = (keys as any[]).slice(0, take);
+    const fits = Math.floor(MAX_BALLOT_PAGE_BYTES / Number(first?.size || 1));
+    const pageKeys = (keys as any[]).slice(0, Math.max(1, fits));
 
     // Put envelopes in `pageKeys` order in JS, not with ORDER BY: MySQL cannot
     // sort a row larger than `sort_buffer_size` (256 KiB by default), and one
     // envelope can be (e.g. five choices at budget 100).
     const fetched = await (db as any).queryAsync(
-      `SELECT id, choice, created
+      `SELECT id, ${ballotDoc} AS choice, created, JSON_STORAGE_SIZE(${ballotDoc}) AS size
          FROM votes
         WHERE proposal = ? AND id IN (?)`,
       [proposalId, pageKeys.map(k => k.id)]
     );
     const byId = new Map<string, any>((fetched as any[]).map(r => [r.id, r]));
-    const rows = pageKeys.map(k => byId.get(k.id));
-    if (rows.some(r => r === undefined)) {
-      // A vote in the window was deleted between the two queries. Serving the
-      // rest would renumber what follows it, so ask the reader to retry.
+    const fetchedRows = pageKeys.map(k => byId.get(k.id));
+    if (fetchedRows.some(r => r === undefined)) {
+      // A vote in the window was deleted between the queries. Serving the rest
+      // would renumber what follows it, so ask the reader to retry.
       return sendError(res, 'ballot list changed while reading; retry', 503);
     }
+    let pageBytes = 0;
+    let take = 0;
+    for (const row of fetchedRows) {
+      const size = Number(row.size);
+      if (take > 0 && pageBytes + size > MAX_BALLOT_PAGE_BYTES) break;
+      pageBytes += size;
+      take++;
+    }
+    const rows = fetchedRows.slice(0, take);
 
     const ballots: any[] = [];
     for (let i = 0; i < rows.length; i++) {
@@ -427,6 +389,18 @@ router.post('/proposal/:id/te_sgp_dkg', async (req, res) => {
 
     const snapshot = committeeFor(proposal, res);
     if (!snapshot) return;
+
+    // No key by the start means the key ceremony failed, for good: the coordinator
+    // stops working on the proposal then and will not run its tally. A key that
+    // arrived later would open voting for ballots nobody counts. Once a key is
+    // stored, a keyper may still resend its matching result.
+    if (!proposal.te_mpk && Math.floor(Date.now() / 1000) >= proposal.start) {
+      return sendError(
+        res,
+        'voting has started without a key; the key ceremony failed',
+        422
+      );
+    }
 
     const { pkElection, committeePKs, keyperSig } = req.body || {};
     let pkCanon: string;
@@ -661,8 +635,8 @@ async function submitAggregate(
 
 /**
  * One keyper's aggregate. Once `thresholdT` keypers submit the same one, it is
- * stored as the proposal's aggregate. These rules match the protocol's reference
- * store:
+ * the proposal's canonical aggregate (`canonicalAggregateFor`). These rules match
+ * the protocol's reference store:
  *
  *   - 422 before voting ends.
  *   - A keyper may replace its aggregate until quorum is reached (the coordinator
@@ -819,7 +793,6 @@ async function verifyShareProofs(
   pkHex: string
 ): Promise<number | null> {
   await ensureCurves();
-  const hex = (v: string) => Buffer.from(String(v).replace(/^0x/, ''), 'hex');
 
   for (let candidate = 0; candidate < entries.length; candidate++) {
     let c1: G2Point | null = null;
@@ -1008,8 +981,6 @@ router.post('/proposal/:id/te_sgp_decryption_share', async (req, res) => {
     // One INSERT for all candidates, so the shares are stored all or nothing and
     // a retry is not mistaken for different shares.
     const now = Math.floor(Date.now() / 1000);
-    const hex = (v: unknown) =>
-      Buffer.from(String(v).replace(/^0x/, ''), 'hex');
     const rows = entries.map((entry: any, candidate: number) => {
       const proof = hex(entry.proof);
       return [
@@ -1341,9 +1312,8 @@ router.post('/proposal/:id/te_tally_stalled', async (req, res) => {
 
     try {
       await (db as any).queryAsync(
-        `INSERT INTO te_request_nonces (proposal_id, op, issued_at, accepted_at)
-         VALUES (?, ?, ?, ?)`,
-        [proposalId, op, issuedAt, now]
+        'INSERT INTO te_request_nonces (proposal_id, op, issued_at) VALUES (?, ?, ?)',
+        [proposalId, op, issuedAt]
       );
     } catch (err: any) {
       if (err?.code === 'ER_DUP_ENTRY') {

@@ -121,9 +121,23 @@ async function query(parent, args, context?, info?) {
     ? 'FORCE INDEX (idx_votes_on_space_proposal_created_id)'
     : '';
 
-  // Pick the page by keys only, then load the full rows by primary key. A private
-  // ballot's `choice` alone can exceed MySQL's sort buffer (256 KiB by default),
-  // which makes sorting full rows fail.
+  // Two queries instead of one, because of private (`shutter-elgamal`) ballots.
+  //
+  // A private vote stores its whole encrypted ballot in `choice`: about 150 KB at
+  // three weighted choices, up to 1 MB at the 19-choice limit. When MySQL sorts
+  // full rows, each row must fit in the sort buffer (256 KiB by default), so a
+  // single `SELECT v.* … ORDER BY` fails with "Out of sort memory" as soon as one
+  // such ballot is among the sorted rows: a voter's history, a proposal's votes.
+  // Computing a smaller `choice` in that query does not help; MySQL still carries
+  // the full column through the sort.
+  //
+  // 1. Pick the page by sorting only the primary key. Measured on 200,000 votes,
+  //    this sort plus step 2 takes about a quarter of the old single query.
+  // 2. Load those rows by primary key, which needs no sort. A private ballot's
+  //    `choice` is cut to its first ciphertext component, the only part a vote
+  //    list shows; whole ballots would let one public request load up to 1 GB
+  //    into the hub. Whole ballots are served by `te_sgp_ballots`.
+  //
   // cb = -3 marks votes of deleted proposals, pending deletion by the sequencer
   const query = `
     SELECT v.voter, v.space, v.proposal FROM votes v ${indexHint}
@@ -136,8 +150,15 @@ async function query(parent, args, context?, info?) {
     const keys = await db.queryAsync(query, params);
     if (keys.length > 0) {
       const keyOf = (v: any) => `${v.voter}\0${v.space}\0${v.proposal}`;
+      // Every `votes` column, listed so that `choice` can be cut for private ballots.
       const rows = await db.queryAsync(
-        'SELECT * FROM votes WHERE (voter, space, proposal) IN (?)',
+        `SELECT id, ipfs, voter, created, space, proposal,
+                IF(JSON_CONTAINS_PATH(choice, 'one', '$.zkProof'),
+                   JSON_OBJECT('ciphertexts', JSON_ARRAY(
+                     JSON_OBJECT('c1', choice->'$.ciphertexts[0].c1'))),
+                   choice) AS choice,
+                metadata, reason, app, vp, vp_by_strategy, vp_state, cb, vp_value
+           FROM votes WHERE (voter, space, proposal) IN (?)`,
         [keys.map(k => [k.voter, k.space, k.proposal])]
       );
       const byKey = new Map(rows.map(row => [keyOf(row), row]));

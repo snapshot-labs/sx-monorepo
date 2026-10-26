@@ -13,12 +13,11 @@ import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
 import { verify } from './helpers/provider';
 import relayer, { issueReceipt } from './helpers/relayer';
+import { MAX_PRIVATE_VOTE_SIZE } from './helpers/teCommittee';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
 
 const MAX_MESSAGE_SIZE = 1e5;
-/** Only for a vote on a `shutter-elgamal` proposal; see the size check below. */
-const MAX_PRIVATE_VOTE_SIZE = 1e6;
 
 const NETWORK_METADATA = {
   evm: {

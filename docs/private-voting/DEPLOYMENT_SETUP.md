@@ -62,29 +62,43 @@ keyper files rather than in this repository.
 
 ### 1a. Identities (`.env`)
 
-```bash
-cd sx-monorepo
-python3 scripts/sgp/gen-env.py            # prints the plan, writes nothing
-python3 scripts/sgp/gen-env.py --write
-```
+1. Copy the template and keep it private:
+   ```bash
+   cd sx-monorepo
+   cp .env.example .env && chmod 600 .env
+   ```
+2. Replace every `0x...` with a new key: `SEQ_RELAYER_PK`, `TE_ELIGIBILITY_PRIVATE_KEY`
+   and `COORDINATOR_SIGNING_KEY`. Also fill `COORDINATOR_API_TOKEN` and
+   `MYSQL_ROOT_PASSWORD`. The line above each one in the file gives the command that
+   creates it. In production, take the keys from your secret store instead.
+3. Set `TE_RESULT_PUBLISHER_ADDRESS` to the address of `COORDINATOR_SIGNING_KEY`.
+   From `apps/sequencer`, so the library resolves:
+   ```bash
+   bun -e 'console.log(new (require("@ethersproject/wallet").Wallet)(process.argv[1]).address)' 0x<COORDINATOR_SIGNING_KEY>
+   ```
+   Give the same address to every keyper operator, as their `COORDINATOR_IDENTITY`.
 
-The script creates one key for each identity this deployment owns and derives every
-address from its key: the sequencer's own secrets, the coordinator's signing key and
-relay token, and the eligibility issuer's key. The file is `chmod 600` and gitignored.
+**The coordinator's address must match in all three places:** `COORDINATOR_SIGNING_KEY`,
+`TE_RESULT_PUBLISHER_ADDRESS` and every keyper's `COORDINATOR_IDENTITY`. If they
+differ, the failure shows up hours later, as an authorisation error that names neither
+side, on a proposal whose ballots are already cast.
 
-**Why one script writes them all.** The coordinator's address appears in three places:
-`COORDINATOR_SIGNING_KEY` in `.env`, `TE_RESULT_PUBLISHER_ADDRESS` beside it, and
-`COORDINATOR_IDENTITY` in every keyper's env. If they differ, the failure shows up
-hours later, as an authorisation error that names neither side, on a proposal whose
-ballots are already cast. The script derives all three from one key.
+Do not change the coordinator key once private proposals exist. Every existing
+proposal has its address frozen on it, and every keyper has it pinned, so a new key
+breaks every election in flight.
 
-Two values need a person. A re-run keeps both, so this applies to a first run, or after
-you delete `.env`:
+Change `TE_ELIGIBILITY_PRIVATE_KEY` only when no private proposal is open or waiting
+to start. It takes effect when the sequencer restarts. Every private proposal keeps
+the key frozen on it when it was created, so after the change every proposal created
+before it accepts no more votes, including one that has not started yet: it opens,
+then refuses every voter. Votes cast before the change still count, and those
+proposals are tallied as usual. Proposals created after the change use the new key.
 
-- **`WALLETCONNECT_PROJECT_ID`** is written as a placeholder, and the placeholder is
-  fine. Only the sequencer uses it, to whitelist custom space domains with Reown, and
-  only when `REOWN_SECRET` is set. The UI's wallet connection uses its own
-  `VITE_WC_PROJECT_ID`.
+Two values can stay as they are at first:
+
+- **`WALLETCONNECT_PROJECT_ID`**: the template's value is fine. Only the sequencer uses
+  it, to whitelist custom space domains with Reown, and only when `REOWN_SECRET` is
+  set. The UI's wallet connection uses its own `VITE_WC_PROJECT_ID`.
 - **`TE_SOLVER_CEILING`** starts at `1e12`, which suits roughly a 0.5 GB coordinator.
   It decides every proposal's `scale`, so set it for your hardware. See the RAM table in [Coordinator sizing](README.md#coordinator-sizing--what-a-tally-costs)
   before changing it.
@@ -98,18 +112,28 @@ and every closed *public* proposal stays on "Finalizing results". Closed private
 proposals are not affected: the sequencer copies their published result into the
 scores on its own.
 
-**`TE_KEYPERS` is carried, not generated.** Those URLs come from the people who
-operate the keypers; the script cannot mint them. Put the URLs they give you in
+**`TE_KEYPERS` comes from the keyper operators.** Put the URLs they give you in
 `.env` before creating a private proposal.
 
-Re-running is safe, and is how you repair a file you edited by mistake: the script
-reads the existing keys back and only recomputes the derived values.
+**`HUB_API_KEY` is needed only against a rate-limited hub.** A hub with
+`RATE_LIMIT_DATABASE_URL` set (Snapshot's own hub is one) allows each IP 100 requests a
+minute, unless the request carries a Snapshot API key. Every keyper's and the
+coordinator's request reaches the hub through te-data-layer, so to the hub they all
+come from one IP. A large weighted proposal needs more than 100 requests a minute at
+tally time; past that the hub answers 429 and the tally stalls. Set `HUB_API_KEY` to
+an API key for that hub, and te-data-layer sends it with every request. It must be an
+API key issued by Snapshot for that hub
+([API keys](https://docs.snapshot.box/tools/api/api-keys)): the hub checks it, and
+answers every request with an unknown key with 401. The hub in this compose file has
+no rate limit, so leave it unset here.
 
-- `--rotate` creates new keys instead. This **breaks every election already in
-  flight**, because every keyper has the coordinator's address pinned and every
-  existing proposal has it frozen.
-- `--rotate-coordinator` creates a new coordinator key only and keeps the rest. Every
-  keyper operator must then update `COORDINATOR_IDENTITY` in their env.
+**With `HUB_API_KEY` set, restrict who can reach te-data-layer.** te-data-layer sends
+the key with every request it forwards, and it has no authentication or rate limit of
+its own. So anyone who can reach port 3002 reads the hub without the hub's per-IP
+limit and uses up the key's quota. Once the quota is spent, the keypers get 429 again
+and the tally stalls. Only the keypers need port 3002 from outside; the coordinator
+reaches it on the compose network. Allow only the keypers' IPs (a firewall rule, or an
+allow-list in a reverse proxy), or put a per-IP rate limit in front of it.
 
 `.env.example` is the annotated reference for every variable.
 
@@ -167,10 +191,24 @@ as they are:
 VITE_TE_ENABLED=true
 VITE_LOCAL_HUB_URL=http://localhost:3000/graphql
 VITE_LOCAL_SEQUENCER_URL=http://localhost:3001
+VITE_ENABLED_NETWORKS=s-tn
+VITE_METADATA_NETWORK=s-tn
 ```
 
-`VITE_MIN_DKG_LEAD_TIME_S` (default 180) must match the sequencer's
-`MIN_DKG_LEAD_TIME_S`. If you change one, set the other in this file too.
+The flag asks every hub the UI reads for the private-voting fields, and a hub
+without this release rejects those queries, so that network's proposal pages come
+up empty. Turn it on only when every hub the UI reads runs this release. The local
+URLs above replace only the testnet hub, so `VITE_ENABLED_NETWORKS=s-tn` turns off
+mainnet, which would still read `hub.snapshot.org`, and `VITE_METADATA_NETWORK=s-tn`
+moves profiles, aliases and follows to testnet, since mainnet is no longer loaded.
+
+Ballots are built and tallies verified in Web Workers, which load the BLST library
+with `eval`. If your web server sends a Content Security Policy, its `script-src`
+must allow `'unsafe-eval'`.
+
+`VITE_MIN_DKG_LEAD_TIME_S` (default 180) must be at least the sequencer's
+`MIN_DKG_LEAD_TIME_S`, or the UI offers start times the sequencer refuses. If you raise
+the sequencer's, raise this one too.
 
 Other `VITE_*` keys (Alchemy, Infura, Etherscan, WalletConnect) enable chain-data
 features, such as token balances, ENS and more wallet options. None are needed here.
@@ -195,9 +233,13 @@ mkdir -p mysql-data
 docker compose up -d --build
 ```
 
-If this fails with `required variable COORDINATOR_SIGNING_KEY is missing`, step 1a
-has not been done. The coordinator is fail-closed on its two secrets, and compose
-refuses to start *any* service until both are in `.env`.
+A new `mysql-data` gets the full schema on first start. **Upgrading an existing hub
+database** instead: run `apps/hub/migrations/001-private-voting.sql` once, before
+starting this release. Without it, private voting fails on missing columns.
+
+If this fails with `required variable … is missing`, step 1a has not been done.
+Compose refuses to start *any* service until `MYSQL_ROOT_PASSWORD`,
+`COORDINATOR_SIGNING_KEY` and `COORDINATOR_API_TOKEN` are all in `.env`.
 
 Then start the committee. In a real deployment the operators do this on their own
 machines. For local testing, run this from the folder with the two files from step 1b.
@@ -284,7 +326,13 @@ fix that:
   pin the exact strategy you want to test rather than filling in a form.
 
 The rest of this section is the second option. It is three separate inserts, and
-each one is needed for a different reason.
+each one is needed for a different reason. They, and the checks in later steps, pass
+MySQL's root password from `.env` into the container:
+
+```bash
+cd sx-monorepo
+export MYSQL_PWD=$(grep '^MYSQL_ROOT_PASSWORD=' .env | cut -d= -f2)
+```
 
 ### 3a. Mark Sepolia as premium
 
@@ -292,8 +340,7 @@ The sequencer refuses proposals from a network that is not marked premium, so th
 must exist before any space can be used.
 
 ```bash
-cd sx-monorepo
-docker exec -i sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<'EOF'
+docker exec -i -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<'EOF'
 INSERT IGNORE INTO networks (id, name, testnet, premium)
 VALUES ('11155111', 'Sepolia', 1, 1);
 EOF
@@ -317,7 +364,7 @@ Two fields decide whether this works:
 ```bash
 export TOKEN=0xabc...   # Sepolia test ERC-20
 
-docker exec -i sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<EOF
+docker exec -i -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<EOF
 INSERT INTO spaces (id, name, settings, verified, deleted, flagged, hibernated,
                     turbo_expiration, proposal_count, vote_count, follower_count,
                     created, updated)
@@ -353,7 +400,7 @@ A fresh database has no rows in `options`, and every missing limit counts as 0. 
 without this step every proposal is refused, with an error about limits.
 
 ```bash
-docker exec -i sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<'EOF'
+docker exec -i -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub <<'EOF'
 INSERT IGNORE INTO options (name, value) VALUES
   ('space.default.proposal_limit_per_day','100'),
   ('space.default.proposal_limit_per_month','1000'),
@@ -363,6 +410,12 @@ INSERT IGNORE INTO options (name, value) VALUES
 EOF
 echo "space ready"
 ```
+
+Private proposals have a lower choice limit of their own, whatever `choices_limit`
+says, because every ballot must fit the 1 MB limit for a private vote: at most **19
+choices for weighted voting** (at the default `TE_WEIGHTED_BUDGET` of 100) and 689 for
+single-choice and basic. The editor does not check it, so a larger private proposal is
+refused by the sequencer only after the author has signed it.
 
 ---
 
@@ -422,7 +475,7 @@ keyper remains for the tally), or the ceremony stops (`status=halted_complaint`)
 Confirm the key landed:
 
 ```bash
-docker exec sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub \
+docker exec -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub \
   -e "SELECT title, te_mpk IS NOT NULL AS has_key FROM proposals ORDER BY created DESC LIMIT 1;"
 ```
 
@@ -443,7 +496,7 @@ read an individual ballot; only a quorum of keypers working together could.
 Check it was stored encrypted:
 
 ```bash
-docker exec sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub \
+docker exec -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub \
   -e "SELECT voter, vp, LEFT(choice, 80) AS ciphertext FROM votes ORDER BY created DESC LIMIT 1\G"
 ```
 
@@ -481,7 +534,7 @@ do not have to trust the server's number, because you recompute it.
 From the command line:
 
 ```bash
-docker exec sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub -e \
+docker exec -e MYSQL_PWD sx-monorepo-mysql-1 mysql -uroot -h127.0.0.1 snapshot_hub -e \
   "SELECT p.title, p.scores_state, p.scores, r.totals_json, r.keyper_indices
      FROM proposals p LEFT JOIN te_results r ON r.proposal_id = p.id
     ORDER BY p.created DESC LIMIT 1\G"

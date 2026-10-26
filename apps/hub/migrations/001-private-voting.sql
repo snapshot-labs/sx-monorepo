@@ -43,8 +43,7 @@ CREATE TABLE te_dkg_submissions (
   committee_pks_hex MEDIUMTEXT NOT NULL,
   signature VARCHAR(200) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index),
-  INDEX idx_te_dkg_match (proposal_id, mpk_hex(64))
+  PRIMARY KEY (proposal_id, keyper_index)
 );
 
 CREATE TABLE te_results (
@@ -64,21 +63,13 @@ CREATE TABLE te_aggregate_submissions (
   digest VARCHAR(66) NOT NULL,
   signature VARCHAR(200) NOT NULL,
   posted_at BIGINT NOT NULL,
-  PRIMARY KEY (proposal_id, keyper_index),
-  INDEX idx_te_agg_match (proposal_id, digest)
-);
-
-CREATE TABLE te_eligibility_key (
-  id TINYINT NOT NULL PRIMARY KEY,
-  public_key VARCHAR(100) NOT NULL,
-  updated BIGINT NOT NULL
+  PRIMARY KEY (proposal_id, keyper_index)
 );
 
 CREATE TABLE te_request_nonces (
   proposal_id VARCHAR(66) NOT NULL,
   op VARCHAR(32) NOT NULL,
   issued_at BIGINT NOT NULL,
-  accepted_at BIGINT NOT NULL,
   PRIMARY KEY (proposal_id, op, issued_at)
 );
 

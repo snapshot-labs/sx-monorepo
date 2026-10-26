@@ -3,13 +3,19 @@ import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
-import { SgpAttestationError } from '../helpers/sgpAttestation';
+import {
+  eligibilityPublicKey,
+  SgpAttestationError
+} from '../helpers/sgpAttestation';
 import {
   isDustVotingPower,
   isWithinSgpVotingWindow,
   verifyTeBallot
 } from '../helpers/te';
-import { getEligibilityKey } from '../helpers/teEligibility';
+import {
+  isEligibilityKeyRotated,
+  KEY_ROTATED_MESSAGE
+} from '../helpers/teEligibility';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
 import { updateProposalAndVotes } from '../scores';
 
@@ -72,6 +78,9 @@ export async function verify(body): Promise<any> {
     // would reject.
     if (typeof msg.payload.choice !== 'object' || msg.payload.choice === null) {
       return Promise.reject('invalid choice: expected ballot object');
+    }
+    if (await isEligibilityKeyRotated(proposal)) {
+      return Promise.reject(KEY_ROTATED_MESSAGE);
     }
     try {
       verifyBallotCredential(proposal, msg.payload.choice);
@@ -166,25 +175,60 @@ export async function verify(body): Promise<any> {
   // if (await isLimitReached(msg.space)) return Promise.reject('too much activity, please contact an admin');
 
   // Checks the credential's signature and the voter's signature over the ballot
-  // (which covers the credential), as well as the ballot proofs. It takes 10-80 s
-  // of worker time, so it runs last: a vote that fails validation or has no
-  // voting power is refused without it.
+  // (which covers the credential), as well as the ballot proofs. It takes about
+  // 26 ms of worker time per proof branch (8 s for a 3-choice weighted ballot,
+  // about 50 s at the 19-choice limit), so it runs last: a vote that fails
+  // validation or has no voting power is refused without it.
   if (proposal.privacy === 'shutter-elgamal') {
     const result = await verifyTeBallot(
       proposal,
       body.address.toLowerCase(),
       JSON.stringify(msg.payload.choice),
-      await getEligibilityKey()
+      await eligibilityPublicKey()
     );
     if (!result.ok) {
       if (result.reason === 'sequencer_busy') {
         return Promise.reject('sequencer busy, please try again in a moment');
+      }
+      if (result.reason === 'verifier_unavailable') {
+        return Promise.reject(
+          'could not check the private ballot, please try again in a moment'
+        );
       }
       return Promise.reject(`invalid private ballot: ${result.reason}`);
     }
   }
 
   return { proposal, vp };
+}
+
+// The fields a ballot, its credential and each ciphertext may carry. The SDK
+// ignores any other field, but the whole choice is stored, so an extra one could
+// pad every ballot to the 1 MB vote limit; the hub's ballot feed relies on all of
+// a proposal's ballots having the same size.
+const BALLOT_FIELDS = [
+  'electionId',
+  'pseudonym',
+  'vk',
+  'ciphertexts',
+  'zkProof',
+  'voterSignature',
+  'attestation'
+];
+const CREDENTIAL_FIELDS = [
+  'scheme',
+  'electionId',
+  'pseudonym',
+  'vk',
+  'weight',
+  'nonce',
+  'signature'
+];
+const CIPHERTEXT_FIELDS = ['c1', 'c2'];
+
+function refuseUnknownFields(value: any, allowed: string[]): void {
+  const extra = Object.keys(value ?? {}).find(key => !allowed.includes(key));
+  if (extra) throw new SgpAttestationError(`unexpected field ${extra}`);
 }
 
 /**
@@ -217,6 +261,13 @@ export function verifyBallotCredential(proposal: any, choice: any): void {
   // other value, so one bad vote would stop the tally. Missing means this scheme.
   if ((credential.scheme ?? 'ATTESTATION_V1') !== 'ATTESTATION_V1') {
     throw new SgpAttestationError('unsupported credential scheme');
+  }
+  refuseUnknownFields(choice, BALLOT_FIELDS);
+  refuseUnknownFields(credential, CREDENTIAL_FIELDS);
+  for (const ciphertext of Array.isArray(choice.ciphertexts)
+    ? choice.ciphertexts
+    : []) {
+    refuseUnknownFields(ciphertext, CIPHERTEXT_FIELDS);
   }
 }
 

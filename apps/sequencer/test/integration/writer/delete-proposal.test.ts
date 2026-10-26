@@ -88,8 +88,7 @@ describe('delete-proposal: private proposals', () => {
     await db.queryAsync('INSERT INTO te_request_nonces SET ?', {
       proposal_id: ID,
       op: 'tally_stall',
-      issued_at: 1,
-      accepted_at: 1
+      issued_at: 1
     });
 
     await action({

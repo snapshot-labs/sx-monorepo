@@ -15,7 +15,7 @@ services:
       - --default-authentication-plugin=mysql_native_password
       - --max_connections=300
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD (hex, see .env.example)}
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
@@ -37,13 +37,12 @@ services:
       PORT: "3000"
       NETWORK: testnet
       DB_SSL: "false"
-      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
-      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      HUB_DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/snapshot_sequencer
       # Followed by the browser (scores redirect), so not http://sequencer:3001.
       SEQUENCER_URL: "${SEQUENCER_PUBLIC_URL:-http://localhost:${SEQ_PORT:-3001}}"
       STAMP_URL: https://stamp.fyi
       SCORE_API_URL: https://score.snapshot.org
-      SIDEKICK_URL: https://sh5.co
       KEYCARD_URL: ""
       RATE_LIMIT_DATABASE_URL: ""
     ports:
@@ -69,8 +68,8 @@ services:
       PORT: "3001"
       NETWORK: testnet
       DB_SSL: "false"
-      HUB_DATABASE_URL: mysql://root@mysql:3306/snapshot_hub
-      SEQ_DATABASE_URL: mysql://root@mysql:3306/snapshot_sequencer
+      HUB_DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/snapshot_hub
+      SEQ_DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/snapshot_sequencer
       RELAYER_PK: ${SEQ_RELAYER_PK:-}
       DEFAULT_NETWORK: "11155111"
       SHUTTER_URL: ""
@@ -78,10 +77,8 @@ services:
       SCORE_API_URL: https://score.snapshot.org
       SCHNAPS_API_URL: https://schnaps.snapshot.box
       BROVIDER_URL: https://rpc.snapshot.org
-      OVERLORD_URL: https://overlord.snapshot.box
       AUTH_SECRET: ${SEQ_AUTH_SECRET}
       WALLETCONNECT_PROJECT_ID: ${WALLETCONNECT_PROJECT_ID}
-      LAST_CB: "1"
       TE_KEYPERS: "${TE_KEYPERS:-}"
       TE_THRESHOLD_T: "${TE_THRESHOLD_T:-2}"
       TE_WEIGHTED_BUDGET: "${TE_WEIGHTED_BUDGET:-100}"
@@ -111,6 +108,7 @@ services:
       HUB_URL: http://hub:3000
       LOG_LEVEL: "${TE_DATA_LAYER_LOG_LEVEL:-info}"
       HUB_TIMEOUT_MS: "${HUB_TIMEOUT_MS:-10000}"
+      HUB_API_KEY: "${HUB_API_KEY:-}"
     ports:
       - "${TE_DATA_LAYER_PORT:-3002}:3002"
     depends_on:

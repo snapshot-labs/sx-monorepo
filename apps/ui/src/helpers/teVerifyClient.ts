@@ -42,14 +42,9 @@ export function runVerify(
     };
   }
 
-  // `type: 'module'` is required because Vite's dev server serves workers as ES
-  // modules; a classic worker fails there with "Cannot use import statement outside
-  // a module".
-  //
-  // The production build still emits an IIFE worker (Vite's `worker.format`
-  // default). So the SDK loads BLST from `/blst.js` differently: in dev with fetch +
-  // indirect eval, in production with `importScripts`. This is intended: production
-  // does not need `script-src 'unsafe-eval'` in the CSP.
+  // `type: 'module'`, and built as one (`worker.format` in vite.config.ts). In a
+  // module worker the SDK loads BLST from `/blst.js` with fetch + indirect eval, so
+  // a Content Security Policy must allow `script-src 'unsafe-eval'`.
   const worker = new Worker(new URL('./teVerifyWorker.ts', import.meta.url), {
     type: 'module'
   });

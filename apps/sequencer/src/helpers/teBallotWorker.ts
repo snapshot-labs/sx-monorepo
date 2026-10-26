@@ -13,6 +13,9 @@ const sdk = require('@shutter-network/urban-verified-crypto');
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 const ready = sdk.initCurves();
+// Handled, so a failed load fails each job with its message (`await ready` below)
+// instead of ending the thread.
+ready.catch(() => {});
 
 parentPort.on(
   'message',
