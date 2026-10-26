@@ -143,8 +143,8 @@ describe('ens', () => {
     });
 
     describe('for other TLDs using an offchain DNS resolver', () => {
-      // NOTE: skipping because ENS' DNSSEC oracle doesn't trust the new DNS
-      // root key (KSK-2024) yet, so every DNS name resolves to nothing
+      // NOTE: skipping because the ENS DNSSEC oracle doesn't trust the new DNS
+      // root key (KSK-2024) yet, so gasless DNS names resolve to nothing
       it.skip('should return the owner of the domain name', async () => {
         const owner = await getNameOwner('wanki.moe', 1);
         expect(owner).toBe('0xd410007411572127c77b4c3ff88696865a589A2b');
