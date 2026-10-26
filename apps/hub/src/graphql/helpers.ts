@@ -82,7 +82,7 @@ export function checkLimits(args: any = {}, type) {
   return true;
 }
 
-function formatSkinSettings(result) {
+export function formatSkinSettings(result) {
   return SKIN_SETTINGS.reduce((acc, colorName) => {
     acc[colorName] = result[colorName];
 
