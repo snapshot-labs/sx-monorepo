@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { _t } from '@/helpers/utils';
+import { buildUsage } from '@/helpers/keycard';
+import { ApiKey } from '@/helpers/keycard/types';
+import { _n, _t } from '@/helpers/utils';
 
 const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
 
@@ -23,18 +25,55 @@ const {
   monthlyUsage
 } = useApiKeys();
 
+const isKeyModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
+const selectedKey = ref<ApiKey | null>(null);
 const usagePeriod = ref<'day' | 'month'>('day');
+const usageKey = ref('all');
 const usageView = ref<'chart' | 'table'>('chart');
 
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
 );
-const usageSeries = computed(() =>
-  usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
-);
+const usageKeyItems = computed(() => [
+  { key: 'all', label: 'All keys' },
+  ...keys.value.map(key => ({ key: key.key, label: key.name }))
+]);
+const usageSeries = computed(() => {
+  const isDaily = usagePeriod.value === 'day';
+  const rows = (isDaily ? dailyUsage.value : monthlyUsage.value).filter(
+    row => usageKey.value === 'all' || row.key === usageKey.value
+  );
+  return buildUsage(rows, isDaily ? 30 : 12, usagePeriod.value);
+});
 const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
 );
+
+watch(keys, () => {
+  if (!keys.value.some(key => key.key === usageKey.value)) {
+    usageKey.value = 'all';
+  }
+});
+
+function getMonthRequests(key: string) {
+  const [{ hub, score }] = buildUsage(
+    monthlyUsage.value.filter(row => row.key === key),
+    1,
+    'month'
+  );
+  return hub + score;
+}
+
+function openKeyModal(key: ApiKey | null = null) {
+  selectedKey.value = key;
+  isKeyModalOpen.value = true;
+}
+
+function openDeleteModal(key: ApiKey) {
+  selectedKey.value = key;
+  isDeleteModalOpen.value = true;
+}
 </script>
 
 <template>
@@ -68,9 +107,14 @@ const usageRangeLabel = computed(() =>
     </UiContainerSettings>
 
     <template v-else>
-      <div class="px-4 pt-4 max-w-[592px]">
-        <h3>API keys</h3>
-        <span class="inline-block" v-text="DESCRIPTION" />
+      <div class="flex items-start justify-between gap-3 px-4 pt-4">
+        <div class="max-w-[592px]">
+          <h3>API keys</h3>
+          <span class="inline-block" v-text="DESCRIPTION" />
+        </div>
+        <UiButton primary class="shrink-0" @click="openKeyModal()">
+          New key
+        </UiButton>
       </div>
 
       <div v-if="!isError" class="mt-4">
@@ -108,6 +152,13 @@ const usageRangeLabel = computed(() =>
               </button>
             </div>
             <UiSelectDropdown
+              v-if="keys.length > 1"
+              v-model="usageKey"
+              title="API key"
+              placement="end"
+              :items="usageKeyItems"
+            />
+            <UiSelectDropdown
               v-model="usagePeriod"
               title="Period"
               placement="end"
@@ -122,13 +173,16 @@ const usageRangeLabel = computed(() =>
         >
           <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
         </div>
-        <ApiSpendingTable v-else :series="usageSeries" />
+        <ApiUsageTable v-else :series="usageSeries" />
       </div>
 
-      <UiSectionHeader class="mt-4" label="Keys" sticky />
+      <UiSectionHeader class="mt-4" label="API keys" sticky />
       <UiColumnHeader class="space-x-3">
-        <div class="grow text-left">Name</div>
+        <div class="flex-1 min-w-0 text-left">Name</div>
+        <div class="flex-1 min-w-0">Key</div>
+        <div class="hidden sm:flex w-[150px]">This month</div>
         <div class="hidden sm:flex w-[150px]">Created</div>
+        <div class="min-w-3.5" />
       </UiColumnHeader>
 
       <UiLoading v-if="isLoading" class="px-4 py-3 block" />
@@ -148,18 +202,56 @@ const usageRangeLabel = computed(() =>
           :key="key.key"
           class="border-b flex space-x-3 py-3 items-center"
         >
-          <div class="grow overflow-hidden flex items-center gap-2">
-            <div
-              class="text-skin-link font-semibold truncate"
-              v-text="key.name"
-            />
-            <ApiKeyField :value="key.key" masked inline class="shrink-0" />
+          <div
+            class="flex-1 min-w-0 text-skin-link font-semibold truncate"
+            v-text="key.name"
+          />
+          <div class="flex flex-1 min-w-0">
+            <ApiKeyField :value="key.key" masked inline />
           </div>
+          <div
+            class="hidden sm:flex w-[150px] shrink-0 items-center"
+            v-text="`${_n(getMonthRequests(key.key))} req`"
+          />
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
             {{ _t(key.created, 'MMM D, YYYY') }}
           </div>
+          <UiDropdown>
+            <template #button>
+              <div class="flex items-center h-full">
+                <button type="button" class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
+              </div>
+            </template>
+            <template #items>
+              <UiDropdownItem @click="openKeyModal(key)">
+                <IS-pencil :width="16" />
+                Rename key
+              </UiDropdownItem>
+              <UiDropdownItem
+                class="!text-skin-danger"
+                @click="openDeleteModal(key)"
+              >
+                <IH-trash :width="16" />
+                Delete key
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
       </div>
+      <teleport to="#modal">
+        <ModalApiKey
+          :open="isKeyModalOpen"
+          :api-key="selectedKey"
+          @close="isKeyModalOpen = false"
+        />
+        <ModalDeleteApiKey
+          :open="isDeleteModalOpen"
+          :api-key="selectedKey"
+          @close="isDeleteModalOpen = false"
+        />
+      </teleport>
     </template>
   </div>
 </template>
