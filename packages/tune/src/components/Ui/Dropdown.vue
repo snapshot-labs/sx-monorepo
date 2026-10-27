@@ -45,7 +45,7 @@ withDefaults(
         <MenuItems
           class="rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
         >
-          <div class="max-h-[208px] overflow-y-auto">
+          <div class="dropdown-scroll max-h-[208px] overflow-y-auto py-1">
             <slot name="items" />
           </div>
         </MenuItems>
@@ -53,3 +53,22 @@ withDefaults(
     </Float>
   </Menu>
 </template>
+
+<style lang="scss" scoped>
+.dropdown-scroll {
+  &::-webkit-scrollbar {
+    width: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--text), 0.4) padding-box;
+    border: 4px solid transparent;
+    border-radius: 8px;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--text), 0.4) transparent;
+  }
+}
+</style>
