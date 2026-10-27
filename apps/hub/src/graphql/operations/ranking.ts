@@ -2,6 +2,7 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { rankedSpaces } from '../../helpers/spaces';
+import { getSymbolSearchCandidates } from '../../helpers/spaceSearch';
 import {
   checkLimits,
   formatSkinSettings,
@@ -28,6 +29,7 @@ export default async function (_parent, args, context, info) {
       plugin = ''
     } = where;
     const searchStr = search?.toLowerCase() || '';
+    const symbolCandidates = getSymbolSearchCandidates(searchStr);
     let searchCategory = category?.toLowerCase() || '';
     if (searchCategory === 'all') searchCategory = '';
 
@@ -35,7 +37,7 @@ export default async function (_parent, args, context, info) {
       const filteredBySearch =
         space.id.includes(searchStr) ||
         space.name?.toLowerCase().includes(searchStr) ||
-        space.symbol?.toLowerCase() === searchStr;
+        symbolCandidates.includes(space.symbol?.toLowerCase());
       const filteredByNetwork = network
         ? space.networks.includes(network)
         : true;

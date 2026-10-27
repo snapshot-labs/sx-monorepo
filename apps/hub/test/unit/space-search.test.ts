@@ -1,6 +1,7 @@
 import { fetchSpaces } from '../../src/graphql/helpers';
 import ranking from '../../src/graphql/operations/ranking';
 import db from '../../src/helpers/mysql';
+import { rankedSpaces } from '../../src/helpers/spaces';
 
 jest.mock('../../src/helpers/mysql', () => ({
   __esModule: true,
@@ -28,9 +29,65 @@ jest.mock('../../src/graphql/helpers', () => ({
 
 const queryAsync = db.queryAsync as jest.Mock;
 
-beforeEach(() => queryAsync.mockReset().mockResolvedValue([]));
+beforeEach(() => {
+  queryAsync.mockReset().mockResolvedValue([]);
+  rankedSpaces[0].symbol = 'WLFI';
+});
 
 describe('Explore ticker search', () => {
+  describe.each(['stWLFI', 'veWLFI', 'STwlfi', 'vEwLfI'])(
+    '%s VP symbol',
+    symbol => {
+      beforeEach(() => {
+        rankedSpaces[0].symbol = symbol;
+      });
+
+      it.each(['WLFI', 'wlfi', 'WlFi', symbol])(
+        'matches complete ticker %s',
+        async search => {
+          const result = await ranking(
+            null,
+            { first: 20, skip: 0, where: { search } },
+            {},
+            {}
+          );
+          expect(result).toMatchObject({ metrics: { total: 1 } });
+          expect(queryAsync.mock.calls[0][1][0]).toEqual([
+            'worldlibertyfinancial.com'
+          ]);
+        }
+      );
+
+      it.each(['WLF', 'lfi', 'st', 've', 'WLFIx', '%', '_'])(
+        'rejects partial ticker %s',
+        async search => {
+          const result = await ranking(
+            null,
+            { first: 20, skip: 0, where: { search } },
+            {},
+            {}
+          );
+          expect(result).toMatchObject({ metrics: { total: 0 } });
+          expect(queryAsync).not.toHaveBeenCalled();
+        }
+      );
+    }
+  );
+
+  it.each(['xWLFI', 'astWLFI', 'WLFI token'])(
+    'rejects unsupported VP symbol %s',
+    async symbol => {
+      rankedSpaces[0].symbol = symbol;
+      const result = await ranking(
+        null,
+        { first: 20, skip: 0, where: { search: 'WLFI' } },
+        {},
+        {}
+      );
+      expect(result).toMatchObject({ metrics: { total: 0 } });
+    }
+  );
+
   it.each(['WLFI', 'wlfi', 'WlFi'])(
     'matches the full ticker %s',
     async search => {
@@ -100,13 +157,17 @@ describe('spaces search query', () => {
 
       const [sql, params] = queryAsync.mock.calls[0];
       expect(sql).toContain(
-        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) = ?"
+        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) IN (?)"
       );
       expect(params).toEqual(
         expect.arrayContaining([
           `%${search}%`,
           `%${search}%`,
-          search.toLowerCase()
+          [
+            search.toLowerCase(),
+            `st${search.toLowerCase()}`,
+            `ve${search.toLowerCase()}`
+          ]
         ])
       );
     }

@@ -5,6 +5,7 @@ import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import db from '../helpers/mysql';
 import { DEFAULT_COUNTS, spacesMetadata } from '../helpers/spaces';
+import { getSymbolSearchCandidates } from '../helpers/spaceSearch';
 import { jsonParse } from '../helpers/utils';
 
 const network = process.env.NETWORK || 'testnet';
@@ -339,8 +340,12 @@ export async function fetchSpaces(args) {
 
   if (where.search) {
     const wildcardSearch = `%${where.search}%`;
-    queryStr += ` AND (s.id LIKE ? OR s.name LIKE ? OR LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) = ?)`;
-    params.push(wildcardSearch, wildcardSearch, where.search.toLowerCase());
+    queryStr += ` AND (s.id LIKE ? OR s.name LIKE ? OR LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) IN (?))`;
+    params.push(
+      wildcardSearch,
+      wildcardSearch,
+      getSymbolSearchCandidates(where.search)
+    );
   }
 
   if ('turbo' in where) {
