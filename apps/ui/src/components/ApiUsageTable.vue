@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { formatUsd, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
 import { _n } from '@/helpers/utils';
 
@@ -16,17 +15,9 @@ const hasActivity = computed(() =>
 );
 
 const rows = computed(() =>
-  [...props.series].reverse().map(bucket => {
-    const hub = bucket.hub * PRICE_PER_REQUEST.hub;
-    const score = bucket.score * PRICE_PER_REQUEST.score;
-    return {
-      ts: bucket.ts,
-      label: bucket.label,
-      hub: { count: bucket.hub, cost: hub },
-      score: { count: bucket.score, cost: score },
-      total: { count: bucket.hub + bucket.score, cost: hub + score }
-    };
-  })
+  [...props.series]
+    .reverse()
+    .map(bucket => ({ ...bucket, total: bucket.hub + bucket.score }))
 );
 
 const visibleRows = computed(() => rows.value.slice(0, visibleCount.value));
@@ -48,9 +39,9 @@ watch(
   <div>
     <UiColumnHeader :sticky="false" class="space-x-3">
       <div class="grow text-left">Period</div>
-      <div class="hidden sm:flex w-[100px] justify-end">Hub</div>
-      <div class="hidden sm:flex w-[100px] justify-end">Score</div>
-      <div class="w-[100px] flex justify-end">Total</div>
+      <div class="hidden sm:flex w-[120px] justify-end">Hub API</div>
+      <div class="hidden sm:flex w-[120px] justify-end">Score API</div>
+      <div class="w-[120px] flex justify-end">Total</div>
     </UiColumnHeader>
     <UiStateWarning v-if="!hasActivity" class="px-4 py-3">
       No requests in this period yet.
@@ -63,26 +54,17 @@ watch(
       >
         <div class="grow text-skin-link truncate" v-text="row.label" />
         <div
-          class="hidden sm:flex w-[100px] shrink-0 flex-col items-end leading-tight"
-        >
-          <span v-text="_n(row.hub.count)" />
-          <span class="text-[13px]" v-text="formatUsd(row.hub.cost)" />
-        </div>
+          class="hidden sm:flex w-[120px] shrink-0 justify-end"
+          v-text="`${_n(row.hub)} req`"
+        />
         <div
-          class="hidden sm:flex w-[100px] shrink-0 flex-col items-end leading-tight"
-        >
-          <span v-text="_n(row.score.count)" />
-          <span class="text-[13px]" v-text="formatUsd(row.score.cost)" />
-        </div>
+          class="hidden sm:flex w-[120px] shrink-0 justify-end"
+          v-text="`${_n(row.score)} req`"
+        />
         <div
-          class="w-[100px] shrink-0 flex flex-col items-end leading-tight text-skin-heading"
-        >
-          <span v-text="_n(row.total.count)" />
-          <span
-            class="text-[13px] text-skin-text"
-            v-text="formatUsd(row.total.cost)"
-          />
-        </div>
+          class="w-[120px] shrink-0 flex justify-end text-skin-heading"
+          v-text="`${_n(row.total)} req`"
+        />
       </div>
       <button
         v-if="hasMore"

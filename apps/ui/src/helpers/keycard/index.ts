@@ -5,17 +5,37 @@ import { ApiKey, Usage, UsageBucket, UsageHistory } from './types';
 
 dayjs.extend(utc);
 
-const KEYCARD_URL = 'https://keycard.snapshot.org';
+const KEYCARD_URL =
+  import.meta.env.VITE_KEYCARD_URL || 'https://keycard.snapshot.org';
 
 const DOMAIN = {
   name: 'snapshot',
   version: '0.1.4'
 };
 
-const GetKeysSchema = {
+const TYPES = {
   GetKeys: [
     { name: 'from', type: 'address' },
     { name: 'alias', type: 'address' },
+    { name: 'timestamp', type: 'uint64' }
+  ],
+  CreateKey: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'name', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ],
+  RenameKey: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'key', type: 'string' },
+    { name: 'name', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ],
+  DeleteKey: [
+    { name: 'from', type: 'address' },
+    { name: 'alias', type: 'address' },
+    { name: 'key', type: 'string' },
     { name: 'timestamp', type: 'uint64' }
   ]
 };
@@ -25,28 +45,13 @@ const APP_FIELD: Record<string, keyof Usage> = {
   'score-api': 'score'
 };
 
-export const PRICE_PER_REQUEST: Record<keyof Usage, number> = {
-  hub: 0.0001,
-  score: 0.0002
-};
-
 type KeysResponse = {
   keys: ApiKey[];
   usage: {
-    daily: { app: string; day: string; total: number }[];
-    monthly: { app: string; month: string; total: number }[];
+    daily: { key: string; app: string; day: string; total: number }[];
+    monthly: { key: string; app: string; month: string; total: number }[];
   };
 };
-
-export function formatUsd(value: number): string {
-  if (value > 0 && value < 0.01) return '~$0.00';
-
-  const formatter = new Intl.NumberFormat('en', {
-    style: 'currency',
-    currency: 'USD'
-  });
-  return formatter.format(value);
-}
 
 async function rpcCall(method: string, params: any) {
   const res = await fetch(KEYCARD_URL, {
@@ -68,6 +73,29 @@ async function rpcCall(method: string, params: any) {
   }
 
   return result;
+}
+
+// Signs the call with the alias, which Keycard checks against the hub aliases
+async function signedRpcCall(
+  method: string,
+  type: keyof typeof TYPES,
+  alias: Wallet,
+  from: string,
+  params: Record<string, string> = {}
+) {
+  const message = {
+    from,
+    alias: alias.address,
+    ...params,
+    timestamp: Math.floor(Date.now() / 1000)
+  };
+  const sig = await alias._signTypedData(
+    DOMAIN,
+    { [type]: TYPES[type] },
+    message
+  );
+
+  return rpcCall(method, { ...message, sig });
 }
 
 // The API buckets usage by the legacy period strings DD-MM-YYYY (day) and
@@ -108,31 +136,45 @@ export async function fetchKeys(
   alias: Wallet,
   from: string
 ): Promise<{ keys: ApiKey[]; usage: UsageHistory }> {
-  const message = {
-    from,
-    alias: alias.address,
-    timestamp: Math.floor(Date.now() / 1000)
-  };
-  const sig = await alias._signTypedData(DOMAIN, GetKeysSchema, message);
-
-  const { keys, usage }: KeysResponse = await rpcCall('get_keys_by_owner', {
-    ...message,
-    sig
-  });
+  const { keys, usage }: KeysResponse = await signedRpcCall(
+    'get_keys_by_owner',
+    'GetKeys',
+    alias,
+    from
+  );
 
   return {
     keys: keys.filter(row => row.key),
     usage: {
-      daily: buildUsage(
-        usage.daily.map(row => ({ ...row, period: row.day })),
-        30,
-        'day'
-      ),
-      monthly: buildUsage(
-        usage.monthly.map(row => ({ ...row, period: row.month })),
-        12,
-        'month'
-      )
+      daily: usage.daily.map(({ day, ...row }) => ({ ...row, period: day })),
+      monthly: usage.monthly.map(({ month, ...row }) => ({
+        ...row,
+        period: month
+      }))
     }
   };
+}
+
+export function createKey(
+  alias: Wallet,
+  from: string,
+  params: { name: string }
+): Promise<ApiKey> {
+  return signedRpcCall('create_key', 'CreateKey', alias, from, params);
+}
+
+export function renameKey(
+  alias: Wallet,
+  from: string,
+  params: { key: string; name: string }
+) {
+  return signedRpcCall('rename_key', 'RenameKey', alias, from, params);
+}
+
+export function deleteKey(
+  alias: Wallet,
+  from: string,
+  params: { key: string }
+) {
+  return signedRpcCall('delete_key', 'DeleteKey', alias, from, params);
 }

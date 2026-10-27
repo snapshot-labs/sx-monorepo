@@ -1,13 +1,15 @@
 import { isHexString } from '@ethersproject/bytes';
 import { Wallet } from '@ethersproject/wallet';
-import { useQuery } from '@tanstack/vue-query';
-import { fetchKeys } from '@/helpers/keycard';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import * as keycard from '@/helpers/keycard';
 import pkg from '../../package.json';
 
 export function useApiKeys() {
   const { web3Account: address, auth } = useWeb3();
   const { getAliasSigner } = useActions();
   const { modalAccountOpen } = useModal();
+  const queryClient = useQueryClient();
+  const uiStore = useUiStore();
 
   const storedKeys = useStorage(
     `${pkg.name}.aliases`,
@@ -28,11 +30,34 @@ export function useApiKeys() {
 
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ['keycard', 'keys', address] as const,
-    queryFn: () => fetchKeys(aliasWallet.value as Wallet, address.value),
+    queryFn: () =>
+      keycard.fetchKeys(aliasWallet.value as Wallet, address.value),
     enabled: () => !!aliasWallet.value,
     staleTime: 5 * 60 * 1000,
     retry: false
   });
+
+  function useKeyMutation<T, R>(
+    request: (alias: Wallet, from: string, params: T) => Promise<R>
+  ) {
+    return useMutation({
+      mutationFn: (params: T) =>
+        request(aliasWallet.value as Wallet, address.value, params),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ['keycard', 'keys'] }),
+      onError: (err: Error) => uiStore.addNotification('error', err.message)
+    });
+  }
+
+  const { mutate: createKey, isPending: isCreating } = useKeyMutation(
+    keycard.createKey
+  );
+  const { mutate: renameKey, isPending: isRenaming } = useKeyMutation(
+    keycard.renameKey
+  );
+  const { mutate: deleteKey, isPending: isDeleting } = useKeyMutation(
+    keycard.deleteKey
+  );
 
   const isAuthError = computed(
     () => error.value?.cause === 400 || error.value?.cause === 401
@@ -73,6 +98,12 @@ export function useApiKeys() {
     authenticate,
     isAuthError,
     keys,
+    createKey,
+    isCreating,
+    renameKey,
+    isRenaming,
+    deleteKey,
+    isDeleting,
     dailyUsage,
     monthlyUsage
   };

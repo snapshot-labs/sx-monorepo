@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { formatUsd, PRICE_PER_REQUEST } from '@/helpers/keycard';
 import { UsageBucket } from '@/helpers/keycard/types';
 import { _n } from '@/helpers/utils';
 
@@ -92,11 +91,6 @@ const shownScore = computed(() =>
   hovered.value ? hovered.value.scoreValue : totals.value.score
 );
 
-const shownHubCost = computed(() => shownHub.value * PRICE_PER_REQUEST.hub);
-const shownScoreCost = computed(
-  () => shownScore.value * PRICE_PER_REQUEST.score
-);
-
 const periodTotal = computed(() => totals.value.hub + totals.value.score);
 
 watch(
@@ -113,16 +107,16 @@ watch(
       <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-link" />
-          <span class="text-skin-text">Hub</span>
+          <span class="text-skin-text">Hub API</span>
           <span class="font-semibold text-skin-link">
-            {{ _n(shownHub) }} ({{ formatUsd(shownHubCost) }})
+            {{ _n(shownHub) }} req
           </span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="size-2 rounded-full bg-skin-text" />
-          <span class="text-skin-text">Score</span>
+          <span class="text-skin-text">Score API</span>
           <span class="font-semibold text-skin-link">
-            {{ _n(shownScore) }} ({{ formatUsd(shownScoreCost) }})
+            {{ _n(shownScore) }} req
           </span>
         </div>
       </div>
