@@ -339,8 +339,8 @@ export async function fetchSpaces(args) {
 
   if (where.search) {
     const wildcardSearch = `%${where.search}%`;
-    queryStr += ` AND (s.id LIKE ? OR s.name LIKE ?)`;
-    params.push(wildcardSearch, wildcardSearch);
+    queryStr += ` AND (s.id LIKE ? OR s.name LIKE ? OR LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) = ?)`;
+    params.push(wildcardSearch, wildcardSearch, where.search.toLowerCase());
   }
 
   if ('turbo' in where) {
