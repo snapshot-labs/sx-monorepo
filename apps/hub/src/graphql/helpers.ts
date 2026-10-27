@@ -5,7 +5,6 @@ import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import db from '../helpers/mysql';
 import { DEFAULT_COUNTS, spacesMetadata } from '../helpers/spaces';
-import { getSymbolSearchCandidates } from '../helpers/spaceSearch';
 import { jsonParse } from '../helpers/utils';
 
 const network = process.env.NETWORK || 'testnet';
@@ -298,6 +297,12 @@ export function buildWhereQuery(
     }
   });
   return { query, params };
+}
+
+// Only allow complete symbols, optionally with a known voting-power prefix.
+export function getSymbolSearchCandidates(search: string): string[] {
+  const ticker = search.toLowerCase();
+  return ticker ? [ticker, `st${ticker}`, `ve${ticker}`] : [];
 }
 
 export async function fetchSpaces(args) {

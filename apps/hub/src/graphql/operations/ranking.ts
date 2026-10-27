@@ -2,11 +2,11 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { rankedSpaces } from '../../helpers/spaces';
-import { getSymbolSearchCandidates } from '../../helpers/spaceSearch';
 import {
   checkLimits,
   formatSkinSettings,
   formatSpace,
+  getSymbolSearchCandidates,
   handleRelatedSpaces,
   PublicError
 } from '../helpers';
