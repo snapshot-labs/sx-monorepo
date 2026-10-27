@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { buildUsage } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
-import { _t } from '@/helpers/utils';
+import { _n, _t } from '@/helpers/utils';
 
 const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
 
@@ -55,6 +55,15 @@ watch(keys, () => {
     usageKey.value = 'all';
   }
 });
+
+function getMonthRequests(key: string) {
+  const [{ hub, score }] = buildUsage(
+    monthlyUsage.value.filter(row => row.key === key),
+    1,
+    'month'
+  );
+  return hub + score;
+}
 
 function openKeyModal(key: ApiKey | null = null) {
   selectedKey.value = key;
@@ -171,6 +180,7 @@ function openDeleteModal(key: ApiKey) {
       <UiColumnHeader class="space-x-3">
         <div class="flex-1 min-w-0 text-left">Name</div>
         <div class="flex-1 min-w-0">Key</div>
+        <div class="hidden sm:flex w-[150px]">This month</div>
         <div class="hidden sm:flex w-[150px]">Created</div>
         <div class="min-w-3.5" />
       </UiColumnHeader>
@@ -199,6 +209,10 @@ function openDeleteModal(key: ApiKey) {
           <div class="flex flex-1 min-w-0">
             <ApiKeyField :value="key.key" masked inline />
           </div>
+          <div
+            class="hidden sm:flex w-[150px] shrink-0 items-center"
+            v-text="`${_n(getMonthRequests(key.key))} req`"
+          />
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
             {{ _t(key.created, 'MMM D, YYYY') }}
           </div>
