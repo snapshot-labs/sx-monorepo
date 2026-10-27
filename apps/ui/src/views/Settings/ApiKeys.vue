@@ -229,10 +229,7 @@ function openDeleteModal(key: ApiKey) {
                 <IS-pencil :width="16" />
                 Rename key
               </UiDropdownItem>
-              <UiDropdownItem
-                class="!text-skin-danger"
-                @click="openDeleteModal(key)"
-              >
+              <UiDropdownItem danger @click="openDeleteModal(key)">
                 <IH-trash :width="16" />
                 Delete key
               </UiDropdownItem>

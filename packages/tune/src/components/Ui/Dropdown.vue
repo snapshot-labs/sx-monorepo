@@ -45,7 +45,7 @@ withDefaults(
         <MenuItems
           class="rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
         >
-          <div class="max-h-[208px] overflow-y-auto">
+          <div class="max-h-[208px] overflow-y-auto py-1">
             <slot name="items" />
           </div>
         </MenuItems>
