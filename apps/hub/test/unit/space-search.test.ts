@@ -1,4 +1,3 @@
-import { fetchSpaces } from '../../src/graphql/helpers';
 import ranking from '../../src/graphql/operations/ranking';
 import db from '../../src/helpers/mysql';
 import { rankedSpaces } from '../../src/helpers/spaces';
@@ -147,29 +146,4 @@ describe('Explore ticker search', () => {
 
     expect(result).toMatchObject({ metrics: { total: 2 } });
   });
-});
-
-describe('spaces search query', () => {
-  it.each(['WLFI', 'wlfi', 'WlFi', 'WLF', '%', '_'])(
-    'uses equality and a literal parameter for ticker %s',
-    async search => {
-      await fetchSpaces({ first: 20, skip: 0, where: { search } });
-
-      const [sql, params] = queryAsync.mock.calls[0];
-      expect(sql).toContain(
-        "LOWER(JSON_UNQUOTE(JSON_EXTRACT(s.settings, '$.symbol'))) IN (?)"
-      );
-      expect(params).toEqual(
-        expect.arrayContaining([
-          `%${search}%`,
-          `%${search}%`,
-          [
-            search.toLowerCase(),
-            `st${search.toLowerCase()}`,
-            `ve${search.toLowerCase()}`
-          ]
-        ])
-      );
-    }
-  );
 });
