@@ -32,6 +32,7 @@ const item = computed(() => resolveSpaceItem(props.space, props.org ?? null));
         class="ml-1"
         :verified="space.verified"
         :turbo="space.turbo"
+        :plus="space.plus"
         :flagged="
           ('additionalRawData' in space && space.additionalRawData?.flagged) ||
           false

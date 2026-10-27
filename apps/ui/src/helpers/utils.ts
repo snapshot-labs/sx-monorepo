@@ -17,7 +17,8 @@ import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
   MAX_FILE_SIZE_BYTES,
-  MAX_SYMBOL_LENGTH
+  MAX_SYMBOL_LENGTH,
+  SNAPSHOT_PLUS_FEES
 } from './constants';
 import { getProvider } from './provider';
 import { getOwner } from './stamp';
@@ -779,6 +780,24 @@ export function prettyConcat(options: string[], connector = 'or') {
   return uniqOptions.length > 1
     ? `${uniqOptions.slice(0, -1).join(', ')}${uniqOptions.length > 2 ? ',' : ''} ${connector} ${uniqOptions.slice(-1)}`
     : uniqOptions[0];
+}
+
+// Snapshot Plus: no Pro subscription, and credits that cover a proposal
+export function isPlusSpace(space: {
+  turbo: boolean;
+  credits_parsed: number | null;
+}) {
+  return (
+    !space.turbo && (space.credits_parsed ?? 0) >= SNAPSHOT_PLUS_FEES.proposal
+  );
+}
+
+// What a Snapshot Plus balance pays for, e.g. "≈ 7 proposals or 153 votes"
+export function formatPlusUsage(credits: number) {
+  // The epsilon absorbs float error, e.g. 0.0006 / 0.0002 = 2.9999999999999996
+  const proposals = Math.floor(credits / SNAPSHOT_PLUS_FEES.proposal + 1e-9);
+  const votes = Math.floor(credits / SNAPSHOT_PLUS_FEES.vote + 1e-9);
+  return `≈ ${proposals} proposal${proposals === 1 ? '' : 's'} or ${votes} votes`;
 }
 
 export function isUserAbortError(err: any) {
