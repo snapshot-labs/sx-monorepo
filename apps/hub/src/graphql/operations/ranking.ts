@@ -37,7 +37,7 @@ export default async function (_parent, args, context, info) {
       const filteredBySearch =
         space.id.includes(searchStr) ||
         space.name?.toLowerCase().includes(searchStr) ||
-        symbolCandidates.includes(space.symbol?.toLowerCase());
+        (space.symbol && symbolCandidates.includes(space.symbol.toLowerCase()));
       const filteredByNetwork = network
         ? space.networks.includes(network)
         : true;
