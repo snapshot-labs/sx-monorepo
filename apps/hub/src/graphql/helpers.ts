@@ -299,10 +299,20 @@ export function buildWhereQuery(
   return { query, params };
 }
 
-// Only allow complete symbols, optionally with a known voting-power prefix.
-export function getSymbolSearchCandidates(search: string): string[] {
+const VP_SYMBOL_PREFIXES = ['st', 've'];
+
+// Match the complete symbol, or the symbol without a lowercase voting-power
+// prefix (stETH, veCRV). An uppercase start like STRK is part of the ticker.
+export function isSymbolMatch(symbol: string, search: string): boolean {
   const ticker = search.toLowerCase();
-  return ticker ? [ticker, `st${ticker}`, `ve${ticker}`] : [];
+  if (!ticker) return false;
+  if (symbol.toLowerCase() === ticker) return true;
+
+  return VP_SYMBOL_PREFIXES.some(
+    prefix =>
+      symbol.startsWith(prefix) &&
+      symbol.slice(prefix.length).toLowerCase() === ticker
+  );
 }
 
 export async function fetchSpaces(args) {

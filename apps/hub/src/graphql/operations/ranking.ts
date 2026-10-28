@@ -6,8 +6,8 @@ import {
   checkLimits,
   formatSkinSettings,
   formatSpace,
-  getSymbolSearchCandidates,
   handleRelatedSpaces,
+  isSymbolMatch,
   PublicError
 } from '../helpers';
 
@@ -29,7 +29,6 @@ export default async function (_parent, args, context, info) {
       plugin = ''
     } = where;
     const searchStr = search?.toLowerCase() || '';
-    const symbolCandidates = getSymbolSearchCandidates(searchStr);
     let searchCategory = category?.toLowerCase() || '';
     if (searchCategory === 'all') searchCategory = '';
 
@@ -37,7 +36,7 @@ export default async function (_parent, args, context, info) {
       const filteredBySearch =
         space.id.includes(searchStr) ||
         space.name?.toLowerCase().includes(searchStr) ||
-        (space.symbol && symbolCandidates.includes(space.symbol.toLowerCase()));
+        (space.symbol && isSymbolMatch(space.symbol, searchStr));
       const filteredByNetwork = network
         ? space.networks.includes(network)
         : true;
