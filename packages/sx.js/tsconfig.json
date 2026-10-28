@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist"
