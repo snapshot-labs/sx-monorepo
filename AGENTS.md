@@ -72,5 +72,6 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 - Code needs to pass lint and type checks to be merged
 - Use TypeScript whenever possible, avoid `any`
 - Reuse existing code when possible — check helpers, composables, and utils before writing new logic
+- Put tests in the package's `test/` folder mirroring `src/`, not next to source files
 - Name errors in catch blocks `err`: `catch (err) { ... }`
 - Use `is`/`has` prefix for boolean refs and variables (e.g. `isLoading`, `hasError`)

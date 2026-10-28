@@ -45,8 +45,7 @@ const config: HardhatUserConfig = {
     apiKey: process.env.ETHERSCAN_API_KEY
   },
   paths: {
-    sources: 'ethereum/src/',
-    tests: './tests'
+    sources: 'ethereum/src/'
   }
 };
 
