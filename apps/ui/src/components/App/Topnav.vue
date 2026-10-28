@@ -188,8 +188,8 @@ onUnmounted(() => {
             <IH-switch-horizontal />
             Change wallet
           </UiDropdownItem>
-          <hr class="bg-skin-text/20 h-[2px]" />
-          <UiDropdownItem class="!text-skin-danger" @click="logout()">
+          <hr class="border-skin-text/20" />
+          <UiDropdownItem danger @click="logout()">
             <IH-logout />
             Log out
           </UiDropdownItem>

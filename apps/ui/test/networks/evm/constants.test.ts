@@ -1,0 +1,50 @@
+import { describe, expect, it } from 'vitest';
+import { createConstants } from '@/networks/evm/constants';
+
+describe('EVM Constants', () => {
+  const pin = async () => ({ provider: 'dummy', cid: '1' });
+  const constants = createConstants('eth', { pin });
+  const input = `0x395ed61716b48dc904140b515e9f682e33330154:1,0x395ed61716b48dc904140b515e9f682e33330154:2,0x395ed61716b48dc904140b515e9f682e33330154:3,
+      0x395ed61716b48dc904140b515e9f682e33330154:4
+
+  0x395ed61716b48dc904140b515e9f682e33330154:5,
+,
+  `;
+
+  it('should include all editor entries for standard networks', () => {
+    expect(constants.EDITOR_AUTHENTICATORS).toHaveLength(3);
+    expect(constants.EDITOR_VOTING_STRATEGIES).toHaveLength(4);
+    expect(constants.EDITOR_PROPOSAL_VALIDATIONS).toHaveLength(1);
+    expect(constants.EDITOR_EXECUTION_STRATEGIES).toHaveLength(2);
+  });
+
+  describe('EDITOR_VOTING_STRATEGIES', () => {
+    describe('whitelist', () => {
+      const strategy = constants.EDITOR_VOTING_STRATEGIES.find(
+        s => s.name === 'Whitelist'
+      )!;
+
+      describe('generateSummary', () => {
+        it('should return the correct number of addresses', () => {
+          const summary = strategy.generateSummary!({
+            whitelist: input
+          });
+
+          expect(summary).toEqual('(5 addresses)');
+        });
+      });
+
+      describe('generateParams', () => {
+        it('should return the encoded value of the whitelist tree root', async () => {
+          const summary = await strategy.generateParams!({
+            whitelist: input
+          });
+
+          expect(summary).toEqual([
+            '0x107aeb9f6cd74046422dc4138dd222efb6f0790d9e4e5e541fb00320e3866d49'
+          ]);
+        });
+      });
+    });
+  });
+});

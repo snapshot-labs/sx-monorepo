@@ -65,7 +65,7 @@ const config: KnipConfig = {
     // Same as sx-evm: these are resolved through foundry remappings. The
     // scripts and tests are only ever run through the test:* shell scripts.
     'contracts/sx-starknet': {
-      entry: ['scripts/**/*.ts', 'tests/**/*.ts'],
+      entry: ['scripts/**/*.ts', 'test/**/*.ts'],
       ignoreDependencies: [
         '@gnosis.pm/safe-contracts',
         '@gnosis.pm/zodiac',
