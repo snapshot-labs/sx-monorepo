@@ -91,7 +91,7 @@ const networks = computed(() => {
 function isValidNetwork(network: string): network is string {
   return (
     network === 'all' ||
-    (protocol.value === 'snapshot' && !loaded.value) ||
+    (!!network && protocol.value === 'snapshot' && !loaded.value) ||
     networks.value.some(n => n.id === network)
   );
 }
