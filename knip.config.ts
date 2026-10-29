@@ -8,7 +8,7 @@ const config: KnipConfig = {
   rules: { duplicates: 'off' },
   workspaces: {
     '.': {
-      entry: ['scripts/*.ts'],
+      entry: ['scripts/*.ts', 'stage.config.js'],
       ignore: ['docs/**']
     },
     'apps/api': {
