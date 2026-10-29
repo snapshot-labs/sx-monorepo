@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { networks, SnapshotNetwork } from '@/helpers/networks';
+import { getNetworkDetails, NetworkDetails } from '@/helpers/networks';
 import { getUrl, shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
@@ -31,12 +31,9 @@ defineEmits<{
 
 const network = computed(() => getNetwork(props.networkId));
 const hasAddress = computed(() => props.strategy.address.startsWith('0x'));
-const strategyNetworkDetails = computed<SnapshotNetwork | null>(() => {
-  if (!props.strategy.chainId) return null;
-  if (!(props.strategy.chainId in networks)) return null;
-
-  return networks[props.strategy.chainId];
-});
+const strategyNetworkDetails = computed<NetworkDetails | null>(() =>
+  props.strategy.chainId ? getNetworkDetails(props.strategy.chainId) : null
+);
 const isOffchainNetwork = computed(() => {
   return offchainNetworks.includes(props.networkId);
 });

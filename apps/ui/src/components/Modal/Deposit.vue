@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import QRCode from 'qrcode';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { formatAddress, getUrl } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -16,7 +16,7 @@ const emit = defineEmits<{
 
 const { copy, copied } = useClipboard();
 
-const network = computed(() => networks[props.chainId]);
+const network = computed(() => getNetworkDetails(props.chainId));
 
 const formattedAddress = computed(() => formatAddress(props.address));
 

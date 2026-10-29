@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
@@ -107,11 +107,9 @@ const blockExplorerUrl = computed(() => {
 
   if (!snapshot || !chainId) return null;
 
-  const network = networks[chainId];
+  const explorerUrl = getNetworkDetails(chainId)?.explorerUrl;
 
-  return network?.explorer?.url
-    ? `${network.explorer.url}/block/${snapshot}`
-    : null;
+  return explorerUrl ? `${explorerUrl}/block/${snapshot}` : null;
 });
 
 const offchainProposal = computed<boolean>(() =>

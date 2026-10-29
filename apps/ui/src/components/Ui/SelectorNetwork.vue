@@ -20,27 +20,15 @@ const { networks } = useOffchainNetworksList(() => props.definition.networkId);
 const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;
   if (networksListKind === 'full') {
-    return networks.value
-      .filter(network => {
-        if (
-          props.definition.networkId === 's' &&
-          'testnet' in network &&
-          network.testnet
-        ) {
-          return false;
-        }
-
-        return true;
+    return networks.value.map(network => ({
+      id: network.chainId,
+      name: network.name,
+      icon: h('img', {
+        src: getUrl(network.logo),
+        alt: network.name,
+        class: 'rounded-full'
       })
-      .map(network => ({
-        id: String(network.chainId),
-        name: network.name,
-        icon: h('img', {
-          src: getUrl(network.logo),
-          alt: network.name,
-          class: 'rounded-full'
-        })
-      }));
+    }));
   }
 
   return enabledNetworks

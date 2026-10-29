@@ -59,23 +59,15 @@ const networks = computed(() => {
 
   let protocolNetworks: SelectItem<string>[] = [];
   if (protocol.value === 'snapshot') {
-    protocolNetworks = offchainNetworks.value
-      .filter(network => {
-        return !(
-          metadataNetwork === 's' &&
-          'testnet' in network &&
-          network.testnet
-        );
+    protocolNetworks = offchainNetworks.value.map(network => ({
+      id: network.chainId,
+      name: network.name,
+      icon: h('img', {
+        src: getUrl(network.logo),
+        alt: network.name,
+        class: 'rounded-full size-3.5'
       })
-      .map(network => ({
-        id: network.key,
-        name: network.name,
-        icon: h('img', {
-          src: getUrl(network.logo),
-          alt: network.name,
-          class: 'rounded-full size-3.5'
-        })
-      }));
+    }));
   } else {
     protocolNetworks = explorePageNetworks.map(networkId => {
       const network = getNetwork(networkId);

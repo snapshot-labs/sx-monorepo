@@ -406,7 +406,16 @@ export type NetworkApi = {
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
   getNetworks(): Promise<
-    Record<ChainId, { spaces_count: number; premium: boolean }>
+    Record<
+      ChainId,
+      {
+        name: string;
+        logo: string;
+        explorer: string;
+        spaces_count: number;
+        premium: boolean;
+      }
+    >
   >;
   loadSettings(): Promise<Setting[]>;
   loadLastIndexedBlock(): Promise<number | null>;
