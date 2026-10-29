@@ -12,9 +12,9 @@
     "start": "node dist/src/index.js",
     "start:test": "dotenv -e test/.env.test bun run dev",
     "test:setup": "dotenv -e test/.env.test ts-node ./test/setupDb.ts",
-    "test": "bun run test:setup; PORT=3030 start-server-and-test 'bun run start:test' http://localhost:3030 'dotenv -e test/.env.test jest --runInBand'",
+    "test": "bun run test:setup; PORT=3030 start-server-and-test 'bun run start:test' http://localhost:3030 'dotenv -e test/.env.test -- jest --runInBand'",
     "test:unit": "dotenv -e test/.env.test jest test/unit/",
-    "test:e2e": "PORT=3030 start-server-and-test 'bun run start:test' http://localhost:3030 'dotenv -e test/.env.test jest --runInBand --collectCoverage=false test/e2e/'"
+    "test:e2e": "PORT=3030 start-server-and-test 'bun run start:test' http://localhost:3030 'dotenv -e test/.env.test -- jest --runInBand --collectCoverage=false test/e2e/'"
   },
   "dependencies": {
     "@graphql-tools/schema": "^10.0.0",
