@@ -1,5 +1,5 @@
 import { reactive } from 'vue';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, metadataNetwork } from '@/networks';
 import { METADATA as EVM_METADATA } from '@/networks/evm/metadata';
 import { METADATA as STARKNET_METADATA } from '@/networks/starknet/metadata';
 import { ChainId } from '@/types';
@@ -29,20 +29,16 @@ function requestHubNetworks() {
   if (isRequested) return;
   isRequested = true;
 
-  offchainNetworks
-    .filter(id => enabledNetworks.includes(id))
-    .forEach(networkId =>
-      getNetwork(networkId)
-        .api.getNetworks()
-        .then(networks => {
-          for (const { id, name, logo, explorer } of networks) {
-            hubNetworks.set(id, { name, logo, explorerUrl: explorer });
-          }
-        })
-        .catch(() => {
-          isRequested = false;
-        })
-    );
+  getNetwork(metadataNetwork)
+    .api.getNetworks()
+    .then(networks => {
+      for (const { id, name, logo, explorer } of networks) {
+        hubNetworks.set(id, { name, logo, explorerUrl: explorer });
+      }
+    })
+    .catch(() => {
+      isRequested = false;
+    });
 }
 
 export function getNetworkDetails(chainId: ChainId): NetworkDetails | null {

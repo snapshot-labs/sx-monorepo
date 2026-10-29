@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
-import { enabledNetworks, getNetwork } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -15,7 +20,13 @@ const props = defineProps<{
   };
 }>();
 
-const { networks } = useOffchainNetworksList(() => props.definition.networkId);
+// Onchain spaces list every network from the hub, only for the full list
+const { networks } = useOffchainNetworksList(() =>
+  props.definition.networksListKind === 'full' &&
+  !offchainNetworks.includes(props.definition.networkId)
+    ? metadataNetwork
+    : props.definition.networkId
+);
 
 const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;

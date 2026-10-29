@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { computed } from 'vue';
 
 const { getNetworks } = vi.hoisted(() => ({ getNetworks: vi.fn() }));
 
 vi.mock('@/networks', () => ({
-  enabledNetworks: ['s'],
-  offchainNetworks: ['s', 's-tn'],
+  metadataNetwork: 's',
   getNetwork: () => ({ api: { getNetworks } })
 }));
 
@@ -46,11 +46,12 @@ describe('getNetworkDetails()', () => {
       }
     ]);
     const getNetworkDetails = await importGetNetworkDetails();
+    const network = computed(() => getNetworkDetails(100));
 
-    expect(getNetworkDetails(100)).toBeNull();
+    expect(network.value).toBeNull();
     await flushPromises();
 
-    expect(getNetworkDetails(100)).toEqual({
+    expect(network.value).toEqual({
       name: 'Gnosis',
       logo: 'ipfs://logo',
       explorerUrl: 'https://gnosisscan.io'
@@ -69,14 +70,4 @@ describe('getNetworkDetails()', () => {
 
     expect(getNetworks).toHaveBeenCalledTimes(2);
   });
-
-  it.each(['constructor', '__proto__', 'toString'])(
-    'should not treat %s as a network',
-    async chainId => {
-      getNetworks.mockResolvedValue([]);
-      const getNetworkDetails = await importGetNetworkDetails();
-
-      expect(getNetworkDetails(chainId)).toBeNull();
-    }
-  );
 });

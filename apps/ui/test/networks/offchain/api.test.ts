@@ -36,5 +36,16 @@ describe('offchain api', () => {
       expect(sameNetworks).toBe(networks);
       expect(fetchMock).toHaveBeenCalledTimes(1);
     });
+
+    it('should request the hub again after a failure', async () => {
+      const fetchMock = vi.fn(async () => new Response(null, { status: 500 }));
+      vi.stubGlobal('fetch', fetchMock);
+      const api = createApi('https://hub.test/graphql', 's', constants);
+
+      await expect(api.getNetworks()).rejects.toThrow();
+      await expect(api.getNetworks()).rejects.toThrow();
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
   });
 });

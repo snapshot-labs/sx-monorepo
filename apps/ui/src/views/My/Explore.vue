@@ -49,7 +49,7 @@ const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
     category
   });
 
-const { networks: offchainNetworks } = useOffchainNetworksList(
+const { networks: offchainNetworks, loaded } = useOffchainNetworksList(
   metadataNetwork,
   true
 );
@@ -87,8 +87,13 @@ const networks = computed(() => {
   return [{ id: 'all', name: 'All networks' }, ...protocolNetworks];
 });
 
+// A network from the URL is kept until the hub networks are loaded
 function isValidNetwork(network: string): network is string {
-  return network === 'all' || networks.value.some(n => n.id === network);
+  return (
+    network === 'all' ||
+    (protocol.value === 'snapshot' && !loaded.value) ||
+    networks.value.some(n => n.id === network)
+  );
 }
 
 function isValidCategory(category: string): category is SpaceCategory {
@@ -123,7 +128,8 @@ watch(
     () => route.query.q as string,
     () => route.query.p as string,
     () => route.query.c as string,
-    () => route.query.n as string
+    () => route.query.n as string,
+    loaded
   ],
   ([searchQueryValue, protocolQuery, categoryQuery, networkQuery]) => {
     const _protocol = (
