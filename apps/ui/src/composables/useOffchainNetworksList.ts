@@ -1,16 +1,9 @@
 import { MaybeRefOrGetter } from 'vue';
 import { getNetwork } from '@/networks';
+import { HubNetwork } from '@/networks/types';
 import { NetworkID } from '@/types';
 
-type OffchainNetwork = {
-  chainId: string;
-  name: string;
-  logo: string;
-  premium: boolean;
-  spacesCount: number;
-};
-
-const networksById = ref(new Map<NetworkID, OffchainNetwork[]>());
+const networksById = ref(new Map<NetworkID, HubNetwork[]>());
 
 export function useOffchainNetworksList(
   networkId: MaybeRefOrGetter<NetworkID>,
@@ -27,7 +20,7 @@ export function useOffchainNetworksList(
       new Set(
         allNetworks.value
           ?.filter(network => network.premium)
-          .map(network => network.chainId)
+          .map(network => network.id)
       )
   );
 
@@ -41,18 +34,7 @@ export function useOffchainNetworksList(
     if (networksById.value.has(id)) return;
 
     try {
-      const result = await getNetwork(id).api.getNetworks();
-
-      networksById.value.set(
-        id,
-        Object.entries(result).map(([chainId, network]) => ({
-          chainId,
-          name: network.name,
-          logo: network.logo,
-          premium: network.premium,
-          spacesCount: network.spaces_count
-        }))
-      );
+      networksById.value.set(id, await getNetwork(id).api.getNetworks());
     } catch (err) {
       throw new Error(`Failed to load networks for ${id}: ${err}`);
     }

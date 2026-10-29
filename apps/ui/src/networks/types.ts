@@ -341,6 +341,15 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
 };
 
+export type HubNetwork = {
+  id: string;
+  name: string;
+  logo: string;
+  explorer: string;
+  spacesCount: number;
+  premium: boolean;
+};
+
 export type NetworkApi = {
   apiUrl: string;
   loadProposalScoresTicks(proposalId: string): Promise<ScoresTick[]>;
@@ -405,18 +414,7 @@ export type NetworkApi = {
   ): Promise<Statement[]>;
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
-  getNetworks(): Promise<
-    Record<
-      ChainId,
-      {
-        name: string;
-        logo: string;
-        explorer: string;
-        spaces_count: number;
-        premium: boolean;
-      }
-    >
-  >;
+  getNetworks(): Promise<HubNetwork[]>;
   loadSettings(): Promise<Setting[]>;
   loadLastIndexedBlock(): Promise<number | null>;
 };

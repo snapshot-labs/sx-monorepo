@@ -1087,27 +1087,11 @@ export function createApi(
 
       return formatStrategy(data.strategy as ApiStrategy);
     },
-    // Requested once and shared by every caller, only ipfs:// logos and
-    // https:// explorers are kept as they end up in img and link attributes
+    // Requested once and shared by every caller
     getNetworks: () => {
       networksRequest ??= apollo
         .query({ query: NETWORKS_QUERY })
-        .then(({ data }) =>
-          Object.fromEntries(
-            data.networks.map(network => [
-              network.id,
-              {
-                name: network.name,
-                logo: network.logo.startsWith('ipfs://') ? network.logo : '',
-                explorer: network.explorer.startsWith('https://')
-                  ? network.explorer
-                  : '',
-                spaces_count: network.spacesCount,
-                premium: network.premium
-              }
-            ])
-          )
-        )
+        .then(({ data }) => data.networks)
         .catch(err => {
           networksRequest = undefined;
           throw err;

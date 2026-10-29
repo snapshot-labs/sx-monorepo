@@ -4,7 +4,7 @@ import { METADATA as EVM_METADATA } from '@/networks/evm/metadata';
 import { METADATA as STARKNET_METADATA } from '@/networks/starknet/metadata';
 import { ChainId } from '@/types';
 
-export type NetworkDetails = {
+type NetworkDetails = {
   name: string;
   logo: string;
   explorerUrl: string;
@@ -31,14 +31,12 @@ function requestHubNetworks() {
 
   offchainNetworks
     .filter(id => enabledNetworks.includes(id))
-    .forEach(id =>
-      getNetwork(id)
+    .forEach(networkId =>
+      getNetwork(networkId)
         .api.getNetworks()
         .then(networks => {
-          for (const [chainId, { name, logo, explorer }] of Object.entries(
-            networks
-          )) {
-            hubNetworks.set(chainId, { name, logo, explorerUrl: explorer });
+          for (const { id, name, logo, explorer } of networks) {
+            hubNetworks.set(id, { name, logo, explorerUrl: explorer });
           }
         })
         .catch(() => {

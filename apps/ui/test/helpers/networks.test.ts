@@ -35,15 +35,16 @@ describe('getNetworkDetails()', () => {
   });
 
   it('should load other networks from the hub once', async () => {
-    getNetworks.mockResolvedValue({
-      100: {
+    getNetworks.mockResolvedValue([
+      {
+        id: '100',
         name: 'Gnosis',
         logo: 'ipfs://logo',
         explorer: 'https://gnosisscan.io',
-        spaces_count: 1,
+        spacesCount: 1,
         premium: false
       }
-    });
+    ]);
     const getNetworkDetails = await importGetNetworkDetails();
 
     expect(getNetworkDetails(100)).toBeNull();
@@ -59,7 +60,7 @@ describe('getNetworkDetails()', () => {
   });
 
   it('should request the hub again after a failure', async () => {
-    getNetworks.mockRejectedValueOnce(new Error('down')).mockResolvedValue({});
+    getNetworks.mockRejectedValueOnce(new Error('down')).mockResolvedValue([]);
     const getNetworkDetails = await importGetNetworkDetails();
 
     getNetworkDetails(100);
@@ -72,7 +73,7 @@ describe('getNetworkDetails()', () => {
   it.each(['constructor', '__proto__', 'toString'])(
     'should not treat %s as a network',
     async chainId => {
-      getNetworks.mockResolvedValue({});
+      getNetworks.mockResolvedValue([]);
       const getNetworkDetails = await importGetNetworkDetails();
 
       expect(getNetworkDetails(chainId)).toBeNull();

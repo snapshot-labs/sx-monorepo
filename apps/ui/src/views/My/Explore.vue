@@ -60,7 +60,7 @@ const networks = computed(() => {
   let protocolNetworks: SelectItem<string>[] = [];
   if (protocol.value === 'snapshot') {
     protocolNetworks = offchainNetworks.value.map(network => ({
-      id: network.chainId,
+      id: network.id,
       name: network.name,
       icon: h('img', {
         src: getUrl(network.logo),
