@@ -12,6 +12,10 @@ jest.mock('../../../src/helpers/strategies', () => ({
   getStrategies: jest.fn(() => mockStrategies)
 }));
 
+jest.mock('../../../src/helpers/actions', () => ({
+  getNetworkIds: jest.fn(async () => ['1', '5042999'])
+}));
+
 // Mock the log module to avoid any issues
 jest.mock('../../../src/helpers/log', () => ({
   warn: jest.fn()
@@ -185,6 +189,22 @@ describe('helpers/spaceValidation', () => {
 
         await expect(validateSpaceSettings(space, 'mainnet')).rejects.toBe(
           'space cannot be its own child'
+        );
+      });
+    });
+
+    describe('network validation', () => {
+      it('should allow a network from the hub DB missing from networks.json', async () => {
+        const space = createMockSpace({ network: '5042999' });
+        await expect(
+          validateSpaceSettings(space, 'mainnet')
+        ).resolves.toBeUndefined();
+      });
+
+      it('should reject a network missing from the hub DB', async () => {
+        const space = createMockSpace({ network: '10' });
+        await expect(validateSpaceSettings(space, 'mainnet')).rejects.toBe(
+          'network not allowed'
         );
       });
     });
