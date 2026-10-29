@@ -88,7 +88,7 @@ export async function addOrUpdateSkin(
 }
 
 export async function getProposal(space, id) {
-  const query = `SELECT * FROM proposals WHERE space = ? AND id = ?`;
+  const query = 'SELECT * FROM proposals WHERE space = ? AND id = ?';
   const [proposal] = await db.queryAsync(query, [space, id]);
   if (!proposal) return false;
 
@@ -123,7 +123,7 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  const query = 'SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1';
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]

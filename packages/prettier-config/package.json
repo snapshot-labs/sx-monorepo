@@ -10,8 +10,5 @@
     "access": "public"
   },
   "license": "MIT",
-  "main": "index.js",
-  "scripts": {
-    "lint": "eslint ."
-  }
+  "main": "index.js"
 }

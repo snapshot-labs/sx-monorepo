@@ -48,7 +48,7 @@ async function run() {
   const config = CONFIG[networkId];
 
   if (!networkId || !config) {
-    console.error(`Invalid network ID. Use 'sn' or 'sn-sep'.`);
+    console.error("Invalid network ID. Use 'sn' or 'sn-sep'.");
     process.exit(1);
   }
 

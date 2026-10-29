@@ -27,7 +27,7 @@ watch(
   async () => {
     await nextTick();
     // @ts-ignore
-    const el = treasuriesList.value?.$el.querySelector(`a[aria-active="true"]`);
+    const el = treasuriesList.value?.$el.querySelector('a[aria-active="true"]');
     if (el) el.scrollIntoView();
   },
   { immediate: true }

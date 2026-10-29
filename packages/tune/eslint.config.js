@@ -1,15 +1,15 @@
 import vueConfig from '@snapshot-labs/eslint-config-vue';
+import oxlint from 'eslint-plugin-oxlint';
 import storybook from 'eslint-plugin-storybook';
-import autoImportGlobals from './.eslintrc-auto-import.json' with { type: 'json' };
 
 export default [
+  {
+    // oxlint reads the same eslint-disable comments, so ESLint must not
+    // report or remove the ones for rules it has handed over
+    linterOptions: { reportUnusedDisableDirectives: 'off' }
+  },
   ...vueConfig,
   ...storybook.configs['flat/recommended'],
-  {
-    languageOptions: {
-      globals: autoImportGlobals.globals
-    }
-  },
   {
     rules: {
       '@typescript-eslint/consistent-type-imports': [
@@ -25,6 +25,17 @@ export default [
             'Use `import type { ... }` instead of inline `import { type ... }`'
         }
       ]
+    }
+  },
+  ...oxlint
+    .buildFromOxlintConfigFile('../../.oxlintrc.json')
+    .filter(config => config.name !== 'oxlint/oxlint-config-ignore-patterns'),
+  {
+    rules: {
+      'import-x/no-extraneous-dependencies': 'off',
+      'import-x/order': 'off',
+      'lines-between-class-members': 'off',
+      'prettier/prettier': 'off'
     }
   },
   {

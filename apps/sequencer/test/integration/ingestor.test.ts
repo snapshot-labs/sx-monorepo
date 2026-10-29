@@ -325,7 +325,7 @@ describe('ingestor', () => {
     it('saves the proposal in the DB', async () => {
       const typeResult = await ingestor(proposalRequest);
       const dbResult = await db.queryAsync(
-        `SELECT * from proposals WHERE id = ? LIMIT 1`,
+        'SELECT * from proposals WHERE id = ? LIMIT 1',
         typeResult.id
       );
 

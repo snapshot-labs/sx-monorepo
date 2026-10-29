@@ -117,6 +117,7 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
     "electron": "^38.2.0",
+    "eslint-plugin-oxlint": "1.89.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
     "postcss": "^8.4.30",

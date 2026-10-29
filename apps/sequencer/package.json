@@ -5,8 +5,6 @@
   "license": "MIT",
   "//ajv": "ajv 8.11.0 is a transitive dep of @snapshot-labs/snapshot.js (also used by ajv-formats and ajv-errors). Pinned at this level to force a single hoisted copy at node_modules/ajv. Without it, bun puts eslint's ajv@^6.x in the root slot and gives snapshot.js / ajv-formats / ajv-errors each their own nested 8.x copy — same version, different module identities, which breaks ajv-errors's vocabulary registration ('SyntaxError: Unexpected token :'). Drop this dep when bun supports nested overrides (oven-sh/bun#6608) or ajv-errors is replaced upstream.",
   "scripts": {
-    "lint": "eslint src/ test/ --ext .ts",
-    "lint:fix": "bun run lint --fix",
     "typecheck": "tsc --noEmit",
     "build": "tsc",
     "dev": "nodemon src/index.ts",

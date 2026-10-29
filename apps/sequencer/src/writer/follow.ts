@@ -17,7 +17,7 @@ export const getFollowsCount = async (follower: string): Promise<number> => {
 };
 
 export async function verify(message): Promise<any> {
-  const query = `SELECT * FROM follows WHERE follower = ? AND space = ? LIMIT 1`;
+  const query = 'SELECT * FROM follows WHERE follower = ? AND space = ? LIMIT 1';
   const follows = await db.queryAsync(query, [message.from, message.space]);
 
   if (follows.length !== 0) {

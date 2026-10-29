@@ -77,7 +77,8 @@
         "selector": "Identifier[name=/^(e|evt)$/][typeAnnotation.typeAnnotation.typeName.name=/Event$/]",
         "message": "Use event"
       }
-    ]
+    ],
+    "core/quotes": ["error", "single", { "avoidEscape": true }]
   },
   "overrides": [
     {

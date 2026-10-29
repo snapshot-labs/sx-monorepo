@@ -13,8 +13,6 @@
     "test:eth-tx-auth": "bash './scripts/eth-tx-auth-test.sh'",
     "test:l1-execution": "bash './scripts/l1-avatar-execution-test.sh'",
     "test-ts": "bun run test:stark-sig-auth && bun run test:eth-sig-auth && bun run test:eth-tx-auth && bun run test:l1-execution",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
