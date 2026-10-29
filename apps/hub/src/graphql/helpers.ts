@@ -299,6 +299,24 @@ export function buildWhereQuery(
   return { query, params };
 }
 
+// A leading "$" or a lowercase voting-power prefix (stETH, veCRV) is not part
+// of the ticker. An uppercase start like STRK is.
+const SYMBOL_PREFIXES = ['$', 'st', 've'];
+
+export function isSymbolMatch(symbol: string, search: string): boolean {
+  const ticker = search.trim().toLowerCase();
+  if (!ticker) return false;
+
+  const trimmed = symbol.trim();
+  if (trimmed.toLowerCase() === ticker) return true;
+
+  return SYMBOL_PREFIXES.some(
+    prefix =>
+      trimmed.startsWith(prefix) &&
+      trimmed.slice(prefix.length).toLowerCase() === ticker
+  );
+}
+
 export async function fetchSpaces(args) {
   const { first = 20, skip = 0, where = {} } = args;
 

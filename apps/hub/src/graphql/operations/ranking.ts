@@ -7,6 +7,7 @@ import {
   formatSkinSettings,
   formatSpace,
   handleRelatedSpaces,
+  isSymbolMatch,
   PublicError
 } from '../helpers';
 
@@ -34,7 +35,8 @@ export default async function (_parent, args, context, info) {
     let filteredSpaces = rankedSpaces.filter(space => {
       const filteredBySearch =
         space.id.includes(searchStr) ||
-        space.name?.toLowerCase().includes(searchStr);
+        space.name?.toLowerCase().includes(searchStr) ||
+        (space.symbol && isSymbolMatch(space.symbol, searchStr));
       const filteredByNetwork = network
         ? space.networks.includes(network)
         : true;
