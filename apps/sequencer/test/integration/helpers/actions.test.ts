@@ -133,18 +133,27 @@ describe('helpers/actions', () => {
       curtis: '0xf6238F73A87D390CB00b2B380D2B777E13Fe2725'
     };
 
+    // These call live networks: a timed-out test keeps running and its
+    // assertion lands in a later test, so give slow responses time to finish
+    const NETWORK_TIMEOUT = 30_000;
+
     it.each(Object.entries(mapping))(
       'returns true when it exists for %s',
       async (network, id) => {
         return expect(sxSpaceExists(network, id)).resolves.toEqual(true);
-      }
+      },
+      NETWORK_TIMEOUT
     );
 
-    it('returns false when it does not exist', async () => {
-      return expect(sxSpaceExists('sep', mapping['eth'])).resolves.toEqual(
-        false
-      );
-    });
+    it(
+      'returns false when it does not exist',
+      async () => {
+        return expect(sxSpaceExists('sep', mapping['eth'])).resolves.toEqual(
+          false
+        );
+      },
+      NETWORK_TIMEOUT
+    );
   });
 
   describe('addOrUpdateSpace', () => {
