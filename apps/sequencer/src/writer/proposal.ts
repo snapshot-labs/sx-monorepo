@@ -235,7 +235,7 @@ export async function verify(body): Promise<any> {
     }
   }
 
-  if (msg.payload.snapshot < networks[space.network].start) {
+  if (msg.payload.snapshot < (networks[space.network]?.start ?? 0)) {
     return Promise.reject('proposal snapshot must be after network start');
   }
 

@@ -1,4 +1,5 @@
 import snapshot from '@snapshot-labs/snapshot.js';
+import { getNetworkIds } from './actions';
 import log from './log';
 import { getStrategies } from './strategies';
 
@@ -38,7 +39,8 @@ export async function validateSpaceSettings(
     space,
     {
       spaceType,
-      snapshotEnv
+      snapshotEnv,
+      networks: await getNetworkIds()
     }
   );
 
