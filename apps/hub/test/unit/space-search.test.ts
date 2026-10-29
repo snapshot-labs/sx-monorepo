@@ -34,48 +34,51 @@ beforeEach(() => {
 });
 
 describe('Explore ticker search', () => {
-  describe.each(['stWLFI', 'veWLFI'])('%s VP symbol', symbol => {
-    beforeEach(() => {
-      rankedSpaces[0].symbol = symbol;
-    });
+  describe.each(['stWLFI', 'veWLFI', '$WLFI', ' WLFI '])(
+    '%s symbol',
+    symbol => {
+      beforeEach(() => {
+        rankedSpaces[0].symbol = symbol;
+      });
 
-    it.each(['WLFI', 'wlfi', 'WlFi', symbol])(
-      'matches complete ticker %s',
-      async search => {
-        const result = await ranking(
-          null,
-          { first: 20, skip: 0, where: { search } },
-          {},
-          {}
-        );
-        expect(result).toMatchObject({ metrics: { total: 1 } });
-        expect(queryAsync.mock.calls[0][1][0]).toEqual([
-          'worldlibertyfinancial.com'
-        ]);
-      }
-    );
+      it.each(['WLFI', 'wlfi', 'WlFi', symbol])(
+        'matches complete ticker %s',
+        async search => {
+          const result = await ranking(
+            null,
+            { first: 20, skip: 0, where: { search } },
+            {},
+            {}
+          );
+          expect(result).toMatchObject({ metrics: { total: 1 } });
+          expect(queryAsync.mock.calls[0][1][0]).toEqual([
+            'worldlibertyfinancial.com'
+          ]);
+        }
+      );
 
-    it.each(['WLF', 'lfi', 'st', 've', 'WLFIx', '%', '_'])(
-      'rejects partial ticker %s',
-      async search => {
-        const result = await ranking(
-          null,
-          { first: 20, skip: 0, where: { search } },
-          {},
-          {}
-        );
-        expect(result).toMatchObject({ metrics: { total: 0 } });
-        expect(queryAsync).not.toHaveBeenCalled();
-      }
-    );
-  });
+      it.each(['WLF', 'lfi', 'st', 've', 'WLFIx', '%', '_'])(
+        'rejects partial ticker %s',
+        async search => {
+          const result = await ranking(
+            null,
+            { first: 20, skip: 0, where: { search } },
+            {},
+            {}
+          );
+          expect(result).toMatchObject({ metrics: { total: 0 } });
+          expect(queryAsync).not.toHaveBeenCalled();
+        }
+      );
+    }
+  );
 
   describe.each([
     ['STwlfi', 'WLFI'],
     ['vEwLfI', 'wlfi'],
     ['STRK', 'rk'],
     ['VEST', 'st']
-  ])('%s ticker without a lowercase prefix', (symbol, ticker) => {
+  ])('%s is a whole ticker, not a prefixed %s', (symbol, ticker) => {
     beforeEach(() => {
       rankedSpaces[0].symbol = symbol;
     });
@@ -96,7 +99,7 @@ describe('Explore ticker search', () => {
       }
     );
 
-    it(`does not match ${ticker} by stripping the uppercase start`, async () => {
+    it(`does not match ${ticker}`, async () => {
       const result = await ranking(
         null,
         { first: 20, skip: 0, where: { search: ticker } },

@@ -299,19 +299,21 @@ export function buildWhereQuery(
   return { query, params };
 }
 
-const VP_SYMBOL_PREFIXES = ['st', 've'];
+// A leading "$" or a lowercase voting-power prefix (stETH, veCRV) is not part
+// of the ticker. An uppercase start like STRK is.
+const SYMBOL_PREFIXES = ['$', 'st', 've'];
 
-// Match the complete symbol, or the symbol without a lowercase voting-power
-// prefix (stETH, veCRV). An uppercase start like STRK is part of the ticker.
 export function isSymbolMatch(symbol: string, search: string): boolean {
-  const ticker = search.toLowerCase();
+  const ticker = search.trim().toLowerCase();
   if (!ticker) return false;
-  if (symbol.toLowerCase() === ticker) return true;
 
-  return VP_SYMBOL_PREFIXES.some(
+  const trimmed = symbol.trim();
+  if (trimmed.toLowerCase() === ticker) return true;
+
+  return SYMBOL_PREFIXES.some(
     prefix =>
-      symbol.startsWith(prefix) &&
-      symbol.slice(prefix.length).toLowerCase() === ticker
+      trimmed.startsWith(prefix) &&
+      trimmed.slice(prefix.length).toLowerCase() === ticker
   );
 }
 
