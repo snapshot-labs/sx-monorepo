@@ -64,6 +64,7 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 
 - **Node** >=22.6, **Bun** >=1.3 (workspaces: `apps/*`, `packages/*`)
 - **Turborepo** for task orchestration (`turbo.json`)
+- **oxlint** via `@stage-labs/config` (`stage lint`, rules in `.oxlintrc.json`), runs before ESLint in `bun run lint`
 - **ESLint** `@snapshot-labs` config (Vue variant for UI)
 - **Prettier** `@snapshot-labs/prettier-config`
 
