@@ -1,9 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "types": ["node", "jest"],
     "target": "esnext",
-    "module": "commonjs",
-    "moduleResolution": "Node",
+    "module": "NodeNext",
     "rootDir": "./",
     "outDir": "./build",
     "lib": ["esnext"],
