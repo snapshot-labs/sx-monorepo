@@ -1,6 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
-import networksJson from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   LAST_USED_CONNECTOR_CACHE_KEY,
   RECENT_CONNECTOR
@@ -19,18 +18,12 @@ type Web3providerWithSafe = Web3Provider & {
   };
 };
 
-const networks: Record<
-  string,
-  { chainId: ChainId; name: string; unknown?: boolean }
-> = networksJson;
-
-const defaultNetwork: string =
-  import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
-
 const state = reactive({
   account: '',
   name: '',
-  network: networks[defaultNetwork],
+  network: {
+    chainId: Number(import.meta.env.VITE_DEFAULT_NETWORK || 1) as ChainId
+  },
   authLoading: false
 });
 const authInitiated = ref(false);
@@ -155,15 +148,7 @@ export function useWeb3() {
   }
 
   function handleChainChanged(chainId: ChainId) {
-    if (!networks[chainId]) {
-      networks[chainId] = {
-        ...networks[defaultNetwork],
-        chainId,
-        name: 'Unknown',
-        unknown: true
-      };
-    }
-    state.network = networks[chainId];
+    state.network = { chainId };
   }
 
   function attachConnectorEvents(connector: Connector) {

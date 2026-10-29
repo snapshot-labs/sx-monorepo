@@ -104,7 +104,7 @@ export function useSpaceAlerts(
 
     return Array.from(ids)
       .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
-      .map(chainId => networks.value.find(n => String(n.chainId) === chainId))
+      .map(chainId => networks.value.find(n => n.id === chainId))
       .filter(network => !!network);
   });
 

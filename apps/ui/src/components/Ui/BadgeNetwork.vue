@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { getUrl } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { ChainId, NetworkID } from '@/types';
-
-type SnapshotJSNetworks = typeof networks;
-type SnapshotJSNetwork = SnapshotJSNetworks[keyof SnapshotJSNetworks];
 
 type NetworkData = {
   name: string;
@@ -35,18 +32,8 @@ const networkData = computed<NetworkData | null>(() => {
   }
 
   if (props.chainId) {
-    try {
-      const network: SnapshotJSNetwork | undefined =
-        networks[String(props.chainId)];
-      if (!network) return null;
-
-      return {
-        name: network.name,
-        avatar: network.logo
-      };
-    } catch {
-      return null;
-    }
+    const network = getNetworkDetails(props.chainId);
+    if (network) return { name: network.name, avatar: network.logo };
   }
 
   return null;

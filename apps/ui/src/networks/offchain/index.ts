@@ -1,7 +1,11 @@
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
-import { formatAddress, getSpaceController } from '@/helpers/utils';
+import {
+  formatAddress,
+  getChainIdKind,
+  getSpaceController
+} from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { ChainId, NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -77,13 +81,13 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
       chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
-      const network = networks[chainId.toString()];
-      const isStarknet = 'starknet' in network;
+      const explorerUrl = getNetworkDetails(chainId)?.explorerUrl;
+      const isStarknet = getChainIdKind(chainId) === 'starknet';
 
       switch (type) {
         case 'transaction':
           if (id.startsWith('0x')) {
-            return network ? `${network.explorer.url}/tx/${id}` : '';
+            return explorerUrl ? `${explorerUrl}/tx/${id}` : '';
           }
 
           if (isStarknet) return '';
@@ -93,11 +97,11 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract':
         case 'address':
-          return network
-            ? `${network.explorer.url}/${isStarknet ? 'contract' : 'address'}/${formatAddress(id)}`
+          return explorerUrl
+            ? `${explorerUrl}/${isStarknet ? 'contract' : 'address'}/${formatAddress(id)}`
             : '';
         case 'block':
-          return network ? `${network.explorer.url}/block/${id}` : '';
+          return explorerUrl ? `${explorerUrl}/block/${id}` : '';
         default:
           throw new Error('Not implemented');
       }

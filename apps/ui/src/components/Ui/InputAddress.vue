@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { networks as snapshotJsNetworks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { getUrl } from '@/helpers/utils';
 import { BaseDefinition } from '@/types';
 
@@ -28,17 +28,10 @@ const emit = defineEmits<{
 const networkDetails = computed<NetworkDetails | null>(() => {
   const chainId = props.definition?.chainId;
 
-  if (!chainId) return null;
+  const network = chainId ? getNetworkDetails(chainId) : null;
+  if (!network) return null;
 
-  if (chainId in snapshotJsNetworks) {
-    const network = snapshotJsNetworks[chainId];
-    return {
-      name: network.name,
-      logoUrl: getUrl(network.logo)
-    };
-  }
-
-  return null;
+  return { name: network.name, logoUrl: getUrl(network.logo) };
 });
 
 const shouldShowPicker = computed(() => {
