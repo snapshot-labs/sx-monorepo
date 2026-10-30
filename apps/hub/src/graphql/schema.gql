@@ -979,6 +979,10 @@ type Network {
   id: String!
   "Network display name"
   name: String!
+  "Network logo, an ipfs:// URI"
+  logo: String!
+  "Block explorer base URL"
+  explorer: String!
   "Whether this is a premium network"
   premium: Boolean!
   "Number of spaces using this network"

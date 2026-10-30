@@ -418,6 +418,9 @@ export const NETWORKS_QUERY = gql(`
   query Networks {
     networks {
       id
+      name
+      logo
+      explorer
       spacesCount
       premium
     }

@@ -1,5 +1,5 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { getNetwork } from '@/networks';
 import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm/metadata';
 import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet/metadata';
@@ -42,10 +42,10 @@ export function getGenericExplorerUrl(
       mappedType = 'token';
     }
 
-    const network = networks[chainId];
-    if (!network) return null;
+    const explorerUrl = getNetworkDetails(chainId)?.explorerUrl;
+    if (!explorerUrl) return null;
 
-    return `${network.explorer.url}/${mappedType}/${address}`;
+    return `${explorerUrl}/${mappedType}/${address}`;
   }
 
   try {

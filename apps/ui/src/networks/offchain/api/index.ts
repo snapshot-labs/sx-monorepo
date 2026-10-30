@@ -674,6 +674,8 @@ export function createApi(
     }
   });
 
+  let networksRequest: ReturnType<NetworkApi['getNetworks']> | undefined;
+
   return {
     apiUrl: uri,
     loadProposalScoresTicks: async (
@@ -1100,20 +1102,17 @@ export function createApi(
 
       return formatStrategy(data.strategy as ApiStrategy);
     },
-    getNetworks: async () => {
-      const { data } = await apollo.query({
-        query: NETWORKS_QUERY
-      });
+    // Requested once and shared by every caller
+    getNetworks: () => {
+      networksRequest ??= apollo
+        .query({ query: NETWORKS_QUERY })
+        .then(({ data }) => data.networks)
+        .catch(err => {
+          networksRequest = undefined;
+          throw err;
+        });
 
-      return Object.fromEntries(
-        data.networks.map(network => [
-          network.id,
-          {
-            spaces_count: network.spacesCount,
-            premium: network.premium
-          }
-        ])
-      );
+      return networksRequest;
     },
     loadSettings: async (): Promise<Setting[]> => {
       const {

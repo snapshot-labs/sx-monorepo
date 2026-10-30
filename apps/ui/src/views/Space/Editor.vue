@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { getExecutionKey } from '@/helpers/ui';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
@@ -76,8 +76,10 @@ const enforcedVoteType = ref<VoteType | null>(null);
 const nonPremiumNetworksList = computed(() => {
   const networks = alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks;
   if (!networks) return '';
-  const boldNames = networks.map((n: any) => `<b>${n.name}</b>`);
-  return prettyConcat(boldNames, 'and');
+  return prettyConcat(
+    networks.map((n: any) => `"${n.name}"`),
+    'and'
+  );
 });
 
 const disabledStrategiesList = computed(() => {
@@ -643,8 +645,7 @@ watchEffect(() => {
             class="mb-4"
           >
             You cannot create proposals. This space is configured with
-            non-premium networks (<span v-html="nonPremiumNetworksList" />).
-            Change to a
+            non-premium networks ({{ nonPremiumNetworksList }}). Change to a
             <AppLink
               :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
             >
@@ -723,8 +724,10 @@ watchEffect(() => {
             class="mb-4"
           >
             Please use a Safe on
-            {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
-            create proposals.
+            {{
+              getNetworkDetails(space.snapshot_chain_id)?.name ?? 'this network'
+            }}
+            to create proposals.
           </UiAlert>
           <UiAlert
             v-else-if="isUsingOnlyInoperativeSigAuthenticators"
