@@ -38,7 +38,7 @@ export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
 
   async connect(isAutoConnect = false) {
-    const { projectId, getTheme, ...metadata } = this.options;
+    const { projectId, getTheme, wallet, ...metadata } = this.options;
     const themeMode = getTheme?.() ?? 'light';
 
     try {
@@ -91,7 +91,16 @@ export default class Walletconnect extends Connector {
 
       if (!isAutoConnect && !this.provider) {
         await this.disconnect();
-        await this.modal.open();
+        await this.modal.open(
+          wallet ? { view: 'ConnectingWalletConnectBasic' } : undefined
+        );
+        if (wallet) {
+          // Use the same controller version as AppKit's modal singleton.
+          const { RouterController } = await import(
+            '@reown/appkit-controllers'
+          );
+          RouterController.reset('ConnectingWalletConnect', { wallet });
+        }
       }
 
       this.provider = await awaitProvider(this.modal, { isAutoConnect });
