@@ -5,6 +5,13 @@ import { _n, _t } from '@/helpers/utils';
 
 const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
 
+type SortType = 'requests' | 'created';
+
+const SORT_COLUMNS = [
+  { type: 'requests', label: 'This month' },
+  { type: 'created', label: 'Created' }
+] as const;
+
 const PERIOD_ITEMS = [
   { key: 'day', label: 'Day' },
   { key: 'month', label: 'Month' }
@@ -31,6 +38,7 @@ const selectedKey = ref<ApiKey | null>(null);
 const usagePeriod = ref<'day' | 'month'>('day');
 const usageKey = ref('all');
 const usageView = ref<'chart' | 'table'>('chart');
+const sortBy = ref<`${SortType}-${'asc' | 'desc'}`>('requests-desc');
 
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
@@ -45,6 +53,14 @@ const usageSeries = computed(() => {
     row => usageKey.value === 'all' || row.key === usageKey.value
   );
   return buildUsage(rows, isDaily ? 30 : 12, usagePeriod.value);
+});
+const sortedKeys = computed(() => {
+  const [type, direction] = sortBy.value.split('-') as [SortType, string];
+  return keys.value
+    .map(key => ({ ...key, requests: getMonthRequests(key.key) }))
+    .sort((a, b) =>
+      direction === 'asc' ? a[type] - b[type] : b[type] - a[type]
+    );
 });
 const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
@@ -63,6 +79,16 @@ function getMonthRequests(key: string) {
     'month'
   );
   return hub + score;
+}
+
+function handleSortChange(type: SortType) {
+  if (sortBy.value.startsWith(type)) {
+    sortBy.value = sortBy.value.endsWith('desc')
+      ? `${type}-asc`
+      : `${type}-desc`;
+  } else {
+    sortBy.value = `${type}-desc`;
+  }
 }
 
 function openKeyModal(key: ApiKey | null = null) {
@@ -180,8 +206,16 @@ function openDeleteModal(key: ApiKey) {
       <UiColumnHeader class="space-x-3">
         <div class="flex-1 min-w-0 text-left">Name</div>
         <div class="flex-1 min-w-0">Key</div>
-        <div class="hidden sm:flex w-[150px]">This month</div>
-        <div class="hidden sm:flex w-[150px]">Created</div>
+        <UiColumnHeaderItemSortable
+          v-for="column in SORT_COLUMNS"
+          :key="column.type"
+          class="hidden sm:flex w-[150px]"
+          :is-ordered="sortBy.startsWith(column.type)"
+          :order-direction="sortBy.endsWith('asc') ? 'asc' : 'desc'"
+          @sort-change="handleSortChange(column.type)"
+        >
+          {{ column.label }}
+        </UiColumnHeaderItemSortable>
         <div class="min-w-3.5" />
       </UiColumnHeader>
 
@@ -198,7 +232,7 @@ function openDeleteModal(key: ApiKey) {
       </UiStateWarning>
       <div v-else class="px-4">
         <div
-          v-for="key in keys"
+          v-for="key in sortedKeys"
           :key="key.key"
           class="border-b flex space-x-3 py-3 items-center"
         >
@@ -211,7 +245,7 @@ function openDeleteModal(key: ApiKey) {
           </div>
           <div
             class="hidden sm:flex w-[150px] shrink-0 items-center"
-            v-text="`${_n(getMonthRequests(key.key))} req`"
+            v-text="`${_n(key.requests)} req`"
           />
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
             {{ _t(key.created, 'MMM D, YYYY') }}
