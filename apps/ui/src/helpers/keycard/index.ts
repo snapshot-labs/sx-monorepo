@@ -1,7 +1,7 @@
 import { Wallet } from '@ethersproject/wallet';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { ApiKey, Usage, UsageBucket, UsageHistory } from './types';
+import { ApiKey, Usage, UsageBucket, UsageHistory, UsageRow } from './types';
 
 dayjs.extend(utc);
 
@@ -130,6 +130,17 @@ export function buildUsage(
     });
   }
   return buckets;
+}
+
+// Total requests of each key in the current UTC month
+export function getMonthRequests(rows: UsageRow[]): Record<string, number> {
+  const period = dayjs.utc().format('MM-YYYY');
+  const totals: Record<string, number> = {};
+  for (const row of rows) {
+    if (row.period !== period || !APP_FIELD[row.app]) continue;
+    totals[row.key] = (totals[row.key] ?? 0) + row.total;
+  }
+  return totals;
 }
 
 export async function fetchKeys(
