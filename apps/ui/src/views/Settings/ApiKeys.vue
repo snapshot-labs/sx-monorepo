@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { buildUsage } from '@/helpers/keycard';
+import { buildUsage, getMonthRequests } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
-import { _n, _t } from '@/helpers/utils';
+import { _n, _t, compareAddresses } from '@/helpers/utils';
 
 const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
 
-type SortType = 'requests' | 'created';
+type SortType = 'name' | 'requests' | 'created';
 
 const SORT_COLUMNS = [
   { type: 'requests', label: 'This month' },
@@ -45,7 +45,9 @@ const isStarknetAccount = computed(
 );
 const usageKeyItems = computed(() => [
   { key: 'all', label: 'All keys' },
-  ...keys.value.map(key => ({ key: key.key, label: key.name }))
+  ...keys.value
+    .map(key => ({ key: key.key, label: key.name }))
+    .sort((a, b) => a.label.localeCompare(b.label))
 ]);
 const usageSeries = computed(() => {
   const isDaily = usagePeriod.value === 'day';
@@ -56,11 +58,20 @@ const usageSeries = computed(() => {
 });
 const sortedKeys = computed(() => {
   const [type, direction] = sortBy.value.split('-') as [SortType, string];
+  const requests = getMonthRequests(monthlyUsage.value);
   return keys.value
-    .map(key => ({ ...key, requests: getMonthRequests(key.key) }))
-    .sort((a, b) =>
-      direction === 'asc' ? a[type] - b[type] : b[type] - a[type]
-    );
+    .map(key => ({
+      ...key,
+      requests: requests[key.key] ?? 0,
+      isOwn: !key.owner || compareAddresses(key.owner, web3Account.value)
+    }))
+    .sort((a, b) => {
+      const sign = direction === 'asc' ? 1 : -1;
+      if (type !== 'name') return sign * (a[type] - b[type]);
+      // Own keys first, then external ones, each sorted by name
+      if (a.isOwn !== b.isOwn) return a.isOwn ? -1 : 1;
+      return sign * a.name.localeCompare(b.name);
+    });
 });
 const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
@@ -72,22 +83,13 @@ watch(keys, () => {
   }
 });
 
-function getMonthRequests(key: string) {
-  const [{ hub, score }] = buildUsage(
-    monthlyUsage.value.filter(row => row.key === key),
-    1,
-    'month'
-  );
-  return hub + score;
-}
-
 function handleSortChange(type: SortType) {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
       ? `${type}-asc`
       : `${type}-desc`;
   } else {
-    sortBy.value = `${type}-desc`;
+    sortBy.value = type === 'name' ? 'name-asc' : `${type}-desc`;
   }
 }
 
@@ -204,7 +206,14 @@ function openDeleteModal(key: ApiKey) {
 
       <UiSectionHeader class="mt-4" label="API keys" sticky />
       <UiColumnHeader class="space-x-3">
-        <div class="flex-1 min-w-0 text-left">Name</div>
+        <UiColumnHeaderItemSortable
+          class="flex-1 min-w-0"
+          :is-ordered="sortBy.startsWith('name')"
+          :order-direction="sortBy.endsWith('asc') ? 'asc' : 'desc'"
+          @sort-change="handleSortChange('name')"
+        >
+          Name
+        </UiColumnHeaderItemSortable>
         <div class="flex-1 min-w-0">Key</div>
         <UiColumnHeaderItemSortable
           v-for="column in SORT_COLUMNS"
@@ -236,12 +245,21 @@ function openDeleteModal(key: ApiKey) {
           :key="key.key"
           class="border-b flex space-x-3 py-3 items-center"
         >
-          <div
-            class="flex-1 min-w-0 text-skin-link font-semibold truncate"
-            v-text="key.name"
-          />
+          <div class="flex-1 min-w-0 flex items-center gap-2">
+            <AppLink
+              v-if="!key.isOwn"
+              :to="{ name: 'user', params: { user: key.owner } }"
+              class="shrink-0 flex"
+            >
+              <UiStamp :id="key.owner" :size="24" loading="lazy" />
+            </AppLink>
+            <div
+              class="text-skin-link font-semibold truncate"
+              v-text="key.name"
+            />
+          </div>
           <div class="flex flex-1 min-w-0">
-            <ApiKeyField :value="key.key" masked inline />
+            <ApiKeyField v-if="key.isOwn" :value="key.key" masked inline />
           </div>
           <div
             class="hidden sm:flex w-[150px] shrink-0 items-center"
@@ -250,7 +268,8 @@ function openDeleteModal(key: ApiKey) {
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
             {{ _t(key.created, 'MMM D, YYYY') }}
           </div>
-          <UiDropdown>
+          <div v-if="!key.isOwn" class="min-w-3.5" />
+          <UiDropdown v-else>
             <template #button>
               <div class="flex items-center h-full">
                 <button type="button" class="text-skin-link">
