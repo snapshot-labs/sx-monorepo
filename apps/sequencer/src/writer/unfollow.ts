@@ -2,7 +2,7 @@ import db from '../helpers/mysql';
 import { DEFAULT_NETWORK_ID } from '../helpers/utils';
 
 export async function verify(message): Promise<any> {
-  const query = `SELECT * FROM follows WHERE follower = ? AND space = ? AND network = ? LIMIT 1`;
+  const query = 'SELECT * FROM follows WHERE follower = ? AND space = ? AND network = ? LIMIT 1';
   const follows = await db.queryAsync(query, [
     message.from,
     message.space,

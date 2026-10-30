@@ -335,7 +335,7 @@ async function updateWalletConnectWhitelist(
   }
 
   try {
-    await fetch(`https://cloud.reown.com/api/set-allowed-domains`, {
+    await fetch('https://cloud.reown.com/api/set-allowed-domains', {
       method,
       headers: {
         Accept: 'application/json',

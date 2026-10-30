@@ -27,8 +27,6 @@
     "dev": "tsc -w",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "bun run lint --fix",
     "prepare": "bun run build",
     "prepublishOnly": "bun run lint"
   },

@@ -34,7 +34,7 @@ export default class Karmahq extends Provider {
         throw err;
       }
 
-      console.log(`Error, retrying...`);
+      console.log('Error, retrying...');
       return this.fetchWithRetry(fn, retries - 1);
     }
   }

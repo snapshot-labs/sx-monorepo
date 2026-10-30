@@ -87,7 +87,7 @@ export async function setProposalKey(params) {
       const choice = await shutterDecrypt(jsonParse(vote.choice), `0x${key}`);
       log.info(`[shutter] decrypted choice ${JSON.stringify(choice)}`);
       if (choice !== false && choice !== '') {
-        sqlQuery += `UPDATE votes SET choice = ? WHERE id = ? LIMIT 1; `;
+        sqlQuery += 'UPDATE votes SET choice = ? WHERE id = ? LIMIT 1; ';
         sqlParams.push(choice);
         sqlParams.push(vote.id);
       }
@@ -112,7 +112,7 @@ router.all('/', async (req, res) => {
   );
 
   if (!SHUTTER_IPS.includes(getIp(req))) {
-    log.warn(`[shutter] wrong ip`);
+    log.warn('[shutter] wrong ip');
     return rpcError(res, 500, 'not authorized ip', null);
   }
 

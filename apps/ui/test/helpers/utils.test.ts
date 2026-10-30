@@ -24,7 +24,7 @@ describe('utils', () => {
     });
 
     it('should escape all HTML-sensitive characters', () => {
-      expect(escapeHtml(`<>&"'`)).toBe('&lt;&gt;&amp;&quot;&#39;');
+      expect(escapeHtml('<>&"\'')).toBe('&lt;&gt;&amp;&quot;&#39;');
     });
 
     it('should leave plain text untouched', () => {
