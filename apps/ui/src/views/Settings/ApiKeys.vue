@@ -35,6 +35,12 @@ const isDeleteModalOpen = ref(false);
 const selectedKey = ref<ApiKey | null>(null);
 const usagePeriod = ref<'day' | 'month'>('day');
 const usageKey = ref('all');
+const usageKeyModel = computed({
+  get: () => usageKey.value,
+  set: (value: string | null) => {
+    usageKey.value = value ?? 'all';
+  }
+});
 const usageView = ref<'chart' | 'table'>('chart');
 const sortBy = ref<`${SortType}-${'asc' | 'desc'}`>('requests-desc');
 
@@ -42,10 +48,10 @@ const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
 );
 const usageKeyItems = computed(() => [
-  { key: 'all', label: 'All keys' },
+  { id: 'all', name: 'All keys' },
   ...keys.value
-    .map(key => ({ key: key.key, label: key.name }))
-    .sort((a, b) => a.label.localeCompare(b.label))
+    .map(key => ({ id: key.key, name: key.name }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 ]);
 const usageSeries = computed(() => {
   const isDaily = usagePeriod.value === 'day';
@@ -154,7 +160,7 @@ function openDeleteModal(key: ApiKey) {
       <div v-if="!isError" class="mt-4">
         <div class="flex items-center justify-between gap-2 mb-3 px-4">
           <UiEyebrow class="font-medium">Usage</UiEyebrow>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-end justify-end gap-2">
             <div
               class="relative top-1 flex items-center rounded-full border p-1"
             >
@@ -185,12 +191,18 @@ function openDeleteModal(key: ApiKey) {
                 <IH-table class="size-[18px]" />
               </button>
             </div>
-            <UiSelectDropdown
+            <Combobox
               v-if="keys.length > 1"
-              v-model="usageKey"
-              title="API key"
-              placement="end"
-              :items="usageKeyItems"
+              v-model="usageKeyModel"
+              class="top-1"
+              inline
+              :gap="8"
+              :definition="{
+                type: 'string',
+                title: 'API key',
+                enum: usageKeyItems.map(item => item.id),
+                options: usageKeyItems
+              }"
             />
             <UiSelectDropdown
               v-model="usagePeriod"
