@@ -100,11 +100,14 @@ async function handleVoteSubmitted() {
   editMode.value = false;
 }
 
+watch(id, () => {
+  modalOpenVote.value = false;
+  editMode.value = false;
+});
+
 watch(
   [id, proposal, isPending],
   async ([, proposal, isPending]) => {
-    modalOpenVote.value = false;
-    editMode.value = false;
     discourseTopic.value = null;
 
     if (!isPending && !proposal) {
@@ -255,7 +258,7 @@ watchEffect(() => {
           :top="TOTAL_NAV_HEIGHT"
           :bottom="64"
         >
-          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
+          <div v-bind="$attrs" class="flex flex-col gap-4 p-4 pb-0 !h-auto">
             <div v-if="hasVoteSection" class="max-md:hidden">
               <UiEyebrow class="mb-2.5 flex items-center space-x-2">
                 <template v-if="editMode">
