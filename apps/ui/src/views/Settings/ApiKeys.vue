@@ -3,8 +3,6 @@ import { buildUsage, getMonthRequests } from '@/helpers/keycard';
 import { ApiKey } from '@/helpers/keycard/types';
 import { _n, _t, compareAddresses } from '@/helpers/utils';
 
-const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
-
 type SortType = 'name' | 'requests' | 'created';
 
 const SORT_COLUMNS = [
@@ -105,40 +103,48 @@ function openDeleteModal(key: ApiKey) {
 </script>
 
 <template>
-  <div v-bind="$attrs" class="!h-auto">
+  <div v-bind="$attrs" :class="{ '!h-auto': isAuthenticated }">
     <UiLoading v-if="web3.authLoading" class="px-4 py-4 block" />
 
-    <UiContainerSettings
-      v-else-if="isStarknetAccount || !isAuthenticated"
-      class="px-4 pt-4"
-      title="API keys"
-      :description="DESCRIPTION"
+    <UiStateWarning v-else-if="isStarknetAccount" class="px-4 py-3">
+      API keys are not available for Starknet accounts yet.
+    </UiStateWarning>
+
+    <div
+      v-else-if="!isAuthenticated"
+      class="flex items-center justify-center h-full p-4"
     >
-      <UiStateWarning v-if="isStarknetAccount" class="max-w-[592px]">
-        API keys are not available for Starknet accounts yet.
-      </UiStateWarning>
-      <div
-        v-else
-        class="border rounded-lg max-w-[592px] px-4 py-8 flex flex-col items-center gap-3 text-center"
-      >
-        <IH-lock-closed class="size-[24px]" />
-        <div class="space-y-1">
-          <h4 class="text-skin-heading">Authenticate your account</h4>
-          <div class="text-sm leading-[18px] max-w-[360px]">
-            Verify your account once to manage your keys.
-          </div>
+      <div class="border rounded-lg w-full max-w-[440px] text-center">
+        <div class="bg-skin-border h-[100px] rounded-t-lg" />
+        <UiStamp
+          :id="web3Account"
+          :size="80"
+          class="-mt-[40px] border-4 border-skin-bg"
+        />
+        <div class="px-4 pb-4 pt-2 space-y-2">
+          <div class="text-[20px] text-skin-link">Verify your account</div>
+          <div>Sign a message with your wallet to continue.</div>
         </div>
-        <UiButton primary :loading="isAuthenticating" @click="authenticate">
-          Authenticate
-        </UiButton>
+        <div class="border-t p-4">
+          <UiButton
+            primary
+            class="w-full"
+            :loading="isAuthenticating"
+            @click="authenticate"
+          >
+            Authenticate
+          </UiButton>
+        </div>
       </div>
-    </UiContainerSettings>
+    </div>
 
     <template v-else>
       <div class="flex items-start justify-between gap-3 px-4 pt-4">
         <div class="max-w-[592px]">
           <h3>API keys</h3>
-          <span class="inline-block" v-text="DESCRIPTION" />
+          <span class="inline-block">
+            Access the Snapshot APIs with your own API keys.
+          </span>
         </div>
         <UiButton primary class="shrink-0" @click="openKeyModal()">
           New key
