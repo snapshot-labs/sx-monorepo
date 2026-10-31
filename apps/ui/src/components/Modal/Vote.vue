@@ -236,6 +236,7 @@ watchEffect(async () => {
       <button
         v-if="pickedChoice"
         type="button"
+        aria-label="Back"
         class="absolute left-0 -top-1 p-4"
         @click="pickedChoice = null"
       >
@@ -263,13 +264,15 @@ watchEffect(async () => {
         :voting-power="votingPower"
       />
       <ProposalVoteForm
-        v-if="!choice"
+        v-if="!props.choice"
+        v-show="!pickedChoice"
+        :key="web3.account"
         list
         :proposal="proposal"
         :default-choice="currentVote?.choice"
         @vote="pickedChoice = $event"
       />
-      <template v-else>
+      <template v-if="choice">
         <dl>
           <dt class="text-sm leading-5">Choice</dt>
           <dd class="text-skin-heading text-[20px] leading-6">
