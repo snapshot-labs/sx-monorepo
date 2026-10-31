@@ -29,6 +29,11 @@ METADATA_BY_CHAIN_ID.set(42220, {
   ticker: 'CELO'
 });
 
+METADATA_BY_CHAIN_ID.set(143, { name: 'Monad', ticker: 'MON' });
+METADATA_BY_CHAIN_ID.set(999, { name: 'HyperEVM', ticker: 'HYPE' });
+METADATA_BY_CHAIN_ID.set(9745, { name: 'Plasma', ticker: 'XPL' });
+METADATA_BY_CHAIN_ID.set(80094, { name: 'Berachain', ticker: 'BERA' });
+
 type Treasury = {
   chainId: string;
   address: string;
