@@ -1,16 +1,16 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { buildUsage } from '@/helpers/keycard';
+import { buildUsage, getMonthRequests } from '@/helpers/keycard';
+
+beforeAll(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-08-25T12:00:00Z'));
+});
+
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 describe('buildUsage', () => {
-  beforeAll(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2026-08-25T12:00:00Z'));
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-  });
-
   it('zero-fills every bucket when there are no rows', () => {
     const daily = buildUsage([], 30, 'day');
     const monthly = buildUsage([], 12, 'month');
@@ -67,5 +67,19 @@ describe('buildUsage', () => {
 
     expect(daily[0]).toMatchObject({ label: 'Jul 27', hub: 4 });
     expect(monthly[0]).toMatchObject({ label: 'Sep', score: 9 });
+  });
+});
+
+describe('getMonthRequests', () => {
+  it('sums the current month requests of each key', () => {
+    expect(
+      getMonthRequests([
+        { key: 'a', app: 'snapshot-hub', period: '08-2026', total: 2 },
+        { key: 'a', app: 'score-api', period: '08-2026', total: 3 },
+        { key: 'b', app: 'snapshot-hub', period: '08-2026', total: 7 },
+        { key: 'b', app: 'snapshot-hub', period: '07-2026', total: 100 },
+        { key: 'b', app: 'other-api', period: '08-2026', total: 100 }
+      ])
+    ).toEqual({ a: 5, b: 7 });
   });
 });
