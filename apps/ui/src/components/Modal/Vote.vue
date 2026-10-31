@@ -15,7 +15,7 @@ const REASON_DEFINITION = {
   title: 'Reason',
   type: 'string',
   format: 'long',
-  examples: ['Share you reason (optional)'],
+  examples: ['Share your reason (optional)'],
   maxLength: 5000
 };
 
@@ -264,28 +264,25 @@ watchEffect(async () => {
             No choice selected
           </div>
         </dd>
-        <dt class="text-sm leading-5 mt-3">Voting power</dt>
+        <dt class="text-sm leading-5 mt-3 flex items-center gap-1">
+          Voting power
+          <UiTooltip
+            v-if="!isStarknetProposal && blockExplorerUrl"
+            :title="`Calculated at block ${_n(proposal.snapshot)}`"
+          >
+            <AppLink :to="blockExplorerUrl">
+              <IH-information-circle class="size-3" />
+            </AppLink>
+          </UiTooltip>
+        </dt>
         <dd v-if="isVotingPowerPending">
           <UiLoading />
         </dd>
         <dd
           v-else-if="votingPower"
-          class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
+          class="font-semibold text-skin-heading text-[20px] leading-6"
         >
           {{ formattedVotingPower }}
-          <span
-            v-if="!isStarknetProposal && proposal.snapshot && blockExplorerUrl"
-            class="font-normal flex gap-0.5 text-sm items-center"
-          >
-            (
-            <AppLink :to="blockExplorerUrl">{{
-              _n(proposal.snapshot)
-            }}</AppLink>
-            <UiTooltip title="Snapshot block number">
-              <IH-information-circle class="size-3" />
-            </UiTooltip>
-            )
-          </span>
         </dd>
       </dl>
       <div v-if="['none', 'inco'].includes(proposal.privacy)" class="s-box">
