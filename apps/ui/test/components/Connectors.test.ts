@@ -1,7 +1,17 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
-import { expect, it } from 'vitest';
+import { Storage } from 'happy-dom';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import Connectors from '@/components/Connectors.vue';
+
+beforeEach(() => {
+  // Use browser storage even when the host runtime exposes its own global.
+  vi.stubGlobal('localStorage', new Storage());
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 it('renders Oath using the native wallet row and emits its WalletConnect connector', async () => {
   const wrapper = mount(Connectors, { global: { stubs: { UiPill: true } } });
