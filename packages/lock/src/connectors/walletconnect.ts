@@ -17,22 +17,34 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const awaitProvider = (
   appKit: AppKit,
   { isAutoConnect }: { isAutoConnect: boolean }
-) =>
-  new Promise((resolve, reject) => {
-    appKit.subscribeEvents(event => {
+) => {
+  let unsubscribeEvents = () => {};
+  let unsubscribeProviders = () => {};
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  return new Promise((resolve, reject) => {
+    unsubscribeEvents = appKit.subscribeEvents(event => {
       if (event.data.event === 'MODAL_CLOSE') reject('User closed modal');
     });
 
-    appKit.subscribeProviders(state => {
-      resolve(state['eip155']);
+    unsubscribeProviders = appKit.subscribeProviders(state => {
+      if (state.eip155) resolve(state.eip155);
     });
 
     if (isAutoConnect) {
-      setTimeout(() => {
+      const provider = appKit.getWalletProvider();
+      if (provider) resolve(provider);
+
+      timeout = setTimeout(() => {
         reject('Timeout');
       }, RECONNECT_TIMEOUT);
     }
+  }).finally(() => {
+    unsubscribeEvents();
+    unsubscribeProviders();
+    clearTimeout(timeout);
   });
+};
 
 export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
