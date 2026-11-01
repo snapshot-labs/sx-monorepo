@@ -17,28 +17,40 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const awaitProvider = (
   appKit: AppKit,
   { isAutoConnect }: { isAutoConnect: boolean }
-) =>
-  new Promise((resolve, reject) => {
-    appKit.subscribeEvents(event => {
+) => {
+  let unsubscribeEvents = () => {};
+  let unsubscribeProviders = () => {};
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  return new Promise((resolve, reject) => {
+    unsubscribeEvents = appKit.subscribeEvents(event => {
       if (event.data.event === 'MODAL_CLOSE') reject('User closed modal');
     });
 
-    appKit.subscribeProviders(state => {
-      resolve(state['eip155']);
+    unsubscribeProviders = appKit.subscribeProviders(state => {
+      if (state.eip155) resolve(state.eip155);
     });
 
     if (isAutoConnect) {
-      setTimeout(() => {
+      const provider = appKit.getWalletProvider();
+      if (provider) resolve(provider);
+
+      timeout = setTimeout(() => {
         reject('Timeout');
       }, RECONNECT_TIMEOUT);
     }
+  }).finally(() => {
+    unsubscribeEvents();
+    unsubscribeProviders();
+    clearTimeout(timeout);
   });
+};
 
 export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
 
   async connect(isAutoConnect = false) {
-    const { projectId, getTheme, ...metadata } = this.options;
+    const { projectId, getTheme, wallet, ...metadata } = this.options;
     const themeMode = getTheme?.() ?? 'light';
 
     try {
@@ -91,7 +103,16 @@ export default class Walletconnect extends Connector {
 
       if (!isAutoConnect && !this.provider) {
         await this.disconnect();
-        await this.modal.open();
+        await this.modal.open(
+          wallet ? { view: 'ConnectingWalletConnectBasic' } : undefined
+        );
+        if (wallet) {
+          // Use the same controller version as AppKit's modal singleton.
+          const { RouterController } = await import(
+            '@reown/appkit-controllers'
+          );
+          RouterController.reset('ConnectingWalletConnect', { wallet });
+        }
       }
 
       this.provider = await awaitProvider(this.modal, { isAutoConnect });
