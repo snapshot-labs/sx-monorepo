@@ -15,7 +15,7 @@ const REASON_DEFINITION = {
   title: 'Reason',
   type: 'string',
   format: 'long',
-  examples: ['Share you reason (optional)'],
+  examples: ['Share your reason (optional)'],
   maxLength: 5000
 };
 
@@ -56,6 +56,11 @@ const {
   toRef(props, 'open')
 );
 
+const currentVote = computed(
+  () => votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
+const pickedChoice = ref<Choice | null>(null);
+const choice = computed(() => props.choice ?? pickedChoice.value);
 const loading = ref(false);
 const hidden = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -123,7 +128,6 @@ const isStarknetProposal = computed<boolean>(() =>
 const canSubmit = computed<boolean>(
   () =>
     formValidated.value &&
-    !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
     !!voteValidationPower.value?.canVote &&
     !!votingPower.value?.canVote
@@ -131,7 +135,7 @@ const canSubmit = computed<boolean>(
 
 async function handleSubmit() {
   loading.value = true;
-  selectedChoice.value = props.choice;
+  selectedChoice.value = choice.value;
 
   if (offchainProposal.value) {
     try {
@@ -203,6 +207,7 @@ watch(
 
     isTxPreferred.value = false;
     isAdvancedOpen.value = false;
+    pickedChoice.value = null;
 
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       loading.value = true;
@@ -210,9 +215,7 @@ watch(
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    form.value.reason =
-      votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
-      '';
+    form.value.reason = currentVote.value?.reason || '';
 
     loading.value = false;
   },
@@ -230,6 +233,15 @@ watchEffect(async () => {
 <template>
   <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
+      <button
+        v-if="pickedChoice"
+        type="button"
+        aria-label="Back"
+        class="absolute left-0 -top-1 p-4"
+        @click="pickedChoice = null"
+      >
+        <IH-arrow-narrow-left class="mr-2" />
+      </button>
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
@@ -251,88 +263,95 @@ watchEffect(async () => {
         v-else-if="votingPower && !votingPower.canVote"
         :voting-power="votingPower"
       />
-      <dl>
-        <dt class="text-sm leading-5">Choice</dt>
-        <dd class="text-skin-heading text-[20px] leading-6">
-          <span
-            v-if="choice"
-            class="test-skin-heading font-semibold"
-            v-text="getChoiceText(proposal.choices, choice)"
-          />
-          <div v-else class="flex gap-1 text-skin-danger items-center">
-            <IH-exclamation-circle />
-            No choice selected
-          </div>
-        </dd>
-        <dt class="text-sm leading-5 mt-3">Voting power</dt>
-        <dd v-if="isVotingPowerPending">
-          <UiLoading />
-        </dd>
-        <dd
-          v-else-if="votingPower"
-          class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
-        >
-          {{ formattedVotingPower }}
-          <span
-            v-if="!isStarknetProposal && proposal.snapshot && blockExplorerUrl"
-            class="font-normal flex gap-0.5 text-sm items-center"
-          >
-            (
-            <AppLink :to="blockExplorerUrl">{{
-              _n(proposal.snapshot)
-            }}</AppLink>
-            <UiTooltip title="Snapshot block number">
-              <IH-information-circle class="size-3" />
-            </UiTooltip>
-            )
-          </span>
-        </dd>
-      </dl>
-      <div v-if="['none', 'inco'].includes(proposal.privacy)" class="s-box">
-        <UiForm
-          v-model="form"
-          :error="formErrors"
-          :definition="{ properties: { reason: REASON_DEFINITION } }"
-        />
-      </div>
-      <div v-if="canVoteViaTx">
-        <button
-          type="button"
-          class="flex items-center gap-1 text-skin-text text-sm"
-          @click="isAdvancedOpen = !isAdvancedOpen"
-        >
-          Advanced
-          <IH-chevron-down
-            class="w-[14px] h-[14px] transition-transform"
-            :class="{ 'rotate-180': isAdvancedOpen }"
-          />
-        </button>
-        <div
-          class="grid transition-all duration-200"
-          :class="isAdvancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-        >
-          <div class="overflow-hidden">
-            <label
-              class="flex gap-2.5 items-start cursor-pointer border rounded-lg p-3 mt-2"
+      <ProposalVoteForm
+        v-if="!props.choice"
+        v-show="!pickedChoice"
+        :key="web3.account"
+        list
+        :proposal="proposal"
+        :default-choice="currentVote?.choice"
+        @vote="pickedChoice = $event"
+      />
+      <template v-if="choice">
+        <dl>
+          <dt class="text-sm leading-5">Choice</dt>
+          <dd class="text-skin-heading text-[20px] leading-6">
+            <span
+              class="test-skin-heading font-semibold"
+              v-text="getChoiceText(proposal.choices, choice)"
+            />
+          </dd>
+          <dt class="text-sm leading-5 mt-3 flex items-center gap-1">
+            Voting power
+            <UiTooltip
+              v-if="!isStarknetProposal && blockExplorerUrl"
+              :title="`Calculated at block ${_n(proposal.snapshot)}`"
             >
-              <input v-model="isTxPreferred" type="checkbox" class="mt-[3px]" />
-              <span class="leading-5 block space-y-1">
-                <span class="block text-skin-link"
-                  >Vote with a transaction</span
-                >
-                <span class="block text-sm text-skin-text">
-                  For Ledger / hardware wallets. Sends an on-chain Ethereum
-                  transaction instead of a signature. Use this if signing fails
-                  on a Ledger or other hardware wallet. This costs gas.
+              <AppLink :to="blockExplorerUrl">
+                <IH-information-circle class="size-3" />
+              </AppLink>
+            </UiTooltip>
+          </dt>
+          <dd v-if="isVotingPowerPending">
+            <UiLoading />
+          </dd>
+          <dd
+            v-else-if="votingPower"
+            class="font-semibold text-skin-heading text-[20px] leading-6"
+          >
+            {{ formattedVotingPower }}
+          </dd>
+        </dl>
+        <div v-if="['none', 'inco'].includes(proposal.privacy)" class="s-box">
+          <UiForm
+            v-model="form"
+            :error="formErrors"
+            :definition="{ properties: { reason: REASON_DEFINITION } }"
+          />
+        </div>
+        <div v-if="canVoteViaTx">
+          <button
+            type="button"
+            class="flex items-center gap-1 text-skin-text text-sm"
+            @click="isAdvancedOpen = !isAdvancedOpen"
+          >
+            Advanced
+            <IH-chevron-down
+              class="w-[14px] h-[14px] transition-transform"
+              :class="{ 'rotate-180': isAdvancedOpen }"
+            />
+          </button>
+          <div
+            class="grid transition-all duration-200"
+            :class="isAdvancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
+          >
+            <div class="overflow-hidden">
+              <label
+                class="flex gap-2.5 items-start cursor-pointer border rounded-lg p-3 mt-2"
+              >
+                <input
+                  v-model="isTxPreferred"
+                  type="checkbox"
+                  class="mt-[3px]"
+                />
+                <span class="leading-5 block space-y-1">
+                  <span class="block text-skin-link"
+                    >Vote with a transaction</span
+                  >
+                  <span class="block text-sm text-skin-text">
+                    For Ledger / hardware wallets. Sends an on-chain Ethereum
+                    transaction instead of a signature. Use this if signing
+                    fails on a Ledger or other hardware wallet. This costs gas.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </label>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
     </div>
 
-    <template #footer>
+    <template v-if="choice" #footer>
       <div class="flex flex-col xs:flex-row gap-3">
         <UiButton
           class="w-full order-last xs:order-none"
