@@ -3,10 +3,12 @@ const props = defineProps<{
   verified: boolean;
   turbo: boolean;
   flagged: boolean;
+  // Pro features come from Snapshot Plus credits, not a subscription
+  plus?: boolean;
 }>();
 
 const badgeLabel = computed(() => {
-  if (props.turbo) return 'Pro space';
+  if (props.turbo) return props.plus ? 'Snapshot Plus' : 'Pro space';
   if (props.verified) return 'Verified space';
   if (props.flagged) return 'Flagged space';
   return '';
@@ -15,8 +17,11 @@ const badgeLabel = computed(() => {
 
 <template>
   <UiTooltip v-if="badgeLabel" :title="badgeLabel">
-    <IS-badge-check v-if="turbo" class="text-[#e2b719]" />
-    <IS-badge-check v-else-if="verified" class="text-[#2394ea]" />
+    <IS-badge-check
+      v-if="turbo"
+      :class="plus ? 'text-[#2394ea]' : 'text-[#e2b719]'"
+    />
+    <IS-badge-check v-else-if="verified" class="text-skin-link" />
     <IS-exclamation-circle v-else-if="flagged" class="text-skin-danger" />
   </UiTooltip>
 </template>

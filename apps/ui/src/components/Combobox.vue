@@ -131,12 +131,14 @@ function getDisplayValue(value: T | null) {
           </div>
         </div>
         <ComboboxOptions
-          class="w-full bg-skin-border border-t-skin-text/10 border shadow-xl overflow-hidden"
+          class="w-full bg-skin-border shadow-xl overflow-hidden"
           :class="
-            inline ? 'max-w-[80vw] sm:max-w-[300px] rounded-lg' : 'rounded-b-lg'
+            inline
+              ? 'max-w-[80vw] sm:max-w-[300px] rounded-lg'
+              : 'rounded-b-lg border border-t-skin-text/10'
           "
         >
-          <div class="max-h-[208px] overflow-y-auto">
+          <div class="max-h-[208px] overflow-y-auto py-1">
             <div
               v-if="filteredOptions.length === 0 && query !== ''"
               class="relative cursor-default select-none text-center py-2 px-3"
@@ -154,12 +156,12 @@ function getDisplayValue(value: T | null) {
               <li
                 class="flex items-center justify-between px-3"
                 :class="{
-                  'bg-skin-bg/25': active
+                  'bg-skin-link/[.08]': active
                 }"
               >
                 <component :is="item.icon" class="size-[20px] mr-2" />
                 <span
-                  class="w-full py-2 text-skin-link truncate"
+                  class="w-full py-1.5 leading-6 text-skin-link truncate"
                   :class="{
                     'opacity-40': disabled,
                     'cursor-pointer': !disabled

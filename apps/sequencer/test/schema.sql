@@ -10,6 +10,8 @@ CREATE TABLE spaces (
   hibernated INT NOT NULL DEFAULT '0',
   turbo INT NOT NULL DEFAULT '0',
   turbo_expiration BIGINT NOT NULL DEFAULT '0',
+  credits_deposited BIGINT NOT NULL DEFAULT '0',
+  credits_spent BIGINT NOT NULL DEFAULT '0',
   proposal_count INT NOT NULL DEFAULT '0',
   vote_count INT NOT NULL DEFAULT '0',
   follower_count INT NOT NULL DEFAULT '0',
@@ -70,6 +72,7 @@ CREATE TABLE proposals (
   votes INT(12) NOT NULL,
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
+  credits TINYINT NOT NULL DEFAULT '0',
   te_config JSON DEFAULT NULL,
   te_mpk VARBINARY(96) DEFAULT NULL,
   te_committee_pks JSON DEFAULT NULL,
@@ -264,6 +267,8 @@ CREATE TABLE networks (
   name VARCHAR(32) NOT NULL,
   testnet TINYINT UNSIGNED NOT NULL DEFAULT '0',
   premium TINYINT UNSIGNED NOT NULL DEFAULT '0',
+  logo VARCHAR(256) NOT NULL DEFAULT '',
+  explorer VARCHAR(256) NOT NULL DEFAULT '',
   PRIMARY KEY (id),
   INDEX premium (premium)
 );

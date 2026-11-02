@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { _t } from '@/helpers/utils';
+import { buildUsage, getMonthRequests } from '@/helpers/keycard';
+import { ApiKey } from '@/helpers/keycard/types';
+import { _n, _t, compareAddresses } from '@/helpers/utils';
 
-const DESCRIPTION = 'Access the Snapshot APIs with your own API keys.';
+type SortType = 'name' | 'requests' | 'created';
+
+const SORT_COLUMNS = [
+  { type: 'requests', label: 'This month' },
+  { type: 'created', label: 'Created' }
+] as const;
 
 const PERIOD_ITEMS = [
   { key: 'day', label: 'Day' },
@@ -23,54 +30,125 @@ const {
   monthlyUsage
 } = useApiKeys();
 
+const isKeyModalOpen = ref(false);
+const isDeleteModalOpen = ref(false);
+const selectedKey = ref<ApiKey | null>(null);
 const usagePeriod = ref<'day' | 'month'>('day');
+const usageKey = ref('all');
 const usageView = ref<'chart' | 'table'>('chart');
+const sortBy = ref<`${SortType}-${'asc' | 'desc'}`>('requests-desc');
 
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
 );
-const usageSeries = computed(() =>
-  usagePeriod.value === 'day' ? dailyUsage.value : monthlyUsage.value
-);
+const usageKeyItems = computed(() => [
+  { key: 'all', label: 'All keys' },
+  ...keys.value
+    .map(key => ({ key: key.key, label: key.name }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+]);
+const usageSeries = computed(() => {
+  const isDaily = usagePeriod.value === 'day';
+  const rows = (isDaily ? dailyUsage.value : monthlyUsage.value).filter(
+    row => usageKey.value === 'all' || row.key === usageKey.value
+  );
+  return buildUsage(rows, isDaily ? 30 : 12, usagePeriod.value);
+});
+const sortedKeys = computed(() => {
+  const [type, direction] = sortBy.value.split('-') as [SortType, string];
+  const requests = getMonthRequests(monthlyUsage.value);
+  return keys.value
+    .map(key => ({
+      ...key,
+      requests: requests[key.key] ?? 0,
+      isOwn: !key.owner || compareAddresses(key.owner, web3Account.value)
+    }))
+    .sort((a, b) => {
+      const sign = direction === 'asc' ? 1 : -1;
+      if (type !== 'name') return sign * (a[type] - b[type]);
+      // Own keys first, then external ones, each sorted by name
+      if (a.isOwn !== b.isOwn) return a.isOwn ? -1 : 1;
+      return sign * a.name.localeCompare(b.name);
+    });
+});
 const usageRangeLabel = computed(() =>
   usagePeriod.value === 'day' ? 'Last 30 days' : 'Last 12 months'
 );
+
+watch(keys, () => {
+  if (!keys.value.some(key => key.key === usageKey.value)) {
+    usageKey.value = 'all';
+  }
+});
+
+function handleSortChange(type: SortType) {
+  if (sortBy.value.startsWith(type)) {
+    sortBy.value = sortBy.value.endsWith('desc')
+      ? `${type}-asc`
+      : `${type}-desc`;
+  } else {
+    sortBy.value = type === 'name' ? 'name-asc' : `${type}-desc`;
+  }
+}
+
+function openKeyModal(key: ApiKey | null = null) {
+  selectedKey.value = key;
+  isKeyModalOpen.value = true;
+}
+
+function openDeleteModal(key: ApiKey) {
+  selectedKey.value = key;
+  isDeleteModalOpen.value = true;
+}
 </script>
 
 <template>
-  <div v-bind="$attrs" class="!h-auto">
+  <div v-bind="$attrs" :class="{ '!h-auto': isAuthenticated }">
     <UiLoading v-if="web3.authLoading" class="px-4 py-4 block" />
 
-    <UiContainerSettings
-      v-else-if="isStarknetAccount || !isAuthenticated"
-      class="px-4 pt-4"
-      title="API keys"
-      :description="DESCRIPTION"
+    <UiStateWarning v-else-if="isStarknetAccount" class="px-4 py-3">
+      API keys are not available for Starknet accounts yet.
+    </UiStateWarning>
+
+    <div
+      v-else-if="!isAuthenticated"
+      class="flex items-center justify-center h-full p-4"
     >
-      <UiStateWarning v-if="isStarknetAccount" class="max-w-[592px]">
-        API keys are not available for Starknet accounts yet.
-      </UiStateWarning>
-      <div
-        v-else
-        class="border rounded-lg max-w-[592px] px-4 py-8 flex flex-col items-center gap-3 text-center"
-      >
-        <IH-lock-closed class="size-[24px]" />
-        <div class="space-y-1">
-          <h4 class="text-skin-heading">Authenticate your account</h4>
-          <div class="text-sm leading-[18px] max-w-[360px]">
-            Verify your account once to manage your keys.
-          </div>
+      <div class="border rounded-lg w-full max-w-[440px] text-center">
+        <div class="bg-skin-border h-[100px] rounded-t-lg" />
+        <UiStamp
+          :id="web3Account"
+          :size="80"
+          class="-mt-[40px] border-4 border-skin-bg"
+        />
+        <div class="px-4 pb-4 pt-2 space-y-2">
+          <div class="text-[20px] text-skin-link">Verify your account</div>
+          <div>Sign a message with your wallet to continue.</div>
         </div>
-        <UiButton primary :loading="isAuthenticating" @click="authenticate">
-          Authenticate
-        </UiButton>
+        <div class="border-t p-4">
+          <UiButton
+            primary
+            class="w-full"
+            :loading="isAuthenticating"
+            @click="authenticate"
+          >
+            Authenticate
+          </UiButton>
+        </div>
       </div>
-    </UiContainerSettings>
+    </div>
 
     <template v-else>
-      <div class="px-4 pt-4 max-w-[592px]">
-        <h3>API keys</h3>
-        <span class="inline-block" v-text="DESCRIPTION" />
+      <div class="flex items-start justify-between gap-3 px-4 pt-4">
+        <div class="max-w-[592px]">
+          <h3>API keys</h3>
+          <span class="inline-block">
+            Access the Snapshot APIs with your own API keys.
+          </span>
+        </div>
+        <UiButton primary class="shrink-0" @click="openKeyModal()">
+          New key
+        </UiButton>
       </div>
 
       <div v-if="!isError" class="mt-4">
@@ -108,6 +186,13 @@ const usageRangeLabel = computed(() =>
               </button>
             </div>
             <UiSelectDropdown
+              v-if="keys.length > 1"
+              v-model="usageKey"
+              title="API key"
+              placement="end"
+              :items="usageKeyItems"
+            />
+            <UiSelectDropdown
               v-model="usagePeriod"
               title="Period"
               placement="end"
@@ -122,13 +207,31 @@ const usageRangeLabel = computed(() =>
         >
           <ApiUsageChart :series="usageSeries" :range-label="usageRangeLabel" />
         </div>
-        <ApiSpendingTable v-else :series="usageSeries" />
+        <ApiUsageTable v-else :series="usageSeries" />
       </div>
 
-      <UiSectionHeader class="mt-4" label="Keys" sticky />
+      <UiSectionHeader class="mt-4" label="API keys" sticky />
       <UiColumnHeader class="space-x-3">
-        <div class="grow text-left">Name</div>
-        <div class="hidden sm:flex w-[150px]">Created</div>
+        <UiColumnHeaderItemSortable
+          class="flex-1 min-w-0"
+          :is-ordered="sortBy.startsWith('name')"
+          :order-direction="sortBy.endsWith('asc') ? 'asc' : 'desc'"
+          @sort-change="handleSortChange('name')"
+        >
+          Name
+        </UiColumnHeaderItemSortable>
+        <div class="flex-1 min-w-0">Key</div>
+        <UiColumnHeaderItemSortable
+          v-for="column in SORT_COLUMNS"
+          :key="column.type"
+          class="hidden sm:flex w-[150px]"
+          :is-ordered="sortBy.startsWith(column.type)"
+          :order-direction="sortBy.endsWith('asc') ? 'asc' : 'desc'"
+          @sort-change="handleSortChange(column.type)"
+        >
+          {{ column.label }}
+        </UiColumnHeaderItemSortable>
+        <div class="min-w-3.5" />
       </UiColumnHeader>
 
       <UiLoading v-if="isLoading" class="px-4 py-3 block" />
@@ -144,22 +247,67 @@ const usageRangeLabel = computed(() =>
       </UiStateWarning>
       <div v-else class="px-4">
         <div
-          v-for="key in keys"
+          v-for="key in sortedKeys"
           :key="key.key"
           class="border-b flex space-x-3 py-3 items-center"
         >
-          <div class="grow overflow-hidden flex items-center gap-2">
+          <div class="flex-1 min-w-0 flex items-center gap-2">
+            <AppLink
+              v-if="!key.isOwn"
+              :to="{ name: 'user', params: { user: key.owner } }"
+              class="shrink-0 flex"
+            >
+              <UiStamp :id="key.owner" :size="24" loading="lazy" />
+            </AppLink>
             <div
               class="text-skin-link font-semibold truncate"
               v-text="key.name"
             />
-            <ApiKeyField :value="key.key" masked inline class="shrink-0" />
           </div>
+          <div class="flex flex-1 min-w-0">
+            <ApiKeyField v-if="key.isOwn" :value="key.key" masked inline />
+          </div>
+          <div
+            class="hidden sm:flex w-[150px] shrink-0 items-center"
+            v-text="`${_n(key.requests)} req`"
+          />
           <div class="hidden sm:flex w-[150px] shrink-0 items-center">
             {{ _t(key.created, 'MMM D, YYYY') }}
           </div>
+          <div v-if="!key.isOwn" class="min-w-3.5" />
+          <UiDropdown v-else>
+            <template #button>
+              <div class="flex items-center h-full">
+                <button type="button" class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
+              </div>
+            </template>
+            <template #items>
+              <UiDropdownItem @click="openKeyModal(key)">
+                <IS-pencil :width="16" />
+                Rename key
+              </UiDropdownItem>
+              <UiDropdownItem danger @click="openDeleteModal(key)">
+                <IH-trash :width="16" />
+                Delete key
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
       </div>
+      <teleport to="#modal">
+        <ModalApiKey
+          :open="isKeyModalOpen"
+          :api-key="selectedKey"
+          @close="isKeyModalOpen = false"
+        />
+        <ModalDeleteApiKey
+          :open="isDeleteModalOpen"
+          :api-key="selectedKey"
+          @close="isDeleteModalOpen = false"
+        />
+      </teleport>
     </template>
   </div>
 </template>

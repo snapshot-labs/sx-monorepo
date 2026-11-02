@@ -88,7 +88,7 @@ export function checkLimits(args: any = {}, type) {
   return true;
 }
 
-function formatSkinSettings(result) {
+export function formatSkinSettings(result) {
   return SKIN_SETTINGS.reduce((acc, colorName) => {
     acc[colorName] = result[colorName];
 
@@ -105,7 +105,9 @@ export function formatSpace({
   flagged,
   hibernated,
   skinSettings,
-  created
+  created,
+  credits_deposited = null,
+  credits_spent = 0
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
   const space = {
@@ -173,6 +175,12 @@ export function formatSpace({
   space.hibernated = hibernated;
   space.turbo = new Date((turboExpiration || 0) * 1000) > new Date();
   space.turboExpiration = turboExpiration ?? 0;
+  // Snapshot Plus balance, stored in gwei, negative when owed, null when not loaded
+  const credits =
+    credits_deposited === null ? null : credits_deposited - credits_spent;
+  space.credits =
+    credits === null ? null : (BigInt(credits) * 1_000_000_000n).toString(); // wei
+  space.credits_parsed = credits === null ? null : credits / 1e9; // ETH
   space.rank = spaceMetadata?.rank ?? null;
 
   // always return parent and children in child node format
@@ -295,6 +303,24 @@ export function buildWhereQuery(
     }
   });
   return { query, params };
+}
+
+// A leading "$" or a lowercase voting-power prefix (stETH, veCRV) is not part
+// of the ticker. An uppercase start like STRK is.
+const SYMBOL_PREFIXES = ['$', 'st', 've'];
+
+export function isSymbolMatch(symbol: string, search: string): boolean {
+  const ticker = search.trim().toLowerCase();
+  if (!ticker) return false;
+
+  const trimmed = symbol.trim();
+  if (trimmed.toLowerCase() === ticker) return true;
+
+  return SYMBOL_PREFIXES.some(
+    prefix =>
+      trimmed.startsWith(prefix) &&
+      trimmed.slice(prefix.length).toLowerCase() === ticker
+  );
 }
 
 export async function fetchSpaces(args) {

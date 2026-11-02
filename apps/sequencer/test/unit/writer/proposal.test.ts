@@ -135,6 +135,43 @@ describe('writer/proposal', () => {
   msg.payload.end = Math.floor(Date.now() / 1000) + 60;
   input.msg = JSON.stringify(msg);
 
+  describe('getProposalTimeline()', () => {
+    const now = 1_000_000_000;
+    const period = 3600;
+
+    it.each([
+      ['no voting settings', undefined],
+      ['a voting delay', { delay: 60 }],
+      ['a voting period', { period }]
+    ])('keeps a future start with %s', (_, voting) => {
+      const payload = { start: now + 60, end: now + 60 + period };
+      expect(writer.getProposalTimeline(payload, voting, now)).toEqual(payload);
+    });
+
+    it('moves a past start to now and keeps the author end', () => {
+      const payload = { start: now - period, end: now + 60 };
+      expect(writer.getProposalTimeline(payload, {}, now)).toEqual({
+        start: now,
+        end: now + 60
+      });
+    });
+
+    it('moves a start before the voting delay to now + delay', () => {
+      const payload = { start: now + 30, end: now + period };
+      expect(writer.getProposalTimeline(payload, { delay: 60 }, now)).toEqual({
+        start: now + 60,
+        end: now + period
+      });
+    });
+
+    it('moves the end with the start when the space has a voting period', () => {
+      const payload = { start: now - period, end: now };
+      expect(
+        writer.getProposalTimeline(payload, { delay: 60, period }, now)
+      ).toEqual({ start: now + 60, end: now + 60 + period });
+    });
+  });
+
   describe('verify()', () => {
     describe('when the schema is invalid', () => {
       const msg = JSON.parse(input.msg);
@@ -183,7 +220,7 @@ describe('writer/proposal', () => {
 
       await expect(
         writer.verify({ ...input, msg: JSON.stringify(msg) })
-      ).resolves.toBeUndefined();
+      ).resolves.toEqual({ plus: false });
       expect(mockGetSpace).toHaveBeenCalledTimes(1);
       expect(mockGetProposalsCount).toHaveBeenCalledTimes(1);
     });
@@ -217,9 +254,9 @@ describe('writer/proposal', () => {
           voting: { ...spacesGetSpaceFixtures.voting, period: VOTING_PERIOD }
         });
 
-        await expect(
-          writer.verify(inputWithVotingPeriod)
-        ).resolves.toBeUndefined();
+        await expect(writer.verify(inputWithVotingPeriod)).resolves.toEqual({
+          plus: false
+        });
         expect(mockGetSpace).toHaveBeenCalledTimes(1);
         expect(mockGetProposalsCount).toHaveBeenCalledTimes(1);
       });
@@ -247,13 +284,32 @@ describe('writer/proposal', () => {
         });
 
         const msg = JSON.parse(input.msg);
+        msg.timestamp = Math.floor(Date.now() / 1000);
         msg.payload.start = msg.timestamp + VOTING_DELAY;
+        msg.payload.end = msg.payload.start + 60;
 
         await expect(
           writer.verify({ ...input, msg: JSON.stringify(msg) })
-        ).resolves.toBeUndefined();
+        ).resolves.toEqual({ plus: false });
         expect(mockGetSpace).toHaveBeenCalledTimes(1);
         expect(mockGetProposalsCount).toHaveBeenCalledTimes(1);
+      });
+
+      it('rejects if the end is before the voting delay from now', async () => {
+        expect.assertions(1);
+        mockGetSpace.mockResolvedValueOnce({
+          ...spacesGetSpaceFixtures,
+          voting: { ...spacesGetSpaceFixtures.voting, delay: 60 }
+        });
+
+        const msg = JSON.parse(input.msg);
+        msg.timestamp = Math.floor(Date.now() / 1000) - 120;
+        msg.payload.start = msg.timestamp + 60;
+        msg.payload.end = msg.payload.start + 90;
+
+        await expect(
+          writer.verify({ ...input, msg: JSON.stringify(msg) })
+        ).rejects.toMatch('proposal end date must be in the future');
       });
     });
 
@@ -319,7 +375,7 @@ describe('writer/proposal', () => {
         it('does not validate the space validation', async () => {
           expect.assertions(2);
 
-          await expect(writer.verify(input)).resolves.toBeUndefined();
+          await expect(writer.verify(input)).resolves.toEqual({ plus: false });
           expect(mockSnapshotUtilsValidate).toHaveBeenCalledTimes(0);
         });
       });
@@ -328,7 +384,7 @@ describe('writer/proposal', () => {
         it('does not validate the space validation', async () => {
           expect.assertions(2);
 
-          await expect(writer.verify(input)).resolves.toBeUndefined();
+          await expect(writer.verify(input)).resolves.toEqual({ plus: false });
           expect(mockSnapshotUtilsValidate).toHaveBeenCalledTimes(0);
         });
       });
@@ -344,19 +400,19 @@ describe('writer/proposal', () => {
         it('accepts a proposal with shutter privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: 'shutter' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with undefined privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: undefined }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with no privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: '' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
       });
 
@@ -372,19 +428,19 @@ describe('writer/proposal', () => {
         it('accepts a proposal with shutter privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: 'shutter' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with undefined privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: undefined }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with no privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: '' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
       });
 
@@ -405,13 +461,13 @@ describe('writer/proposal', () => {
         it('accepts a proposal with undefined privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: undefined }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with no privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: '' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
       });
 
@@ -426,13 +482,13 @@ describe('writer/proposal', () => {
         it('accepts a proposal with shutter privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: 'shutter' }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('accepts a proposal with undefined privacy', () => {
           return expect(
             writer.verify(updateInputPayload(input, { privacy: undefined }))
-          ).resolves.toBeUndefined();
+          ).resolves.toEqual({ plus: false });
         });
 
         it('rejects a proposal with privacy empty string', async () => {
@@ -623,7 +679,7 @@ describe('writer/proposal', () => {
 
     it('verifies a valid input', async () => {
       expect.assertions(1);
-      await expect(writer.verify(input)).resolves.toBeUndefined();
+      await expect(writer.verify(input)).resolves.toEqual({ plus: false });
     });
   });
 });

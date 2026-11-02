@@ -11,7 +11,8 @@ defineProps<{
 
 <template>
   <button
-    class="flex items-center space-x-1 hover:text-skin-link uppercase truncate"
+    type="button"
+    class="flex items-center space-x-1 hover:text-skin-link truncate"
     @click="emit('sortChange')"
   >
     <span><slot /></span>

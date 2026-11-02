@@ -84,6 +84,31 @@ body {
   @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
 
+// Slim scrollbars for inner scroll areas, the window keeps the native one
+
+:not(html, body) {
+  &::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(var(--text), 0.4) padding-box;
+    border: 4px solid transparent;
+    border-radius: 8px;
+    min-height: 40px;
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(var(--text), 0.4) transparent;
+  }
+}
+
 // Typography
 
 h1 {

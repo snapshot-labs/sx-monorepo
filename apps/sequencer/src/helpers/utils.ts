@@ -55,11 +55,17 @@ export class ServerError extends Error {
   }
 }
 
+// Errors (DB, network) serialize internals like SQL queries or hosts, only
+// ServerError is meant for clients
+export function toPublicError(err: unknown) {
+  return err instanceof Error && !(err instanceof ServerError) ? 'failed' : err;
+}
+
 export function sendError(res: Response, description: any, status?: number) {
   const statusCode = status ?? (typeof description === 'string' ? 400 : 500);
   return res.status(statusCode).json({
     error: statusCode < 500 ? 'client_error' : 'server_error',
-    error_description: description
+    error_description: toPublicError(description)
   });
 }
 

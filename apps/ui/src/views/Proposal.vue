@@ -86,7 +86,15 @@ const withoutContentInBottom = computed(() =>
   String(route.name).endsWith('proposal-votes')
 );
 
-async function handleVoteClick(choice: Choice) {
+const hasVoteSection = computed(
+  () =>
+    !!proposal.value &&
+    ((!proposal.value.cancelled &&
+      ['pending', 'active'].includes(proposal.value.state)) ||
+      !!currentVote.value)
+);
+
+async function handleVoteClick(choice: Choice | null) {
   if (!web3.value.account) {
     modalAccountOpen.value = true;
     return;
@@ -104,7 +112,7 @@ async function handleVoteClick(choice: Choice) {
 
 function handleAcceptTerms() {
   termsStore.accept(props.space);
-  handleVoteClick(selectedChoice.value!);
+  handleVoteClick(selectedChoice.value);
 }
 
 async function handleVoteSubmitted() {
@@ -112,11 +120,14 @@ async function handleVoteSubmitted() {
   editMode.value = false;
 }
 
+watch(id, () => {
+  modalOpenVote.value = false;
+  editMode.value = false;
+});
+
 watch(
   [id, proposal, isPending],
   async ([, proposal, isPending]) => {
-    modalOpenVote.value = false;
-    editMode.value = false;
     discourseTopic.value = null;
 
     if (!isPending && !proposal) {
@@ -267,14 +278,8 @@ watchEffect(() => {
           :top="TOTAL_NAV_HEIGHT"
           :bottom="64"
         >
-          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
-            <div
-              v-if="
-                (!proposal.cancelled &&
-                  ['pending', 'active'].includes(proposal.state)) ||
-                currentVote
-              "
-            >
+          <div v-bind="$attrs" class="flex flex-col gap-4 p-4 pb-0 !h-auto">
+            <div v-if="hasVoteSection" class="max-md:hidden">
               <UiEyebrow class="mb-2.5 flex items-center space-x-2">
                 <template v-if="editMode">
                   <IH-cursor-click />
@@ -386,35 +391,7 @@ watchEffect(() => {
                   :edit-mode="editMode"
                   @enter-edit-mode="editMode = true"
                 >
-                  <ProposalVoteBasic
-                    v-if="proposal.type === 'basic'"
-                    :choices="proposal.choices"
-                    @vote="handleVoteClick"
-                  />
-                  <ProposalVoteSingleChoice
-                    v-else-if="proposal.type === 'single-choice'"
-                    :proposal="proposal"
-                    :default-choice="currentVote?.choice"
-                    @vote="handleVoteClick"
-                  />
-                  <ProposalVoteApproval
-                    v-else-if="proposal.type === 'approval'"
-                    :proposal="proposal"
-                    :default-choice="currentVote?.choice"
-                    @vote="handleVoteClick"
-                  />
-                  <ProposalVoteRankedChoice
-                    v-else-if="
-                      ['ranked-choice', 'copeland'].includes(proposal.type)
-                    "
-                    :proposal="proposal"
-                    :default-choice="currentVote?.choice"
-                    @vote="handleVoteClick"
-                  />
-                  <ProposalVoteWeighted
-                    v-else-if="
-                      ['weighted', 'quadratic'].includes(proposal.type)
-                    "
+                  <ProposalVoteForm
                     :proposal="proposal"
                     :default-choice="currentVote?.choice"
                     @vote="handleVoteClick"
@@ -455,6 +432,34 @@ watchEffect(() => {
           </div>
         </UiAffix>
       </UiResizableHorizontal>
+      <div
+        v-if="hasVoteSection"
+        class="md:hidden sticky bottom-0 z-40 border-t bg-skin-bg p-3"
+      >
+        <ProposalVote
+          :proposal="proposal"
+          @enter-edit-mode="handleVoteClick(null)"
+        >
+          <template #waiting>
+            <TimeRelative
+              v-slot="{ relativeTime }"
+              :time="proposal.start"
+              without-suffix
+            >
+              Voting starts
+              {{ relativeTime === 'now' ? 'soon' : `in ${relativeTime}` }}
+            </TimeRelative>
+          </template>
+          <UiButton
+            primary
+            class="w-full"
+            :size="48"
+            @click="handleVoteClick(null)"
+          >
+            Vote
+          </UiButton>
+        </ProposalVote>
+      </div>
     </template>
     <teleport to="#modal">
       <ModalTerms

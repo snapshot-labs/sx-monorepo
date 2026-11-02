@@ -6,10 +6,9 @@
     "moduleResolution": "bundler",
     "sourceMap": true,
     "lib": ["esnext", "dom"],
-    "baseUrl": ".",
     "types": ["vite/client", "unplugin-icons/types/vue"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "noUncheckedIndexedAccess": false,
   },
@@ -18,6 +17,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
+    "test/**/*.ts",
     "auto-imports.d.ts",
     "components.d.ts",
     "vite.config.ts"

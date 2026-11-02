@@ -6,7 +6,6 @@ export default {
     ignore: [
       /^\/src/,
       /^\/test/,
-      /^\/tests/,
       /^\/storybook-static/,
       /^\/screenshots/,
       /\.md$/

@@ -6,7 +6,7 @@ import {
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
@@ -103,7 +103,10 @@ const spaceDelegationsOptions = computed<
   { id: number; name: string; icon: VNode }[]
 >(() => {
   return delegationsSupportedByCurrentWallet.value.map((d, i) => {
-    const network = getNetworkDetails(d.chainId as string);
+    const network = getNetworkDetails(d.chainId) ?? {
+      name: 'Unknown network',
+      logo: ''
+    };
 
     return {
       id: i,
@@ -168,10 +171,6 @@ function isDelegationSupportedByConnectedWallet(
   if (!auth.value?.connector || !delegation) return false;
 
   return delegationConnectors(delegation).includes(auth.value.connector.type);
-}
-
-function getNetworkDetails(chainId: number | string) {
-  return networks[chainId] || { name: 'Unknown network', logo: '' };
 }
 
 async function handleSubmit() {

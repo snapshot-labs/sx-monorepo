@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CALENDLY_URL } from '@/helpers/constants';
+
 useTitle('Network');
 
 const FAQ = [
@@ -18,8 +20,6 @@ const FAQ = [
   }
 ];
 
-const LINK = 'https://calendly.com/snapshotlabs/30min';
-
 const currentQuestion = ref();
 
 function toggleQuestion(id: number) {
@@ -34,7 +34,7 @@ function toggleQuestion(id: number) {
           Unlock governance for your ecosystem
         </h1>
         <AppLink
-          :to="LINK"
+          :to="CALENDLY_URL"
           class="px-4 py-3 space-x-2 bg-skin-primary text-skin-accent-foreground rounded-full"
         >
           Talk to sales
@@ -150,7 +150,7 @@ function toggleQuestion(id: number) {
       <UiEyebrow class="mb-2">Get started</UiEyebrow>
       <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <AppLink
-        :to="LINK"
+        :to="CALENDLY_URL"
         class="px-4 py-3 space-x-2 bg-skin-primary text-skin-accent-foreground rounded-full"
       >
         Talk to sales

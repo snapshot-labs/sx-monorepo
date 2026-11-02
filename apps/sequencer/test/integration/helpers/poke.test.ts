@@ -10,7 +10,7 @@ import { spacesSqlFixtures } from '../../fixtures/space';
 const mockGetSpaceUri = jest.fn((): any => {
   return 'https://snapshot.org';
 });
-const mockGetJSON = jest.fn((): any => {
+const mockGetJSON = jest.fn<any, any[]>(() => {
   return {};
 });
 jest.mock('@snapshot-labs/snapshot.js', () => {
@@ -21,7 +21,7 @@ jest.mock('@snapshot-labs/snapshot.js', () => {
     utils: {
       ...originalModule.utils,
       getSpaceUri: () => mockGetSpaceUri(),
-      getJSON: () => mockGetJSON()
+      getJSON: (...args: any[]) => mockGetJSON(...args)
     }
   };
 });
@@ -29,6 +29,16 @@ jest.mock('@snapshot-labs/snapshot.js', () => {
 describe('poke', () => {
   afterAll(async () => {
     await db.endAsync();
+  });
+
+  it('fetches the TXT record content without decompressing it', async () => {
+    mockGetJSON.mockResolvedValueOnce({});
+
+    await expect(poke('test.eth')).rejects.toMatch('invalid space format');
+    expect(mockGetJSON).toHaveBeenCalledWith(
+      'https://snapshot.org',
+      expect.objectContaining({ compress: false })
+    );
   });
 
   describe('on invalid input', () => {

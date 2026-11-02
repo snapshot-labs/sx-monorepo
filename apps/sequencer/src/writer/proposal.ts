@@ -2,7 +2,7 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { uniq } from 'lodash';
-import { CB } from '../constants';
+import { CB, PROPOSAL_FEE } from '../constants';
 import { getPremiumNetworkIds, getSpace } from '../helpers/actions';
 import log from '../helpers/log';
 import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
@@ -35,6 +35,18 @@ import {
 } from '../helpers/utils';
 
 const scoreAPIUrl = process.env.SCORE_API_URL || 'https://score.snapshot.org';
+
+// The start can't be earlier than the voting delay from now (e.g. a Safe
+// signature confirmed late), the end follows the voting period when set
+export function getProposalTimeline(
+  payload: { start: number; end: number },
+  voting?: { delay?: number; period?: number },
+  now = Math.floor(Date.now() / 1e3)
+) {
+  const start = Math.max(payload.start, now + (voting?.delay || 0));
+  const end = voting?.period ? start + voting.period : payload.end;
+  return { start, end };
+}
 
 export const getProposalsCount = async (space, author) => {
   const query = `
@@ -131,11 +143,6 @@ export async function verify(body): Promise<any> {
     return Promise.reject('wrong proposal format');
   }
 
-  const tsInt = (Date.now() / 1e3).toFixed();
-  if (msg.payload.end <= tsInt) {
-    return Promise.reject('proposal end date must be in the future');
-  }
-
   const isChoicesValid = validateChoices({
     type: msg.payload.type,
     choices: msg.payload.choices
@@ -143,8 +150,6 @@ export async function verify(body): Promise<any> {
   if (!isChoicesValid) {
     return Promise.reject('wrong choices for basic type voting');
   }
-
-  // if (msg.payload.start < created) return Promise.reject('invalid start date');
 
   if (space.voting?.delay) {
     const isValidDelay = msg.payload.start === created + space.voting.delay;
@@ -155,6 +160,11 @@ export async function verify(body): Promise<any> {
     const isValidPeriod =
       msg.payload.end - msg.payload.start === space.voting.period;
     if (!isValidPeriod) return Promise.reject('invalid voting period');
+  }
+
+  const { start, end } = getProposalTimeline(msg.payload, space.voting);
+  if (end <= start) {
+    return Promise.reject('proposal end date must be in the future');
   }
 
   if (space.voting?.type) {
@@ -274,7 +284,7 @@ export async function verify(body): Promise<any> {
     }
   }
 
-  if (msg.payload.snapshot < networks[space.network].start) {
+  if (msg.payload.snapshot < (networks[space.network]?.start ?? 0)) {
     return Promise.reject('proposal snapshot must be after network start');
   }
 
@@ -325,9 +335,17 @@ export async function verify(body): Promise<any> {
   if (msg.payload.choices.length > choicesLimit) {
     return Promise.reject(`number of choices can not exceed ${choicesLimit}`);
   }
+
+  return { plus: !!space.plus };
 }
 
-export async function action(body, ipfs, receipt, id): Promise<void> {
+export async function action(
+  body,
+  ipfs,
+  receipt,
+  id,
+  context?: { plus: boolean }
+): Promise<void> {
   const msg = jsonParse(body.msg);
   const space = msg.space;
 
@@ -335,7 +353,12 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
   const spaceSettings = await getSpace(space);
 
   const author = body.address;
-  const created = parseInt(msg.timestamp);
+  const created = Math.floor(Date.now() / 1e3);
+  const { start, end } = getProposalTimeline(
+    msg.payload,
+    spaceSettings.voting,
+    created
+  );
   const metadata = msg.payload.metadata || {};
   const strategies = JSON.stringify(spaceSettings.strategies);
   const validation = JSON.stringify(spaceSettings.voteValidation || {});
@@ -358,6 +381,7 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     }
   }
 
+  const credits = context?.plus ? 1 : 0;
   const proposal = {
     id,
     ipfs,
@@ -376,8 +400,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     labels: msg.payload.labels?.length
       ? JSON.stringify(msg.payload.labels)
       : null,
-    start: parseInt(msg.payload.start || '0'),
-    end: parseInt(msg.payload.end || '0'),
+    start,
+    end,
     quorum,
     quorum_type: (quorum && spaceSettings.voting?.quorumType) || '',
     privacy,
@@ -393,7 +417,8 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     votes: 0,
     validation,
     flagged: +containsFlaggedLinks(msg.payload.body),
-    cb: CB.PENDING_SYNC
+    cb: CB.PENDING_SYNC,
+    credits
   };
 
   // Freeze the committee onto the row; nothing rewrites these columns later.
@@ -437,8 +462,18 @@ export async function action(body, ipfs, receipt, id): Promise<void> {
     INSERT INTO leaderboard (space, user, proposal_count)
       VALUES(?, ?, 1)
       ON DUPLICATE KEY UPDATE proposal_count = proposal_count + 1;
-    UPDATE spaces SET proposal_count = proposal_count + 1 WHERE id = ?;
+    UPDATE spaces SET proposal_count = proposal_count + 1,
+      credits_spent = credits_spent + ? WHERE id = ?;
   `;
 
-  await db.queryAsync(query, [proposal, space, author, space]);
+  // A proposal created on Snapshot Plus is charged, even into a negative
+  // balance. Nothing runs after a failed insert, so it is never charged twice
+  await db.queryAsync(query, [
+    proposal,
+    space,
+    author,
+    credits ? PROPOSAL_FEE : 0,
+    // Space ids are stored lowercase, and the column is case-sensitive
+    space.toLowerCase()
+  ]);
 }

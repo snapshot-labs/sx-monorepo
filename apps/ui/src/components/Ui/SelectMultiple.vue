@@ -86,7 +86,7 @@ function isItemDisabled(item: T) {
         <ListboxOptions
           class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
         >
-          <div class="max-h-[208px] overflow-y-auto">
+          <div class="max-h-[208px] overflow-y-auto py-1">
             <ListboxOption
               v-for="item in definition.options"
               v-slot="{ active, selected, disabled }"
@@ -98,12 +98,12 @@ function isItemDisabled(item: T) {
               <li
                 class="flex items-center justify-between px-3"
                 :class="{
-                  'bg-skin-bg/25': active
+                  'bg-skin-link/[.08]': active
                 }"
               >
                 <component :is="item.icon" class="size-[20px] mr-2" />
                 <span
-                  class="w-full py-2 text-skin-link"
+                  class="w-full py-1.5 leading-6 text-skin-link"
                   :class="{
                     'opacity-40': disabled,
                     'cursor-pointer': !disabled

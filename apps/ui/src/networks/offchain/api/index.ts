@@ -12,7 +12,7 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses } from '@/helpers/utils';
+import { clone, compareAddresses, isPlusSpace } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -185,6 +185,8 @@ function formatSpace(
   }
 
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
+    const plus = isPlusSpace(space);
+
     return {
       id: space.id,
       protocol: 'snapshot',
@@ -196,7 +198,9 @@ function formatSpace(
       vote_count: space.votesCount,
       follower_count: space.followersCount,
       active_proposals: space.activeProposals,
-      turbo: space.turbo,
+      // Snapshot Plus spaces get every Pro feature
+      turbo: space.turbo || plus,
+      plus,
       verified: space.verified,
       snapshot_chain_id: space.network
     };
@@ -222,6 +226,8 @@ function formatSpace(
       logo: skinSettings?.logo
     };
   }
+
+  const plus = isPlusSpace(space);
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
@@ -251,8 +257,11 @@ function formatSpace(
     protocol: 'snapshot',
     network: networkId,
     verified: space.verified,
-    turbo: space.turbo,
+    // Snapshot Plus spaces get every Pro feature
+    turbo: space.turbo || plus,
     turbo_expiration: space.turboExpiration,
+    plus,
+    credits: space.credits_parsed ?? 0,
     controller: '',
     snapshot_chain_id: space.network,
     name: space.name,
@@ -664,6 +673,8 @@ export function createApi(
       }
     }
   });
+
+  let networksRequest: ReturnType<NetworkApi['getNetworks']> | undefined;
 
   return {
     apiUrl: uri,
@@ -1091,20 +1102,17 @@ export function createApi(
 
       return formatStrategy(data.strategy as ApiStrategy);
     },
-    getNetworks: async () => {
-      const { data } = await apollo.query({
-        query: NETWORKS_QUERY
-      });
+    // Requested once and shared by every caller
+    getNetworks: () => {
+      networksRequest ??= apollo
+        .query({ query: NETWORKS_QUERY })
+        .then(({ data }) => data.networks)
+        .catch(err => {
+          networksRequest = undefined;
+          throw err;
+        });
 
-      return Object.fromEntries(
-        data.networks.map(network => [
-          network.id,
-          {
-            spaces_count: network.spacesCount,
-            premium: network.premium
-          }
-        ])
-      );
+      return networksRequest;
     },
     loadSettings: async (): Promise<Setting[]> => {
       const {

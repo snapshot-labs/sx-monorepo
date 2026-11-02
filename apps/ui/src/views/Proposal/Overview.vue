@@ -510,22 +510,6 @@ onBeforeUnmount(() => destroyAudio());
                 Edit proposal
               </UiDropdownItem>
               <UiDropdownItem
-                v-if="flaggable"
-                :disabled="flagging"
-                @click="handleFlagClick"
-              >
-                <IH-flag :width="16" />
-                Flag proposal
-              </UiDropdownItem>
-              <UiDropdownItem
-                v-if="cancellable"
-                :disabled="cancelling"
-                @click="handleCancelClick"
-              >
-                <IS-x-mark :width="16" />
-                Cancel proposal
-              </UiDropdownItem>
-              <UiDropdownItem
                 v-if="proposalMetadataUrl"
                 :to="proposalMetadataUrl"
               >
@@ -542,6 +526,24 @@ onBeforeUnmount(() => destroyAudio());
               <UiDropdownItem v-if="snapshotV1Url" :to="snapshotV1Url">
                 <IH-arrow-sm-right class="-rotate-45" :width="16" />
                 View on v1 interface
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="flaggable"
+                :disabled="flagging"
+                danger
+                @click="handleFlagClick"
+              >
+                <IH-flag :width="16" />
+                Flag proposal
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="cancellable"
+                :disabled="cancelling"
+                danger
+                @click="handleCancelClick"
+              >
+                <IS-x-mark :width="16" />
+                Cancel proposal
               </UiDropdownItem>
             </template>
           </UiDropdown>
