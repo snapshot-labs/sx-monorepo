@@ -13,6 +13,7 @@ export type Payment = {
   token_symbol: string;
   timestamp?: number;
   type: string;
+  _indexer: string;
 };
 
 const PAYMENTS_QUERY = gql`
@@ -30,6 +31,7 @@ const PAYMENTS_QUERY = gql`
       token_symbol
       timestamp
       type
+      _indexer
     }
   }
 `;
