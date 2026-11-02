@@ -104,7 +104,7 @@ export function useSpaceAlerts(
 
     return Array.from(ids)
       .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
-      .map(chainId => networks.value.find(n => String(n.chainId) === chainId))
+      .map(chainId => networks.value.find(n => n.id === chainId))
       .filter(network => !!network);
   });
 
@@ -225,7 +225,8 @@ export function useSpaceAlerts(
       });
     }
 
-    if (isProJustExpired.value) {
+    // A space that moved to Snapshot Plus keeps its Pro features
+    if (isProJustExpired.value && !space.value.plus) {
       alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
 

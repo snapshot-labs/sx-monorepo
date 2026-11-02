@@ -75,6 +75,7 @@ watchEffect(() => setTitle(props.space.name));
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
+            :plus="space.plus"
             :flagged="space.additionalRawData?.flagged || false"
           />
         </div>

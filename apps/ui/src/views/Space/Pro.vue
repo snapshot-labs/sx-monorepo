@@ -2,7 +2,11 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
-import { DOCS_URL } from '@/helpers/constants';
+import {
+  CALENDLY_URL,
+  DOCS_URL,
+  PRO_MONTHLY_PRICES
+} from '@/helpers/constants';
 import { _n, _t } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
@@ -26,8 +30,6 @@ type Feature = {
 };
 type SubscriptionLength = 'monthly' | 'yearly';
 
-const CALENDLY = 'https://calendly.com/snapshot-labs/pro-plan';
-
 const DATE_FORMAT = 'D MMM YYYY';
 
 const USERS = [
@@ -43,11 +45,6 @@ const USERS = [
 const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
 
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
-
-const PRO_MONTHLY_PRICES: Record<SubscriptionLength, number> = {
-  monthly: 600,
-  yearly: 500
-} as const;
 
 const FEATURES = [
   {
@@ -158,6 +155,11 @@ const tokens = computed(() => {
 const supportedConnectors = computed(() => {
   return getNetwork(metadataNetwork).managerConnectors;
 });
+
+// A Snapshot Plus space has Pro features but no plan to extend
+const isSelectedSpacePro = computed(
+  () => !!selectedSpace.value?.turbo && !selectedSpace.value.plus
+);
 
 const isCurrentConnectorSupported = computed(() => {
   return (
@@ -380,11 +382,11 @@ onMounted(() => {
           "
           @click="handleTurboClick"
         >
-          {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+          {{ isSelectedSpacePro ? 'Extend' : 'Upgrade' }}
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div v-if="!subscription?.hasActiveSubscription">
-          <AppLink :to="CALENDLY">
+          <AppLink :to="CALENDLY_URL">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </AppLink>
@@ -477,11 +479,11 @@ onMounted(() => {
           "
           @click="handleTurboClick"
         >
-          {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+          {{ isSelectedSpacePro ? 'Extend' : 'Upgrade' }}
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <AppLink :to="CALENDLY">
+          <AppLink :to="CALENDLY_URL">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
           </AppLink>

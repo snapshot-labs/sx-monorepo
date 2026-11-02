@@ -112,7 +112,6 @@ Source of truth: `tailwind.config.ts`
 ## Testing
 
 - **Vitest** + **happy-dom** + **@vue/test-utils**
-- Tests are colocated next to source files
 - Component visual documentation is maintained in the tune UI kit (`packages/tune`)
 
 ## GraphQL Codegen

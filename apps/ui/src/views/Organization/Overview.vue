@@ -147,6 +147,7 @@ function getSpaceLabel(s: Space) {
             class="top-0.5"
             :verified="space.verified"
             :turbo="spaces.some(s => s.turbo)"
+            :plus="!spaces.some(s => s.turbo && !s.plus)"
             :flagged="space.additionalRawData?.flagged || false"
           />
         </div>

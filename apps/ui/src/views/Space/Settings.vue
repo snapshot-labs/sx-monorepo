@@ -18,6 +18,7 @@ defineOptions({ inheritAttrs: false });
 
 const router = useRouter();
 const route = useRoute();
+const { web3 } = useWeb3();
 const {
   loading,
   isModified,
@@ -59,7 +60,8 @@ const {
   deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
-const { invalidateController } = useSpaceController(toRef(props, 'space'));
+const { invalidateController, isLoading: isControllerLoading } =
+  useSpaceController(toRef(props, 'space'));
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
@@ -207,6 +209,23 @@ const canProposeSettingsChanges = computed(
   () => !canModifySettings.value && selfGovernedExecution.value !== null
 );
 
+const readOnlyMessage = computed(() => {
+  if (
+    loading.value ||
+    web3.value.authLoading ||
+    isControllerLoading.value ||
+    canModifySettings.value ||
+    canProposeSettingsChanges.value ||
+    ['controller', 'billing'].includes(activeTab.value)
+  ) {
+    return undefined;
+  }
+
+  return isOffchainNetwork.value
+    ? 'Only the space controller and admins can edit these settings'
+    : 'Only the space controller can edit these settings';
+});
+
 const isTicketValid = computed(() => {
   return !(
     strategies.value.some(s => s.address === 'ticket') &&
@@ -262,6 +281,7 @@ const error = computed(() => {
 
 const showToolbar = computed(() => {
   return (
+    readOnlyMessage.value ||
     (isModified.value &&
       isAdvancedFormResolved.value &&
       (canModifySettings.value || canProposeSettingsChanges.value)) ||
@@ -670,6 +690,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     :is-modified="!!isModified"
     :saving="saving || proposing"
     :save-label="saveLabel"
+    :read-only-message="readOnlyMessage"
     @save="
       canProposeSettingsChanges
         ? handleProposeSettingsChanges()

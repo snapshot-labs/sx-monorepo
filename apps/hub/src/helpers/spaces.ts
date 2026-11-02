@@ -28,6 +28,7 @@ export let spacesMetadata: Record<string, Metadata> = {};
 type Metadata = {
   id: string;
   name: string;
+  symbol?: string;
   verified: boolean;
   flagged: boolean;
   turbo: boolean;
@@ -122,6 +123,7 @@ function mapSpaces(spaces: Record<string, any>) {
     spacesMetadata[id] = {
       id,
       name: space.name,
+      symbol: space.symbol,
       verified: space.verified,
       flagged: space.flagged,
       turbo: isTurbo(space.turboExpiration),

@@ -242,6 +242,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               </template>
               <template #items>
                 <UiDropdownItem
+                  :danger="!isUpdatableDelegation"
                   @click="
                     isUpdatableDelegation
                       ? handleUpdateDelegatesClick()
@@ -418,6 +419,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </template>
                 <template #items>
                   <UiDropdownItem
+                    :danger="
+                      !isUpdatableDelegation && getHasDelegatedTo(delegate.user)
+                    "
                     @click="
                       isUpdatableDelegation
                         ? handleUpdateDelegatesClick(delegate.user)

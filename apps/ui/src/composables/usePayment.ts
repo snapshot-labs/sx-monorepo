@@ -1,5 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
+import { parseUnits } from '@ethersproject/units';
 import { MaybeRefOrGetter } from 'vue';
 import { approve as approveToken, getTokenAllowance } from '@/helpers/token';
 import { verifyNetwork } from '@/helpers/walletNetworks';
@@ -17,7 +18,8 @@ const PAYMENT_CONTRACT_ADDRESSES: Record<ChainId, string> = {
 } as const;
 
 const PAYMENT_CONTRACT_ABI = [
-  'function payWithERC20Token(address token, uint256 amount, string barcode)'
+  'function payWithERC20Token(address token, uint256 amount, string barcode)',
+  'function payWithNativeToken(string barcode) payable'
 ] as const;
 
 export const TOKENS: Record<ChainId, Token[]> = {
@@ -96,7 +98,7 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
     );
   }
 
-  async function pay(token: Token, amount: number, barcode: string) {
+  async function getPaymentContract() {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return;
@@ -104,22 +106,36 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
 
     await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
-    const paymentContract = new Contract(
+    return new Contract(
       PAYMENT_CONTRACT_ADDRESSES[toValue(network)],
       PAYMENT_CONTRACT_ABI,
       auth.value.provider.getSigner()
     );
+  }
 
-    return paymentContract.payWithERC20Token(
+  async function pay(token: Token, amount: number, barcode: string) {
+    const paymentContract = await getPaymentContract();
+
+    return paymentContract?.payWithERC20Token(
       token.contractAddress,
       getWeiAmount(token, amount),
       barcode
     );
   }
 
+  // `amount` is a decimal ETH string, e.g. '0.05'
+  async function payWithNativeToken(amount: string, barcode: string) {
+    const paymentContract = await getPaymentContract();
+
+    return paymentContract?.payWithNativeToken(barcode, {
+      value: parseUnits(amount, 18)
+    });
+  }
+
   return {
     getIsApproved,
     approve,
-    pay
+    pay,
+    payWithNativeToken
   };
 }

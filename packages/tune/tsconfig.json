@@ -6,7 +6,6 @@
     "moduleResolution": "bundler",
     "sourceMap": true,
     "lib": ["esnext", "dom"],
-    "baseUrl": ".",
     "types": ["unplugin-icons/types/vue"],
     "declaration": true,
     "emitDeclarationOnly": true,

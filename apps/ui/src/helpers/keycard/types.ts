@@ -1,6 +1,7 @@
 export type ApiKey = {
   key: string;
   name: string;
+  owner: string;
   created: number;
 };
 
@@ -14,7 +15,14 @@ export type UsageBucket = Usage & {
   ts: number;
 };
 
+export type UsageRow = {
+  key: string;
+  app: string;
+  period: string;
+  total: number;
+};
+
 export type UsageHistory = {
-  daily: UsageBucket[];
-  monthly: UsageBucket[];
+  daily: UsageRow[];
+  monthly: UsageRow[];
 };

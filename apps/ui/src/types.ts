@@ -154,6 +154,7 @@ export type RelatedSpace = {
   follower_count: number;
   active_proposals: number | null;
   turbo: boolean;
+  plus?: boolean;
   verified: boolean;
   snapshot_chain_id: string;
 };
@@ -195,6 +196,9 @@ export type Space = {
   verified: boolean;
   turbo: boolean;
   turbo_expiration: number;
+  // Snapshot Plus, offchain only: credits balance in ETH, negative when owed
+  plus?: boolean;
+  credits?: number;
   snapshot_chain_id?: string;
   name: string;
   avatar: string;

@@ -19,15 +19,12 @@ export const METADATA_BY_CHAIN_ID = new Map<ChainId, Metadata>(
   ])
 );
 
-METADATA_BY_CHAIN_ID.set(100, {
-  name: 'Gnosis Chain',
-  ticker: 'XDAI'
-});
-
-METADATA_BY_CHAIN_ID.set(42220, {
-  name: 'Celo',
-  ticker: 'CELO'
-});
+METADATA_BY_CHAIN_ID.set(100, { name: 'Gnosis Chain', ticker: 'XDAI' });
+METADATA_BY_CHAIN_ID.set(42220, { name: 'Celo', ticker: 'CELO' });
+METADATA_BY_CHAIN_ID.set(143, { name: 'Monad', ticker: 'MON' });
+METADATA_BY_CHAIN_ID.set(999, { name: 'HyperEVM', ticker: 'HYPE' });
+METADATA_BY_CHAIN_ID.set(9745, { name: 'Plasma', ticker: 'XPL' });
+METADATA_BY_CHAIN_ID.set(80094, { name: 'Berachain', ticker: 'BERA' });
 
 type Treasury = {
   chainId: string;

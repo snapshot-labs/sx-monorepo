@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "types": ["bun"],
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",

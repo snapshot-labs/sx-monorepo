@@ -21,6 +21,7 @@ describe('helpers/actions', () => {
     domain: undefined,
     hibernated: false,
     turbo: false,
+    plus: false,
     name: 'Test Space',
     admins: ['0xFC01614d28595d9ea5963daD9f44C0E0F0fE10f0'],
     symbol: 'TEST',
@@ -36,6 +37,7 @@ describe('helpers/actions', () => {
     domain: undefined,
     hibernated: false,
     turbo: false,
+    plus: false,
     admins: ['0x87D68ecFBcF53c857ABf494728Cf3DE1016b27B0'],
     symbol: 'TEST2',
     network: '1',
@@ -131,18 +133,27 @@ describe('helpers/actions', () => {
       curtis: '0xf6238F73A87D390CB00b2B380D2B777E13Fe2725'
     };
 
+    // These call live networks: a timed-out test keeps running and its
+    // assertion lands in a later test, so give slow responses time to finish
+    const NETWORK_TIMEOUT = 30_000;
+
     it.each(Object.entries(mapping))(
       'returns true when it exists for %s',
       async (network, id) => {
         return expect(sxSpaceExists(network, id)).resolves.toEqual(true);
-      }
+      },
+      NETWORK_TIMEOUT
     );
 
-    it('returns false when it does not exist', async () => {
-      return expect(sxSpaceExists('sep', mapping['eth'])).resolves.toEqual(
-        false
-      );
-    });
+    it(
+      'returns false when it does not exist',
+      async () => {
+        return expect(sxSpaceExists('sep', mapping['eth'])).resolves.toEqual(
+          false
+        );
+      },
+      NETWORK_TIMEOUT
+    );
   });
 
   describe('addOrUpdateSpace', () => {

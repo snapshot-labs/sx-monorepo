@@ -39,8 +39,11 @@ async function getSpaceENS(id: string): Promise<Space> {
     }
 
     try {
+      // The URI comes from an untrusted ENS record, never decompress its
+      // response (CVE-2026-111497: Brotli decoder RCE in unpatched Node.js)
       return await snapshot.utils.getJSON(uri, {
-        gateways: ['pineapple.fyi']
+        gateways: ['pineapple.fyi'],
+        compress: false
       });
     } catch {
       return Promise.reject(`${uri} is not a valid JSON file`);

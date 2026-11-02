@@ -4,8 +4,10 @@ import db from '../../helpers/mysql';
 import { rankedSpaces } from '../../helpers/spaces';
 import {
   checkLimits,
+  formatSkinSettings,
   formatSpace,
   handleRelatedSpaces,
+  isSymbolMatch,
   PublicError
 } from '../helpers';
 
@@ -33,7 +35,8 @@ export default async function (_parent, args, context, info) {
     let filteredSpaces = rankedSpaces.filter(space => {
       const filteredBySearch =
         space.id.includes(searchStr) ||
-        space.name?.toLowerCase().includes(searchStr);
+        space.name?.toLowerCase().includes(searchStr) ||
+        (space.symbol && isSymbolMatch(space.symbol, searchStr));
       const filteredByNetwork = network
         ? space.networks.includes(network)
         : true;
@@ -77,8 +80,9 @@ export default async function (_parent, args, context, info) {
     if (!filteredSpaces.length) return { items: [], metrics };
 
     const query = `
-      SELECT s.* FROM spaces s WHERE s.id IN (?)
-      GROUP BY s.id
+      SELECT s.*, skins.*, s.id AS id FROM spaces s
+      LEFT JOIN skins ON s.id = skins.id
+      WHERE s.id IN (?)
       ORDER BY FIELD(s.id, ?) ASC
     `;
     let spaces = await db.queryAsync(query, [filteredSpaces, filteredSpaces]);
@@ -86,6 +90,7 @@ export default async function (_parent, args, context, info) {
       Object.assign(
         space,
         formatSpace({
+          skinSettings: formatSkinSettings(space),
           turboExpiration: space.turbo_expiration,
           ...space
         })
