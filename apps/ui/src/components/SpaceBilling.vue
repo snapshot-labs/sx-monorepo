@@ -123,7 +123,11 @@ async function openPortal(paymentId: string) {
             <UiDropdownItem
               v-else
               :to="
-                getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
+                getGenericExplorerUrl(
+                  payment._indexer === 'base' ? 8453 : chainId,
+                  payment.id,
+                  'transaction'
+                ) || ''
               "
             >
               <IH-arrow-sm-right class="-rotate-45" :width="16" />
