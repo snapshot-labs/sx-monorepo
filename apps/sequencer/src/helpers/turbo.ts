@@ -14,12 +14,18 @@ type SpaceStatus = { id: string; turbo_expiration: number; credits: number };
 
 const SCHNAPS_API_URL = process.env.SCHNAPS_API_URL;
 const NETWORK_PREFIX = process.env.NETWORK === 'mainnet' ? 's:' : 's-tn:';
-const EVM_INDEXER = process.env.NETWORK === 'mainnet' ? 'eth' : 'sep';
 const RUN_INTERVAL = 10 * 1e3; // 10 seconds
 const MAX_SPACES = 10_000;
 
-// DEFAULT_NETWORK is always an EVM chain, and block.number below is ethers-only.
-const provider = getProvider(process.env.DEFAULT_NETWORK ?? '1') as EvmProvider;
+// The schnaps-api indexer of each chain, with how many blocks it can lag
+// behind (about 2 minutes) before its data is considered outdated
+const EVM_INDEXERS: Record<string, { chainId: string; maxLag: number }> =
+  process.env.NETWORK === 'mainnet'
+    ? {
+        eth: { chainId: '1', maxLag: 10 },
+        base: { chainId: '8453', maxLag: 60 }
+      }
+    : { sep: { chainId: '11155111', maxLag: 10 } };
 
 // Periodically sync the turbo status of spaces with the schnaps-api
 export async function trackTurboStatuses() {
@@ -37,9 +43,9 @@ export async function trackTurboStatuses() {
   }
 }
 
-// A space can have one row per payment source (onchain, Stripe), and Pro
-// payments can name it in any case: keep the latest expiration, and the
-// credits, which only onchain payments add
+// A space can have one row per payment source (each chain, Stripe), and Pro
+// payments can name it in any case: keep the latest expiration, and add up
+// the credits deposited on each chain
 export function mergeSpaces(spaces: Space[]): SpaceStatus[] {
   const merged = new Map<string, SpaceStatus>();
   for (const { id, turbo_expiration, credits } of spaces) {
@@ -49,7 +55,7 @@ export function mergeSpaces(spaces: Space[]): SpaceStatus[] {
     merged.set(key, {
       id: key,
       turbo_expiration: Math.max(prev?.turbo_expiration ?? 0, turbo_expiration),
-      credits: Math.max(prev?.credits ?? 0, Number(credits) || 0)
+      credits: (prev?.credits ?? 0) + (Number(credits) || 0)
     });
   }
   return [...merged.values()];
@@ -85,8 +91,8 @@ export async function updateTurboStatuses(spaces: SpaceStatus[]) {
 async function getSpacesExpirationDates(): Promise<Space[]> {
   const query = `
     query GetSpaces {
-      _metadata(id: "last_indexed_block", indexer: "${EVM_INDEXER}") {
-        id
+      _metadatas(where: { id: "last_indexed_block" }) {
+        indexer
         value
       }
       spaces(first: ${MAX_SPACES}) {
@@ -117,17 +123,25 @@ async function getSpacesExpirationDates(): Promise<Space[]> {
       return [];
     }
 
-    if (!data.data._metadata) {
-      console.log(
-        `Schnaps last_indexed_block missing for indexer "${EVM_INDEXER}". Skipping update.`
-      );
-      return [];
-    }
+    // Credits add up across chains, so every indexer must be up to date
+    for (const [indexer, { chainId, maxLag }] of Object.entries(EVM_INDEXERS)) {
+      const metadata = data.data._metadatas.find(m => m.indexer === indexer);
+      if (!metadata) {
+        console.log(
+          `Schnaps last_indexed_block missing for indexer "${indexer}". Skipping update.`
+        );
+        return [];
+      }
 
-    const block = await provider.getBlock('latest');
-    if (block.number - Number(data.data._metadata.value) > 10) {
-      console.log('Schnaps API is outdated. Skipping update.');
-      return [];
+      const block = await (getProvider(chainId) as EvmProvider).getBlock(
+        'latest'
+      );
+      if (block.number - Number(metadata.value) > maxLag) {
+        console.log(
+          `Schnaps API is outdated for "${indexer}". Skipping update.`
+        );
+        return [];
+      }
     }
 
     if (data.data.spaces.length === MAX_SPACES) {

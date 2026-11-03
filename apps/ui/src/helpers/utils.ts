@@ -797,7 +797,7 @@ export function formatPlusUsage(credits: number) {
   // The epsilon absorbs float error, e.g. 0.0006 / 0.0002 = 2.9999999999999996
   const proposals = Math.floor(credits / SNAPSHOT_PLUS_FEES.proposal + 1e-9);
   const votes = Math.floor(credits / SNAPSHOT_PLUS_FEES.vote + 1e-9);
-  return `≈ ${proposals} proposal${proposals === 1 ? '' : 's'} or ${votes} votes`;
+  return `≈ ${_n(proposals)} proposal${proposals === 1 ? '' : 's'} or ${_n(votes)} votes`;
 }
 
 export function isUserAbortError(err: any) {

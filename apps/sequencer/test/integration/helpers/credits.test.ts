@@ -233,17 +233,18 @@ describe('Snapshot Plus credits', () => {
   });
 
   describe('mergeSpaces()', () => {
-    it('keeps the latest expiration and the onchain credits of each space', () => {
+    it('keeps the latest expiration and adds up the credits of each chain', () => {
       expect(
         mergeSpaces([
           { id: 's:a.eth', turbo_expiration: 100, credits: '5000' },
+          { id: 's:a.eth', turbo_expiration: 0, credits: '2000' }, // Base
           { id: 's:a.eth', turbo_expiration: 200, credits: '0' }, // Stripe
           { id: 's:A.ETH', turbo_expiration: 50, credits: '0' },
           { id: 's-tn:a.eth', turbo_expiration: 900, credits: '9000' },
           { id: 's:b.eth', turbo_expiration: 0, credits: 'bad' }
         ])
       ).toEqual([
-        { id: 'a.eth', turbo_expiration: 200, credits: 5000 },
+        { id: 'a.eth', turbo_expiration: 200, credits: 7000 },
         { id: 'b.eth', turbo_expiration: 0, credits: 0 }
       ]);
     });
