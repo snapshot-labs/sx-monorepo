@@ -13,8 +13,7 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src test",
-    "lint:fix": "bun run lint --fix",
-    "format": "prettier --write src tests"
+    "lint:fix": "bun run lint --fix"
   },
   "dependencies": {
     "@coinbase/cdp-sdk": "^1.45.0",

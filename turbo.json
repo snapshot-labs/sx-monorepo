@@ -17,9 +17,6 @@
     "lint:fix": {
       "dependsOn": ["transit"]
     },
-    "//#lint:scripts": {
-      "dependsOn": ["transit"]
-    },
     "typecheck": {
       "dependsOn": ["^build", "codegen"]
     },

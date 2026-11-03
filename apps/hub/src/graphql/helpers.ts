@@ -341,31 +341,31 @@ export async function fetchSpaces(args) {
   if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
 
   if (where.strategy) {
-    queryStr += ` AND JSON_CONTAINS(JSON_EXTRACT(s.settings, '$.strategies[*].name'), JSON_ARRAY(?))`;
+    queryStr += " AND JSON_CONTAINS(JSON_EXTRACT(s.settings, '$.strategies[*].name'), JSON_ARRAY(?))";
     params.push(where.strategy);
   }
 
   if (where.plugin) {
-    queryStr += ` AND JSON_CONTAINS(JSON_KEYS(s.settings->'$.plugins'), JSON_ARRAY(?))`;
+    queryStr += " AND JSON_CONTAINS(JSON_KEYS(s.settings->'$.plugins'), JSON_ARRAY(?))";
     params.push(where.plugin);
   }
 
   if (where.domain) {
-    queryStr += ` AND domain = ?`;
+    queryStr += ' AND domain = ?';
     params.push(where.domain);
   }
 
   if (where.search) {
     const wildcardSearch = `%${where.search}%`;
-    queryStr += ` AND (s.id LIKE ? OR s.name LIKE ?)`;
+    queryStr += ' AND (s.id LIKE ? OR s.name LIKE ?)';
     params.push(wildcardSearch, wildcardSearch);
   }
 
   if ('turbo' in where) {
     if (where.turbo) {
-      queryStr += ` AND (s.turbo = 1 OR s.turbo_expiration > UNIX_TIMESTAMP())`;
+      queryStr += ' AND (s.turbo = 1 OR s.turbo_expiration > UNIX_TIMESTAMP())';
     } else {
-      queryStr += ` AND s.turbo = 0 AND s.turbo_expiration <= UNIX_TIMESTAMP()`;
+      queryStr += ' AND s.turbo = 0 AND s.turbo_expiration <= UNIX_TIMESTAMP()';
     }
   }
 

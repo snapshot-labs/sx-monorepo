@@ -31,7 +31,7 @@ export default async function (_parent, { voter, space, proposal }) {
       { url: scoreAPIUrl }
     );
   } else if (space) {
-    const query = `SELECT settings FROM spaces WHERE id = ? AND deleted = 0 LIMIT 1`;
+    const query = 'SELECT settings FROM spaces WHERE id = ? AND deleted = 0 LIMIT 1';
     let [s] = await db.queryAsync(query, [space]);
 
     if (!s) {

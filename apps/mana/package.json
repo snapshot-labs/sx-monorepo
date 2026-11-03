@@ -4,8 +4,6 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "lint": "eslint . --rule 'no-console: error'",
-    "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "migrate": "bun run knex migrate:latest",

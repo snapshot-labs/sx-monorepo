@@ -72,7 +72,7 @@ export class Provider {
     );
 
     await hubDB.queryAsync(
-      `INSERT IGNORE INTO statements (id, delegate, statement, source, space, network, created, updated) VALUES ?`,
+      'INSERT IGNORE INTO statements (id, delegate, statement, source, space, network, created, updated) VALUES ?',
       [delegates.map(d => Object.values(d))]
     );
   }

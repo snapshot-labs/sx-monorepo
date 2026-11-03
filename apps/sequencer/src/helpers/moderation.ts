@@ -71,7 +71,7 @@ export function containsFlaggedLinks(body: string): boolean {
 
 export function flagEntity({ type, action, value }) {
   if (!type || !action || !value) {
-    throw new Error(`missing params. 'type', 'action' and 'value' required`);
+    throw new Error("missing params. 'type', 'action' and 'value' required");
   }
   if (!['proposal', 'space'].includes(type)) throw new Error('invalid type');
   if (type === 'proposal' && !['flag', 'unflag'].includes(action)) {
@@ -87,25 +87,25 @@ export function flagEntity({ type, action, value }) {
   let query;
   switch (`${type}-${action}`) {
     case 'space-flag':
-      query = `UPDATE spaces SET flagged = 1, verified = 0 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE spaces SET flagged = 1, verified = 0 WHERE id = ? LIMIT 1';
       break;
     case 'space-unflag':
-      query = `UPDATE spaces SET flagged = 0 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE spaces SET flagged = 0 WHERE id = ? LIMIT 1';
       break;
     case 'space-verify':
-      query = `UPDATE spaces SET verified = 1, flagged = 0 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE spaces SET verified = 1, flagged = 0 WHERE id = ? LIMIT 1';
       break;
     case 'proposal-flag':
-      query = `UPDATE proposals SET flagged = 1 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE proposals SET flagged = 1 WHERE id = ? LIMIT 1';
       break;
     case 'proposal-unflag':
-      query = `UPDATE proposals SET flagged = 0 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE proposals SET flagged = 0 WHERE id = ? LIMIT 1';
       break;
     case 'space-hibernate':
-      query = `UPDATE spaces SET hibernated = 1 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE spaces SET hibernated = 1 WHERE id = ? LIMIT 1';
       break;
     case 'space-reactivate':
-      query = `UPDATE spaces SET hibernated = 0 WHERE id = ? LIMIT 1`;
+      query = 'UPDATE spaces SET hibernated = 0 WHERE id = ? LIMIT 1';
       break;
   }
 

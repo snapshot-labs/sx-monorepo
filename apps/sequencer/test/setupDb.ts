@@ -42,7 +42,7 @@ async function run() {
     await db.queryAsync(`${statement}${splitToken}`);
   }
 
-  console.info(`Setting the permissions`);
+  console.info('Setting the permissions');
   await db.queryAsync(
     `ALTER USER '${config.user}'@'localhost' IDENTIFIED WITH mysql_native_password BY '${config.password}';`
   );

@@ -15,7 +15,7 @@ const BATCH_SIZE = 100;
 
 async function getVotesPendingDeletion(): Promise<Vote[]> {
   return db.queryAsync(
-    `SELECT id, voter, space FROM votes WHERE cb = ? LIMIT ?`,
+    'SELECT id, voter, space FROM votes WHERE cb = ? LIMIT ?',
     [CB.PENDING_DELETE, BATCH_SIZE]
   );
 }
