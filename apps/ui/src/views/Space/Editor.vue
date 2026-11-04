@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { RadioGroup, RadioGroupLabel, RadioGroupOption } from '@headlessui/vue';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { BASIC_CHOICES, DOCS_URL, VERIFIED_URL } from '@/helpers/constants';
+import {
+  BASIC_CHOICES,
+  DOCS_URL,
+  IS_TE_ENABLED,
+  MIN_DKG_LEAD_TIME_S,
+  PRIVACY_TYPES_INFO,
+  VERIFIED_URL
+} from '@/helpers/constants';
 import { getNetworkDetails } from '@/helpers/networks';
 import { getExecutionKey } from '@/helpers/ui';
 import { omit, prettyConcat } from '@/helpers/utils';
@@ -11,7 +19,7 @@ import { validateForm } from '@/helpers/validation';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
-import { Contact, Space, Transaction, VoteType } from '@/types';
+import { Contact, Privacy, Space, Transaction, VoteType } from '@/types';
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -98,6 +106,10 @@ const unsupportedPremiumStrategiesList = computed(() => {
   );
 });
 
+const isPrivateVoting = computed(
+  () => proposal.value?.privacy === 'shutter-elgamal'
+);
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
@@ -108,6 +120,19 @@ const privacy = computed({
     }
   }
 });
+
+// With permanent private voting enabled, the shielded-voting switch becomes a
+// three-way choice so spaces set to "any" keep classic Shutter.
+const PRIVACY_OPTIONS: Privacy[] = ['none', 'shutter', 'shutter-elgamal'];
+
+// An encrypted tally can only sum votes per choice, so other types are refused
+// here and by the sequencer.
+const PRIVATE_VOTING_TYPES = ['single-choice', 'basic', 'weighted'];
+const hasPrivateVotingTypeConflict = computed(
+  () =>
+    isPrivateVoting.value &&
+    !PRIVATE_VOTING_TYPES.includes(proposal.value?.type ?? '')
+);
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -327,6 +352,8 @@ const canSubmit = computed(() => {
     unsupportedPremiumStrategiesList.value.length ||
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
+    hasPrivateVotingTypeConflict.value ||
+    hasPrivateVotingDelayConflict.value ||
     isMissingExecution.value
   ) {
     return false;
@@ -370,9 +397,51 @@ const defaultVotingDelay = computed(() =>
   isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
-const proposalStart = computed(
-  () => proposal.value?.start ?? unixTimestamp.value + props.space.voting_delay
+// Shutter-elgamal proposals need time for DKG before voting opens; the sequencer
+// rejects starts sooner than MIN_DKG_LEAD_TIME_S from now. The display and picker
+// use this floor too. The extra minute allows for the time spent signing. Not on
+// an edit: it does not send `start`, so moving it would only show a wrong date.
+const SIGNING_SLACK_S = 60;
+// A space with a voting delay fixes the start at `created + delay`, so a delay
+// shorter than the floor leaves no start the sequencer accepts. Not on an edit,
+// which keeps its start.
+const MIN_PRIVATE_VOTING_DELAY_S = MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S;
+const hasPrivateVotingDelayConflict = computed(
+  () =>
+    isPrivateVoting.value &&
+    !proposal.value?.originalProposal &&
+    props.space.voting_delay > 0 &&
+    props.space.voting_delay < MIN_PRIVATE_VOTING_DELAY_S
 );
+const privateVotingStartFloor = computed(() =>
+  isPrivateVoting.value && !proposal.value?.originalProposal
+    ? unixTimestamp.value + MIN_DKG_LEAD_TIME_S + SIGNING_SLACK_S
+    : 0
+);
+
+const proposalStart = computed(() => {
+  const base =
+    proposal.value?.start ?? unixTimestamp.value + props.space.voting_delay;
+  return Math.max(base, privateVotingStartFloor.value);
+});
+
+// When private voting is turned on and the draft starts too soon, move the start
+// (and end, keeping the voting period) to the floor so the saved draft matches
+// the picker. An unset start is left alone: `proposalStart` applies the floor,
+// and in a space with a voting delay the start must stay `now + delay`.
+watch(privateVotingStartFloor, floor => {
+  if (!proposal.value || floor === 0) return;
+  if (proposal.value.start != null && proposal.value.start < floor) {
+    const originalPeriod =
+      proposal.value.min_end != null && proposal.value.start != null
+        ? proposal.value.min_end - proposal.value.start
+        : 0;
+    proposal.value.start = floor;
+    if (originalPeriod > 0) {
+      proposal.value.min_end = floor + originalPeriod;
+    }
+  }
+});
 
 const proposalMinEnd = computed(
   () =>
@@ -908,12 +977,65 @@ watchEffect(() => {
               </template>
             </UiInputArray>
           </div>
-          <UiSwitch
-            v-if="isOffchainSpace && space.privacy === 'any'"
-            v-model="privacy"
-            title="Shielded voting"
-            tooltip="Choices will be encrypted and only visible once the voting period is over."
-          />
+          <template v-if="isOffchainSpace && space.privacy === 'any'">
+            <RadioGroup
+              v-if="IS_TE_ENABLED && proposal.privacy"
+              v-model="proposal.privacy"
+              class="space-y-2"
+            >
+              <RadioGroupLabel class="s-label">Privacy</RadioGroupLabel>
+              <RadioGroupOption
+                v-for="id in PRIVACY_OPTIONS"
+                :key="id"
+                v-slot="{ checked }"
+                :value="id"
+                class="flex items-center gap-2 cursor-pointer focus:outline-none"
+              >
+                <span
+                  :class="
+                    checked ? 'border-skin-primary' : 'border-skin-border'
+                  "
+                  class="flex justify-center items-center size-[18px] shrink-0 rounded-full border-2"
+                >
+                  <span
+                    v-if="checked"
+                    class="size-2 rounded-full bg-skin-primary"
+                  />
+                </span>
+                <span class="text-skin-link flex items-center gap-1">
+                  {{ PRIVACY_TYPES_INFO[id].label }}
+                  <UiTooltip
+                    v-if="PRIVACY_TYPES_INFO[id].description"
+                    :title="PRIVACY_TYPES_INFO[id].description"
+                  >
+                    <IH-question-mark-circle class="shrink-0" />
+                  </UiTooltip>
+                </span>
+              </RadioGroupOption>
+            </RadioGroup>
+            <UiSwitch
+              v-else
+              v-model="privacy"
+              title="Shielded voting"
+              tooltip="Choices will be encrypted and only visible once the voting period is over."
+            />
+          </template>
+          <UiAlert
+            v-if="hasPrivateVotingTypeConflict"
+            type="error"
+            class="!my-0"
+          >
+            Permanent private voting supports only single choice, basic and
+            weighted voting. Change the voting type before submitting.
+          </UiAlert>
+          <UiAlert
+            v-if="hasPrivateVotingDelayConflict"
+            type="error"
+            class="!my-0"
+          >
+            Permanent private voting needs this space's voting delay to be 0 or
+            at least {{ Math.ceil(MIN_PRIVATE_VOTING_DELAY_S / 60) }} minutes.
+          </UiAlert>
           <EditorLabels
             v-if="space.labels?.length"
             v-model="proposal.labels"
@@ -926,8 +1048,18 @@ watchEffect(() => {
             :start="proposalStart"
             :min_end="proposalMinEnd"
             :max_end="proposalMaxEnd"
+            :min_start="privateVotingStartFloor"
             :editable="!proposal.originalProposal"
           />
+          <div
+            v-if="privateVotingStartFloor > 0"
+            class="text-sm text-skin-text -mt-2.5"
+          >
+            Private voting requires a
+            {{ Math.round(MIN_DKG_LEAD_TIME_S / 60) }}-minute setup window
+            before voting opens so the keyper committee can generate the
+            encryption key. The start time is scheduled accordingly.
+          </div>
         </div>
       </UiAffix>
     </div>

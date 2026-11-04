@@ -45,4 +45,18 @@ export async function action(body): Promise<void> {
     msg.space,
     msg.space
   ]);
+
+  // Only proposals with a frozen committee have private-voting rows. That includes
+  // a private proposal later made public, which keeps its committee.
+  if (proposal.te_sgp_config) {
+    await db.queryAsync(
+      `DELETE FROM te_dkg_submissions WHERE proposal_id = ?;
+       DELETE FROM te_aggregate_submissions WHERE proposal_id = ?;
+       DELETE FROM te_decryption_shares WHERE proposal_id = ?;
+       DELETE FROM te_results WHERE proposal_id = ?;
+       DELETE FROM te_revote_nonces WHERE proposal_id = ?;
+       DELETE FROM te_request_nonces WHERE proposal_id = ?;`,
+      [id, id, id, id, id, id]
+    );
+  }
 }

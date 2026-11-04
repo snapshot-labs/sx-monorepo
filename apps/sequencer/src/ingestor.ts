@@ -13,8 +13,11 @@ import { timeIngestorProcess } from './helpers/metrics';
 import { flaggedIps } from './helpers/moderation';
 import { verify } from './helpers/provider';
 import relayer, { issueReceipt } from './helpers/relayer';
+import { MAX_PRIVATE_VOTE_SIZE } from './helpers/teCommittee';
 import { getIp, jsonParse, sha256 } from './helpers/utils';
 import writer from './writer';
+
+const MAX_MESSAGE_SIZE = 1e5;
 
 const NETWORK_METADATA = {
   evm: {
@@ -66,7 +69,11 @@ export default async function ingestor(req) {
     const underTs = (ts - under).toFixed();
     const { domain, message, types } = body.data;
 
-    if (JSON.stringify(body).length > 1e5) {
+    // The limit is 1e5, except for votes on private proposals, whose `choice` is
+    // the whole encrypted ballot (~158 KB at three choices). That case is checked
+    // below, once the message type is known.
+    const messageSize = JSON.stringify(body).length;
+    if (messageSize > MAX_PRIVATE_VOTE_SIZE) {
       return Promise.reject('too large message');
     }
 
@@ -93,6 +100,16 @@ export default async function ingestor(req) {
       return Promise.reject('wrong types');
     }
     type = hashTypes[hash];
+
+    if (messageSize > MAX_MESSAGE_SIZE) {
+      const isVote = ['vote', 'vote-array', 'vote-string'].includes(type);
+      const proposal = isVote
+        ? await getProposal(message.space, message.proposal)
+        : null;
+      if (proposal?.privacy !== 'shutter-elgamal') {
+        return Promise.reject('too large message');
+      }
+    }
 
     try {
       if (

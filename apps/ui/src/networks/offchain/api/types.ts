@@ -7,7 +7,7 @@ import {
   VoteType
 } from '@/types';
 import {
-  OffchainProposalFragmentFragment,
+  OffchainProposalTeFragmentFragment,
   OffchainRelatedSpaceFragmentFragment,
   OffchainSpaceFragmentFragment,
   OffchainStatementFragmentFragment,
@@ -59,7 +59,7 @@ export type ApiSpace = Override<
       {
         type: VoteType | '' | null;
         quorumType: 'default' | 'rejection';
-        privacy: '' | 'shutter' | 'any';
+        privacy: '' | 'shutter' | 'shutter-elgamal' | 'any';
       }
     >;
     delegationPortal: DelegationPortal | null;
@@ -75,16 +75,19 @@ export type ApiSpace = Override<
   }
 >;
 
+// Uses the Te fragment, which extends `offchainProposalFragment` with the te_*
+// fields. When private voting is disabled those fields are not fetched, so code
+// must handle them being missing (see `queries.ts`).
 export type ApiProposal = Override<
-  OffchainProposalFragmentFragment,
+  OffchainProposalTeFragmentFragment,
   {
     type: VoteType;
     state: 'active' | 'pending' | 'closed';
     scores_state: 'invalid' | 'pending' | 'final';
-    privacy: 'shutter' | '';
+    privacy: 'shutter' | 'shutter-elgamal' | '';
     quorumType: 'default' | 'rejection';
     space: Override<
-      OffchainProposalFragmentFragment['space'],
+      OffchainProposalTeFragmentFragment['space'],
       { labels: SpaceMetadataLabel[] }
     >;
     strategies: Strategy[];

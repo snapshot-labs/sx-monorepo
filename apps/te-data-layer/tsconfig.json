@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "target": "esnext",
+    "module": "NodeNext",
+    "rootDir": "./",
+    "outDir": "./dist",
+    "lib": ["esnext"],
+    "esModuleInterop": true,
+    "sourceMap": true
+  },
+  "include": ["src", "test"],
+  "exclude": ["node_modules", "dist"]
+}

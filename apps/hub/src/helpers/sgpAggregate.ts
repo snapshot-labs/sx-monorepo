@@ -1,0 +1,93 @@
+import { SgpDigestError } from './sgpDigests';
+
+/**
+ * Kept as a `bigint`: a sum of raw voting power passes 2^53 on large-supply
+ * tokens, and the keyper's signature covers the exact integer.
+ */
+function canonicalWeight(value: unknown): bigint {
+  let weight: bigint;
+  try {
+    weight = BigInt(value as any);
+  } catch {
+    throw new SgpDigestError(
+      `totalAdmittedWeight: expected an integer (got ${value})`
+    );
+  }
+  if (weight < 0n) {
+    throw new SgpDigestError('totalAdmittedWeight: must not be negative');
+  }
+  return weight;
+}
+
+/**
+ * Normalises a compressed point to lowercase `0x` hex. Quorum counts byte-identical
+ * submissions, so letter case must not make two equal points differ.
+ */
+export function canonicalPoint(
+  value: unknown,
+  label: string,
+  size: number
+): string {
+  const body =
+    typeof value === 'string' &&
+    (value.startsWith('0x') || value.startsWith('0X'))
+      ? value.slice(2)
+      : value;
+  if (
+    typeof body !== 'string' ||
+    body.length !== size * 2 ||
+    !/^[0-9a-fA-F]*$/.test(body)
+  ) {
+    throw new SgpDigestError(`${label}: expected ${size} bytes of hex`);
+  }
+  return `0x${body.toLowerCase()}`;
+}
+
+export function canonicalAggregate(raw: any, electionId: string) {
+  if (!raw || typeof raw !== 'object') {
+    throw new SgpDigestError('aggregate: expected an object');
+  }
+  const aggregates = (Array.isArray(raw.aggregates) ? raw.aggregates : []).map(
+    (ct: any, i: number) => ({
+      c1: canonicalPoint(ct?.c1, `aggregates[${i}].c1`, 96),
+      c2: canonicalPoint(ct?.c2, `aggregates[${i}].c2`, 96)
+    })
+  );
+  const admitted = (Array.isArray(raw.admitted) ? raw.admitted : []).map(
+    (seq: any, i: number) => {
+      if (!Number.isInteger(seq) || seq < 0) {
+        throw new SgpDigestError(`admitted[${i}]: expected a sequence number`);
+      }
+      return seq;
+    }
+  );
+  const exclusions = (Array.isArray(raw.exclusions) ? raw.exclusions : []).map(
+    (x: any, i: number) => {
+      if (!Number.isInteger(x?.sequenceNumber) || x.sequenceNumber < 0) {
+        throw new SgpDigestError(
+          `exclusions[${i}].sequenceNumber: expected a sequence number`
+        );
+      }
+      if (typeof x?.reason !== 'string') {
+        throw new SgpDigestError(`exclusions[${i}].reason: expected a string`);
+      }
+      return { sequenceNumber: x.sequenceNumber, reason: x.reason };
+    }
+  );
+  const totalAdmittedWeight = canonicalWeight(raw.totalAdmittedWeight ?? 0);
+  // Must match `shutter_governance_protocol.envelopes.codecs`: when
+  // `totalScaledWeight` is missing, use `totalAdmittedWeight` (they are equal when
+  // `scale = 1`). Any other default would give a different digest from the signer's.
+  const totalScaledWeight = canonicalWeight(
+    raw.totalScaledWeight ?? raw.totalAdmittedWeight ?? 0
+  );
+
+  return {
+    electionId,
+    aggregates,
+    admitted,
+    exclusions,
+    totalAdmittedWeight,
+    totalScaledWeight
+  };
+}
