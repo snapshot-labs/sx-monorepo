@@ -8,8 +8,8 @@ const props = defineProps<{
 }>();
 
 const badgeLabel = computed(() => {
-  if (props.turbo) return props.plus ? 'Snapshot Plus' : 'Pro space';
-  if (props.verified) return 'Verified space';
+  if (props.turbo) return props.plus ? 'Snapshot Plus' : 'Snapshot Pro';
+  if (props.verified) return 'Verified';
   if (props.flagged) return 'Flagged space';
   return '';
 });

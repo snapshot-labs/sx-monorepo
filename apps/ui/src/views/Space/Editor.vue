@@ -653,7 +653,9 @@ watchEffect(() => {
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             or
-            <AppLink :to="{ name: 'space-pro' }"> upgrade your space </AppLink>
+            <AppLink :to="{ name: 'space-upgrade' }">
+              upgrade your space
+            </AppLink>
             to continue.
           </UiAlert>
           <UiAlert
@@ -698,8 +700,8 @@ watchEffect(() => {
             class="mb-4"
           >
             This space is configured with premium strategies, please
-            <AppLink :to="{ name: 'space-pro' }">
-              upgrade to Snapshot Pro
+            <AppLink :to="{ name: 'space-upgrade' }">
+              upgrade your space
             </AppLink>
             or
             <AppLink
@@ -765,7 +767,9 @@ watchEffect(() => {
                   proposals per day and
                   {{ limits['space.verified.proposal_limit_per_month'] }}
                   proposals per month.
-                  <AppLink :to="{ name: 'space-pro' }">Increase limit</AppLink>.
+                  <AppLink :to="{ name: 'space-upgrade' }"
+                    >Increase limit</AppLink
+                  >.
                 </span>
               </UiAlert>
             </template>
@@ -810,7 +814,7 @@ watchEffect(() => {
               #error-suffix
             >
               <AppLink
-                :to="{ name: 'space-pro' }"
+                :to="{ name: 'space-upgrade' }"
                 class="ml-1 text-skin-danger font-semibold"
                 >Increase limit</AppLink
               >.
@@ -900,7 +904,7 @@ watchEffect(() => {
                 <div class="text-skin-danger">
                   Maximum number of choices reached.
                   <AppLink
-                    :to="{ name: 'space-pro' }"
+                    :to="{ name: 'space-upgrade' }"
                     class="text-skin-danger font-semibold"
                     >Increase limit</AppLink
                   >.

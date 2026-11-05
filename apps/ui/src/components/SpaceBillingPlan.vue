@@ -114,7 +114,7 @@ const summaries = computed<Record<Plan, string>>(() => ({
           <UiButton
             v-else-if="currentPlan === 'pro'"
             class="primary"
-            :to="{ name: 'space-pro' }"
+            :to="{ name: 'space-upgrade' }"
           >
             Extend
           </UiButton>
@@ -157,7 +157,7 @@ const summaries = computed<Record<Plan, string>>(() => ({
         </button>
         <AppLink
           v-else-if="plan === 'pro'"
-          :to="{ name: 'space-pro' }"
+          :to="{ name: 'space-upgrade' }"
           class="text-skin-link"
         >
           {{ hasProEnded ? 'Renew' : 'Upgrade' }}

@@ -115,8 +115,8 @@ const hasAnyAlerts = computed(
             ? 'strategies require'
             : 'strategy requires'
         }}
-        Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
+        an upgraded space.
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
         or
         <AppLink
           :to="`${DOCS_URL}/faq/migrations#migrating-from-delegation-to-with-delegation-strategy`"
@@ -133,8 +133,8 @@ const hasAnyAlerts = computed(
         used by your space and/or its strategies require{{
           unsupportedProOnlyNetworks.length > 1 ? '' : 's'
         }}
-        Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
+        an upgraded space.
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
         or
         <AppLink
           :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
@@ -161,8 +161,8 @@ const hasAnyAlerts = computed(
     </template>
     <template v-if="hasWhitelabelAlerts">
       <UiAlert type="error">
-        Custom domain requires Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
+        Custom domain requires an upgraded space.
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
         or
         <AppLink
           :to="`${DOCS_URL}/user-guides/spaces/add-custom-domain#migrating-from-a-whitelabel`"

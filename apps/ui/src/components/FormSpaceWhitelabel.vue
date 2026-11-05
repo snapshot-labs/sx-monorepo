@@ -122,7 +122,7 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
   <UiMessage
     v-if="isDisabled"
     type="info"
-    :learn-more-link="{ name: 'space-pro' }"
+    :learn-more-link="{ name: 'space-upgrade' }"
     class="mb-4 max-w-[592px]"
   >
     Upgrade your space to access whitelabel features.

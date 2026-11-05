@@ -18,6 +18,8 @@ export type NavItem = {
 export type NavConfig = {
   slim?: boolean;
   items: Record<string, NavItem>;
+  // Shown as a button at the bottom of the nav
+  footer?: NavItem;
 };
 
 export type NavContext = {

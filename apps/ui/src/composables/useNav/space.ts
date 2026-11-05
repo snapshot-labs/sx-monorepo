@@ -3,6 +3,7 @@ import { explorePageProtocols, offchainNetworks } from '@/networks';
 import { NavConfig, NavContext, NavItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
+import IHBadgeCheck from '~icons/heroicons-outline/badge-check';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
@@ -78,13 +79,17 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
         link: { name: 'space-overview' },
         isActive: true
       },
-      ...tabItems,
-      snapshotPro: {
-        name: 'Snapshot Pro',
-        link: { name: 'space-pro' },
-        hidden: !isOffchainNetwork
-      }
-    }
+      ...tabItems
+    },
+    // Plus spaces are turbo too, see the offchain space mapping
+    footer:
+      isOffchainNetwork && !context.space?.turbo
+        ? {
+            name: 'Upgrade space',
+            icon: IHBadgeCheck,
+            link: { name: 'space-upgrade' }
+          }
+        : undefined
   };
 }
 
@@ -146,7 +151,9 @@ export default {
   getConfig(context: NavContext): NavConfig | null {
     if (!context.space) return null;
 
-    if (['space-settings', 'space-pro'].includes(String(context.route.name))) {
+    if (
+      ['space-settings', 'space-upgrade'].includes(String(context.route.name))
+    ) {
       return getSpaceSettingsConfig(context);
     }
     return getSpaceMainConfig(context);
