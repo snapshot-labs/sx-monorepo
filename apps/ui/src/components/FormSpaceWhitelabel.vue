@@ -125,7 +125,7 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
     :learn-more-link="{ name: 'space-upgrade' }"
     class="mb-4 max-w-[592px]"
   >
-    Upgrade your space to access whitelabel features.
+    Upgrade your space to use a custom domain.
   </UiMessage>
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">

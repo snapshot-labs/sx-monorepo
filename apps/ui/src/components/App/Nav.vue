@@ -3,8 +3,10 @@ const { config } = useNav();
 </script>
 
 <template>
-  <div class="border-r bg-skin-bg flex-col">
-    <div class="flex-1 py-4 no-scrollbar overscroll-contain overflow-auto">
+  <div class="border-r bg-skin-bg">
+    <div
+      class="flex flex-col py-4 no-scrollbar overscroll-contain overflow-auto"
+    >
       <AppLink
         v-for="(item, key) in config?.items ?? {}"
         v-slot="{ isExactActive }"
@@ -25,12 +27,12 @@ const { config } = useNav();
           <UiPill v-if="item.count" :label="item.count" />
         </div>
       </AppLink>
-    </div>
-    <div v-if="config?.footer" class="p-4">
-      <UiButton :to="config.footer.link" class="whitespace-nowrap !pl-3">
-        <component :is="config.footer.icon" v-if="config.footer.icon" />
-        {{ config.footer.name }}
-      </UiButton>
+      <div v-if="config?.footer" class="mt-auto px-4 pt-4">
+        <UiButton :to="config.footer.link" class="whitespace-nowrap !pl-3">
+          <component :is="config.footer.icon" v-if="config.footer.icon" />
+          {{ config.footer.name }}
+        </UiButton>
+      </div>
     </div>
   </div>
 </template>

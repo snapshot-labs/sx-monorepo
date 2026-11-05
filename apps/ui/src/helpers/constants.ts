@@ -24,6 +24,7 @@ export const SCHNAPS_URLS: Record<string, string> = {
 export const DOCS_URL = 'https://docs.snapshot.box';
 
 export const CALENDLY_URL = 'https://calendly.com/bonustrack';
+export const SALES_TELEGRAM_URL = 'https://t.me/bonustrack';
 
 export const PRO_MONTHLY_PRICES = { monthly: 600, yearly: 500 } as const;
 

@@ -6,16 +6,19 @@ import {
   CALENDLY_URL,
   DOCS_URL,
   PRO_MONTHLY_PRICES,
+  SALES_TELEGRAM_URL,
   SNAPSHOT_PLUS_FEES
 } from '@/helpers/constants';
-import { _n } from '@/helpers/utils';
+import { _n, getUrl, prettyConcat } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
-import { Connector } from '@/networks/types';
+import { Connector, HubNetwork } from '@/networks/types';
+import { usePlusMonthlyCostQuery } from '@/queries/plusMonthlyCost';
 import {
   SUBSCRIPTION_UNAVAILABLE,
   useSubscriptionStatusQuery
 } from '@/queries/subscription';
 import { Space } from '@/types';
+import ICTelegram from '~icons/c/telegram';
 import ICFlag from '~icons/heroicons-outline/flag';
 import ICGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IClightningBolt from '~icons/heroicons-outline/lightning-bolt';
@@ -128,6 +131,66 @@ const proEndDate = computed(() =>
     ? dayjs(selectedSpace.value.turbo_expiration * 1e3).format(DATE_FORMAT)
     : ''
 );
+// What blocks this space from creating proposals today, as in the editor
+const { alerts } = props.space
+  ? useSpaceAlerts(toRef(props, 'space') as Ref<Space>, { isEditor: true })
+  : { alerts: ref(new Map()) };
+// Short plan status shown in the hero tag
+const planDetail = computed(() => {
+  if (currentPlan.value === 'plus') {
+    return `${_n(selectedSpace.value?.credits, 'standard', { maximumFractionDigits: 4 })} ETH left`;
+  }
+  return proEndDate.value ? `Until ${proEndDate.value}` : '';
+});
+
+const unlock = computed(() => {
+  const networks: HubNetwork[] =
+    alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks ?? [];
+  const strategies: string[] =
+    alerts.value.get('HAS_PRO_ONLY_STRATEGIES')?.strategies ?? [];
+  if (!networks.length && !strategies.length) return null;
+
+  const names = networks.map(({ name }) => name);
+  if (strategies.length) {
+    const kind = strategies.length > 1 ? 'strategies' : 'strategy';
+    names.push(`the ${prettyConcat(strategies, 'and')} ${kind}`);
+  }
+  const isStrategiesOnly =
+    !strategies.length &&
+    networks.every(({ id }) => id !== props.space?.snapshot_chain_id);
+  const pronoun = networks.length > 1 ? 'them' : 'it';
+
+  return {
+    networks,
+    hasStrategies: strategies.length > 0,
+    title: `Unlock ${prettyConcat(names, 'and')}`,
+    about: isStrategiesOnly
+      ? `Use ${pronoun} in your strategies and create proposals again, with either plan.`
+      : 'Create proposals again, with either plan.'
+  };
+});
+
+// Pro spaces get no recommendation, so we never suggest a downgrade
+const { data: plusMonthlyCost } = usePlusMonthlyCostQuery(() =>
+  currentPlan.value === 'pro' ? undefined : props.space
+);
+// Compared with the Pro price for the selected billing period
+const recommendedPlan = computed(() => {
+  if (plusMonthlyCost.value === undefined) return null;
+  return plusMonthlyCost.value > PRO_MONTHLY_PRICES[subscriptionLength.value]
+    ? 'pro'
+    : 'plus';
+});
+// The primary button follows the current plan, then the recommendation
+const primaryPlan = computed(
+  () => currentPlan.value ?? recommendedPlan.value ?? 'pro'
+);
+const recommendationReason = computed(() => {
+  const plusCost = _n(plusMonthlyCost.value ?? 0, 'standard', {
+    maximumFractionDigits: 0
+  });
+  return `Plus ~$${plusCost}/mo vs Pro $${PRO_MONTHLY_PRICES[subscriptionLength.value]}/mo at your usage`;
+});
 
 const paymentNetwork = computed(() =>
   metadataNetwork === 's' ? '1' : '11155111'
@@ -252,31 +315,49 @@ onMounted(() => {
 
 <template>
   <div class="space-y-10 pb-8">
-    <div
-      class="px-4 pt-8 pb-3 flex flex-col items-center text-center gap-2.5 bg-gradient-to-b from-skin-border to-skin-border/0"
-    >
-      <UiStamp
+    <div>
+      <!-- Same cover and avatar overlap as the space page hero -->
+      <div
         v-if="selectedSpace"
-        :id="spaceKey"
-        type="space"
-        :size="64"
-        class="rounded-lg"
-      />
-      <h1 class="text-balance">
-        Upgrade {{ selectedSpace?.name ?? 'your space' }}
-      </h1>
-      <p class="text-lg">
-        Premium features and higher limits. Pay as you go, or subscribe.
-      </p>
-      <div v-if="currentPlan === 'plus'" class="text-base">
-        Currently on Plus, with
-        {{
-          _n(selectedSpace?.credits, 'standard', { maximumFractionDigits: 4 })
-        }}
-        ETH of credits left.
+        class="h-[156px] md:h-[140px] mb-[-49px] overflow-hidden"
+      >
+        <SpaceCover :space="selectedSpace" />
       </div>
-      <div v-else-if="proEndDate" class="text-base">
-        Currently on Pro, until {{ proEndDate }}.
+      <div
+        class="px-4 flex flex-col items-center text-center gap-2.5"
+        :class="{
+          'pt-8 bg-gradient-to-b from-skin-border to-skin-border/0':
+            !selectedSpace
+        }"
+      >
+        <SpaceAvatar
+          v-if="selectedSpace"
+          :space="selectedSpace"
+          :size="90"
+          class="relative border-4 border-skin-bg !rounded-lg"
+        />
+        <h1 class="text-balance">
+          Upgrade {{ selectedSpace?.name ?? 'your space' }}
+        </h1>
+        <p class="text-lg text-balance">
+          Premium features and higher limits.<br />
+          Pay as you go, or subscribe.
+        </p>
+        <div
+          v-if="planDetail"
+          class="flex items-center gap-1.5 border rounded-full px-3 py-1 text-base"
+        >
+          <UiBadgeSpace
+            turbo
+            :plus="currentPlan === 'plus'"
+            :verified="false"
+            :flagged="false"
+          />
+          <span class="text-skin-link">
+            {{ currentPlan === 'plus' ? 'Plus' : 'Pro' }}
+          </span>
+          · {{ planDetail }}
+        </div>
       </div>
     </div>
 
@@ -284,18 +365,29 @@ onMounted(() => {
       <!-- Subgrid rows keep both cards' price, text and button aligned -->
       <div class="grid md:grid-cols-2 gap-3 mx-auto max-w-[740px]">
         <div
-          class="border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
+          class="relative border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
           :class="{ 'border-skin-link': currentPlan === 'plus' }"
         >
+          <div
+            v-if="currentPlan === 'plus' || recommendedPlan === 'plus'"
+            class="absolute -top-[11px] inset-x-0 flex justify-center"
+          >
+            <UiPill
+              v-if="currentPlan === 'plus'"
+              label="Current plan"
+              class="!text-sm !leading-[22px] !px-2"
+            />
+            <UiTooltip v-else :title="recommendationReason">
+              <UiPill
+                variant="primary"
+                label="Recommended"
+                class="!text-sm !leading-[22px] !px-2"
+              />
+            </UiTooltip>
+          </div>
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
             <UiBadgeSpace turbo plus :verified="false" :flagged="false" />
             <h3>Plus</h3>
-            <span
-              v-if="currentPlan === 'plus'"
-              class="text-sm border rounded-full px-2 whitespace-nowrap"
-            >
-              Current plan
-            </span>
             <span class="ml-auto text-sm whitespace-nowrap">Pay per use</span>
           </div>
           <div>
@@ -309,7 +401,7 @@ onMounted(() => {
             No commitment. Pay in ETH on Ethereum or Base.
           </div>
           <UiButton
-            :primary="currentPlan === 'plus'"
+            :primary="primaryPlan === 'plus'"
             class="w-full"
             @click="choose('plus')"
           >
@@ -317,18 +409,29 @@ onMounted(() => {
           </UiButton>
         </div>
         <div
-          class="border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
+          class="relative border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
           :class="{ 'border-skin-link': currentPlan === 'pro' }"
         >
+          <div
+            v-if="currentPlan === 'pro' || recommendedPlan === 'pro'"
+            class="absolute -top-[11px] inset-x-0 flex justify-center"
+          >
+            <UiPill
+              v-if="currentPlan === 'pro'"
+              label="Current plan"
+              class="!text-sm !leading-[22px] !px-2"
+            />
+            <UiTooltip v-else :title="recommendationReason">
+              <UiPill
+                variant="primary"
+                label="Recommended"
+                class="!text-sm !leading-[22px] !px-2"
+              />
+            </UiTooltip>
+          </div>
           <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
             <UiBadgeSpace turbo :verified="false" :flagged="false" />
             <h3>Pro</h3>
-            <span
-              v-if="currentPlan === 'pro'"
-              class="text-sm border rounded-full px-2 whitespace-nowrap"
-            >
-              Current plan
-            </span>
             <span class="ml-auto text-sm whitespace-nowrap">Subscription</span>
           </div>
           <div>
@@ -336,6 +439,13 @@ onMounted(() => {
               ${{ PRO_MONTHLY_PRICES[subscriptionLength] }}
               <span class="text-base text-skin-text">/ month</span>
             </h2>
+            <div>
+              {{
+                subscriptionLength === 'yearly'
+                  ? `Billed $${_n(PRO_MONTHLY_PRICES.yearly * 12)} yearly`
+                  : 'Billed monthly'
+              }}
+            </div>
             <div class="flex gap-1 rounded-full border p-1 text-sm mt-2">
               <button
                 v-for="length in ['monthly', 'yearly'] as SubscriptionLength[]"
@@ -362,7 +472,7 @@ onMounted(() => {
           </div>
           <UiButton
             v-if="subscription?.hasActiveSubscription"
-            :primary="currentPlan !== 'plus'"
+            :primary="primaryPlan === 'pro'"
             class="w-full"
             :loading="isStripeLoading"
             @click="redirectToPortal(spaceKey.split(':')[0])"
@@ -371,7 +481,7 @@ onMounted(() => {
           </UiButton>
           <UiButton
             v-else
-            :primary="currentPlan !== 'plus'"
+            :primary="primaryPlan === 'pro'"
             class="w-full"
             :loading="!!selectedSpace && !subscription"
             :disabled="
@@ -383,11 +493,50 @@ onMounted(() => {
           </UiButton>
         </div>
       </div>
-      <div class="text-center">
-        <AppLink :to="CALENDLY_URL">
-          Talk to sales
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </AppLink>
+      <div class="flex justify-center">
+        <UiDropdown placement="start">
+          <template #button>
+            <UiButton>
+              Talk to sales
+              <IH-chevron-down />
+            </UiButton>
+          </template>
+          <template #items>
+            <UiDropdownItem :to="CALENDLY_URL">
+              <IH-calendar />
+              Book a call
+            </UiDropdownItem>
+            <UiDropdownItem :to="SALES_TELEGRAM_URL">
+              <ICTelegram />
+              Message us
+            </UiDropdownItem>
+          </template>
+        </UiDropdown>
+      </div>
+      <div
+        v-if="unlock"
+        class="mx-auto max-w-[740px] flex flex-col items-center text-center gap-3 px-4 pt-4 pb-2"
+      >
+        <div class="flex shrink-0">
+          <img
+            v-for="network in unlock.networks"
+            :key="network.id"
+            :src="getUrl(network.logo) ?? undefined"
+            :alt="network.name"
+            :title="network.name"
+            class="size-[48px] rounded-full border-[3px] border-skin-bg bg-skin-border -ml-3 first:ml-0"
+          />
+          <div
+            v-if="unlock.hasStrategies"
+            class="size-[48px] rounded-full border-[3px] border-skin-bg bg-skin-border -ml-3 first:ml-0 flex items-center justify-center text-skin-link"
+          >
+            <IH-puzzle class="size-[28px]" />
+          </div>
+        </div>
+        <div>
+          <h3 class="text-balance" v-text="unlock.title" />
+          <div class="text-lg leading-snug" v-text="unlock.about" />
+        </div>
       </div>
     </div>
 
