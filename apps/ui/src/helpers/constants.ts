@@ -37,8 +37,6 @@ export const PLAN_BADGE_CLASSES = {
 // Smallest Snapshot Plus deposit in ETH that Schnaps credits, smaller
 // deposits are ignored. The fees themselves come from the hub options
 export const PLUS_MIN_DEPOSIT = 0.01;
-// Warn when credits cover fewer than this many proposals
-export const PLUS_LOW_CREDITS_PROPOSALS = 5;
 // Days to warn before and after Pro ends
 export const PRO_EXPIRATION_WARNING_DAYS = 7;
 export const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;

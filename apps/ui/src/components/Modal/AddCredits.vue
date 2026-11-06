@@ -112,16 +112,19 @@ const isSpaceSupported = computed(() => {
 // An owed balance is paid back first
 const credits = computed(() => props.space.credits ?? 0);
 const estimate = computed(() => {
-  if (!form.value.amount || formErrors.value.amount) return '';
+  // The usage needs the fees, from the hub options
+  if (
+    !form.value.amount ||
+    formErrors.value.amount ||
+    !isSettingsLoaded.value
+  ) {
+    return '';
+  }
 
   const total = credits.value + Number(form.value.amount);
   const balance = _n(total, 'standard', { maximumFractionDigits: 4 });
 
-  // Usage needs the fees, from the hub options
-  const usage = isSettingsLoaded.value
-    ? ` ${formatPlusUsage(total, plusFees.value)}`
-    : '';
-  return `New balance ${balance} ETH${usage}`;
+  return `New balance ${balance} ETH ${formatPlusUsage(total, plusFees.value)}`;
 });
 // Pays back what is owed and covers a proposal, never below what Schnaps credits
 const minimumForPlus = computed(() =>

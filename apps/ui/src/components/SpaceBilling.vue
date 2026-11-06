@@ -22,6 +22,8 @@ const {
 );
 
 const { redirectToPortal, isLoading } = useStripeCheckout();
+// Retries the hub options if they failed to load at app start
+useSettings();
 
 const portalPaymentId = ref<string | null>(null);
 const isAddCreditsModalOpen = ref(false);
