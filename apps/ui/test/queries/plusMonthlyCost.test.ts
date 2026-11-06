@@ -12,6 +12,13 @@ vi.mock('@/networks/offchain', () => ({
   HUB_URLS: { s: 'https://hub.test/graphql' }
 }));
 
+vi.mock('@/composables/useSettings', () => ({
+  isSettingsLoaded: { value: true },
+  plusFees: { value: { proposal: 0.008, vote: 0.00016 } }
+}));
+
+const FEES = { proposal: 0.008, vote: 0.00016 };
+
 const SPACE = { id: 'test.eth', network: 's' } as Space;
 
 function mockProposals(votes: number[]) {
@@ -38,15 +45,15 @@ describe('fetchPlusMonthlyCost', () => {
   it('should average the last 3 months of fees in USD', async () => {
     mockProposals([100, 200, 0]);
 
-    // (3 * 0.01 + 300 * 0.0002) ETH / 3 months * $2000
-    expect(await fetchPlusMonthlyCost(SPACE)).toBeCloseTo(60);
+    // (3 * 0.008 + 300 * 0.00016) ETH / 3 months * $2000
+    expect(await fetchPlusMonthlyCost(SPACE, FEES)).toBeCloseTo(48);
   });
 
   it('should query the space proposals of the last 90 days', async () => {
     const fetchMock = mockProposals([]);
     const now = Math.floor(Date.now() / 1e3);
 
-    await fetchPlusMonthlyCost(SPACE);
+    await fetchPlusMonthlyCost(SPACE, FEES);
 
     const [url, init] = fetchMock.mock.calls[0] as unknown as [
       string,
@@ -61,7 +68,7 @@ describe('fetchPlusMonthlyCost', () => {
   it('should skip the ETH price when there is no activity', async () => {
     mockProposals([]);
 
-    expect(await fetchPlusMonthlyCost(SPACE)).toBe(0);
+    expect(await fetchPlusMonthlyCost(SPACE, FEES)).toBe(0);
     expect(getEthPriceMock).not.toHaveBeenCalled();
   });
 
@@ -69,7 +76,7 @@ describe('fetchPlusMonthlyCost', () => {
     mockProposals([10]);
     getEthPriceMock.mockResolvedValue(null);
 
-    await expect(fetchPlusMonthlyCost(SPACE)).rejects.toThrow(
+    await expect(fetchPlusMonthlyCost(SPACE, FEES)).rejects.toThrow(
       'ETH price unavailable'
     );
   });

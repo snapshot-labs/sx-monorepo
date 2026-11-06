@@ -2,8 +2,9 @@
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { normalize } from 'viem/ens';
+import { isSettingsLoaded, plusFees } from '@/composables/useSettings';
 import { getBalance } from '@/helpers/alchemy';
-import { ETH_CONTRACT, SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
+import { ETH_CONTRACT, PLUS_MIN_DEPOSIT } from '@/helpers/constants';
 import { _n, formatPlusUsage } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
@@ -79,7 +80,7 @@ const definition = computed(() => ({
     amount: {
       type: 'number',
       title: 'Amount (ETH)',
-      minimum: SNAPSHOT_PLUS_FEES.proposal,
+      minimum: PLUS_MIN_DEPOSIT,
       maximum: maxAmount.value,
       examples: ['0.1']
     }
@@ -116,10 +117,18 @@ const estimate = computed(() => {
   const total = credits.value + Number(form.value.amount);
   const balance = _n(total, 'standard', { maximumFractionDigits: 4 });
 
-  return `New balance ${balance} ETH ${formatPlusUsage(total)}`;
+  // Usage needs the fees, from the hub options
+  const usage = isSettingsLoaded.value
+    ? ` ${formatPlusUsage(total, plusFees.value)}`
+    : '';
+  return `New balance ${balance} ETH${usage}`;
 });
+// Pays back what is owed and covers a proposal, never below what Schnaps credits
 const minimumForPlus = computed(() =>
-  Number((SNAPSHOT_PLUS_FEES.proposal - credits.value).toFixed(6))
+  Math.max(
+    PLUS_MIN_DEPOSIT,
+    Number((plusFees.value.proposal - credits.value).toFixed(6))
+  )
 );
 
 async function deposit() {

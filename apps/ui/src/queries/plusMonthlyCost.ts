@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed, MaybeRefOrGetter, toValue } from 'vue';
-import { SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
+import { isSettingsLoaded, plusFees } from '@/composables/useSettings';
 import { getEthPrice } from '@/helpers/prices';
 import { HUB_URLS } from '@/networks/offchain';
 import { Space } from '@/types';
@@ -12,7 +12,10 @@ const QUERY = `query ($space: String!, $created: Int!) {
 }`;
 
 // What Plus would cost per month in USD, at the space's 3-month average
-export async function fetchPlusMonthlyCost(space: Space): Promise<number> {
+export async function fetchPlusMonthlyCost(
+  space: Space,
+  fees: { proposal: number; vote: number }
+): Promise<number> {
   const created = Math.floor(Date.now() / 1e3) - MONTHS * 30 * 86400;
   const res = await fetch(HUB_URLS[space.network] as string, {
     method: 'POST',
@@ -28,8 +31,7 @@ export async function fetchPlusMonthlyCost(space: Space): Promise<number> {
 
   const monthlyEth =
     data.proposals.reduce(
-      (sum, { votes }) =>
-        sum + SNAPSHOT_PLUS_FEES.proposal + votes * SNAPSHOT_PLUS_FEES.vote,
+      (sum, { votes }) => sum + fees.proposal + votes * fees.vote,
       0
     ) / MONTHS;
   if (!monthlyEth) return 0;
@@ -49,10 +51,13 @@ export function usePlusMonthlyCostQuery(
       computed(() => {
         const value = toValue(space);
         return value && `${value.network}:${value.id}`;
-      })
+      }),
+      plusFees
     ],
-    queryFn: () => fetchPlusMonthlyCost(toValue(space) as Space),
-    enabled: () => !!toValue(space),
+    queryFn: () =>
+      fetchPlusMonthlyCost(toValue(space) as Space, plusFees.value),
+    // Fees come from the hub options, wait for them
+    enabled: () => !!toValue(space) && isSettingsLoaded.value,
     staleTime: 60 * 60 * 1000
   });
 }
