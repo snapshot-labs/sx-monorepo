@@ -216,7 +216,7 @@ const readOnlyMessage = computed(() => {
     isControllerLoading.value ||
     canModifySettings.value ||
     canProposeSettingsChanges.value ||
-    ['controller', 'billing'].includes(activeTab.value)
+    activeTab.value === 'controller'
   ) {
     return undefined;
   }
@@ -280,6 +280,8 @@ const error = computed(() => {
 });
 
 const showToolbar = computed(() => {
+  if (activeTab.value === 'billing') return false;
+
   return (
     readOnlyMessage.value ||
     (isModified.value &&
@@ -420,7 +422,7 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
 
 onBeforeRouteLeave(async to => {
   if (!isModified.value || !canModifySettings.value) return true;
-  if (to.name !== 'space-pro') return true;
+  if (to.name !== 'space-upgrade') return true;
 
   const { isCanceled } = await revealLeaveConfirm();
   return !isCanceled;

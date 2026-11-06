@@ -8,6 +8,7 @@ import {
   createErc1155Metadata,
   escapeHtml,
   formatAddress,
+  getProDaysLeft,
   getSpaceController,
   getStampUrl,
   getUserFacingErrorMessage,
@@ -486,5 +487,20 @@ describe('utils', () => {
         }
       });
     });
+  });
+});
+
+describe('getProDaysLeft', () => {
+  const now = Math.floor(Date.now() / 1e3);
+
+  it('should round the days left up', () => {
+    expect(getProDaysLeft(now + 5.2 * 86400)).toBe(6);
+    expect(getProDaysLeft(now + 3600)).toBe(1);
+  });
+
+  it('should be 0 or less once Pro ended', () => {
+    expect(getProDaysLeft(now - 3600)).toBeLessThanOrEqual(0);
+    expect(getProDaysLeft(now - 3.5 * 86400)).toBe(-3);
+    expect(getProDaysLeft(0)).toBeLessThan(-7);
   });
 });
