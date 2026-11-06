@@ -2,13 +2,13 @@ import { capture } from '@snapshot-labs/snapshot-sentry';
 import snapshot from '@snapshot-labs/snapshot.js';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { uniq } from 'lodash';
-import { CB, PROPOSAL_FEE } from '../constants';
+import { CB } from '../constants';
 import { getPremiumNetworkIds, getSpace } from '../helpers/actions';
 import log from '../helpers/log';
 import { containsFlaggedLinks, flaggedAddresses } from '../helpers/moderation';
 import { isMalicious } from '../helpers/monitoring';
 import db from '../helpers/mysql';
-import { getLimits, getSpaceType } from '../helpers/options';
+import { getLimit, getLimits, getSpaceType } from '../helpers/options';
 import { getProvider } from '../helpers/provider';
 import { validateSpaceSettings } from '../helpers/spaceValidation';
 import {
@@ -390,7 +390,7 @@ export async function action(
     proposal,
     space,
     author,
-    credits ? PROPOSAL_FEE : 0,
+    credits ? await getLimit('space.plus.proposal_fee') : 0,
     // Space ids are stored lowercase, and the column is case-sensitive
     space.toLowerCase()
   ]);

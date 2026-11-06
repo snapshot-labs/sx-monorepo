@@ -4,6 +4,7 @@ import castArray from 'lodash/castArray';
 import intersection from 'lodash/intersection';
 import uniq from 'lodash/uniq';
 import db from '../helpers/mysql';
+import { getNumberOption } from '../helpers/options';
 import { DEFAULT_COUNTS, spacesMetadata } from '../helpers/spaces';
 import { jsonParse } from '../helpers/utils';
 
@@ -175,6 +176,14 @@ export function formatSpace({
   space.credits =
     credits === null ? null : (BigInt(credits) * 1_000_000_000n).toString(); // wei
   space.credits_parsed = credits === null ? null : credits / 1e9; // ETH
+  // Snapshot Plus: no Pro subscription, and a balance that covers a proposal.
+  // Not Plus until the options load, so a restart never makes every space Plus
+  const proposalFee = getNumberOption('space.plus.proposal_fee');
+  space.plus =
+    !space.turbo &&
+    credits !== null &&
+    proposalFee !== null &&
+    credits >= proposalFee;
   space.rank = spaceMetadata?.rank ?? null;
 
   // always return parent and children in child node format

@@ -1,6 +1,6 @@
 import snapshot from '@snapshot-labs/snapshot.js';
-import { PROPOSAL_FEE } from '../constants';
 import db from './mysql';
+import { getLimit } from './options';
 import { DEFAULT_NETWORK_ID, jsonParse, NETWORK_ID_WHITELIST } from './utils';
 
 function normalizeSettings(settings: any) {
@@ -133,10 +133,12 @@ export async function getSpace(
 
   const isPro =
     spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3;
-  // Snapshot Plus: no subscription, and a balance that covers a proposal
+  // Snapshot Plus: no subscription, and a balance that covers a proposal.
+  // Fees are in gwei, in the options table
   const isPlus =
     !isPro &&
-    spaces[0].credits_deposited - spaces[0].credits_spent >= PROPOSAL_FEE;
+    spaces[0].credits_deposited - spaces[0].credits_spent >=
+      (await getLimit('space.plus.proposal_fee'));
 
   return {
     ...jsonParse(spaces[0].settings, {}),

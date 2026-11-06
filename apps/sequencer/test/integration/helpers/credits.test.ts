@@ -1,4 +1,3 @@
-import { PROPOSAL_FEE, VOTE_FEE } from '../../../src/constants';
 import { getSpace } from '../../../src/helpers/actions';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import { mergeSpaces, updateTurboStatuses } from '../../../src/helpers/turbo';
@@ -11,6 +10,9 @@ jest.mock('../../../src/scores', () => ({
 }));
 
 const SPACE = 'plus-credits.eth';
+// Snapshot Plus fees in gwei, as stored in the options table
+const PROPOSAL_FEE = 8_000_000;
+const VOTE_FEE = 160_000;
 const settings = JSON.stringify({
   name: 'Plus',
   network: '1',
@@ -70,6 +72,9 @@ function vote(
 describe('Snapshot Plus credits', () => {
   // Before each test too, so rows left by an interrupted run can't interfere
   async function cleanup() {
+    await db.queryAsync('DELETE FROM options WHERE name LIKE ?', [
+      'space.plus.%'
+    ]);
     await db.queryAsync('DELETE FROM spaces WHERE id = ?', [SPACE]);
     const spaces = [SPACE, SPACE.toUpperCase()];
     await db.queryAsync('DELETE FROM proposals WHERE space IN (?)', [spaces]);
@@ -77,7 +82,15 @@ describe('Snapshot Plus credits', () => {
     await db.queryAsync('DELETE FROM leaderboard WHERE space IN (?)', [spaces]);
   }
 
-  beforeEach(cleanup);
+  beforeEach(async () => {
+    await cleanup();
+    await db.queryAsync('INSERT INTO options (name, value) VALUES ?', [
+      [
+        ['space.plus.proposal_fee', PROPOSAL_FEE],
+        ['space.plus.vote_fee', VOTE_FEE]
+      ]
+    ]);
+  });
 
   afterAll(async () => {
     await cleanup();
