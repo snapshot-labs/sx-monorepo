@@ -73,14 +73,12 @@ const { modalAccountOpen } = useModal();
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
-const nonPremiumNetworksList = computed(() => {
-  const networks = alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks;
-  if (!networks) return '';
-  return prettyConcat(
-    networks.map((n: any) => `"${n.name}"`),
-    'and'
-  );
-});
+const proOnlyNetworks = computed<string[]>(
+  () =>
+    alerts.value
+      .get('HAS_PRO_ONLY_NETWORKS')
+      ?.networks?.map((n: any) => n.name) ?? []
+);
 
 const disabledStrategiesList = computed(() => {
   return (
@@ -90,13 +88,9 @@ const disabledStrategiesList = computed(() => {
   );
 });
 
-const unsupportedPremiumStrategiesList = computed(() => {
-  return (
-    alerts.value
-      .get('HAS_PRO_ONLY_STRATEGIES')
-      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
-  );
-});
+const proOnlyStrategies = computed<string[]>(
+  () => alerts.value.get('HAS_PRO_ONLY_STRATEGIES')?.strategies ?? []
+);
 
 const privacy = computed({
   get() {
@@ -324,7 +318,7 @@ const canSubmit = computed(() => {
     hasUnsupportedNetworks ||
     hasFormErrors ||
     disabledStrategiesList.value.length ||
-    unsupportedPremiumStrategiesList.value.length ||
+    proOnlyStrategies.value.length ||
     isSafeInvalidNetwork.value ||
     isUsingOnlyInoperativeSigAuthenticators.value ||
     isMissingExecution.value
@@ -640,23 +634,23 @@ watchEffect(() => {
             reactivate it to create new proposals.
           </UiAlert>
           <UiAlert
-            v-else-if="nonPremiumNetworksList && !proposal?.originalProposal"
+            v-else-if="proOnlyNetworks.length && !proposal?.originalProposal"
             type="error"
             class="mb-4"
           >
-            You cannot create proposals. This space is configured with
-            non-premium networks ({{ nonPremiumNetworksList }}). Change to a
+            You cannot create proposals.
+            <AppLink :to="{ name: 'space-upgrade' }"
+              >Upgrade your space</AppLink
+            >
+            to keep using the {{ prettyConcat(proOnlyNetworks, 'and') }}
+            {{ proOnlyNetworks.length > 1 ? 'networks' : 'network' }}, or
             <AppLink
               :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
+              class="inline-flex items-center"
             >
-              premium network
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
+              switch to a premium network
+              <IH-arrow-sm-right class="-rotate-45" />
             </AppLink>
-            or
-            <AppLink :to="{ name: 'space-upgrade' }">
-              upgrade your space
-            </AppLink>
-            to continue.
           </UiAlert>
           <UiAlert
             v-else-if="
@@ -692,33 +686,30 @@ watchEffect(() => {
             </template>
           </UiAlert>
           <UiAlert
-            v-else-if="
-              unsupportedPremiumStrategiesList.length &&
-              !proposal?.originalProposal
-            "
+            v-else-if="proOnlyStrategies.length && !proposal?.originalProposal"
             type="error"
             class="mb-4"
           >
-            This space is configured with premium strategies, please
-            <AppLink :to="{ name: 'space-upgrade' }">
-              upgrade your space
-            </AppLink>
-            or
+            You cannot create proposals.
+            <AppLink :to="{ name: 'space-upgrade' }"
+              >Upgrade your space</AppLink
+            >
+            to keep using the {{ prettyConcat(proOnlyStrategies, 'and') }}
+            {{ proOnlyStrategies.length > 1 ? 'strategies' : 'strategy' }}, or
             <AppLink
               :to="{
                 name: 'space-settings',
                 params: { tab: 'voting-strategies' }
               }"
               >edit your strategies</AppLink
-            >
-            to create a proposal.
+            >.
             <AppLink
               :to="`${DOCS_URL}/user-guides/premium-voting-strategies`"
               class="inline-flex items-center"
             >
               Learn more
-              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
-            >.
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
           </UiAlert>
           <UiAlert
             v-else-if="space.snapshot_chain_id && isSafeInvalidNetwork"
