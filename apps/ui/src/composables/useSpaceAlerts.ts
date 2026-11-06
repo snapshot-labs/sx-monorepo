@@ -2,8 +2,11 @@ import { evmNetworks, starknetNetworks } from '@snapshot-labs/sx';
 import {
   DEPRECATED_STRATEGIES,
   DISABLED_STRATEGIES,
-  OVERRIDING_STRATEGIES
+  OVERRIDING_STRATEGIES,
+  PRO_AFTER_EXPIRATION_WARNING_DAYS,
+  PRO_EXPIRATION_WARNING_DAYS
 } from '@/helpers/constants';
+import { getProDaysLeft } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { useRelayerInfoQuery } from '@/queries/relayerInfo';
 import { NetworkID, Space } from '@/types';
@@ -11,10 +14,6 @@ import { NetworkID, Space } from '@/types';
 const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
 ];
-
-const PRO_EXPIRATION_WARNING_DAYS = 7;
-const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
@@ -108,27 +107,9 @@ export function useSpaceAlerts(
       .filter(network => !!network);
   });
 
-  const warningDaysBeforeProExpiration = computed(() => {
-    const now = Date.now();
-    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
-    const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
-
-    if (expirationTime < now || expirationTime > now + warningThresholdMs) {
-      return 0;
-    }
-
-    const diff = expirationTime - now;
-
-    return Math.ceil(diff / DAY_IN_MS);
-  });
-
-  const isProJustExpired = computed(() => {
-    const now = Date.now();
-    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
-    const graceThresholdMs = PRO_AFTER_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
-
-    return expirationTime < now && expirationTime >= now - graceThresholdMs;
-  });
+  const proDaysLeft = computed(() =>
+    getProDaysLeft(space.value.turbo_expiration || 0)
+  );
 
   const sigAuthenticatorAddresses = computed(() => {
     const networksConfig: Partial<
@@ -219,14 +200,21 @@ export function useSpaceAlerts(
       });
     }
 
-    if (warningDaysBeforeProExpiration.value) {
+    if (
+      proDaysLeft.value > 0 &&
+      proDaysLeft.value <= PRO_EXPIRATION_WARNING_DAYS
+    ) {
       alertsMap.set('IS_PRO_EXPIRING_SOON', {
-        daysUntilExpiration: warningDaysBeforeProExpiration.value
+        daysUntilExpiration: proDaysLeft.value
       });
     }
 
     // A space that moved to Snapshot Plus keeps its Pro features
-    if (isProJustExpired.value && !space.value.plus) {
+    if (
+      proDaysLeft.value <= 0 &&
+      proDaysLeft.value > -PRO_AFTER_EXPIRATION_WARNING_DAYS &&
+      !space.value.plus
+    ) {
       alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
 

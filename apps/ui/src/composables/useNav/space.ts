@@ -1,5 +1,15 @@
+import dayjs from 'dayjs';
+import { h } from 'vue';
+import {
+  PLAN_BADGE_CLASSES,
+  PLUS_LOW_CREDITS,
+  PRO_AFTER_EXPIRATION_WARNING_DAYS,
+  PRO_EXPIRATION_WARNING_DAYS
+} from '@/helpers/constants';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
+import { _n, getProDaysLeft } from '@/helpers/utils';
 import { explorePageProtocols, offchainNetworks } from '@/networks';
+import { Space } from '@/types';
 import { NavConfig, NavContext, NavItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
@@ -11,6 +21,7 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
+import ISBadgeCheck from '~icons/heroicons-solid/badge-check';
 
 const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
 const XMAQUINA_SPACE_ID = 's:xmaquina.eth';
@@ -53,6 +64,55 @@ const SETTINGS_TABS: {
   { key: 'billing', name: 'Billing', offchainOnly: true }
 ];
 
+export function getPlanItem(space: Space): NonNullable<NavConfig['header']> {
+  const link = { name: 'space-upgrade' };
+  const icon = () =>
+    h(ISBadgeCheck, { class: PLAN_BADGE_CLASSES[space.plus ? 'plus' : 'pro'] });
+  // The pill shows a short value, the tooltip the full detail
+  if (space.plus) {
+    const credits = space.credits ?? 0;
+    const hasWarning = credits < PLUS_LOW_CREDITS;
+    const left = `${_n(credits, 'standard', { maximumFractionDigits: 4 })} ETH left`;
+    return {
+      name: 'Plus',
+      value: `${_n(credits, 'standard', { maximumFractionDigits: 3 })} ETH`,
+      detail: hasWarning ? `Only ${left}, add credits soon` : left,
+      hasWarning,
+      icon,
+      link
+    };
+  }
+
+  const daysLeft = getProDaysLeft(space.turbo_expiration || 0);
+  const date = dayjs(space.turbo_expiration * 1e3).format('D MMM YYYY');
+  if (daysLeft > PRO_EXPIRATION_WARNING_DAYS) {
+    return { name: 'Pro', value: date, detail: `Until ${date}`, icon, link };
+  }
+  // Close to the end, the countdown matters more than the date
+  if (daysLeft > 0) {
+    return {
+      name: 'Pro',
+      value: `${daysLeft}d left`,
+      detail: `Expires on ${date}`,
+      hasWarning: true,
+      icon,
+      link
+    };
+  }
+  // A Pro that just ended keeps its pill, so the space notices and renews
+  if (daysLeft > -PRO_AFTER_EXPIRATION_WARNING_DAYS) {
+    return {
+      name: 'Pro',
+      value: 'Expired',
+      detail: `Expired on ${date}`,
+      hasWarning: true,
+      icon: IHBadgeCheck,
+      link
+    };
+  }
+  return { name: 'Upgrade space', icon: IHBadgeCheck, link };
+}
+
 function getSpaceSettingsConfig(context: NavContext): NavConfig {
   const isOffchainNetwork = context.space
     ? offchainNetworks.includes(context.space.network)
@@ -81,14 +141,9 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
       },
       ...tabItems
     },
-    // Plus spaces are turbo too, see the offchain space mapping
-    footer:
-      isOffchainNetwork && !context.space?.turbo
-        ? {
-            name: 'Upgrade space',
-            icon: IHBadgeCheck,
-            link: { name: 'space-upgrade' }
-          }
+    header:
+      isOffchainNetwork && context.space
+        ? getPlanItem(context.space)
         : undefined
   };
 }

@@ -119,13 +119,9 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
 </script>
 
 <template>
-  <UiMessage
-    v-if="isDisabled"
-    type="info"
-    :learn-more-link="{ name: 'space-upgrade' }"
-    class="mb-4 max-w-[592px]"
-  >
-    Upgrade your space to use a custom domain.
+  <UiMessage v-if="isDisabled" type="info" class="mb-4 max-w-[592px]">
+    <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
+    to use a custom domain.
   </UiMessage>
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">

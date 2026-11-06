@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { PLAN_BADGE_CLASSES } from '@/helpers/constants';
+
 const props = defineProps<{
   verified: boolean;
   turbo: boolean;
@@ -19,7 +21,7 @@ const badgeLabel = computed(() => {
   <UiTooltip v-if="badgeLabel" :title="badgeLabel">
     <IS-badge-check
       v-if="turbo"
-      :class="plus ? 'text-[#2394ea]' : 'text-[#e2b719]'"
+      :class="PLAN_BADGE_CLASSES[plus ? 'plus' : 'pro']"
     />
     <IS-badge-check v-else-if="verified" class="text-skin-link" />
     <IS-exclamation-circle v-else-if="flagged" class="text-skin-danger" />

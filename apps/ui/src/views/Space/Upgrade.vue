@@ -36,7 +36,7 @@ const YEARLY_SAVING = Math.round(
   (1 - PRO_MONTHLY_PRICES.yearly / PRO_MONTHLY_PRICES.monthly) * 100
 );
 
-// Plus gets every Pro feature except the Explore highlight
+// Plus gets every Pro feature except the extra visibility
 const FEATURES = [
   {
     name: 'Any network',
@@ -44,14 +44,15 @@ const FEATURES = [
     about: 'Run your space and strategies on any network you need.'
   },
   {
-    name: 'Advanced strategies',
+    name: 'Any strategies',
     icon: ICPuzzle,
-    about: 'Use delegation, overrides and other heavy strategies.'
+    about: 'Use delegation, overrides and any other strategy you need.'
   },
   {
-    name: 'Featured in Explore',
+    name: 'More visibility',
     icon: ICStatusOnline,
-    about: 'Rank higher in Explore and search, so more voters find you.',
+    about:
+      'Rank higher when voters look for spaces, and get proposals featured on X.',
     isProOnly: true
   },
   {
@@ -81,6 +82,11 @@ const FEATURES = [
   }
 ];
 
+const PLANS = [
+  { id: 'plus', name: 'Plus', billing: 'Pay per use' },
+  { id: 'pro', name: 'Pro', billing: 'Subscription' }
+] as const;
+
 const LIMITS = [
   ['Proposals per day', 'proposal_limit_per_day'],
   ['Proposals per month', 'proposal_limit_per_month'],
@@ -103,7 +109,9 @@ const { redirectToPortal, isLoading: isStripeLoading } = useStripeCheckout();
 const referral = route.query.ref as string;
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
-const selectedSpace = ref<Space | null>(props.space || null);
+// Picked from the modal when the page is opened without a space
+const pickedSpace = ref<Space | null>(null);
+const selectedSpace = computed(() => props.space ?? pickedSpace.value);
 // What to open once a space is picked
 const intent = ref<'plus' | 'pro'>('pro');
 const modalPaymentOpen = ref(false);
@@ -126,23 +134,10 @@ const currentPlan = computed(() => {
   if (selectedSpace.value?.plus) return 'plus';
   return selectedSpace.value?.turbo ? 'pro' : null;
 });
-const proEndDate = computed(() =>
-  currentPlan.value === 'pro' && selectedSpace.value?.turbo_expiration
-    ? dayjs(selectedSpace.value.turbo_expiration * 1e3).format(DATE_FORMAT)
-    : ''
-);
 // What blocks this space from creating proposals today, as in the editor
 const { alerts } = props.space
   ? useSpaceAlerts(toRef(props, 'space') as Ref<Space>, { isEditor: true })
   : { alerts: ref(new Map()) };
-// Short plan status shown in the hero tag
-const planDetail = computed(() => {
-  if (currentPlan.value === 'plus') {
-    return `${_n(selectedSpace.value?.credits, 'standard', { maximumFractionDigits: 4 })} ETH left`;
-  }
-  return proEndDate.value ? `Until ${proEndDate.value}` : '';
-});
-
 const unlock = computed(() => {
   const networks: HubNetwork[] =
     alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks ?? [];
@@ -240,7 +235,7 @@ function choose(plan: 'plus' | 'pro') {
 }
 
 function handlePickSpace(space: Space) {
-  selectedSpace.value = space;
+  pickedSpace.value = space;
   modalSpaceOpen.value = false;
   choose(intent.value);
 }
@@ -261,7 +256,7 @@ async function handlePaymentConfirmed() {
 
 function handleModalPaymentClose() {
   modalPaymentOpen.value = false;
-  selectedSpace.value = props.space || null;
+  pickedSpace.value = null;
 }
 
 async function handleStripeSuccess() {
@@ -343,21 +338,6 @@ onMounted(() => {
           Premium features and higher limits.<br />
           Pay as you go, or subscribe.
         </p>
-        <div
-          v-if="planDetail"
-          class="flex items-center gap-1.5 border rounded-full px-3 py-1 text-base"
-        >
-          <UiBadgeSpace
-            turbo
-            :plus="currentPlan === 'plus'"
-            :verified="false"
-            :flagged="false"
-          />
-          <span class="text-skin-link">
-            {{ currentPlan === 'plus' ? 'Plus' : 'Pro' }}
-          </span>
-          · {{ planDetail }}
-        </div>
       </div>
     </div>
 
@@ -365,132 +345,121 @@ onMounted(() => {
       <!-- Subgrid rows keep both cards' price, text and button aligned -->
       <div class="grid md:grid-cols-2 gap-3 mx-auto max-w-[740px]">
         <div
+          v-for="plan in PLANS"
+          :key="plan.id"
           class="relative border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
-          :class="{ 'border-skin-link': currentPlan === 'plus' }"
+          :class="{ 'border-skin-link': currentPlan === plan.id }"
         >
           <div
-            v-if="currentPlan === 'plus' || recommendedPlan === 'plus'"
+            v-if="currentPlan === plan.id || recommendedPlan === plan.id"
             class="absolute -top-[11px] inset-x-0 flex justify-center"
           >
-            <UiPill
-              v-if="currentPlan === 'plus'"
-              label="Current plan"
-              class="!text-sm !leading-[22px] !px-2"
-            />
-            <UiTooltip v-else :title="recommendationReason">
+            <UiTooltip
+              :title="currentPlan === plan.id ? '' : recommendationReason"
+            >
               <UiPill
-                variant="primary"
-                label="Recommended"
-                class="!text-sm !leading-[22px] !px-2"
-              />
-            </UiTooltip>
-          </div>
-          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <UiBadgeSpace turbo plus :verified="false" :flagged="false" />
-            <h3>Plus</h3>
-            <span class="ml-auto text-sm whitespace-nowrap">Pay per use</span>
-          </div>
-          <div>
-            <h2>
-              {{ SNAPSHOT_PLUS_FEES.proposal }} ETH
-              <span class="text-base text-skin-text">/ proposal</span>
-            </h2>
-            <div>+ {{ SNAPSHOT_PLUS_FEES.vote }} ETH / vote</div>
-          </div>
-          <div class="leading-snug">
-            No commitment. Pay in ETH on Ethereum or Base.
-          </div>
-          <UiButton
-            :primary="primaryPlan === 'plus'"
-            class="w-full"
-            @click="choose('plus')"
-          >
-            Add credits
-          </UiButton>
-        </div>
-        <div
-          class="relative border rounded-xl p-4 grid grid-rows-subgrid row-span-4 gap-3"
-          :class="{ 'border-skin-link': currentPlan === 'pro' }"
-        >
-          <div
-            v-if="currentPlan === 'pro' || recommendedPlan === 'pro'"
-            class="absolute -top-[11px] inset-x-0 flex justify-center"
-          >
-            <UiPill
-              v-if="currentPlan === 'pro'"
-              label="Current plan"
-              class="!text-sm !leading-[22px] !px-2"
-            />
-            <UiTooltip v-else :title="recommendationReason">
-              <UiPill
-                variant="primary"
-                label="Recommended"
-                class="!text-sm !leading-[22px] !px-2"
-              />
-            </UiTooltip>
-          </div>
-          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <UiBadgeSpace turbo :verified="false" :flagged="false" />
-            <h3>Pro</h3>
-            <span class="ml-auto text-sm whitespace-nowrap">Subscription</span>
-          </div>
-          <div>
-            <h2>
-              ${{ PRO_MONTHLY_PRICES[subscriptionLength] }}
-              <span class="text-base text-skin-text">/ month</span>
-            </h2>
-            <div>
-              {{
-                subscriptionLength === 'yearly'
-                  ? `Billed $${_n(PRO_MONTHLY_PRICES.yearly * 12)} yearly`
-                  : 'Billed monthly'
-              }}
-            </div>
-            <div class="flex gap-1 rounded-full border p-1 text-sm mt-2">
-              <button
-                v-for="length in ['monthly', 'yearly'] as SubscriptionLength[]"
-                :key="length"
-                type="button"
-                class="flex-1 rounded-full px-3 py-1 capitalize whitespace-nowrap"
-                :class="
-                  subscriptionLength === length
-                    ? 'bg-skin-border text-skin-heading'
-                    : 'text-skin-text'
+                :variant="currentPlan === plan.id ? 'default' : 'primary'"
+                :label="
+                  currentPlan === plan.id ? 'Current plan' : 'Recommended'
                 "
-                :aria-pressed="subscriptionLength === length"
-                @click="subscriptionLength = length"
-              >
-                {{ length }}
-                <span v-if="length === 'yearly'" class="text-skin-link">
-                  −{{ YEARLY_SAVING }}%
-                </span>
-              </button>
+                class="!text-sm !leading-[22px] !px-2"
+              />
+            </UiTooltip>
+          </div>
+          <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <UiBadgeSpace
+              turbo
+              :plus="plan.id === 'plus'"
+              :verified="false"
+              :flagged="false"
+            />
+            <h3 v-text="plan.name" />
+            <span
+              class="ml-auto text-sm whitespace-nowrap"
+              v-text="plan.billing"
+            />
+          </div>
+          <template v-if="plan.id === 'plus'">
+            <div>
+              <h2>
+                {{ SNAPSHOT_PLUS_FEES.proposal }} ETH
+                <span class="text-base text-skin-text">/ proposal</span>
+              </h2>
+              <div>+ {{ SNAPSHOT_PLUS_FEES.vote }} ETH / vote</div>
             </div>
-          </div>
-          <div class="leading-snug">
-            Fixed price, featured in Explore. Pay by card, USDC or USDT.
-          </div>
-          <UiButton
-            v-if="subscription?.hasActiveSubscription"
-            :primary="primaryPlan === 'pro'"
-            class="w-full"
-            :loading="isStripeLoading"
-            @click="redirectToPortal(spaceKey.split(':')[0])"
-          >
-            Manage subscription
-          </UiButton>
-          <UiButton
-            v-else
-            :primary="primaryPlan === 'pro'"
-            class="w-full"
-            :loading="!!selectedSpace && !subscription"
-            :disabled="
-              !!selectedSpace && selectedSpace.network !== metadataNetwork
-            "
-            @click="choose('pro')"
-          >
-            {{ currentPlan === 'pro' ? 'Extend Pro' : 'Upgrade to Pro' }}
-          </UiButton>
+            <div class="leading-snug">
+              No commitment. Pay in ETH on Ethereum or Base.
+            </div>
+            <UiButton
+              :primary="primaryPlan === 'plus'"
+              class="w-full"
+              @click="choose('plus')"
+            >
+              Add credits
+            </UiButton>
+          </template>
+          <template v-else>
+            <div>
+              <h2>
+                ${{ PRO_MONTHLY_PRICES[subscriptionLength] }}
+                <span class="text-base text-skin-text">/ month</span>
+              </h2>
+              <div>
+                {{
+                  subscriptionLength === 'yearly'
+                    ? `Billed $${_n(PRO_MONTHLY_PRICES.yearly * 12)} yearly`
+                    : 'Billed monthly'
+                }}
+              </div>
+              <div class="flex gap-1 rounded-full border p-1 text-sm mt-2">
+                <button
+                  v-for="length in [
+                    'monthly',
+                    'yearly'
+                  ] as SubscriptionLength[]"
+                  :key="length"
+                  type="button"
+                  class="flex-1 rounded-full px-3 py-1 capitalize whitespace-nowrap"
+                  :class="
+                    subscriptionLength === length
+                      ? 'bg-skin-border text-skin-heading'
+                      : 'text-skin-text'
+                  "
+                  :aria-pressed="subscriptionLength === length"
+                  @click="subscriptionLength = length"
+                >
+                  {{ length }}
+                  <span v-if="length === 'yearly'" class="text-skin-link">
+                    −{{ YEARLY_SAVING }}%
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div class="leading-snug">
+              Fixed price, with more visibility. Pay by card, USDC or USDT.
+            </div>
+            <UiButton
+              v-if="subscription?.hasActiveSubscription"
+              :primary="primaryPlan === 'pro'"
+              class="w-full"
+              :loading="isStripeLoading"
+              @click="redirectToPortal(spaceKey.split(':')[0])"
+            >
+              Manage subscription
+            </UiButton>
+            <UiButton
+              v-else
+              :primary="primaryPlan === 'pro'"
+              class="w-full"
+              :loading="!!selectedSpace && !subscription"
+              :disabled="
+                !!selectedSpace && selectedSpace.network !== metadataNetwork
+              "
+              @click="choose('pro')"
+            >
+              {{ currentPlan === 'pro' ? 'Extend Pro' : 'Upgrade to Pro' }}
+            </UiButton>
+          </template>
         </div>
       </div>
       <div class="flex justify-center">
@@ -502,13 +471,13 @@ onMounted(() => {
             </UiButton>
           </template>
           <template #items>
-            <UiDropdownItem :to="CALENDLY_URL">
-              <IH-calendar />
-              Book a call
-            </UiDropdownItem>
             <UiDropdownItem :to="SALES_TELEGRAM_URL">
               <ICTelegram />
               Message us
+            </UiDropdownItem>
+            <UiDropdownItem :to="CALENDLY_URL">
+              <IH-calendar />
+              Book a call
             </UiDropdownItem>
           </template>
         </UiDropdown>

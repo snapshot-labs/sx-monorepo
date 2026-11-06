@@ -4,9 +4,24 @@ const { config } = useNav();
 
 <template>
   <div class="border-r bg-skin-bg">
-    <div
-      class="flex flex-col py-4 no-scrollbar overscroll-contain overflow-auto"
-    >
+    <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
+      <div v-if="config?.header" class="px-4 pb-3">
+        <UiTooltip :title="config.header.detail ?? ''" placement="right">
+          <UiButton :to="config.header.link" class="whitespace-nowrap !pl-3">
+            <component :is="config.header.icon" v-if="config.header.icon" />
+            <span>
+              {{ config.header.name }}
+              <span v-if="config.header.value" class="text-skin-text">
+                · {{ config.header.value }}
+              </span>
+            </span>
+            <IS-exclamation-circle
+              v-if="config.header.hasWarning"
+              class="text-skin-danger size-[16px]"
+            />
+          </UiButton>
+        </UiTooltip>
+      </div>
       <AppLink
         v-for="(item, key) in config?.items ?? {}"
         v-slot="{ isExactActive }"
@@ -27,12 +42,6 @@ const { config } = useNav();
           <UiPill v-if="item.count" :label="item.count" />
         </div>
       </AppLink>
-      <div v-if="config?.footer" class="mt-auto px-4 pt-4">
-        <UiButton :to="config.footer.link" class="whitespace-nowrap !pl-3">
-          <component :is="config.footer.icon" v-if="config.footer.icon" />
-          {{ config.footer.name }}
-        </UiButton>
-      </div>
     </div>
   </div>
 </template>

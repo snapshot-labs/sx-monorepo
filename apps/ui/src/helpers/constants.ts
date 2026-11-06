@@ -28,8 +28,19 @@ export const SALES_TELEGRAM_URL = 'https://t.me/bonustrack';
 
 export const PRO_MONTHLY_PRICES = { monthly: 600, yearly: 500 } as const;
 
+// Badge colors for Snapshot Plus and Snapshot Pro spaces
+export const PLAN_BADGE_CLASSES = {
+  plus: 'text-[#2394ea]',
+  pro: 'text-[#e2b719]'
+} as const;
+
 // Snapshot Plus fees, in ETH. Plus is on while the balance covers a proposal
 export const SNAPSHOT_PLUS_FEES = { proposal: 0.01, vote: 0.0002 };
+// Warn when credits cover fewer than 5 proposals
+export const PLUS_LOW_CREDITS = 5 * SNAPSHOT_PLUS_FEES.proposal;
+// Days to warn before and after Pro ends
+export const PRO_EXPIRATION_WARNING_DAYS = 7;
+export const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;
 
 export const VERIFIED_URL = `${DOCS_URL}/user-guides/spaces/get-verified`;
 
