@@ -1,22 +1,15 @@
 import { formatSpace } from '../../src/graphql/helpers';
 
-const PROPOSAL_FEE = 8_000_000; // gwei
-
 jest.mock('../../src/helpers/mysql', () => ({
   __esModule: true,
   default: { queryAsync: jest.fn() }
 }));
 
-let isOptionsLoaded = true;
+const FEE = 8_000_000; // gwei
+// Read with the space, as a string like other option values
+const FEE_COLUMN: Record<string, any> = { plus_proposal_fee: String(FEE) };
 
-jest.mock('../../src/helpers/options', () => ({
-  getNumberOption: (name: string) => {
-    if (!isOptionsLoaded) return null;
-    return name === 'space.plus.proposal_fee' ? PROPOSAL_FEE : 0;
-  }
-}));
-
-function space(fields: Record<string, any>) {
+function isPlus(fields: Record<string, any>) {
   return formatSpace({
     id: 'plus.eth',
     settings: '{}',
@@ -27,35 +20,26 @@ function space(fields: Record<string, any>) {
     hibernated: 0,
     skinSettings: null,
     created: 0,
+    ...FEE_COLUMN,
     ...fields
-  });
+  }).plus;
 }
 
 describe('formatSpace plus', () => {
   it('should be Plus when the balance covers a proposal', () => {
-    expect(space({ credits_deposited: PROPOSAL_FEE }).plus).toBe(true);
+    expect(isPlus({ credits_deposited: FEE })).toBe(true);
   });
 
-  it('should not be Plus when the balance is below the proposal fee', () => {
-    expect(
-      space({ credits_deposited: PROPOSAL_FEE, credits_spent: 1 }).plus
-    ).toBe(false);
+  it('should not be Plus below the proposal fee', () => {
+    expect(isPlus({ credits_deposited: FEE, credits_spent: 1 })).toBe(false);
   });
 
   it('should not be Plus with an active Pro subscription', () => {
     const turboExpiration = Math.floor(Date.now() / 1e3) + 86400;
-    expect(
-      space({ credits_deposited: PROPOSAL_FEE, turboExpiration }).plus
-    ).toBe(false);
+    expect(isPlus({ credits_deposited: FEE, turboExpiration })).toBe(false);
   });
 
   it('should not be Plus on spaces nested in other entities', () => {
-    expect(space({}).plus).toBe(false);
-  });
-
-  it('should not be Plus before the options load', () => {
-    isOptionsLoaded = false;
-    expect(space({ credits_deposited: PROPOSAL_FEE }).plus).toBe(false);
-    isOptionsLoaded = true;
+    expect(isPlus({ plus_proposal_fee: undefined })).toBe(false);
   });
 });

@@ -10,7 +10,6 @@ import { checkKeycard } from './helpers/keycard';
 import log from './helpers/log';
 import initMetrics from './helpers/metrics';
 import { closeDatabase } from './helpers/mysql';
-import refreshOptionsCache from './helpers/options';
 import rateLimit from './helpers/rateLimit';
 import refreshSpacesCache from './helpers/spaces';
 import './helpers/strategies';
@@ -29,7 +28,6 @@ const PORT = process.env.PORT || 3000;
 
 const { stop: stopMetrics } = initMetrics(app);
 refreshSpacesCache();
-refreshOptionsCache();
 
 app.disable('x-powered-by');
 app.use(express.json({ limit: '20mb' }));

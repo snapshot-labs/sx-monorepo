@@ -134,11 +134,11 @@ export async function getSpace(
   const isPro =
     spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3;
   // Snapshot Plus: no subscription, and a balance that covers a proposal.
-  // The fee is in gwei, and a missing option reads as 0 like other options
+  // A missing fee reads as 0, like other options
   const isPlus =
     !isPro &&
     spaces[0].credits_deposited - spaces[0].credits_spent >=
-      Number(spaces[0].plus_proposal_fee ?? 0);
+      Number(spaces[0].plus_proposal_fee);
 
   return {
     ...jsonParse(spaces[0].settings, {}),

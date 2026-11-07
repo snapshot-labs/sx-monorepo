@@ -8,6 +8,7 @@ import {
   formatSpace,
   handleRelatedSpaces,
   isSymbolMatch,
+  PLUS_PROPOSAL_FEE_COLUMN,
   PublicError
 } from '../helpers';
 
@@ -80,7 +81,7 @@ export default async function (_parent, args, context, info) {
     if (!filteredSpaces.length) return { items: [], metrics };
 
     const query = `
-      SELECT s.*, skins.*, s.id AS id FROM spaces s
+      SELECT s.*, skins.*, s.id AS id, ${PLUS_PROPOSAL_FEE_COLUMN} FROM spaces s
       LEFT JOIN skins ON s.id = skins.id
       WHERE s.id IN (?)
       ORDER BY FIELD(s.id, ?) ASC
