@@ -12,10 +12,7 @@ const QUERY = `query ($space: String!, $created: Int!) {
 }`;
 
 // What Plus would cost per month in USD, at the space's 3-month average
-export async function fetchPlusMonthlyCost(
-  space: Space,
-  fees: { proposal: number; vote: number }
-): Promise<number> {
+export async function fetchPlusMonthlyCost(space: Space): Promise<number> {
   const created = Math.floor(Date.now() / 1e3) - MONTHS * 30 * 86400;
   const res = await fetch(HUB_URLS[space.network] as string, {
     method: 'POST',
@@ -31,7 +28,8 @@ export async function fetchPlusMonthlyCost(
 
   const monthlyEth =
     data.proposals.reduce(
-      (sum, { votes }) => sum + fees.proposal + votes * fees.vote,
+      (sum, { votes }) =>
+        sum + plusFees.value.proposal + votes * plusFees.value.vote,
       0
     ) / MONTHS;
   if (!monthlyEth) return 0;
@@ -54,8 +52,7 @@ export function usePlusMonthlyCostQuery(
       }),
       plusFees
     ],
-    queryFn: () =>
-      fetchPlusMonthlyCost(toValue(space) as Space, plusFees.value),
+    queryFn: () => fetchPlusMonthlyCost(toValue(space) as Space),
     // Fees come from the hub options, wait for them
     enabled: () => !!toValue(space) && isSettingsLoaded.value,
     staleTime: 60 * 60 * 1000
