@@ -1,6 +1,5 @@
 import snapshot from '@snapshot-labs/snapshot.js';
 import db from './mysql';
-import { getLimit } from './options';
 import { DEFAULT_NETWORK_ID, jsonParse, NETWORK_ID_WHITELIST } from './utils';
 
 function normalizeSettings(settings: any) {
@@ -123,7 +122,8 @@ export async function getSpace(
     };
   }
 
-  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
+  // The Plus fee is read in the same query, so every message keeps one round trip
+  const query = `SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent, (SELECT value FROM options WHERE name = 'space.plus.proposal_fee') AS plus_proposal_fee FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1`;
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]
@@ -134,11 +134,11 @@ export async function getSpace(
   const isPro =
     spaces[0].turbo === 1 || spaces[0].turbo_expiration > Date.now() / 1e3;
   // Snapshot Plus: no subscription, and a balance that covers a proposal.
-  // Fees are in gwei, in the options table
+  // The fee is in gwei, and a missing option reads as 0 like other options
   const isPlus =
     !isPro &&
     spaces[0].credits_deposited - spaces[0].credits_spent >=
-      (await getLimit('space.plus.proposal_fee'));
+      Number(spaces[0].plus_proposal_fee ?? 0);
 
   return {
     ...jsonParse(spaces[0].settings, {}),
