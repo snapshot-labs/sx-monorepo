@@ -80,7 +80,8 @@ const definition = computed(() => ({
     amount: {
       type: 'number',
       title: 'Amount (ETH)',
-      minimum: PLUS_MIN_DEPOSIT,
+      // Covers a proposal, and Schnaps ignores smaller deposits
+      minimum: Math.max(PLUS_MIN_DEPOSIT, plusFees.value.proposal),
       maximum: maxAmount.value,
       examples: ['0.1']
     }
