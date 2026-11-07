@@ -12,6 +12,11 @@ vi.mock('@/networks/offchain', () => ({
   HUB_URLS: { s: 'https://hub.test/graphql' }
 }));
 
+vi.mock('@/composables/useSettings', () => ({
+  isSettingsLoaded: { value: true },
+  plusFees: { value: { proposal: 0.008, vote: 0.00016 } }
+}));
+
 const SPACE = { id: 'test.eth', network: 's' } as Space;
 
 function mockProposals(votes: number[]) {
@@ -38,8 +43,8 @@ describe('fetchPlusMonthlyCost', () => {
   it('should average the last 3 months of fees in USD', async () => {
     mockProposals([100, 200, 0]);
 
-    // (3 * 0.01 + 300 * 0.0002) ETH / 3 months * $2000
-    expect(await fetchPlusMonthlyCost(SPACE)).toBeCloseTo(60);
+    // (3 * 0.008 + 300 * 0.00016) ETH / 3 months * $2000
+    expect(await fetchPlusMonthlyCost(SPACE)).toBeCloseTo(48);
   });
 
   it('should query the space proposals of the last 90 days', async () => {

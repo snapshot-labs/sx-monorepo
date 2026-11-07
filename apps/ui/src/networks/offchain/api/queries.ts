@@ -13,6 +13,7 @@ gql(`
     activeProposals
     turbo
     credits_parsed
+    plus
     verified
   }
 
@@ -22,6 +23,7 @@ gql(`
     turbo
     turboExpiration
     credits_parsed
+    plus
     admins
     members
     name

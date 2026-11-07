@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
-import { PRO_MONTHLY_PRICES, SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
+import { plusFees } from '@/composables/useSettings';
+import { PRO_MONTHLY_PRICES } from '@/helpers/constants';
 import { _n, _rt, formatPlusUsage } from '@/helpers/utils';
 import { Space } from '@/types';
 
@@ -13,7 +14,6 @@ const PLAN_NAMES: Record<Plan, string> = {
 };
 
 const PRO_PRICE = `$${PRO_MONTHLY_PRICES.monthly} / month or $${(PRO_MONTHLY_PRICES.yearly * 12).toLocaleString('en-US')} / year`;
-const PLUS_PRICES = `${SNAPSHOT_PLUS_FEES.proposal} ETH / proposal · ${SNAPSHOT_PLUS_FEES.vote} ETH / vote`;
 
 const props = defineProps<{ space: Space }>();
 
@@ -30,6 +30,10 @@ const otherPlans = computed(() =>
   (Object.keys(PLAN_NAMES) as Plan[]).filter(plan => plan !== currentPlan.value)
 );
 
+const plusPrices = computed(
+  () =>
+    `${plusFees.value.proposal} ETH / proposal · ${plusFees.value.vote} ETH / vote`
+);
 const credits = computed(() => props.space.credits ?? 0);
 const balance = computed(
   () =>
@@ -61,8 +65,8 @@ const card = computed(() => {
   if (currentPlan.value === 'plus') {
     return {
       value: balance.value,
-      detail: `${formatPlusUsage(credits.value)} left`,
-      footer: `Pay per use · ${PLUS_PRICES}`
+      detail: `${formatPlusUsage(credits.value, plusFees.value)} left`,
+      footer: `Pay per use · ${plusPrices.value}`
     };
   }
 
@@ -72,8 +76,8 @@ const card = computed(() => {
 const summaries = computed<Record<Plan, string>>(() => ({
   basic: 'Free',
   plus: !credits.value
-    ? PLUS_PRICES
-    : `${balance.value}${credits.value < 0 ? ' owed' : ''} · ${PLUS_PRICES}`,
+    ? plusPrices.value
+    : `${balance.value}${credits.value < 0 ? ' owed' : ''} · ${plusPrices.value}`,
   pro: hasProEnded.value ? `Ended ${expiration.value}` : PRO_PRICE
 }));
 </script>

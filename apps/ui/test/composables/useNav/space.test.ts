@@ -7,6 +7,11 @@ vi.mock('@/networks', () => ({
   offchainNetworks: ['s']
 }));
 
+// 5 proposals at 0.008 ETH: Plus warns below 0.04 ETH
+vi.mock('@/composables/useSettings', () => ({
+  plusFees: { value: { proposal: 0.008, vote: 0.00016 } }
+}));
+
 const DAY = 86400;
 
 function space(fields: Partial<Space>) {
