@@ -1,4 +1,3 @@
-import { PROPOSAL_FEE, VOTE_FEE } from '../../../src/constants';
 import { getSpace } from '../../../src/helpers/actions';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import { mergeSpaces, updateTurboStatuses } from '../../../src/helpers/turbo';
@@ -11,6 +10,9 @@ jest.mock('../../../src/scores', () => ({
 }));
 
 const SPACE = 'plus-credits.eth';
+// Snapshot Plus fees in gwei, seeded in the options table by test/setup.ts
+const PROPOSAL_FEE = 8_000_000;
+const VOTE_FEE = 160_000;
 const settings = JSON.stringify({
   name: 'Plus',
   network: '1',
