@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import db from '../src/helpers/mysql';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 
 async function main() {
   if (process.argv.length < 2) {
@@ -19,10 +18,6 @@ async function main() {
     console.error(`First argument should be either "run" or "preview"`);
     return process.exit(1);
   }
-
-  const liveNetworks = Object.values(networks)
-    .filter((network: any) => !network.testnet)
-    .map((network: any) => network.key);
 
   const query = `
     WITH toHibernate AS (
@@ -45,7 +40,7 @@ async function main() {
     ${commands[action]};
   `;
 
-  const results = await db.queryAsync(query, liveNetworks);
+  const results = await db.queryAsync(query);
 
   if (action === 'preview') {
     console.log(`Spaces eligible for hibernation: ${results[0].count}`);
@@ -58,8 +53,8 @@ async function main() {
   try {
     await main();
     process.exit(0);
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     process.exit(1);
   }
 })();
