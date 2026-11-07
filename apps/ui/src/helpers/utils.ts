@@ -792,6 +792,11 @@ export function isPlusSpace(space: {
   );
 }
 
+// Days left on Pro, rounded up: 1 on its last day, 0 or less once it ended
+export function getProDaysLeft(turboExpiration: number) {
+  return Math.ceil((turboExpiration * 1e3 - Date.now()) / 864e5);
+}
+
 // What a Snapshot Plus balance pays for, e.g. "≈ 7 proposals or 153 votes"
 export function formatPlusUsage(credits: number) {
   // The epsilon absorbs float error, e.g. 0.0006 / 0.0002 = 2.9999999999999996
