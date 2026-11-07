@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
+import { isSettingsLoaded } from '@/composables/useSettings';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -21,6 +22,8 @@ const {
 );
 
 const { redirectToPortal, isLoading } = useStripeCheckout();
+// Retries the hub options if they failed to load at app start
+useSettings();
 
 const portalPaymentId = ref<string | null>(null);
 const isAddCreditsModalOpen = ref(false);
@@ -44,10 +47,13 @@ async function openPortal(paymentId: string) {
       description="Your plan, credits and payment history."
     >
       <UiEyebrow class="mb-3 font-medium">Current plan</UiEyebrow>
+      <!-- Plus fees come from the hub options -->
       <SpaceBillingPlan
+        v-if="isSettingsLoaded"
         :space="space"
         @add-credits="isAddCreditsModalOpen = true"
       />
+      <UiLoading v-else class="block" />
     </UiContainerSettings>
 
     <UiSectionHeader class="mt-4" label="Payment history" sticky />

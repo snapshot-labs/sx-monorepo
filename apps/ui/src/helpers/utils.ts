@@ -17,8 +17,7 @@ import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
   MAX_FILE_SIZE_BYTES,
-  MAX_SYMBOL_LENGTH,
-  SNAPSHOT_PLUS_FEES
+  MAX_SYMBOL_LENGTH
 } from './constants';
 import { getProvider } from './provider';
 import { getOwner } from './stamp';
@@ -771,26 +770,19 @@ export function prettyConcat(options: string[], connector = 'or') {
     : uniqOptions[0];
 }
 
-// Snapshot Plus: no Pro subscription, and credits that cover a proposal
-export function isPlusSpace(space: {
-  turbo: boolean;
-  credits_parsed: number | null;
-}) {
-  return (
-    !space.turbo && (space.credits_parsed ?? 0) >= SNAPSHOT_PLUS_FEES.proposal
-  );
-}
-
 // Days left on Pro, rounded up: 1 on its last day, 0 or less once it ended
 export function getProDaysLeft(turboExpiration: number) {
   return Math.ceil((turboExpiration * 1e3 - Date.now()) / 864e5);
 }
 
 // What a Snapshot Plus balance pays for, e.g. "≈ 7 proposals or 153 votes"
-export function formatPlusUsage(credits: number) {
+export function formatPlusUsage(
+  credits: number,
+  fees: { proposal: number; vote: number }
+) {
   // The epsilon absorbs float error, e.g. 0.0006 / 0.0002 = 2.9999999999999996
-  const proposals = Math.floor(credits / SNAPSHOT_PLUS_FEES.proposal + 1e-9);
-  const votes = Math.floor(credits / SNAPSHOT_PLUS_FEES.vote + 1e-9);
+  const proposals = Math.floor(credits / fees.proposal + 1e-9);
+  const votes = Math.floor(credits / fees.vote + 1e-9);
   return `≈ ${_n(proposals)} proposal${proposals === 1 ? '' : 's'} or ${_n(votes)} votes`;
 }
 

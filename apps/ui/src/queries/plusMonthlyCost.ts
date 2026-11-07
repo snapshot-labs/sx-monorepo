@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/vue-query';
 import { computed, MaybeRefOrGetter, toValue } from 'vue';
-import { SNAPSHOT_PLUS_FEES } from '@/helpers/constants';
+import { isSettingsLoaded, plusFees } from '@/composables/useSettings';
 import { getEthPrice } from '@/helpers/prices';
 import { HUB_URLS } from '@/networks/offchain';
 import { Space } from '@/types';
@@ -29,7 +29,7 @@ export async function fetchPlusMonthlyCost(space: Space): Promise<number> {
   const monthlyEth =
     data.proposals.reduce(
       (sum, { votes }) =>
-        sum + SNAPSHOT_PLUS_FEES.proposal + votes * SNAPSHOT_PLUS_FEES.vote,
+        sum + plusFees.value.proposal + votes * plusFees.value.vote,
       0
     ) / MONTHS;
   if (!monthlyEth) return 0;
@@ -49,10 +49,12 @@ export function usePlusMonthlyCostQuery(
       computed(() => {
         const value = toValue(space);
         return value && `${value.network}:${value.id}`;
-      })
+      }),
+      plusFees
     ],
     queryFn: () => fetchPlusMonthlyCost(toValue(space) as Space),
-    enabled: () => !!toValue(space),
+    // Fees come from the hub options, wait for them
+    enabled: () => !!toValue(space) && isSettingsLoaded.value,
     staleTime: 60 * 60 * 1000
   });
 }

@@ -34,10 +34,9 @@ export const PLAN_BADGE_CLASSES = {
   pro: 'text-[#e2b719]'
 } as const;
 
-// Snapshot Plus fees, in ETH. Plus is on while the balance covers a proposal
-export const SNAPSHOT_PLUS_FEES = { proposal: 0.01, vote: 0.0002 };
-// Warn when credits cover fewer than 5 proposals
-export const PLUS_LOW_CREDITS = 5 * SNAPSHOT_PLUS_FEES.proposal;
+// Smallest Snapshot Plus deposit in ETH that Schnaps credits, smaller
+// deposits are ignored. The fees themselves come from the hub options
+export const PLUS_MIN_DEPOSIT = 0.01;
 // Days to warn before and after Pro ends
 export const PRO_EXPIRATION_WARNING_DAYS = 7;
 export const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;

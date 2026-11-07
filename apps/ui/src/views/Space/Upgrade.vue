@@ -2,12 +2,12 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
+import { isSettingsLoaded, plusFees } from '@/composables/useSettings';
 import {
   CALENDLY_URL,
   DOCS_URL,
   PRO_MONTHLY_PRICES,
-  SALES_TELEGRAM_URL,
-  SNAPSHOT_PLUS_FEES
+  SALES_TELEGRAM_URL
 } from '@/helpers/constants';
 import { _n, getUrl, prettyConcat } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
@@ -380,12 +380,17 @@ onMounted(() => {
             />
           </div>
           <template v-if="plan.id === 'plus'">
-            <div>
+            <!-- Fees come from the hub options -->
+            <div v-if="isSettingsLoaded">
               <h2>
-                {{ SNAPSHOT_PLUS_FEES.proposal }} ETH
+                {{ plusFees.proposal }} ETH
                 <span class="text-base text-skin-text">/ proposal</span>
               </h2>
-              <div>+ {{ SNAPSHOT_PLUS_FEES.vote }} ETH / vote</div>
+              <div>+ {{ plusFees.vote }} ETH / vote</div>
+            </div>
+            <div v-else class="space-y-2.5 py-1">
+              <div class="lazy-loading rounded-md h-[24px] w-[190px]" />
+              <div class="lazy-loading rounded-md h-[16px] w-[130px]" />
             </div>
             <div class="leading-snug">
               No commitment. Pay in ETH on Ethereum or Base.
