@@ -13,7 +13,7 @@ import { createApi } from './api';
 import * as constants from './constants';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
 
-const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
+export const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
