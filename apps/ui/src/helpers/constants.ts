@@ -24,11 +24,22 @@ export const SCHNAPS_URLS: Record<string, string> = {
 export const DOCS_URL = 'https://docs.snapshot.box';
 
 export const CALENDLY_URL = 'https://calendly.com/bonustrack';
+export const SALES_TELEGRAM_URL = 'https://t.me/bonustrack';
 
 export const PRO_MONTHLY_PRICES = { monthly: 600, yearly: 500 } as const;
 
-// Snapshot Plus fees, in ETH. Plus is on while the balance covers a proposal
-export const SNAPSHOT_PLUS_FEES = { proposal: 0.01, vote: 0.0002 };
+// Badge colors for Snapshot Plus and Snapshot Pro spaces
+export const PLAN_BADGE_CLASSES = {
+  plus: 'text-[#2394ea]',
+  pro: 'text-[#e2b719]'
+} as const;
+
+// Smallest Snapshot Plus deposit in ETH that Schnaps credits, smaller
+// deposits are ignored. The fees themselves come from the hub options
+export const PLUS_MIN_DEPOSIT = 0.01;
+// Days to warn before and after Pro ends
+export const PRO_EXPIRATION_WARNING_DAYS = 7;
+export const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;
 
 export const VERIFIED_URL = `${DOCS_URL}/user-guides/spaces/get-verified`;
 

@@ -98,6 +98,13 @@ async function getTokenPricesBatch(
   );
 }
 
+export async function getEthPrice(): Promise<number | null> {
+  const coins = await fetchCoins<CoinPrice>(
+    'prices/current/coingecko:ethereum'
+  );
+  return coins['coingecko:ethereum']?.price ?? null;
+}
+
 export async function getTokenPrices(
   chainId: string,
   contractAddresses: string[]

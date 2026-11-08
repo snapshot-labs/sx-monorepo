@@ -12,7 +12,7 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses, isPlusSpace } from '@/helpers/utils';
+import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -176,7 +176,7 @@ function formatSpace(
   }
 
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
-    const plus = isPlusSpace(space);
+    const { plus } = space;
 
     return {
       id: space.id,
@@ -218,7 +218,7 @@ function formatSpace(
     };
   }
 
-  const plus = isPlusSpace(space);
+  const { plus } = space;
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
