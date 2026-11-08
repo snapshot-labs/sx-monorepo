@@ -15,8 +15,7 @@ import { getNames } from '@/helpers/stamp';
 import {
   clone,
   compareAddresses,
-  getDelegationReadChainId,
-  isPlusSpace
+  getDelegationReadChainId
 } from '@/helpers/utils';
 import {
   NetworkApi,
@@ -181,7 +180,7 @@ function formatSpace(
   }
 
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
-    const plus = isPlusSpace(space);
+    const { plus } = space;
 
     return {
       id: space.id,
@@ -223,7 +222,7 @@ function formatSpace(
     };
   }
 
-  const plus = isPlusSpace(space);
+  const { plus } = space;
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',

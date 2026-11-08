@@ -547,6 +547,8 @@ type Space {
   credits: String
   "Snapshot Plus balance in ETH, negative when owed. Null on spaces nested in other entities"
   credits_parsed: Float
+  "Whether the space is on Snapshot Plus: no Pro subscription, and a balance that covers a proposal. False on spaces nested in other entities"
+  plus: Boolean!
   "Ranking score"
   rank: Float
   "Boost settings"

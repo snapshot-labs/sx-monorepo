@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import { h } from 'vue';
+import { plusFees } from '@/composables/useSettings';
 import {
   PLAN_BADGE_CLASSES,
-  PLUS_LOW_CREDITS,
   PRO_AFTER_EXPIRATION_WARNING_DAYS,
   PRO_EXPIRATION_WARNING_DAYS
 } from '@/helpers/constants';
@@ -71,7 +71,8 @@ export function getPlanItem(space: Space): NonNullable<NavConfig['header']> {
   // The pill shows a short value, the tooltip the full detail
   if (space.plus) {
     const credits = space.credits ?? 0;
-    const hasWarning = credits < PLUS_LOW_CREDITS;
+    // Warn when credits cover fewer than 5 proposals
+    const hasWarning = credits < 5 * plusFees.value.proposal;
     const left = `${_n(credits, 'standard', { maximumFractionDigits: 4 })} ETH left`;
     return {
       name: 'Plus',
