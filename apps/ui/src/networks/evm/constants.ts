@@ -7,7 +7,7 @@ import {
   MAX_SYMBOL_LENGTH
 } from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
-import { getUrl, shorten, sleep } from '@/helpers/utils';
+import { _d, getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
@@ -164,6 +164,10 @@ export function createConstants(
     }),
     ...(config.ProposalValidations.VotingPower && {
       [config.ProposalValidations.VotingPower]: 'Voting power'
+    }),
+    ...(config.ProposalValidations.VotingPowerWithCooldown && {
+      [config.ProposalValidations.VotingPowerWithCooldown]:
+        'Voting power with cooldown'
     })
   };
 
@@ -250,6 +254,43 @@ export function createConstants(
       : [])
   ];
 
+  const VOTING_POWER_PARAMS = [
+    'uint256',
+    'tuple(address addr, bytes params)[]'
+  ];
+  const VOTING_POWER_WITH_COOLDOWN_PARAMS = [
+    'uint256',
+    'uint256',
+    ...VOTING_POWER_PARAMS
+  ];
+
+  const generateValidationStrategies = (strategies: StrategyConfig[]) =>
+    Promise.all(
+      strategies.map(async strategy => ({
+        addr: strategy.address,
+        params: strategy.generateParams
+          ? (await strategy.generateParams(strategy.params))[0]
+          : '0x00'
+      }))
+    );
+
+  const generateValidationMetadata = async (params: Record<string, any>) => {
+    const strategiesMetadata = await Promise.all(
+      params.strategies.map(async (strategy: StrategyConfig) => {
+        if (!strategy.generateMetadata) return;
+
+        const metadata = await strategy.generateMetadata(strategy.params);
+        const pinned = await pin(metadata);
+
+        return `ipfs://${pinned.cid}`;
+      })
+    );
+
+    return {
+      strategies_metadata: strategiesMetadata
+    };
+  };
+
   const EDITOR_PROPOSAL_VALIDATIONS = [
     ...(config.ProposalValidations.Vanilla
       ? [
@@ -279,51 +320,20 @@ export function createConstants(
             generateParams: async (params: Record<string, any>) => {
               const abiCoder = new AbiCoder();
 
-              const strategies = await Promise.all(
-                params.strategies.map(async (strategy: StrategyConfig) => {
-                  return {
-                    addr: strategy.address,
-                    params: strategy.generateParams
-                      ? (await strategy.generateParams(strategy.params))[0]
-                      : '0x00'
-                  };
-                })
-              );
-
               return [
-                abiCoder.encode(
-                  ['uint256', 'tuple(address addr, bytes params)[]'],
-                  [params.threshold, strategies]
-                )
+                abiCoder.encode(VOTING_POWER_PARAMS, [
+                  params.threshold,
+                  await generateValidationStrategies(params.strategies)
+                ])
               ];
             },
-            generateMetadata: async (params: Record<string, any>) => {
-              const strategiesMetadata = await Promise.all(
-                params.strategies.map(async (strategy: StrategyConfig) => {
-                  if (!strategy.generateMetadata) return;
-
-                  const metadata = await strategy.generateMetadata(
-                    strategy.params
-                  );
-                  const pinned = await pin(metadata);
-
-                  return `ipfs://${pinned.cid}`;
-                })
-              );
-
-              return {
-                strategies_metadata: strategiesMetadata
-              };
-            },
+            generateMetadata: generateValidationMetadata,
             parseParams: async (params: string) => {
               const abiCoder = new AbiCoder();
 
               return {
                 threshold: abiCoder
-                  .decode(
-                    ['uint256', 'tuple(address addr, bytes params)[]'],
-                    params
-                  )[0]
+                  .decode(VOTING_POWER_PARAMS, params)[0]
                   .toString()
               };
             },
@@ -338,6 +348,75 @@ export function createConstants(
                   format: 'uint256',
                   title: 'Proposal threshold',
                   examples: ['1']
+                }
+              }
+            }
+          }
+        ]
+      : []),
+    ...(config.ProposalValidations.VotingPowerWithCooldown
+      ? [
+          {
+            address: config.ProposalValidations.VotingPowerWithCooldown,
+            type: 'VotingPowerWithCooldown',
+            name: 'Voting power with cooldown',
+            icon: IHLightningBolt,
+            validate: (params: Record<string, any>) => {
+              return params?.strategies?.length > 0;
+            },
+            generateSummary: (params: Record<string, any>) =>
+              `(${params.threshold}, max. ${params.maxActiveProposals}, ${_d(params.cooldown)} cooldown)`,
+            generateParams: async (params: Record<string, any>) => {
+              const abiCoder = new AbiCoder();
+
+              return [
+                abiCoder.encode(VOTING_POWER_WITH_COOLDOWN_PARAMS, [
+                  params.cooldown,
+                  params.maxActiveProposals,
+                  params.threshold,
+                  await generateValidationStrategies(params.strategies)
+                ])
+              ];
+            },
+            generateMetadata: generateValidationMetadata,
+            parseParams: async (params: string) => {
+              const abiCoder = new AbiCoder();
+
+              const [cooldown, maxActiveProposals, threshold] = abiCoder.decode(
+                VOTING_POWER_WITH_COOLDOWN_PARAMS,
+                params
+              );
+
+              return {
+                threshold: threshold.toString(),
+                maxActiveProposals: Number(maxActiveProposals),
+                cooldown: Number(cooldown)
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['threshold', 'maxActiveProposals', 'cooldown'],
+              properties: {
+                threshold: {
+                  type: 'string',
+                  format: 'uint256',
+                  title: 'Proposal threshold',
+                  examples: ['1']
+                },
+                maxActiveProposals: {
+                  type: 'integer',
+                  minimum: 1,
+                  title: 'Max. proposals',
+                  tooltip:
+                    'Number of proposals an author can create before having to wait for the cooldown to pass since their last proposal',
+                  examples: ['1']
+                },
+                cooldown: {
+                  type: 'integer',
+                  format: 'duration',
+                  title: 'Cooldown'
                 }
               }
             }

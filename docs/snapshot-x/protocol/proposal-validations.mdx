@@ -45,6 +45,22 @@ Each time an `author` creates a proposal, a counter is incremented up to a limit
 
 Using this strategy can help to prevent proposal creation spam in your space. 
 
+### Proposition power with active proposal limiter
+
+A strategy that combines the two strategies above. An `author` can create a proposal only if their `propositionPower` exceeds the `proposalThreshold` and they have not exceeded the limit of `maxActiveProposals`. It is available in the Snapshot interface as "Voting power with cooldown".
+
+When calling this strategy, `params` should be:
+
+```solidity
+uint256 cooldown = ... // In seconds
+uint256 maxActiveProposals = ... // Cannot be 0
+uint256 proposalThreshold = ...
+Strategy[] allowedStrategies ...
+params = abi.encode(cooldown, maxActiveProposals, proposalThreshold, allowedStrategies);
+```
+
+`userParams` is the same as for the Proposition power strategy.
+
 ### And more!
 
 These strategies can be combined and extended to provide flexible Proposal validation mechanisms. The interface for Proposal validation strategies can be found [here](https://github.com/snapshot-labs/sx-evm/tree/main/src/proposal-validations).
