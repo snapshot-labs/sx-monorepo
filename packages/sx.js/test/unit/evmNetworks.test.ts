@@ -32,7 +32,8 @@ describe('createStandardConfig', () => {
       },
       ProposalValidations: {
         Vanilla: undefined,
-        VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+        VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311',
+        VotingPowerWithCooldown: '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
       },
       ExecutionStrategies: {
         IncoSimpleQuorumVanilla: undefined,
@@ -60,7 +61,8 @@ describe('createStandardConfig', () => {
       },
       proposalValidations: {
         Vanilla: '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6',
-        VotingPower: null
+        VotingPower: null,
+        VotingPowerWithCooldown: null
       },
       executionStrategies: {
         IncoSimpleQuorumVanilla: '0xe03ED076c98095BDE288Cb78730365786e2Caab3',
@@ -101,6 +103,7 @@ describe('createStandardConfig', () => {
       '0x8141C869D63f41Fd6759c12e2fDA019E3b9A28C6'
     );
     expect(config.ProposalValidations.VotingPower).toBeUndefined();
+    expect(config.ProposalValidations.VotingPowerWithCooldown).toBeUndefined();
     expect(config.ExecutionStrategies.IncoSimpleQuorumVanilla).toBe(
       '0xe03ED076c98095BDE288Cb78730365786e2Caab3'
     );
