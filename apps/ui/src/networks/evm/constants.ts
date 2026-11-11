@@ -416,7 +416,12 @@ export function createConstants(
                 cooldown: {
                   type: 'integer',
                   format: 'duration',
-                  title: 'Cooldown'
+                  // A zero cooldown resets the counter on every proposal.
+                  minimum: 60,
+                  title: 'Cooldown',
+                  errorMessage: {
+                    minimum: 'Cooldown must be at least 1 minute'
+                  }
                 }
               }
             }

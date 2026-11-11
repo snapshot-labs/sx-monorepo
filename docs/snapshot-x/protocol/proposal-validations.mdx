@@ -47,7 +47,7 @@ Using this strategy can help to prevent proposal creation spam in your space.
 
 ### Proposition power with active proposal limiter
 
-A strategy that combines the two strategies above. An `author` can create a proposal only if their `propositionPower` exceeds the `proposalThreshold` and they have not exceeded the limit of `maxActiveProposals`. It is available in the Snapshot interface as "Voting power with cooldown".
+A strategy that combines the two strategies above. An `author` can create a proposal only if their `propositionPower` is at least the `proposalThreshold` and they have not reached the limit of `maxActiveProposals` within the `cooldown` period. It is available in the Snapshot interface as "Voting power with cooldown".
 
 When calling this strategy, `params` should be:
 
