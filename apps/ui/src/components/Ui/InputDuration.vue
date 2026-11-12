@@ -37,10 +37,14 @@ watch(
   <div>
     <div
       v-if="definition.title"
-      class="mb-1"
+      class="mb-1 flex items-center gap-1"
       :class="{ 'text-skin-danger': error && isDirty }"
-      v-text="`${definition.title}${required ? ' *' : ''}`"
-    />
+    >
+      {{ definition.title }}{{ required ? ' *' : '' }}
+      <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
+        <IH-question-mark-circle class="shrink-0" />
+      </UiTooltip>
+    </div>
     <div class="flex !mb-0" :class="{ 's-error': error && isDirty }">
       <UiWrapperInput
         v-slot="{ id }"

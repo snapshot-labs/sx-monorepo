@@ -274,8 +274,8 @@ export function createConstants(
       }))
     );
 
-  const generateValidationMetadata = async (params: Record<string, any>) => {
-    const strategiesMetadata = await Promise.all(
+  const generateValidationMetadata = async (params: Record<string, any>) => ({
+    strategies_metadata: await Promise.all(
       params.strategies.map(async (strategy: StrategyConfig) => {
         if (!strategy.generateMetadata) return;
 
@@ -284,11 +284,14 @@ export function createConstants(
 
         return `ipfs://${pinned.cid}`;
       })
-    );
+    )
+  });
 
-    return {
-      strategies_metadata: strategiesMetadata
-    };
+  const PROPOSAL_THRESHOLD_DEFINITION = {
+    type: 'string',
+    format: 'uint256',
+    title: 'Proposal threshold',
+    examples: ['1']
   };
 
   const EDITOR_PROPOSAL_VALIDATIONS = [
@@ -343,12 +346,7 @@ export function createConstants(
               additionalProperties: false,
               required: ['threshold'],
               properties: {
-                threshold: {
-                  type: 'string',
-                  format: 'uint256',
-                  title: 'Proposal threshold',
-                  examples: ['1']
-                }
+                threshold: PROPOSAL_THRESHOLD_DEFINITION
               }
             }
           }
@@ -399,12 +397,7 @@ export function createConstants(
               additionalProperties: false,
               required: ['threshold', 'maxActiveProposals', 'cooldown'],
               properties: {
-                threshold: {
-                  type: 'string',
-                  format: 'uint256',
-                  title: 'Proposal threshold',
-                  examples: ['1']
-                },
+                threshold: PROPOSAL_THRESHOLD_DEFINITION,
                 maxActiveProposals: {
                   type: 'integer',
                   minimum: 1,
@@ -419,6 +412,8 @@ export function createConstants(
                   // A zero cooldown resets the counter on every proposal.
                   minimum: 60,
                   title: 'Cooldown',
+                  tooltip:
+                    'Set it to at least the max. voting duration to cap how many open proposals an author can have',
                   errorMessage: {
                     minimum: 'Cooldown must be at least 1 minute'
                   }
