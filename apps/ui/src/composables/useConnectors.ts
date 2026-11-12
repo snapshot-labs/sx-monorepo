@@ -1,5 +1,6 @@
 import { ConnectorDetail, useLock } from '@snapshot-labs/lock/vue';
 import { APP_NAME } from '@/helpers/constants';
+import { OATH_WALLET } from '@/helpers/oathWallet';
 import { getAddresses } from '@/helpers/stamp';
 import { ConnectorType } from '@/networks/types';
 import IHUser from '~icons/heroicons-outline/user';
@@ -86,5 +87,19 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
 } as const;
 
 export function useConnectors() {
-  return useLock(CONNECTOR_DETAILS);
+  return useLock({
+    ...CONNECTOR_DETAILS,
+    walletconnect: [
+      {
+        ...CONNECTOR_DETAILS.walletconnect,
+        id: 'oath-wallet',
+        info: { name: OATH_WALLET.name, icon: OATH_WALLET.image_url },
+        options: {
+          ...CONNECTOR_DETAILS.walletconnect.options,
+          wallet: OATH_WALLET
+        }
+      },
+      CONNECTOR_DETAILS.walletconnect
+    ]
+  });
 }

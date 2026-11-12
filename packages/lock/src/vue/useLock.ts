@@ -15,7 +15,9 @@ eip6963.requestProviders();
 
 const injectedProviders = ref(eip6963.providerDetails);
 
-export function useLock(details: Record<ConnectorType, ConnectorDetail>): {
+export function useLock(
+  details: Record<ConnectorType, ConnectorDetail | ConnectorDetail[]>
+): {
   connectors: ComputedRef<Connector[]>;
 } {
   function getConnectors(
@@ -33,8 +35,13 @@ export function useLock(details: Record<ConnectorType, ConnectorDetail>): {
   }
 
   const connectors = computed<Connector[]>(() =>
-    (Object.entries(details) as [ConnectorType, ConnectorDetail][]).flatMap(
-      ([type, detail]) =>
+    (
+      Object.entries(details) as [
+        ConnectorType,
+        ConnectorDetail | ConnectorDetail[]
+      ][]
+    ).flatMap(([type, details]) =>
+      (Array.isArray(details) ? details : [details]).flatMap(detail =>
         getConnectors(type, detail).map(
           d =>
             new connectorsClass[type]({
@@ -46,6 +53,7 @@ export function useLock(details: Record<ConnectorType, ConnectorDetail>): {
               autoConnectOnly: d.autoConnectOnly ?? false
             })
         )
+      )
     )
   );
 
