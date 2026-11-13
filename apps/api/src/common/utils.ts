@@ -75,6 +75,14 @@ export function dropIpfs(metadataUri: string) {
   return metadataUri.replace('ipfs://', '');
 }
 
+/**
+ * A space created without a metadata URI gets its own default metadata item,
+ * identified by the space address.
+ */
+export function getSpaceMetadataId(space: string, metadataUri: string) {
+  return dropIpfs(metadataUri) || space;
+}
+
 export function getSpaceName(address: string) {
   const seed = parseInt(
     hash.getSelectorFromName(address).toString().slice(0, 12)
