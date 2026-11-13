@@ -16,6 +16,15 @@ import {
 } from '@/helpers/ens';
 import { getProvider } from '@/helpers/provider';
 
+// Sepolia names expire and ENSv2 gets redeployed there (fox.eth lapsed at
+// block 12114717), so read Sepolia at a block where the fixtures are live.
+// CCIP-read calls stay on latest, ethers only follows offchain lookups there
+const SEPOLIA_BLOCK = 12114000;
+const sepolia = getProvider(11155111);
+const callSepolia = sepolia.call.bind(sepolia);
+sepolia.call = async (tx, blockTag) =>
+  callSepolia(tx, (await tx.ccipReadEnabled) ? blockTag : SEPOLIA_BLOCK);
+
 afterEach(() => {
   vi.restoreAllMocks();
   resetEnsV2Cache();
