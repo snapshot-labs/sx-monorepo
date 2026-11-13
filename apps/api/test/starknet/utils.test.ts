@@ -59,28 +59,31 @@ describe('formatAddressVariant', () => {
 });
 
 describe('handleExecutionStrategy', () => {
-  it('should read the execution strategy at the given block', async () => {
-    const actual = await handleExecutionStrategy(
-      '0x076a6349d0338841581bc75b7fa7062f6cc23f6fca6a112ef8b8d5fbbaea7dd6',
-      ['0xB4722D72598A9d3A1ccA84c32f62c2644409e168'],
-      948629,
-      createConfig('sn')
-    );
+  const address =
+    '0x076a6349d0338841581bc75b7fa7062f6cc23f6fca6a112ef8b8d5fbbaea7dd6';
+  const payload = ['0xB4722D72598A9d3A1ccA84c32f62c2644409e168'];
+  const config = createConfig('sn');
 
-    expect(actual).toEqual({
-      executionStrategyType: 'EthRelayer',
-      destinationAddress: '0xB4722D72598A9d3A1ccA84c32f62c2644409e168',
-      quorum: 1n
-    });
-  });
+  it.each([948629, 'latest'] as const)(
+    'should read the execution strategy at block %s',
+    async blockIdentifier => {
+      const actual = await handleExecutionStrategy(
+        address,
+        payload,
+        blockIdentifier,
+        config
+      );
+
+      expect(actual).toEqual({
+        executionStrategyType: 'EthRelayer',
+        destinationAddress: '0xB4722D72598A9d3A1ccA84c32f62c2644409e168',
+        quorum: 1n
+      });
+    }
+  );
 
   it('should return null when the strategy is not deployed at the given block', async () => {
-    const actual = await handleExecutionStrategy(
-      '0x076a6349d0338841581bc75b7fa7062f6cc23f6fca6a112ef8b8d5fbbaea7dd6',
-      ['0xB4722D72598A9d3A1ccA84c32f62c2644409e168'],
-      1,
-      createConfig('sn')
-    );
+    const actual = await handleExecutionStrategy(address, payload, 1, config);
 
     expect(actual).toBeNull();
   });

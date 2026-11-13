@@ -79,7 +79,8 @@ export function getVoteValue(label: string) {
 export async function handleExecutionStrategy(
   address: string,
   payload: string[],
-  blockNumber: number,
+  // Pool transactions have no block yet, those are read at the latest block.
+  blockIdentifier: number | 'latest',
   config: FullConfig
 ) {
   try {
@@ -87,7 +88,7 @@ export async function handleExecutionStrategy(
 
     const starkProvider = new RpcProvider({
       nodeUrl: config.overrides.networkNodeUrl,
-      blockIdentifier: blockNumber
+      blockIdentifier
     });
 
     const executionContract = new Contract(
