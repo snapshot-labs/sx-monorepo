@@ -79,13 +79,15 @@ export function getVoteValue(label: string) {
 export async function handleExecutionStrategy(
   address: string,
   payload: string[],
+  blockNumber: number,
   config: FullConfig
 ) {
   try {
     if (address === '0x0') return null;
 
     const starkProvider = new RpcProvider({
-      nodeUrl: config.overrides.networkNodeUrl
+      nodeUrl: config.overrides.networkNodeUrl,
+      blockIdentifier: blockNumber
     });
 
     const executionContract = new Contract(

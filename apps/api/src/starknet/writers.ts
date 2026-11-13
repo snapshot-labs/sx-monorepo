@@ -411,7 +411,12 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
+  const handlePropose: starknet.Writer = async ({
+    txId,
+    blockNumber,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event || !txId) return;
 
     logger.info('Handle propose');
@@ -495,6 +500,7 @@ export function createWriters(config: FullConfig) {
     const executionStrategy = await handleExecutionStrategy(
       event.proposal.execution_strategy,
       event.payload,
+      blockNumber,
       config
     );
     if (executionStrategy) {
@@ -649,7 +655,12 @@ export function createWriters(config: FullConfig) {
     ]);
   };
 
-  const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
+  const handleUpdate: starknet.Writer = async ({
+    block,
+    blockNumber,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle update');
@@ -674,6 +685,7 @@ export function createWriters(config: FullConfig) {
     const executionStrategy = await handleExecutionStrategy(
       event.execution_strategy.address,
       event.payload,
+      blockNumber,
       config
     );
     if (executionStrategy) {
