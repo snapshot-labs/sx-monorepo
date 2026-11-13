@@ -24,10 +24,11 @@ COPY packages/tune/package.json packages/tune/
 
 # Build
 FROM base AS build
-RUN bun install --frozen-lockfile --ignore-scripts
+RUN bun install --frozen-lockfile --ignore-scripts --filter=schnaps-api
 
-# schnaps-api has no workspace dependencies, so build it directly instead of
-# through turbo (whose build task pulls in unrelated api codegen).
+# schnaps-api has no workspace dependencies, so install only its own packages
+# and build it directly instead of through turbo (whose build task pulls in
+# unrelated api codegen).
 COPY apps/schnaps-api apps/schnaps-api
 RUN cd apps/schnaps-api && bun run codegen && bun run build
 
