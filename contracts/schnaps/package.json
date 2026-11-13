@@ -1,0 +1,12 @@
+{
+  "name": "schnaps",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "forge test"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#4e17c2e95821b9bff7c2b1e099b078d319142c48",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.7"
+  }
+}

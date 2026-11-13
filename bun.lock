@@ -323,6 +323,13 @@
         "wait-on": "^8.0.5",
       },
     },
+    "contracts/schnaps": {
+      "name": "schnaps",
+      "dependencies": {
+        "@openzeppelin/contracts": "github:OpenZeppelin/openzeppelin-contracts#4e17c2e95821b9bff7c2b1e099b078d319142c48",
+        "forge-std": "github:foundry-rs/forge-std#v1.9.7",
+      },
+    },
     "contracts/sx-evm": {
       "name": "sx-evm",
       "dependencies": {
@@ -1392,7 +1399,7 @@
 
     "@opentelemetry/sql-common": ["@opentelemetry/sql-common@0.41.2", "", { "dependencies": { "@opentelemetry/core": "^2.0.0" }, "peerDependencies": { "@opentelemetry/api": "^1.1.0" } }, "sha512-4mhWm3Z8z+i508zQJ7r6Xi7y4mmoJpdvH0fZPFRkWrdp5fq7hhZ2HhYokEOLkfqSMgPR4Z9EyB3DBkbKGOqZiQ=="],
 
-    "@openzeppelin/contracts": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts#3d7a938", { "bin": { "openzeppelin-contracts-migrate-imports": "scripts/migrate-imports.js" } }, "OpenZeppelin-openzeppelin-contracts-3d7a938", "sha512-29sgM3qrfjZ4V5vy4bvZdh73oFWbYRpTBHCEqMedM3rs/Q49EZTgYiX6J4D/n8qFKKgn3G4fWerx4qP50pNhpA=="],
+    "@openzeppelin/contracts": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts#4e17c2e", {}, "OpenZeppelin-openzeppelin-contracts-4e17c2e", "sha512-XmohLVJQsqe1aJlgzA9YSNovCeWbqjvFVH3z7a4zOpiKC3f6BXCEi5J87L+l6byqo/nzui/3x4tWwuCGtzHfHw=="],
 
     "@openzeppelin/contracts-upgradeable": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts-upgradeable#65420cb", { "bin": { "openzeppelin-contracts-migrate-imports": "scripts/migrate-imports.js" } }, "OpenZeppelin-openzeppelin-contracts-upgradeable-65420cb", "sha512-Ki1wWyRWDcU+OErG6J5C7rwmoLZ4QMMreOpkDLcsRnFOZq0IvWIpV/C5reGkxkATCLzoU3JkKr8mpWA3vTQ/aw=="],
 
@@ -4398,6 +4405,8 @@
 
     "scheduler": ["scheduler@0.27.0", "", {}, "sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q=="],
 
+    "schnaps": ["schnaps@workspace:contracts/schnaps"],
+
     "scrypt-js": ["scrypt-js@3.0.1", "", {}, "sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA=="],
 
     "scuid": ["scuid@1.1.0", "", {}, "sha512-MuCAyrGZcTLfQoH2XoBlQ8C6bzwN88XT/0slOGz0pn8+gIP85BOAfYa44ZXQUTOwRwPU0QvgU+V+OSajl/59Xg=="],
@@ -5993,6 +6002,8 @@
     "sucrase/tinyglobby": ["tinyglobby@0.2.15", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.3" } }, "sha512-j2Zq4NyQYG5XMST4cbs02Ak8iJUdxRM0XI5QyxXuZOzKOINmWurp3smXu3y5wDcJrptwpSjgXHzIQxR0omXljQ=="],
 
     "superagent/mime": ["mime@2.6.0", "", { "bin": { "mime": "cli.js" } }, "sha512-USPkMeET31rOMiarsBNIHZKLGgvKc/LrjofAnBlOttf5ajRvqiRA8QsenbcooctK6d6Ts6aqZXBA+XbkKthiQg=="],
+
+    "sx-evm/@openzeppelin/contracts": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts#3d7a938", { "bin": { "openzeppelin-contracts-migrate-imports": "scripts/migrate-imports.js" } }, "OpenZeppelin-openzeppelin-contracts-3d7a938", "sha512-29sgM3qrfjZ4V5vy4bvZdh73oFWbYRpTBHCEqMedM3rs/Q49EZTgYiX6J4D/n8qFKKgn3G4fWerx4qP50pNhpA=="],
 
     "sx-starknet/@openzeppelin/contracts": ["openzeppelin-solidity@github:OpenZeppelin/openzeppelin-contracts#05f218f", {}, "OpenZeppelin-openzeppelin-contracts-05f218f", "sha512-a4RgDqGlcEaRSj7/IRXp7kTbLD+MtEXPQAyYs4Ka0EOWt3jaGTVCh+yxEHrVqtrqD1OVKWuZrp81ufdyrFibgA=="],
 
