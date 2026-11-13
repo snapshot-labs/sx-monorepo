@@ -33,6 +33,7 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
+  getSpaceMetadataId,
   updateCounter,
   updateScoresTick
 } from '../common/utils';
@@ -129,7 +130,7 @@ export function createWriters(config: FullConfig) {
       );
       await handleSpaceMetadata(space.id, metadataUri, config);
 
-      space.metadata = dropIpfs(metadataUri);
+      space.metadata = getSpaceMetadataId(space.id, metadataUri);
     } catch (err) {
       logger.warn({ err }, 'Failed to handle space metadata');
     }
@@ -173,7 +174,7 @@ export function createWriters(config: FullConfig) {
       const space = await Space.loadEntity(spaceId, config.indexerName);
       if (!space) return;
 
-      space.metadata = dropIpfs(metadataUri);
+      space.metadata = getSpaceMetadataId(space.id, metadataUri);
 
       await space.save();
     } catch (err) {
@@ -411,7 +412,12 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
+  const handlePropose: starknet.Writer = async ({
+    txId,
+    block,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event || !txId) return;
 
     logger.info('Handle propose');
@@ -495,6 +501,7 @@ export function createWriters(config: FullConfig) {
     const executionStrategy = await handleExecutionStrategy(
       event.proposal.execution_strategy,
       event.payload,
+      block?.block_number ?? 'latest',
       config
     );
     if (executionStrategy) {
@@ -674,6 +681,7 @@ export function createWriters(config: FullConfig) {
     const executionStrategy = await handleExecutionStrategy(
       event.execution_strategy.address,
       event.payload,
+      block?.block_number ?? 'latest',
       config
     );
     if (executionStrategy) {

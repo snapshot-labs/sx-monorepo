@@ -804,11 +804,24 @@ export function isUserAbortError(err: any) {
   );
 }
 
+// Reverts of Snapshot X contracts that the UI cannot check beforehand,
+// keyed by custom error selector.
+const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
+  // FailedToPassProposalValidation()
+  '0x78b51a90': 'Proposal limit reached. Try again later.'
+};
+
 export function getUserFacingErrorMessage(
   err: unknown,
   fallback: string = 'Something went wrong. Please try again later.'
 ): string {
-  return (err instanceof Error && err.message) || fallback;
+  if (!(err instanceof Error) || !err.message) return fallback;
+
+  const selector = Object.keys(CONTRACT_ERROR_MESSAGES).find(selector =>
+    new RegExp(`\\b${selector}\\b`).test(err.message)
+  );
+
+  return selector ? CONTRACT_ERROR_MESSAGES[selector] : err.message;
 }
 
 async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {

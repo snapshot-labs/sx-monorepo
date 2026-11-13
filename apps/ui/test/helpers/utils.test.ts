@@ -405,6 +405,22 @@ describe('utils', () => {
         'Something went wrong. Please try again later.'
       );
     });
+
+    it('should return a readable message for a failed proposal validation', () => {
+      const testError = new Error(
+        'cannot estimate gas; transaction may fail or may require manual gas limit (reason="execution reverted", error={"code":3,"message":"execution reverted","data":"0x78b51a90"}, code=UNPREDICTABLE_GAS_LIMIT)'
+      );
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Proposal limit reached. Try again later.'
+      );
+    });
+
+    it('should not match a selector inside longer hex data', () => {
+      const testError = new Error('reverted, data="0x78b51a90abcdef"');
+
+      expect(getUserFacingErrorMessage(testError)).toBe(testError.message);
+    });
   });
 
   describe('getSpaceController', () => {
