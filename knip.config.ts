@@ -52,6 +52,10 @@ const config: KnipConfig = {
     },
     // Solidity only: foundry resolves these through remappings.txt, which knip
     // cannot follow, so every dependency looks unused to it.
+    'contracts/schnaps': {
+      ignoreDependencies: ['@openzeppelin/contracts', 'forge-std'],
+      ignoreBinaries: ['forge']
+    },
     'contracts/sx-evm': {
       ignoreDependencies: [
         '@openzeppelin/contracts',
