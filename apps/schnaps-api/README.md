@@ -76,11 +76,11 @@ bun run withdraw            # print what would be withdrawn, and simulate it
 bun run withdraw --propose  # add it to the Safe queue
 ```
 
-Owners then review, sign and execute in the [Safe app](https://app.safe.global).
-Nothing moves until they do. A network with nothing to withdraw, or with a
-Schnaps transaction already in the queue, is skipped.
+`--propose` prints a WalletConnect QR code. Scan it with the wallet of a Safe
+owner and sign one request per network. No private key or API key is needed.
+The signature counts as that owner's confirmation.
 
-`--propose` needs `SAFE_PROPOSER_KEY`: the private key of a Safe owner, or of a
-proposer that an owner added in the Safe settings (once per network). A proposer
-can only queue transactions, it cannot sign or execute them. Set `SAFE_API_KEY`
-if the Safe Transaction Service asks for one.
+The other owners then review, sign and execute in the
+[Safe app](https://app.safe.global). Nothing moves until they do. A network with
+nothing to withdraw, or with a Schnaps transaction already in the queue, is
+skipped.
