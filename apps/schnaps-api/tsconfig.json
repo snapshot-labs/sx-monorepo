@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "NodeNext",
+    "rootDir": "./",
+    "outDir": "./dist",
+    // Same strictness as the standalone schnaps-api repo. Tightening these
+    // means editing writers.ts and stripe/*.ts, which changes the indexing
+    // hash in src/index.ts and makes the indexer rebuild its database.
+    "noImplicitAny": false,
+    "noUncheckedIndexedAccess": false
+  }
+}
