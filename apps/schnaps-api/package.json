@@ -9,7 +9,8 @@
     "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
-    "start": "node dist/src/index.js"
+    "start": "node dist/src/index.js",
+    "withdraw": "bun scripts/withdraw.ts"
   },
   "dependencies": {
     "@snapshot-labs/checkpoint": "0.1.0-beta.80",
@@ -23,8 +24,11 @@
   },
   "devDependencies": {
     "@types/node": "^24",
+    "@types/qrcode": "^1.5.6",
+    "@walletconnect/sign-client": "^2.21.9",
     "knex": "^3.1.0",
     "nodemon": "^3.0.1",
+    "qrcode": "^1.5.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.8.3"
   }
