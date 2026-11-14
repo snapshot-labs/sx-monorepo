@@ -1,0 +1,24 @@
+scalar BigDecimal
+scalar BigInt
+
+type Payment {
+  id: String!
+  sender: String!
+  token_address: String!
+  token_symbol: String!
+  amount_raw: BigInt!
+  amount_decimal: BigDecimal!
+  barcode: String!
+  block: Int!
+  timestamp: Int!
+  type: String!
+  ref: String
+  space: String!
+}
+
+type Space {
+  id: String!
+  turbo_expiration: Int!
+  turbo_expiration_date: String!
+  credits: BigInt!
+}
