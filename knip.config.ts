@@ -27,6 +27,13 @@ const config: KnipConfig = {
       ignoreDependencies: ['pg']
     },
     'apps/mcp': {},
+    'apps/schnaps-api': {
+      entry: ['src/index.ts'],
+      // writers.ts is part of the indexing hash (see src/index.ts): editing it
+      // makes the indexer rebuild its database, so its unused export stays.
+      ignore: ['src/writers.ts'],
+      ignoreDependencies: ['ts-node']
+    },
     'apps/sequencer': {
       entry: ['src/**/*.ts', 'scripts/**/*.ts'],
       ignoreDependencies: ['ajv']
