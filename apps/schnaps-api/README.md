@@ -63,3 +63,24 @@ Copy `.env.example` to `.env`:
 - `HYPERSYNC_API_TOKEN` — index through Envio HyperSync instead of the RPC; replays get much faster.
 - `INDEX_TESTNET` — index Sepolia instead of Ethereum.
 - `SENTRY_DSN`: error reporting; omit to disable.
+
+## Withdraw
+
+`Schnaps` is owned by a Safe, so withdrawing means queueing a Safe transaction.
+`scripts/withdraw.ts` builds one per network (Ethereum and Base) that sends the
+full ETH, USDC and USDT balance of the contract to the `RECIPIENT` set in the
+script.
+
+```sh
+bun run withdraw            # print what would be withdrawn, and simulate it
+bun run withdraw --propose  # add it to the Safe queue
+```
+
+`--propose` prints a WalletConnect QR code. Scan it with the wallet of a Safe
+owner and sign one request per network. No private key or API key is needed.
+The signature counts as that owner's confirmation.
+
+The other owners then review, sign and execute in the
+[Safe app](https://app.safe.global). Nothing moves until they do. A network with
+nothing to withdraw, or with a Schnaps transaction already in the queue, is
+skipped.
