@@ -1,10 +1,9 @@
 import { requireBearerAuth } from '@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js';
 import { mcpAuthRouter } from '@modelcontextprotocol/sdk/server/auth/router.js';
-import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { type NextFunction, type Request, type Response } from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import pkg from '../package.json' with { type: 'json' };
 import { SnapshotOAuthProvider } from './auth.js';
 import instructions from './instructions.md' with { type: 'text' };
@@ -69,8 +68,19 @@ if (process.argv.includes('--stdio')) {
   const port = Number(process.env.PORT ?? 8080);
   const baseUrl = process.env.BASE_URL ?? `http://localhost:${port}`;
 
-  const app = createMcpExpressApp({ host: '0.0.0.0' });
+  const app = express();
   app.set('trust proxy', 1);
+
+  // Bun's Brotli decoder is unpatched for CVE-2026-111497, so refuse compressed
+  // bodies before any body parser (ours or the OAuth router's) inflates them.
+  app.use((req: Request, res: Response, next: NextFunction): void => {
+    if (req.headers['content-encoding']) {
+      res.status(415).json({ error: 'unsupported_content_encoding' });
+      return;
+    }
+    next();
+  });
+  app.use(express.json());
 
   app.get('/', (_req: Request, res: Response): void => {
     const commit = process.env.COMMIT_HASH ?? '';
