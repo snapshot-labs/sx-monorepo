@@ -1,7 +1,7 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
-import { buildWhereQuery, checkLimits } from '../helpers';
+import { buildWhereQuery, checkLimits, OFFCHAIN_NETWORKS } from '../helpers';
 
 export default async function (parent, args) {
   const { first, skip, where = {} } = args;
@@ -19,7 +19,7 @@ export default async function (parent, args) {
   };
   const whereQuery = buildWhereQuery(fields, 's', where);
   const queryStr = whereQuery.query;
-  const params: any[] = whereQuery.params;
+  const params: any[] = [OFFCHAIN_NETWORKS, ...whereQuery.params];
 
   let orderBy = args.orderBy || 'created';
   let orderDirection = args.orderDirection || 'desc';
@@ -32,8 +32,8 @@ export default async function (parent, args) {
 
   const query = `
     SELECT s.* FROM statements s
-    INNER JOIN spaces sp ON sp.id = s.space
-    WHERE sp.deleted = 0 ${queryStr}
+    LEFT JOIN spaces sp ON sp.id = s.space
+    WHERE (sp.deleted = 0 OR s.network NOT IN (?)) ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);

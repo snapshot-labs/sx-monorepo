@@ -16,6 +16,10 @@ const DEFAULT_ADDRESS_FORMAT: AddressFormat[] = [
   'starknetAddress'
 ];
 
+// Follows and statements on these networks belong to a hub space. Other
+// networks (Snapshot X, governors) never have a row in the spaces table.
+export const OFFCHAIN_NETWORKS = ['s', 's-tn'];
+
 export class PublicError extends Error {}
 
 const ARG_LIMITS = {

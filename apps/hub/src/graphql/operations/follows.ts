@@ -1,7 +1,12 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
-import { buildWhereQuery, checkLimits, formatFollow } from '../helpers';
+import {
+  buildWhereQuery,
+  checkLimits,
+  formatFollow,
+  OFFCHAIN_NETWORKS
+} from '../helpers';
 
 export default async function (parent, args) {
   const { first, skip, where = {} } = args;
@@ -18,7 +23,7 @@ export default async function (parent, args) {
   };
   const whereQuery = buildWhereQuery(fields, 'f', where);
   const queryStr = whereQuery.query;
-  const params = whereQuery.params.concat(skip, first);
+  const params = [OFFCHAIN_NETWORKS, ...whereQuery.params, skip, first];
 
   let orderBy = args.orderBy || 'created';
   let orderDirection = args.orderDirection || 'desc';
@@ -40,9 +45,9 @@ export default async function (parent, args) {
       spaces.turbo_expiration as spaceTurboExpiration,
       spaces.hibernated as spaceHibernated
     FROM follows f
-    INNER JOIN spaces ON spaces.id = f.space
+    LEFT JOIN spaces ON spaces.id = f.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE spaces.deleted = 0 ${queryStr}
+    WHERE (spaces.deleted = 0 OR f.network NOT IN (?)) ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
 
