@@ -12,7 +12,7 @@ import { Proposal, ProposalExecution } from '@/types';
 
 export const STARKNET_L1_EXECUTION_QUERY = gql`
   query ($id: String!) {
-    starknetL1Execution(id: $id) {
+    starknetl1executions(where: { id: $id }) {
       tx
     }
   }
@@ -132,10 +132,11 @@ export function useExecutionActions(
       }
     });
 
-    if (!data.starknetL1Execution) {
+    const [l1Execution] = data.starknetl1executions;
+    if (!l1Execution) {
       isL1ExecutionReady.value = true;
     } else {
-      executionTx.value = data.starknetL1Execution.tx;
+      executionTx.value = l1Execution.tx;
       executionNetwork.value = baseNetwork;
     }
   }
