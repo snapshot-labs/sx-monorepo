@@ -17,6 +17,7 @@ src
 │  ├─ OZVotesVotingStrategy.sol - "Strategy that uses delegated balances of OZ Votes tokens as voting power"
 │  ├─ WhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist. Whitelist is stored in a bytes array On-Chain."
 │  ├─ MerkleWhitelistVotingStrategy.sol — "Strategy that gives predetermined voting power for members in a whitelist. Whitelist is stored in a Merkle tree Off-Chain, with only the root being stored On-Chain."
+│  ├─ OracleVotingStrategy.sol — "Strategy that uses voting power attested offchain by a trusted oracle via an EIP712 signature"
 │  └─ VanillaVotingStrategy.sol — "Vanilla Strategy"
 ├─ execution-strategies
 │  ├─ timelocks
