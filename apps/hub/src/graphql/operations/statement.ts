@@ -1,18 +1,17 @@
 import { capture } from '@snapshot-labs/snapshot-sentry';
 import log from '../../helpers/log';
 import db from '../../helpers/mysql';
-import { OFFCHAIN_NETWORKS } from '../helpers';
 
 export default async function (parent, args) {
   const id = args.id;
   const query = `
     SELECT s.* FROM statements s
     LEFT JOIN spaces sp ON sp.id = s.space
-    WHERE s.id = ? AND (sp.deleted = 0 OR s.network NOT IN (?))
+    WHERE s.id = ? AND (sp.deleted = 0 OR s.network NOT IN ('s', 's-tn'))
     LIMIT 1
   `;
   try {
-    const statements = await db.queryAsync(query, [id, OFFCHAIN_NETWORKS]);
+    const statements = await db.queryAsync(query, id);
     if (statements.length === 1) return statements[0];
     return null;
   } catch (err: any) {
