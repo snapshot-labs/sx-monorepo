@@ -32,8 +32,8 @@ export default async function (parent, args) {
 
   const query = `
     SELECT s.* FROM statements s
-    INNER JOIN spaces sp ON sp.id = s.space
-    WHERE sp.deleted = 0 ${queryStr}
+    LEFT JOIN spaces sp ON sp.id = s.space
+    WHERE (sp.deleted = 0 OR s.network NOT IN ('s', 's-tn')) ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
   params.push(skip, first);
