@@ -14,3 +14,17 @@ updates:
       snapshot:
         patterns:
         - "@snapshot-labs/*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7
+    # Merging a change to these workflows triggers a deploy.
+    exclude-paths:
+      - ".github/workflows/deploy*.yml"
+      - ".github/workflows/_deploy-app.yml"
+    groups:
+      actions:
+        patterns:
+        - "*"
