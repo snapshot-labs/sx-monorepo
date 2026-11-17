@@ -42,7 +42,7 @@ jobs:
       APP_KEY: ${{ inputs.app_key }}
       RELEASE_INFIX: ${{ inputs.release_infix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -50,10 +50,10 @@ jobs:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
       - name: Set up kubectl
-        uses: azure/setup-kubectl@v4
+        uses: azure/setup-kubectl@v5
 
       - name: Set up Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v5
 
       - name: Configure cluster access
         run: doctl kubernetes cluster kubeconfig save "$DOKS_CLUSTER"
