@@ -40,9 +40,9 @@ export default async function (parent, args) {
       spaces.turbo_expiration as spaceTurboExpiration,
       spaces.hibernated as spaceHibernated
     FROM follows f
-    INNER JOIN spaces ON spaces.id = f.space
+    LEFT JOIN spaces ON spaces.id = f.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE spaces.deleted = 0 ${queryStr}
+    WHERE (spaces.deleted = 0 OR f.network NOT IN ('s', 's-tn')) ${queryStr}
     ORDER BY ${orderBy} ${orderDirection} LIMIT ?, ?
   `;
 

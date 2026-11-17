@@ -6,8 +6,8 @@ export default async function (parent, args) {
   const id = args.id;
   const query = `
     SELECT s.* FROM statements s
-    INNER JOIN spaces sp ON sp.id = s.space
-    WHERE s.id = ? AND sp.deleted = 0
+    LEFT JOIN spaces sp ON sp.id = s.space
+    WHERE s.id = ? AND (sp.deleted = 0 OR s.network NOT IN ('s', 's-tn'))
     LIMIT 1
   `;
   try {
