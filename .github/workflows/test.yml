@@ -5,6 +5,9 @@ on:
   push:
     branches: [master]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
@@ -46,3 +49,36 @@ jobs:
       - run: bun run lint:unused
       - run: bun run test
       - run: bun run test:integration
+
+  test-offchain:
+    name: ${{ matrix.app }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [hub, sequencer]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.0"
+      # The mysql driver only supports mysql_native_password.
+      - name: Start MySQL
+        run: |
+          docker run -d --name mysql -p 3306:3306 --tmpfs /var/lib/mysql \
+            -e MYSQL_ROOT_PASSWORD=root mysql:8.0 \
+            --default-authentication-plugin=mysql_native_password
+          timeout 120 sh -c 'until docker exec mysql mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do sleep 1; done'
+      - name: Start Redis
+        if: matrix.app == 'sequencer'
+        run: docker run -d --name redis -p 6379:6379 redis:7
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+        working-directory: apps/${{ matrix.app }}
