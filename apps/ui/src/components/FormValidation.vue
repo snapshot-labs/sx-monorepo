@@ -91,7 +91,11 @@ function handleStrategySave(value: Record<string, any>) {
         @click="addStrategy(strategy)"
       />
     </div>
-    <div v-else-if="model.type === 'VotingPower'">
+    <div
+      v-else-if="
+        model.type === 'VotingPower' || model.type === 'VotingPowerWithCooldown'
+      "
+    >
       <UiEyebrow class="mb-2 font-medium">Included strategies</UiEyebrow>
       <span class="mb-3 inline-block">
         Select strategies that will be used to compute proposal

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
-import { enabledNetworks, getNetwork } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -15,32 +20,26 @@ const props = defineProps<{
   };
 }>();
 
-const { networks } = useOffchainNetworksList(() => props.definition.networkId);
+// Onchain spaces list every network from the hub, only for the full list
+const { networks } = useOffchainNetworksList(() =>
+  props.definition.networksListKind === 'full' &&
+  !offchainNetworks.includes(props.definition.networkId)
+    ? metadataNetwork
+    : props.definition.networkId
+);
 
 const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;
   if (networksListKind === 'full') {
-    return networks.value
-      .filter(network => {
-        if (
-          props.definition.networkId === 's' &&
-          'testnet' in network &&
-          network.testnet
-        ) {
-          return false;
-        }
-
-        return true;
+    return networks.value.map(network => ({
+      id: network.id,
+      name: network.name,
+      icon: h('img', {
+        src: getUrl(network.logo),
+        alt: network.name,
+        class: 'rounded-full'
       })
-      .map(network => ({
-        id: String(network.chainId),
-        name: network.name,
-        icon: h('img', {
-          src: getUrl(network.logo),
-          alt: network.name,
-          class: 'rounded-full'
-        })
-      }));
+    }));
   }
 
   return enabledNetworks

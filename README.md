@@ -1,4 +1,4 @@
-[![Test CI](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml/badge.svg)](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml)
+[![CI](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/ci.yml/badge.svg)](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/ci.yml)
 [![Discord](https://img.shields.io/discord/707079246388133940.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.snapshot.org/)
 
 # Snapshot monorepository

@@ -1,5 +1,5 @@
 import { getRelayerInfo } from '@/helpers/mana';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress } from '@/helpers/utils';
@@ -96,9 +96,11 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
       if (dataType === 'address') id = formatAddress(id);
 
-      const network = networks[chainIdOverride ?? chainId];
+      const explorerUrl = getNetworkDetails(
+        chainIdOverride ?? chainId
+      )?.explorerUrl;
 
-      return `${network.explorer.url}/${dataType}/${id}`;
+      return explorerUrl ? `${explorerUrl}/${dataType}/${id}` : '';
     }
   };
 

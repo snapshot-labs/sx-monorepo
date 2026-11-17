@@ -21,7 +21,11 @@ export const SUPPORTED_CHAIN_IDS = [
   '1', // Ethereum,
   '10', // Optimism,
   '137', // Polygon,
+  '143', // Monad
+  '999', // HyperEVM
   '1329', // Sei
+  '1868', // Soneium
+  '4326', // MegaETH
   '8217', // Klaytn
   '8453', // Base
   '33111', // Curtis
@@ -29,6 +33,7 @@ export const SUPPORTED_CHAIN_IDS = [
   '42161', // Arbitrum
   '42170', // Arbitrum Nova
   '43114', // Avalanche
+  '80094', // Berachain
   '81457', // Blast
   '84532', // Base Sepolia
   '11155111' // Sepolia
@@ -38,7 +43,11 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
   '1': { name: 'ethereum', isTestnet: false },
   '10': { name: 'optimism', isTestnet: false },
   '137': { name: 'matic', isTestnet: false },
+  '143': { name: 'monad', isTestnet: false },
+  '999': { name: 'hyperevm', isTestnet: false },
   '1329': { name: 'sei', isTestnet: false },
+  '1868': { name: 'soneium', isTestnet: false },
+  '4326': { name: 'megaeth', isTestnet: false },
   '8217': { name: 'klaytn', isTestnet: false },
   '8453': { name: 'base', isTestnet: false },
   '33111': { name: 'ape_curtis', isTestnet: true },
@@ -46,6 +55,7 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
   '42161': { name: 'arbitrum', isTestnet: false },
   '42170': { name: 'arbitrum_nova', isTestnet: false },
   '43114': { name: 'avalanche', isTestnet: false },
+  '80094': { name: 'bera_chain', isTestnet: false },
   '81457': { name: 'blast', isTestnet: false },
   '84532': { name: 'base_sepolia', isTestnet: true },
   '11155111': { name: 'sepolia', isTestnet: true }

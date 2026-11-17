@@ -1,0 +1,19 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = []
+# Same compiler settings as the deployed contract, so the build matches it.
+auto_detect_solc = false
+solc = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 10_000
+fs_permissions = [{ access = "read-write", path = "./deployments/"}]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+[rpc_endpoints]
+goerli = "${GOERLI_RPC_URL}"
+
+[etherscan]
+goerli = { key = "${ETHERSCAN_API_KEY}" }

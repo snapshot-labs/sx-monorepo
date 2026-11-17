@@ -14,14 +14,20 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   '97', // Binance Smart Chain Testnet
   '100', // Gnosis Chain
   '137', // Polygon,
+  '143', // Monad
   '324', // ZkSync Era
+  '480', // World Chain
+  '999', // HyperEVM
+  '1868', // Soneium
   '8453', // Base
   '33111', // Curtis
   '33139', // Apechain
   '42161', // Arbitrum
   '42170', // Arbitrum Nova
   '42220', // Celo
+  '80094', // Berachain
   '84532', // Base Sepolia
+  '534352', // Scroll
   '11155111' // Sepolia
 ] as const;
 
@@ -29,7 +35,9 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
  * Those ChainIds will only show native token balance.
  */
 export const MINIMAL_SUPPORTED_CHAIN_IDS = [
-  '5000' // Mantle
+  '4326', // MegaETH
+  '5000', // Mantle
+  '9745' // Plasma
 ] as const;
 
 export const SUPPORTED_CHAIN_IDS = [
@@ -44,14 +52,20 @@ const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   '97': 'bnb-testnet',
   '100': 'gnosis-mainnet',
   '137': 'polygon-mainnet',
+  '143': 'monad-mainnet',
   '324': 'zksync-mainnet',
+  '480': 'worldchain-mainnet',
+  '999': 'hyperliquid-mainnet',
+  '1868': 'soneium-mainnet',
   '8453': 'base-mainnet',
   '33111': 'apechain-curtis',
   '33139': 'apechain-mainnet',
   '42161': 'arb-mainnet',
   '42170': 'arbnova-mainnet',
   '42220': 'celo-mainnet',
+  '80094': 'berachain-mainnet',
   '84532': 'base-sepolia',
+  '534352': 'scroll-mainnet',
   '11155111': 'eth-sepolia'
 };
 

@@ -18,6 +18,9 @@ export type NavItem = {
 export type NavConfig = {
   slim?: boolean;
   items: Record<string, NavItem>;
+  // Shown as a button at the top of the nav: a muted value after the name,
+  // and an optional tooltip detail
+  header?: NavItem & { value?: string; detail?: string; hasWarning?: boolean };
 };
 
 export type NavContext = {

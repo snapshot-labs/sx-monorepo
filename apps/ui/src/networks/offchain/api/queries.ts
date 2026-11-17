@@ -13,6 +13,7 @@ gql(`
     activeProposals
     turbo
     credits_parsed
+    plus
     verified
   }
 
@@ -22,6 +23,7 @@ gql(`
     turbo
     turboExpiration
     credits_parsed
+    plus
     admins
     members
     name
@@ -418,6 +420,9 @@ export const NETWORKS_QUERY = gql(`
   query Networks {
     networks {
       id
+      name
+      logo
+      explorer
       spacesCount
       premium
     }

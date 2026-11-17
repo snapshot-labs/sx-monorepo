@@ -12,7 +12,7 @@ import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
-import { clone, compareAddresses, isPlusSpace } from '@/helpers/utils';
+import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -176,7 +176,7 @@ function formatSpace(
   }
 
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
-    const plus = isPlusSpace(space);
+    const { plus } = space;
 
     return {
       id: space.id,
@@ -218,7 +218,7 @@ function formatSpace(
     };
   }
 
-  const plus = isPlusSpace(space);
+  const { plus } = space;
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
@@ -659,6 +659,8 @@ export function createApi(
     }
   });
 
+  let networksRequest: ReturnType<NetworkApi['getNetworks']> | undefined;
+
   return {
     apiUrl: uri,
     loadProposalScoresTicks: async (
@@ -1085,20 +1087,17 @@ export function createApi(
 
       return formatStrategy(data.strategy as ApiStrategy);
     },
-    getNetworks: async () => {
-      const { data } = await apollo.query({
-        query: NETWORKS_QUERY
-      });
+    // Requested once and shared by every caller
+    getNetworks: () => {
+      networksRequest ??= apollo
+        .query({ query: NETWORKS_QUERY })
+        .then(({ data }) => data.networks)
+        .catch(err => {
+          networksRequest = undefined;
+          throw err;
+        });
 
-      return Object.fromEntries(
-        data.networks.map(network => [
-          network.id,
-          {
-            spaces_count: network.spacesCount,
-            premium: network.premium
-          }
-        ])
-      );
+      return networksRequest;
     },
     loadSettings: async (): Promise<Setting[]> => {
       const {

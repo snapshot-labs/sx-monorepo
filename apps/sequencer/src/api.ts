@@ -8,7 +8,7 @@ import { flagEntity } from './helpers/moderation';
 import poke from './helpers/poke';
 import relayer from './helpers/relayer';
 import serve from './helpers/requestDeduplicator';
-import { sendError, verifyAuth } from './helpers/utils';
+import { sendError, toPublicError, verifyAuth } from './helpers/utils';
 import typedData from './ingestor';
 import { updateProposalAndVotes } from './scores';
 import { name, version } from '../package.json';
@@ -65,7 +65,7 @@ router.get('/scores/:proposalId', async (req, res) => {
     log.warn(
       `[api] updateProposalAndVotes() failed ${proposalId}, ${JSON.stringify(err)}`
     );
-    return res.json({ error: 'failed', message: err });
+    return res.json({ error: 'failed', message: toPublicError(err) });
   }
 });
 

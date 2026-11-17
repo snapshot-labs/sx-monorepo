@@ -90,6 +90,10 @@ export function formatSkinSettings(result) {
   }, {});
 }
 
+// The Snapshot Plus proposal fee in gwei, read along with spaces
+export const PLUS_PROPOSAL_FEE_COLUMN =
+  "(SELECT value FROM options WHERE name = 'space.plus.proposal_fee') AS plus_proposal_fee";
+
 export function formatSpace({
   id,
   settings,
@@ -101,7 +105,8 @@ export function formatSpace({
   skinSettings,
   created,
   credits_deposited = null,
-  credits_spent = 0
+  credits_spent = 0,
+  plus_proposal_fee = null
 }) {
   const spaceMetadata = spacesMetadata[id] || {};
   const space = {
@@ -175,6 +180,10 @@ export function formatSpace({
   space.credits =
     credits === null ? null : (BigInt(credits) * 1_000_000_000n).toString(); // wei
   space.credits_parsed = credits === null ? null : credits / 1e9; // ETH
+  // Snapshot Plus: no Pro subscription, and a balance that covers a proposal.
+  // A missing fee reads as 0, like other options
+  space.plus =
+    !space.turbo && credits !== null && credits >= Number(plus_proposal_fee);
   space.rank = spaceMetadata?.rank ?? null;
 
   // always return parent and children in child node format
@@ -370,7 +379,7 @@ export async function fetchSpaces(args) {
   }
 
   const query = `
-    SELECT s.*, skins.*, s.id AS id FROM spaces s
+    SELECT s.*, skins.*, s.id AS id, ${PLUS_PROPOSAL_FEE_COLUMN} FROM spaces s
     LEFT JOIN skins ON s.id = skins.id
     WHERE s.deleted = 0 ${queryStr}
     ORDER BY s.${orderBy} ${orderDirection} LIMIT ?, ?

@@ -15,7 +15,7 @@ const pendingTasks = computed(() => {
     const daysText = days === 1 ? 'less than 1 day' : `${days} days`;
     _alerts.push({
       description: `Your Pro plan expires in ${daysText}, renew now`,
-      link: { name: 'space-pro' },
+      link: { name: 'space-upgrade' },
       type: 'error'
     });
   }
@@ -23,7 +23,7 @@ const pendingTasks = computed(() => {
   if (alerts.value.has('IS_PRO_JUST_EXPIRED')) {
     _alerts.push({
       description: 'Your Pro plan just expired, renew now',
-      link: { name: 'space-pro' },
+      link: { name: 'space-upgrade' },
       type: 'error'
     });
   }

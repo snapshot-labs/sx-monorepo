@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
-import { networks } from '@/helpers/networks';
+import { getNetworkDetails } from '@/helpers/networks';
 import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
@@ -169,8 +169,11 @@ const isEditable = computed(() => {
     name="wrong-safe-network"
   >
     Please use a Safe on
-    {{ networks[proposal.space.snapshot_chain_id]?.name ?? 'space network' }} to
-    vote.
+    {{
+      getNetworkDetails(proposal.space.snapshot_chain_id)?.name ??
+      'space network'
+    }}
+    to vote.
   </slot>
   <div v-else>
     <slot />

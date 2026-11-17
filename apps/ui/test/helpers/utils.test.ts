@@ -8,6 +8,7 @@ import {
   createErc1155Metadata,
   escapeHtml,
   formatAddress,
+  getProDaysLeft,
   getSpaceController,
   getStampUrl,
   getUserFacingErrorMessage,
@@ -371,6 +372,22 @@ describe('utils', () => {
         'Something went wrong. Please try again later.'
       );
     });
+
+    it('should return a readable message for a failed proposal validation', () => {
+      const testError = new Error(
+        'cannot estimate gas; transaction may fail or may require manual gas limit (reason="execution reverted", error={"code":3,"message":"execution reverted","data":"0x78b51a90"}, code=UNPREDICTABLE_GAS_LIMIT)'
+      );
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Proposal limit reached. Try again later.'
+      );
+    });
+
+    it('should not match a selector inside longer hex data', () => {
+      const testError = new Error('reverted, data="0x78b51a90abcdef"');
+
+      expect(getUserFacingErrorMessage(testError)).toBe(testError.message);
+    });
   });
 
   describe('getSpaceController', () => {
@@ -486,5 +503,20 @@ describe('utils', () => {
         }
       });
     });
+  });
+});
+
+describe('getProDaysLeft', () => {
+  const now = Math.floor(Date.now() / 1e3);
+
+  it('should round the days left up', () => {
+    expect(getProDaysLeft(now + 5.2 * 86400)).toBe(6);
+    expect(getProDaysLeft(now + 3600)).toBe(1);
+  });
+
+  it('should be 0 or less once Pro ended', () => {
+    expect(getProDaysLeft(now - 3600)).toBeLessThanOrEqual(0);
+    expect(getProDaysLeft(now - 3.5 * 86400)).toBe(-3);
+    expect(getProDaysLeft(0)).toBeLessThan(-7);
   });
 });

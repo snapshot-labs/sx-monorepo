@@ -1,6 +1,7 @@
 export type ApiKey = {
   key: string;
   name: string;
+  owner: string;
   created: number;
 };
 

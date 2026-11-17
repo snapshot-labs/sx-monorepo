@@ -17,8 +17,7 @@ import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
   MAX_FILE_SIZE_BYTES,
-  MAX_SYMBOL_LENGTH,
-  SNAPSHOT_PLUS_FEES
+  MAX_SYMBOL_LENGTH
 } from './constants';
 import { getProvider } from './provider';
 import { getOwner } from './stamp';
@@ -771,22 +770,20 @@ export function prettyConcat(options: string[], connector = 'or') {
     : uniqOptions[0];
 }
 
-// Snapshot Plus: no Pro subscription, and credits that cover a proposal
-export function isPlusSpace(space: {
-  turbo: boolean;
-  credits_parsed: number | null;
-}) {
-  return (
-    !space.turbo && (space.credits_parsed ?? 0) >= SNAPSHOT_PLUS_FEES.proposal
-  );
+// Days left on Pro, rounded up: 1 on its last day, 0 or less once it ended
+export function getProDaysLeft(turboExpiration: number) {
+  return Math.ceil((turboExpiration * 1e3 - Date.now()) / 864e5);
 }
 
 // What a Snapshot Plus balance pays for, e.g. "≈ 7 proposals or 153 votes"
-export function formatPlusUsage(credits: number) {
+export function formatPlusUsage(
+  credits: number,
+  fees: { proposal: number; vote: number }
+) {
   // The epsilon absorbs float error, e.g. 0.0006 / 0.0002 = 2.9999999999999996
-  const proposals = Math.floor(credits / SNAPSHOT_PLUS_FEES.proposal + 1e-9);
-  const votes = Math.floor(credits / SNAPSHOT_PLUS_FEES.vote + 1e-9);
-  return `≈ ${proposals} proposal${proposals === 1 ? '' : 's'} or ${votes} votes`;
+  const proposals = Math.floor(credits / fees.proposal + 1e-9);
+  const votes = Math.floor(credits / fees.vote + 1e-9);
+  return `≈ ${_n(proposals)} proposal${proposals === 1 ? '' : 's'} or ${_n(votes)} votes`;
 }
 
 export function isUserAbortError(err: any) {
@@ -796,11 +793,24 @@ export function isUserAbortError(err: any) {
   );
 }
 
+// Reverts of Snapshot X contracts that the UI cannot check beforehand,
+// keyed by custom error selector.
+const CONTRACT_ERROR_MESSAGES: Record<string, string> = {
+  // FailedToPassProposalValidation()
+  '0x78b51a90': 'Proposal limit reached. Try again later.'
+};
+
 export function getUserFacingErrorMessage(
   err: unknown,
   fallback: string = 'Something went wrong. Please try again later.'
 ): string {
-  return (err instanceof Error && err.message) || fallback;
+  if (!(err instanceof Error) || !err.message) return fallback;
+
+  const selector = Object.keys(CONTRACT_ERROR_MESSAGES).find(selector =>
+    new RegExp(`\\b${selector}\\b`).test(err.message)
+  );
+
+  return selector ? CONTRACT_ERROR_MESSAGES[selector] : err.message;
 }
 
 async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {

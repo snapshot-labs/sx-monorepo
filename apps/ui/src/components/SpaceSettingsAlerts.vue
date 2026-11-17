@@ -108,39 +108,30 @@ const hasAnyAlerts = computed(
         </AppLink>
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyStrategies.length" type="error">
-        The
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
+        to keep using the
         {{ prettyConcat(unsupportedProOnlyStrategies, 'and') }}
         {{
-          unsupportedProOnlyStrategies.length > 1
-            ? 'strategies require'
-            : 'strategy requires'
-        }}
-        Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
-        or
+          unsupportedProOnlyStrategies.length > 1 ? 'strategies' : 'strategy'
+        }}, or
         <AppLink
           :to="`${DOCS_URL}/faq/migrations#migrating-from-delegation-to-with-delegation-strategy`"
           class="inline-flex items-center"
         >
-          follow migration guide
+          follow the migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyNetworks.length" type="error">
-        The
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
+        to keep using the
         {{ prettyConcat(unsupportedProOnlyNetworks, 'and') }}
-        {{ unsupportedProOnlyNetworks.length > 1 ? 'networks' : 'network' }}
-        used by your space and/or its strategies require{{
-          unsupportedProOnlyNetworks.length > 1 ? '' : 's'
-        }}
-        Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
-        or
+        {{ unsupportedProOnlyNetworks.length > 1 ? 'networks' : 'network' }}, or
         <AppLink
           :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
           class="inline-flex items-center"
         >
-          change to a premium network
+          switch to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
@@ -161,14 +152,13 @@ const hasAnyAlerts = computed(
     </template>
     <template v-if="hasWhitelabelAlerts">
       <UiAlert type="error">
-        Custom domain requires Snapshot Pro.
-        <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
-        or
+        <AppLink :to="{ name: 'space-upgrade' }">Upgrade your space</AppLink>
+        to keep your custom domain, or
         <AppLink
           :to="`${DOCS_URL}/user-guides/spaces/add-custom-domain#migrating-from-a-whitelabel`"
           class="inline-flex items-center"
         >
-          follow migration guide
+          follow the migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>

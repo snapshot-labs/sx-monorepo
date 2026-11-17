@@ -1,8 +1,9 @@
 import snapshot from '@snapshot-labs/snapshot.js';
-import { CB, VOTE_FEE } from '../constants';
+import { CB } from '../constants';
 import { getProposal } from '../helpers/actions';
 import log from '../helpers/log';
 import db from '../helpers/mysql';
+import { getLimit } from '../helpers/options';
 import { captureError, hasStrategyOverride, jsonParse } from '../helpers/utils';
 import { updateProposalAndVotes } from '../scores';
 
@@ -225,7 +226,7 @@ export async function action(body, ipfs, receipt, id, context): Promise<void> {
         created,
         created,
         // New votes on a Snapshot Plus proposal are charged, even into a negative balance
-        context.proposal.credits ? VOTE_FEE : 0,
+        context.proposal.credits ? await getLimit('space.plus.vote_fee') : 0,
         // Space ids are stored lowercase, and the column is case-sensitive
         msg.space.toLowerCase()
       ]

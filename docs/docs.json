@@ -71,7 +71,7 @@
               "user-guides/spaces/migrate-or-delete",
               "user-guides/spaces/badges-and-warnings",
               "user-guides/spaces/cover-image-size",
-              "user-guides/spaces/pro"
+              "user-guides/spaces/upgrade"
             ]
           },
           {
@@ -190,6 +190,10 @@
     ]
   },
   "redirects": [
+    {
+      "source": "/user-guides/spaces/pro",
+      "destination": "/user-guides/spaces/upgrade"
+    },
     {
       "source": "/tools/snapshot.js",
       "destination": "/tools/snapshot-js"

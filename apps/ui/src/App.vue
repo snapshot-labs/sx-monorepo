@@ -20,6 +20,8 @@ const {
   failed: whiteLabelFailed
 } = useWhiteLabel();
 const { setTitle } = useTitle();
+// Hub options (limits, Plus fees), used across the app
+useSettings();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 

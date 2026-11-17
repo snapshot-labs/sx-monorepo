@@ -1,4 +1,3 @@
-import { PROPOSAL_FEE, VOTE_FEE } from '../../../src/constants';
 import { getSpace } from '../../../src/helpers/actions';
 import db, { sequencerDB } from '../../../src/helpers/mysql';
 import { mergeSpaces, updateTurboStatuses } from '../../../src/helpers/turbo';
@@ -11,6 +10,9 @@ jest.mock('../../../src/scores', () => ({
 }));
 
 const SPACE = 'plus-credits.eth';
+// Snapshot Plus fees in gwei, seeded in the options table by test/setup.ts
+const PROPOSAL_FEE = 8_000_000;
+const VOTE_FEE = 160_000;
 const settings = JSON.stringify({
   name: 'Plus',
   network: '1',
@@ -233,17 +235,18 @@ describe('Snapshot Plus credits', () => {
   });
 
   describe('mergeSpaces()', () => {
-    it('keeps the latest expiration and the onchain credits of each space', () => {
+    it('keeps the latest expiration and adds up the credits of each chain', () => {
       expect(
         mergeSpaces([
           { id: 's:a.eth', turbo_expiration: 100, credits: '5000' },
+          { id: 's:a.eth', turbo_expiration: 0, credits: '2000' }, // Base
           { id: 's:a.eth', turbo_expiration: 200, credits: '0' }, // Stripe
           { id: 's:A.ETH', turbo_expiration: 50, credits: '0' },
           { id: 's-tn:a.eth', turbo_expiration: 900, credits: '9000' },
           { id: 's:b.eth', turbo_expiration: 0, credits: 'bad' }
         ])
       ).toEqual([
-        { id: 'a.eth', turbo_expiration: 200, credits: 5000 },
+        { id: 'a.eth', turbo_expiration: 200, credits: 7000 },
         { id: 'b.eth', turbo_expiration: 0, credits: 0 }
       ]);
     });

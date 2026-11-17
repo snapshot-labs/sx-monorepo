@@ -12,6 +12,8 @@ type LIMITS =
   | 'space.ecosystem.proposal_limit_per_month'
   | 'space.flagged.proposal_limit_per_day'
   | 'space.flagged.proposal_limit_per_month'
+  | 'space.plus.proposal_fee'
+  | 'space.plus.vote_fee'
   | 'space.turbo.body_limit'
   | 'space.turbo.choices_limit'
   | 'space.turbo.proposal_limit_per_day'
@@ -37,6 +39,8 @@ const DEFAULT_LIMITS_SETTINGS: Record<LIMITS, number> = {
   'space.ecosystem.proposal_limit_per_month': 0,
   'space.flagged.proposal_limit_per_day': 0,
   'space.flagged.proposal_limit_per_month': 0,
+  'space.plus.proposal_fee': 0,
+  'space.plus.vote_fee': 0,
   'space.turbo.body_limit': 0,
   'space.turbo.choices_limit': 0,
   'space.turbo.proposal_limit_per_day': 0,
@@ -58,6 +62,13 @@ const limits = ref(clone(DEFAULT_LIMITS_SETTINGS));
 const lists = ref(clone(DEFAULT_LISTS_SETTINGS));
 
 const initialized = ref(false);
+
+export const isSettingsLoaded = readonly(initialized);
+// Snapshot Plus fees in ETH, stored in gwei in the hub options
+export const plusFees = computed(() => ({
+  proposal: limits.value['space.plus.proposal_fee'] / 1e9,
+  vote: limits.value['space.plus.vote_fee'] / 1e9
+}));
 
 const network = getNetwork(metadataNetwork);
 

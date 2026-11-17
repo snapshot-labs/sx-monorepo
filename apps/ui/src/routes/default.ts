@@ -17,7 +17,7 @@ import SettingsNotifications from '@/views/Settings/Notifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
-import SpacePro from '@/views/Space/Pro.vue';
+import SpaceUpgrade from '@/views/Space/Upgrade.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
@@ -103,7 +103,8 @@ export default [
         component: Notifications
       },
       { path: '/profile/:user', name: 'user', component: User },
-      { path: '/pro', name: 'pro', component: SpacePro }
+      { path: '/upgrade', name: 'upgrade', component: SpaceUpgrade },
+      { path: '/pro', redirect: { name: 'upgrade' } }
     ]
   }
 ];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { getNetworkDetails } from '@/helpers/networks';
 import { getChainIdKind, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
@@ -49,19 +49,22 @@ const formValidator = computed(() =>
   })
 );
 
-const availableNetworks = computed(() => {
-  return Object.entries(networks)
-    .filter(([, network]) => props.chainIds.includes(network.chainId))
-    .map(([, network]) => ({
-      id: network.chainId,
+const availableNetworks = computed(() =>
+  props.chainIds.flatMap(chainId => {
+    const network = getNetworkDetails(chainId);
+    if (!network) return [];
+
+    return {
+      id: chainId,
       name: network.name,
       icon: h('img', {
         src: getUrl(network.logo),
         alt: network.name,
         class: 'rounded-full'
       })
-    }));
-});
+    };
+  })
+);
 
 const networkDefinition = computed(() => {
   return {

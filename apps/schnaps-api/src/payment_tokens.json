@@ -1,0 +1,11 @@
+{
+  "sep": {
+    "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238": "USDC",
+    "0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0": "USDT",
+    "0x8ec1409bf214893aea175c9c00c711593277f1c3": "SNUSDC"
+  },
+  "eth": {
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC",
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT"
+  }
+}

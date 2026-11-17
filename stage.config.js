@@ -7,6 +7,7 @@ export default defineConfig({
     'apps/hub': { type: 'library' },
     'apps/mana': { type: 'library' },
     'apps/mcp': { type: 'library' },
+    'apps/schnaps-api': { type: 'library' },
     'apps/sequencer': { type: 'library' },
     'packages/lock': { type: 'library' },
     'packages/sx.js': { type: 'library' }

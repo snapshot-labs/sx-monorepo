@@ -220,6 +220,8 @@ export function createConfig(networkId: NetworkID): Config {
         network.ExecutionStrategies.SimpleQuorumTimelock ?? null,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower ?? null,
+      propositionPowerWithCooldownValidationStrategyAddress:
+        network.ProposalValidations.VotingPowerWithCooldown ?? null,
       apeGasStrategy: network.Strategies.ApeGas ?? null,
       apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     }

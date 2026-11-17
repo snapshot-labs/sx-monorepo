@@ -31,6 +31,24 @@ describe('getTokenPrices', () => {
     vi.unstubAllGlobals();
   });
 
+  it.each([
+    ['999', 'coingecko:hyperliquid', 'hyperliquid'],
+    ['143', 'coingecko:monad', 'monad'],
+    ['9745', 'coingecko:plasma', 'plasma'],
+    ['80094', 'coingecko:berachain-bera', 'berachain'],
+    ['480', 'coingecko:ethereum', 'wc']
+  ])(
+    'prices chain %s with native %s and %s token ids',
+    async (chainId, native, chain) => {
+      const calls = mockFetch();
+
+      await getTokenPrices(chainId, [ETH_CONTRACT, fakeAddress(1)]);
+
+      expect(calls[0]).toContain(native);
+      expect(calls[0]).toContain(`${chain}:${fakeAddress(1)}`);
+    }
+  );
+
   it('prices every ERC-20 token alongside the native asset when there are exactly 100 of them', async () => {
     mockFetch();
 

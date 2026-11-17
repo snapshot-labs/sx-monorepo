@@ -30,6 +30,7 @@ type Overrides = {
   proposalValidations?: {
     Vanilla?: string;
     VotingPower?: AddressOverride;
+    VotingPowerWithCooldown?: AddressOverride;
   };
   executionStrategies?: {
     IncoSimpleQuorumVanilla?: string;
@@ -110,6 +111,10 @@ export function createStandardConfig(
       VotingPower: resolveAddress(
         proposalValidations.VotingPower,
         '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+      ),
+      VotingPowerWithCooldown: resolveAddress(
+        proposalValidations.VotingPowerWithCooldown,
+        '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
       )
     },
     ExecutionStrategies: {

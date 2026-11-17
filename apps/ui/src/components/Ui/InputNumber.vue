@@ -7,6 +7,7 @@ const props = withDefaults(
     definition: any;
     disabled?: boolean;
     required?: boolean;
+    loading?: boolean;
   }>(),
   { disabled: false }
 );
@@ -21,6 +22,7 @@ const { isDirty } = useDirty(model, props.definition);
     :error="error"
     :dirty="isDirty"
     :required="required"
+    :loading="loading"
   >
     <input
       :id="id"

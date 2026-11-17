@@ -45,6 +45,7 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
+  getSpaceMetadataId,
   updateCounter,
   updateScoresTick
 } from '../../../common/utils';
@@ -293,7 +294,7 @@ export function createWriters(
         config.indexerName
       );
 
-      space.metadata = dropIpfs(metadataUri);
+      space.metadata = getSpaceMetadataId(space.id, metadataUri);
     } catch (err) {
       logger.info({ err }, 'Failed to fetch space metadata');
     }
@@ -355,7 +356,7 @@ export function createWriters(
       const space = await Space.loadEntity(spaceId, config.indexerName);
       if (!space) return;
 
-      space.metadata = dropIpfs(metadataUri);
+      space.metadata = getSpaceMetadataId(space.id, metadataUri);
 
       await space.save();
     } catch (err) {

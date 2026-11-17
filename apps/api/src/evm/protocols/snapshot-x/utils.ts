@@ -29,6 +29,23 @@ export function convertChoice(rawChoice: number): 1 | 2 | 3 | null {
   return null;
 }
 
+function decodeVotingPowerParams(params: `0x${string}`, hasCooldown: boolean) {
+  if (!hasCooldown) {
+    return decodeAbiParameters(
+      parseAbiParameters('uint256, (address,bytes)[]'),
+      params
+    );
+  }
+
+  // The cooldown variant prepends cooldown and maxActiveProposals.
+  const [, , threshold, strategies] = decodeAbiParameters(
+    parseAbiParameters('uint256, uint256, uint256, (address,bytes)[]'),
+    params
+  );
+
+  return [threshold, strategies] as const;
+}
+
 export async function updateProposalValidationStrategy(
   space: Space,
   validationStrategyAddress: string,
@@ -45,15 +62,20 @@ export async function updateProposalValidationStrategy(
   space.voting_power_validation_strategy_strategies_params = [];
   space.voting_power_validation_strategy_metadata = metadataUri;
 
+  const isStrategy = (address: string | null) =>
+    address !== null && strategyAddress === getAddress(address);
+  const hasCooldown = isStrategy(
+    protocolConfig.propositionPowerWithCooldownValidationStrategyAddress
+  );
+
   if (
-    protocolConfig.propositionPowerValidationStrategyAddress !== null &&
-    strategyAddress ===
-      getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
+    hasCooldown ||
+    isStrategy(protocolConfig.propositionPowerValidationStrategyAddress)
   ) {
     try {
-      const [threshold, strategies] = decodeAbiParameters(
-        parseAbiParameters('uint256, (address,bytes)[]'),
-        validationStrategyParams as `0x${string}`
+      const [threshold, strategies] = decodeVotingPowerParams(
+        validationStrategyParams as `0x${string}`,
+        hasCooldown
       );
 
       space.proposal_threshold = threshold.toString();
