@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './tests',
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  workers: process.env.CI ? 1 : undefined,
   outputDir: '.browser/test-results',
   use: {
     baseURL: 'http://localhost:8080',
