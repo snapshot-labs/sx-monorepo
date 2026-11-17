@@ -9,35 +9,55 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.head.sha || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
-env:
-  STARKNET_DEVNET_VERSION: 0.4.2
-  STARKNET_DEVNET_SHA256: 26ae7d7940080eb41bd90ab9781b9f741f2f6d31861da9645556b2894eb95f86
-
 jobs:
-  lint-build-test:
+  # Tells the jobs below which of them a pull request needs. They run unless it
+  # says "false", so pushes to master (where it is skipped) run everything, and
+  # so does a failure of this job.
+  changes:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-26.04
-    timeout-minutes: 15
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.affected.outputs.code }}
+      hub: ${{ steps.affected.outputs.hub }}
+      sequencer: ${{ steps.affected.outputs.sequencer }}
+      integration: ${{ steps.affected.outputs.integration }}
+      e2e: ${{ steps.affected.outputs.e2e }}
     steps:
+      # Depth 2 gives the merge commit and the base commit it is compared to.
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - name: Setup Node.js 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 24
-      - name: Setup Bun
+          fetch-depth: 2
+      - &setup-bun
+        name: Setup Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version-file: package.json
-      - name: Install Starknet Devnet
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/devnet.tar.gz" \
-            "https://github.com/0xSpaceShard/starknet-devnet/releases/download/v$STARKNET_DEVNET_VERSION/starknet-devnet-x86_64-unknown-linux-gnu.tar.gz"
-          echo "$STARKNET_DEVNET_SHA256  $RUNNER_TEMP/devnet.tar.gz" | sha256sum --check
-          sudo tar -xzf "$RUNNER_TEMP/devnet.tar.gz" -C /usr/local/bin starknet-devnet
-      - name: Install Foundry
+      - id: affected
+        shell: bash
+        run: bun scripts/ci-affected.ts | tee -a "$GITHUB_OUTPUT"
+
+  lint-build-test:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - &checkout
+        name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - &setup-node
+        name: Setup Node.js 24
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - *setup-bun
+      - &setup-foundry
+        name: Install Foundry
         uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
         with:
           version: v1.7.1
@@ -47,27 +67,40 @@ jobs:
       - run: bun run lint
       - run: bun run lint:unused
       - run: bun run test
-      - run: bun run test:integration
 
-  test-offchain:
-    name: ${{ matrix.app }}
+  integration:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.integration != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    env:
+      STARKNET_DEVNET_VERSION: 0.4.2
+      STARKNET_DEVNET_SHA256: 26ae7d7940080eb41bd90ab9781b9f741f2f6d31861da9645556b2894eb95f86
+    steps:
+      - *checkout
+      - *setup-node
+      - *setup-bun
+      - *setup-foundry
+      - name: Install Starknet Devnet
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/devnet.tar.gz" \
+            "https://github.com/0xSpaceShard/starknet-devnet/releases/download/v$STARKNET_DEVNET_VERSION/starknet-devnet-x86_64-unknown-linux-gnu.tar.gz"
+          echo "$STARKNET_DEVNET_SHA256  $RUNNER_TEMP/devnet.tar.gz" | sha256sum --check
+          sudo tar -xzf "$RUNNER_TEMP/devnet.tar.gz" -C /usr/local/bin starknet-devnet
+      - run: bun install --frozen-lockfile
+      - run: bun run test:integration
+        working-directory: packages/sx.js
+
+  hub:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.hub != 'false' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        app: [hub, sequencer]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - name: Setup Node.js 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 24
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+    # Shared with the sequencer job, github.job is the job's name.
+    steps: &offchain-steps
+      - *checkout
+      - *setup-node
+      - *setup-bun
       # The mysql driver only supports mysql_native_password.
       - name: Start MySQL
         run: |
@@ -76,30 +109,32 @@ jobs:
             --default-authentication-plugin=mysql_native_password
           timeout 120 sh -c 'until docker exec mysql mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do sleep 1; done'
       - name: Start Redis
-        if: matrix.app == 'sequencer'
+        if: github.job == 'sequencer'
         run: docker run -d --name redis -p 6379:6379 redis:7
       - run: bun install --frozen-lockfile
       - run: bun run test
-        working-directory: apps/${{ matrix.app }}
+        working-directory: apps/${{ github.job }}
+
+  sequencer:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.sequencer != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps: *offchain-steps
 
   e2e:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.e2e != 'false' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 60
     container:
       image: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
-      - name: Checkout code
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - *checkout
       - name: Install unzip
         run: apt-get update && apt-get install -y unzip
-      - name: Setup Node.js 24
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: 24
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+      - *setup-node
+      - *setup-bun
       - run: bun install --frozen-lockfile
       - run: PLAYWRIGHT_HTML_OPEN=never bun run test:e2e --reporter=html
       - name: Upload Playwright report
