@@ -13,9 +13,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Tells the jobs below which of them a pull request needs. They run unless it
-  # says "false", so pushes to master (where it is skipped) run everything, and
-  # so does a failure of this job.
+  # Tells the jobs below whether a pull request can affect them. They run unless
+  # it says "false", so pushes to master (where it is skipped) run everything,
+  # and so does a failure of this job.
   changes:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-26.04
@@ -25,21 +25,28 @@ jobs:
       hub: ${{ steps.affected.outputs.hub }}
       sequencer: ${{ steps.affected.outputs.sequencer }}
       integration: ${{ steps.affected.outputs.integration }}
-      e2e: ${{ steps.affected.outputs.e2e }}
     steps:
       # Depth 2 gives the merge commit and the base commit it is compared to.
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 2
-      - &setup-bun
-        name: Setup Bun
-        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
-        with:
-          bun-version-file: package.json
+      # Docs affect no job. A file in a workspace affects the jobs that test it:
+      # hub, sequencer and sx.js depend on no other workspace. Any other file
+      # (bun.lock, root config, workflows) affects every job.
       - id: affected
         shell: bash
-        run: bun scripts/ci-affected.ts | tee -a "$GITHUB_OUTPUT"
+        run: |
+          changed=$(git diff --name-only --no-renames HEAD^1 HEAD)
+          files=$(grep -vE '^(docs|\.changeset)/|(^|/)(README|AGENTS|CHANGELOG)\.md$' <<< "$changed" || true)
+          shared=$(grep -vE '^(apps|packages|contracts)/' <<< "$files" || true)
+          affected() { if [[ -n $shared ]] || grep -q "^$1" <<< "$files"; then echo true; else echo false; fi; }
+          {
+            echo "code=$(affected .)"
+            echo "hub=$(affected apps/hub/)"
+            echo "sequencer=$(affected apps/sequencer/)"
+            echo "integration=$(affected packages/sx.js/)"
+          } | tee -a "$GITHUB_OUTPUT"
 
   lint-build-test:
     needs: changes
@@ -55,7 +62,11 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
-      - *setup-bun
+      - &setup-bun
+        name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
       - &setup-foundry
         name: Install Foundry
         uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
@@ -124,7 +135,7 @@ jobs:
 
   e2e:
     needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.e2e != 'false' }}
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-26.04
     timeout-minutes: 60
     container:
