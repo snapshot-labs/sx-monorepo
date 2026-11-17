@@ -37,6 +37,7 @@ jobs:
       - id: affected
         shell: bash
         run: |
+          exit 1 # live test: force a failure
           changed=$(git diff --name-only --no-renames HEAD^1 HEAD)
           files=$(grep -vE '^(docs|\.changeset)/|(^|/)(README|AGENTS|CHANGELOG)\.md$' <<< "$changed" || true)
           shared=$(grep -vE '^(apps|packages|contracts)/' <<< "$files" || true)
