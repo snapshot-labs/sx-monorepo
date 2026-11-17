@@ -20,10 +20,16 @@ updates:
       interval: "monthly"
     cooldown:
       default-days: 7
-    # Merging a change to these workflows triggers a deploy.
+    # Updated by hand: a pull request cannot test these workflows, and merging
+    # a change to the deploy ones triggers a deploy.
     exclude-paths:
       - ".github/workflows/deploy*.yml"
       - ".github/workflows/_deploy-app.yml"
+      - ".github/workflows/_promote-app.yml"
+    ignore:
+      # v2 renames the inputs release.yml uses and needs Changesets CLI v3.
+      - dependency-name: "changesets/action"
+        update-types: ["version-update:semver-major"]
     groups:
       actions:
         patterns:
