@@ -31,8 +31,10 @@ export interface Topic {
   latest_poster: User;
 }
 
-export interface TopicWithPosts
-  extends Pick<Topic, 'id' | 'title' | 'posts_count'> {
+export interface TopicWithPosts extends Pick<
+  Topic,
+  'id' | 'title' | 'posts_count'
+> {
   posts: Reply[];
 }
 

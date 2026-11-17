@@ -454,12 +454,7 @@ export function getCacheHash(value?: string) {
 
 export function getStampUrl(
   type:
-    | 'avatar'
-    | 'user-cover'
-    | 'space'
-    | 'space-cover'
-    | 'space-logo'
-    | 'token',
+    'avatar' | 'user-cover' | 'space' | 'space-cover' | 'space-logo' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string,

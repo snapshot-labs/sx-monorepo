@@ -144,7 +144,9 @@ export const useNotificationsStore = defineStore('notifications', () => {
   watch(
     () => web3.value.account,
     account => {
-      shownLastUnreadTs.value = account ? lastUnreadTs.value[account] ?? 0 : 0;
+      shownLastUnreadTs.value = account
+        ? (lastUnreadTs.value[account] ?? 0)
+        : 0;
     }
   );
 

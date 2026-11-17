@@ -133,7 +133,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         const rank = ({ supportInfo }: AuthenticatorWithSupportInfo) =>
           preferRelayerType && supportInfo.relayerType === preferRelayerType
             ? -1
-            : supportInfo.priority ?? 0;
+            : (supportInfo.priority ?? 0);
 
         return rank(a) - rank(b);
       })

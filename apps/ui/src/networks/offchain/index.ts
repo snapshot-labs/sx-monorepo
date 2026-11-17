@@ -72,12 +72,7 @@ export function createOffchainNetwork(networkId: 's' | 's-tn'): Network {
     getExplorerUrl: (
       id: string,
       type:
-        | 'transaction'
-        | 'address'
-        | 'contract'
-        | 'strategy'
-        | 'token'
-        | 'block',
+        'transaction' | 'address' | 'contract' | 'strategy' | 'token' | 'block',
       chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;

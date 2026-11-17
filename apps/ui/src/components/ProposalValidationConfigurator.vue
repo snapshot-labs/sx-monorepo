@@ -6,10 +6,7 @@ import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHUser from '~icons/heroicons-outline/user';
 
 type ValidationDetailId =
-  | 'only-members'
-  | 'basic'
-  | 'passport-gated'
-  | 'karma-eas-attestation';
+  'only-members' | 'basic' | 'passport-gated' | 'karma-eas-attestation';
 type ValidationDetailsExtra = {
   tag?: string;
   icon?: Component;

@@ -123,7 +123,8 @@ export async function getSpace(
   }
 
   // The Plus fee is read in the same query, so every message keeps one round trip
-  const query = "SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent, (SELECT value FROM options WHERE name = 'space.plus.proposal_fee') AS plus_proposal_fee FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1";
+  const query =
+    "SELECT settings, domain, deleted, flagged, verified, turbo, turbo_expiration, hibernated, credits_deposited, credits_spent, (SELECT value FROM options WHERE name = 'space.plus.proposal_fee') AS plus_proposal_fee FROM spaces WHERE id = ? AND deleted in (?) LIMIT 1";
   const spaces = await db.queryAsync(query, [
     id.toLowerCase(),
     includeDeleted ? [0, 1] : [0]

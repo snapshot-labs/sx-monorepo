@@ -41,9 +41,7 @@ export class EthereumSig {
 
   public async sign<
     T extends
-      | EIP712ProposeMessage
-      | EIP712UpdateProposalMessage
-      | EIP712VoteMessage
+      EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
   >(
     signer: Signer & TypedDataSigner,
     verifyingContract: string,

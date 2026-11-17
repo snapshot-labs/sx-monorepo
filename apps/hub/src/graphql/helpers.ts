@@ -350,12 +350,14 @@ export async function fetchSpaces(args) {
   if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
 
   if (where.strategy) {
-    queryStr += " AND JSON_CONTAINS(JSON_EXTRACT(s.settings, '$.strategies[*].name'), JSON_ARRAY(?))";
+    queryStr +=
+      " AND JSON_CONTAINS(JSON_EXTRACT(s.settings, '$.strategies[*].name'), JSON_ARRAY(?))";
     params.push(where.strategy);
   }
 
   if (where.plugin) {
-    queryStr += " AND JSON_CONTAINS(JSON_KEYS(s.settings->'$.plugins'), JSON_ARRAY(?))";
+    queryStr +=
+      " AND JSON_CONTAINS(JSON_KEYS(s.settings->'$.plugins'), JSON_ARRAY(?))";
     params.push(where.plugin);
   }
 
