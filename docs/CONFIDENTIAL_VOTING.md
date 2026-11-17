@@ -155,3 +155,5 @@ api: `schema.gql`, `evm/{types,config,index}.ts`, `evm/protocols/snapshot-x/{abi
 ui: `helpers/inco.ts`, `networks/evm/actions.ts`, `networks/common/graphqlApi/{queries,index}.ts`, `networks/{index,types}.ts`, `views/CreateSpaceSnapshotX.vue`, `views/Proposal/Overview.vue`, `components/ProposalResults.vue`, `routes/default.ts`, `helpers/constants.ts`, `types.ts`, `main.ts`, `vite.config.ts`.
 
 mana: `eth/rpc.ts`.
+
+<!-- CI live test, do not merge -->
