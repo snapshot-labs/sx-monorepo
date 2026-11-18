@@ -230,7 +230,8 @@ export const RECENT_CONNECTOR = 'recent-connector';
 
 export const FLAGS = {
   MALICIOUS: 1,
-  DMCA: 2
+  DMCA: 2,
+  WITHHELD: 3
 };
 
 export const OVERRIDING_STRATEGIES: readonly string[] = [
