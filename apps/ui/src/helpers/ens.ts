@@ -53,6 +53,12 @@ const ENS_CONTRACTS: ENSContracts = {
     'function supportsInterface(bytes4 interfaceId) view returns (bool)'
   ],
   ensV2: {
+    1: {
+      universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
+      universalHelper: '0x46AE127D14683Ac74eF151e46ae2117A1A25C676',
+      ensV1Resolver: '0x394D8EB4a4fDF599384DeAb25F31d111d755c398',
+      dnsTldResolver: '0xaB48304A2520CE420E636AaCD48A8bb3e7e485Ee'
+    },
     11155111: {
       universalResolver: '0xeEeEEEeE14D718C2B47D9923Deab1335E144EeEe',
       universalHelper: '0xd453e5Bdb62CC3beA84341B1e306319C8Ffd7DFe',
