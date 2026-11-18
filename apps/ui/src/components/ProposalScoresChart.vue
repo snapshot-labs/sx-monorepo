@@ -5,34 +5,19 @@ import { ScoresTick } from '@/types';
 const props = withDefaults(
   defineProps<{
     ticks: ScoresTick[];
-    choices: string[];
+    // A series with several choices shows the sum of their scores
+    series: { choices: number[]; label: string; color: string }[];
     decimals: number;
     start: number;
     end: number;
     quorum?: number;
+    showLabelsOnMobile?: boolean;
   }>(),
   { quorum: 0 }
 );
 
 const HEIGHT = 160;
 const PADDING = { top: 24, bottom: 30, left: 24, right: 24 };
-const SERIES = [
-  {
-    stroke: 'stroke-skin-success',
-    fill: 'fill-skin-success',
-    bg: 'bg-skin-success'
-  },
-  {
-    stroke: 'stroke-skin-danger',
-    fill: 'fill-skin-danger',
-    bg: 'bg-skin-danger'
-  },
-  {
-    stroke: 'stroke-skin-text',
-    fill: 'fill-skin-text',
-    bg: 'bg-skin-text'
-  }
-];
 const CHART_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
 const ZERO_Y = PADDING.top + CHART_HEIGHT;
 
@@ -45,8 +30,16 @@ const drawingWidth = computed(
   () => chartWidth.value - PADDING.left - PADDING.right
 );
 
+// Scores are by series from here on
 const sortedTicks = computed(() =>
-  [...props.ticks].sort((a, b) => a.timestamp - b.timestamp)
+  [...props.ticks]
+    .sort((a, b) => a.timestamp - b.timestamp)
+    .map(tick => ({
+      timestamp: tick.timestamp,
+      scores: props.series.map(({ choices }) =>
+        choices.reduce((sum, choice) => sum + tick.scores[choice], 0)
+      )
+    }))
 );
 
 const effectiveEnd = computed(() => {
@@ -123,10 +116,10 @@ const currentTs = computed(() => hoveredTimestamp.value ?? effectiveEnd.value);
 const currentTick = computed(() => getTickAt(currentTs.value));
 
 const lines = computed(() =>
-  [...props.choices.keys()].reverse().map(i => ({
+  [...props.series.keys()].reverse().map(i => ({
     points: buildPath(i, props.start, currentTs.value, true),
-    ...SERIES[i],
-    label: props.choices[i],
+    color: props.series[i].color,
+    label: props.series[i].label,
     score: currentTick.value
       ? _vp(currentTick.value.scores[i] / 10 ** props.decimals)
       : '0'
@@ -138,7 +131,7 @@ const displayLines = computed(() => [...lines.value].reverse());
 const grayedLines = computed(() =>
   hoveredTimestamp.value === null
     ? []
-    : [...props.choices.keys()].map(i =>
+    : [...props.series.keys()].map(i =>
         buildPath(i, hoveredTimestamp.value!, effectiveEnd.value, false)
       )
 );
@@ -148,13 +141,13 @@ const currentX = computed(() => timestampToX(currentTs.value));
 const bulletPoints = computed(() => {
   const tick = currentTick.value;
   if (!tick) return [];
-  return [...props.choices.keys()]
+  return [...props.series.keys()]
     .reverse()
     .filter(i => tick.scores[i] > 0)
     .map(i => ({
       x: currentX.value,
       y: scoreToY(tick.scores[i]),
-      fill: SERIES[i].fill
+      color: props.series[i].color
     }));
 });
 
@@ -194,17 +187,15 @@ const dateLabels = computed(() => {
 });
 
 const displayedDate = computed(() =>
-  hoveredTimestamp.value === null
-    ? null
-    : new Date(hoveredTimestamp.value * 1000)
-        .toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit'
-        })
-        .replace(',', ' ·')
+  new Date(currentTs.value * 1000)
+    .toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+    .replace(',', ' ·')
 );
 
 function handleMouseMove(event: MouseEvent) {
@@ -220,21 +211,30 @@ function handleMouseMove(event: MouseEvent) {
 
 <template>
   <div v-if="ticks.length > 0">
-    <div class="flex justify-between items-center mb-2 px-4 py-2.5">
-      <div class="flex gap-2.5">
+    <div class="flex justify-between items-start gap-2.5 mb-2 px-4 py-2.5">
+      <div class="flex flex-wrap gap-x-2.5 min-w-0 grow">
         <div
           v-for="(line, i) in displayLines"
           :key="i"
           class="flex items-center gap-1.5"
         >
-          <span class="w-2 h-2 rounded-full" :class="line.bg" />
-          <span class="text-skin-text hidden md:block" v-text="line.label" />
+          <span
+            class="w-2 h-2 rounded-full shrink-0"
+            :style="{ backgroundColor: line.color }"
+          />
+          <span
+            class="text-skin-text truncate max-w-[160px]"
+            :class="{ 'hidden md:block': !showLabelsOnMobile }"
+            :title="line.label"
+            v-text="line.label"
+          />
           <span class="font-bold text-skin-link" v-text="line.score" />
         </div>
       </div>
+      <!-- Keeps its space so the legend does not rewrap when the date shows -->
       <span
-        v-if="displayedDate"
-        class="text-skin-link"
+        class="text-skin-link shrink-0"
+        :class="{ 'invisible hidden md:block': hoveredTimestamp === null }"
         v-text="displayedDate"
       />
     </div>
@@ -281,7 +281,7 @@ function handleMouseMove(event: MouseEvent) {
             v-for="(line, i) in lines"
             :key="i"
             :points="line.points"
-            :class="line.stroke"
+            :stroke="line.color"
           />
           <polyline
             v-for="(pts, i) in grayedLines"
@@ -297,7 +297,7 @@ function handleMouseMove(event: MouseEvent) {
             :cx="pt.x"
             :cy="pt.y"
             r="8"
-            :class="pt.fill"
+            :fill="pt.color"
             class="animate-halo"
           />
         </template>
@@ -307,7 +307,7 @@ function handleMouseMove(event: MouseEvent) {
           :cx="pt.x"
           :cy="pt.y"
           r="4"
-          :class="pt.fill"
+          :fill="pt.color"
         />
         <text
           v-for="(lbl, i) in dateLabels"

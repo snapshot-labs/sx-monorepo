@@ -62,18 +62,10 @@ function handleAcceptTerms() {
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <ProposalResults
-              v-if="proposal.type === 'basic'"
-              :proposal="proposal"
-            />
-            <div v-else />
+            <ProposalResults :proposal="proposal" />
           </template>
           <template #ended>
-            <ProposalResults
-              v-if="proposal.type === 'basic'"
-              :proposal="proposal"
-            />
-            <div v-else />
+            <ProposalResults :proposal="proposal" />
           </template>
           <ProposalVoteBasic
             v-if="proposal.type === 'basic'"

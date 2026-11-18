@@ -504,11 +504,11 @@ export function createApi(
   return {
     apiUrl: uri,
     loadProposalScoresTicks: async (
-      proposalId: string
+      proposal: Proposal
     ): Promise<ScoresTick[]> => {
       const { data } = await apollo.query({
         query: PROPOSAL_SCORES_TICKS_QUERY,
-        variables: { id: proposalId }
+        variables: { id: proposal.id }
       });
 
       return (data.proposal?.scores_ticks ?? []).map(tick => ({
@@ -517,7 +517,7 @@ export function createApi(
           Number(tick.scores_1),
           Number(tick.scores_2),
           Number(tick.scores_3)
-        ] as const
+        ]
       }));
     },
     loadProposalVotes: async (

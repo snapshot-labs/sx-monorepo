@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import {
+  getChoiceColors,
+  getVisibleChoicesCount,
+  OTHERS_COLOR
+} from '@/helpers/choices';
+import {
   formatQuorum,
   getProposalCurrentQuorum,
   quorumChoiceProgress,
@@ -11,8 +16,6 @@ import { _n, _p, _vp } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal as ProposalType } from '@/types';
-
-const DEFAULT_MAX_CHOICES = 6;
 
 const SHUTTER_URL = 'https://www.shutter.network/shielded-voting';
 
@@ -35,6 +38,8 @@ const queryClient = useQueryClient();
 const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const colors = computed(() => getChoiceColors(props.proposal));
 
 const quorumAmount = computed(() => {
   const current = getProposalCurrentQuorum(
@@ -74,24 +79,18 @@ const results = computed(() => {
     .sort((a, b) => b.progress - a.progress);
 });
 
-const hasOneExtra = computed(() => {
-  return results.value.length === DEFAULT_MAX_CHOICES + 1;
-});
+const visibleCount = computed(() =>
+  getVisibleChoicesCount(results.value.length)
+);
 
 const visibleResults = computed(() => {
-  if (displayAllChoices.value || hasOneExtra.value) {
-    return results.value;
-  }
+  if (displayAllChoices.value) return results.value;
 
-  return results.value.slice(0, DEFAULT_MAX_CHOICES);
+  return results.value.slice(0, visibleCount.value);
 });
 
 const otherResultsSummary = computed(() => {
-  const otherResultsStartIndex = hasOneExtra.value
-    ? DEFAULT_MAX_CHOICES + 1
-    : DEFAULT_MAX_CHOICES;
-
-  return results.value.slice(otherResultsStartIndex).reduce(
+  return results.value.slice(visibleCount.value).reduce(
     (acc, result) => ({
       progress: acc.progress + result.progress,
       count: acc.count + 1
@@ -101,6 +100,35 @@ const otherResultsSummary = computed(() => {
       count: 0
     }
   );
+});
+
+// Segments of the small results bar: leading choices, others, quorum left
+const barSegments = computed(() => {
+  const { choices, quorum_type } = props.proposal;
+  const others = { choice: 0, progress: otherResultsSummary.value.progress };
+  // Approval scores add up to more than the total, the bar has to fit them all
+  const total = results.value.reduce((sum, { progress }) => sum + progress, 0);
+  const scale = Math.min(1, 100 / total);
+  const getWidth = (result: { choice: number; progress: number }) =>
+    quorumChoiceProgress(quorum_type, result, totalProgress.value) * scale;
+
+  return [
+    ...visibleResults.value.map(result => ({
+      label: `${choices[result.choice - 1]} ${_p(result.progress / 100)}`,
+      width: getWidth(result),
+      color: colors.value[result.choice - 1] ?? OTHERS_COLOR
+    })),
+    {
+      label: `Others ${_p(others.progress / 100)}`,
+      width: getWidth(others),
+      color: OTHERS_COLOR
+    },
+    {
+      label: 'Quorum left',
+      width: 100 * (1 - totalProgress.value),
+      color: 'rgb(var(--border))'
+    }
+  ].filter(segment => segment.width > 0);
 });
 
 const isFinalizing = computed(() => {
@@ -177,18 +205,14 @@ onMounted(() => {
         v-for="result in visibleResults"
         :key="result.choice"
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
-        :class="{
-          [`_${result.choice} choice-border`]: proposal.type === 'basic'
-        }"
+        :style="{ borderColor: colors[result.choice - 1] }"
       >
         <div
-          class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
-          :class="{
-            [`_${result.choice} choice-bg opacity-20`]:
-              proposal.type === 'basic'
-          }"
+          class="absolute inset-y-0 left-0 pointer-events-none -z-10"
+          :class="colors[result.choice - 1] ? 'opacity-20' : 'bg-skin-border'"
           :style="{
-            width: `${result.progress.toFixed(2)}%`
+            width: `${result.progress.toFixed(2)}%`,
+            backgroundColor: colors[result.choice - 1]
           }"
         />
         <div
@@ -271,20 +295,13 @@ onMounted(() => {
         }"
       >
         <div
-          v-for="result in results"
-          :key="result.choice"
-          :title="props.proposal.choices[result.choice - 1]"
-          class="choice-bg float-left h-full"
+          v-for="(segment, i) in barSegments"
+          :key="i"
+          v-tippy="{ content: segment.label }"
+          class="float-left h-full"
           :style="{
-            width: `${quorumChoiceProgress(props.proposal.quorum_type, result, totalProgress).toFixed(3)}%`
-          }"
-          :class="`_${result.choice}`"
-        />
-        <div
-          title="Quorum left"
-          class="choice-bg _quorum float-left h-full"
-          :style="{
-            width: `${(100 * (1 - totalProgress)).toFixed(3)}%`
+            width: `${segment.width.toFixed(3)}%`,
+            backgroundColor: segment.color
           }"
         />
       </div>

@@ -34,6 +34,24 @@
 
 // App-specific styles
 
+// Choice colors of proposals with more than For / Against / Abstain, see
+// getChoiceColors. These are the chart colors of Polymarket, ordered so that
+// its three blues, which look alike, are not given to choices next to each
+// other. There is one per choice that can be shown without being grouped as
+// "Others".
+$choice-colors: #4378ff, #fdc503, #ff7f0e, #87bfff, #ff5952, #27ae60, #1452f0;
+
+:root {
+  @for $i from 1 through length($choice-colors) {
+    --choice-#{$i}: #{nth($choice-colors, $i)};
+  }
+}
+
+.dark {
+  --choice-1: #2797ff;
+  --choice-7: #0093fd;
+}
+
 .choice-bg {
   &._1 {
     @apply bg-skin-success;
@@ -43,9 +61,6 @@
   }
   &._3 {
     @apply bg-skin-text;
-  }
-  &._quorum {
-    @apply bg-skin-border;
   }
 }
 
@@ -61,21 +76,6 @@
   }
   &._quorum {
     @apply text-skin-border;
-  }
-}
-
-.choice-border {
-  &._1 {
-    @apply border-skin-success;
-  }
-  &._2 {
-    @apply border-skin-danger;
-  }
-  &._3 {
-    @apply border-skin-text;
-  }
-  &._quorum {
-    @apply border-skin-text;
   }
 }
 
