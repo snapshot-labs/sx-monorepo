@@ -9,14 +9,12 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { call } from './call';
 import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
-import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
 
 type ENSContracts = {
   registry: string;
   registryAbi: string[];
-  resolvers: Record<ENSChainId, string[]>;
   resolverAbi: string[];
   resolverV2Abi: string[];
   erc165Abi: string[];
@@ -76,17 +74,6 @@ const ENS_CONTRACTS: ENSContracts = {
     'function findExactOwner(bytes name) view returns (address)'
   ],
   nameWrapperAbi: ['function ownerOf(uint256) view returns (address)'],
-  resolvers: {
-    1: [
-      '0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63',
-      '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41',
-      '0xF29100983E058B709F3D539b0c765937B804AC15'
-    ],
-    11155111: [
-      '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
-      '0x8948458626811dd0c23EB25Cc74291247077cC51'
-    ]
-  },
   nameWrappers: {
     1: '0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401',
     11155111: '0x0635513f179D50A207757E05759CbD106d7dFcE8'
@@ -235,55 +222,18 @@ async function getDNSOwner(domain: string): Promise<string> {
   );
 }
 
-async function deepResolve(
-  chainId: ENSChainId,
-  node: string,
-  property: string,
-  params: any[]
-) {
-  const provider = getProvider(chainId);
-  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
-
-  const resolverAddress: string = await call(
-    provider,
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'resolver', [node]]
-  );
-
-  if (!resolverAddress || resolverAddress === EVM_EMPTY_ADDRESS) return null;
-
-  try {
-    return await call(provider, ENS_CONTRACTS.resolverAbi, [
-      resolverAddress,
-      property,
-      params
-    ]);
-  } catch (err: any) {
-    // The resolver reverts on this method (CCIP-read, ENS v2, or a broken
-    // resolver). Treat as "no record", matching the old multicall path, so
-    // callers degrade gracefully (e.g. getSpaceController falls back to the
-    // name owner) instead of throwing. Network/timeout errors are re-thrown
-    // so a transient RPC failure is not silently read as "no record".
-    if (err?.code === 'CALL_EXCEPTION') return null;
-    throw err;
-  }
-}
-
 export async function resolveName(name: string, chainId: ENSChainId) {
-  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
+  const ensV2 = ENS_CONTRACTS.ensV2[chainId];
+  if (!ensV2) throw new Error('Unsupported chainId');
 
   const normalized = ensNormalize(name);
-  const node = namehash(normalized);
-  const ensV2 = ENS_CONTRACTS.ensV2[chainId];
-  const address: string | null = ensV2
-    ? await resolveRecord(
-        normalized,
-        chainId,
-        ensV2.universalResolver,
-        'addr',
-        [node]
-      )
-    : await deepResolve(chainId, node, 'addr', [node]);
+  const address: string | null = await resolveRecord(
+    normalized,
+    chainId,
+    ensV2.universalResolver,
+    'addr',
+    [namehash(normalized)]
+  );
 
   if (!address || address === EVM_EMPTY_ADDRESS) return null;
 
@@ -295,7 +245,8 @@ export async function getEnsTextRecord(
   record: string,
   chainId: ENSChainId
 ) {
-  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
+  const ensV2 = ENS_CONTRACTS.ensV2[chainId];
+  if (!ensV2) throw new Error('Unsupported chainId');
 
   let normalized: string;
 
@@ -305,17 +256,13 @@ export async function getEnsTextRecord(
     return null;
   }
 
-  const node = namehash(normalized);
-  const ensV2 = ENS_CONTRACTS.ensV2[chainId];
-  const value = ensV2
-    ? await resolveRecord(
-        normalized,
-        chainId,
-        ensV2.universalResolver,
-        'text',
-        [node, record]
-      )
-    : await deepResolve(chainId, node, 'text', [node, record]);
+  const value = await resolveRecord(
+    normalized,
+    chainId,
+    ensV2.universalResolver,
+    'text',
+    [namehash(normalized), record]
+  );
 
   return value || null;
 }
@@ -327,7 +274,7 @@ export async function setEnsTextRecord(
   value: string,
   chainId: ENSChainId
 ) {
-  if (!ENS_CONTRACTS.resolvers[chainId]) throw new Error('Unsupported chainId');
+  if (!ENS_CONTRACTS.ensV2[chainId]) throw new Error('Unsupported chainId');
 
   const normalized = ensNormalize(ens);
   const { address } = await getResolverDetails(normalized, chainId);
@@ -504,9 +451,7 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
     : EVM_EMPTY_ADDRESS;
 
   if (!normalized.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
-    const resolvedAddress = ensV2
-      ? await resolveName(normalized, chainId)
-      : (await getAddresses([normalized], chainId))[normalized];
+    const resolvedAddress = await resolveName(normalized, chainId);
     const nameTokens = normalized.split('.');
 
     if (nameTokens.length > 2) {

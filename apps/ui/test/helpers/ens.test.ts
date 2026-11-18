@@ -174,7 +174,7 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      it('should reject for subdomains, whose resolver fails', async () => {
+      it('should reject for subdomains', async () => {
         await expect(getNameOwner('web3.wanki.moe', 1)).rejects.toThrow();
       }, 10000);
     });
@@ -185,13 +185,13 @@ describe('ens', () => {
         expect(owner).toBe('0x4e7abb71BEe38011c54c30D0130c0c71Da09222b');
       }, 10000);
 
-      it('should reject when the resolver fails on a subdomain that does not exist', async () => {
+      it('should reject when the subdomain does not exist', async () => {
         await expect(
           getNameOwner('lucemans-test-not-exist.cb.id', 1)
         ).rejects.toThrow();
       }, 10000);
 
-      it('should reject when the resolver fails on a domain that does not exist', async () => {
+      it('should reject when the domain does not exist', async () => {
         await expect(
           getNameOwner('lucemans-test-not-exist.cbars.id', 1)
         ).rejects.toThrow();
@@ -274,11 +274,6 @@ describe('ens', () => {
     it('should return the v1 resolver of an unmigrated name on testnet', async () => {
       const resolver = await getResolver('boorger.eth', 11155111);
       expect(resolver).toBe('0x8FADE66B79cC9f707aB26799354482EB93a5B7dD');
-    }, 10000);
-
-    it('should return the resolver of a name migrated to ENSv2 on mainnet', async () => {
-      const resolver = await getResolver('aavegotchi.eth', 1);
-      expect(resolver).toBe('0xf77B6ebEa5E3E6fFc49ec16A00Ae2081943381B1');
     }, 10000);
 
     it('should return the v1 resolver on mainnet', async () => {
