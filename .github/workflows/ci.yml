@@ -1,0 +1,157 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # Tells the jobs below whether a pull request can affect them. They run unless
+  # it says "false", so pushes to master (where it is skipped) run everything,
+  # and so does a failure of this job.
+  changes:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.affected.outputs.code }}
+      hub: ${{ steps.affected.outputs.hub }}
+      sequencer: ${{ steps.affected.outputs.sequencer }}
+      integration: ${{ steps.affected.outputs.integration }}
+    steps:
+      # Depth 2 gives the merge commit and the base commit it is compared to.
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+      # Docs affect no job. A file in a workspace affects the jobs that test it:
+      # hub, sequencer and sx.js depend on no other workspace. Any other file
+      # (bun.lock, root config, workflows) affects every job.
+      - id: affected
+        shell: bash
+        run: |
+          changed=$(git diff --name-only --no-renames HEAD^1 HEAD)
+          files=$(grep -vE '^(docs|\.changeset)/|(^|/)(README|AGENTS|CHANGELOG)\.md$' <<< "$changed" || true)
+          shared=$(grep -vE '^(apps|packages|contracts)/' <<< "$files" || true)
+          affected() { if [[ -n $shared ]] || grep -q "^$1" <<< "$files"; then echo true; else echo false; fi; }
+          {
+            echo "code=$(affected .)"
+            echo "hub=$(affected apps/hub/)"
+            echo "sequencer=$(affected apps/sequencer/)"
+            echo "integration=$(affected packages/sx.js/)"
+          } | tee -a "$GITHUB_OUTPUT"
+
+  lint-build-test:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - &checkout
+        name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - &setup-node
+        name: Setup Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - &setup-bun
+        name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: package.json
+      - &setup-foundry
+        name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@dba66c27052e63476d886f22216e119ba7e615bf # v1.9.2
+        with:
+          version: v1.7.1
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: bun run typecheck
+      - run: bun run lint
+      - run: bun run lint:unused
+      - run: bun run test
+
+  integration:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.integration != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    env:
+      STARKNET_DEVNET_VERSION: 0.4.2
+      STARKNET_DEVNET_SHA256: 26ae7d7940080eb41bd90ab9781b9f741f2f6d31861da9645556b2894eb95f86
+    steps:
+      - *checkout
+      - *setup-node
+      - *setup-bun
+      - *setup-foundry
+      - name: Install Starknet Devnet
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/devnet.tar.gz" \
+            "https://github.com/0xSpaceShard/starknet-devnet/releases/download/v$STARKNET_DEVNET_VERSION/starknet-devnet-x86_64-unknown-linux-gnu.tar.gz"
+          echo "$STARKNET_DEVNET_SHA256  $RUNNER_TEMP/devnet.tar.gz" | sha256sum --check
+          sudo tar -xzf "$RUNNER_TEMP/devnet.tar.gz" -C /usr/local/bin starknet-devnet
+      - run: bun install --frozen-lockfile
+      - run: bun run test:integration
+        working-directory: packages/sx.js
+
+  hub:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.hub != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    # Shared with the sequencer job, github.job is the job's name.
+    steps: &offchain-steps
+      - *checkout
+      - *setup-node
+      - *setup-bun
+      # The mysql driver only supports mysql_native_password.
+      - name: Start MySQL
+        run: |
+          docker run -d --name mysql -p 3306:3306 --tmpfs /var/lib/mysql \
+            -e MYSQL_ROOT_PASSWORD=root mysql:8.0 \
+            --default-authentication-plugin=mysql_native_password
+          timeout 120 sh -c 'until docker exec mysql mysqladmin ping -h127.0.0.1 -uroot -proot --silent; do sleep 1; done'
+      - name: Start Redis
+        if: github.job == 'sequencer'
+        run: docker run -d --name redis -p 6379:6379 redis:7
+      - run: bun install --frozen-lockfile
+      - run: bun run test
+        working-directory: apps/${{ github.job }}
+
+  sequencer:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.sequencer != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps: *offchain-steps
+
+  e2e:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - *checkout
+      - name: Install unzip
+        run: apt-get update && apt-get install -y unzip
+      - *setup-node
+      - *setup-bun
+      - run: bun install --frozen-lockfile
+      - run: PLAYWRIGHT_HTML_OPEN=never bun run test:e2e --reporter=html
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
