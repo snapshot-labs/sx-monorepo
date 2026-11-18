@@ -93,8 +93,8 @@ describe('ens', () => {
       }, 10000);
 
       it('should return the owner of a name migrated to ENSv2 on mainnet', async () => {
-        const owner = await getNameOwner('aavegotchi.eth', 1);
-        expect(owner).toBe('0xb54a8D75D59C110eb9e20ef37673a233B02Ccb08');
+        const owner = await getNameOwner('ethenagovernance.eth', 1);
+        expect(owner).toBe('0xC5ceB655E63c1B990150FeeFf4f63d8A43BbD6cb');
       });
 
       it('should resolve the same address as the space controller', async () => {
@@ -298,10 +298,10 @@ describe('ens', () => {
       ],
       [
         'ENSv2 on mainnet',
-        'aavegotchi.eth',
+        'ethenagovernance.eth',
         1,
-        '0xb54a8D75D59C110eb9e20ef37673a233B02Ccb08',
-        '0xf77B6ebEa5E3E6fFc49ec16A00Ae2081943381B1'
+        '0xC5ceB655E63c1B990150FeeFf4f63d8A43BbD6cb',
+        '0xC251cDefa3199bf37972BBCb954bba363AB34D50'
       ],
       [
         'ENSv1',
