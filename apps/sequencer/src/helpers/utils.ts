@@ -355,7 +355,15 @@ async function updateWalletConnectWhitelist(
   return true;
 }
 
+// Temporary: these names expired and were registered by someone else, so the
+// space has no controller until the case is settled. Admins keep their rights.
+const CONTROLLER_LOCKED_SPACES = ['aavegotchi.eth'];
+
 export async function getSpaceController(space: string, network = NETWORK) {
+  if (CONTROLLER_LOCKED_SPACES.includes(space.toLowerCase())) {
+    return '0x0000000000000000000000000000000000000000';
+  }
+
   const tld = space.split('.').slice(-1)[0];
   const tldMapping = {
     shib: {

@@ -92,6 +92,11 @@ describe('ens', () => {
         expect(owner).toBe('0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809');
       }, 10000);
 
+      it('should return the owner of a name migrated to ENSv2 on mainnet', async () => {
+        const owner = await getNameOwner('ethenagovernance.eth', 1);
+        expect(owner).toBe('0xC5ceB655E63c1B990150FeeFf4f63d8A43BbD6cb');
+      });
+
       it('should resolve the same address as the space controller', async () => {
         const controller = await getSpaceController('fox.eth', 11155111);
         expect(controller).toBe('0x7Bc153b2a4C8a2f3428bd0da77a901b81c6dD809');
@@ -169,9 +174,8 @@ describe('ens', () => {
         expect(owner).toBe('0x0000000000000000000000000000000000000000');
       }, 10000);
 
-      it('should return an empty address for subdomains', async () => {
-        const owner = await getNameOwner('web3.wanki.moe', 1);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      it('should reject for subdomains', async () => {
+        await expect(getNameOwner('web3.wanki.moe', 1)).rejects.toThrow();
       }, 10000);
     });
 
@@ -181,14 +185,16 @@ describe('ens', () => {
         expect(owner).toBe('0x4e7abb71BEe38011c54c30D0130c0c71Da09222b');
       }, 10000);
 
-      it('should return an empty address when the subdomain does not exist', async () => {
-        const owner = await getNameOwner('lucemans-test-not-exist.cb.id', 1);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      it('should reject when the subdomain does not exist', async () => {
+        await expect(
+          getNameOwner('lucemans-test-not-exist.cb.id', 1)
+        ).rejects.toThrow();
       }, 10000);
 
-      it('should return an empty address when the domain does not exist', async () => {
-        const owner = await getNameOwner('lucemans-test-not-exist.cbars.id', 1);
-        expect(owner).toBe('0x0000000000000000000000000000000000000000');
+      it('should reject when the domain does not exist', async () => {
+        await expect(
+          getNameOwner('lucemans-test-not-exist.cbars.id', 1)
+        ).rejects.toThrow();
       }, 10000);
 
       it('should not answer a DNS domain on testnet from mainnet', async () => {
@@ -241,7 +247,7 @@ describe('ens', () => {
       ).rejects.toThrow();
     }, 10000);
 
-    it('should leave chains without a Universal Resolver on the v1 path', async () => {
+    it('should read a mainnet record through the Universal Resolver', async () => {
       const record = await getEnsTextRecord('stakedao.eth', 'snapshot', 1);
       expect(record).toBe('0xB0552b6860CE5C0202976Db056b5e3Cc4f9CC765');
     }, 10000);
@@ -291,6 +297,13 @@ describe('ens', () => {
         '0x3DF10566A3f1B90dd692B49ec6f3653f5bCE6CFF'
       ],
       [
+        'ENSv2 on mainnet',
+        'ethenagovernance.eth',
+        1,
+        '0xC5ceB655E63c1B990150FeeFf4f63d8A43BbD6cb',
+        '0xC251cDefa3199bf37972BBCb954bba363AB34D50'
+      ],
+      [
         'ENSv1',
         'ens.eth',
         1,
@@ -319,7 +332,7 @@ describe('ens', () => {
         ).rejects.toBe(intercepted);
         expect(send).toHaveBeenCalledOnce();
 
-        const isV2 = version === 'ENSv2';
+        const isV2 = version.startsWith('ENSv2');
         const setter = new Interface([
           `function setText(${isV2 ? 'bytes' : 'bytes32'},string,string)`
         ]);
