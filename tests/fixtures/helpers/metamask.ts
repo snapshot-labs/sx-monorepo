@@ -80,7 +80,10 @@ export class MetaMaskHelper {
     const buffer = await response.arrayBuffer();
     await fs.writeFile(zipPath, Buffer.from(buffer));
 
-    await decompress(zipPath, EXTENSION_PATH);
+    // Other workers wait for EXTENSION_PATH, so it must only appear once complete.
+    const tempPath = `${EXTENSION_PATH}.tmp`;
+    await decompress(zipPath, tempPath);
+    await fs.rename(tempPath, EXTENSION_PATH);
 
     await fs.unlink(zipPath);
 
