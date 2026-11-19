@@ -396,7 +396,7 @@ watchEffect(async () => {
       :shareable="{ proposal, choice: selectedChoice! }"
       :network="proposal.network"
       :messages="{
-        title: 'Vote success!'
+        title: 'Your vote is in!'
       }"
       :type="'vote'"
       @close="modalShareOpen = false"
