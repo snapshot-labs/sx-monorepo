@@ -1,11 +1,9 @@
 import { FunctionalComponent } from 'vue';
 import { getChoiceText } from '@/helpers/utils';
 import { Choice, Proposal, Space, User } from '@/types';
-import ICFarcaster from '~icons/c/farcaster';
-import ICLens from '~icons/c/lens';
 import ICX from '~icons/c/x';
 
-type SocialNetwork = 'x' | 'lens' | 'farcaster';
+type SocialNetwork = 'x';
 type SpaceUser = { user: User; space: Space };
 export type Vote = { proposal: Proposal; choice: Choice };
 
@@ -16,11 +14,7 @@ const SOCIAL_NETWORKS: {
   id: SocialNetwork;
   name: string;
   icon: FunctionalComponent;
-}[] = [
-  { id: 'x', name: 'X', icon: ICX },
-  { id: 'lens', name: 'Lens', icon: ICLens },
-  { id: 'farcaster', name: 'Farcaster', icon: ICFarcaster }
-];
+}[] = [{ id: 'x', name: 'X', icon: ICX }];
 
 export function useSharing() {
   const { app } = useApp();
@@ -109,8 +103,6 @@ export function useSharing() {
 
     if (type === 'vote' && socialNetwork === 'x') {
       message += `%20%23${app.value.app_name}`;
-    } else if (socialNetwork === 'lens') {
-      message += `&hashtags=${app.value.app_name}`;
     }
 
     let url: string;
@@ -118,12 +110,6 @@ export function useSharing() {
     switch (socialNetwork) {
       case 'x':
         url = `https://x.com/intent/post/?text=${message}`;
-        break;
-      case 'lens':
-        url = `https://hey.xyz/?text=${message}`;
-        break;
-      case 'farcaster':
-        url = `https://warpcast.com/~/compose?text=${message}`;
         break;
       default:
         throw new Error('Invalid network');
