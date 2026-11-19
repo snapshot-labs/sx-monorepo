@@ -68,7 +68,7 @@ watch(
         <div v-if="messages.subtitle" v-text="messages.subtitle" />
       </div>
 
-      <UiDropdown class="pt-2">
+      <UiDropdown class="pt-3">
         <template #button>
           <UiButton>
             <IH-calendar />
