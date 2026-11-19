@@ -35,21 +35,16 @@
 // App-specific styles
 
 // Choice colors of proposals with more than For / Against / Abstain, see
-// getChoiceColors. These are the chart colors of Polymarket, ordered so that
-// its three blues, which look alike, are not given to choices next to each
-// other. There is one per choice that can be shown without being grouped as
-// "Others".
-$choice-colors: #4378ff, #fdc503, #ff7f0e, #87bfff, #ff5952, #27ae60, #1452f0;
+// getChoiceColors. These are the default label colors of GitHub without its
+// red and green, which are too close to the For and Against colors, and
+// without the light ones, which do not show on a light background.
+// Blue, dark blue and purple look alike, so they are kept apart.
+$choice-colors: #1d76db, #fbca04, #5319e7, #d93f0b, #0052cc, #006b75;
 
 :root {
   @for $i from 1 through length($choice-colors) {
     --choice-#{$i}: #{nth($choice-colors, $i)};
   }
-}
-
-.dark {
-  --choice-1: #2797ff;
-  --choice-7: #0093fd;
 }
 
 .choice-bg {

@@ -5,6 +5,8 @@ type Ballot = { ranking: number[]; vp: number };
 
 const TICK_INTERVAL = 3600;
 const MAX_CHOICES = 6;
+// Number of --choice-N colors defined in style.scss
+const CHOICE_COLORS = 6;
 const BASIC_COLORS = ['--success', '--danger', '--text'].map(
   name => `rgb(var(${name}))`
 );
@@ -31,7 +33,7 @@ export function getVisibleChoicesCount(choicesCount: number) {
 /**
  * Returns the color of each choice, by choice index.
  * Colors go by score: the leading choice gets the first color, the next one
- * the second color and so on. Choices grouped as "Others" get none.
+ * the second color and so on. Choices after the last color get none.
  */
 export function getChoiceColors(
   proposal: Pick<Proposal, 'type' | 'choices' | 'scores'>
@@ -44,7 +46,7 @@ export function getChoiceColors(
       (a, b) =>
         Number(proposal.scores[b] ?? 0) - Number(proposal.scores[a] ?? 0)
     )
-    .slice(0, getVisibleChoicesCount(proposal.choices.length))
+    .slice(0, CHOICE_COLORS)
     .forEach((choice, rank) => {
       colors[choice] = `var(--choice-${rank + 1})`;
     });

@@ -52,14 +52,15 @@ describe('getChoiceColors', () => {
     ]);
   });
 
-  it('should color a lone extra choice', () => {
+  it('should leave the choices after the last color without one', () => {
     const colors = getChoiceColors({
       type: 'weighted',
       choices: Array(7).fill(''),
       scores: []
     });
 
-    expect(colors[6]).toBe('var(--choice-7)');
+    expect(colors[5]).toBe('var(--choice-6)');
+    expect(colors[6]).toBeUndefined();
   });
 
   it('should color the first choices when there are no scores yet', () => {
