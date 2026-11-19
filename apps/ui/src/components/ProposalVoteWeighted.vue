@@ -7,6 +7,7 @@ type WeightedChoice = Record<string, number>;
 const props = defineProps<{
   proposal: Proposal;
   defaultChoice?: Choice;
+  submitTo?: string;
 }>();
 
 defineEmits<{
@@ -89,13 +90,15 @@ watch(
         ></div>
       </div>
     </div>
-    <UiButton
-      primary
-      class="w-full"
-      :size="48"
-      @click="$emit('vote', selectedChoices)"
-    >
-      Vote
-    </UiButton>
+    <teleport defer :to="submitTo" :disabled="!submitTo">
+      <UiButton
+        primary
+        class="w-full"
+        :size="48"
+        @click="$emit('vote', selectedChoices)"
+      >
+        Vote
+      </UiButton>
+    </teleport>
   </div>
 </template>

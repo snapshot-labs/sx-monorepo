@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { UiColumnHeader } from '@snapshot-labs/tune';
+import {
+  getChoiceColors,
+  getVisibleChoicesCount,
+  OTHERS_COLOR
+} from '@/helpers/choices';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { useProposalScoresTicksQuery } from '@/queries/proposals';
+import {
+  hasScoresTicks,
+  useProposalScoresTicksQuery
+} from '@/queries/proposals';
 import { useProposalVotesQuery } from '@/queries/votes';
 import { Proposal as ProposalType, Vote } from '@/types';
 
@@ -26,6 +34,31 @@ const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 const { data: scoresTicks, isPending: isScoresTicksPending } =
   useProposalScoresTicksQuery(toRef(() => props.proposal));
 
+const choiceColors = computed(() => getChoiceColors(props.proposal));
+
+// Same choices as the results: the leading ones, then the others as one line
+const chartSeries = computed(() => {
+  const { type, choices, scores } = props.proposal;
+  const order = [...choices.keys()];
+  if (type !== 'basic') order.sort((a, b) => scores[b] - scores[a]);
+
+  const visibleCount = getVisibleChoicesCount(order.length);
+  const series = order.slice(0, visibleCount).map(choice => ({
+    choices: [choice],
+    label: choices[choice],
+    color: choiceColors.value[choice] ?? OTHERS_COLOR
+  }));
+  if (order.length > visibleCount) {
+    series.push({
+      choices: order.slice(visibleCount),
+      label: 'Others',
+      color: OTHERS_COLOR
+    });
+  }
+
+  return series;
+});
+
 const {
   data,
   fetchNextPage,
@@ -38,6 +71,12 @@ const {
   choiceFilter,
   sortBy
 });
+
+function getVoteColor(vote: Vote) {
+  return typeof vote.choice === 'number'
+    ? choiceColors.value[vote.choice - 1]
+    : undefined;
+}
 
 function handleSortChange(type: 'vp' | 'created') {
   if (sortBy.value.startsWith(type)) {
@@ -68,15 +107,16 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <div v-if="proposal.type === 'basic' && proposal.vote_count > 0">
+  <div v-if="hasScoresTicks(proposal)">
     <ProposalScoresChart
       v-if="scoresTicks && scoresTicks.length > 0"
       :ticks="scoresTicks"
-      :choices="proposal.choices"
+      :series="chartSeries"
       :decimals="proposal.vp_decimals"
       :start="proposal.start"
       :end="proposal.max_end"
-      :quorum="proposal.quorum"
+      :quorum="proposal.type === 'basic' ? proposal.quorum : 0"
+      :show-labels-on-mobile="proposal.type !== 'basic'"
       class="border-b pb-3"
     />
     <div
@@ -176,14 +216,11 @@ function handleScrollEvent(target: HTMLElement) {
         >
           <div
             class="right-0 h-[8px] absolute"
+            :class="getVoteColor(vote) ? 'opacity-20' : 'bg-skin-border'"
             :style="{
-              width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
+              width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`,
+              backgroundColor: getVoteColor(vote)
             }"
-            :class="
-              proposal.type === 'basic'
-                ? `choice-bg opacity-20 _${vote.choice}`
-                : 'bg-skin-border'
-            "
           />
           <AppLink
             :to="{

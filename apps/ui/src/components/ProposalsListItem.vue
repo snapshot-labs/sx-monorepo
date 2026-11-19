@@ -20,7 +20,8 @@ const space = computed(() => ({
   ...props.proposal.space
 }));
 
-const handleVoteClick = (choice: Choice) => {
+// Without a choice, the choice is picked in the vote modal
+const handleVoteClick = (choice: Choice | null) => {
   if (!web3.value.account) {
     modalAccountOpen.value = true;
     return;
@@ -38,7 +39,7 @@ const handleVoteClick = (choice: Choice) => {
 
 function handleAcceptTerms() {
   termsStore.accept(space.value);
-  handleVoteClick(selectedChoice.value!);
+  handleVoteClick(selectedChoice.value);
 }
 </script>
 <template>
@@ -62,18 +63,10 @@ function handleAcceptTerms() {
           <template #cancelled><div /></template>
           <template #voted-pending><div /></template>
           <template #voted>
-            <ProposalResults
-              v-if="proposal.type === 'basic'"
-              :proposal="proposal"
-            />
-            <div v-else />
+            <ProposalResults :proposal="proposal" />
           </template>
           <template #ended>
-            <ProposalResults
-              v-if="proposal.type === 'basic'"
-              :proposal="proposal"
-            />
-            <div v-else />
+            <ProposalResults :proposal="proposal" />
           </template>
           <ProposalVoteBasic
             v-if="proposal.type === 'basic'"
@@ -82,6 +75,9 @@ function handleAcceptTerms() {
             class="py-2"
             @vote="handleVoteClick"
           />
+          <UiButton v-else class="my-1.5" @click="handleVoteClick(null)">
+            Vote
+          </UiButton>
         </ProposalVote>
       </div>
     </div>
@@ -95,7 +91,7 @@ function handleAcceptTerms() {
       @accept="handleAcceptTerms"
     />
     <ModalVote
-      v-if="proposal.type === 'basic' && proposal.state === 'active'"
+      v-if="proposal.state === 'active'"
       :choice="selectedChoice"
       :proposal="proposal"
       :open="modalOpenVote"
