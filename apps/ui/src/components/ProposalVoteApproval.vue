@@ -6,6 +6,7 @@ type ApprovalChoice = number[];
 const props = defineProps<{
   proposal: Proposal;
   defaultChoice?: Choice;
+  submitTo?: string;
 }>();
 
 const emit = defineEmits<{
@@ -42,8 +43,10 @@ function toggleSelectedChoice(choice: number) {
         <IH-check v-if="selectedChoices.includes(index + 1)" class="shrink-0" />
       </UiButton>
     </div>
-    <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
-      Vote
-    </UiButton>
+    <teleport defer :to="submitTo" :disabled="!submitTo">
+      <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
+        Vote
+      </UiButton>
+    </teleport>
   </div>
 </template>

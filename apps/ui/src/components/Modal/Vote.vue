@@ -60,6 +60,7 @@ const currentVote = computed(
   () => votes.value[`${props.proposal.network}:${props.proposal.id}`]
 );
 const pickedChoice = ref<Choice | null>(null);
+const submitId = useId();
 const choice = computed(() => props.choice ?? pickedChoice.value);
 const loading = ref(false);
 const hidden = ref(false);
@@ -268,6 +269,7 @@ watchEffect(async () => {
         v-show="!pickedChoice"
         :key="web3.account"
         list
+        :submit-to="`#${submitId}`"
         :proposal="proposal"
         :default-choice="currentVote?.choice"
         @vote="pickedChoice = $event"
@@ -351,8 +353,10 @@ watchEffect(async () => {
       </template>
     </div>
 
-    <template v-if="choice" #footer>
-      <div class="flex flex-col xs:flex-row gap-3">
+    <template #footer>
+      <!-- The Vote button of the choices form renders here -->
+      <div v-show="!choice" :id="submitId" class="flex flex-col" />
+      <div v-if="choice" class="flex flex-col xs:flex-row gap-3">
         <UiButton
           class="w-full order-last xs:order-none"
           @click="emit('close')"
