@@ -73,7 +73,7 @@ watch(() => props.proposal.id, fetchPrices, { immediate: true });
               data.spot.price_usd *
                 (data.timeline?.currency_rate_applied
                   ? 1
-                  : data.timeline?.currency_rate ?? 1),
+                  : (data.timeline?.currency_rate ?? 1)),
               'compact',
               { maximumFractionDigits: data.spot.price_usd >= 1 ? 2 : 4 }
             )

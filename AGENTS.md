@@ -9,8 +9,8 @@ bun run build              # Build all packages
 bun run test               # Run tests across all packages
 bun run test:integration   # Run integration tests
 bun run test:e2e           # Run Playwright end-to-end tests
-bun run lint               # Lint all code and scripts
-bun run lint:fix           # Lint and auto-fix
+bun run lint               # Lint and check formatting
+bun run lint:fix           # Lint, auto-fix and format
 bun run typecheck          # TypeScript type checking
 ```
 
@@ -62,11 +62,11 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 
 ## Tooling
 
-- **Node** >=22.6, **Bun** >=1.3 (workspaces: `apps/*`, `packages/*`)
+- **Node** >=22.6, **Bun** >=1.4.4 (workspaces: `apps/*`, `packages/*`)
 - **Turborepo** for task orchestration (`turbo.json`)
-- **oxlint** via `@stage-labs/config` (`stage lint`, rules in `.oxlintrc.json`), runs before ESLint in `bun run lint`
-- **ESLint** `@snapshot-labs` config (Vue variant for UI)
-- **Prettier** `@snapshot-labs/prettier-config`
+- **oxlint** via `@stage-labs/config` (`stage lint`, rules in `.oxlintrc.json`) for all JS/TS, including the `<script>` of Vue files
+- **ESLint** only in `apps/ui` and `packages/tune`, for Vue templates and the few rules oxlint can't check (`eslint-plugin-oxlint` turns off the rest), and in `apps/mcp`, which has its own config
+- **`bun fmt`** formats JS, TS and Vue files (options in `bunfig.toml`). `bun run lint` checks it and `bun run lint:fix` applies it
 
 ## Conventions
 

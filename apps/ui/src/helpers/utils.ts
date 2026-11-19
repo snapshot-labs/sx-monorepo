@@ -183,7 +183,7 @@ export function getCurrentName(currentUnit: 'block' | 'second') {
 export function _c(value: string | bigint, decimals = 18) {
   const raw = BigInt(value);
   const parsed = Number(raw) / 10 ** decimals;
-  if (raw !== 0n && parsed < 0.001) return `~0`;
+  if (raw !== 0n && parsed < 0.001) return '~0';
 
   const formatter = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
   return formatter.format(parsed);
@@ -454,12 +454,7 @@ export function getCacheHash(value?: string) {
 
 export function getStampUrl(
   type:
-    | 'avatar'
-    | 'user-cover'
-    | 'space'
-    | 'space-cover'
-    | 'space-logo'
-    | 'token',
+    'avatar' | 'user-cover' | 'space' | 'space-cover' | 'space-logo' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string,
@@ -473,7 +468,7 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
-  const cropParam = cropped === false ? `&fit=inside` : '';
+  const cropParam = cropped === false ? '&fit=inside' : '';
 
   return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
