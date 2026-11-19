@@ -4,6 +4,7 @@ import { Choice, Proposal } from '@/types';
 const props = defineProps<{
   proposal: Proposal;
   defaultChoice?: Choice;
+  submitTo?: string;
 }>();
 
 const emit = defineEmits<{
@@ -30,13 +31,15 @@ const selectedChoice = ref<number | null>(
         <IH-check v-if="selectedChoice === index + 1" class="shrink-0" />
       </UiButton>
     </div>
-    <UiButton
-      primary
-      :size="48"
-      :disabled="!selectedChoice"
-      @click="emit('vote', selectedChoice!)"
-    >
-      Vote
-    </UiButton>
+    <teleport defer :to="submitTo" :disabled="!submitTo">
+      <UiButton
+        primary
+        :size="48"
+        :disabled="!selectedChoice"
+        @click="emit('vote', selectedChoice!)"
+      >
+        Vote
+      </UiButton>
+    </teleport>
   </div>
 </template>

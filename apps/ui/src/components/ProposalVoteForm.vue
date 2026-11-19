@@ -8,6 +8,8 @@ defineProps<{
   defaultChoice?: Choice;
   /** Renders basic proposals as a labeled list instead of icon buttons */
   list?: boolean;
+  /** Selector of the element to render the Vote button in, instead of under the choices */
+  submitTo?: string;
 }>();
 
 const emit = defineEmits<{
@@ -25,6 +27,7 @@ const emit = defineEmits<{
     v-else-if="['basic', 'single-choice'].includes(proposal.type)"
     :proposal="proposal"
     :default-choice="defaultChoice"
+    :submit-to="submitTo"
     @vote="
       emit(
         'vote',
@@ -36,18 +39,21 @@ const emit = defineEmits<{
     v-else-if="proposal.type === 'approval'"
     :proposal="proposal"
     :default-choice="defaultChoice"
+    :submit-to="submitTo"
     @vote="emit('vote', $event)"
   />
   <ProposalVoteRankedChoice
     v-else-if="['ranked-choice', 'copeland'].includes(proposal.type)"
     :proposal="proposal"
     :default-choice="defaultChoice"
+    :submit-to="submitTo"
     @vote="emit('vote', $event)"
   />
   <ProposalVoteWeighted
     v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
     :proposal="proposal"
     :default-choice="defaultChoice"
+    :submit-to="submitTo"
     @vote="emit('vote', $event)"
   />
 </template>

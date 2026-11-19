@@ -75,12 +75,7 @@ function handleAcceptTerms() {
             class="py-2"
             @vote="handleVoteClick"
           />
-          <UiButton
-            v-else
-            :size="40"
-            class="my-2"
-            @click="handleVoteClick(null)"
-          >
+          <UiButton v-else class="my-1.5" @click="handleVoteClick(null)">
             Vote
           </UiButton>
         </ProposalVote>
