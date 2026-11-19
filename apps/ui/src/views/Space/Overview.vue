@@ -47,6 +47,7 @@ watchEffect(() => setTitle(props.space.name));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 flex gap-2">
+        <DropdownSpace :space="space" />
         <UiTooltip title="New proposal">
           <UiButton
             :to="{
@@ -123,7 +124,7 @@ watchEffect(() => setTitle(props.space.name));
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(space.about)"
         />
-        <div class="space-x-2 flex">
+        <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
             <AppLink
               :to="social.href"
@@ -132,7 +133,6 @@ watchEffect(() => setTitle(props.space.name));
               <component :is="social.icon" class="size-[26px]" />
             </AppLink>
           </template>
-          <DropdownCalendar :space="space" />
         </div>
       </div>
     </div>
