@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import shuffle from 'lodash/shuffle';
 import { PayloadType, Vote } from '@/composables/useSharing';
 import { getNetwork } from '@/networks';
 import { NetworkID } from '@/types';
@@ -35,15 +36,21 @@ const isCarouselStopped = ref(false);
 
 const network = computed(() => getNetwork(props.network));
 
-// What to do next, shown one at a time. The Snapshot MCP only knows the spaces of the hub:
-// it is left out on Snapshot X, Governor and testnet proposals.
-const slides = computed(() => [
+// What to do next, shown one at a time, in a new random order each time the modal opens.
+const SLIDES = [
   { id: 'share', text: 'Share it with the world' },
-  ...(props.shareable.proposal.network === 's'
-    ? [{ id: 'mcp', text: 'Next time, just ask your AI agent' }]
-    : []),
-  { id: 'calendar', text: 'Never miss the next proposal' }
-]);
+  { id: 'mcp', text: 'Next time, just ask your AI agent' },
+  { id: 'calendar', text: 'Never miss a proposal' }
+];
+const shuffledSlides = ref(shuffle(SLIDES));
+
+// The Snapshot MCP only knows the spaces of the hub: it is left out on Snapshot X, Governor
+// and testnet proposals.
+const slides = computed(() =>
+  shuffledSlides.value.filter(
+    item => item.id !== 'mcp' || props.shareable.proposal.network === 's'
+  )
+);
 const slide = computed(() => slides.value[slideIndex.value] ?? slides.value[0]);
 
 // Called when the dot of the slide has filled up.
@@ -54,6 +61,7 @@ function showNextSlide() {
 watch(
   () => props.open,
   () => {
+    shuffledSlides.value = shuffle(SLIDES);
     slideIndex.value = 0;
     isCarouselStopped.value = false;
   }
