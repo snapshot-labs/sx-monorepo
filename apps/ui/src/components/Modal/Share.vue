@@ -68,7 +68,7 @@ watch(
         <div v-if="messages.subtitle" v-text="messages.subtitle" />
       </div>
 
-      <UiDropdown>
+      <UiDropdown class="pt-2">
         <template #button>
           <UiButton>
             <IH-calendar />
@@ -95,6 +95,7 @@ watch(
           >
             <AppLink
               class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
+              :aria-label="`Share on ${socialNetwork.name}`"
               :to="getShareUrl(socialNetwork.id, type, shareable)"
             >
               <component :is="socialNetwork.icon" />

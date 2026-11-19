@@ -6,7 +6,7 @@ const space = { network: 's', id: 'ens.eth', name: 'ENS & friends' } as const;
 describe('getCalendarUrl', () => {
   it('should mirror the path of the space on Sidekick', () => {
     expect(getCalendarUrl(space)).toBe('https://sh5.co/s:ens.eth/calendar.ics');
-    expect(getCalendarUrl({ network: 'sep', id: '0xABC' })).toBe(
+    expect(getCalendarUrl({ ...space, network: 'sep', id: '0xABC' })).toBe(
       'https://sh5.co/sep:0xABC/calendar.ics'
     );
   });

@@ -7,7 +7,7 @@ import ICOutlook from '~icons/c/outlook';
 export type CalendarSpace = { network: NetworkID; id: string; name: string };
 
 // The calendar of a space's proposals, an iCalendar feed served by Sidekick.
-export function getCalendarUrl(space: Pick<CalendarSpace, 'network' | 'id'>) {
+export function getCalendarUrl(space: CalendarSpace) {
   return `${SIDEKICK_URL}/${space.network}:${space.id}/calendar.ics`;
 }
 
