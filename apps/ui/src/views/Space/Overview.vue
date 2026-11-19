@@ -123,7 +123,7 @@ watchEffect(() => setTitle(props.space.name));
           class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(space.about)"
         />
-        <div v-if="socials.length > 0" class="space-x-2 flex">
+        <div class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
             <AppLink
               :to="social.href"
@@ -132,6 +132,7 @@ watchEffect(() => setTitle(props.space.name));
               <component :is="social.icon" class="size-[26px]" />
             </AppLink>
           </template>
+          <DropdownCalendar :space="space" />
         </div>
       </div>
     </div>

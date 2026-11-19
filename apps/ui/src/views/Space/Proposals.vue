@@ -221,7 +221,6 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
           :is-error="isVotingPowerError"
           @fetch="fetchVotingPower"
         />
-        <DropdownCalendar :space="space" />
         <UiTooltip title="New proposal">
           <UiButton
             :to="{

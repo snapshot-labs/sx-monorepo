@@ -40,11 +40,15 @@ function handleCopyLinkClick() {
 </script>
 
 <template>
-  <UiDropdown>
+  <UiDropdown placement="start">
     <template #button>
-      <UiButton title="Add to calendar" uniform>
-        <IH-calendar />
-      </UiButton>
+      <button
+        type="button"
+        title="Add to calendar"
+        class="block text-skin-text hover:text-skin-link"
+      >
+        <IH-calendar class="size-[26px]" />
+      </button>
     </template>
     <template #items>
       <UiDropdownItem
