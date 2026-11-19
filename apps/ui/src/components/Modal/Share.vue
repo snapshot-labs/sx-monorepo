@@ -68,18 +68,38 @@ watch(
         <div v-if="messages.subtitle" v-text="messages.subtitle" />
       </div>
 
+      <UiDropdown>
+        <template #button>
+          <UiButton>
+            <IH-calendar />
+            Add to calendar
+          </UiButton>
+        </template>
+        <template #items>
+          <DropdownCalendarItems
+            :space="{
+              network: shareable.proposal.network,
+              ...shareable.proposal.space
+            }"
+          />
+        </template>
+      </UiDropdown>
+
       <div class="flex flex-col">
         <div class="my-2">Share your {{ type }}</div>
         <div class="flex space-x-2">
-          <AppLink
+          <UiTooltip
             v-for="(socialNetwork, i) in SOCIAL_NETWORKS"
             :key="i"
-            class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
             :title="`Share on ${socialNetwork.name}`"
-            :to="getShareUrl(socialNetwork.id, type, shareable)"
           >
-            <component :is="socialNetwork.icon" />
-          </AppLink>
+            <AppLink
+              class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
+              :to="getShareUrl(socialNetwork.id, type, shareable)"
+            >
+              <component :is="socialNetwork.icon" />
+            </AppLink>
+          </UiTooltip>
         </div>
       </div>
     </div>
