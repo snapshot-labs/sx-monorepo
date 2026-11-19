@@ -352,7 +352,7 @@ export type HubNetwork = {
 
 export type NetworkApi = {
   apiUrl: string;
-  loadProposalScoresTicks(proposalId: string): Promise<ScoresTick[]>;
+  loadProposalScoresTicks(proposal: Proposal): Promise<ScoresTick[]>;
   loadProposalVotes(
     proposal: Proposal,
     paginationOpts: PaginationOpts,
