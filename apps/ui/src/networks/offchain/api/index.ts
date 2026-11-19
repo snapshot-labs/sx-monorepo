@@ -6,7 +6,8 @@ import {
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
-  DELEGATION_TYPES_NAMES
+  DELEGATION_TYPES_NAMES,
+  FLAGS
 } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
@@ -420,6 +421,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
+  const isWithheld = proposal.flagCode === FLAGS.WITHHELD;
 
   return {
     id: proposal.id,
@@ -437,9 +439,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     },
     proposal_id: proposal.id,
     type: proposal.type,
-    title: proposal.title,
-    body: proposal.body,
-    discussion: proposal.discussion,
+    title: isWithheld ? '' : proposal.title,
+    body: isWithheld ? '' : proposal.body,
+    discussion: isWithheld ? '' : proposal.discussion,
     executions,
     created: proposal.created,
     edited: proposal.updated,
