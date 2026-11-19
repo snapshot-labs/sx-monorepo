@@ -106,9 +106,10 @@ const otherResultsSummary = computed(() => {
 const barSegments = computed(() => {
   const { choices, quorum_type } = props.proposal;
   const others = { choice: 0, progress: otherResultsSummary.value.progress };
-  // Approval scores add up to more than the total, the bar has to fit them all
+  // Approval scores add up to more or less than the total: the bar shows the
+  // share of each choice, so that it is always full
   const total = results.value.reduce((sum, { progress }) => sum + progress, 0);
-  const scale = Math.min(1, 100 / total);
+  const scale = total ? 100 / total : 0;
   const getWidth = (result: { choice: number; progress: number }) =>
     quorumChoiceProgress(quorum_type, result, totalProgress.value) * scale;
 
