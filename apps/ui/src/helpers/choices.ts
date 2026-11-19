@@ -4,9 +4,8 @@ type TickVote = { choice: Choice; vp: number; created: number };
 type Ballot = { ranking: number[]; vp: number };
 
 const TICK_INTERVAL = 3600;
+// Also the number of --choice-N colors in style.scss
 const MAX_CHOICES = 6;
-// Number of --choice-N colors defined in style.scss
-const CHOICE_COLORS = 6;
 const BASIC_COLORS = ['--success', '--danger', '--text'].map(
   name => `rgb(var(${name}))`
 );
@@ -42,11 +41,8 @@ export function getChoiceColors(
 
   const colors: (string | undefined)[] = proposal.choices.map(() => undefined);
   [...proposal.choices.keys()]
-    .sort(
-      (a, b) =>
-        Number(proposal.scores[b] ?? 0) - Number(proposal.scores[a] ?? 0)
-    )
-    .slice(0, CHOICE_COLORS)
+    .sort((a, b) => (proposal.scores[b] ?? 0) - (proposal.scores[a] ?? 0))
+    .slice(0, MAX_CHOICES)
     .forEach((choice, rank) => {
       colors[choice] = `var(--choice-${rank + 1})`;
     });
@@ -103,6 +99,7 @@ export function getScoresTicks(
   const getTimestamp = (vote: TickVote) =>
     Math.floor(vote.created / TICK_INTERVAL) * TICK_INTERVAL;
 
+  const isWeighted = type === 'weighted' || type === 'quadratic';
   // Voting power by choice so far, as square roots on quadratic voting
   const sums = Array<number>(choicesCount).fill(0);
   const ballots: Ballot[] = [];
@@ -110,12 +107,14 @@ export function getScoresTicks(
 
   function addVote({ choice, vp }: TickVote) {
     if (type === 'ranked-choice') {
-      if (isChoices(choice) && choice.length === choicesCount) {
-        ballots.push({ ranking: choice, vp });
+      // Rankings sent as strings count too
+      const ranking = Array.isArray(choice) ? choice.map(Number) : [];
+      if (isChoices(ranking) && ranking.length === choicesCount) {
+        ballots.push({ ranking, vp });
       }
     } else if (type === 'approval') {
       if (isChoices(choice)) for (const c of choice) sums[c - 1] += vp;
-    } else if (type !== 'weighted' && type !== 'quadratic') {
+    } else if (!isWeighted) {
       if (isChoice(choice)) sums[choice - 1] += vp;
     } else if (typeof choice === 'object' && !Array.isArray(choice)) {
       const weights = Object.entries(choice ?? {});
@@ -127,7 +126,10 @@ export function getScoresTicks(
       if (!isValid || !(weightsTotal > 0)) return;
 
       for (const [c, weight] of weights) {
-        const power = (vp * weight) / weightsTotal;
+        // A weight under a key like "01" goes to no choice, and one too big
+        // to divide counts as 0: such a vote must not break the scores
+        if (c !== String(Number(c))) continue;
+        const power = (weight / weightsTotal || 0) * vp;
         sums[Number(c) - 1] += type === 'quadratic' ? Math.sqrt(power) : power;
       }
       total += vp;
@@ -138,13 +140,13 @@ export function getScoresTicks(
     if (type === 'ranked-choice') {
       return getRankedChoiceScores(ballots, choicesCount);
     }
-    if (type !== 'quadratic') return [...sums];
+    if (!isWeighted) return [...sums];
 
-    // Squared sums of square roots, scaled back to the voting power counted
-    const squares = sums.map(sum => sum ** 2);
-    const squaresTotal = squares.reduce((sum, square) => sum + square, 0);
-    return squares.map(square =>
-      squaresTotal ? (square / squaresTotal) * total : 0
+    // Shares of the voting power counted, from squared sums on quadratic voting
+    const shares = sums.map(sum => (type === 'quadratic' ? sum ** 2 : sum));
+    const sharesTotal = shares.reduce((sum, share) => sum + share, 0);
+    return shares.map(share =>
+      sharesTotal ? (share / sharesTotal) * total : 0
     );
   }
 

@@ -39,12 +39,13 @@
 // red and green, which are too close to the For and Against colors, and
 // without the light ones, which do not show on a light background.
 // Blue, dark blue and purple look alike, so they are kept apart.
-$choice-colors: #1d76db, #fbca04, #5319e7, #d93f0b, #0052cc, #006b75;
-
 :root {
-  @for $i from 1 through length($choice-colors) {
-    --choice-#{$i}: #{nth($choice-colors, $i)};
-  }
+  --choice-1: #1d76db;
+  --choice-2: #fbca04;
+  --choice-3: #5319e7;
+  --choice-4: #d93f0b;
+  --choice-5: #0052cc;
+  --choice-6: #006b75;
 }
 
 .choice-bg {

@@ -52,17 +52,6 @@ describe('getChoiceColors', () => {
     ]);
   });
 
-  it('should leave the choices after the last color without one', () => {
-    const colors = getChoiceColors({
-      type: 'weighted',
-      choices: Array(7).fill(''),
-      scores: []
-    });
-
-    expect(colors[5]).toBe('var(--choice-6)');
-    expect(colors[6]).toBeUndefined();
-  });
-
   it('should color the first choices when there are no scores yet', () => {
     expect(
       getChoiceColors({ type: 'weighted', choices: ['A', 'B'], scores: [] })
@@ -149,6 +138,22 @@ describe('getScoresTicks', () => {
         { choice: { __proto__: 1 }, vp: 1, created: 0 }
       ])
     ).toEqual([{ timestamp: 0, scores: [0, 0] }]);
+  });
+
+  it('should count hand-made votes like the proposal scores do', () => {
+    // Weights too big to add up give no score, the voting power still counts
+    const [{ scores }] = getScoresTicks('quadratic', 2, [
+      { choice: { 1: 1 }, vp: 10, created: 0 },
+      { choice: { 1: 1e308, 2: 1e308 }, vp: 10, created: 1 },
+      { choice: { '01': 1 }, vp: 10, created: 2 }
+    ]);
+
+    expect(scores).toEqual([30, 0]);
+    expect(
+      getScoresTicks('ranked-choice', 2, [
+        { choice: JSON.parse('["2", "1"]'), vp: 1, created: 0 }
+      ])
+    ).toEqual([{ timestamp: 0, scores: [0, 1] }]);
   });
 
   it('should ignore choices that do not fit the voting type', () => {

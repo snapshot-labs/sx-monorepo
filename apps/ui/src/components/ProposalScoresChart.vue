@@ -37,7 +37,7 @@ const sortedTicks = computed(() =>
     .map(tick => ({
       timestamp: tick.timestamp,
       scores: props.series.map(({ choices }) =>
-        choices.reduce((sum, choice) => sum + tick.scores[choice], 0)
+        choices.reduce((sum, choice) => sum + (tick.scores[choice] ?? 0), 0)
       )
     }))
 );
