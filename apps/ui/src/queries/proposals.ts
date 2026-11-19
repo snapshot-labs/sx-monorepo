@@ -5,6 +5,7 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { SCORES_TICKS_TYPES } from '@/helpers/choices';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { SCORES_TICKS_MAX_VOTES } from '@/networks/offchain/api';
@@ -254,6 +255,23 @@ export function useProposalQuery(
   });
 }
 
+// The runoff of ranked choice is replayed at every tick, which gets slow:
+// this caps choices × votes.
+const RANKED_CHOICE_MAX_SIZE = 40_000;
+
+export function hasScoresTicks(proposal: Proposal) {
+  if (proposal.vote_count === 0) return false;
+  if (!offchainNetworks.includes(proposal.network)) return true;
+
+  return (
+    SCORES_TICKS_TYPES.includes(proposal.type) &&
+    (proposal.privacy === 'none' || proposal.completed) &&
+    proposal.vote_count <= SCORES_TICKS_MAX_VOTES &&
+    (proposal.type !== 'ranked-choice' ||
+      proposal.choices.length * proposal.vote_count <= RANKED_CHOICE_MAX_SIZE)
+  );
+}
+
 export function useProposalScoresTicksQuery(
   proposal: MaybeRefOrGetter<Proposal>
 ) {
@@ -266,17 +284,8 @@ export function useProposalScoresTicksQuery(
     queryFn: async () => {
       const p = toValue(proposal);
 
-      if (offchainNetworks.includes(p.network)) {
-        if (
-          p.type !== 'basic' ||
-          (p.privacy !== 'none' && !p.completed) ||
-          p.vote_count > SCORES_TICKS_MAX_VOTES
-        ) {
-          return [];
-        }
-      }
-
-      return getNetwork(p.network).api.loadProposalScoresTicks(p.id);
-    }
+      return getNetwork(p.network).api.loadProposalScoresTicks(p);
+    },
+    enabled: () => hasScoresTicks(toValue(proposal))
   });
 }

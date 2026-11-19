@@ -34,6 +34,20 @@
 
 // App-specific styles
 
+// Choice colors of proposals with more than For / Against / Abstain, see
+// getChoiceColors. These are the default label colors of GitHub without its
+// red and green, which are too close to the For and Against colors, and
+// without the light ones, which do not show on a light background.
+// Blue, dark blue and purple look alike, so they are kept apart.
+:root {
+  --choice-1: #1d76db;
+  --choice-2: #fbca04;
+  --choice-3: #5319e7;
+  --choice-4: #d93f0b;
+  --choice-5: #0052cc;
+  --choice-6: #006b75;
+}
+
 .choice-bg {
   &._1 {
     @apply bg-skin-success;
@@ -43,9 +57,6 @@
   }
   &._3 {
     @apply bg-skin-text;
-  }
-  &._quorum {
-    @apply bg-skin-border;
   }
 }
 
@@ -61,21 +72,6 @@
   }
   &._quorum {
     @apply text-skin-border;
-  }
-}
-
-.choice-border {
-  &._1 {
-    @apply border-skin-success;
-  }
-  &._2 {
-    @apply border-skin-danger;
-  }
-  &._3 {
-    @apply border-skin-text;
-  }
-  &._quorum {
-    @apply border-skin-text;
   }
 }
 

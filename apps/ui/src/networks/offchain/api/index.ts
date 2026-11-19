@@ -3,6 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
+import { getScoresTicks } from '@/helpers/choices';
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
@@ -680,9 +681,9 @@ export function createApi(
   return {
     apiUrl: uri,
     loadProposalScoresTicks: async (
-      proposalId: string
+      proposal: Proposal
     ): Promise<ScoresTick[]> => {
-      const votes: { choice: number; vp: number; created: number }[] = [];
+      const votes: Parameters<typeof getScoresTicks>[2] = [];
       let skip = 0;
 
       while (skip < SCORES_TICKS_MAX_VOTES) {
@@ -691,7 +692,7 @@ export function createApi(
           variables: {
             first: SCORES_TICKS_LIMIT,
             skip,
-            where: { proposal: proposalId }
+            where: { proposal: proposal.id }
           }
         });
 
@@ -702,32 +703,7 @@ export function createApi(
         skip += SCORES_TICKS_LIMIT;
       }
 
-      const scores: [number, number, number] = [0, 0, 0];
-      const ticks: ScoresTick[] = [];
-
-      for (const vote of votes) {
-        if (
-          typeof vote.choice === 'number' &&
-          vote.choice >= 1 &&
-          vote.choice <= 3
-        ) {
-          scores[vote.choice - 1] += vote.vp;
-        }
-
-        const hourTs = Math.floor(vote.created / 3600) * 3600;
-        const last = ticks.at(-1);
-
-        if (!last || last.timestamp !== hourTs) {
-          ticks.push({
-            timestamp: hourTs,
-            scores: [...scores] as [number, number, number]
-          });
-        } else {
-          last.scores = [...scores] as [number, number, number];
-        }
-      }
-
-      return ticks;
+      return getScoresTicks(proposal.type, proposal.choices.length, votes);
     },
     loadProposalVotes: async (
       proposal: Proposal,
