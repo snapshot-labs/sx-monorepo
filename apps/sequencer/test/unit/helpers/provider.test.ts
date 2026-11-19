@@ -68,4 +68,16 @@ describe('PROVIDER_OPTIONS call sites', () => {
       PROVIDER_OPTIONS
     );
   });
+
+  it.each(['aavegotchi.eth', 'AAVEGOTCHI.ETH'])(
+    'getSpaceController() returns no controller for the locked space %s',
+    async space => {
+      mockGetSpaceController.mockClear();
+
+      await expect(getSpaceController(space)).resolves.toBe(
+        '0x0000000000000000000000000000000000000000'
+      );
+      expect(mockGetSpaceController).not.toHaveBeenCalled();
+    }
+  );
 });
