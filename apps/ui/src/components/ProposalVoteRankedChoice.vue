@@ -7,6 +7,7 @@ type RankedChoice = number[];
 const props = defineProps<{
   proposal: Proposal;
   defaultChoice?: Choice;
+  submitTo?: string;
 }>();
 
 const emit = defineEmits<{
@@ -46,8 +47,10 @@ const selectedChoices = ref<RankedChoice>(
         </UiButton>
       </template>
     </Draggable>
-    <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
-      Vote
-    </UiButton>
+    <teleport defer :to="submitTo" :disabled="!submitTo">
+      <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
+        Vote
+      </UiButton>
+    </teleport>
   </div>
 </template>
