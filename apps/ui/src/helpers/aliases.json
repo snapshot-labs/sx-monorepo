@@ -81,5 +81,6 @@
   "mimo.eth": "parallel-protocol.eth",
   "aventus.eth": "aventus-gov.eth",
   "maple.eth": "mapledao.eth",
-  "cartesi-community-grants-program.eth": "cartesi.eth"
+  "cartesi-community-grants-program.eth": "cartesi.eth",
+  "aavegotchi.eth": "aavegotchi-dao.eth"
 }
