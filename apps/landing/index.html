@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snapshot</title>
+    <meta
+      name="description"
+      content="With 95%+ market share and 15,000+ active spaces, Snapshot is the leading platform for decentralized governance, coordinating billions in treasury decisions."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+      media="(prefers-color-scheme: dark)"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon-dark.svg"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="preload"
+      href="../../packages/tune/src/assets/fonts/Calibre-Medium-Custom.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body
+    class="overflow-x-hidden break-words bg-white font-serif font-medium text-black"
+  >
+    <div class="group overflow-hidden bg-black text-white">
+      <div
+        id="marquee"
+        class="flex w-max animate-marquee group-hover:[animation-play-state:paused]"
+      >
+        <p class="whitespace-nowrap py-2.5 pr-8 text-[19px] leading-[29px]">
+          Psst! Lorem ipsum dolor sit, consectetur adipiscing elit, sed do
+          eiusmod tempor <span class="underline">dolore magna</span>. →
+        </p>
+      </div>
+    </div>
+    <main class="relative min-h-[calc(100svh-53px)] overflow-hidden">
+      <div aria-hidden="true" class="pointer-events-none">
+        <div class="absolute inset-x-0 top-0 h-[540px] bg-yellow"></div>
+        <canvas
+          class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
+        ></canvas>
+        <div
+          data-boxes="4"
+          class="absolute inset-x-0 top-[calc(100svh-53px-760px)] h-[600px] overflow-hidden text-yellow [&>div]:absolute [&>div]:bg-current"
+        ></div>
+        <div
+          data-boxes="6"
+          class="absolute inset-x-0 top-[320px] h-[600px] overflow-hidden text-white [&>div]:absolute [&>div]:bg-current"
+        ></div>
+      </div>
+      <header class="relative flex py-6">
+        <a
+          href="/"
+          aria-label="Snapshot home"
+          class="flex h-[66px] items-center bg-yellow px-5"
+        >
+          <svg width="38" height="38" viewBox="0 0 300 300" aria-hidden="true">
+            <path
+              d="M200 300V100C255.228 100 300 144.772 300 200C300 255.228 255.228 300 200 300Z"
+            />
+            <path
+              d="M0 100C0 44.772 44.772 0 100 0V200C44.772 200 0 155.228 0 100Z"
+            />
+            <path d="M100 100H300V0H200C144.771 0 100 44.772 100 100Z" />
+            <path d="M200 200H0V300H100C155.229 300 200 255.228 200 200Z" />
+          </svg>
+        </a>
+      </header>
+      <div
+        class="relative mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-2.5"
+      >
+        <div>
+          <p
+            class="w-fit bg-yellow py-3 text-[17px] uppercase tracking-[1.7px]"
+          >
+            Turn chaos to consensus
+          </p>
+          <h1 class="max-w-[760px] bg-yellow py-3 text-[76px] leading-[83.6px]">
+            Excepteur sint occaecat cupidatat non proident
+          </h1>
+        </div>
+        <div class="flex justify-end">
+          <div class="w-full max-w-[760px]">
+            <p class="bg-yellow py-3 text-[26px] leading-[31.2px]">
+              With 95%+ market share and 15,000+ active spaces, Snapshot is the
+              leading platform for decentralized governance, coordinating
+              billions in treasury decisions.
+            </p>
+            <a
+              href="https://snapshot.box"
+              class="flex h-[53px] w-fit items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
+            >
+              Launch app →
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
