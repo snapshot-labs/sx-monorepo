@@ -21,7 +21,10 @@ import type { ConnectorType } from '@snapshot-labs/lock';
 
 const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
   injected: {},
-  walletconnect: { info: { name: 'WalletConnect' }, options: { projectId: '...' } }
+  walletconnect: {
+    info: { name: 'WalletConnect' },
+    options: { projectId: '...' }
+  }
   // ...
 };
 
@@ -37,3 +40,10 @@ The package root currently exposes only the shared `Connector` and
 ```ts
 import type { Connector, ConnectorType } from '@snapshot-labs/lock';
 ```
+
+A connector type can also receive an array of details with distinct `id` values.
+Each choice retains the underlying connector type, so existing network filters
+continue to apply. For WalletConnect, `options.wallet` accepts AppKit wallet
+metadata (`id`, `name`, and optional icon, mobile link and store URL) and opens
+that wallet's QR/connection screen directly. Omit it for the generic picker.
+AppKit and its controllers are pinned together to share the same modal state.
