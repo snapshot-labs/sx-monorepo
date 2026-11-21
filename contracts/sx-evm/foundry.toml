@@ -14,7 +14,7 @@ src = "src"
 test = "test"
 via_ir = true
 ffi = true
-fs_permissions = [{ access = "read-write", path = "./deployments/"}]
+fs_permissions = [{ access = "read-write", path = "./deployments/"}, { access = "read", path = "./node_modules/@safe-global/safe-contracts/build/artifacts/"}]
 
 [profile.ci]
 fuzz = { runs = 1_000 }
