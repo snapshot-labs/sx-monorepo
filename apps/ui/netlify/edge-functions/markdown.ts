@@ -26,6 +26,5 @@ export default async (request: Request): Promise<Response> => {
 
 export const config = {
   pattern: '^/[^/]+(/proposal/[^/]+)?\\.md$',
-  method: ['GET', 'HEAD'],
   cache: 'manual'
 };
