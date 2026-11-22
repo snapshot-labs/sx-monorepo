@@ -59,6 +59,18 @@ describe('tool metadata', () => {
     }
   });
 
+  // Directory policy: descriptions say what a tool does, with no instructions about
+  // other tools or external instruction sources. Usage guidance lives in instructions.md.
+  test('descriptions do not name other tools or point to the server instructions', async () => {
+    const { tools } = await (await connect(signedIn)).listTools();
+    for (const tool of tools) {
+      for (const other of tools.filter(t => t.name !== tool.name)) {
+        expect(tool.description).not.toContain(other.name);
+      }
+      expect(tool.description).not.toMatch(/server instructions|preemptively|call this/i);
+    }
+  });
+
   test('read tools are read-only, write tools declare an output schema', async () => {
     const { tools } = await (await connect(signedIn)).listTools();
     const byName = Object.fromEntries(tools.map(t => [t.name, t]));
