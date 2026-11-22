@@ -53,6 +53,8 @@ describe('tool metadata', () => {
     expect(tools).toHaveLength(6);
     for (const tool of tools) {
       expect(tool.title).toBeTruthy();
+      // Claude's directory portal reads the title from annotations.
+      expect(tool.annotations?.title).toBe(tool.title);
       expect(tool.annotations?.openWorldHint).toBe(false);
     }
   });
