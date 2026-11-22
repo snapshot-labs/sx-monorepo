@@ -30,7 +30,8 @@ mock.module('../src/hub.ts', () => ({
     })) as { aliases?: { address: string }[] };
     return (result?.aliases ?? [])[0]?.address;
   },
-  schemaCache: Promise.resolve({})
+  schemaCache: Promise.resolve({}),
+  getProposalSnapshotBlock: async () => 1
 }));
 
 export function makeRes() {

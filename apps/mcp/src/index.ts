@@ -12,6 +12,7 @@ import logger from './logger.js';
 import {
   createResolveContext,
   registerFollowTool,
+  registerPrompts,
   registerProposeTool,
   registerQueryTool,
   registerSchemaTool,
@@ -53,6 +54,7 @@ function createMcpServer(mode: 'http' | 'stdio'): McpServer {
   registerVoteTool(server, resolveContext);
   registerProposeTool(server, resolveContext);
   registerFollowTool(server, resolveContext);
+  registerPrompts(server);
   return server;
 }
 

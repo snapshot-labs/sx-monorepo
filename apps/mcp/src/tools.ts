@@ -59,8 +59,14 @@ export function createResolveContext(mode: 'http' | 'stdio'): ResolveContext {
 
 type ToolResponse = {
   content: { type: 'text'; text: string }[];
+  structuredContent?: Record<string, unknown>;
   isError?: boolean;
 };
+
+// Every tool only talks to Snapshot, so none of them reach an open world.
+const READ = { readOnlyHint: true, openWorldHint: false };
+
+const LINK = z.url();
 
 type Extra = { requestId?: unknown; sessionId?: unknown; authInfo?: AuthInfoExtra };
 
@@ -87,7 +93,8 @@ async function requireSpace<T>(id: string, fields: string): Promise<T> {
 async function handle(
   tool: string,
   extra: Record<string, unknown> | undefined,
-  fn: () => Promise<unknown>
+  fn: () => Promise<unknown>,
+  structured = false
 ): Promise<ToolResponse> {
   const ex = extra as Extra | undefined;
   const reqId = String(ex?.requestId ?? '-');
@@ -99,7 +106,10 @@ async function handle(
   try {
     const result = await fn();
     log.info('tool ok');
-    return { content: [{ type: 'text' as const, text: JSON.stringify(result, null, 2) }] };
+    const content = [{ type: 'text' as const, text: JSON.stringify(result) }];
+    return structured
+      ? { content, structuredContent: result as Record<string, unknown> }
+      : { content };
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     log.error({ err: e }, 'tool error');
@@ -118,7 +128,7 @@ export function registerSchemaTool(server: McpServer): void {
       description:
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
       inputSchema: {},
-      annotations: { readOnlyHint: true }
+      annotations: READ
     },
     (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
   );
@@ -141,7 +151,7 @@ export function registerQueryTool(
           .optional()
           .describe('GraphQL variables')
       },
-      annotations: { readOnlyHint: true }
+      annotations: READ
     },
     ({ query, variables }, extra) =>
       handle('snapshot-query', extra, async () => {
@@ -167,7 +177,14 @@ export function registerWhoamiTool(
       description:
         'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
       inputSchema: {},
-      annotations: { readOnlyHint: true }
+      outputSchema: {
+        address: z.string(),
+        alias: z.string(),
+        authorized: z.boolean(),
+        profile: z.record(z.string(), z.unknown()).nullable(),
+        links: z.object({ profile: LINK, alias: LINK })
+      },
+      annotations: READ
     },
     (_args, extra) =>
       handle('snapshot-whoami', extra, async () => {
@@ -194,7 +211,7 @@ export function registerWhoamiTool(
             alias: `https://snapshot.box/#/settings/alias/authorize/${alias}`
           }
         };
-      })
+      }, true)
   );
 }
 
@@ -223,7 +240,11 @@ export function registerVoteTool(
             'Reason for the vote (ignored on shutter-encrypted proposals)'
           )
       },
-      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
+      outputSchema: {
+        result: z.unknown(),
+        links: z.object({ voter: LINK, space: LINK, proposal: LINK })
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-vote', extra, async () => {
@@ -258,7 +279,7 @@ export function registerVoteTool(
             proposal: `https://snapshot.box/#/s:${data.space}/proposal/${data.proposal}`
           }
         };
-      })
+      }, true)
   );
 }
 
@@ -295,7 +316,11 @@ export function registerProposeTool(
         end: z.number().int().optional().describe('Voting end (unix seconds). Defaults to start + space.voting.period (3 days if unset).'),
         privacy: z.enum(['shutter', 'none']).optional().describe('Shutter shielded voting. Only honored when the space\'s voting.privacy is "any" (or already "shutter", in which case it is forced).')
       },
-      annotations: { readOnlyHint: false, destructiveHint: false }
+      outputSchema: {
+        result: z.unknown(),
+        links: z.object({ space: LINK, proposal: LINK.optional() })
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-propose', extra, async () => {
@@ -351,7 +376,7 @@ export function registerProposeTool(
             proposal: result.id ? `https://snapshot.box/#/s:${space.id}/proposal/${result.id}` : undefined
           }
         };
-      })
+      }, true)
   );
 }
 
@@ -372,7 +397,12 @@ export function registerFollowTool(
           .default('follow')
           .describe('Whether to follow or unfollow the space. Defaults to "follow".')
       },
-      annotations: { readOnlyHint: false, destructiveHint: true }
+      outputSchema: {
+        action: z.enum(['follow', 'unfollow']),
+        result: z.unknown(),
+        links: z.object({ space: LINK })
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-follow', extra, async () => {
@@ -392,6 +422,46 @@ export function registerFollowTool(
           result,
           links: { space: `https://snapshot.box/#/s:${space.id}` }
         };
-      })
+      }, true)
+  );
+}
+
+export function registerPrompts(server: McpServer): void {
+  server.registerPrompt(
+    'space-summary',
+    {
+      title: 'Summarize a space',
+      description: 'Active and recent proposals of a Snapshot space, with their results.',
+      argsSchema: { space: z.string().describe('Space ID (e.g. "ens.eth")') }
+    },
+    ({ space }) => ({
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: `Summarize the Snapshot space ${JSON.stringify(space)}: its active proposals and the five most recent closed ones, what each decides, the current or final results, and when voting ends.`
+          }
+        }
+      ]
+    })
+  );
+  server.registerPrompt(
+    'proposals-to-vote',
+    {
+      title: 'Proposals I can vote on',
+      description: 'Active proposals in the spaces you follow, with your voting power.'
+    },
+    () => ({
+      messages: [
+        {
+          role: 'user',
+          content: {
+            type: 'text',
+            text: 'List the active Snapshot proposals in the spaces I follow, with my voting power on each and whether I already voted.'
+          }
+        }
+      ]
+    })
   );
 }
