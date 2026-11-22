@@ -1,0 +1,67 @@
+name: MCP registry
+
+# Publishes apps/mcp/server.json to the official MCP registry as box.snapshot/mcp.
+# The version comes from apps/mcp/package.json, and a version that's already listed is skipped.
+# Needs MCP_REGISTRY_KEY in the mcp_registry environment: the hex Ed25519 private key whose
+# public key is in the TXT record on snapshot.box.
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'apps/mcp/server.json'
+      - 'apps/mcp/package.json'
+      - '.github/workflows/mcp-registry.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish to the MCP registry
+    environment: mcp_registry
+    concurrency:
+      group: mcp_registry
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: apps/mcp
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+      - name: Use the version from package.json
+        id: version
+        run: |
+          version=$(jq -r .version package.json)
+          jq --arg v "$version" '.version = $v' server.json > server.json.tmp
+          mv server.json.tmp server.json
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check if this version is already listed
+        id: listed
+        run: |
+          name=$(jq -r '.name | @uri' server.json)
+          status=$(curl -s -o /dev/null --max-time 30 --retry 3 -w '%{http_code}' \
+            "https://registry.modelcontextprotocol.io/v0/servers/$name/versions/${{ steps.version.outputs.version }}" || true)
+          case "$status" in
+            200) echo "listed=true" >> "$GITHUB_OUTPUT" ;;
+            404) echo "listed=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::The MCP registry answered $status"; exit 1 ;;
+          esac
+      - name: Install mcp-publisher
+        if: steps.listed.outputs.listed == 'false'
+        run: |
+          curl -fsSL --max-time 60 -o mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/download/v1.8.8/mcp-publisher_linux_amd64.tar.gz
+          echo "09f1fa70ee146b640584274a1a6b2b8a0310b05d4321fa9224e6df6a016d67f4  mcp-publisher.tar.gz" | sha256sum -c -
+          tar xzf mcp-publisher.tar.gz mcp-publisher
+      - name: Publish
+        if: steps.listed.outputs.listed == 'false'
+        env:
+          MCP_PRIVATE_KEY: ${{ secrets.MCP_REGISTRY_KEY }}
+        run: |
+          [ -n "$MCP_PRIVATE_KEY" ] || { echo "::error::MCP_REGISTRY_KEY is missing from the mcp_registry environment"; exit 1; }
+          # v1.8.8 only takes the key as a flag. From v1.8.12 it can read MCP_PRIVATE_KEY directly.
+          ./mcp-publisher login dns --domain snapshot.box --private-key "$MCP_PRIVATE_KEY"
+          ./mcp-publisher publish
