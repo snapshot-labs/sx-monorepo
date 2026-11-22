@@ -114,6 +114,7 @@ export function registerSchemaTool(server: McpServer): void {
   server.registerTool(
     'snapshot-schema',
     {
+      title: 'Get the GraphQL schema',
       description:
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
       inputSchema: {},
@@ -130,8 +131,9 @@ export function registerQueryTool(
   server.registerTool(
     'snapshot-query',
     {
+      title: 'Query Snapshot data',
       description:
-        'Execute any GraphQL query against the Snapshot API. The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Timestamps are unix seconds UTC. Use snapshot-schema only when this query errors on an unknown field.',
+        'Execute any GraphQL query against the Snapshot Hub GraphQL API (docs: https://docs.snapshot.box/tools/api). The user\'s address is auto-bound as $user: declare `query Foo($user: String!)` and do NOT pass `user` in `variables` (it is overwritten). Common queries: `spaces(where: { search })` to find a space by name (ids are slugs like "ens.eth", not names); `proposals(where: { space_in, state })`; `proposals(where: { title_contains })`; `vp(voter: $user, space, proposal)` for voting power; `user(id: $user) { name about }` for the user\'s profile. Timestamps are unix seconds UTC. Use snapshot-schema only when this query errors on an unknown field.',
       inputSchema: {
         query: z.string().describe('GraphQL query string'),
         variables: z
@@ -161,6 +163,7 @@ export function registerWhoamiTool(
   server.registerTool(
     'snapshot-whoami',
     {
+      title: 'Get the connected account',
       description:
         'Return the connected identity and signing capability. `address` is the user\'s account, auto-injected as `$user` in snapshot-query. `alias` is the delegated signer wallet that actually signs writes on the user\'s behalf. `authorized` is true only when that alias is currently authorized for the user: when false, write tools (snapshot-vote, snapshot-propose, snapshot-follow) will fail until the user re-authorizes. `links.alias` points to the page where the user authorizes or revokes that alias. Call this to confirm whose behalf the assistant is acting on, and as a pre-flight before writes. Also returns the user\'s public profile (name, about, avatar) when one exists. If no wallet is connected, returns the authorization prompt.',
       inputSchema: {},
@@ -202,6 +205,7 @@ export function registerVoteTool(
   server.registerTool(
     'snapshot-vote',
     {
+      title: 'Vote on a proposal',
       description:
         'Cast a vote on a Snapshot proposal. Re-calling this on the same proposal REPLACES the previous vote (use it to change a vote). The proposal\'s `type` and `privacy` are fetched and applied automatically; shutter-encrypted proposals strip the reason. Preconditions: proposal `state: "active"` and `vp(voter: $user, space, proposal).vp > 0`. If not yet authorized, returns the authorization URL.',
       inputSchema: {
@@ -276,6 +280,7 @@ export function registerProposeTool(
   server.registerTool(
     'snapshot-propose',
     {
+      title: 'Create a proposal',
       description:
         'Create a Snapshot proposal. Only `space`, `title`, `body` are required. The space\'s enforced voting type, voting period, and privacy mode are read from the space and applied automatically; the snapshot block is set to the current chain head of the space\'s network. `choices` defaults to ["For", "Against", "Abstain"] for basic voting and is required for other types. Pass `privacy: "shutter"` only on spaces where `voting.privacy === "any"` to opt into Shutter encryption; spaces with `voting.privacy === "shutter"` always encrypt.',
       inputSchema: {
@@ -357,6 +362,7 @@ export function registerFollowTool(
   server.registerTool(
     'snapshot-follow',
     {
+      title: 'Follow or unfollow a space',
       description:
         'Follow or unfollow a Snapshot space for the user. Set `action: "follow"` (default) to add the space to the followed list, or `action: "unfollow"` to remove it. Following a space you already follow returns the error "you are already following this space", and unfollowing a space you do not follow returns "you can only unfollow a space you follow". Check the current state first via `follows(where: { follower: $user })`, which also lists followed spaces.',
       inputSchema: {
