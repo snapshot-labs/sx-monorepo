@@ -93,6 +93,34 @@ describe('tool results', () => {
     expect((result.content as { text: string }[])[0].text).toContain('Authorize the alias first');
   });
 
+  test('whoami still answers when the hub omits the profile field', async () => {
+    setGqlHandler(query => (query === 'aliases' ? { aliases: [{ address: user }] } : {}));
+    const result = await (await connect(signedIn)).callTool({ name: 'snapshot-whoami', arguments: {} });
+    expect(result.isError).toBeFalsy();
+    expect(result.structuredContent).toMatchObject({ authorized: true, profile: null });
+  });
+
+  test('whoami with the hub down reports not authorized and no profile', async () => {
+    setGqlHandler(() => {
+      throw new Error('hub unreachable');
+    });
+    const result = await (await connect(signedIn)).callTool({ name: 'snapshot-whoami', arguments: {} });
+    expect(result.isError).toBeFalsy();
+    expect(result.structuredContent).toMatchObject({ authorized: false, profile: null });
+  });
+
+  test('query with the hub down is a tool error with the reason', async () => {
+    setGqlHandler(() => {
+      throw new Error('hub unreachable');
+    });
+    const result = await (await connect(signedIn)).callTool({
+      name: 'snapshot-query',
+      arguments: { query: '{ proposals { id } }' }
+    });
+    expect(result.isError).toBe(true);
+    expect((result.content as { text: string }[])[0].text).toContain('hub unreachable');
+  });
+
   test('query results stay text only, as compact JSON', async () => {
     setGqlHandler(() => ({ proposals: [{ id: '0x1', title: 'A' }] }));
     const result = await (await connect(signedIn)).callTool({

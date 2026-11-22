@@ -197,7 +197,7 @@ export function registerWhoamiTool(
           gql('query ($id: String!) { user(id: $id) { name about avatar } }', {
             id: address
           })
-            .then(r => (r as { user: unknown }).user)
+            .then(r => (r as { user?: unknown }).user ?? null)
             // Profile lookup is best-effort; the address alone is still useful.
             .catch(() => null)
         ]);
