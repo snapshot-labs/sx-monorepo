@@ -128,7 +128,7 @@ export function registerSchemaTool(server: McpServer): void {
       description:
         'Returns the Snapshot GraphQL schema. Large response: call only when a snapshot-query fails on an unknown field, not preemptively. Common queries are listed in the server instructions.',
       inputSchema: {},
-      annotations: READ
+      annotations: { title: 'Get the GraphQL schema', ...READ }
     },
     (_args, extra) => handle('snapshot-schema', extra, () => schemaCache)
   );
@@ -151,7 +151,7 @@ export function registerQueryTool(
           .optional()
           .describe('GraphQL variables')
       },
-      annotations: READ
+      annotations: { title: 'Query Snapshot data', ...READ }
     },
     ({ query, variables }, extra) =>
       handle('snapshot-query', extra, async () => {
@@ -184,7 +184,7 @@ export function registerWhoamiTool(
         profile: z.record(z.string(), z.unknown()).nullable(),
         links: z.object({ profile: LINK, alias: LINK })
       },
-      annotations: READ
+      annotations: { title: 'Get the connected account', ...READ }
     },
     (_args, extra) =>
       handle('snapshot-whoami', extra, async () => {
@@ -244,7 +244,7 @@ export function registerVoteTool(
         result: z.unknown(),
         links: z.object({ voter: LINK, space: LINK, proposal: LINK })
       },
-      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false }
+      annotations: { title: 'Vote on a proposal', readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-vote', extra, async () => {
@@ -320,7 +320,7 @@ export function registerProposeTool(
         result: z.unknown(),
         links: z.object({ space: LINK, proposal: LINK.optional() })
       },
-      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
+      annotations: { title: 'Create a proposal', readOnlyHint: false, destructiveHint: false, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-propose', extra, async () => {
@@ -402,7 +402,7 @@ export function registerFollowTool(
         result: z.unknown(),
         links: z.object({ space: LINK })
       },
-      annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false }
+      annotations: { title: 'Follow or unfollow a space', readOnlyHint: false, destructiveHint: true, openWorldHint: false }
     },
     (data, extra) =>
       handle('snapshot-follow', extra, async () => {
