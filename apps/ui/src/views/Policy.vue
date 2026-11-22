@@ -20,6 +20,17 @@ When you visit our website(s) or platform, we collect personal data that is nece
 ## Data collection when you use our voting platform
 When you create spaces, proposals and take part in organization’s governance, we collect the data that is required to allow DAO’s, DeFi protocols or NFT communities etc. to vote in a way that is easy to verify and hard to contest, e.g. ENS name, wallet address, your number of tokens, the name of your DAO and further optional information for your profile, like a description or avatar, the roles to manage a space, such as controller, admin or author.  Please note that a space serves as a hub for all proposals related to the organization and a source of information for the users. Therefore, it can be viewed by anyone visiting the platform.
 
+## Data collection when you use our platform through an AI assistant (Snapshot MCP)
+When you connect an AI assistant, such as Claude or ChatGPT, to our platform through our MCP server (https://mcp.snapshot.box), we process the data needed to let the assistant read governance data and act on your behalf:
+
+- Your wallet address, which links the assistant to your account on our platform.
+- A signer wallet (“alias”) that is created for you when you authorize the connection. It is created and its key is held by our service provider Coinbase Developer Platform. It cannot sign or send transactions, so it cannot move funds, and we only use it to sign messages on our platform such as votes, proposals and follows. You can revoke it at any time in your settings on our platform.
+- The requests your assistant sends to our MCP server, such as queries, votes and proposals. Votes, proposals and follows are published like any other action on our platform (see “InterPlanetary File System (IPFS)” below).
+- Technical logs for each request (a request identifier, the name of the action, a shortened form of your wallet address, and error details when a request fails), which we use to operate and secure the service.
+
+Our MCP server only receives the requests your assistant sends to it, not your conversations with the assistant. Your assistant’s provider processes your conversations according to its own privacy policy.
+For further information on the purpose and scope of the data processing of Coinbase please see here: https://www.coinbase.com/legal/privacy.
+
 ## Communication and contact forms etc.
 When you contact us by email, telephone, chat, letter, or other means of communication, we collect the data exchanged between you and us for the purposes of communicating with you and provide our services to you, in particular, to respond to your enquiries. By providing us with this information, you acknowledge that we use your personal information in accordance with this Privacy Notice.
 
@@ -105,7 +116,7 @@ Due to continuous development of our website/platform and the contents thereof, 
     <UiContainer class="!max-w-screen-md pt-6">
       <div class="mb-6">
         <h1 class="font-display mb-2">Privacy policy</h1>
-        <div>Last updated: 9 August 2024</div>
+        <div>Last updated: 22 November 2026</div>
       </div>
       <UiMarkdown :body="terms" />
     </UiContainer>
