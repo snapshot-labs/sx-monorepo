@@ -24,7 +24,7 @@ When you create spaces, proposals and take part in organization’s governance, 
 When you connect an AI assistant, such as Claude or ChatGPT, to our platform through our MCP server (https://mcp.snapshot.box), we process the data needed to let the assistant read governance data and act on your behalf:
 
 - Your wallet address, which links the assistant to your account on our platform.
-- A signer wallet (“alias”) that is created for you when you authorize the connection. It is created and its key is held by our service provider Coinbase Developer Platform. It cannot sign or send transactions, so it cannot move funds, and we only use it to sign messages on our platform such as votes, proposals and follows. You can revoke it at any time in your settings on our platform.
+- A signer wallet (“alias”) that is created for you when you authorize the connection. It is created and its key is held by our service provider Coinbase Developer Platform, which therefore receives the content of each message it signs, such as your vote and its reason or the text of your proposal. It cannot sign or send transactions, so it cannot move funds, and we only use it to sign messages on our platform such as votes, proposals and follows. You can revoke it at any time in your settings on our platform.
 - The requests your assistant sends to our MCP server, such as queries, votes and proposals. Votes, proposals and follows are published like any other action on our platform (see “InterPlanetary File System (IPFS)” below).
 - Technical logs for each request (a request identifier, the name of the action, a shortened form of your wallet address, and error details when a request fails), which we use to operate and secure the service.
 
