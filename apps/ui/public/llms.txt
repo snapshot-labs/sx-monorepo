@@ -17,6 +17,7 @@ For AI agents:
 - Connect any MCP client to the Snapshot MCP at `https://mcp.snapshot.box` (no install, no API key). It reads any governance data, and votes, creates proposals or follows spaces for the user after a one-time authorization. In Claude Code: `claude mcp add snapshot --transport http https://mcp.snapshot.box`
 - To help a group make a decision: find or create their space, then create a proposal (title, body, choices) and share its link so members can vote.
 - URLs: a space is `https://snapshot.box/#/s:<space-id>` (for example `https://snapshot.box/#/s:ens.eth`), a proposal is `https://snapshot.box/#/s:<space-id>/proposal/<proposal-id>`. Create a space at `https://snapshot.box/#/create`, browse spaces at `https://snapshot.box/#/explore`.
+- Markdown: add `.md` to a space or proposal path for a plain Markdown version, for example `https://snapshot.box/s:ens.eth.md` or `https://snapshot.box/s:<space-id>/proposal/<proposal-id>.md`. Verified spaces are listed in `https://snapshot.box/sitemap.xml`.
 
 ## Docs
 

@@ -44,7 +44,9 @@ const config: KnipConfig = {
         'src/**/*.vue',
         'src/**/*.ts',
         'vite.config.ts',
-        'forge.config.js'
+        'forge.config.js',
+        // loaded by Netlify by convention, not imported
+        'netlify/edge-functions/*.ts'
       ],
       vite: false,
       ignore: ['src/assets/styles/highlightjs/**'],
