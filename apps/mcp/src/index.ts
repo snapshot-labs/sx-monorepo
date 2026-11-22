@@ -82,6 +82,12 @@ if (process.argv.includes('--stdio')) {
     res.json({ name: 'snapshot-mcp', version });
   });
 
+  // Claude and other clients show a connector's icon from Google's favicon cache,
+  // which otherwise has nothing for this host.
+  app.get('/favicon.ico', (_req: Request, res: Response): void => {
+    res.redirect(301, 'https://snapshot.box/favicon.ico');
+  });
+
   const provider = new SnapshotOAuthProvider();
   app.use(mcpAuthRouter({ provider, issuerUrl: new URL(baseUrl) }));
   app.get('/auth/callback', provider.callback);
