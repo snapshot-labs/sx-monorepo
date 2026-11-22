@@ -31,21 +31,27 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Use the version from package.json
         id: version
         run: |
           version=$(jq -r .version package.json)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "::error::Invalid version in apps/mcp/package.json"; exit 1; }
           jq --arg v "$version" '.version = $v' server.json > server.json.tmp
           mv server.json.tmp server.json
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Check if this version is already listed
         id: listed
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
           name=$(jq -r '.name | @uri' server.json)
           status=$(curl -s -o /dev/null --max-time 30 --retry 3 -w '%{http_code}' \
-            "https://registry.modelcontextprotocol.io/v0/servers/$name/versions/${{ steps.version.outputs.version }}" || true)
+            "https://registry.modelcontextprotocol.io/v0/servers/$name/versions/$VERSION" || true)
           case "$status" in
-            200) echo "listed=true" >> "$GITHUB_OUTPUT" ;;
+            200) echo "listed=true" >> "$GITHUB_OUTPUT"
+              echo "::notice::$VERSION is already listed. Bump the version in apps/mcp/package.json to publish changes." ;;
             404) echo "listed=false" >> "$GITHUB_OUTPUT" ;;
             *) echo "::error::The MCP registry answered $status"; exit 1 ;;
           esac
