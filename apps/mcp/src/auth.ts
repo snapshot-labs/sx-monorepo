@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { type OAuthRegisteredClientsStore } from '@modelcontextprotocol/sdk/server/auth/clients.js';
+import { InvalidTokenError } from '@modelcontextprotocol/sdk/server/auth/errors.js';
 import {
   type AuthorizationParams,
   type OAuthServerProvider
@@ -149,14 +150,18 @@ export class SnapshotOAuthProvider implements OAuthServerProvider {
   }
 
   async verifyAccessToken(token: string): Promise<AuthInfo> {
-    const p = await verifyAs<{ sub: string; aud: string; signerKey: string }>(token);
+    // InvalidTokenError makes requireBearerAuth answer 401 with WWW-Authenticate,
+    // so clients sign in again. Any other error becomes a 500.
+    const p = await verifyAs<{ sub: string; aud: string; signerKey: string }>(token).catch(() => {
+      throw new InvalidTokenError('Invalid or expired token');
+    });
     if (
       typeof p.sub !== 'string' ||
       typeof p.aud !== 'string' ||
       typeof p.signerKey !== 'string' ||
       typeof p.exp !== 'number'
     ) {
-      throw new Error('Invalid token');
+      throw new InvalidTokenError('Invalid token');
     }
     return {
       token,
