@@ -12,6 +12,8 @@ export type StakedDelegationNetworkId = 'sn' | 'sn-sep';
 export type ValidatorPool = {
   staker: string;
   pool: string;
+  /** Display name, when known. */
+  name?: string;
   /** STRK delegated to the pool, in wei (string to keep bigint precision). */
   delegated: string;
   /** Validator self-stake, in wei. */

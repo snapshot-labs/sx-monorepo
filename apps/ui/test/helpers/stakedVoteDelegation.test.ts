@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  FIXTURES_ENABLED,
   isSameAddress,
   isValidStarknetAddress,
   normalizeAddress,
@@ -83,5 +84,11 @@ describe('registryCalls', () => {
     expect(registryCalls.setAcceptsDefaultDelegations(true).calldata).toEqual([
       '1'
     ]);
+  });
+});
+
+describe('fixtures', () => {
+  it('are off unless explicitly enabled', () => {
+    expect(FIXTURES_ENABLED).toBe(false);
   });
 });

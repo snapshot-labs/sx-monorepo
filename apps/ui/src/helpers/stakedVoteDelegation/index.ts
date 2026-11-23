@@ -1,5 +1,6 @@
 import { Account, Call, CallData, num } from 'starknet';
 import { getRpcUrl } from '@/helpers/provider';
+import { shortenAddress } from '@/helpers/utils';
 import { verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import { createProvider } from '@/networks/starknet/provider';
 import {
@@ -8,8 +9,14 @@ import {
   StakedDelegationNetworkId,
   ValidatorPool
 } from './config';
+import {
+  FIXTURE_VALIDATORS,
+  getFixtureMemberships,
+  isFixtureStaker
+} from './fixtures';
 
 export * from './config';
+export { FIXTURES_ENABLED } from './fixtures';
 
 /** Why an address ends up voting with a given stake. */
 export type ResolutionReason =
@@ -117,6 +124,7 @@ export async function getIsStaker(
   address: string,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<boolean> {
+  if (isFixtureStaker(address)) return true;
   const { staking } = getStakedDelegationConfig(networkId);
   const [variant] = await getStarkProvider(networkId).callContract({
     contractAddress: staking,
@@ -184,8 +192,18 @@ export async function findMemberships(
   onProgress?: (done: number, total: number) => void,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<{ validator: ValidatorPool; amount: bigint }[]> {
-  const pools = getStakedDelegationConfig(networkId).pools.validators.filter(
-    validator => BigInt(validator.delegated) > ZERO
+  const fixture = getFixtureMemberships(member);
+  if (fixture) {
+    onProgress?.(1, 1);
+    return fixture.flatMap(({ staker, amount }) => {
+      const validator = getValidator(staker, networkId);
+      return validator ? [{ validator, amount }] : [];
+    });
+  }
+
+  const pools = getValidators(networkId).filter(
+    validator =>
+      BigInt(validator.delegated) > ZERO && !isFixtureStaker(validator.staker)
   );
   const found: { validator: ValidatorPool; amount: bigint }[] = [];
   let cursor = 0;
@@ -213,12 +231,28 @@ export async function findMemberships(
   return found.sort((a, b) => (b.amount > a.amount ? 1 : -1));
 }
 
+/** Validators with a STRK pool, largest delegated stake first. */
+export function getValidators(
+  networkId = STAKED_DELEGATION_NETWORK
+): ValidatorPool[] {
+  const { validators } = getStakedDelegationConfig(networkId).pools;
+  if (!FIXTURE_VALIDATORS.length) return validators;
+  return [...FIXTURE_VALIDATORS, ...validators].sort((a, b) =>
+    BigInt(b.delegated) > BigInt(a.delegated) ? 1 : -1
+  );
+}
+
+/** Validator name when known, otherwise a shortened address. */
+export function shortenVoter(address: string) {
+  return getValidator(address)?.name ?? shortenAddress(address);
+}
+
 export function getValidator(
   staker: string,
   networkId = STAKED_DELEGATION_NETWORK
 ): ValidatorPool | null {
   return (
-    getStakedDelegationConfig(networkId).pools.validators.find(validator =>
+    getValidators(networkId).find(validator =>
       isSameAddress(validator.staker, staker)
     ) ?? null
   );
