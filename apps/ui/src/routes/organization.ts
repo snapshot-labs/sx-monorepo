@@ -1,5 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
 import OrganizationOverview from '@/views/Organization/Overview.vue';
+import StakedDelegation from '@/views/Organization/StakedDelegation.vue';
 import Organization from '@/views/Organization.vue';
 import ProposalExecution from '@/views/Proposal/Execution.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
@@ -72,6 +73,11 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
       path: ':space/delegates',
       name: `${prefix}-delegates`,
       component: SpaceDelegates
+    },
+    {
+      path: 'staking-delegation',
+      name: `${prefix}-staking-delegation`,
+      component: StakedDelegation
     },
     {
       path: 'treasury/:index?/:tab?',
