@@ -4,7 +4,6 @@ import { ASCII, asciiFrame, asciiGrid, asciiPath, heroBoxes } from './hero';
 import Logo from './Logo.vue';
 import { HeroFrame, startScene } from './scene';
 import {
-  boxShift,
   closingParts,
   fieldParts,
   heroParts,
@@ -14,15 +13,16 @@ import {
 
 const BOX_FRAME_HEIGHT = 600;
 const MIN_BANNER_COPIES = 3;
-// Each slide's rectangles: a set in its color low on the page, then a white
-// set over the band, numbered across both.
+// Each slide's rectangles: 4 in its color low on the page, then 6 white ones
+// over the band. The scene draws them all with their slide once the page
+// scrolls, so only the hero's show before that.
 const BOX_LAYERS = [
-  { slide: 1, count: 4, class: 'top-[calc(100svh-53px-760px)] text-yellow' },
-  { slide: 1, count: 6, class: 'top-[320px] text-white' },
-  { slide: 2, count: 4, class: 'top-[calc(100svh-53px-760px)] text-[#6fdcdd]' },
-  { slide: 2, count: 6, class: 'top-[320px] text-white' },
-  { slide: 3, count: 4, class: 'top-[calc(100svh-53px-760px)] text-black' },
-  { slide: 3, count: 6, class: 'top-[320px] text-white' }
+  { count: 4, class: 'top-[calc(100svh-53px-760px)] text-yellow' },
+  { count: 6, class: 'top-[320px] text-white' },
+  { count: 4, class: 'invisible top-[calc(100svh-53px-760px)]' },
+  { count: 6, class: 'invisible top-[320px]' },
+  { count: 4, class: 'invisible top-[calc(100svh-53px-760px)]' },
+  { count: 6, class: 'invisible top-[320px]' }
 ];
 const LOGO_GROUNDS = ['', '#6fdcdd', '#fff'];
 
@@ -57,24 +57,9 @@ const copies = ref(1);
 const copyWidth = ref(0);
 const stage = ref<HTMLElement>();
 const ascii = ref<HTMLCanvasElement>();
+const heroLayer = ref<HTMLElement>();
 const scene = ref<HTMLCanvasElement>();
 const banner = ref<HTMLElement[]>([]);
-
-// Where rectangle i of a layer sits, moving out of view on its side.
-function boxStyle(layer: number, i: number) {
-  const { x, y, width, height } = boxes.value[layer]![i]!;
-  const { slide } = BOX_LAYERS[layer]!;
-  const n = layer % 2 ? i + BOX_LAYERS[layer - 1]!.count : i;
-  const shift =
-    (n % 2 ? 1 : -1) * (1 + 0.2 * n) * boxShift(slide, n, progress.value);
-  return {
-    left: `${x}px`,
-    top: `${y}px`,
-    width: `${width}px`,
-    height: `${height}px`,
-    transform: `translateX(calc(${shift} * (100vw + 100%)))`
-  };
-}
 
 function startAscii(canvas: HTMLCanvasElement): () => HeroFrame {
   const ctx = canvas.getContext('2d');
@@ -152,7 +137,7 @@ onMounted(() => {
 
   // Once the page has loaded, the glyph field takes over the hero on scroll.
   addEventListener('load', () =>
-    startScene(scene.value!, ascii.value!, heroFrame, () => progress.value)
+    startScene(scene.value!, heroLayer.value!, heroFrame, () => progress.value)
   );
 });
 </script>
@@ -183,17 +168,29 @@ onMounted(() => {
             data-part="band"
             class="absolute inset-x-0 top-0 h-[540px] bg-yellow"
           />
-          <canvas
-            ref="ascii"
-            class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
-          />
-          <div
-            v-for="(layer, l) in BOX_LAYERS"
-            :key="l"
-            class="absolute inset-x-0 z-[6] h-[600px] overflow-hidden [&>div]:absolute [&>div]:bg-current"
-            :class="layer.class"
-          >
-            <div v-for="(_, i) in boxes[l]" :key="i" :style="boxStyle(l, i)" />
+          <div ref="heroLayer">
+            <canvas
+              ref="ascii"
+              class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
+            />
+            <div
+              v-for="(layer, l) in BOX_LAYERS"
+              :key="l"
+              data-boxes
+              class="absolute inset-x-0 z-[6] h-[600px] overflow-hidden [&>div]:absolute [&>div]:bg-current"
+              :class="layer.class"
+            >
+              <div
+                v-for="(box, i) in boxes[l]"
+                :key="i"
+                :style="{
+                  left: `${box.x}px`,
+                  top: `${box.y}px`,
+                  width: `${box.width}px`,
+                  height: `${box.height}px`
+                }"
+              />
+            </div>
           </div>
         </div>
         <header class="relative z-20 flex py-6">

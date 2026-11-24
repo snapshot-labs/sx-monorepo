@@ -2,8 +2,9 @@ import './style.css';
 import { createApp } from 'vue';
 import Landing from './Landing.vue';
 
-// /terms and /privacy load their page and its text on their own.
-const page = location.pathname.replace(/^\/|\/$/g, '');
+// /#/terms and /#/privacy load their page and its text on their own. Each
+// page sets up for good, so a new hash loads the site again.
+const page = location.hash.replace(/^#\/?|\/$/g, '');
 if (page === 'terms' || page === 'privacy') {
   import('./Legal.vue').then(({ default: Legal }) =>
     createApp(Legal, { page }).mount('#app')
@@ -11,3 +12,4 @@ if (page === 'terms' || page === 'privacy') {
 } else {
   createApp(Landing).mount('#app');
 }
+addEventListener('hashchange', () => location.reload());

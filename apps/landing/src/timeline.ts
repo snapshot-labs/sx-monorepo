@@ -75,19 +75,6 @@ export function closingParts(progress: number) {
   return copyIn(stepTime(progress, 1));
 }
 
-// Where rectangle i of a slide is: 0 in place, 1 out of view on its side, -1
-// out of view on the other side. The hero's leave, the field's pass through
-// and the closing ones come in and stay.
-export function boxShift(slide: number, i: number, progress: number): number {
-  const out = (t: number) => smoothstep(0.06 + i * 0.024, 0.3 + i * 0.024, t);
-  const into = (t: number) => smoothstep(0.44 + i * 0.024, 0.68 + i * 0.024, t);
-  if (slide === 1) return out(stepTime(progress, 0));
-  if (slide === 2) {
-    return 1 - into(stepTime(progress, 0)) - out(stepTime(progress, 1));
-  }
-  return 1 - into(stepTime(progress, 1));
-}
-
 // Which slide's color the logo tab takes, 1 to 3: it changes once the strips
 // behind it, which lead the push, have pushed the next slide in.
 export function slideBehindLogo(progress: number): number {

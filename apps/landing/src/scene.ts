@@ -33,6 +33,7 @@ const fragmentShader = /* glsl */ `
   uniform float uRatio;
   uniform float uProgress;
   uniform float uTime;
+  uniform vec4 uBoxes[30];
 
   const vec2 CELL = vec2(${ASCII_GLYPH.pitch}, ${ASCII.lineHeight.toFixed(1)});
   const float BASELINE = ${ASCII_GLYPH.baseline};
@@ -42,6 +43,7 @@ const fragmentShader = /* glsl */ `
   const vec4 BLACK = vec4(0.0, 0.0, 0.0, 1.0);
   const vec4 WHITE = vec4(1.0);
   const vec4 CYAN = vec4(0.435, 0.863, 0.867, 1.0);
+  const vec4 YELLOW = vec4(0.98, 0.996, 0.412, 1.0);
   const vec4 LIGHT = vec4(0.894, 0.894, 0.898, 1.0);
 
   float hash(vec2 p) {
@@ -98,14 +100,15 @@ const fragmentShader = /* glsl */ `
     return vec2(isHero ? floor(texture2D(uKinds, (cell + 0.5) / uGrid).r * 255.0 + 0.5) : 0.0, 0.0);
   }
 
-  // What cell shows: the hero, then the field, then the rings. Each next
-  // slide comes in from the right in strips of three rows, each on its own
-  // timing, pushing the last one out to the left. The strips behind the logo
-  // lead, so its tab can change color with them (slideBehindLogo).
-  vec2 glyphOf(vec2 cell) {
+  // Which slide cell shows (x) and from which of its cells (yz): the hero,
+  // then the field, then the rings. Each next slide comes in from the right in
+  // strips of three rows, each on its own timing, pushing the last one out to
+  // the left. The strips behind the logo lead, so its tab can change color
+  // with them (slideBehindLogo).
+  vec3 sourceOf(vec2 cell) {
     float toField = pushTime(0.0);
     float toRings = pushTime(1.0);
-    if (toField <= 0.0) return slideAt(0.0, cell);
+    if (toField <= 0.0) return vec3(0.0, cell);
     float next = toRings > 0.0 ? 2.0 : 1.0;
     float strip = floor(cell.y / 3.0);
     bool isHeader = uOrigin.y + strip * 3.0 * CELL.y < 112.0;
@@ -114,8 +117,22 @@ const fragmentShader = /* glsl */ `
     float pushed = smoothstep(0.0, 1.0, clamp((t - delay) / 0.6, 0.0, 1.0));
     float width = floor(uSize.x / CELL.x);
     float edge = floor((1.0 - pushed) * width);
-    if (cell.x - floor(-uOrigin.x / CELL.x) >= edge) return slideAt(next, cell - vec2(edge, 0.0));
-    return slideAt(next - 1.0, cell + vec2(width - edge, 0.0));
+    if (cell.x - floor(-uOrigin.x / CELL.x) >= edge) return vec3(next, cell - vec2(edge, 0.0));
+    return vec3(next - 1.0, cell + vec2(width - edge, 0.0));
+  }
+
+  // The color of the rectangle of slide which at point at, if any. Each slide
+  // has 10 in uBoxes: 4 in its color, then 6 white ones painted over them.
+  vec4 boxAt(float which, vec2 at) {
+    vec4 color = vec4(0.0);
+    for (int i = 0; i < 30; i++) {
+      float slide = floor(float(i) / 10.0);
+      vec4 box = uBoxes[i];
+      if (slide != which || any(lessThan(at, box.xy)) || any(greaterThanEqual(at, box.zw))) continue;
+      if (float(i) - slide * 10.0 >= 4.0) color = WHITE;
+      else color = slide == 0.0 ? YELLOW : slide == 1.0 ? CYAN : BLACK;
+    }
+    return color;
   }
 
   vec4 groundOf(float palette, bool isDigit) {
@@ -161,11 +178,19 @@ const fragmentShader = /* glsl */ `
   void main() {
     vec2 px = vec2(gl_FragCoord.x, uSize.y * uRatio - gl_FragCoord.y) / uRatio;
     vec2 cell = floor((px - uOrigin) / CELL);
+    // A slide's rectangles move with it, over its glyphs.
+    vec3 here = sourceOf(cell);
+    vec4 box = boxAt(here.x, px + (here.yz - cell) * CELL);
+    if (box.a > 0.0) {
+      gl_FragColor = box;
+      return;
+    }
     // Carets reach into the row above and periods into the row below.
     vec4 ground = vec4(0.0);
     for (int i = -1; i <= 1; i++) {
       vec2 c = cell + vec2(0.0, float(i));
-      vec2 g = glyphOf(c);
+      vec3 source = i == 0 ? here : sourceOf(c);
+      vec2 g = slideAt(source.x, source.yz);
       bool isDigit = g.x == 4.0 || g.x == 5.0;
       if (i == 0) ground = groundOf(g.y, isDigit);
       if (g.x > 0.0 && isInk(g.x, px - uOrigin - c * CELL)) {
@@ -178,10 +203,12 @@ const fragmentShader = /* glsl */ `
 `;
 
 // Draws the scene on canvas with plain WebGL once the page scrolls, in place
-// of the hero's 2D canvas (ascii). Without WebGL, the hero stays as it is.
+// of the hero's 2D canvas and rectangles (hero), which it also draws: the
+// rectangles of every slide, read from the page. Without WebGL, the hero stays
+// as it is.
 export function startScene(
   canvas: HTMLCanvasElement,
-  ascii: HTMLCanvasElement,
+  hero: HTMLElement,
   heroFrame: () => HeroFrame,
   scrollProgress: () => number
 ): void {
@@ -240,6 +267,24 @@ export function startScene(
     gl.uniform1f(uniform('uClip'), main.offsetHeight);
     // The field's and the rings' colors end where the hero's yellow does.
     gl.uniform1f(uniform('uBand'), band.offsetHeight);
+    // Each rectangle as the part of it its layer and the hero show.
+    const boxes = Array.from(
+      hero.querySelectorAll<HTMLElement>('[data-boxes] > div'),
+      box => {
+        const { offsetTop: top, offsetHeight: height } = box.parentElement!;
+        return [
+          Math.max(0, box.offsetLeft),
+          top + Math.max(0, box.offsetTop),
+          Math.min(width, box.offsetLeft + box.offsetWidth),
+          Math.min(
+            top + height,
+            top + box.offsetTop + box.offsetHeight,
+            main.offsetHeight
+          )
+        ];
+      }
+    );
+    gl.uniform4fv(uniform('uBoxes'), boxes.flat());
   };
 
   // The hero's current frame as one texel per cell.
@@ -276,7 +321,7 @@ export function startScene(
   const setActive = (active: boolean) => {
     isActive = active;
     canvas.hidden = !active;
-    ascii.style.visibility = active ? 'hidden' : '';
+    hero.style.visibility = active ? 'hidden' : '';
     if (active) layout();
   };
 
@@ -307,7 +352,7 @@ export function startScene(
   canvas.addEventListener('webglcontextlost', () => {
     cancelAnimationFrame(frame);
     canvas.hidden = true;
-    ascii.style.visibility = '';
+    hero.style.visibility = '';
   });
   frame = requestAnimationFrame(render);
 }

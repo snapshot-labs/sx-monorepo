@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
 import {
-  boxShift,
   closingParts,
   fieldParts,
   heroParts,
@@ -48,22 +47,6 @@ describe('heroParts', () => {
   });
 });
 
-describe('boxShift', () => {
-  test("moves the hero's rectangles out one after another", () => {
-    expect(boxShift(1, 0, 0)).toBe(0);
-    expect(boxShift(1, 0, 0.1)).toBeGreaterThan(boxShift(1, 5, 0.1));
-    expect(boxShift(1, 9, 0.5)).toBe(1);
-  });
-
-  test("passes the field's rectangles through", () => {
-    expect([0.2, 0.5, 0.9].map(p => boxShift(2, 9, p))).toEqual([1, 0, -1]);
-  });
-
-  test('brings the closing rectangles in to stay', () => {
-    expect([0.6, 1].map(p => boxShift(3, 9, p))).toEqual([1, 0]);
-  });
-});
-
 describe('fieldParts', () => {
   test('comes in as the hero leaves, holds, then leaves', () => {
     expect(fieldParts(0.2).title).toEqual([0, 0]);
@@ -95,13 +78,6 @@ describe('both steps', () => {
         fieldParts(first).text[0],
         10
       );
-      for (const i of [0, 5]) {
-        expect(boxShift(2, i, second) + boxShift(1, i, first)).toBeCloseTo(
-          0,
-          10
-        );
-        expect(boxShift(3, i, second)).toBeCloseTo(boxShift(2, i, first), 10);
-      }
     }
   });
 });
