@@ -25,6 +25,7 @@ const props = defineProps<{
 defineEmits<{ (e: 'select'): void }>();
 
 const { explorerUrl } = getStakedDelegationConfig();
+const { getProfile } = useSnapshotProfiles();
 
 function strk(wei: bigint | string) {
   return _vp(Number(BigInt(wei) / 10n ** 15n) / 1000);
@@ -50,7 +51,9 @@ const subtitle = computed(() => {
   if (hasCustomReceiver.value && props.config) {
     return `Votes via ${shortenAddress(props.config.voteReceiver)}`;
   }
-  return props.validator.name ? shortenAddress(props.validator.staker) : '';
+  const hasName =
+    !!props.validator.name || !!getProfile(props.validator.staker)?.name;
+  return hasName ? shortenAddress(props.validator.staker) : '';
 });
 </script>
 
@@ -78,7 +81,7 @@ const subtitle = computed(() => {
             class="whitespace-nowrap"
             :class="{ 'lg:hidden': showYourStake }"
           >
-            Staked
+            You stake
           </UiPill>
           <UiPill v-if="validator.exiting" class="whitespace-nowrap">
             Exiting

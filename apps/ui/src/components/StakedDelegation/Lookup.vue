@@ -6,7 +6,6 @@ import {
   isValidStarknetAddress,
   shortenVoter
 } from '@/helpers/stakedVoteDelegation';
-import { _c } from '@/helpers/utils';
 import {
   useIsStakerQuery,
   useMembershipsQuery,
@@ -78,6 +77,7 @@ const {
 const validator = computed(() =>
   address.value ? getValidator(address.value) : null
 );
+const isValidator = computed(() => !!isStaker.value || !!validator.value);
 const profile = computed(() =>
   address.value ? getValidatorProfile(address.value) : null
 );
@@ -123,7 +123,14 @@ function handleSubmit() {
     </form>
 
     <template v-if="address">
-      <div class="flex flex-col gap-2">
+      <StakedDelegationValidatorProfileCard
+        v-if="isValidator"
+        :staker="address"
+        :config="validatorConfig"
+        :record="records?.[voter]"
+        :is-record-loading="isRecordsPending"
+      />
+      <div v-else class="flex flex-col gap-2">
         <StakedDelegationAddress :address="address" :size="40" />
         <div
           v-if="profile?.about || profile?.website"
@@ -145,34 +152,14 @@ function handleSubmit() {
         </div>
       </div>
 
-      <div class="grid gap-3 sm:grid-cols-2">
+      <div
+        v-if="!isValidator || delegatee || memberships?.length"
+        class="grid gap-3 sm:grid-cols-2"
+      >
         <div class="border rounded-lg px-3.5 py-3">
           <UiEyebrow class="text-skin-text">As a delegator</UiEyebrow>
           <UiLoading v-if="isDelegateePending" class="mt-1" />
           <div v-else class="text-skin-heading" v-text="choice" />
-        </div>
-        <div v-if="isStaker" class="border rounded-lg px-3.5 py-3">
-          <UiEyebrow class="text-skin-text">As a validator</UiEyebrow>
-          <UiLoading v-if="!validatorConfig" class="mt-1" />
-          <div v-else class="flex flex-col gap-0.5">
-            <div class="text-skin-heading">
-              {{
-                validatorConfig.acceptsDefaultDelegations
-                  ? 'Accepts default delegations'
-                  : 'Declined default delegations'
-              }}
-            </div>
-            <div class="text-skin-text text-[16px]">
-              Votes with
-              {{
-                isSameAddress(validatorConfig.voteReceiver, address)
-                  ? 'its staker address'
-                  : shortenVoter(validatorConfig.voteReceiver)
-              }}<template v-if="validator">
-                · {{ _c(validator.delegated) }} STRK delegated</template
-              >
-            </div>
-          </div>
         </div>
       </div>
 
@@ -190,7 +177,7 @@ function handleSubmit() {
       </div>
 
       <div class="flex flex-col gap-2">
-        <UiEyebrow class="text-skin-text">Pools</UiEyebrow>
+        <UiEyebrow class="text-skin-text">Staked with</UiEyebrow>
         <StakedDelegationMemberships
           :memberships="memberships"
           :member="address"

@@ -25,6 +25,32 @@ const {
 
 const { explorerUrl } = getStakedDelegationConfig();
 
+// Public profile: the validator's Snapshot profile, signed by its wallet.
+const usersStore = useUsersStore();
+const {
+  request: requestProfile,
+  getProfile,
+  refresh: refreshProfile
+} = useSnapshotProfiles();
+watch(
+  () => props.staker,
+  staker => {
+    requestProfile(staker);
+    usersStore.fetchUser(staker);
+  },
+  { immediate: true }
+);
+const profile = computed(() => getProfile(props.staker));
+const user = computed(
+  () => usersStore.getUser(props.staker) ?? { id: props.staker, created: null }
+);
+const isProfileOpen = ref(false);
+
+function closeProfile() {
+  isProfileOpen.value = false;
+  refreshProfile(props.staker);
+}
+
 const { data: config, isPending } = useValidatorConfigQuery(() => props.staker);
 const { data: records } = useVotingRecordsQuery(() =>
   config.value ? [config.value.voteReceiver] : []
@@ -168,6 +194,38 @@ const footerNote = computed(() => {
       <div class="p-4 flex flex-col sm:flex-row sm:items-center gap-3 border-b">
         <div class="flex-1 min-w-0 flex flex-col gap-1.5">
           <div>
+            <h4 class="text-skin-heading">Public profile</h4>
+            <p class="text-skin-text text-[15px] leading-[22px]">
+              Name, logo and description delegators see when they open your
+              validator. Stored as your Snapshot profile and signed by this
+              wallet.
+            </p>
+          </div>
+          <div class="flex items-start gap-2.5 min-w-0">
+            <UiStamp :id="staker" type="avatar" :size="24" class="shrink-0" />
+            <div class="min-w-0">
+              <div
+                class="text-skin-link truncate"
+                v-text="profile?.name || 'No name yet'"
+              />
+              <div
+                class="text-skin-text text-[15px] line-clamp-2"
+                v-text="profile?.about || 'No description yet'"
+              />
+            </div>
+          </div>
+        </div>
+        <UiButton
+          class="shrink-0 sm:min-w-[120px]"
+          :disabled="isReadOnly"
+          @click="isProfileOpen = true"
+        >
+          Edit profile
+        </UiButton>
+      </div>
+      <div class="p-4 flex flex-col sm:flex-row sm:items-center gap-3 border-b">
+        <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+          <div>
             <h4 class="text-skin-heading">Vote receiver</h4>
             <p class="text-skin-text text-[15px] leading-[22px]">
               Votes with your self-stake and your pool's default delegations.
@@ -214,6 +272,15 @@ const footerNote = computed(() => {
         </UiButton>
       </div>
     </div>
+
+    <teleport to="#modal">
+      <ModalEditUser
+        v-if="!isReadOnly"
+        :open="isProfileOpen"
+        :user="user"
+        @close="closeProfile"
+      />
+    </teleport>
 
     <!-- Vote receiver dialog -->
     <UiModal

@@ -58,6 +58,13 @@ watch(hasYourValidators, has => {
   if (!has) view.value = 'all';
 });
 
+// Validators' own Snapshot profiles (names, avatars), used for display and
+// search. Loaded in a few batched requests.
+const { request: requestProfile, getProfile } = useSnapshotProfiles();
+watch(validators, list => list.forEach(v => requestProfile(v.staker)), {
+  immediate: true
+});
+
 const filtered = computed(() => {
   let list = validators.value;
   if (view.value === 'yours') {
@@ -69,6 +76,7 @@ const filtered = computed(() => {
   return list.filter(
     validator =>
       validator.name?.toLowerCase().includes(query) ||
+      getProfile(validator.staker)?.name?.toLowerCase().includes(query) ||
       (hex && validator.staker.toLowerCase().replace(/^0x0*/, '').includes(hex))
   );
 });
@@ -215,7 +223,7 @@ const COLUMNS: {
           :disabled="!hasYourValidators"
           @click="view = 'yours'"
         >
-          Your validators
+          You stake with
           <UiLoading
             v-if="isMembershipsPending"
             :size="12"

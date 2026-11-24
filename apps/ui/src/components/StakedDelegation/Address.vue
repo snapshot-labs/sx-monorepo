@@ -34,7 +34,11 @@ watch(
   { immediate: true }
 );
 
+const { request: requestProfile, getProfile } = useSnapshotProfiles();
+watch(() => props.address, requestProfile, { immediate: true });
+
 const validatorName = computed(() => getValidator(props.address)?.name);
+const snapshotName = computed(() => getProfile(props.address)?.name);
 const profile = computed(() => getValidatorProfile(props.address));
 const hasLogoError = ref(false);
 watch(
@@ -46,6 +50,7 @@ const displayName = computed(
   () =>
     props.label ||
     validatorName.value ||
+    snapshotName.value ||
     name.value ||
     shortenAddress(props.address)
 );
@@ -93,7 +98,10 @@ const explorerLink = computed(
         <slot name="subtitle" />
       </div>
       <div
-        v-else-if="!compact && (subtitle || label || validatorName || name)"
+        v-else-if="
+          !compact &&
+          (subtitle || label || validatorName || snapshotName || name)
+        "
         class="text-[15px] text-skin-text truncate"
         v-text="subtitle || shortenAddress(address)"
       />

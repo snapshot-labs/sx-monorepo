@@ -32,13 +32,13 @@ const NETWORKS: Record<NetworkId, { staking: string; fromBlock: number }> = {
   }
 };
 
-const CONCURRENCY = 10;
+const CONCURRENCY = 4;
 
 /** Uptime window, as on the Voyager staking dashboard. */
 const LIVENESS_DAYS = 30;
 
 /** Retries flaky RPC calls (public nodes drop requests under load). */
-async function withRetry<T>(fn: () => Promise<T>, attempts = 5): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, attempts = 8): Promise<T> {
   for (let attempt = 1; ; attempt++) {
     try {
       return await fn();
@@ -177,19 +177,22 @@ async function main() {
   const callData = new CallData(abi);
 
   const callView = async (entrypoint: string, stakerAddress: string) => {
-    const result = await provider.callContract(
-      {
-        contractAddress: config.staking,
-        entrypoint,
-        calldata: callData.compile(entrypoint, {
-          staker_address: stakerAddress
-        })
-      },
-      block
+    const result = await withRetry(() =>
+      provider.callContract(
+        {
+          contractAddress: config.staking,
+          entrypoint,
+          calldata: callData.compile(entrypoint, {
+            staker_address: stakerAddress
+          })
+        },
+        block
+      )
     );
     return callData.parse(entrypoint, result) as any;
   };
 
+  const failures: string[] = [];
   const rows = await mapWithConcurrency(
     [...stakers],
     CONCURRENCY,
@@ -225,12 +228,22 @@ async function main() {
           message.includes('Staker does not exist') ||
           message.includes('5374616b657220646f6573206e6f74206578697374');
         if (!isExited) {
-          console.warn(`\nskipping ${staker}: ${message}`);
+          console.warn(`\nfailed ${staker}: ${message.split('\n')[0]}`);
+          failures.push(staker);
         }
         return null;
       }
     }
   );
+
+  if (failures.length) {
+    // Never write a partial list: missing validators would silently drop
+    // their delegators' pools from the page.
+    console.error(
+      `\n${failures.length} validators could not be read; not writing the file. Re-run, ideally with a less loaded RPC.`
+    );
+    process.exit(1);
+  }
 
   const liveness = await loadLiveness(provider, config.staking, block);
 

@@ -92,10 +92,12 @@ node --experimental-strip-types scripts/generate-staking-pools.ts sn-sep <rpc-ur
 node --experimental-strip-types scripts/generate-staking-pools.ts sn <rpc-url>
 ```
 
-Use a dedicated RPC (not the app's shared one): a mainnet run reads every
-`NewDelegationPool` event since genesis plus 30 days of attestation events,
-and public endpoints rate-limit it. The committed `pools.sn.json` predates
-the uptime column, so regenerate it before launch.
+Use the Starknet nodes RPC, not the app's shared one: a mainnet run reads
+every `NewDelegationPool` event since genesis plus 30 days of attestation
+events, and public endpoints rate-limit it.
+
+- Mainnet: `https://mainnet.nodes.starknet.org/rpc/v0_9`
+- Sepolia: `https://sepolia.nodes.starknet.org/rpc/v0_9`
 
 To find a connected wallet's pools, the page calls `get_pool_member_info_v1`
 on every listed pool (see Speed).
