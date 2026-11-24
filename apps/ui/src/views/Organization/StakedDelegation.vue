@@ -97,6 +97,7 @@ watchEffect(() => setTitle('Delegation'));
       />
       <StakedDelegationValidators
         v-else-if="activeTab === 'validators'"
+        :account="account"
         @select="staker => selectTab('lookup', { address: staker })"
       />
       <StakedDelegationLookup

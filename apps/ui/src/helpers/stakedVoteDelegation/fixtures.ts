@@ -22,7 +22,8 @@ const TEST_VALIDATOR: ValidatorPool = {
   delegated: toWei(4_820_000),
   own: toWei(250_000),
   commission: 500,
-  exiting: false
+  exiting: false,
+  liveness: 0.998
 };
 
 /**
@@ -37,7 +38,8 @@ const DECLINED_VALIDATOR: ValidatorPool = {
   delegated: toWei(1_340_000),
   own: toWei(60_000),
   commission: 800,
-  exiting: false
+  exiting: false,
+  liveness: 0.91
 };
 
 const RECEIVER_VALIDATOR: ValidatorPool = {
@@ -46,7 +48,8 @@ const RECEIVER_VALIDATOR: ValidatorPool = {
   delegated: toWei(2_150_000),
   own: toWei(120_000),
   commission: 1000,
-  exiting: false
+  exiting: false,
+  liveness: 0.97
 };
 
 /** Sample profiles, as validators would add them to validatorProfiles.ts. */

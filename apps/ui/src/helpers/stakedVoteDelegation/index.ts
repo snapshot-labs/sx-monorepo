@@ -408,14 +408,19 @@ export async function findMemberships(
   return found.sort((a, b) => (b.amount > a.amount ? 1 : -1));
 }
 
-/** Validators with a STRK pool, largest delegated stake first. */
+/** Self-stake plus delegated stake: what a validator votes with. */
+export function totalStake(validator: ValidatorPool): bigint {
+  return BigInt(validator.own) + BigInt(validator.delegated);
+}
+
+/** Validators with a STRK pool, largest total stake first. */
 export function getValidators(
   networkId = STAKED_DELEGATION_NETWORK
 ): ValidatorPool[] {
   const { validators } = getStakedDelegationConfig(networkId).pools;
   const all = FIXTURE_VALIDATORS.length
     ? [...FIXTURE_VALIDATORS, ...validators].sort((a, b) =>
-        BigInt(b.delegated) > BigInt(a.delegated) ? 1 : -1
+        totalStake(b) > totalStake(a) ? 1 : -1
       )
     : validators;
   return all.map(validator => {

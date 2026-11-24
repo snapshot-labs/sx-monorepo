@@ -21,6 +21,8 @@ export type ValidatorPool = {
   /** Commission in basis points (e.g. 500 = 5%). */
   commission: number | null;
   exiting: boolean;
+  /** Share of epochs attested in the liveness window (0–1). */
+  liveness?: number;
 };
 
 export type PoolsSnapshot = {
@@ -29,6 +31,8 @@ export type PoolsSnapshot = {
   generatedAt: string;
   staking: string;
   token: string;
+  /** Window used for `liveness`. */
+  liveness?: { days: number; epochs: number };
   validators: ValidatorPool[];
 };
 

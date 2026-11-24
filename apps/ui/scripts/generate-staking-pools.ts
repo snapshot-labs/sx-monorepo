@@ -34,6 +34,21 @@ const NETWORKS: Record<NetworkId, { staking: string; fromBlock: number }> = {
 
 const CONCURRENCY = 10;
 
+/** Uptime window, as on the Voyager staking dashboard. */
+const LIVENESS_DAYS = 30;
+
+/** Retries flaky RPC calls (public nodes drop requests under load). */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 5): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt >= attempts) throw err;
+      await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** attempt));
+    }
+  }
+}
+
 function normalize(address: string | bigint) {
   return num.toHex64(num.toBigInt(address));
 }
@@ -53,6 +68,73 @@ async function mapWithConcurrency<T, U>(
   });
   await Promise.all(workers);
   return results;
+}
+
+/**
+ * Share of recent epochs each validator attested in, from the attestation
+ * contract's `StakerAttestationSuccessful` events over the last
+ * LIVENESS_DAYS. The denominator is the number of epochs seen in the window.
+ */
+async function loadLiveness(
+  provider: RpcProvider,
+  staking: string,
+  latestBlock: number
+): Promise<{ byStaker: Map<string, number>; epochs: number }> {
+  const { abi } = await provider.getClassAt(staking);
+  const callData = new CallData(abi);
+  const params = callData.parse(
+    'contract_parameters_v1',
+    await provider.callContract({
+      contractAddress: staking,
+      entrypoint: 'contract_parameters_v1'
+    })
+  ) as { attestation_contract: bigint };
+  const attestation = normalize(params.attestation_contract);
+
+  // Estimate the first block of the window from recent block times.
+  const sampleSpan = 10_000;
+  const [latest, earlier] = await Promise.all([
+    provider.getBlockWithTxHashes(latestBlock),
+    provider.getBlockWithTxHashes(latestBlock - sampleSpan)
+  ]);
+  const secondsPerBlock =
+    (Number(latest.timestamp) - Number(earlier.timestamp)) / sampleSpan;
+  const windowBlocks = Math.ceil((LIVENESS_DAYS * 86_400) / secondsPerBlock);
+  const fromBlock = Math.max(0, latestBlock - windowBlocks);
+
+  const key = hash.getSelectorFromName('StakerAttestationSuccessful');
+  const attested = new Map<string, Set<string>>();
+  const epochs = new Set<string>();
+  let continuationToken: string | undefined;
+  let pages = 0;
+  do {
+    const page = await withRetry(() =>
+      provider.getEvents({
+        address: attestation,
+        keys: [[key]],
+        from_block: { block_number: fromBlock },
+        to_block: { block_number: latestBlock },
+        chunk_size: 1000,
+        continuation_token: continuationToken
+      })
+    );
+    for (const event of page.events) {
+      const staker = normalize(event.keys[1]);
+      const epoch = event.data[0];
+      epochs.add(epoch);
+      if (!attested.has(staker)) attested.set(staker, new Set());
+      attested.get(staker)!.add(epoch);
+    }
+    continuationToken = page.continuation_token;
+    process.stdout.write(`\rattestation pages: ${++pages}`);
+  } while (continuationToken);
+  process.stdout.write('\n');
+
+  const byStaker = new Map<string, number>();
+  for (const [staker, set] of attested) {
+    byStaker.set(staker, epochs.size ? set.size / epochs.size : 0);
+  }
+  return { byStaker, epochs: epochs.size };
 }
 
 async function main() {
@@ -75,14 +157,16 @@ async function main() {
   const eventKey = hash.getSelectorFromName('NewDelegationPool');
   let continuationToken: string | undefined;
   do {
-    const page = await provider.getEvents({
-      address: config.staking,
-      keys: [[eventKey]],
-      from_block: { block_number: config.fromBlock },
-      to_block: { block_number: block },
-      chunk_size: 1000,
-      continuation_token: continuationToken
-    });
+    const page = await withRetry(() =>
+      provider.getEvents({
+        address: config.staking,
+        keys: [[eventKey]],
+        from_block: { block_number: config.fromBlock },
+        to_block: { block_number: block },
+        chunk_size: 1000,
+        continuation_token: continuationToken
+      })
+    );
     for (const event of page.events) stakers.add(normalize(event.keys[1]));
     continuationToken = page.continuation_token;
     process.stdout.write(`\rvalidators found: ${stakers.size}`);
@@ -148,9 +232,18 @@ async function main() {
     }
   );
 
+  const liveness = await loadLiveness(provider, config.staking, block);
+
+  // Sorted by total stake (self-stake + delegated): what a validator votes with.
+  const total = (row: { own: string; delegated: string }) =>
+    BigInt(row.own) + BigInt(row.delegated);
   const validators = rows
     .filter((row): row is NonNullable<typeof row> => row !== null)
-    .sort((a, b) => (BigInt(b.delegated) > BigInt(a.delegated) ? 1 : -1));
+    .map(row => ({
+      ...row,
+      liveness: liveness.byStaker.get(row.staker) ?? 0
+    }))
+    .sort((a, b) => (total(b) > total(a) ? 1 : -1));
 
   const output = {
     network: networkId,
@@ -158,6 +251,10 @@ async function main() {
     generatedAt: new Date().toISOString(),
     staking: config.staking,
     token: STRK_TOKEN,
+    liveness: {
+      days: LIVENESS_DAYS,
+      epochs: liveness.epochs
+    },
     validators
   };
 

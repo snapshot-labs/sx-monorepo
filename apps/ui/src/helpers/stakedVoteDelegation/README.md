@@ -23,6 +23,22 @@ The page is at `/#/delegation` on the Starknet organization
 - **When your choice counts**: open votes and polls, and a preview of who
   votes with your stake before you save.
 
+## Validators dashboard
+
+Columns: staking power (share of all STRK stake), stake (self-stake +
+delegated, STRK only), commission, uptime, governance record, and the
+connected wallet's stake. Every column sorts, and "Your validators" filters
+to the validators the wallet stakes with. Rows link to Look up; on wide
+screens a Stake / Manage button opens the validator on Voyager.
+
+- **Stake, commission** come from `staker_pool_info` / `get_staker_info_v1`
+  at the block in `pools.<network>.json`.
+- **Uptime** is the share of epochs in the last 30 days in which the
+  validator attested (`StakerAttestationSuccessful` events of the
+  attestation contract). The denominator is the number of epochs seen in the
+  window, so validators that joined recently read lower than they are.
+- **Defaults, vote receivers and records** are read live.
+
 ## Validator profiles
 
 Names, logos, websites and a short "about" come from
