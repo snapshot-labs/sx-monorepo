@@ -38,13 +38,13 @@ function selectTab(tab: Tab, query: Record<string, string> = {}) {
   router.replace({ query: { ...route.query, tab, ...query } });
 }
 
-watchEffect(() => setTitle('Staked STRK vote delegation'));
+watchEffect(() => setTitle('Delegation'));
 </script>
 
 <template>
   <div>
     <div class="p-4 flex flex-col gap-2.5">
-      <h2 class="text-skin-heading">Staked STRK vote delegation</h2>
+      <h2 class="text-skin-heading">Delegation</h2>
       <p class="text-skin-text max-w-[720px] leading-[26px]">
         The validator you stake with votes with your staked STRK by default. You
         can keep your own vote or give it to any address, at any time.

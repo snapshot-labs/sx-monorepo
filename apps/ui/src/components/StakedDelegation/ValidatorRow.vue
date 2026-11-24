@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { isSameAddress, ValidatorPool } from '@/helpers/stakedVoteDelegation';
+import { VotingRecord } from '@/helpers/stakedVoteDelegation/votingRecord';
 import { _p, _vp } from '@/helpers/utils';
 import { useValidatorConfigQuery } from '@/queries/stakedVoteDelegation';
 
@@ -7,6 +8,8 @@ const props = defineProps<{
   validator: ValidatorPool;
   rank: number;
   totalDelegated: bigint;
+  record?: VotingRecord;
+  isRecordLoading?: boolean;
 }>();
 
 const { data: config, isPending } = useValidatorConfigQuery(
@@ -50,7 +53,7 @@ const hasCustomReceiver = computed(
         </template>
       </StakedDelegationAddress>
     </div>
-    <div class="hidden md:block w-[200px] shrink-0 truncate">
+    <div class="hidden lg:block w-[200px] shrink-0 truncate">
       <UiLoading v-if="isPending" :size="16" />
       <StakedDelegationAddress
         v-else-if="config && hasCustomReceiver"
@@ -59,6 +62,12 @@ const hasCustomReceiver = computed(
         :size="20"
       />
       <span v-else class="text-skin-text text-[16px]">Staker address</span>
+    </div>
+    <div class="hidden sm:block w-[96px] shrink-0">
+      <StakedDelegationRecordDots
+        :record="record"
+        :is-loading="isRecordLoading"
+      />
     </div>
     <div class="hidden sm:block w-[110px] shrink-0 text-right">
       <UiLoading v-if="isPending" :size="16" />

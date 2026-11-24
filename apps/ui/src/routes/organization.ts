@@ -75,8 +75,8 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
       component: SpaceDelegates
     },
     {
-      path: 'staking-delegation',
-      name: `${prefix}-staking-delegation`,
+      path: 'delegation',
+      name: `${prefix}-delegation`,
       component: StakedDelegation
     },
     {

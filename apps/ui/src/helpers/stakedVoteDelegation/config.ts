@@ -71,6 +71,16 @@ export const STAKED_DELEGATION_NETWORKS: Record<
 export const STAKED_DELEGATION_NETWORK: StakedDelegationNetworkId =
   import.meta.env.VITE_STAKED_DELEGATION_NETWORK === 'sn' ? 'sn' : 'sn-sep';
 
+/** Spaces whose voting power the SNIP changes. */
+export const GOVERNANCE_SPACES = [
+  {
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
+    kind: 'Vote'
+  },
+  { network: 's', id: 'starknet.eth', kind: 'Poll' }
+] as const;
+
 export const SNIP_URL =
   'https://github.com/starknet-innovation/staked-strk-vote-delegation/blob/main/snip/snip-staked-vote-delegation.md';
 

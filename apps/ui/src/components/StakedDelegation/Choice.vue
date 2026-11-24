@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FunctionalComponent } from 'vue';
 import {
+  getStakedDelegationConfig,
   getValidators,
   isSameAddress,
   isValidStarknetAddress,
@@ -21,8 +22,16 @@ const props = defineProps<{
   memberships?: Membership[];
 }>();
 
-const { pendingAction, isReadOnly, delegate, keepOwnVote, resetDelegation } =
-  useStakedDelegationActions();
+const {
+  pendingAction,
+  lastSaved,
+  isReadOnly,
+  delegate,
+  keepOwnVote,
+  resetDelegation
+} = useStakedDelegationActions();
+
+const { explorerUrl } = getStakedDelegationConfig();
 
 const OPTIONS: {
   id: Option;
@@ -123,6 +132,29 @@ const saveLabel = computed(() => {
   return 'Delegate';
 });
 
+/** Delegate to preview; `undefined` while the address is not valid yet. */
+const previewDelegatee = computed<string | null | undefined>(() => {
+  if (selected.value === 'default') return null;
+  if (selected.value === 'self') return props.account;
+  return isValidStarknetAddress(delegateeInput.value) && !inputError.value
+    ? normalizeAddress(delegateeInput.value)
+    : undefined;
+});
+
+const radioRefs = ref<HTMLButtonElement[]>([]);
+
+// Arrow keys move the selection, as in a native radio group.
+function handleRadioKeydown(event: KeyboardEvent, index: number) {
+  const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
+    event.key
+  ];
+  if (!step) return;
+  event.preventDefault();
+  const next = (index + step + OPTIONS.length) % OPTIONS.length;
+  selected.value = OPTIONS[next].id;
+  radioRefs.value[next]?.focus();
+}
+
 function selectSuggestion(staker: string) {
   delegateeInput.value = staker;
   isInputFocused.value = false;
@@ -146,19 +178,22 @@ function handleBlur() {
   <div v-else class="flex flex-col gap-3">
     <div class="grid gap-2.5 md:grid-cols-3" role="radiogroup">
       <button
-        v-for="option in OPTIONS"
+        v-for="(option, index) in OPTIONS"
         :key="option.id"
+        ref="radioRefs"
         type="button"
         role="radio"
         :aria-checked="selected === option.id"
+        :tabindex="selected === option.id ? 0 : -1"
         :disabled="!!pendingAction"
-        class="relative text-left border rounded-lg p-3.5 flex flex-col gap-2 transition-colors disabled:cursor-not-allowed"
+        class="relative text-left border rounded-lg p-3.5 flex flex-col gap-2 transition-colors disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-skin-link"
         :class="
           selected === option.id
             ? 'border-skin-link bg-skin-border/30'
             : 'hover:border-skin-text'
         "
         @click="selected = option.id"
+        @keydown="handleRadioKeydown($event, index)"
       >
         <div class="flex items-center justify-between gap-2">
           <div
@@ -229,6 +264,15 @@ function handleBlur() {
       </div>
     </div>
 
+    <StakedDelegationVotingPowerPreview
+      v-if="memberships?.length && previewDelegatee !== undefined"
+      :account="account"
+      :memberships="memberships"
+      :delegatee="previewDelegatee"
+      :is-changed="isDirty"
+      class="max-w-[640px]"
+    />
+
     <div class="flex flex-wrap items-center gap-3">
       <UiButton
         primary
@@ -244,6 +288,20 @@ function handleBlur() {
       <span v-else-if="isReadOnly" class="text-skin-text text-[16px]">
         You are viewing this address as a guest. Connect its wallet to make
         changes.
+      </span>
+      <span
+        v-else-if="lastSaved && !isDirty"
+        class="flex items-center gap-1.5 text-skin-success text-[16px]"
+      >
+        <IH-check-circle class="shrink-0" />
+        Saved on-chain.
+        <AppLink
+          :to="`${explorerUrl}/tx/${lastSaved.txHash}`"
+          class="text-skin-link flex items-center gap-0.5"
+        >
+          View transaction
+          <IH-arrow-sm-right class="-rotate-45" />
+        </AppLink>
       </span>
       <span v-else-if="!isDirty" class="text-skin-text text-[16px]">
         Choose an option to change where your vote goes.

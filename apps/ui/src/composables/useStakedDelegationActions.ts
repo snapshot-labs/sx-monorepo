@@ -19,6 +19,10 @@ export type StakedDelegationAction =
   | 'accepts';
 
 const pendingAction = ref<StakedDelegationAction | null>(null);
+const lastSaved = ref<{
+  action: StakedDelegationAction;
+  txHash: string;
+} | null>(null);
 
 export function useStakedDelegationActions() {
   const { auth, web3 } = useWeb3();
@@ -43,6 +47,7 @@ export function useStakedDelegationActions() {
     }
 
     pendingAction.value = action;
+    lastSaved.value = null;
     try {
       const txHash = await sendRegistryCall(auth.value.provider, call);
       uiStore.addPendingTransaction(
@@ -53,6 +58,7 @@ export function useStakedDelegationActions() {
       await queryClient.invalidateQueries({
         queryKey: stakedDelegationKeys.all
       });
+      lastSaved.value = { action, txHash };
       uiStore.addNotification('success', 'Saved on-chain.');
       return true;
     } catch (err) {
@@ -68,6 +74,7 @@ export function useStakedDelegationActions() {
 
   return {
     pendingAction,
+    lastSaved,
     isStarknetWallet,
     isReadOnly,
     delegate: (delegatee: string) =>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { isSameAddress, Membership } from '@/helpers/stakedVoteDelegation';
+import { VotingRecord } from '@/helpers/stakedVoteDelegation/votingRecord';
 import { _c, _p } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -9,6 +10,8 @@ const props = defineProps<{
   progress: { done: number; total: number };
   /** The delegator, to show "You" when the vote stays with them. */
   member?: string;
+  /** Voting records keyed by lowercased voting address. */
+  records?: Record<string, VotingRecord>;
 }>();
 
 const totalStake = computed(() =>
@@ -66,14 +69,24 @@ function share(amount: bigint) {
         class="flex flex-col md:flex-row md:items-center gap-2.5 md:gap-3 px-4 py-3 border-b last:border-b-0"
       >
         <div class="md:w-[34%] min-w-0">
-          <StakedDelegationAddress
-            :address="membership.validator.staker"
-            :subtitle="
-              membership.validator.commission !== null
-                ? `${membership.validator.commission / 100}% commission`
-                : undefined
-            "
-          />
+          <StakedDelegationAddress :address="membership.validator.staker">
+            <template #subtitle>
+              <div class="flex items-center gap-2 text-[15px] text-skin-text">
+                <span
+                  v-if="membership.validator.commission !== null"
+                  class="whitespace-nowrap"
+                >
+                  {{ membership.validator.commission / 100 }}% commission
+                </span>
+                <StakedDelegationRecordDots
+                  v-if="records"
+                  :record="
+                    records[membership.config.voteReceiver.toLowerCase()]
+                  "
+                />
+              </div>
+            </template>
+          </StakedDelegationAddress>
         </div>
         <div class="md:w-[26%] flex flex-col gap-1">
           <div

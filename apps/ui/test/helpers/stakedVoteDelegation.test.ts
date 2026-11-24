@@ -7,6 +7,11 @@ import {
   registryCalls,
   resolvePoolMember
 } from '@/helpers/stakedVoteDelegation';
+import {
+  pickRecentProposals,
+  RECORD_SIZE
+} from '@/helpers/stakedVoteDelegation/votingRecord';
+import { Proposal } from '@/types';
 
 const MEMBER = '0x111';
 const STAKER = '0x222';
@@ -90,5 +95,25 @@ describe('registryCalls', () => {
 describe('fixtures', () => {
   it('are off unless explicitly enabled', () => {
     expect(FIXTURES_ENABLED).toBe(false);
+  });
+});
+
+describe('pickRecentProposals', () => {
+  const proposal = (id: string, created: number, state = 'closed') =>
+    ({ id, created, state }) as unknown as Proposal;
+
+  it('merges votes and polls, newest first, without pending ones', () => {
+    const votes = [proposal('v1', 10), proposal('v2', 30, 'pending')];
+    const polls = [proposal('p1', 20), proposal('p2', 5, 'active')];
+    expect(pickRecentProposals(votes, polls).map(p => p.id)).toEqual([
+      'p1',
+      'v1',
+      'p2'
+    ]);
+  });
+
+  it(`keeps at most ${RECORD_SIZE}`, () => {
+    const many = Array.from({ length: 10 }, (_, i) => proposal(`v${i}`, i));
+    expect(pickRecentProposals(many, [])).toHaveLength(RECORD_SIZE);
   });
 });

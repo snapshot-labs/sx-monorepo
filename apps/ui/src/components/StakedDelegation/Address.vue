@@ -14,6 +14,8 @@ const props = withDefaults(
     subtitle?: string;
     /** Link the name to the block explorer. Off inside clickable rows. */
     linked?: boolean;
+    /** Name only, no second line. */
+    compact?: boolean;
   }>(),
   { size: 32, linked: true }
 );
@@ -68,7 +70,7 @@ const explorerLink = computed(
         <slot name="subtitle" />
       </div>
       <div
-        v-else-if="subtitle || label || validatorName || name"
+        v-else-if="!compact && (subtitle || label || validatorName || name)"
         class="text-[15px] text-skin-text truncate"
         v-text="subtitle || shortenAddress(address)"
       />

@@ -199,7 +199,7 @@ async function handleSetReceiver() {
             role="radio"
             :aria-checked="accepts === option.value"
             :disabled="!!pendingAction"
-            class="text-left border rounded-lg p-3.5 flex flex-col gap-1.5 transition-colors disabled:cursor-not-allowed"
+            class="text-left border rounded-lg p-3.5 flex flex-col gap-1.5 transition-colors disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-skin-link"
             :class="
               accepts === option.value
                 ? 'border-skin-link bg-skin-border/30'

@@ -88,3 +88,27 @@ export function isFixtureStaker(address: string) {
     validator => validator.staker.toLowerCase() === address.toLowerCase()
   );
 }
+
+/**
+ * Sample votes on the 6 most recent proposals (newest first), so the voting
+ * record can be seen locally. `1` is "For" on votes and the first option on
+ * polls; `null` means the address did not vote.
+ */
+const FIXTURE_VOTES: Record<string, (number | null)[]> = {
+  // Test validator: votes on almost everything
+  [TEST_VALIDATOR.staker]: [1, 1, null, 1, 1, 1],
+  // Cinder's vote receiver
+  '0x025f527f2967f29ef0f84fb9b9ce3ef6c87f6fac6e800e7b2afc287281fe3a85': [
+    null,
+    1,
+    null,
+    null,
+    1,
+    null
+  ]
+};
+
+export function getFixtureVotes(voter: string) {
+  if (!FIXTURES_ENABLED) return null;
+  return FIXTURE_VOTES[voter.toLowerCase()] ?? null;
+}

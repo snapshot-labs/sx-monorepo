@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { isSameAddress, shortenVoter } from '@/helpers/stakedVoteDelegation';
+import {
+  getStakedDelegationConfig,
+  isSameAddress,
+  shortenVoter
+} from '@/helpers/stakedVoteDelegation';
 import { _c } from '@/helpers/utils';
 import {
   useMembershipsQuery,
-  useStakedDelegateeQuery
+  useStakedDelegateeQuery,
+  useVotingRecordsQuery
 } from '@/queries/stakedVoteDelegation';
 
 const props = defineProps<{ account: string }>();
@@ -21,7 +26,13 @@ const {
   progress
 } = useMembershipsQuery(() => props.account);
 
+const { explorerUrl } = getStakedDelegationConfig();
+
 const isHowItWorksOpen = ref(false);
+
+const { data: records } = useVotingRecordsQuery(() =>
+  (memberships.value ?? []).map(m => m.config.voteReceiver)
+);
 
 const totalStake = computed(() =>
   (memberships.value ?? []).reduce((sum, m) => sum + m.amount, 0n)
@@ -108,6 +119,10 @@ const votesGoTo = computed(() => {
       </div>
     </div>
 
+    <div class="px-4 pb-4">
+      <StakedDelegationLiveVotes />
+    </div>
+
     <UiSectionHeader label="Your choice" />
     <div class="p-4">
       <StakedDelegationChoice
@@ -123,6 +138,7 @@ const votesGoTo = computed(() => {
       <StakedDelegationMemberships
         :memberships="memberships"
         :member="account"
+        :records="records"
         :is-loading="isFetchingMemberships && !memberships"
         :is-error="isMembershipsError"
         :progress="progress"
@@ -133,9 +149,14 @@ const votesGoTo = computed(() => {
               You have no STRK in a delegation pool on this network. Your choice
               is saved and applies as soon as you stake.
             </span>
-            <UiButton @click="$emit('browseValidators')">
-              Browse validators
-            </UiButton>
+            <div class="flex flex-wrap gap-2.5">
+              <UiButton :to="`${explorerUrl}/staking`" primary>
+                Stake STRK
+              </UiButton>
+              <UiButton @click="$emit('browseValidators')">
+                Browse validators
+              </UiButton>
+            </div>
           </div>
         </template>
       </StakedDelegationMemberships>

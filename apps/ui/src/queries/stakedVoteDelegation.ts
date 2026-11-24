@@ -5,12 +5,18 @@ import {
   getDelegatee,
   getIsStaker,
   getValidatorConfig,
+  GOVERNANCE_SPACES,
   isValidStarknetAddress,
   Membership,
   normalizeAddress,
   resolvePoolMember,
   STAKED_DELEGATION_NETWORK
 } from '@/helpers/stakedVoteDelegation';
+import {
+  loadVotingRecords,
+  pickRecentProposals
+} from '@/helpers/stakedVoteDelegation/votingRecord';
+import { useProposalsSummaryQuery } from '@/queries/proposals';
 
 export const stakedDelegationKeys = {
   all: ['stakedDelegation', STAKED_DELEGATION_NETWORK] as const,
@@ -21,7 +27,9 @@ export const stakedDelegationKeys = {
   isStaker: (address: MaybeRefOrGetter<string>) =>
     [...stakedDelegationKeys.all, 'isStaker', address] as const,
   memberships: (address: MaybeRefOrGetter<string>) =>
-    [...stakedDelegationKeys.all, 'memberships', address] as const
+    [...stakedDelegationKeys.all, 'memberships', address] as const,
+  votingRecords: (voters: MaybeRefOrGetter<string[]>, proposals: unknown) =>
+    ['stakedDelegation', 'votingRecords', voters, proposals] as const
 };
 
 function isEnabled(address: MaybeRefOrGetter<string>) {
@@ -81,6 +89,7 @@ export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
           return {
             validator,
             amount,
+            config,
             ...resolvePoolMember(member, validator.staker, delegatee, config)
           };
         })
@@ -91,4 +100,41 @@ export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
   });
 
   return { ...query, progress };
+}
+
+/**
+ * How each address voted on the most recent Starknet votes and polls.
+ * Returns a map keyed by lowercased address.
+ */
+export function useVotingRecordsQuery(voters: MaybeRefOrGetter<string[]>) {
+  const [voteSpace, pollSpace] = GOVERNANCE_SPACES;
+  const { data: votes, isPending: isVotesPending } = useProposalsSummaryQuery(
+    voteSpace.network,
+    voteSpace.id
+  );
+  const { data: polls, isPending: isPollsPending } = useProposalsSummaryQuery(
+    pollSpace.network,
+    pollSpace.id
+  );
+
+  const proposals = computed(() =>
+    pickRecentProposals(votes.value, polls.value)
+  );
+  const sortedVoters = computed(() =>
+    [...new Set(toValue(voters).map(v => v.toLowerCase()))].sort()
+  );
+
+  return useQuery({
+    queryKey: stakedDelegationKeys.votingRecords(
+      sortedVoters,
+      computed(() => proposals.value.map(p => `${p.network}:${p.id}`))
+    ),
+    queryFn: () => loadVotingRecords(sortedVoters.value, proposals.value),
+    enabled: () =>
+      !isVotesPending.value &&
+      !isPollsPending.value &&
+      sortedVoters.value.length > 0,
+    staleTime: 5 * 60_000,
+    placeholderData: previous => previous
+  });
 }

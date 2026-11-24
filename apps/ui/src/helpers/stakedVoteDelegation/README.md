@@ -2,8 +2,9 @@
 
 UI for the draft SNIP
 [Staked STRK Vote Delegation to Validators](https://github.com/starknet-innovation/staked-strk-vote-delegation/blob/main/snip/snip-staked-vote-delegation.md).
-The page is at `/#/staking-delegation` on the Starknet organization
-(governance.starknet.io), with a "Staking delegation" nav item.
+The page is at `/#/delegation` on the Starknet organization
+(governance.starknet.io), with a "Delegation" nav item. The existing
+"Delegates" nav item is hidden for Starknet.
 
 ## What it does
 
@@ -15,6 +16,12 @@ The page is at `/#/staking-delegation` on the Starknet organization
   (`set_accepts_default_delegations`).
 - **Anyone**: look up how any address resolves, and browse validators with
   their live registry settings.
+- **Voting record**: how each validator's voting address voted on the 6 most
+  recent Starknet votes (Snapshot X) and polls (`starknet.eth`), from the
+  Snapshot X API and the Snapshot hub (`votingRecord.ts`). Mainnet
+  governance data, so Sepolia validators show 0/6 unless fixtures are on.
+- **When your choice counts**: open votes and polls, and a preview of who
+  votes with your stake before you save.
 
 ## Networks
 
@@ -48,7 +55,7 @@ VITE_ORGANIZATION_MAPPING='localhost;starknet' \
 bun run dev
 ```
 
-Then open http://localhost:8080/#/staking-delegation. Append
+Then open http://localhost:8080/#/delegation. Append
 `?as=<starknet address>` to view the page as that address (read-only: options
 can be explored, saving is disabled).
 

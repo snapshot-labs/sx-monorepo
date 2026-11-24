@@ -69,11 +69,12 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         },
         position: 3
       },
-      stakingDelegation: {
-        name: 'Staking delegation',
+      delegates: { hidden: true },
+      delegation: {
+        name: 'Delegation',
         icon: IHShieldCheck,
-        link: { name: 'space-staking-delegation' },
-        activeRoute: { prefix: 'space-staking-delegation' },
+        link: { name: 'space-delegation' },
+        activeRoute: { prefix: 'space-delegation' },
         position: 4
       },
       docs: {

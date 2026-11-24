@@ -10,7 +10,8 @@ import {
   useIsStakerQuery,
   useMembershipsQuery,
   useStakedDelegateeQuery,
-  useValidatorConfigQuery
+  useValidatorConfigQuery,
+  useVotingRecordsQuery
 } from '@/queries/stakedVoteDelegation';
 
 const props = defineProps<{ initialAddress?: string }>();
@@ -50,6 +51,27 @@ const { data: isStaker } = useIsStakerQuery(address);
 const { data: validatorConfig } = useValidatorConfigQuery(() =>
   isStaker.value ? address.value : ''
 );
+
+/** Votes are cast by the vote receiver when the address is a validator. */
+const voter = computed(() =>
+  (isStaker.value && validatorConfig.value
+    ? validatorConfig.value.voteReceiver
+    : address.value
+  ).toLowerCase()
+);
+
+const recordVoters = computed(() => {
+  if (!address.value) return [];
+  return [
+    voter.value,
+    ...(memberships.value ?? []).map(m => m.config.voteReceiver)
+  ];
+});
+const {
+  data: records,
+  isPending: isRecordsPending,
+  isError: isRecordsError
+} = useVotingRecordsQuery(recordVoters);
 
 const validator = computed(() =>
   address.value ? getValidator(address.value) : null
@@ -132,10 +154,24 @@ function handleSubmit() {
       </div>
 
       <div class="flex flex-col gap-2">
+        <UiEyebrow class="text-skin-text">
+          Voting record{{
+            voter !== address.toLowerCase() ? ' (via vote receiver)' : ''
+          }}
+        </UiEyebrow>
+        <StakedDelegationVotingRecord
+          :record="records?.[voter]"
+          :is-loading="isRecordsPending"
+          :is-error="isRecordsError"
+        />
+      </div>
+
+      <div class="flex flex-col gap-2">
         <UiEyebrow class="text-skin-text">Pools</UiEyebrow>
         <StakedDelegationMemberships
           :memberships="memberships"
           :member="address"
+          :records="records"
           :is-loading="isFetchingMemberships && !memberships"
           :is-error="isMembershipsError"
           :progress="progress"

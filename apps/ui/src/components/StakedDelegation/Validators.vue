@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { useQueries } from '@tanstack/vue-query';
 import {
   getStakedDelegationConfig,
+  getValidatorConfig,
   getValidators
 } from '@/helpers/stakedVoteDelegation';
 import { _n } from '@/helpers/utils';
+import {
+  stakedDelegationKeys,
+  useVotingRecordsQuery
+} from '@/queries/stakedVoteDelegation';
 
 defineEmits<{ (e: 'select', staker: string): void }>();
 
@@ -32,6 +38,33 @@ const filtered = computed(() => {
 });
 const visible = computed(() => filtered.value.slice(0, limit.value));
 
+// Same cache entries as each row's config query, so this adds no requests.
+const configs = useQueries({
+  queries: computed(() =>
+    visible.value.map(validator => ({
+      queryKey: stakedDelegationKeys.validatorConfig(validator.staker),
+      queryFn: () => getValidatorConfig(validator.staker),
+      staleTime: 60_000
+    }))
+  )
+});
+
+/** Address that votes for each visible validator (its vote receiver). */
+const voterOf = computed(() =>
+  Object.fromEntries(
+    visible.value.map((validator, i) => [
+      validator.staker,
+      (configs.value[i]?.data?.voteReceiver ?? validator.staker).toLowerCase()
+    ])
+  )
+);
+const areConfigsLoaded = computed(() =>
+  configs.value.every(query => !query.isPending)
+);
+const { data: records, isPending: isRecordsPending } = useVotingRecordsQuery(
+  () => (areConfigsLoaded.value ? Object.values(voterOf.value) : [])
+);
+
 watch(search, () => (limit.value = PAGE_SIZE));
 </script>
 
@@ -58,7 +91,12 @@ watch(search, () => (limit.value = PAGE_SIZE));
     <UiColumnHeader class="space-x-3 border-t">
       <div class="w-[28px] shrink-0">#</div>
       <div class="flex-1 truncate">Validator</div>
-      <div class="hidden md:block w-[200px] shrink-0 truncate">Votes with</div>
+      <div class="hidden lg:block w-[200px] shrink-0 truncate">Votes with</div>
+      <div class="hidden sm:block w-[96px] shrink-0">
+        <UiTooltip title="Votes cast on the last 6 Starknet votes and polls">
+          <span>Record</span>
+        </UiTooltip>
+      </div>
       <div class="hidden sm:block w-[110px] shrink-0 text-right">Defaults</div>
       <div class="w-[110px] sm:w-[150px] shrink-0 text-right truncate">
         Delegated STRK
@@ -74,6 +112,8 @@ watch(search, () => (limit.value = PAGE_SIZE));
       :validator="validator"
       :rank="validators.indexOf(validator) + 1"
       :total-delegated="totalDelegated"
+      :record="records?.[voterOf[validator.staker]]"
+      :is-record-loading="isRecordsPending"
       @click="$emit('select', validator.staker)"
     />
     <div

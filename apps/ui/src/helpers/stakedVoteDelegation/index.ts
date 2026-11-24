@@ -37,6 +37,8 @@ export type Membership = {
   amount: bigint;
   votesWith: string;
   reason: ResolutionReason;
+  /** Validator's registry settings, kept to preview other choices. */
+  config: ValidatorConfig;
 };
 
 const SCAN_CONCURRENCY = 12;
