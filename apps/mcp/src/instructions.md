@@ -1,8 +1,8 @@
-Snapshot governance MCP. Reads via snapshot-query, writes via snapshot-vote, schema introspection only on demand.
+Snapshot governance MCP. Reads via snapshot-query, writes via snapshot-vote, schema introspection only on demand: call snapshot-schema only when a snapshot-query fails on an unknown field, since its response is large.
 
 The user's address is auto-bound as `$user` on every snapshot-query: declare it (`query Foo($user: String!)`) and reference it; do NOT pass `user` in `variables`.
 
-Use snapshot-whoami to get the connected user's address (and profile) when you need to show or confirm who the assistant is acting as.
+Use snapshot-whoami to get the connected user's address (and profile) when you need to show or confirm who the assistant is acting as. Before a write, check its `authorized` field: when it is false, give the user `links.alias` to authorize the alias first.
 
 Common patterns:
 - Find a space by name: `spaces(where: { search: "<name>" })`. Space `id` is a slug ("ens.eth"), never the display name.
