@@ -61,6 +61,29 @@ params = abi.encode(cooldown, maxActiveProposals, proposalThreshold, allowedStra
 
 `userParams` is the same as for the Proposition power strategy.
 
+### Proposition power with active proposal limiter V2
+
+The same as the strategy above, except that the proposition power is computed at a recent block chosen by the `author`, at most `maxBlockAge` blocks old, rather than at the block the proposal is created in. This lets strategies whose power is signed offchain for a given block be used. A `cooldown` of `0` disables the active proposals limit.
+
+When calling this strategy, `params` should be:
+
+```solidity
+uint256 cooldown = ... // In seconds, 0 disables the limit
+uint256 maxActiveProposals = ... // Cannot be 0
+uint256 proposalThreshold = ...
+Strategy[] allowedStrategies ...
+uint32 maxBlockAge = ... // In blocks
+params = abi.encode(cooldown, maxActiveProposals, proposalThreshold, allowedStrategies, maxBlockAge);
+```
+
+`userParams` should contain the block the proposition power is computed at, which can't be in the future or older than `maxBlockAge` blocks, and the indexed strategies that the `author` has power with:
+
+```solidity
+uint32 blockNumber = ...
+IndexedStrategy[] userStrategies = ...
+userParams = abi.encode(blockNumber, userStrategies);
+```
+
 ### And more!
 
 These strategies can be combined and extended to provide flexible Proposal validation mechanisms. The interface for Proposal validation strategies can be found [here](https://github.com/snapshot-labs/sx-evm/tree/main/src/proposal-validations).

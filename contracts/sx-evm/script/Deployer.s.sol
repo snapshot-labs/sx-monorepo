@@ -29,6 +29,7 @@ import { VanillaProposalValidationStrategy } from "../src/proposal-validation-st
 import { PropositionPowerProposalValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
 import { ActiveProposalsLimiterProposalValidationStrategy } from "../src/proposal-validation-strategies/ActiveProposalsLimiterProposalValidationStrategy.sol";
 import { PropositionPowerAndActiveProposalsLimiterValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol";
+import { PropositionPowerAndActiveProposalsLimiterValidationStrategyV2 } from "../src/proposal-validation-strategies/PropositionPowerAndActiveProposalsLimiterValidationStrategyV2.sol";
 
 interface SingletonFactory {
     function deploy(bytes memory _initCode, bytes32 salt) external returns (address payable);
@@ -181,6 +182,16 @@ contract Deployer is Script {
         deployments.serialize(
             "PropositionPowerAndActiveProposalsLimiterValidationStrategy",
             propositionPowerAndActiveProposalsLimiterValidationStrategy
+        );
+
+        (address propositionPowerAndActiveProposalsLimiterValidationStrategyV2, ) = noRedeploy(
+            type(PropositionPowerAndActiveProposalsLimiterValidationStrategyV2).creationCode,
+            saltNonce
+        );
+
+        deployments.serialize(
+            "PropositionPowerAndActiveProposalsLimiterValidationStrategyV2",
+            propositionPowerAndActiveProposalsLimiterValidationStrategyV2
         );
 
         // ------- PROXY FACTORY -------
