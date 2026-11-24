@@ -136,7 +136,11 @@ async function main() {
         };
       } catch (err) {
         const message = (err as Error).message;
-        if (!message.includes('Staker does not exist')) {
+        // "Staker does not exist" (some RPCs return it hex-encoded)
+        const isExited =
+          message.includes('Staker does not exist') ||
+          message.includes('5374616b657220646f6573206e6f74206578697374');
+        if (!isExited) {
           console.warn(`\nskipping ${staker}: ${message}`);
         }
         return null;

@@ -45,9 +45,17 @@ data needs a paid API key and a server-side proxy (see the project notes).
 
 ## Speed
 
-Finding a wallet's pools checks every pool with stake, so the first lookup
-takes a few seconds. The result is kept in the browser and shown instantly
-on later visits while a fresh check runs ("Checking for changes…").
+Finding a wallet's pools uses the multicall contract (`aggregate` at
+`0x05754af3…87f4`, same address on mainnet and Sepolia): every listed pool is
+checked in batches of 100 per request, then the found validators' registry
+settings in one more request. On Sepolia that is ~1–2 s for 179 pools,
+depending on the RPC. If a batch fails, it falls back to one request per
+pool. The result is also kept in the browser and shown instantly on later
+visits while a fresh check runs ("Checking for changes…").
+
+Pools are checked even if they were empty when the list was generated, but
+validators that registered after the list was generated are not known:
+regenerate `pools.<network>.json` before launch and periodically after.
 
 ## Networks
 
@@ -68,9 +76,8 @@ node --experimental-strip-types scripts/generate-staking-pools.ts sn-sep <rpc-ur
 node --experimental-strip-types scripts/generate-staking-pools.ts sn <rpc-url>
 ```
 
-To find a connected wallet's pools, the page checks
-`get_pool_member_info_v1` (falling back to `get_pool_member_info` on pools that
-were never upgraded) on every pool with stake, 12 calls at a time.
+To find a connected wallet's pools, the page calls `get_pool_member_info_v1`
+on every listed pool (see Speed).
 
 ## Run locally with the governance.starknet.io theme
 

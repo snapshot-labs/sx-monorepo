@@ -1,4 +1,4 @@
-import { Account, Call, CallData, num } from 'starknet';
+import { Account, Call, CallData, hash, num } from 'starknet';
 import { getRpcUrl } from '@/helpers/provider';
 import { shortenAddress } from '@/helpers/utils';
 import { verifyStarknetNetwork } from '@/helpers/walletNetworks';
@@ -45,6 +45,14 @@ export type Membership = {
 };
 
 const SCAN_CONCURRENCY = 12;
+
+/**
+ * Multicall contract (`aggregate`), deployed at the same address on Starknet
+ * mainnet and Sepolia. Lets one request check many pools.
+ */
+const MULTICALL =
+  '0x05754af3760f3356da99aea5c3ec39ccac7783d925a19666ebbeca58ff0087f4';
+const MULTICALL_BATCH_SIZE = 100;
 const ZERO = 0n;
 
 const providers: Partial<
@@ -113,15 +121,9 @@ export async function getValidatorConfig(
   staker: string,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<ValidatorConfig> {
-  const [voteReceiver, accepts] = await callRegistry(
-    'get_validator_config',
-    [staker],
-    networkId
+  return parseValidatorConfig(
+    await callRegistry('get_validator_config', [staker], networkId)
   );
-  return {
-    voteReceiver: normalizeAddress(voteReceiver),
-    acceptsDefaultDelegations: num.toBigInt(accepts) === 1n
-  };
 }
 
 /** Whether `address` is a registered validator in the staking contract. */
@@ -220,9 +222,138 @@ async function getPoolMemberAmount(
   return num.toBigInt(result[2]);
 }
 
+type ViewCall = {
+  contractAddress: string;
+  entrypoint: string;
+  calldata: string[];
+};
+
+/**
+ * Runs several view calls in one `aggregate` request and returns each call's
+ * result. Throws if any call fails.
+ */
+async function multicall(
+  calls: ViewCall[],
+  networkId: StakedDelegationNetworkId
+): Promise<string[][]> {
+  const callArray: string[] = [];
+  const calldata: string[] = [];
+  for (const call of calls) {
+    callArray.push(
+      call.contractAddress,
+      hash.getSelectorFromName(call.entrypoint),
+      calldata.length.toString(),
+      call.calldata.length.toString()
+    );
+    calldata.push(...call.calldata);
+  }
+  const result = await getStarkProvider(networkId).callContract({
+    contractAddress: MULTICALL,
+    entrypoint: 'aggregate',
+    calldata: [
+      calls.length.toString(),
+      ...callArray,
+      calldata.length.toString(),
+      ...calldata
+    ]
+  });
+
+  // [block_number, retdata_len, (len, ...retdata) per call]
+  const results: string[][] = [];
+  let i = 2;
+  for (let call = 0; call < calls.length; call++) {
+    const len = Number(num.toBigInt(result[i]));
+    results.push(result.slice(i + 1, i + 1 + len));
+    i += 1 + len;
+  }
+  return results;
+}
+
+/** Member amount in each pool (0 when not a member), in one request. */
+async function getPoolMemberAmountsBatch(
+  pools: string[],
+  member: string,
+  networkId: StakedDelegationNetworkId
+): Promise<bigint[]> {
+  const results = await multicall(
+    pools.map(pool => ({
+      contractAddress: pool,
+      entrypoint: 'get_pool_member_info_v1',
+      calldata: [member]
+    })),
+    networkId
+  );
+  // Option::Some(info) => [0, reward_address, amount, ...], None => [1]
+  return results.map(data =>
+    data.length > 2 && num.toBigInt(data[0]) === ZERO
+      ? num.toBigInt(data[2])
+      : ZERO
+  );
+}
+
+function parseValidatorConfig([voteReceiver, accepts]: string[]) {
+  return {
+    voteReceiver: normalizeAddress(voteReceiver),
+    acceptsDefaultDelegations: num.toBigInt(accepts) === 1n
+  };
+}
+
+/** Registry settings for several validators in one request. */
+export async function getValidatorConfigs(
+  stakers: string[],
+  networkId = STAKED_DELEGATION_NETWORK
+): Promise<ValidatorConfig[]> {
+  if (!stakers.length) return [];
+  const registry = requireRegistry(networkId);
+  try {
+    const results = await multicall(
+      stakers.map(staker => ({
+        contractAddress: registry,
+        entrypoint: 'get_validator_config',
+        calldata: [staker]
+      })),
+      networkId
+    );
+    return results.map(parseValidatorConfig);
+  } catch {
+    return Promise.all(
+      stakers.map(staker => getValidatorConfig(staker, networkId))
+    );
+  }
+}
+
+async function scanPoolsOneByOne(
+  pools: ValidatorPool[],
+  member: string,
+  networkId: StakedDelegationNetworkId,
+  report: (count: number) => void
+) {
+  const found: { validator: ValidatorPool; amount: bigint }[] = [];
+  let cursor = 0;
+  const worker = async () => {
+    while (cursor < pools.length) {
+      const validator = pools[cursor++];
+      try {
+        const amount = await getPoolMemberAmount(
+          validator.pool,
+          member,
+          networkId
+        );
+        if (amount > ZERO) found.push({ validator, amount });
+      } catch (err) {
+        console.warn('pool member lookup failed', validator.pool, err);
+      } finally {
+        report(1);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: SCAN_CONCURRENCY }, worker));
+  return found;
+}
+
 /**
  * Finds the STRK delegation pools `member` holds stake in. The staking
- * contract has no reverse lookup, so this checks every pool that has stake.
+ * contract has no reverse lookup, so this checks every listed pool.
  */
 export async function findMemberships(
   member: string,
@@ -238,33 +369,42 @@ export async function findMemberships(
     });
   }
 
+  // Check every listed pool, including ones that were empty when the list was
+  // built: they may have received stake since.
   const pools = getValidators(networkId).filter(
-    validator =>
-      BigInt(validator.delegated) > ZERO && !isFixtureStaker(validator.staker)
+    validator => !isFixtureStaker(validator.staker)
   );
   const found: { validator: ValidatorPool; amount: bigint }[] = [];
-  let cursor = 0;
   let done = 0;
+  const report = (count: number) => onProgress?.((done += count), pools.length);
 
-  const worker = async () => {
-    while (cursor < pools.length) {
-      const validator = pools[cursor++];
+  const batches: ValidatorPool[][] = [];
+  for (let i = 0; i < pools.length; i += MULTICALL_BATCH_SIZE) {
+    batches.push(pools.slice(i, i + MULTICALL_BATCH_SIZE));
+  }
+
+  await Promise.all(
+    batches.map(async batch => {
       try {
-        const amount = await getPoolMemberAmount(
-          validator.pool,
+        const amounts = await getPoolMemberAmountsBatch(
+          batch.map(validator => validator.pool),
           member,
           networkId
         );
-        if (amount > ZERO) found.push({ validator, amount });
+        batch.forEach((validator, i) => {
+          if (amounts[i] > ZERO) found.push({ validator, amount: amounts[i] });
+        });
+        report(batch.length);
       } catch (err) {
-        console.warn('pool member lookup failed', validator.pool, err);
-      } finally {
-        onProgress?.(++done, pools.length);
+        // A pool in the batch may lack the V1 getter: check one by one.
+        console.warn('batched pool lookup failed, checking one by one', err);
+        found.push(
+          ...(await scanPoolsOneByOne(batch, member, networkId, report))
+        );
       }
-    }
-  };
+    })
+  );
 
-  await Promise.all(Array.from({ length: SCAN_CONCURRENCY }, worker));
   return found.sort((a, b) => (b.amount > a.amount ? 1 : -1));
 }
 

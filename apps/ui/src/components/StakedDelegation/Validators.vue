@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useQueries } from '@tanstack/vue-query';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import {
   getStakedDelegationConfig,
-  getValidatorConfig,
-  getValidators
+  getValidatorConfigs,
+  getValidators,
+  ValidatorConfig
 } from '@/helpers/stakedVoteDelegation';
 import { _n } from '@/helpers/utils';
 import {
@@ -38,28 +39,45 @@ const filtered = computed(() => {
 });
 const visible = computed(() => filtered.value.slice(0, limit.value));
 
-// Same cache entries as each row's config query, so this adds no requests.
-const configs = useQueries({
-  queries: computed(() =>
-    visible.value.map(validator => ({
-      queryKey: stakedDelegationKeys.validatorConfig(validator.staker),
-      queryFn: () => getValidatorConfig(validator.staker),
-      staleTime: 60_000
-    }))
-  )
+const queryClient = useQueryClient();
+const visibleStakers = computed(() => visible.value.map(v => v.staker));
+
+// Registry settings for every visible row in one request.
+const { data: configs, isPending: isConfigsPending } = useQuery({
+  queryKey: [...stakedDelegationKeys.all, 'validatorConfigs', visibleStakers],
+  queryFn: async (): Promise<Record<string, ValidatorConfig>> => {
+    const stakers = visibleStakers.value;
+    const list = await getValidatorConfigs(stakers);
+    return Object.fromEntries(
+      stakers.map((staker, i) => {
+        // Share with per-validator queries (lookup, settings).
+        queryClient.setQueryData(
+          stakedDelegationKeys.validatorConfig(staker),
+          list[i]
+        );
+        return [staker, list[i]];
+      })
+    );
+  },
+  staleTime: 60_000,
+  placeholderData: previous => previous
 });
 
 /** Address that votes for each visible validator (its vote receiver). */
 const voterOf = computed(() =>
   Object.fromEntries(
-    visible.value.map((validator, i) => [
+    visible.value.map(validator => [
       validator.staker,
-      (configs.value[i]?.data?.voteReceiver ?? validator.staker).toLowerCase()
+      (
+        configs.value?.[validator.staker]?.voteReceiver ?? validator.staker
+      ).toLowerCase()
     ])
   )
 );
-const areConfigsLoaded = computed(() =>
-  configs.value.every(query => !query.isPending)
+const areConfigsLoaded = computed(
+  () =>
+    !isConfigsPending.value &&
+    visible.value.every(v => configs.value?.[v.staker])
 );
 const { data: records, isPending: isRecordsPending } = useVotingRecordsQuery(
   () => (areConfigsLoaded.value ? Object.values(voterOf.value) : [])
@@ -112,6 +130,8 @@ watch(search, () => (limit.value = PAGE_SIZE));
       :validator="validator"
       :rank="validators.indexOf(validator) + 1"
       :total-delegated="totalDelegated"
+      :config="configs?.[validator.staker]"
+      :is-config-loading="!configs?.[validator.staker]"
       :record="records?.[voterOf[validator.staker]]"
       :is-record-loading="isRecordsPending"
       @click="$emit('select', validator.staker)"

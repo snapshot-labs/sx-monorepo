@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { isSameAddress, ValidatorPool } from '@/helpers/stakedVoteDelegation';
+import {
+  isSameAddress,
+  ValidatorConfig,
+  ValidatorPool
+} from '@/helpers/stakedVoteDelegation';
 import { VotingRecord } from '@/helpers/stakedVoteDelegation/votingRecord';
 import { _p, _vp } from '@/helpers/utils';
-import { useValidatorConfigQuery } from '@/queries/stakedVoteDelegation';
 
 const props = defineProps<{
   validator: ValidatorPool;
@@ -10,11 +13,9 @@ const props = defineProps<{
   totalDelegated: bigint;
   record?: VotingRecord;
   isRecordLoading?: boolean;
+  config?: ValidatorConfig;
+  isConfigLoading?: boolean;
 }>();
-
-const { data: config, isPending } = useValidatorConfigQuery(
-  () => props.validator.staker
-);
 
 const share = computed(() =>
   props.totalDelegated > 0n
@@ -25,8 +26,8 @@ const share = computed(() =>
 );
 const hasCustomReceiver = computed(
   () =>
-    !!config.value &&
-    !isSameAddress(config.value.voteReceiver, props.validator.staker)
+    !!props.config &&
+    !isSameAddress(props.config.voteReceiver, props.validator.staker)
 );
 </script>
 
@@ -54,7 +55,7 @@ const hasCustomReceiver = computed(
       </StakedDelegationAddress>
     </div>
     <div class="hidden xl:block w-[200px] shrink-0 truncate">
-      <UiLoading v-if="isPending" :size="16" />
+      <UiLoading v-if="isConfigLoading" :size="16" />
       <StakedDelegationAddress
         v-else-if="config && hasCustomReceiver"
         :address="config.voteReceiver"
@@ -70,7 +71,7 @@ const hasCustomReceiver = computed(
       />
     </div>
     <div class="hidden sm:block w-[110px] shrink-0 text-right">
-      <UiLoading v-if="isPending" :size="16" />
+      <UiLoading v-if="isConfigLoading" :size="16" />
       <UiPill
         v-else-if="config"
         :variant="config.acceptsDefaultDelegations ? 'default' : 'secondary'"

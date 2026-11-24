@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/vue-query';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   findMemberships,
   getDelegatee,
   getIsStaker,
   getValidatorConfig,
+  getValidatorConfigs,
   GOVERNANCE_SPACES,
   isValidStarknetAddress,
   Membership,
@@ -100,6 +101,7 @@ function writeCachedMemberships(address: string, memberships: Membership[]) {
  */
 export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
   const progress = ref({ done: 0, total: 0 });
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: stakedDelegationKeys.memberships(address),
@@ -114,17 +116,23 @@ export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
         })
       ]);
 
-      const memberships = await Promise.all(
-        pools.map(async ({ validator, amount }) => {
-          const config = await getValidatorConfig(validator.staker);
-          return {
-            validator,
-            amount,
-            config,
-            ...resolvePoolMember(member, validator.staker, delegatee, config)
-          };
-        })
+      const configs = await getValidatorConfigs(
+        pools.map(({ validator }) => validator.staker)
       );
+      const memberships = pools.map(({ validator, amount }, i) => {
+        const config = configs[i];
+        // Share with the per-validator queries (table rows, lookup).
+        queryClient.setQueryData(
+          stakedDelegationKeys.validatorConfig(validator.staker),
+          config
+        );
+        return {
+          validator,
+          amount,
+          config,
+          ...resolvePoolMember(member, validator.staker, delegatee, config)
+        };
+      });
       writeCachedMemberships(member, memberships);
       return memberships;
     },
