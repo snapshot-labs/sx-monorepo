@@ -75,10 +75,19 @@ export function closingParts(progress: number) {
   return copyIn(stepTime(progress, 1));
 }
 
-// Which slide's color the logo tab takes, 1 to 3: it changes once the strips
-// behind it, which lead the push, have pushed the next slide in.
-export function slideBehindLogo(progress: number): number {
-  const covered = PUSH.start + 0.6 * PUSH.length;
-  if (stepTime(progress, 0) < covered) return 1;
-  return stepTime(progress, 1) < covered ? 2 : 3;
+// Which slide's color a header tab takes, 1 to 3, when its left edge is at
+// fraction x of the width. The header's strips lead the push and each next
+// slide comes in from the right, so a tab changes once the push covers it
+// (see scene.ts): the menu on the right before the logo on the left.
+export function slideBehind(progress: number, x: number): number {
+  const pushed = (step: number) =>
+    smoothstep(0, 0.6, (stepTime(progress, step) - PUSH.start) / PUSH.length);
+  if (pushed(0) < 1 - x) return 1;
+  return pushed(1) < 1 - x ? 2 : 3;
+}
+
+// The page or slide a URL hash names: "#/ipsum", "#ipsum" and "#/ipsum/" all
+// name "ipsum".
+export function nameOf(hash: string): string {
+  return hash.replace(/^#\/?|\/$/g, '');
 }
