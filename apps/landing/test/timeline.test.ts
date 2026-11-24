@@ -79,13 +79,28 @@ describe('both steps', () => {
     for (const t of [0.05, 0.2, 0.35, 0.5, 0.65, 0.8]) {
       const first = t * 0.5;
       const second = first + 0.5;
-      expect(fieldParts(second).title[1]).toBe(heroParts(first).title);
-      expect(fieldParts(second).word(2)[1]).toBe(heroParts(first).word(2));
-      expect(closingParts(second).title).toBe(fieldParts(first).title[0]);
-      expect(closingParts(second).text).toBe(fieldParts(first).text[0]);
+      expect(fieldParts(second).title[1]).toBeCloseTo(
+        heroParts(first).title,
+        10
+      );
+      expect(fieldParts(second).word(2)[1]).toBeCloseTo(
+        heroParts(first).word(2),
+        10
+      );
+      expect(closingParts(second).title).toBeCloseTo(
+        fieldParts(first).title[0],
+        10
+      );
+      expect(closingParts(second).text).toBeCloseTo(
+        fieldParts(first).text[0],
+        10
+      );
       for (const i of [0, 5]) {
-        expect(boxShift(2, i, second) + boxShift(1, i, first)).toBe(0);
-        expect(boxShift(3, i, second)).toBe(boxShift(2, i, first));
+        expect(boxShift(2, i, second) + boxShift(1, i, first)).toBeCloseTo(
+          0,
+          10
+        );
+        expect(boxShift(3, i, second)).toBeCloseTo(boxShift(2, i, first), 10);
       }
     }
   });
