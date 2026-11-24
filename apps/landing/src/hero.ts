@@ -31,8 +31,6 @@ export function heroBoxes(
 export const ASCII = {
   chars: [' ', '⋅', '.', '^', ' '] as const,
   lineHeight: 8,
-  cellWidth: 7.6,
-  maxWidth: 1500,
   tickMs: 100,
   tickStep: 0.04
 } as const;
@@ -129,9 +127,9 @@ export function asciiGrid(
   width: number,
   height: number
 ): { cols: number; rows: number } {
-  const effectiveWidth = Math.min(width, ASCII.maxWidth);
+  // Enough columns to cover the full width at the glyphs' own pitch.
   return {
-    cols: Math.max(1, Math.floor(effectiveWidth / ASCII.cellWidth)),
+    cols: Math.max(1, Math.ceil(width / ASCII_GLYPH.pitch)),
     rows: Math.ceil(height / ASCII.lineHeight) + 2
   };
 }

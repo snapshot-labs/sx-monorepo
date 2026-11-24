@@ -3,7 +3,7 @@ import { Config } from 'tailwindcss';
 
 export default {
   presets: [tunePreset],
-  content: ['./index.html'],
+  content: ['./index.html', './terms/index.html', './privacy/index.html'],
   theme: {
     extend: {
       colors: {

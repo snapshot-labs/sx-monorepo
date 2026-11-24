@@ -43,68 +43,165 @@
         </p>
       </div>
     </div>
-    <main class="relative min-h-[calc(100svh-53px)] overflow-hidden">
-      <div aria-hidden="true" class="pointer-events-none">
-        <div class="absolute inset-x-0 top-0 h-[540px] bg-yellow"></div>
+    <div id="stage" class="relative h-[400vh]">
+      <div class="sticky top-0 h-[100svh] overflow-hidden">
+        <main class="relative overflow-hidden">
+          <div aria-hidden="true" class="pointer-events-none">
+            <div
+              data-part="band"
+              class="absolute inset-x-0 top-0 h-[540px] bg-yellow"
+            ></div>
+            <canvas
+              class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
+            ></canvas>
+            <div
+              data-boxes="4"
+              data-slide="1"
+              class="absolute z-[6] inset-x-0 top-[calc(100svh-53px-760px)] h-[600px] overflow-hidden text-yellow [&>div]:absolute [&>div]:bg-current"
+            ></div>
+            <div
+              data-boxes="6"
+              data-slide="1"
+              class="absolute z-[6] inset-x-0 top-[320px] h-[600px] overflow-hidden text-white [&>div]:absolute [&>div]:bg-current"
+            ></div>
+            <div
+              data-boxes="4"
+              data-slide="2"
+              class="absolute z-[6] inset-x-0 top-[calc(100svh-53px-760px)] h-[600px] overflow-hidden text-[#6fdcdd] [&>div]:absolute [&>div]:bg-current"
+            ></div>
+            <div
+              data-boxes="6"
+              data-slide="2"
+              class="absolute z-[6] inset-x-0 top-[320px] h-[600px] overflow-hidden text-white [&>div]:absolute [&>div]:bg-current"
+            ></div>
+            <div
+              data-boxes="4"
+              data-slide="3"
+              class="absolute z-[6] inset-x-0 top-[calc(100svh-53px-760px)] h-[600px] overflow-hidden text-black [&>div]:absolute [&>div]:bg-current"
+            ></div>
+            <div
+              data-boxes="6"
+              data-slide="3"
+              class="absolute z-[6] inset-x-0 top-[320px] h-[600px] overflow-hidden text-white [&>div]:absolute [&>div]:bg-current"
+            ></div>
+          </div>
+          <header class="relative z-20 flex py-6">
+            <a
+              href="/"
+              aria-label="Snapshot home"
+              class="flex h-[66px] items-center bg-yellow px-5"
+            >
+              <svg
+                width="38"
+                height="38"
+                viewBox="0 0 300 300"
+                aria-hidden="true"
+              >
+                <path
+                  d="M200 300V100C255.228 100 300 144.772 300 200C300 255.228 255.228 300 200 300Z"
+                />
+                <path
+                  d="M0 100C0 44.772 44.772 0 100 0V200C44.772 200 0 155.228 0 100Z"
+                />
+                <path d="M100 100H300V0H200C144.771 0 100 44.772 100 100Z" />
+                <path d="M200 200H0V300H100C155.229 300 200 255.228 200 200Z" />
+              </svg>
+            </a>
+          </header>
+          <div
+            class="relative z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-2.5"
+          >
+            <div>
+              <p
+                data-part="eyebrow"
+                class="w-fit bg-yellow py-3 text-[17px] uppercase tracking-[1.7px]"
+              >
+                Quis autem vel eum iure
+              </p>
+              <h1
+                data-part="title"
+                class="max-w-[760px] bg-yellow py-3 text-[76px] leading-[83.6px]"
+              >
+                Excepteur sint occaecat cupidatat non proident
+              </h1>
+            </div>
+            <div class="flex justify-end">
+              <div class="w-full max-w-[760px]">
+                <p
+                  data-part="text"
+                  class="bg-yellow py-3 text-[26px] leading-[31.2px]"
+                >
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, nostrud.
+                </p>
+                <a
+                  href="https://snapshot.box"
+                  data-part="button"
+                  class="flex h-[53px] w-fit items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
+                >
+                  Launch app →
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
         <canvas
-          class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
+          id="particles"
+          hidden
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 z-[5] h-full w-full"
         ></canvas>
         <div
-          data-boxes="4"
-          class="absolute inset-x-0 top-[calc(100svh-53px-760px)] h-[600px] overflow-hidden text-yellow [&>div]:absolute [&>div]:bg-current"
-        ></div>
-        <div
-          data-boxes="6"
-          class="absolute inset-x-0 top-[320px] h-[600px] overflow-hidden text-white [&>div]:absolute [&>div]:bg-current"
-        ></div>
-      </div>
-      <header class="relative flex py-6">
-        <a
-          href="/"
-          aria-label="Snapshot home"
-          class="flex h-[66px] items-center bg-yellow px-5"
+          class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-[215.5px]"
         >
-          <svg width="38" height="38" viewBox="0 0 300 300" aria-hidden="true">
-            <path
-              d="M200 300V100C255.228 100 300 144.772 300 200C300 255.228 255.228 300 200 300Z"
-            />
-            <path
-              d="M0 100C0 44.772 44.772 0 100 0V200C44.772 200 0 155.228 0 100Z"
-            />
-            <path d="M100 100H300V0H200C144.771 0 100 44.772 100 100Z" />
-            <path d="M200 200H0V300H100C155.229 300 200 255.228 200 200Z" />
-          </svg>
-        </a>
-      </header>
-      <div
-        class="relative mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-2.5"
-      >
-        <div>
-          <p
-            class="w-fit bg-yellow py-3 text-[17px] uppercase tracking-[1.7px]"
+          <h2
+            data-part="field-title"
+            class="ml-auto w-full max-w-[760px] translate-x-[100vw] bg-[#6fdcdd] py-3 text-[76px] leading-[83.6px]"
           >
-            Turn chaos to consensus
+            Duis aute irure dolor in reprehenderit est
+          </h2>
+          <p
+            data-part="field-text"
+            class="w-full max-w-[760px] -translate-x-[100vw] bg-[#6fdcdd] py-3 text-[26px] leading-[31.2px]"
+          >
+            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
+            fugit, sed quia consequuntur magni dolores eos qui ratione. Neque
+            porro quisquam est, qui nemo.
           </p>
-          <h1 class="max-w-[760px] bg-yellow py-3 text-[76px] leading-[83.6px]">
-            Excepteur sint occaecat cupidatat non proident
-          </h1>
         </div>
-        <div class="flex justify-end">
-          <div class="w-full max-w-[760px]">
-            <p class="bg-yellow py-3 text-[26px] leading-[31.2px]">
-              With 95%+ market share and 15,000+ active spaces, Snapshot is the
-              leading platform for decentralized governance, coordinating
-              billions in treasury decisions.
-            </p>
-            <a
-              href="https://snapshot.box"
-              class="flex h-[53px] w-fit items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
-            >
-              Launch app →
-            </a>
+        <div
+          id="closing"
+          inert
+          class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-[215.5px]"
+        >
+          <h2
+            data-part="closing-title"
+            class="max-w-[760px] -translate-x-[100vw] bg-white py-3 text-[76px] leading-[83.6px]"
+          >
+            Itaque earum rerum hic tenetur sapiente
+          </h2>
+          <div class="flex justify-end">
+            <div class="w-full max-w-[760px]">
+              <p
+                data-part="closing-text"
+                class="translate-x-[100vw] bg-white py-3 text-[26px] leading-[31.2px]"
+              >
+                At vero eos et accusamus et iusto odio dignissimos ducimus qui
+                blanditiis praesentium voluptatum deleniti atque corrupti quos.
+                Similique sunt in culpa officia.
+              </p>
+              <a
+                href="https://snapshot.box"
+                data-part="closing-button"
+                class="pointer-events-auto flex h-[53px] w-fit translate-x-[100vw] items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
+              >
+                Launch app →
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+    </div>
   </body>
 </html>

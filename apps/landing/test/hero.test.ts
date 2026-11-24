@@ -38,14 +38,16 @@ describe('zero-size frames', () => {
 });
 
 describe('asciiFrame', () => {
-  test('grid follows the frame and caps the width', () => {
+  test('grid follows the frame and covers its full width', () => {
     expect(asciiGrid(1440, 900)).toEqual({
-      cols: Math.floor(1440 / ASCII.cellWidth),
+      cols: Math.ceil(1440 / ASCII_GLYPH.pitch),
       rows: 115
     });
-    expect(asciiGrid(4000, 80).cols).toBe(
-      Math.floor(ASCII.maxWidth / ASCII.cellWidth)
-    );
+    for (const width of [390, 1470, 4000]) {
+      expect(
+        asciiGrid(width, 80).cols * ASCII_GLYPH.pitch
+      ).toBeGreaterThanOrEqual(width);
+    }
   });
 
   test('renders rows of the requested width using only the palette', () => {
