@@ -16,6 +16,9 @@ defineEmits<{ (e: 'browseValidators'): void }>();
 
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const { lastSaved } = useStakedDelegationActions();
+
+const isChoiceOpen = ref(false);
 
 const { data: delegatee, isPending: isDelegateePending } =
   useStakedDelegateeQuery(() => props.account);
@@ -23,10 +26,17 @@ const {
   data: memberships,
   isFetching: isFetchingMemberships,
   isError: isMembershipsError,
+  isPlaceholderData: isMembershipsCached,
   progress
 } = useMembershipsQuery(() => props.account);
 
 const { explorerUrl } = getStakedDelegationConfig();
+
+const isStatusLoading = computed(
+  () =>
+    isDelegateePending.value ||
+    (isFetchingMemberships.value && !memberships.value)
+);
 
 const isHowItWorksOpen = ref(false);
 
@@ -43,19 +53,27 @@ const voters = computed(() => {
   );
   return [...unique];
 });
-const votesGoTo = computed(() => {
-  if (delegatee.value) {
-    return isSameAddress(delegatee.value, props.account)
-      ? 'You'
-      : shortenVoter(delegatee.value);
+const mode = computed<'default' | 'self' | 'delegate'>(() => {
+  if (!delegatee.value) return 'default';
+  return isSameAddress(delegatee.value, props.account) ? 'self' : 'delegate';
+});
+
+const headline = computed(() => {
+  if (mode.value === 'self') return 'You vote with all of your stake';
+  if (mode.value === 'delegate') {
+    return `${shortenVoter(delegatee.value!)} votes with all of your stake`;
   }
-  if (!memberships.value?.length) return 'Your validators';
-  if (voters.value.length === 1) {
-    return isSameAddress(voters.value[0], props.account)
-      ? 'You'
-      : shortenVoter(voters.value[0]);
-  }
-  return `${voters.value.length} addresses`;
+  if (!memberships.value?.length) return 'Your validators will vote for you';
+  return 'Your validators vote for you';
+});
+
+const detail = computed(() => {
+  const pools = memberships.value?.length ?? 0;
+  if (!pools) return 'No stake in a delegation pool yet';
+  const stake = `${_c(totalStake.value)} STRK in ${pools} ${pools === 1 ? 'pool' : 'pools'}`;
+  if (mode.value !== 'default') return `${stake} · your choice`;
+  const n = voters.value.length;
+  return `${stake} · default · votes go to ${n} ${n === 1 ? 'address' : 'addresses'}`;
 });
 </script>
 
@@ -86,52 +104,72 @@ const votesGoTo = computed(() => {
   </div>
 
   <template v-else>
-    <div class="p-4 grid grid-cols-1 xs:grid-cols-3 gap-2 xs:gap-3">
-      <div
-        class="border rounded-lg px-3.5 py-2.5 xs:py-3 flex items-center justify-between gap-2 xs:block"
-      >
-        <UiEyebrow class="text-skin-text">Staked in pools</UiEyebrow>
-        <UiLoading v-if="isFetchingMemberships && !memberships" class="mt-1" />
-        <div v-else class="text-skin-heading text-lg truncate">
-          {{ _c(totalStake) }} <span class="text-skin-text text-sm">STRK</span>
-        </div>
-      </div>
-      <div
-        class="border rounded-lg px-3.5 py-2.5 xs:py-3 flex items-center justify-between gap-2 xs:block"
-      >
-        <UiEyebrow class="text-skin-text">Validators</UiEyebrow>
-        <UiLoading v-if="isFetchingMemberships && !memberships" class="mt-1" />
-        <div v-else class="text-skin-heading text-lg">
-          {{ memberships?.length ?? 0 }}
-        </div>
-      </div>
-      <div
-        class="border rounded-lg px-3.5 py-2.5 xs:py-3 flex items-center justify-between gap-2 xs:block"
-      >
-        <UiEyebrow class="text-skin-text">Your votes go to</UiEyebrow>
-        <UiLoading
-          v-if="isDelegateePending || (isFetchingMemberships && !memberships)"
-          class="mt-1"
-        />
-        <div v-else class="text-skin-heading text-lg truncate">
-          {{ votesGoTo }}
-        </div>
-      </div>
-    </div>
-
-    <div class="px-4 pb-4">
-      <StakedDelegationLiveVotes />
-    </div>
-
-    <UiSectionHeader label="Your choice" />
     <div class="p-4">
-      <StakedDelegationChoice
-        :account="account"
-        :delegatee="delegatee"
-        :is-loading="isDelegateePending"
-        :memberships="memberships"
-      />
+      <div class="border rounded-lg">
+        <div class="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <UiStamp
+              v-if="mode === 'delegate' && delegatee"
+              :id="delegatee"
+              type="avatar"
+              :size="44"
+              class="shrink-0"
+            />
+            <div
+              v-else
+              class="size-[44px] shrink-0 rounded-full bg-skin-link text-skin-bg flex items-center justify-center"
+            >
+              <IH-user v-if="mode === 'self'" class="size-[20px]" />
+              <IH-user-group v-else class="size-[20px]" />
+            </div>
+            <div class="min-w-0">
+              <UiEyebrow class="text-skin-text">Your vote</UiEyebrow>
+              <UiLoading v-if="isStatusLoading" class="block mt-1" />
+              <template v-else>
+                <h3 class="text-skin-heading leading-6" v-text="headline" />
+                <div
+                  class="text-skin-text text-[16px] leading-[22px]"
+                  v-text="detail"
+                />
+              </template>
+            </div>
+          </div>
+          <UiButton
+            primary
+            class="shrink-0 sm:min-w-[120px]"
+            :disabled="isStatusLoading"
+            @click="isChoiceOpen = true"
+          >
+            Change
+          </UiButton>
+        </div>
+        <div class="border-t px-4 py-2.5 flex flex-col gap-1.5">
+          <div
+            v-if="lastSaved"
+            class="flex items-center gap-1.5 text-skin-success text-[15px]"
+          >
+            <IH-check-circle class="shrink-0" />
+            Saved on-chain.
+            <AppLink
+              :to="`${explorerUrl}/tx/${lastSaved.txHash}`"
+              class="text-skin-link flex items-center gap-0.5"
+            >
+              View transaction
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+          </div>
+          <StakedDelegationLiveVotes />
+        </div>
+      </div>
     </div>
+
+    <StakedDelegationChoiceModal
+      :open="isChoiceOpen"
+      :account="account"
+      :delegatee="delegatee"
+      :memberships="memberships"
+      @close="isChoiceOpen = false"
+    />
 
     <UiSectionHeader label="Where your votes go" />
     <div class="p-4 flex flex-col gap-3">
@@ -141,6 +179,7 @@ const votesGoTo = computed(() => {
         :records="records"
         :is-loading="isFetchingMemberships && !memberships"
         :is-error="isMembershipsError"
+        :is-refreshing="isMembershipsCached"
         :progress="progress"
       >
         <template #empty>

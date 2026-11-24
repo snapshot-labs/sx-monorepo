@@ -10,13 +10,16 @@ import {
   ValidatorPool
 } from './config';
 import {
+  FIXTURE_PROFILES,
   FIXTURE_VALIDATORS,
   getFixtureMemberships,
   isFixtureStaker
 } from './fixtures';
+import { VALIDATOR_PROFILES, ValidatorProfile } from './validatorProfiles';
 
 export * from './config';
 export { FIXTURES_ENABLED } from './fixtures';
+export type { ValidatorProfile } from './validatorProfiles';
 
 /** Why an address ends up voting with a given stake. */
 export type ResolutionReason =
@@ -159,6 +162,38 @@ export function resolvePoolMember(
   };
 }
 
+export type VoterShare = { address: string; amount: bigint; share: number };
+
+/**
+ * Who votes with `delegator`'s pool stake if their delegate were `delegatee`
+ * (`null` = default), summed per voting address, largest first.
+ */
+export function aggregateVoters(
+  delegator: string,
+  memberships: Pick<Membership, 'validator' | 'amount' | 'config'>[],
+  delegatee: string | null
+): VoterShare[] {
+  const total = memberships.reduce((sum, m) => sum + m.amount, ZERO);
+  const byVoter = new Map<string, bigint>();
+  for (const m of memberships) {
+    const { votesWith } = resolvePoolMember(
+      delegator,
+      m.validator.staker,
+      delegatee,
+      m.config
+    );
+    const key = normalizeAddress(votesWith);
+    byVoter.set(key, (byVoter.get(key) ?? ZERO) + m.amount);
+  }
+  return [...byVoter.entries()]
+    .map(([address, amount]) => ({
+      address,
+      amount,
+      share: total > ZERO ? Number((amount * 10000n) / total) / 10000 : 0
+    }))
+    .sort((a, b) => (b.amount > a.amount ? 1 : -1));
+}
+
 async function getPoolMemberAmount(
   pool: string,
   member: string,
@@ -238,10 +273,29 @@ export function getValidators(
   networkId = STAKED_DELEGATION_NETWORK
 ): ValidatorPool[] {
   const { validators } = getStakedDelegationConfig(networkId).pools;
-  if (!FIXTURE_VALIDATORS.length) return validators;
-  return [...FIXTURE_VALIDATORS, ...validators].sort((a, b) =>
-    BigInt(b.delegated) > BigInt(a.delegated) ? 1 : -1
-  );
+  const all = FIXTURE_VALIDATORS.length
+    ? [...FIXTURE_VALIDATORS, ...validators].sort((a, b) =>
+        BigInt(b.delegated) > BigInt(a.delegated) ? 1 : -1
+      )
+    : validators;
+  return all.map(validator => {
+    const profile = getValidatorProfile(validator.staker, networkId);
+    return profile ? { ...validator, name: profile.name } : validator;
+  });
+}
+
+/** Profile from validatorProfiles.ts (or local fixtures), if any. */
+export function getValidatorProfile(
+  staker: string,
+  networkId = STAKED_DELEGATION_NETWORK
+): ValidatorProfile | null {
+  let key: string;
+  try {
+    key = normalizeAddress(staker);
+  } catch {
+    return null;
+  }
+  return VALIDATOR_PROFILES[networkId][key] ?? FIXTURE_PROFILES[key] ?? null;
 }
 
 /** Validator name when known, otherwise a shortened address. */

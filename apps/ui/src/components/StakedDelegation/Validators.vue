@@ -91,7 +91,7 @@ watch(search, () => (limit.value = PAGE_SIZE));
     <UiColumnHeader class="space-x-3 border-t">
       <div class="w-[28px] shrink-0">#</div>
       <div class="flex-1 truncate">Validator</div>
-      <div class="hidden lg:block w-[200px] shrink-0 truncate">Votes with</div>
+      <div class="hidden xl:block w-[200px] shrink-0 truncate">Votes with</div>
       <div class="hidden sm:block w-[96px] shrink-0">
         <UiTooltip title="Votes cast on the last 6 Starknet votes and polls">
           <span>Record</span>

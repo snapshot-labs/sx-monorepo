@@ -12,6 +12,8 @@ const props = defineProps<{
   member?: string;
   /** Voting records keyed by lowercased voting address. */
   records?: Record<string, VotingRecord>;
+  /** Showing a cached result while a fresh scan runs. */
+  isRefreshing?: boolean;
 }>();
 
 const totalStake = computed(() =>
@@ -61,7 +63,16 @@ function share(amount: bigint) {
       >
         <div class="w-[34%]">Validator</div>
         <div class="w-[26%]">Stake</div>
-        <div class="flex-1">Votes with</div>
+        <div class="flex-1 flex items-center justify-between gap-2">
+          <span>Votes with</span>
+          <span
+            v-if="isRefreshing"
+            class="flex items-center gap-1.5 font-normal"
+          >
+            <UiLoading :size="12" />
+            Checking for changes…
+          </span>
+        </div>
       </div>
       <div
         v-for="membership in memberships"

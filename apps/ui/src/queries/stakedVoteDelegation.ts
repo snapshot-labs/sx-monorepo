@@ -16,6 +16,7 @@ import {
   loadVotingRecords,
   pickRecentProposals
 } from '@/helpers/stakedVoteDelegation/votingRecord';
+import { lsGet, lsSet } from '@/helpers/utils';
 import { useProposalsSummaryQuery } from '@/queries/proposals';
 
 export const stakedDelegationKeys = {
@@ -63,6 +64,36 @@ export function useIsStakerQuery(address: MaybeRefOrGetter<string>) {
   });
 }
 
+type CachedMembership = Omit<Membership, 'amount'> & { amount: string };
+
+function membershipsCacheKey(address: string) {
+  return `stakedDelegation.memberships.${STAKED_DELEGATION_NETWORK}.${normalizeAddress(address)}`;
+}
+
+/** Last result for this address, shown while a fresh scan runs. */
+function readCachedMemberships(address: string): Membership[] | undefined {
+  try {
+    const cached: CachedMembership[] | null = lsGet(
+      membershipsCacheKey(address),
+      null
+    );
+    return cached?.map(m => ({ ...m, amount: BigInt(m.amount) }));
+  } catch {
+    return undefined;
+  }
+}
+
+function writeCachedMemberships(address: string, memberships: Membership[]) {
+  try {
+    lsSet(
+      membershipsCacheKey(address),
+      memberships.map(m => ({ ...m, amount: m.amount.toString() }))
+    );
+  } catch {
+    // Storage may be full or blocked; the cache is only a speed-up.
+  }
+}
+
 /**
  * Pools the address delegates to, and who votes with each of them under the
  * SNIP resolution rules.
@@ -83,7 +114,7 @@ export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
         })
       ]);
 
-      return Promise.all(
+      const memberships = await Promise.all(
         pools.map(async ({ validator, amount }) => {
           const config = await getValidatorConfig(validator.staker);
           return {
@@ -94,7 +125,11 @@ export function useMembershipsQuery(address: MaybeRefOrGetter<string>) {
           };
         })
       );
+      writeCachedMemberships(member, memberships);
+      return memberships;
     },
+    placeholderData: () =>
+      isEnabled(address) ? readCachedMemberships(toValue(address)) : undefined,
     enabled: () => isEnabled(address),
     staleTime: 60_000
   });

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   getValidator,
+  getValidatorProfile,
   isSameAddress,
   isValidStarknetAddress,
   shortenVoter
@@ -43,6 +44,7 @@ const {
   data: memberships,
   isFetching: isFetchingMemberships,
   isError: isMembershipsError,
+  isPlaceholderData: isMembershipsCached,
   progress
 } = useMembershipsQuery(address);
 const { data: delegatee, isPending: isDelegateePending } =
@@ -75,6 +77,9 @@ const {
 
 const validator = computed(() =>
   address.value ? getValidator(address.value) : null
+);
+const profile = computed(() =>
+  address.value ? getValidatorProfile(address.value) : null
 );
 
 const choice = computed(() => {
@@ -118,8 +123,26 @@ function handleSubmit() {
     </form>
 
     <template v-if="address">
-      <div class="flex items-center gap-3">
+      <div class="flex flex-col gap-2">
         <StakedDelegationAddress :address="address" :size="40" />
+        <div
+          v-if="profile?.about || profile?.website"
+          class="flex flex-col gap-1 max-w-[720px] text-[16px] leading-6"
+        >
+          <p
+            v-if="profile.about"
+            class="text-skin-text"
+            v-text="profile.about"
+          />
+          <AppLink
+            v-if="profile.website"
+            :to="profile.website"
+            class="text-skin-link flex items-center gap-1 self-start"
+          >
+            {{ profile.website.replace(/^https?:\/\//, '') }}
+            <IH-arrow-sm-right class="-rotate-45" />
+          </AppLink>
+        </div>
       </div>
 
       <div class="grid gap-3 sm:grid-cols-2">
@@ -174,6 +197,7 @@ function handleSubmit() {
           :records="records"
           :is-loading="isFetchingMemberships && !memberships"
           :is-error="isMembershipsError"
+          :is-refreshing="isMembershipsCached"
           :progress="progress"
         >
           <template #empty>

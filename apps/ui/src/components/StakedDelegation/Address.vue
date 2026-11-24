@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {
   getStakedDelegationConfig,
-  getValidator
+  getValidator,
+  getValidatorProfile
 } from '@/helpers/stakedVoteDelegation';
 import { getNames } from '@/helpers/stamp';
 import { shortenAddress } from '@/helpers/utils';
@@ -34,6 +35,12 @@ watch(
 );
 
 const validatorName = computed(() => getValidator(props.address)?.name);
+const profile = computed(() => getValidatorProfile(props.address));
+const hasLogoError = ref(false);
+watch(
+  () => props.address,
+  () => (hasLogoError.value = false)
+);
 
 const displayName = computed(
   () =>
@@ -50,7 +57,17 @@ const explorerLink = computed(
 
 <template>
   <div class="flex items-center gap-2.5 min-w-0">
-    <UiStamp :id="address" type="avatar" :size="size" class="shrink-0" />
+    <img
+      v-if="profile?.logo && !hasLogoError"
+      :src="profile.logo"
+      :alt="profile.name"
+      :width="size"
+      :height="size"
+      class="rounded-full shrink-0 object-cover bg-skin-border"
+      :style="{ width: `${size}px`, height: `${size}px` }"
+      @error="hasLogoError = true"
+    />
+    <UiStamp v-else :id="address" type="avatar" :size="size" class="shrink-0" />
     <div class="min-w-0 leading-[22px]">
       <div class="flex items-center gap-1.5 min-w-0">
         <AppLink
@@ -64,6 +81,12 @@ const explorerLink = computed(
         <span v-else class="text-skin-link truncate" :title="address">
           {{ displayName }}
         </span>
+        <UiTooltip
+          v-if="profile?.verified"
+          title="Profile verified by the Starknet Foundation"
+        >
+          <IS-badge-check class="size-[16px] text-skin-link shrink-0" />
+        </UiTooltip>
         <slot name="badge" />
       </div>
       <div v-if="$slots.subtitle" class="mt-0.5">

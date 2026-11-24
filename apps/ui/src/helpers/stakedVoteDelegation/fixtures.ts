@@ -1,4 +1,5 @@
 import { ValidatorPool } from './config';
+import { ValidatorProfile } from './validatorProfiles';
 
 /**
  * Local testing fixtures. They fake staking state only (pool membership and
@@ -33,7 +34,6 @@ const TEST_VALIDATOR: ValidatorPool = {
 const DECLINED_VALIDATOR: ValidatorPool = {
   staker: '0x032cca99f07972f26d60e8b19029b2e6ffd6388bfa97b813bea8fa28cb33cf38',
   pool: '0x0f1f000000000000000000000000000000000000000000000000000000000002',
-  name: 'Basalt Nodes (test)',
   delegated: toWei(1_340_000),
   own: toWei(60_000),
   commission: 800,
@@ -43,12 +43,30 @@ const DECLINED_VALIDATOR: ValidatorPool = {
 const RECEIVER_VALIDATOR: ValidatorPool = {
   staker: '0x04085479aab76b36083a42fc3fc2dee4c967cdda53562334c22a0899e504c6e6',
   pool: '0x0f1f000000000000000000000000000000000000000000000000000000000003',
-  name: 'Cinder Staking (test)',
   delegated: toWei(2_150_000),
   own: toWei(120_000),
   commission: 1000,
   exiting: false
 };
+
+/** Sample profiles, as validators would add them to validatorProfiles.ts. */
+export const FIXTURE_PROFILES: Record<string, ValidatorProfile> =
+  FIXTURES_ENABLED
+    ? {
+        [RECEIVER_VALIDATOR.staker]: {
+          name: 'Cinder Staking (test)',
+          website: 'https://example.com',
+          about:
+            'Test profile. Votes through a separate hot wallet and publishes its reasoning before each vote.',
+          verified: true
+        },
+        [DECLINED_VALIDATOR.staker]: {
+          name: 'Basalt Nodes (test)',
+          about:
+            'Test profile. Declined default delegations so its delegators keep their own vote.'
+        }
+      }
+    : {};
 
 export const FIXTURE_VALIDATORS: ValidatorPool[] = FIXTURES_ENABLED
   ? [TEST_VALIDATOR, RECEIVER_VALIDATOR, DECLINED_VALIDATOR]

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  aggregateVoters,
   FIXTURES_ENABLED,
+  getValidatorProfile,
   isSameAddress,
   isValidStarknetAddress,
   normalizeAddress,
@@ -115,5 +117,61 @@ describe('pickRecentProposals', () => {
   it(`keeps at most ${RECORD_SIZE}`, () => {
     const many = Array.from({ length: 10 }, (_, i) => proposal(`v${i}`, i));
     expect(pickRecentProposals(many, [])).toHaveLength(RECORD_SIZE);
+  });
+});
+
+describe('aggregateVoters', () => {
+  const STRK = 10n ** 18n;
+  const pool = (
+    staker: string,
+    amount: number,
+    config: { voteReceiver: string; acceptsDefaultDelegations: boolean }
+  ) => ({
+    validator: {
+      staker,
+      pool: '0x1',
+      delegated: '0',
+      own: '0',
+      commission: null,
+      exiting: false
+    },
+    amount: BigInt(amount) * STRK,
+    config
+  });
+  const memberships = [
+    pool(STAKER, 60, { voteReceiver: STAKER, acceptsDefaultDelegations: true }),
+    pool('0x555', 30, {
+      voteReceiver: RECEIVER,
+      acceptsDefaultDelegations: true
+    }),
+    pool('0x666', 10, {
+      voteReceiver: '0x666',
+      acceptsDefaultDelegations: false
+    })
+  ];
+
+  it('splits the default across validators, receivers and declines', () => {
+    expect(aggregateVoters(MEMBER, memberships, null)).toEqual([
+      { address: normalizeAddress(STAKER), amount: 60n * STRK, share: 0.6 },
+      { address: normalizeAddress(RECEIVER), amount: 30n * STRK, share: 0.3 },
+      { address: normalizeAddress(MEMBER), amount: 10n * STRK, share: 0.1 }
+    ]);
+  });
+
+  it('sends everything to an explicit delegate', () => {
+    expect(aggregateVoters(MEMBER, memberships, DELEGATEE)).toEqual([
+      { address: normalizeAddress(DELEGATEE), amount: 100n * STRK, share: 1 }
+    ]);
+  });
+
+  it('returns nothing without stake', () => {
+    expect(aggregateVoters(MEMBER, [], null)).toEqual([]);
+  });
+});
+
+describe('getValidatorProfile', () => {
+  it('returns null for unknown or invalid addresses', () => {
+    expect(getValidatorProfile('0x123')).toBeNull();
+    expect(getValidatorProfile('not an address')).toBeNull();
   });
 });

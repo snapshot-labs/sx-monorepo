@@ -53,7 +53,7 @@ const hasCustomReceiver = computed(
         </template>
       </StakedDelegationAddress>
     </div>
-    <div class="hidden lg:block w-[200px] shrink-0 truncate">
+    <div class="hidden xl:block w-[200px] shrink-0 truncate">
       <UiLoading v-if="isPending" :size="16" />
       <StakedDelegationAddress
         v-else-if="config && hasCustomReceiver"
@@ -74,7 +74,7 @@ const hasCustomReceiver = computed(
       <UiPill
         v-else-if="config"
         :variant="config.acceptsDefaultDelegations ? 'default' : 'secondary'"
-        class="whitespace-nowrap"
+        class="w-[84px] text-center whitespace-nowrap"
       >
         {{ config.acceptsDefaultDelegations ? 'Accepting' : 'Declined' }}
       </UiPill>

@@ -23,6 +23,32 @@ The page is at `/#/delegation` on the Starknet organization
 - **When your choice counts**: open votes and polls, and a preview of who
   votes with your stake before you save.
 
+## Validator profiles
+
+Names, logos, websites and a short "about" come from
+[`validatorProfiles.ts`](validatorProfiles.ts), keyed by staker address.
+Validators add themselves with a pull request:
+
+```ts
+'0x0123…': {
+  name: 'Example Validator',
+  logo: 'https://example.com/logo.png',
+  website: 'https://example.com',
+  about: 'Who runs it and how it approaches governance votes.',
+  verified: true // only after SNF confirms the staker address
+}
+```
+
+Without a profile, the page falls back to the validator's Starknet ID name,
+then to the shortened address. The list starts empty; Voyager's validator
+data needs a paid API key and a server-side proxy (see the project notes).
+
+## Speed
+
+Finding a wallet's pools checks every pool with stake, so the first lookup
+takes a few seconds. The result is kept in the browser and shown instantly
+on later visits while a fresh check runs ("Checking for changes…").
+
 ## Networks
 
 | Network | Registry | Notes |
