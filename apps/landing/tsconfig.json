@@ -6,5 +6,6 @@
     "moduleResolution": "bundler",
     "lib": ["esnext", "dom"],
     "types": ["bun"]
-  }
+  },
+  "include": ["src", "test", "vite.config.ts"]
 }

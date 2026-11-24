@@ -178,15 +178,15 @@ const fragmentShader = /* glsl */ `
 `;
 
 // Draws the scene on canvas with plain WebGL once the page scrolls, in place
-// of the hero's 2D canvas (ascii). Returns false when WebGL is not available.
+// of the hero's 2D canvas (ascii). Without WebGL, the hero stays as it is.
 export function startScene(
   canvas: HTMLCanvasElement,
   ascii: HTMLCanvasElement,
   heroFrame: () => HeroFrame,
   scrollProgress: () => number
-): boolean {
+): void {
   const gl = canvas.getContext('webgl');
-  if (!gl) return false;
+  if (!gl) return;
   const program = gl.createProgram()!;
   for (const [type, source] of [
     [gl.VERTEX_SHADER, vertexShader],
@@ -198,7 +198,7 @@ export function startScene(
     gl.attachShader(program, shader);
   }
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
   gl.useProgram(program);
 
   const position = gl.getAttribLocation(program, 'position');
@@ -306,9 +306,8 @@ export function startScene(
   // If the GPU drops the context, the hero's 2D canvas takes over again.
   canvas.addEventListener('webglcontextlost', () => {
     cancelAnimationFrame(frame);
-    canvas.remove();
+    canvas.hidden = true;
     ascii.style.visibility = '';
   });
   frame = requestAnimationFrame(render);
-  return true;
 }
