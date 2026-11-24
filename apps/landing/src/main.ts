@@ -1,6 +1,6 @@
 import './style.css';
 import { ASCII, asciiFrame, asciiGrid, asciiPath, heroBoxes } from './hero';
-import { HeroFrame } from './scene';
+import { HeroFrame, startScene } from './scene';
 import {
   boxShift,
   closingParts,
@@ -87,16 +87,6 @@ document
 document.fonts.load('500 19px Calibre').then(fillBanner, fillBanner);
 addEventListener('resize', fillBanner);
 
-// three.js loads after the page so the hero can turn into particles on scroll.
-const particles = document.querySelector<HTMLCanvasElement>('#particles')!;
-addEventListener('load', () => {
-  import('./scene')
-    .then(({ startScene }) =>
-      startScene(particles, canvas, heroFrame, () => progress)
-    )
-    .catch(() => particles.remove());
-});
-
 // Each part of the hero but the logo leaves on its own as the page scrolls,
 // by moving out of view: nothing fades or shrinks.
 const stage = document.getElementById('stage')!;
@@ -105,25 +95,15 @@ const logo = document.querySelector<HTMLElement>('header a')!;
 
 const part = (name: string) =>
   document.querySelector<HTMLElement>(`[data-part="${name}"]`)!;
-const [eyebrow, title, text, button] = [
-  'eyebrow',
-  'title',
-  'text',
-  'button'
-].map(part) as [HTMLElement, HTMLElement, HTMLElement, HTMLElement];
-const [fieldTitle, fieldText, closingTitle, closingText, closingButton] = [
-  'field-title',
-  'field-text',
-  'closing-title',
-  'closing-text',
-  'closing-button'
-].map(part) as [
-  HTMLElement,
-  HTMLElement,
-  HTMLElement,
-  HTMLElement,
-  HTMLElement
-];
+const eyebrow = part('eyebrow');
+const title = part('title');
+const text = part('text');
+const button = part('button');
+const fieldTitle = part('field-title');
+const fieldText = part('field-text');
+const closingTitle = part('closing-title');
+const closingText = part('closing-text');
+const closingButton = part('closing-button');
 // Each slide's rectangles, in order.
 const boxes = ['1', '2', '3'].map(slide =>
   Array.from(
@@ -220,3 +200,9 @@ const wake = () => {
 addEventListener('scroll', wake, { passive: true });
 addEventListener('resize', wake);
 animateHero(progress);
+
+// Once the page has loaded, the glyph field takes over the hero on scroll.
+const scene = document.querySelector<HTMLCanvasElement>('#scene')!;
+addEventListener('load', () => {
+  if (!startScene(scene, canvas, heroFrame, () => progress)) scene.remove();
+});

@@ -1,14 +1,3 @@
-import {
-  DataTexture,
-  Mesh,
-  NearestFilter,
-  OrthographicCamera,
-  PlaneGeometry,
-  RedFormat,
-  Scene,
-  ShaderMaterial,
-  WebGLRenderer
-} from 'three';
 import { ASCII, ASCII_GLYPH, asciiOrigin } from './hero';
 import { PUSH, STEP } from './timeline';
 
@@ -22,9 +11,11 @@ export interface HeroFrame {
 
 const KIND: Record<string, number> = { '⋅': 1, '.': 2, '^': 3 };
 
+// One triangle that covers the whole canvas.
 const vertexShader = /* glsl */ `
+  attribute vec2 position;
   void main() {
-    gl_Position = vec4(position.xy, 0.0, 1.0);
+    gl_Position = vec4(position, 0.0, 1.0);
   }
 `;
 
@@ -32,6 +23,7 @@ const vertexShader = /* glsl */ `
 // from the hero's glyph, to pixel blocks and binary digits streaming sideways,
 // to rings that spread out from one point until they fill the band.
 const fragmentShader = /* glsl */ `
+  precision highp float;
   uniform sampler2D uKinds;
   uniform vec2 uGrid;
   uniform vec2 uOrigin;
@@ -185,46 +177,69 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
+// Draws the scene on canvas with plain WebGL once the page scrolls, in place
+// of the hero's 2D canvas (ascii). Returns false when WebGL is not available.
 export function startScene(
   canvas: HTMLCanvasElement,
   ascii: HTMLCanvasElement,
   heroFrame: () => HeroFrame,
   scrollProgress: () => number
-): void {
-  const stage = document.getElementById('stage')!;
+): boolean {
+  const gl = canvas.getContext('webgl');
+  if (!gl) return false;
+  const program = gl.createProgram()!;
+  for (const [type, source] of [
+    [gl.VERTEX_SHADER, vertexShader],
+    [gl.FRAGMENT_SHADER, fragmentShader]
+  ] as const) {
+    const shader = gl.createShader(type)!;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    gl.attachShader(program, shader);
+  }
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+  gl.useProgram(program);
+
+  const position = gl.getAttribLocation(program, 'position');
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([-1, -1, 3, -1, -1, 3]),
+    gl.STATIC_DRAW
+  );
+  gl.enableVertexAttribArray(position);
+  gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+  // The hero's glyphs, one texel per cell, read as they are.
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  for (const name of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) {
+    gl.texParameteri(gl.TEXTURE_2D, name, gl.NEAREST);
+  }
+  for (const name of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) {
+    gl.texParameteri(gl.TEXTURE_2D, name, gl.CLAMP_TO_EDGE);
+  }
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+
+  const uniform = (name: string) => gl.getUniformLocation(program, name);
+  const ratio = Math.min(devicePixelRatio || 1, 2);
+  gl.uniform1f(uniform('uRatio'), ratio);
+
   const main = document.querySelector('main')!;
   const band = document.querySelector<HTMLElement>('[data-part="band"]')!;
-  const renderer = new WebGLRenderer({ canvas, alpha: true });
-  const ratio = Math.min(devicePixelRatio || 1, 2);
-  renderer.setPixelRatio(ratio);
-
-  const uniforms = {
-    uKinds: { value: new DataTexture(new Uint8Array(1), 1, 1) },
-    uGrid: { value: [1, 1] },
-    uOrigin: { value: [0, 0] },
-    uSize: { value: [1, 1] },
-    uClip: { value: 1 },
-    uBand: { value: 0 },
-    uRatio: { value: ratio },
-    uProgress: { value: 0 },
-    uTime: { value: 0 }
-  };
-  const scene = new Scene();
-  scene.add(
-    new Mesh(
-      new PlaneGeometry(2, 2),
-      new ShaderMaterial({ uniforms, vertexShader, fragmentShader })
-    )
-  );
-  const camera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
-
+  // What was last drawn: the scroll, the hero's clock and the size.
+  let drawn = '';
   const layout = () => {
     const { clientWidth: width, clientHeight: height } = canvas;
-    renderer.setSize(width, height, false);
-    uniforms.uSize.value = [width, height];
-    uniforms.uClip.value = main.offsetHeight;
+    canvas.width = Math.floor(width * ratio);
+    canvas.height = Math.floor(height * ratio);
+    // Resizing clears the canvas, so the next frame draws again.
+    drawn = '';
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uniform('uSize'), width, height);
+    gl.uniform1f(uniform('uClip'), main.offsetHeight);
     // The field's and the rings' colors end where the hero's yellow does.
-    uniforms.uBand.value = band.offsetHeight;
+    gl.uniform1f(uniform('uBand'), band.offsetHeight);
   };
 
   // The hero's current frame as one texel per cell.
@@ -241,14 +256,20 @@ export function startScene(
         kinds[row * cols + col] = KIND[line[col] ?? ' '] ?? 0;
       }
     });
-    uniforms.uKinds.value.dispose();
-    const texture = new DataTexture(kinds, cols, rows, RedFormat);
-    texture.magFilter = texture.minFilter = NearestFilter;
-    texture.needsUpdate = true;
-    uniforms.uKinds.value = texture;
-    uniforms.uGrid.value = [cols, rows];
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.LUMINANCE,
+      cols,
+      rows,
+      0,
+      gl.LUMINANCE,
+      gl.UNSIGNED_BYTE,
+      kinds
+    );
+    gl.uniform2f(uniform('uGrid'), cols, rows);
     const origin = asciiOrigin(width, height, cols, rows);
-    uniforms.uOrigin.value = [origin.x, origin.y];
+    gl.uniform2f(uniform('uOrigin'), origin.x, origin.y);
   };
 
   let isActive = false;
@@ -259,6 +280,7 @@ export function startScene(
     if (active) layout();
   };
 
+  // Draws only when the scroll, the hero's clock or the size has changed.
   let frame = 0;
   const render = () => {
     frame = requestAnimationFrame(render);
@@ -269,17 +291,24 @@ export function startScene(
     }
     if (!isActive) setActive(true);
     const hero = heroFrame();
+    const state = `${progress} ${hero.time} ${canvas.width}x${canvas.height}`;
+    if (state === drawn) return;
+    drawn = state;
     upload(hero);
-    uniforms.uProgress.value = progress;
-    uniforms.uTime.value = hero.time;
-    renderer.render(scene, camera);
+    gl.uniform1f(uniform('uProgress'), progress);
+    gl.uniform1f(uniform('uTime'), hero.time);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
   addEventListener('resize', () => {
     if (isActive) layout();
   });
-  new IntersectionObserver(([entry]) => {
+  // If the GPU drops the context, the hero's 2D canvas takes over again.
+  canvas.addEventListener('webglcontextlost', () => {
     cancelAnimationFrame(frame);
-    if (entry!.isIntersecting) frame = requestAnimationFrame(render);
-  }).observe(stage);
+    canvas.remove();
+    ascii.style.visibility = '';
+  });
+  frame = requestAnimationFrame(render);
+  return true;
 }

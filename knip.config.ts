@@ -21,9 +21,6 @@ const config: KnipConfig = {
     'apps/hub': {
       entry: ['src/index.ts']
     },
-    'apps/landing': {
-      entry: ['postcss.config.js']
-    },
     'apps/mana': {
       entry: ['src/index.ts', 'knexfile.ts', 'migrations/*.ts'],
       knex: false,
