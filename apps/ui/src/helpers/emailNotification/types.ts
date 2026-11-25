@@ -6,9 +6,7 @@ export type EmailSubscriptionParams = {
 export type EmailSubscriptionMethod = 'subscribe' | 'update';
 
 export type EmailSubscriptionStatus =
-  | 'NOT_SUBSCRIBED'
-  | 'UNVERIFIED'
-  | 'VERIFIED';
+  'NOT_SUBSCRIBED' | 'UNVERIFIED' | 'VERIFIED';
 
 export type EmailSubscription = {
   status: EmailSubscriptionStatus;

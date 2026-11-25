@@ -12,13 +12,12 @@
       "outputs": ["out/**"]
     },
     "lint": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxlintrc.json"]
     },
     "lint:fix": {
-      "dependsOn": ["transit"]
-    },
-    "//#lint:scripts": {
-      "dependsOn": ["transit"]
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/.oxlintrc.json"]
     },
     "typecheck": {
       "dependsOn": ["^build", "codegen"]

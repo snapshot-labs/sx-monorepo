@@ -27,8 +27,8 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const isSelfAlias = computed(() =>
     Boolean(
       web3Account.value &&
-        isValidAddress.value &&
-        checksumAddress.value === getAddress(web3Account.value)
+      isValidAddress.value &&
+      checksumAddress.value === getAddress(web3Account.value)
     )
   );
 
