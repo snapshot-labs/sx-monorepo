@@ -3,6 +3,35 @@ import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { buildWhereQuery, checkLimits, formatProposal } from '../helpers';
 
+// MySQL's default InnoDB stopwords of 1 or 2 characters. The ngram parser
+// (pairs of characters) drops every pair that contains one, both when indexing
+// and when parsing the search string.
+const SHORT_STOPWORDS =
+  'a i an as at be by de en in is it la of on or to'.split(' ');
+
+function isIndexed(word: string): boolean {
+  const chars = [...word];
+  // The ngram index does not match characters outside the Basic Multilingual Plane
+  if (chars.some(char => char.codePointAt(0)! > 0xffff)) return false;
+  for (let i = 0; i < chars.length - 1; i++) {
+    const pair = chars[i] + chars[i + 1];
+    if (!SHORT_STOPWORDS.some(stopword => pair.includes(stopword))) return true;
+  }
+  return false;
+}
+
+/**
+ * The MATCH search string that narrows a title_contains search through the
+ * FULLTEXT index without changing its results, or null to search with LIKE
+ * alone, as before. Every word the index can find must be present, which is
+ * always true of a title containing the term; the LIKE keeps results exact.
+ */
+export function titleMatchQuery(term: string): string | null {
+  if (!/^[\p{L}\p{N}\s]+$/u.test(term)) return null;
+  const words = term.split(/\s+/).filter(isIndexed);
+  return words.length ? words.map(word => `+"${word}"`).join(' ') : null;
+}
+
 export default async function (parent, args) {
   const { first, skip, where = {} } = args;
 
@@ -43,8 +72,15 @@ export default async function (parent, args) {
 
   let searchSql = '';
   if (where.title_contains) {
+    const term = where.title_contains.toLowerCase();
     searchSql = 'AND LOWER(p.title) LIKE ?';
-    params.push(`%${where.title_contains.toLowerCase()}%`);
+    params.push(`%${term}%`);
+    const match = titleMatchQuery(term);
+    if (match) {
+      // The FULLTEXT index finds candidates, the LIKE above keeps results exact
+      searchSql += ' AND MATCH(p.title_lower) AGAINST (? IN BOOLEAN MODE)';
+      params.push(match);
+    }
   }
 
   if (where.strategies_contains) {

@@ -71,6 +71,7 @@ CREATE TABLE proposals (
   flagged INT NOT NULL DEFAULT 0,
   cb INT NOT NULL DEFAULT 0,
   credits TINYINT NOT NULL DEFAULT '0',
+  title_lower TEXT GENERATED ALWAYS AS (LOWER(title)) STORED,
   PRIMARY KEY (id),
   INDEX ipfs (ipfs),
   INDEX author (author),
@@ -88,7 +89,8 @@ CREATE TABLE proposals (
   INDEX idx_proposals_on_space_created_desc_id_asc (space, created DESC, id),
   INDEX idx_proposals_on_created (created),
   INDEX idx_proposals_on_end_desc_id (end DESC, id),
-  INDEX idx_proposals_on_scores_total_value (scores_total_value)
+  INDEX idx_proposals_on_scores_total_value (scores_total_value),
+  FULLTEXT INDEX ft_proposals_title_lower (title_lower) WITH PARSER ngram
 );
 
 CREATE TABLE votes (
