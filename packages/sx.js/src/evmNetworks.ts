@@ -166,21 +166,28 @@ export function createEvmConfig(
 const ethMainnetBlockTime = 12;
 const ethSepoliaBlockTime = 12;
 
+// Deployed on these networks only, at the same address
+const VOTING_POWER_V2 = '0x248D739fa8e9959b280c0Ad10bF38ad195a4b70a';
+
 export const evmNetworks = {
-  eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
+  eth: createStandardConfig(1, {
+    blockTime: ethMainnetBlockTime,
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
+  }),
   oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
     blockTime: ethSepoliaBlockTime,
-    proposalValidations: {
-      VotingPowerV2: '0x248D739fa8e9959b280c0Ad10bF38ad195a4b70a'
-    }
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
   }),
   matic: createStandardConfig(137, { blockTime: 2 }),
   arb1: createStandardConfig(42161, {
     blockTime: ethMainnetBlockTime,
     hasNonNativeBlockNumbers: true
   }),
-  base: createStandardConfig(8453, { blockTime: 2 }),
+  base: createStandardConfig(8453, {
+    blockTime: 2,
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
+  }),
   bnb: createStandardConfig(56, {
     blockTime: 0.45
   }),

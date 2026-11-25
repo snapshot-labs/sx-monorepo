@@ -160,3 +160,13 @@ describe('createEvmConfig', () => {
     ).toBeUndefined();
   });
 });
+
+describe('evmNetworks', () => {
+  it('should only set VotingPowerV2 on the networks it is deployed on', () => {
+    const networks = Object.entries(evmNetworks)
+      .filter(([, network]) => network.ProposalValidations.VotingPowerV2)
+      .map(([networkId]) => networkId);
+
+    expect(networks).toEqual(['eth', 'sep', 'base']);
+  });
+});
