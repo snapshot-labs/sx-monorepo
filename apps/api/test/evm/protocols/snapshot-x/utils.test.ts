@@ -63,4 +63,21 @@ describe('updateProposalValidationStrategy', () => {
       strategies.map(([, strategyParams]) => strategyParams)
     );
   });
+
+  it('should index no threshold or strategies when params are malformed', async () => {
+    const space = new Space('0x123', 'sep');
+
+    await updateProposalValidationStrategy(
+      space,
+      protocolConfig.propositionPowerV2ValidationStrategyAddress!,
+      '0x1234',
+      'ipfs://metadata',
+      {} as EVMConfig,
+      protocolConfig
+    );
+
+    expect(space.validation_strategy_params).toBe('0x1234');
+    expect(space.proposal_threshold).toBe('0');
+    expect(space.voting_power_validation_strategy_strategies).toEqual([]);
+  });
 });
