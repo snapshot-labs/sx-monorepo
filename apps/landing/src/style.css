@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Calibre';
+  src: url('../../../packages/tune/src/assets/fonts/Calibre-Medium-Custom.woff2')
+    format('woff2');
+  font-weight: 500;
+}

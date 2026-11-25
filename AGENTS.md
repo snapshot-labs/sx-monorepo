@@ -21,6 +21,7 @@ CI will reject lint/type/test failures.
 | Directory        | Description                                                           |
 | ---------------- | --------------------------------------------------------------------- |
 | `apps/ui`        | Vue 3 frontend                                                        |
+| `apps/landing`   | Landing page (Vue 3, Vite, Tailwind with the tune preset)             |
 | `apps/api`       | Apollo GraphQL server + Checkpoint blockchain indexer                 |
 | `apps/mana`      | Express transaction relayer                                           |
 | `packages/sx.js` | Shared TypeScript SDK for governance (published as @snapshot-labs/sx) |
