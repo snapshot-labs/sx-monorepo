@@ -10,11 +10,24 @@ jest.mock('../../src/helpers/mysql', () => ({
 
 const queryAsync = db.queryAsync as jest.Mock;
 
-async function search(where: Record<string, unknown>) {
-  queryAsync.mockReset().mockResolvedValueOnce([]);
-  await fetchProposals(null, { first: 20, skip: 0, where });
-  const [sql, params] = queryAsync.mock.calls[0];
-  return { sql: sql.replace(/\s+/g, ' '), params };
+const TIMEOUT = Object.assign(new Error('Query execution was interrupted'), {
+  errno: 3024
+});
+
+async function search(where: Record<string, unknown>, ...results: any[]) {
+  queryAsync.mockReset();
+  for (const result of results) {
+    if (result instanceof Error) queryAsync.mockRejectedValueOnce(result);
+    else queryAsync.mockResolvedValueOnce(result);
+  }
+  const outcome = await fetchProposals(null, { first: 20, skip: 0, where })
+    .then(() => 'ok')
+    .catch((err: Error) => err.message);
+  const calls = queryAsync.mock.calls.map(([sql, params]) => ({
+    sql: sql.replace(/\s+/g, ' '),
+    params
+  }));
+  return { outcome, calls };
 }
 
 describe('titleMatchQuery', () => {
@@ -32,6 +45,11 @@ describe('titleMatchQuery', () => {
     ['test 4', '+"test"'],
     ['project a', '+"project"'],
     ['dao treasury', '+"treasury"'],
+    // Unicode spaces and line breaks separate words
+    ['line\u2028break', '+"break" +"line"'],
+    // The 3 longest words are enough to narrow the search
+    ['one two three four five', '+"three" +"four" +"five"'],
+    ['vote\u00a0now', '+"vote" +"now"'],
     ['aave  v3', '+"aave" +"v3"']
   ])('searches %j with %j', (term, query) => {
     expect(titleMatchQuery(term)).toBe(query);
@@ -60,37 +78,89 @@ describe('titleMatchQuery', () => {
     "don't",
     '#12',
     'gm!',
-    '👍👍'
+    '👍👍',
+    // Control characters
+    'a\u0000b',
+    'gm\u0007',
+    'ab\u202ecd'
   ])('keeps LIKE alone for %j', term => {
     expect(titleMatchQuery(term)).toBeNull();
   });
 });
 
 describe('proposals title search', () => {
-  it('adds the FULLTEXT prefilter after the LIKE, with matching params', async () => {
-    const { sql, params } = await search({
-      title_contains: 'Uniswap',
-      strategies_contains: 'erc20'
-    });
+  const where = { title_contains: 'Uniswap', strategies_contains: 'erc20' };
 
-    expect(sql).toContain(
-      'AND LOWER(p.title) LIKE ? AND MATCH(p.title_lower) AGAINST (? IN BOOLEAN MODE) AND p.strategies LIKE ?'
+  it('keeps the capped LIKE scan when it finishes', async () => {
+    const { outcome, calls } = await search(where, []);
+
+    expect(outcome).toBe('ok');
+    expect(calls).toHaveLength(1);
+    expect(calls[0].sql).toContain('SELECT /*+ MAX_EXECUTION_TIME(200) */');
+    expect(calls[0].sql).toContain(
+      'AND LOWER(p.title) LIKE ? AND p.strategies LIKE ?'
     );
-    expect(params.slice(0, 3)).toEqual(['%uniswap%', '+"uniswap"', '%erc20%']);
+    expect(calls[0].sql).not.toContain('MATCH');
+    expect(calls[0].params.slice(-4)).toEqual(['%uniswap%', '%erc20%', 0, 20]);
   });
 
-  it("keeps today's query when the term cannot use the index", async () => {
-    const { sql, params } = await search({ title_contains: 'DAO' });
+  it('falls back to the FULLTEXT index when the scan is interrupted', async () => {
+    const { outcome, calls } = await search(where, TIMEOUT, []);
 
-    expect(sql).toContain('AND LOWER(p.title) LIKE ?');
-    expect(sql).not.toContain('MATCH');
-    expect(params.slice(0, 1)).toEqual(['%dao%']);
+    expect(outcome).toBe('ok');
+    expect(calls).toHaveLength(2);
+    expect(calls[1].sql).not.toContain('MAX_EXECUTION_TIME');
+    expect(calls[1].sql).toContain(
+      'AND LOWER(p.title) LIKE ? AND p.strategies LIKE ? AND MATCH(p.title_lower) AGAINST (? IN BOOLEAN MODE)'
+    );
+    expect(calls[1].params.slice(-5)).toEqual([
+      '%uniswap%',
+      '%erc20%',
+      '+"uniswap"',
+      0,
+      20
+    ]);
+  });
+
+  it('searches as before when the FULLTEXT query fails', async () => {
+    const { outcome, calls } = await search(
+      where,
+      TIMEOUT,
+      new Error('Unknown column title_lower'),
+      []
+    );
+
+    expect(outcome).toBe('ok');
+    expect(calls).toHaveLength(3);
+    expect(calls[2].sql).not.toContain('MAX_EXECUTION_TIME');
+    expect(calls[2].sql).not.toContain('MATCH');
+    expect(calls[2].params.slice(-4)).toEqual(['%uniswap%', '%erc20%', 0, 20]);
+  });
+
+  it('reports an error when every query fails', async () => {
+    const lost = new Error('connection lost');
+    const { outcome, calls } = await search(where, TIMEOUT, lost, lost);
+
+    expect(outcome).toBe('request failed');
+    expect(calls).toHaveLength(3);
+  });
+
+  it("runs today's query unchanged when the index cannot be used", async () => {
+    const { outcome, calls } = await search({ title_contains: 'DAO' }, []);
+
+    expect(outcome).toBe('ok');
+    expect(calls).toHaveLength(1);
+    expect(calls[0].sql).not.toContain('MAX_EXECUTION_TIME');
+    expect(calls[0].sql).not.toContain('MATCH');
+    expect(calls[0].params.slice(-3)).toEqual(['%dao%', 0, 20]);
   });
 
   it('does not search titles without title_contains', async () => {
-    const { sql } = await search({});
+    const { calls } = await search({}, []);
 
-    expect(sql).not.toContain('LIKE');
-    expect(sql).not.toContain('MATCH');
+    expect(calls).toHaveLength(1);
+    expect(calls[0].sql).not.toContain('LIKE');
+    expect(calls[0].sql).not.toContain('MAX_EXECUTION_TIME');
+    expect(calls[0].sql).not.toContain('MATCH');
   });
 });
