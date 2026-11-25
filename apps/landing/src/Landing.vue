@@ -111,6 +111,7 @@ const snap = (type: string) =>
 let glide = 0;
 function stopGlide() {
   cancelAnimationFrame(glide);
+  glide = 0;
   snap('y mandatory');
 }
 function glideTo(i: number) {
@@ -127,7 +128,7 @@ function glideTo(i: number) {
     const t = Math.min(1, (now - start) / GLIDE_MS);
     scrollTo(0, from + (top - from) * glideCurve(t));
     if (t < 1) glide = requestAnimationFrame(step);
-    else snap('y mandatory');
+    else stopGlide();
   };
   glide = requestAnimationFrame(step);
 }
@@ -236,6 +237,18 @@ onMounted(() => {
   };
   addEventListener('scroll', wake, { passive: true });
   addEventListener('resize', wake);
+
+  // Scrolling keeps the URL on the slide active in the menu, and without an
+  // anchor at the top of the page. A glide leaves the anchor it glides to.
+  const nameSlide = () => {
+    if (glide) return;
+    const slide = SLIDES[slideBehind(target(), menuX.value) - 1]!;
+    const hash =
+      scrollY < stage.value!.offsetTop / 2 ? '' : `#/${slide.toLowerCase()}`;
+    if (location.hash === hash) return;
+    history.replaceState(null, '', hash || location.pathname + location.search);
+  };
+  addEventListener('scroll', nameSlide, { passive: true });
 
   // Once the page has loaded, the glyph field takes over the hero on scroll.
   addEventListener('load', () =>
@@ -453,4 +466,11 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <!-- The legal links, over every slide, lined up with the logo. -->
+  <footer
+    class="fixed bottom-0 left-0 z-30 flex h-[44px] gap-5 bg-white px-5 text-[17px] [&>a]:flex [&>a]:items-center"
+  >
+    <a href="#/terms">Terms of use</a>
+    <a href="#/privacy">Privacy policy</a>
+  </footer>
 </template>
