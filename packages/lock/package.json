@@ -27,8 +27,7 @@
     "dev": "tsc -w",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "prepare": "bun run build",
-    "prepublishOnly": "bun run lint"
+    "prepare": "bun run build"
   },
   "dependencies": {
     "0xsequence": "^2.2.10",

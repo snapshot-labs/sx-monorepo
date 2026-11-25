@@ -7,6 +7,7 @@ COPY package.json bun.lock turbo.json tsconfig.json ./
 COPY apps/api/package.json apps/api/
 COPY apps/delegates-api/package.json apps/delegates-api/
 COPY apps/hub/package.json apps/hub/
+COPY apps/landing/package.json apps/landing/
 COPY apps/mana/package.json apps/mana/
 COPY apps/mcp/package.json apps/mcp/
 COPY apps/schnaps-api/package.json apps/schnaps-api/

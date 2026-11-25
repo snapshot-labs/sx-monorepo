@@ -25,7 +25,6 @@
     "build": "tsc -p tsconfig.esnext.json && tsc -p tsconfig.cjs.json",
     "typecheck": "tsc --noEmit",
     "prepare": "bun run build",
-    "prepublishOnly": "bun run lint",
     "node:evm": "anvil",
     "node:starknet": "starknet-devnet --seed 1",
     "test": "vitest run test/unit",
