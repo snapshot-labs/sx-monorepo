@@ -1,9 +1,14 @@
+import { createBrambleConnector } from './bramble';
 import Connector from './connector';
 
 export default class Argentx extends Connector {
   async connect() {
-    const { getTheme, ...options } = this.options;
+    const { getTheme, getRpcUrl, ...options } = this.options;
     const modalTheme = getTheme?.() ?? 'light';
+
+    const isSilentReconnect = !!localStorage.getItem(
+      'starknetLastConnectedWallet'
+    );
 
     try {
       const injected = (window as any).starknet_argentX;
@@ -14,22 +19,29 @@ export default class Argentx extends Connector {
         return;
       }
 
-      const [starknetkit, { InjectedConnector }, { WebWalletConnector }] =
-        await Promise.all([
-          import('starknetkit'),
-          import('starknetkit/injected'),
-          import('starknetkit/webwallet')
-        ]);
+      const [
+        starknetkit,
+        { InjectedConnector },
+        { WebWalletConnector },
+        bramble
+      ] = await Promise.all([
+        import('starknetkit'),
+        import('starknetkit/injected'),
+        import('starknetkit/webwallet'),
+        createBrambleConnector({
+          getRpcUrl,
+          canOpenInstallPage: !isSilentReconnect
+        })
+      ]);
       const starknet = await starknetkit.connect({
         ...options,
         connectors: [
           new InjectedConnector({ options: { id: 'argentX' } }),
           new InjectedConnector({ options: { id: 'braavos' } }),
+          bramble,
           new WebWalletConnector()
         ],
-        modalMode: localStorage.getItem('starknetLastConnectedWallet')
-          ? 'neverAsk'
-          : 'alwaysAsk',
+        modalMode: isSilentReconnect ? 'neverAsk' : 'alwaysAsk',
         modalTheme
       });
 

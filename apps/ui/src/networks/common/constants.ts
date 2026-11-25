@@ -12,10 +12,7 @@ export const EVM_CONNECTORS: ConnectorType[] = [
 ];
 
 /** Connectors backed by a Starknet wallet (excludes read-only guest). */
-export const STARKNET_WALLET_CONNECTORS: ConnectorType[] = [
-  'argentx',
-  'bramble'
-];
+export const STARKNET_WALLET_CONNECTORS: ConnectorType[] = ['argentx'];
 export const STARKNET_CONNECTORS: ConnectorType[] = [
   ...STARKNET_WALLET_CONNECTORS,
   'guest'

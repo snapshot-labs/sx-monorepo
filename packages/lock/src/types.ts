@@ -1,6 +1,5 @@
 export type ConnectorType =
   | 'argentx'
-  | 'bramble'
   | 'injected'
   | 'walletconnect'
   | 'coinbase'

@@ -1,5 +1,4 @@
 import argentx from './argentx';
-import bramble from './bramble';
 import coinbase from './coinbase';
 import gnosis from './gnosis';
 import guest from './guest';
@@ -11,7 +10,6 @@ import walletconnect from './walletconnect';
 
 export default {
   argentx,
-  bramble,
   injected,
   walletconnect,
   sequence,
