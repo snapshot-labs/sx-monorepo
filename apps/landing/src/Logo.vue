@@ -11,7 +11,7 @@ const PATHS = [
   <a
     href="/"
     aria-label="Snapshot home"
-    class="flex h-[66px] items-center bg-yellow px-5"
+    class="flex h-[66px] items-center px-5"
   >
     <svg width="38" height="38" viewBox="0 0 300 300" aria-hidden="true">
       <path v-for="d in PATHS" :key="d" :d="d" />

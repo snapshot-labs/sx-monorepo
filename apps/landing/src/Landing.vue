@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { computed, FunctionalComponent, h, onMounted, ref } from 'vue';
+import {
+  computed,
+  defineAsyncComponent,
+  FunctionalComponent,
+  h,
+  onMounted,
+  ref,
+  watch,
+  watchSyncEffect
+} from 'vue';
 import { ASCII, asciiFrame, asciiGrid, asciiPath, heroBoxes } from './hero';
 import Logo from './Logo.vue';
 import { HeroFrame, startScene } from './scene';
@@ -30,12 +39,29 @@ const BOX_LAYERS = [
 const TAB_GROUNDS = ['', '#6fdcdd', '#fff'];
 // The menu's, black on the last slide.
 const MENU_GROUNDS = ['', '#6fdcdd', '#000'];
-// The slides, as named in the menu and in the URL (/#/ipsum).
-const SLIDES = ['Lorem', 'Ipsum', 'Dolor'];
+// The slides, as named in the menu and in the URL (/#/protocol).
+const SLIDES = ['Lorem', 'Protocol', 'Dolor'];
+// /#/terms and /#/privacy open over the landing, which waits underneath where
+// it was. Their text loads the first time one opens, and if that fails, as
+// when a new release has replaced it, the page offers a reload.
+const Legal = defineAsyncComponent({
+  loader: () => import('./Legal.vue'),
+  errorComponent: () =>
+    h('p', { class: 'p-5 text-[19px]' }, [
+      "This page didn't load. ",
+      h(
+        'button',
+        { class: 'underline', onClick: () => location.reload() },
+        'Reload'
+      )
+    ])
+});
+const legalOfHash = () =>
+  (['terms', 'privacy'] as const).find(page => page === nameOf(location.hash));
 // The menu items, and the menu's padding around them: smaller on narrow
 // phones so the menu fits beside the logo.
-const MENU_ITEM = 'flex items-center px-2 min-[390px]:px-3 sm:px-5';
-const MENU_PADDING = 'px-1 min-[390px]:px-3';
+const MENU_ITEM = 'flex items-center px-2 min-[420px]:px-3 sm:px-5';
+const MENU_PADDING = 'px-1 min-[420px]:px-3';
 const GLIDE_MS = 1200;
 // The glide's pace: fast, then slow in the middle, then fast again.
 const glideCurve = (t: number) => 0.25 * t + 0.75 * (0.5 + 4 * (t - 0.5) ** 3);
@@ -61,6 +87,15 @@ const Words: FunctionalComponent<{
       )
     )
   ]);
+
+const legal = ref(legalOfHash());
+const legalLayer = ref<HTMLElement>();
+// Under a legal page the landing neither scrolls nor takes focus, and the
+// page takes it so the keyboard scrolls it.
+watchSyncEffect(
+  () => (document.documentElement.style.overflow = legal.value ? 'hidden' : '')
+);
+watch(legalLayer, layer => layer?.focus());
 
 const progress = ref(0);
 const hero = computed(() => heroParts(progress.value));
@@ -111,6 +146,7 @@ const snap = (type: string) =>
 let glide = 0;
 function stopGlide() {
   cancelAnimationFrame(glide);
+  glide = 0;
   snap('y mandatory');
 }
 function glideTo(i: number) {
@@ -127,7 +163,7 @@ function glideTo(i: number) {
     const t = Math.min(1, (now - start) / GLIDE_MS);
     scrollTo(0, from + (top - from) * glideCurve(t));
     if (t < 1) glide = requestAnimationFrame(step);
-    else snap('y mandatory');
+    else stopGlide();
   };
   glide = requestAnimationFrame(step);
 }
@@ -172,10 +208,17 @@ function startAscii(canvas: HTMLCanvasElement): () => HeroFrame {
 }
 
 onMounted(() => {
-  // A slide's anchor opens on that slide, and later ones glide to theirs.
+  // A slide's anchor opens on that slide, and later ones glide to theirs. An
+  // empty one, from a legal page's logo, goes back to the top.
   if (slideOfHash() >= 0) scrollTo(0, slideTop(slideOfHash()));
   addEventListener('hashchange', () => {
-    if (slideOfHash() >= 0) glideTo(slideOfHash());
+    legal.value = legalOfHash();
+    if (slideOfHash() >= 0) {
+      glideTo(slideOfHash());
+    } else if (!nameOf(location.hash)) {
+      scrollTo(0, 0);
+      history.replaceState(null, '', location.pathname + location.search);
+    }
   });
   snap('y mandatory');
   for (const type of ['wheel', 'touchstart', 'keydown']) {
@@ -237,6 +280,18 @@ onMounted(() => {
   addEventListener('scroll', wake, { passive: true });
   addEventListener('resize', wake);
 
+  // Scrolling keeps the URL on the slide active in the menu, and without an
+  // anchor at the top of the page. A glide leaves the anchor it glides to.
+  const nameSlide = () => {
+    if (glide || legal.value) return;
+    const slide = SLIDES[slideBehind(target(), menuX.value) - 1]!;
+    const hash =
+      scrollY < stage.value!.offsetTop / 2 ? '' : `#/${slide.toLowerCase()}`;
+    if (location.hash === hash) return;
+    history.replaceState(null, '', hash || location.pathname + location.search);
+  };
+  addEventListener('scroll', nameSlide, { passive: true });
+
   // Once the page has loaded, the glyph field takes over the hero on scroll.
   addEventListener('load', () =>
     startScene(scene.value!, heroLayer.value!, heroFrame, () => progress.value)
@@ -245,7 +300,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="group snap-start overflow-hidden bg-black text-white">
+  <div
+    class="group snap-start overflow-hidden bg-black text-white"
+    :inert="!!legal"
+  >
     <div
       class="flex w-max animate-marquee group-hover:[animation-play-state:paused]"
       :style="{ '--copy-width': `${copyWidth}px` }"
@@ -262,7 +320,7 @@ onMounted(() => {
       </p>
     </div>
   </div>
-  <div ref="stage" class="relative h-[400vh]">
+  <div ref="stage" class="relative h-[400vh]" :inert="!!legal">
     <!-- Where the slides rest: the stage's top, middle and bottom at the
     viewport's top, middle and bottom, as in slideTop. -->
     <div class="absolute inset-x-0 top-0 snap-start" />
@@ -302,13 +360,14 @@ onMounted(() => {
         </div>
         <header class="relative z-20 flex justify-between py-6">
           <Logo
+            class="bg-yellow"
             :style="{
               backgroundColor: TAB_GROUNDS[slideBehind(progress, 0) - 1]
             }"
           />
           <nav
             ref="menu"
-            class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[390px]:text-[20px]"
+            class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[420px]:text-[20px]"
             :class="[MENU_PADDING, { 'text-white': menuSlide === 2 }]"
             :style="{ backgroundColor: MENU_GROUNDS[menuSlide] }"
           >
@@ -452,5 +511,22 @@ onMounted(() => {
         </div>
       </div>
     </div>
+  </div>
+  <!-- The legal links, over every slide, lined up with the logo. -->
+  <footer
+    class="fixed bottom-0 left-0 z-30 flex h-[53px] gap-5 bg-white px-5 text-[17px] [&>a]:flex [&>a]:items-center"
+    :inert="!!legal"
+  >
+    <a href="#/terms">Terms of use</a>
+    <a href="#/privacy">Privacy policy</a>
+  </footer>
+  <div
+    v-if="legal"
+    :key="legal"
+    ref="legalLayer"
+    tabindex="-1"
+    class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-white outline-none"
+  >
+    <Legal :page="legal" />
   </div>
 </template>
