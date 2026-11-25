@@ -3,10 +3,12 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
+import { getScoresTicks } from '@/helpers/choices';
 import {
   CHAIN_IDS,
   DELEGATE_REGISTRY_STRATEGIES,
-  DELEGATION_TYPES_NAMES
+  DELEGATION_TYPES_NAMES,
+  FLAGS
 } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
@@ -416,6 +418,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
+  const isWithheld = proposal.flagCode === FLAGS.WITHHELD;
 
   return {
     id: proposal.id,
@@ -433,9 +436,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     },
     proposal_id: proposal.id,
     type: proposal.type,
-    title: proposal.title,
-    body: proposal.body,
-    discussion: proposal.discussion,
+    title: isWithheld ? '' : proposal.title,
+    body: isWithheld ? '' : proposal.body,
+    discussion: isWithheld ? '' : proposal.discussion,
     executions,
     created: proposal.created,
     edited: proposal.updated,
@@ -664,9 +667,9 @@ export function createApi(
   return {
     apiUrl: uri,
     loadProposalScoresTicks: async (
-      proposalId: string
+      proposal: Proposal
     ): Promise<ScoresTick[]> => {
-      const votes: { choice: number; vp: number; created: number }[] = [];
+      const votes: Parameters<typeof getScoresTicks>[2] = [];
       let skip = 0;
 
       while (skip < SCORES_TICKS_MAX_VOTES) {
@@ -675,7 +678,7 @@ export function createApi(
           variables: {
             first: SCORES_TICKS_LIMIT,
             skip,
-            where: { proposal: proposalId }
+            where: { proposal: proposal.id }
           }
         });
 
@@ -686,32 +689,7 @@ export function createApi(
         skip += SCORES_TICKS_LIMIT;
       }
 
-      const scores: [number, number, number] = [0, 0, 0];
-      const ticks: ScoresTick[] = [];
-
-      for (const vote of votes) {
-        if (
-          typeof vote.choice === 'number' &&
-          vote.choice >= 1 &&
-          vote.choice <= 3
-        ) {
-          scores[vote.choice - 1] += vote.vp;
-        }
-
-        const hourTs = Math.floor(vote.created / 3600) * 3600;
-        const last = ticks.at(-1);
-
-        if (!last || last.timestamp !== hourTs) {
-          ticks.push({
-            timestamp: hourTs,
-            scores: [...scores] as [number, number, number]
-          });
-        } else {
-          last.scores = [...scores] as [number, number, number];
-        }
-      }
-
-      return ticks;
+      return getScoresTicks(proposal.type, proposal.choices.length, votes);
     },
     loadProposalVotes: async (
       proposal: Proposal,

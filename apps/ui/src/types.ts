@@ -518,5 +518,5 @@ export type Setting = {
 
 export type ScoresTick = {
   timestamp: number;
-  scores: [number, number, number];
+  scores: number[];
 };

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "box.snapshot/mcp",
+  "title": "Snapshot",
+  "description": "Query Snapshot governance data, and vote, propose or follow spaces for the user.",
+  "websiteUrl": "https://docs.snapshot.box/tools/snapshot-mcp",
+  "repository": {
+    "url": "https://github.com/snapshot-labs/sx-monorepo",
+    "source": "github",
+    "subfolder": "apps/mcp"
+  },
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.snapshot.box"
+    }
+  ]
+}

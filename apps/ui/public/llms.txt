@@ -1,0 +1,46 @@
+# Snapshot
+
+> Snapshot is where decisions get made. It is an open source voting platform for any group that decides together: communities, organizations, DAOs and protocols. Create a space, publish proposals and vote, offchain with gasless signed messages or fully onchain with Snapshot X.
+
+Key facts:
+
+- Free to use. Voting offchain costs no gas: a vote is a signed message. Spaces that need higher limits or premium features can upgrade to Snapshot Plus (pay per use with ETH credits) or Snapshot Pro (subscription).
+- No account to create: people connect with a wallet such as MetaMask or Coinbase.
+- Voting types: basic (for, against, abstain), single choice, approval, ranked choice, weighted and quadratic. Votes can be kept private until the end with Shutter encryption.
+- Voting power comes from voting strategies (token or NFT balances, whitelists, delegation and many more) and is read at the proposal's snapshot block, so tokens moved after a proposal is created don't count twice.
+- Snapshot X is the onchain protocol, on EVM chains and Starknet: votes and voting power are computed onchain and passed proposals execute trustlessly, for example from a Safe.
+- Open source (MIT): https://github.com/snapshot-labs/sx-monorepo
+- Used by Arbitrum DAO, Aave DAO, Uniswap, ENS, Gitcoin, Lido, SafeDAO, Convex Finance and many more.
+
+For AI agents:
+
+- Connect any MCP client to the Snapshot MCP at `https://mcp.snapshot.box` (no install, no API key). It reads any governance data, and votes, creates proposals or follows spaces for the user after a one-time authorization. In Claude Code: `claude mcp add snapshot --transport http https://mcp.snapshot.box`
+- To help a group make a decision: find or create their space, then create a proposal (title, body, choices) and share its link so members can vote.
+- URLs: a space is `https://snapshot.box/#/s:<space-id>` (for example `https://snapshot.box/#/s:ens.eth`), a proposal is `https://snapshot.box/#/s:<space-id>/proposal/<proposal-id>`. Create a space at `https://snapshot.box/#/create`, browse spaces at `https://snapshot.box/#/explore`.
+- Markdown: add `.md` to a space or proposal path for a plain Markdown version, for example `https://snapshot.box/s:ens.eth.md` or `https://snapshot.box/s:<space-id>/proposal/<proposal-id>.md`. Verified spaces are listed in `https://snapshot.box/sitemap.xml`.
+
+## Docs
+
+- [Snapshot MCP](https://docs.snapshot.box/tools/snapshot-mcp.md): connect Claude, ChatGPT, Cursor and other AI assistants to Snapshot
+- [Hub GraphQL API](https://docs.snapshot.box/tools/api.md): query spaces, proposals, votes and users at `https://hub.snapshot.org/graphql`, 100 requests per minute without an API key
+- [Docs index for agents](https://docs.snapshot.box/llms.txt): every docs page, as Markdown
+- [Full docs for agents](https://docs.snapshot.box/llms-full.txt): all docs pages in one file
+- [Getting started](https://docs.snapshot.box/index.md)
+- [What is a space?](https://docs.snapshot.box/user-guides/spaces/what-is-a-space.md)
+- [Create a space](https://docs.snapshot.box/user-guides/spaces/create.md): an offchain space needs an ENS name
+- [Create a proposal](https://docs.snapshot.box/user-guides/create.md)
+- [Vote on a proposal](https://docs.snapshot.box/user-guides/voting/vote.md)
+- [Voting types](https://docs.snapshot.box/proposals/voting-types.md)
+- [Voting strategies](https://docs.snapshot.box/user-guides/voting-strategies.md)
+- [Delegation](https://docs.snapshot.box/user-guides/delegation.md)
+- [Snapshot X overview](https://docs.snapshot.box/snapshot-x/overview.md): onchain voting and trustless execution
+- [Upgrade your space](https://docs.snapshot.box/user-guides/spaces/upgrade.md): Snapshot Plus and Snapshot Pro
+- [FAQ](https://docs.snapshot.box/faq.md)
+- [Build with Snapshot](https://docs.snapshot.box/developers.md): APIs, SDKs and the protocol
+
+## Optional
+
+- [Blog](https://blog.snapshot.box)
+- [Status](https://status.snapshot.org)
+- [GitHub](https://github.com/snapshot-labs)
+- [Mirrors](https://docs.snapshot.box/faq.md): snapshot.org and snapshot.eth.limo show the same content as snapshot.box
