@@ -10,6 +10,7 @@
   "OptimisticCompTimelockCompatibleExecutionStrategyImplementation": "0x77e7Aa43b28Df1e467bd4806fE3bF26F5c3EAD27",
   "OptimisticTimelockExecutionStrategyImplementation": "0x49AF19f9318d55ad8e7CE743De9Ce76ED408CE0C",
   "PropositionPowerAndActiveProposalsLimiterValidationStrategy": "0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1",
+  "PropositionPowerAndActiveProposalsLimiterValidationStrategyV2": "0x248D739fa8e9959b280c0Ad10bF38ad195a4b70a",
   "PropositionPowerProposalValidationStrategy": "0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311",
   "ProxyFactory": "0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c",
   "SpaceImplementation": "0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D",
