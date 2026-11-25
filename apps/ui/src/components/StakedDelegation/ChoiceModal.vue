@@ -62,6 +62,7 @@ const selected = ref<Option>('default');
 const delegateeInput = ref('');
 const isInputFocused = ref(false);
 const delegateField = ref<HTMLElement | null>(null);
+const previewRef = ref<HTMLElement | null>(null);
 
 // Bring the address field into view when "Delegate" is picked. Focus stays
 // on the option so arrow-key navigation keeps working.
@@ -171,6 +172,23 @@ const previewDelegatee = computed<string | null | undefined>(() => {
     : undefined;
 });
 
+const isPreviewShown = computed(
+  () =>
+    isDirty.value &&
+    !!props.memberships?.length &&
+    previewDelegatee.value !== undefined
+);
+
+// Keep the "After you save" list in view when it appears or changes.
+watch(
+  () => [isPreviewShown.value, previewDelegatee.value] as const,
+  async ([isShown]) => {
+    if (!isShown || !props.open) return;
+    await nextTick();
+    previewRef.value?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+);
+
 // Arrow keys move the selection, as in a native radio group.
 function handleRadioKeydown(event: KeyboardEvent, index: number) {
   const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[
@@ -235,6 +253,7 @@ async function save() {
               <UiPill v-if="current === option.id">Current</UiPill>
             </div>
             <div
+              v-if="selected === option.id"
               class="text-skin-text text-[15px] leading-5"
               v-text="option.description"
             />
@@ -298,12 +317,14 @@ async function save() {
         </div>
       </div>
 
-      <StakedDelegationVotingPowerPreview
-        v-if="isDirty && memberships?.length && previewDelegatee !== undefined"
-        :account="account"
-        :memberships="memberships"
-        :delegatee="previewDelegatee"
-      />
+      <div ref="previewRef">
+        <StakedDelegationVotingPowerPreview
+          v-if="isPreviewShown"
+          :account="account"
+          :memberships="memberships!"
+          :delegatee="previewDelegatee!"
+        />
+      </div>
     </div>
 
     <template #footer>

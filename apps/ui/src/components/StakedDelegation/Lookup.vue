@@ -181,6 +181,7 @@ function handleSubmit() {
         <StakedDelegationMemberships
           :memberships="memberships"
           :member="address"
+          :is-own="false"
           :records="records"
           :is-loading="isFetchingMemberships && !memberships"
           :is-error="isMembershipsError"

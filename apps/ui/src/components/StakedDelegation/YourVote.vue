@@ -176,6 +176,7 @@ const detail = computed(() => {
       <StakedDelegationMemberships
         :memberships="memberships"
         :member="account"
+        :is-own="true"
         :records="records"
         :is-loading="isFetchingMemberships && !memberships"
         :is-error="isMembershipsError"

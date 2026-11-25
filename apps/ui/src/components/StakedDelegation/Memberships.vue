@@ -14,7 +14,19 @@ const props = defineProps<{
   records?: Record<string, VotingRecord>;
   /** Showing a cached result while a fresh scan runs. */
   isRefreshing?: boolean;
+  /** Whether `member` is the person looking (Your vote) or a lookup. */
+  isOwn?: boolean;
 }>();
+
+/**
+ * When the delegator chose a delegate (or to vote themselves), every pool
+ * votes with that one address: say it once instead of on every row.
+ */
+const chosenVoter = computed(() => {
+  const list = props.memberships ?? [];
+  if (!list.length || !list.every(m => m.reason === 'explicit')) return null;
+  return list[0].votesWith;
+});
 
 const totalStake = computed(() =>
   (props.memberships ?? []).reduce((sum, m) => sum + m.amount, 0n)
@@ -59,6 +71,34 @@ function share(amount: bigint) {
     </div>
     <template v-else>
       <div
+        v-if="chosenVoter"
+        class="flex flex-wrap items-center gap-x-2 gap-y-1 px-4 py-2.5 border-b bg-skin-border/20 text-[16px]"
+      >
+        <span class="text-skin-text">All of this stake votes with</span>
+        <StakedDelegationAddress
+          :address="chosenVoter"
+          :size="20"
+          :label="
+            member && isSameAddress(chosenVoter, member)
+              ? isOwn
+                ? 'you'
+                : 'this address'
+              : undefined
+          "
+          compact
+        />
+        <span class="text-skin-text">
+          · {{ isOwn ? 'your' : 'their' }} choice
+        </span>
+        <span
+          v-if="isRefreshing"
+          class="flex items-center gap-1.5 text-skin-text text-sm ml-auto"
+        >
+          <UiLoading :size="12" />
+          Checking for changes…
+        </span>
+      </div>
+      <div
         class="hidden md:flex px-4 py-2 border-b text-skin-text text-sm font-medium gap-3"
       >
         <div class="w-[30%]">Validator</div>
@@ -68,7 +108,10 @@ function share(amount: bigint) {
           </span>
         </div>
         <div class="w-[24%]">Stake</div>
-        <div class="flex-1 flex items-center justify-between gap-2">
+        <div
+          v-if="!chosenVoter"
+          class="flex-1 flex items-center justify-between gap-2"
+        >
           <span>Votes with</span>
           <span
             v-if="isRefreshing"
@@ -123,7 +166,7 @@ function share(amount: bigint) {
             />
           </div>
         </div>
-        <div class="flex-1 min-w-0 flex items-center gap-2">
+        <div v-if="!chosenVoter" class="flex-1 min-w-0 flex items-center gap-2">
           <span class="md:hidden text-skin-text text-sm shrink-0">
             Votes with
           </span>
