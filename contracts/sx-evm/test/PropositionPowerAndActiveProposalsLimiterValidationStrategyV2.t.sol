@@ -84,6 +84,13 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         _propose(vm.getBlockNumber());
     }
 
+    function testProposeWithoutCooldownSkipsLimiter() public {
+        // The limiter would revert on a max of 0 active proposals, so this only passes if it's skipped
+        maxActiveProposals = 0;
+        _setCompStrategy();
+        _propose(vm.getBlockNumber());
+    }
+
     function testProposeCooldown() public {
         cooldown = 1 days;
         _setCompStrategy();

@@ -11,7 +11,8 @@ import { PropositionPower } from "../utils/PropositionPower.sol";
 /// @notice Strategy that limits proposal creation to authors that exceed a threshold proposition power over a set of
 ///         voting strategies at a recent block, and a maximum number of active proposals.
 /// @dev The author chooses the block, instead of the current block, so that strategies whose voting power is signed
-///      offchain for a given block can be used. A cooldown of 0 disables the active proposals limit.
+///      offchain for a given block can be used. A cooldown of 0 disables the active proposals limit and skips its
+///      storage, so maxActiveProposals is then ignored.
 contract PropositionPowerAndActiveProposalsLimiterValidationStrategyV2 is
     ActiveProposalsLimiter,
     PropositionPower,
@@ -49,7 +50,7 @@ contract PropositionPowerAndActiveProposalsLimiterValidationStrategyV2 is
         }
 
         return
-            ActiveProposalsLimiter._validate(author, cooldown, maxActiveProposals) &&
+            (cooldown == 0 || ActiveProposalsLimiter._validate(author, cooldown, maxActiveProposals)) &&
             _getCumulativePower(author, blockNumber, userStrategies, allowedStrategies) >= proposalThreshold;
     }
 }
