@@ -41,6 +41,9 @@ export type Propose = {
   strategies: StrategyConfig[];
   executionStrategy: AddressConfig;
   metadataUri: string;
+  // Block the proposal validation reads voting power at, 0 for the current block. Only for validations
+  // that take one (VotingPowerV2)
+  blockNumber?: number;
 };
 
 export type UpdateProposal = {

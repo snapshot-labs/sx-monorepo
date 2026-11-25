@@ -36,11 +36,10 @@ describe('updateProposalValidationStrategy', () => {
     [
       'voting power v2',
       protocolConfig.propositionPowerV2ValidationStrategyAddress,
+      // Packed limits: 1 max. active proposal, no cooldown, 256 blocks max. age
       encodeAbiParameters(
-        parseAbiParameters(
-          'uint256, uint256, uint256, (address,bytes)[], uint32'
-        ),
-        [0n, 1n, 100n, strategies, 256]
+        parseAbiParameters('uint256, (address,bytes)[], uint96'),
+        [100n, strategies, (1n << 64n) | 256n]
       )
     ]
   ])('should index %s threshold and strategies', async (_, address, params) => {

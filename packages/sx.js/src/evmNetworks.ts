@@ -167,7 +167,7 @@ const ethMainnetBlockTime = 12;
 const ethSepoliaBlockTime = 12;
 
 // Deployed on these networks only, at the same address
-const VOTING_POWER_V2 = '0x248D739fa8e9959b280c0Ad10bF38ad195a4b70a';
+const VOTING_POWER_V2 = '0x62E8967f705B3588F07b2Dbd685276B8799Ea7aa';
 
 export const evmNetworks = {
   eth: createStandardConfig(1, {
