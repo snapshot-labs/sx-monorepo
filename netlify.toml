@@ -1,0 +1,4 @@
+# Read by every Netlify site of this repo: each builds from the root, and none
+# has a netlify.toml in its package directory.
+[build]
+  ignore = 'sh "$(git rev-parse --show-toplevel)/scripts/netlify-ignore.sh"'
