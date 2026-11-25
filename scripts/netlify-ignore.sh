@@ -10,9 +10,7 @@ snapshot-storybook)
   set -- packages/tune
   ;;
 snapshot-landing)
-  # The legal pages are built from the UI's Terms and Policy views.
-  set -- apps/landing packages/tune apps/ui/src/views/Terms.vue \
-    apps/ui/src/views/Policy.vue
+  set -- apps/landing packages/tune
   ;;
 snapshot-docs)
   set -- docs
