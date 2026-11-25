@@ -66,7 +66,7 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 - **Node** >=22.6, **Bun** >=1.4.4 (workspaces: `apps/*`, `packages/*`)
 - **Turborepo** for task orchestration (`turbo.json`)
 - **oxlint** via `@stage-labs/config` (`stage lint`, rules in `.oxlintrc.json`) for all JS/TS, including the `<script>` of Vue files
-- **ESLint** only in `apps/ui` and `packages/tune`, for Vue templates and the few rules oxlint can't check (`eslint-plugin-oxlint` turns off the rest), and in `apps/mcp`, which has its own config
+- **ESLint** only in `apps/ui` and `packages/tune`, for Vue templates and the few rules oxlint can't check (`eslint-plugin-oxlint` turns off the rest), and in `apps/landing` and `apps/mcp`, which have their own configs
 - **`bun fmt`** formats JS, TS and Vue files (options in `bunfig.toml`). `bun run lint` checks it and `bun run lint:fix` applies it
 
 ## Conventions
