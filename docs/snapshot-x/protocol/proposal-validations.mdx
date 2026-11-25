@@ -69,7 +69,7 @@ When calling this strategy, `params` should be:
 
 ```solidity
 uint256 cooldown = ... // In seconds, 0 disables the limit
-uint256 maxActiveProposals = ... // Cannot be 0
+uint256 maxActiveProposals = ... // Cannot be 0 if cooldown is not 0, ignored otherwise
 uint256 proposalThreshold = ...
 Strategy[] allowedStrategies ...
 uint32 maxBlockAge = ... // In blocks

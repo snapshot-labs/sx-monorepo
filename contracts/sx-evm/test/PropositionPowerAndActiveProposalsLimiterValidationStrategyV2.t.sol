@@ -11,6 +11,7 @@ import { CompToken } from "./mocks/CompToken.sol";
 
 contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest {
     error DuplicateFound(uint8 index);
+    error MaxActiveProposalsCannotBeZero();
     error InvalidBlockNumber(uint32 blockNumber);
 
     uint256 internal proposalThreshold = 100;
@@ -88,6 +89,14 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         // The limiter would revert on a max of 0 active proposals, so this only passes if it's skipped
         maxActiveProposals = 0;
         _setCompStrategy();
+        _propose(vm.getBlockNumber());
+    }
+
+    function testProposeCooldownWithZeroMaxActiveProposals() public {
+        cooldown = 1 days;
+        maxActiveProposals = 0;
+        _setCompStrategy();
+        vm.expectRevert(MaxActiveProposalsCannotBeZero.selector);
         _propose(vm.getBlockNumber());
     }
 

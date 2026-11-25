@@ -26,7 +26,7 @@ contract PropositionPowerAndActiveProposalsLimiterValidationStrategyV2 is
     /// @param author Author of the proposal.
     /// @param params ABI encoded array that should contain the following:
     ///                 cooldown: Duration to wait before the proposal counter gets reset. 0 disables the limit.
-    ///                 maxActiveProposals: Maximum number of active proposals per author. Must be != 0.
+    ///                 maxActiveProposals: Maximum number of active proposals per author. Must be != 0 if cooldown != 0.
     ///                 proposalThreshold: Minimum proposition power required to create a proposal.
     ///                 allowedStrategies: Array of allowed voting strategies.
     ///                 maxBlockAge: Maximum number of blocks between the block chosen by the author and the current block.
