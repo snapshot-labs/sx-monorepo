@@ -38,7 +38,7 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         userPropositionPowerStrategies.push(IndexedStrategy(0, new bytes(0)));
     }
 
-    function _setPropositionPowerStrategies(uint256 threshold, Strategy[] memory strategies) internal {
+    function _setValidationParams(bytes memory params) internal {
         space.updateSettings(
             UpdateSettingsCalldata(
                 NO_UPDATE_UINT32,
@@ -46,10 +46,7 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
                 NO_UPDATE_UINT32,
                 NO_UPDATE_STRING,
                 NO_UPDATE_STRING,
-                Strategy(
-                    address(new PropositionPowerAndActiveProposalsLimiterValidationStrategyV2()),
-                    abi.encode(cooldown, maxActiveProposals, threshold, strategies, maxBlockAge)
-                ),
+                Strategy(address(new PropositionPowerAndActiveProposalsLimiterValidationStrategyV2()), params),
                 "",
                 NO_UPDATE_ADDRESSES,
                 NO_UPDATE_ADDRESSES,
@@ -58,6 +55,15 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
                 NO_UPDATE_UINT8S
             )
         );
+    }
+
+    // maxActiveProposals, cooldown and maxBlockAge packed as three uint32 in a uint96
+    function _limits() internal view returns (uint96) {
+        return (uint96(maxActiveProposals) << 64) | (uint96(cooldown) << 32) | maxBlockAge;
+    }
+
+    function _setPropositionPowerStrategies(uint256 threshold, Strategy[] memory strategies) internal {
+        _setValidationParams(abi.encode(threshold, strategies, _limits()));
     }
 
     function _setCompStrategy() internal {
@@ -131,6 +137,93 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         _propose(vm.getBlockNumber());
     }
 
+    function testProposeLimitsReadFromTheirOwnBits() public {
+        // Distinct values in each field: 2 proposals per 1 day cooldown, a window of 5 blocks
+        cooldown = 1 days;
+        maxActiveProposals = 2;
+        maxBlockAge = 5;
+        _setCompStrategy();
+        vm.roll(vm.getBlockNumber() + 10);
+
+        _propose(0);
+        _propose(vm.getBlockNumber() - 5);
+        vm.expectRevert(FailedToPassProposalValidation.selector);
+        _propose(0);
+
+        vm.warp(vm.getBlockTimestamp() + 1 days);
+        uint32 tooOld = uint32(vm.getBlockNumber() - 6);
+        vm.expectRevert(abi.encodeWithSelector(InvalidBlockNumber.selector, tooOld));
+        _propose(tooOld);
+        _propose(0);
+    }
+
+    function testProposeLimitsAboveUint96Rejected() public {
+        // Stray bits above the three packed uint32 make the ABI decoding revert instead of being ignored
+        Strategy[] memory strategies = new Strategy[](1);
+        strategies[0] = compVotingStrategy;
+        _setValidationParams(abi.encode(proposalThreshold, strategies, (uint256(1) << 96) | _limits()));
+        vm.expectRevert();
+        _propose(0);
+    }
+
+    function testProposeAtCurrentBlockWithZero() public {
+        uint256 recentBlock = vm.getBlockNumber();
+        _propose(0);
+
+        vm.prank(author);
+        compToken.burn(author, 100);
+        vm.roll(vm.getBlockNumber() + 10);
+
+        // 0 reads the current block, where the author no longer has voting power, even though they had it recently
+        vm.expectRevert(FailedToPassProposalValidation.selector);
+        _propose(0);
+        _propose(recentBlock);
+    }
+
+    function testProposeZeroWithMaxBlockAgeZero() public {
+        // A max block age of 0 only accepts the current block, given as 0 or as its number
+        maxBlockAge = 0;
+        _setCompStrategy();
+        vm.roll(vm.getBlockNumber() + 10);
+
+        _propose(0);
+        _propose(vm.getBlockNumber());
+        uint32 previousBlock = uint32(vm.getBlockNumber() - 1);
+        vm.expectRevert(abi.encodeWithSelector(InvalidBlockNumber.selector, previousBlock));
+        _propose(previousBlock);
+    }
+
+    function testProposeZeroIgnoresTokensReceivedInTheCurrentBlock() public {
+        // Like the audited validations, the current block reads the voting power of the block before it
+        address borrower = address(0xbeef);
+        compToken.mint(borrower, proposalThreshold);
+        vm.prank(borrower);
+        compToken.delegate(borrower);
+
+        vm.expectRevert(FailedToPassProposalValidation.selector);
+        _createProposal(
+            borrower,
+            proposalMetadataURI,
+            executionStrategy,
+            abi.encode(uint32(0), userPropositionPowerStrategies)
+        );
+    }
+
+    function testProposeZeroCountsTokensReceivedInThePreviousBlock() public {
+        address holder = address(0xcafe);
+        compToken.mint(holder, proposalThreshold);
+        vm.prank(holder);
+        compToken.delegate(holder);
+        vm.roll(vm.getBlockNumber() + 1);
+
+        _createProposal(
+            holder,
+            proposalMetadataURI,
+            executionStrategy,
+            abi.encode(uint32(0), userPropositionPowerStrategies)
+        );
+    }
+
     function testProposeAtMaxBlockAge() public {
         vm.roll(vm.getBlockNumber() + maxBlockAge);
         _propose(vm.getBlockNumber() - maxBlockAge);
@@ -153,8 +246,10 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         vm.roll(vm.getBlockNumber() + 2 * maxBlockAge);
         uint256 currentBlock = vm.getBlockNumber();
         blockNumber = bound(blockNumber, currentBlock - 2 * maxBlockAge, currentBlock + maxBlockAge);
+        // Also covers 0, which always means the current block
+        if (blockNumber == currentBlock - 2 * maxBlockAge) blockNumber = 0;
 
-        if (blockNumber > currentBlock || currentBlock - blockNumber > maxBlockAge) {
+        if (blockNumber != 0 && (blockNumber > currentBlock || currentBlock - blockNumber > maxBlockAge)) {
             vm.expectRevert(abi.encodeWithSelector(InvalidBlockNumber.selector, uint32(blockNumber)));
         }
         _propose(blockNumber);

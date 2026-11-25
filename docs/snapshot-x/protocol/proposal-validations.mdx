@@ -63,23 +63,24 @@ params = abi.encode(cooldown, maxActiveProposals, proposalThreshold, allowedStra
 
 ### Proposition power with active proposal limiter V2
 
-The same as the strategy above, except that the proposition power is computed at a recent block chosen by the `author`, at most `maxBlockAge` blocks old, rather than at the block the proposal is created in. This lets strategies whose power is signed offchain for a given block be used. A `cooldown` of `0` disables the active proposals limit.
+The same as the strategy above, except that the `author` can have the proposition power computed at a recent block, at most `maxBlockAge` blocks old, rather than at the block the proposal is created in. This lets strategies whose power is signed offchain for a given block be used. A block number of `0` computes it at the block the proposal is created in, like the strategies above. A `cooldown` of `0` disables the active proposals limit.
 
-When calling this strategy, `params` should be:
+When calling this strategy, `params` should be as follows. The three limits are packed in a single `uint96` so that they take one storage slot instead of three, which makes proposals cheaper:
 
 ```solidity
-uint256 cooldown = ... // In seconds, 0 disables the limit
-uint256 maxActiveProposals = ... // Cannot be 0 if cooldown is not 0, ignored otherwise
 uint256 proposalThreshold = ...
 Strategy[] allowedStrategies ...
-uint32 maxBlockAge = ... // In blocks
-params = abi.encode(cooldown, maxActiveProposals, proposalThreshold, allowedStrategies, maxBlockAge);
+uint32 maxActiveProposals = ... // Cannot be 0 if cooldown is not 0, ignored otherwise
+uint32 cooldown = ... // In seconds, 0 disables the limit
+uint32 maxBlockAge = ... // In blocks, 0 only accepts the current block
+uint96 limits = (uint96(maxActiveProposals) << 64) | (uint96(cooldown) << 32) | maxBlockAge;
+params = abi.encode(proposalThreshold, allowedStrategies, limits);
 ```
 
-`userParams` should contain the block the proposition power is computed at, which can't be in the future or older than `maxBlockAge` blocks, and the indexed strategies that the `author` has power with:
+`userParams` should contain the block the proposition power is computed at, either `0` for the current block or a block that isn't in the future or older than `maxBlockAge` blocks, and the indexed strategies that the `author` has power with:
 
 ```solidity
-uint32 blockNumber = ...
+uint32 blockNumber = ... // 0 for the current block
 IndexedStrategy[] userStrategies = ...
 userParams = abi.encode(blockNumber, userStrategies);
 ```
