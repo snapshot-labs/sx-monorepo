@@ -33,7 +33,8 @@ describe('createStandardConfig', () => {
       ProposalValidations: {
         Vanilla: undefined,
         VotingPower: '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311',
-        VotingPowerWithCooldown: '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
+        VotingPowerWithCooldown: '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1',
+        VotingPowerV2: undefined
       },
       ExecutionStrategies: {
         IncoSimpleQuorumVanilla: undefined,
@@ -157,5 +158,15 @@ describe('createEvmConfig', () => {
     expect(
       evmConfig.executionStrategiesImplementations.SimpleQuorumTimelock
     ).toBeUndefined();
+  });
+});
+
+describe('evmNetworks', () => {
+  it('should only set VotingPowerV2 on the networks it is deployed on', () => {
+    const networks = Object.entries(evmNetworks)
+      .filter(([, network]) => network.ProposalValidations.VotingPowerV2)
+      .map(([networkId]) => networkId);
+
+    expect(networks).toEqual(['eth', 'sep', 'base']);
   });
 });
