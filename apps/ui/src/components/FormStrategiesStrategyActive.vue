@@ -14,7 +14,6 @@ type Strategy = Pick<
   | 'params'
   | 'generateSummary'
   | 'paramsDefinition'
-  | 'warning'
 >;
 
 const props = defineProps<{
@@ -45,13 +44,6 @@ const isOffchainNetwork = computed(() => {
     <div class="flex justify-between items-center gap-1">
       <div class="flex min-w-0">
         <div class="whitespace-nowrap truncate">{{ strategy.name }}</div>
-        <UiTooltip
-          v-if="strategy.warning"
-          :title="strategy.warning"
-          class="ml-2 flex items-center"
-        >
-          <IH-exclamation />
-        </UiTooltip>
         <div
           v-if="strategy.generateSummary"
           class="ml-2 pr-2 text-skin-text truncate"

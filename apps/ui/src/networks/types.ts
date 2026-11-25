@@ -76,10 +76,6 @@ export type StrategyTemplate = {
    */
   deprecated?: boolean;
   about?: string;
-  /**
-   * Shown as a warning icon with this text as tooltip, e.g. for unaudited contracts.
-   */
-  warning?: string;
   author?: string;
   version?: string;
   spaceCount?: number;

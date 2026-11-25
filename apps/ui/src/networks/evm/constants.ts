@@ -168,10 +168,6 @@ export function createConstants(
     ...(config.ProposalValidations.VotingPowerWithCooldown && {
       [config.ProposalValidations.VotingPowerWithCooldown]:
         'Voting power with cooldown'
-    }),
-    ...(config.ProposalValidations.VotingPowerV2 && {
-      [config.ProposalValidations.VotingPowerV2]:
-        'Voting power at a recent block'
     })
   };
 
@@ -267,21 +263,6 @@ export function createConstants(
     'uint256',
     ...VOTING_POWER_PARAMS
   ];
-  // V2 takes the threshold and strategies like the plain variant, then maxActiveProposals, cooldown
-  // and maxBlockAge packed as three uint32 in a uint96, so they take one storage slot
-  const VOTING_POWER_V2_PARAMS = [...VOTING_POWER_PARAMS, 'uint96'];
-  const UINT32_MAX = 2 ** 32 - 1;
-  const packLimits = (...values: number[]) =>
-    values.reduce((packed, value) => {
-      if (!Number.isInteger(value) || value < 0 || value > UINT32_MAX) {
-        throw new Error(`${value} doesn't fit in 32 bits`);
-      }
-      return (packed << 32n) | BigInt(value);
-    }, 0n);
-  const unpackLimit = (packed: bigint, index: number) =>
-    Number((packed >> BigInt(32 * index)) & BigInt(UINT32_MAX));
-  const blocksIn = (seconds: number) =>
-    Math.ceil(seconds / config.Meta.blockTime);
 
   const generateValidationStrategies = (strategies: StrategyConfig[]) =>
     Promise.all(
@@ -312,14 +293,6 @@ export function createConstants(
     title: 'Proposal threshold',
     examples: ['1']
   };
-  const MAX_ACTIVE_PROPOSALS_DEFINITION = {
-    type: 'integer',
-    minimum: 1,
-    title: 'Max. proposals',
-    tooltip:
-      'Number of proposals an author can create before having to wait for the cooldown to pass since their last proposal',
-    examples: ['1']
-  };
 
   const EDITOR_PROPOSAL_VALIDATIONS = [
     ...(config.ProposalValidations.Vanilla
@@ -341,8 +314,6 @@ export function createConstants(
             address: config.ProposalValidations.VotingPower,
             type: 'VotingPower',
             name: 'Voting power',
-            about:
-              'Authors need at least the proposal threshold in voting power from the selected strategies.',
             icon: IHLightningBolt,
             validate: (params: Record<string, any>) => {
               return params?.strategies?.length > 0;
@@ -387,8 +358,6 @@ export function createConstants(
             address: config.ProposalValidations.VotingPowerWithCooldown,
             type: 'VotingPowerWithCooldown',
             name: 'Voting power with cooldown',
-            about:
-              'Like voting power, but limits how many proposals an author can create per cooldown period.',
             icon: IHLightningBolt,
             validate: (params: Record<string, any>) => {
               return params?.strategies?.length > 0;
@@ -429,7 +398,14 @@ export function createConstants(
               required: ['threshold', 'maxActiveProposals', 'cooldown'],
               properties: {
                 threshold: PROPOSAL_THRESHOLD_DEFINITION,
-                maxActiveProposals: MAX_ACTIVE_PROPOSALS_DEFINITION,
+                maxActiveProposals: {
+                  type: 'integer',
+                  minimum: 1,
+                  title: 'Max. proposals',
+                  tooltip:
+                    'Number of proposals an author can create before having to wait for the cooldown to pass since their last proposal',
+                  examples: ['1']
+                },
                 cooldown: {
                   type: 'integer',
                   format: 'duration',
@@ -441,98 +417,6 @@ export function createConstants(
                   errorMessage: {
                     minimum: 'Cooldown must be at least 1 minute'
                   }
-                }
-              }
-            }
-          }
-        ]
-      : []),
-    ...(config.ProposalValidations.VotingPowerV2
-      ? [
-          {
-            address: config.ProposalValidations.VotingPowerV2,
-            type: 'VotingPowerV2',
-            name: 'Voting power at a recent block',
-            about:
-              'Like voting power, but at a recent block chosen when proposing, with an optional cooldown.',
-            warning: 'This contract was not audited. Use it at your own risk.',
-            icon: IHLightningBolt,
-            defaultParams: {
-              cooldown: 0,
-              maxActiveProposals: 1,
-              maxBlockAge: blocksIn(60 * 60)
-            },
-            validate: (params: Record<string, any>) => {
-              return params?.strategies?.length > 0;
-            },
-            generateSummary: (params: Record<string, any>) =>
-              params.cooldown
-                ? `(${params.threshold}, max. ${params.maxActiveProposals}, ${_d(params.cooldown)} cooldown)`
-                : `(${params.threshold})`,
-            generateParams: async (params: Record<string, any>) => {
-              const abiCoder = new AbiCoder();
-
-              return [
-                abiCoder.encode(VOTING_POWER_V2_PARAMS, [
-                  params.threshold,
-                  await generateValidationStrategies(params.strategies),
-                  packLimits(
-                    params.maxActiveProposals,
-                    params.cooldown,
-                    params.maxBlockAge
-                  )
-                ])
-              ];
-            },
-            generateMetadata: generateValidationMetadata,
-            parseParams: async (params: string) => {
-              const abiCoder = new AbiCoder();
-
-              const [threshold, , limits] = abiCoder.decode(
-                VOTING_POWER_V2_PARAMS,
-                params
-              );
-              const packed = BigInt(limits.toString());
-
-              return {
-                threshold: threshold.toString(),
-                maxActiveProposals: unpackLimit(packed, 2),
-                cooldown: unpackLimit(packed, 1),
-                maxBlockAge: unpackLimit(packed, 0)
-              };
-            },
-            paramsDefinition: {
-              type: 'object',
-              title: 'Params',
-              additionalProperties: false,
-              required: [
-                'threshold',
-                'maxActiveProposals',
-                'cooldown',
-                'maxBlockAge'
-              ],
-              properties: {
-                threshold: PROPOSAL_THRESHOLD_DEFINITION,
-                maxActiveProposals: {
-                  ...MAX_ACTIVE_PROPOSALS_DEFINITION,
-                  maximum: UINT32_MAX
-                },
-                cooldown: {
-                  type: 'integer',
-                  format: 'duration',
-                  minimum: 0,
-                  maximum: UINT32_MAX,
-                  title: 'Cooldown',
-                  tooltip:
-                    'Leave it at 0 for no limit. Otherwise set it to at least the max. voting duration to cap how many open proposals an author can have'
-                },
-                maxBlockAge: {
-                  type: 'integer',
-                  minimum: 0,
-                  maximum: UINT32_MAX,
-                  title: 'Max. block age (blocks)',
-                  tooltip: `How many blocks old a block chosen by the author can be, 0 for the current block only. A block is about ${config.Meta.blockTime} seconds on this network, so ${blocksIn(60 * 60)} blocks is 1 hour`,
-                  examples: [String(blocksIn(60 * 60))]
                 }
               }
             }

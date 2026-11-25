@@ -36,9 +36,6 @@ defineProps<{
         >
           <IH-question-mark-circle />
         </AppLink>
-        <UiTooltip v-if="strategy.warning" :title="strategy.warning">
-          <IH-exclamation class="text-skin-link" />
-        </UiTooltip>
       </div>
       <div
         v-if="strategy.about"

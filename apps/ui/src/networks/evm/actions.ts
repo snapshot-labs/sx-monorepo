@@ -23,7 +23,6 @@ import {
   getContractCallFormArgs
 } from '@/helpers/transactions';
 import {
-  compareAddresses,
   createErc1155Metadata,
   getChainIdKind,
   getSalt
@@ -72,9 +71,6 @@ export function createActions(
   );
   const { incoProxyFactory, incoMasterSpace } =
     evmNetworks[networkId as keyof typeof evmNetworks].Meta;
-  const votingPowerV2 =
-    evmNetworks[networkId as keyof typeof evmNetworks].ProposalValidations
-      .VotingPowerV2;
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     helpers
@@ -450,13 +446,7 @@ export function createActions(
         authenticator,
         strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${pinned.cid}`,
-        // V2 takes a block to read voting power at, 0 for the block the proposal lands in.
-        // The strategies offered here are all onchain, so they use the current block.
-        ...(votingPowerV2 &&
-          compareAddresses(space.validation_strategy, votingPowerV2) && {
-            blockNumber: 0
-          })
+        metadataUri: `ipfs://${pinned.cid}`
       };
 
       if (relayerType === 'evm') {
