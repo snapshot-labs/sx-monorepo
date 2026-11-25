@@ -9,7 +9,7 @@ vi.mock('../../../../src/common/ipfs', () => ({
   handleVotingPowerValidationMetadata: vi.fn()
 }));
 
-const { protocolConfig } = createConfig('eth');
+const { protocolConfig } = createConfig('sep');
 const strategies = [
   ['0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe', '0x1234'],
   ['0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829', '0xabcd']
@@ -32,9 +32,19 @@ describe('updateProposalValidationStrategy', () => {
         parseAbiParameters('uint256, uint256, uint256, (address,bytes)[]'),
         [604800n, 5n, 100n, strategies]
       )
+    ],
+    [
+      'voting power v2',
+      protocolConfig.propositionPowerV2ValidationStrategyAddress,
+      encodeAbiParameters(
+        parseAbiParameters(
+          'uint256, uint256, uint256, (address,bytes)[], uint32'
+        ),
+        [0n, 1n, 100n, strategies, 256]
+      )
     ]
   ])('should index %s threshold and strategies', async (_, address, params) => {
-    const space = new Space('0x123', 'eth');
+    const space = new Space('0x123', 'sep');
 
     await updateProposalValidationStrategy(
       space,

@@ -31,6 +31,7 @@ type Overrides = {
     Vanilla?: string;
     VotingPower?: AddressOverride;
     VotingPowerWithCooldown?: AddressOverride;
+    VotingPowerV2?: string;
   };
   executionStrategies?: {
     IncoSimpleQuorumVanilla?: string;
@@ -115,7 +116,8 @@ export function createStandardConfig(
       VotingPowerWithCooldown: resolveAddress(
         proposalValidations.VotingPowerWithCooldown,
         '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
-      )
+      ),
+      VotingPowerV2: proposalValidations.VotingPowerV2
     },
     ExecutionStrategies: {
       IncoSimpleQuorumVanilla: executionStrategies.IncoSimpleQuorumVanilla,
@@ -168,7 +170,10 @@ export const evmNetworks = {
   eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
   oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
-    blockTime: ethSepoliaBlockTime
+    blockTime: ethSepoliaBlockTime,
+    proposalValidations: {
+      VotingPowerV2: '0x248D739fa8e9959b280c0Ad10bF38ad195a4b70a'
+    }
   }),
   matic: createStandardConfig(137, { blockTime: 2 }),
   arb1: createStandardConfig(42161, {
