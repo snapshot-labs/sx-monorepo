@@ -100,22 +100,34 @@ const marker = computed(() => {
 const slideTop = (i: number) =>
   stage.value!.offsetTop + i * STEP * (stage.value!.offsetHeight - innerHeight);
 
-// Glides to slide i over a fixed time (see glideCurve). Any wheel, touch or
-// key from the reader stops the glide.
+// The browser snaps scrolling to the slides (the snap points are in the
+// stage), and to the top of the page with the banner.
+const snap = (type: string) =>
+  (document.documentElement.style.scrollSnapType = type);
+
+// Glides to slide i over a fixed time (see glideCurve), without snapping so
+// the browser leaves each frame where it is. Any wheel, touch or key from the
+// reader stops the glide.
 let glide = 0;
+function stopGlide() {
+  cancelAnimationFrame(glide);
+  snap('y mandatory');
+}
 function glideTo(i: number) {
   const top = slideTop(i);
-  cancelAnimationFrame(glide);
+  stopGlide();
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     scrollTo(0, top);
     return;
   }
+  snap('none');
   const from = scrollY;
   const start = performance.now();
   const step = (now: number) => {
     const t = Math.min(1, (now - start) / GLIDE_MS);
     scrollTo(0, from + (top - from) * glideCurve(t));
     if (t < 1) glide = requestAnimationFrame(step);
+    else snap('y mandatory');
   };
   glide = requestAnimationFrame(step);
 }
@@ -165,10 +177,9 @@ onMounted(() => {
   addEventListener('hashchange', () => {
     if (slideOfHash() >= 0) glideTo(slideOfHash());
   });
+  snap('y mandatory');
   for (const type of ['wheel', 'touchstart', 'keydown']) {
-    addEventListener(type, () => cancelAnimationFrame(glide), {
-      passive: true
-    });
+    addEventListener(type, stopGlide, { passive: true });
   }
   const placeMenu = () => {
     menuX.value =
@@ -184,9 +195,12 @@ onMounted(() => {
   document.fonts.ready.then(placeMenu);
 
   const heroFrame = startAscii(ascii.value!);
-  boxes.value = BOX_LAYERS.map(({ count }) =>
-    heroBoxes(count, ascii.value!.clientWidth, BOX_FRAME_HEIGHT, Math.random)
-  );
+  // /?rectangles=off leaves the slides without their random rectangles.
+  if (new URLSearchParams(location.search).get('rectangles') !== 'off') {
+    boxes.value = BOX_LAYERS.map(({ count }) =>
+      heroBoxes(count, ascii.value!.clientWidth, BOX_FRAME_HEIGHT, Math.random)
+    );
+  }
 
   // Repeats the banner copy until it covers the viewport, then scrolls by
   // exactly one copy so the loop is seamless. Fills with the fallback font
@@ -231,7 +245,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="group overflow-hidden bg-black text-white">
+  <div class="group snap-start overflow-hidden bg-black text-white">
     <div
       class="flex w-max animate-marquee group-hover:[animation-play-state:paused]"
       :style="{ '--copy-width': `${copyWidth}px` }"
@@ -249,6 +263,11 @@ onMounted(() => {
     </div>
   </div>
   <div ref="stage" class="relative h-[400vh]">
+    <!-- Where the slides rest: the stage's top, middle and bottom at the
+    viewport's top, middle and bottom, as in slideTop. -->
+    <div class="absolute inset-x-0 top-0 snap-start" />
+    <div class="absolute inset-x-0 top-1/2 snap-center" />
+    <div class="absolute inset-x-0 bottom-0 snap-end" />
     <div class="sticky top-0 h-[100svh] overflow-hidden">
       <main class="relative min-h-full overflow-hidden">
         <div aria-hidden="true" class="pointer-events-none">
