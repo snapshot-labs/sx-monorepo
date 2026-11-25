@@ -71,9 +71,39 @@ export const FIXTURE_PROFILES: Record<string, ValidatorProfile> =
       }
     : {};
 
-export const FIXTURE_VALIDATORS: ValidatorPool[] = FIXTURES_ENABLED
-  ? [TEST_VALIDATOR, RECEIVER_VALIDATOR, DECLINED_VALIDATOR]
+/** 0x + 64 lowercase hex, as addresses are stored everywhere else. */
+function pad(address: string) {
+  return `0x${address.trim().toLowerCase().replace(/^0x/, '').padStart(64, '0')}`;
+}
+
+/**
+ * Wallets to treat as validators locally, so the Validator settings tab can
+ * be tested with a real wallet. Registry calls stay real: the contract does
+ * not check that the caller is a validator.
+ *
+ * VITE_STAKED_DELEGATION_TEST_VALIDATORS=0xabc…,0xdef… (dev builds only)
+ */
+const TEST_VALIDATORS: ValidatorPool[] = import.meta.env.DEV
+  ? String(import.meta.env.VITE_STAKED_DELEGATION_TEST_VALIDATORS ?? '')
+      .split(',')
+      .map(address => address.trim())
+      .filter(address => /^0x[0-9a-fA-F]{1,64}$/.test(address))
+      .map((address, i) => ({
+        staker: pad(address),
+        pool: `0x0f2f${(i + 1).toString(16).padStart(60, '0')}`,
+        delegated: '0',
+        own: '0',
+        commission: null,
+        exiting: false
+      }))
   : [];
+
+export const FIXTURE_VALIDATORS: ValidatorPool[] = [
+  ...(FIXTURES_ENABLED
+    ? [TEST_VALIDATOR, RECEIVER_VALIDATOR, DECLINED_VALIDATOR]
+    : []),
+  ...TEST_VALIDATORS
+];
 
 /** Test delegator, spread across four validators. */
 const FIXTURE_MEMBERSHIPS: Record<
@@ -105,9 +135,9 @@ export function getFixtureMemberships(member: string) {
 }
 
 export function isFixtureStaker(address: string) {
-  return FIXTURE_VALIDATORS.some(
-    validator => validator.staker.toLowerCase() === address.toLowerCase()
-  );
+  if (!/^0x[0-9a-fA-F]{1,64}$/.test(address.trim())) return false;
+  const key = pad(address);
+  return FIXTURE_VALIDATORS.some(validator => validator.staker === key);
 }
 
 /**

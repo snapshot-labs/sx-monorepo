@@ -1,65 +1,76 @@
 {
   "network": "sn",
-  "block": 18402609,
-  "generatedAt": "2026-11-23T06:45:49.846Z",
+  "block": 18496810,
+  "generatedAt": "2026-11-25T02:48:09.139Z",
   "staking": "0x00ca1702e64c81d9a07b86bd2c540188d92a2c73cf5cc0e508d949015e7e84a7",
   "token": "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+  "liveness": {
+    "days": 30,
+    "epochs": 721
+  },
   "validators": [
     {
       "staker": "0x043a242b45c03683e2acc96bb7d207c0cfec6d554b224c76c3b690960b485adb",
       "pool": "0x060e069a86f89f1ab550a93baec20479341579308664fe9e192aed408d6a48ce",
-      "delegated": "321302848889802787113136953",
+      "delegated": "321355658514926184580059163",
       "own": "277690870771161259421027",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x00d3b910d8c528bf0216866053c3821ac6c97983dc096bff642e9a3549210ee7",
       "pool": "0x02cb02c72e8a0975e69e88298443e984d965a49eab38f5bdde1f5072daa09cfe",
-      "delegated": "141211131893768993339987083",
+      "delegated": "141353881451023317330422938",
       "own": "1764537000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x072543946080646d1aac08bb4ba6f6531b2b29ce41ebfe72b8a6506500d5220e",
       "pool": "0x07d695337550e96e1372dd03274965cca0284ded266efc1774d001d37fbca104",
-      "delegated": "132344197793220872852670914",
+      "delegated": "133058764391902090543709652",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x04b00f97e2d2168b91fe64ceeace4a41fc274a85bbdd0adc402c3d0cf9f91bbb",
       "pool": "0x01f170bafce432964d6cbaf2cb75355b2043f5640897e0623b7dbb029bf6b3ef",
-      "delegated": "123223936813226373205706393",
+      "delegated": "124332361015600592754786156",
       "own": "30000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x036963c7b56f08105ffdd7f12560924bdc0cb29ce210417ecbc8bf3c7e4b9090",
       "pool": "0x0362dc7da60bfddc8e3146028dfd94941c6e22403c98b5947104e637543b475d",
-      "delegated": "118811835391155678315655457",
+      "delegated": "118810763502931986546863344",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x0785ba32c2d07462534d523b48f908ff4a6360cb702749e83566239341ed6aae",
       "pool": "0x02ecd9247f57a500414b9dbf2723e5a22ba152ea77c045129c38e799b56a6fc7",
-      "delegated": "106125518573734182051657149",
+      "delegated": "106080636573734182051657149",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.36893203883495146
     },
     {
       "staker": "0x024ed354f5b69825100a1833248bb773ef11722b8b1efc845b97acc5976695c2",
       "pool": "0x009a3b7236dbaa9006ac0f9add671981f11fba944f08c8bd9ca788e6eda7dc89",
-      "delegated": "85893515734527504813250925",
+      "delegated": "86089672847341301860252964",
       "own": "20000000000000000000000",
       "commission": 0,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x071995e702c5c3f27a991c33aa080b278435ce014e422ef1dfe80ff1420e3fc1",
@@ -67,15 +78,17 @@
       "delegated": "65849301096825168458377841",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x01aca15766cb615c3b7ca0fc3680cbde8b21934bb2e7b41594b9d046d7412c00",
       "pool": "0x0778707408dc62e14fee3d9bcdce2e281bdfc030e7f39067a48de3d1e97181dc",
-      "delegated": "50063061986693264980784841",
+      "delegated": "50070652062681014397388539",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 1
     },
     {
       "staker": "0x02952d1e0de1de08fbe6a75d9d0e388e3e89d5d9d42d5f85906ec42ea02e35de",
@@ -83,15 +96,17 @@
       "delegated": "36661772337250992878415966",
       "own": "1000000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9958391123439667
     },
     {
       "staker": "0x0475a1ba31db59f0eda3b3b260ad3abb30a2a67983cd51d753fdb4adad92a524",
       "pool": "0x04283b57b27629a688f70ec2fef1b9b0c038357e082d7f36a8b72e124a42825e",
-      "delegated": "21159991221176858960152208",
+      "delegated": "21164991221176858960152208",
       "own": "101219340359257303901198",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x077d4b4e7ae321aabd0a5a7322108635fcbd0cd746f9ae217b8ea00363494b65",
@@ -99,15 +114,17 @@
       "delegated": "17849779814304137012541170",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9916782246879334
     },
     {
       "staker": "0x0327478b645a0c6889e995fe22b1298fae420dba24cc42422f0c066763d08dc9",
       "pool": "0x0557b05127c57cd84ad613e3f4f40e92c07ede972c4c253c2dd3d8ac73c873fb",
-      "delegated": "17508305271292553171412926",
+      "delegated": "17508311234564391515725758",
       "own": "22790000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x03f7f4e5a23a712787f0c100f02934c4a88606b7f0c880c2fd43e817e6275d83",
@@ -115,7 +132,8 @@
       "delegated": "17069752058487406901980344",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9070735090152566
     },
     {
       "staker": "0x0327a835fda4673a83f63d90bc3a16dd5b1645972acd539b3fc2446e73b11170",
@@ -123,7 +141,8 @@
       "delegated": "17001860024373486324277021",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x057f253980fd33c375e881bd162d9e2e7bc6a151196a484aa204c74f389b3cf3",
@@ -131,7 +150,8 @@
       "delegated": "16503668913828908650000040",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x0655ab8f44bdaeab14c4826383a65af75c21cef9b0cabb018519eed7120c93e3",
@@ -139,7 +159,8 @@
       "delegated": "16110873583579112740666802",
       "own": "21500000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x05b625f0a99bbdb24fbe88cf481e8559e26c0d1d2ac6d957fb77f556857c7543",
@@ -147,7 +168,8 @@
       "delegated": "16087294000000000000000000",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x05ff6a0b57ad4a65981ea21e064d0308e8e01d5d23f293a688062d2aa31f940e",
@@ -155,7 +177,8 @@
       "delegated": "16070002095000000000000000",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x0359e252e663765989b04c266a4daec77662b506ce5f026994cb8ad53628df2a",
@@ -163,7 +186,8 @@
       "delegated": "16034980000000000000000000",
       "own": "20050000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9916782246879334
     },
     {
       "staker": "0x07d915cdeae00b4460979985a18bcc71597153aaa4d02ca293bfd943c1286316",
@@ -171,7 +195,8 @@
       "delegated": "16000191800000000000000000",
       "own": "20002000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x0329de61cdda3e8ff4e69b57cb21bded4ba026fc13f007344053e59737597bb0",
@@ -179,31 +204,35 @@
       "delegated": "15870232350000000000000000",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x041633461e3a1136edc1c31b3c26db2c07e0c179b0036255994bdb01e714d3d4",
       "pool": "0x040e9777cc64df3cffdef51985f4989028b81a09b078dbf31dbb083fd1c41c75",
-      "delegated": "15849788040000000000000000",
+      "delegated": "15853716250000000000000000",
       "own": "20010000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x073eb291861d13aa2584626fb8759acbdad2c513a487254a993d6fd2c6dc3be4",
       "pool": "0x04fd57558f4535156298c2a0660dc8fc41e90cbed93c17ca52e20d28be6296b3",
-      "delegated": "15352892799999999993708544",
+      "delegated": "15353837629999999993708544",
       "own": "191000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x0025ba2f802c73e24ae23ed4f43f6b7e9d38b14f8fea947c322d80c809571c54",
       "pool": "0x03cd4b6866c53da161e073efedcd6342d9f95e57f994f7a081ba497a34b68a3b",
-      "delegated": "15268513040146357137261788",
+      "delegated": "15268799880146357137261788",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x03ee6ce05c901870197b5248e062eddb780f90456ff46ed3c8eba05d0e6538d2",
@@ -211,15 +240,8 @@
       "delegated": "15036734898154302948282433",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0156cf8352b3c55b8a00bc1cb7fa8d157fd6a454a078874abe7e35c0d8f77e69",
-      "pool": "0x01ade74e6bcb55cad265230e9be38e76b548a0e5d153eaba1a5a8ae020e8cca5",
-      "delegated": "15010000000000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x0043b2d0a0c549298567fa7b4b992f4fddf9e38f9819b7749cdf885e2b0023dd",
@@ -227,7 +249,17 @@
       "delegated": "15001000100000000000000000",
       "own": "41080000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
+    },
+    {
+      "staker": "0x0156cf8352b3c55b8a00bc1cb7fa8d157fd6a454a078874abe7e35c0d8f77e69",
+      "pool": "0x01ade74e6bcb55cad265230e9be38e76b548a0e5d153eaba1a5a8ae020e8cca5",
+      "delegated": "15010000000000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x06a1b1ebb671b5e257ec3b039ed72f37578dd63cb9cb06f779f2eb7e1b4ddc21",
@@ -235,15 +267,17 @@
       "delegated": "15000000000000000000000000",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x070ff78577847c55027d6defb5f7613714e052e47235fe8e7bac7c0915a8e08f",
       "pool": "0x044d7c8c9d03b79e298b844b7449a5f79c82b31e9697b6634b403bfe9f168216",
-      "delegated": "14051376353291558853128964",
+      "delegated": "13852432353291558853128964",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x015cc95c70120ec985bdd6115232dd5f875bd58820aa4c62b6565d0fe33c3ac4",
@@ -251,7 +285,8 @@
       "delegated": "13200423428461930904081484",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x068b5f8e8eb23a42ad290800f229f09b1bcc8d43537dd27a127769ffa13b59f1",
@@ -259,7 +294,8 @@
       "delegated": "10450521255654275674611998",
       "own": "40130000000000000000000",
       "commission": 200,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x069b9d9fc5064a3c9025ff44c58f0088467a730fddc1e26652afeae003e1ec25",
@@ -267,23 +303,17 @@
       "delegated": "10000000000000000000000000",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9958391123439667
     },
     {
       "staker": "0x072c6aa4f9f84fad52de9e70b1fc97347e20716935801c4df0cce5b171718e4e",
       "pool": "0x04065cc43b4eab960dcee8d8a54f73081e7dcc847d1a1b4c4d133baed6b8f757",
-      "delegated": "7082579890674456145502420",
+      "delegated": "7085939890674456145502420",
       "own": "20630000000000000000000",
       "commission": 495,
-      "exiting": false
-    },
-    {
-      "staker": "0x02d86897daadee2dffdb5c5b734ab568fe849808105977e0384f8e5d1a0d33d7",
-      "pool": "0x030b0733dff76737c5146d858a159ba19fe17eeecd8a97b88c75135bea363e38",
-      "delegated": "6059080633469086004133888",
-      "own": "20001000000000000000000",
-      "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x0018b139707cf26a62b7b38b5bd7859dab1b4965f29db4d330534ff38a10a22d",
@@ -291,7 +321,17 @@
       "delegated": "6050258584144715565103649",
       "own": "37851000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x02d86897daadee2dffdb5c5b734ab568fe849808105977e0384f8e5d1a0d33d7",
+      "pool": "0x030b0733dff76737c5146d858a159ba19fe17eeecd8a97b88c75135bea363e38",
+      "delegated": "6059080633469086004133888",
+      "own": "20001000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x011984bfc315a132677992d8a3da8487bf3ad39842cbc4c3cdfde56d67525fab",
@@ -299,7 +339,8 @@
       "delegated": "6000100001306115821723479",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x00e154198809f2ae5e5425888719c74abc3ff133583c7746c64d437c0320b0da",
@@ -307,7 +348,8 @@
       "delegated": "5797317360000000000000000",
       "own": "20100000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9791955617198336
     },
     {
       "staker": "0x02db5d9947e213aa9c309f656b8b80592c891d02635c41289748dc0805289753",
@@ -315,7 +357,8 @@
       "delegated": "5022036008783092304805576",
       "own": "341601000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x023d2174be7e064dc31f3f358c850fc1ab3e05ad5b61ea7479e23843250845d0",
@@ -323,7 +366,8 @@
       "delegated": "5000000000000000000000000",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9334257975034674
     },
     {
       "staker": "0x034cadb95a1e54a258d5a711a7be052ca5a8582cadebf7dfc50d11db8d6b19b5",
@@ -331,7 +375,8 @@
       "delegated": "4235879813008620453645115",
       "own": "20100000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.8585298196948682
     },
     {
       "staker": "0x032329f284ebe262e368afba0049ba025ed5999fe1d8da1aa710c9ad5f8c53aa",
@@ -339,7 +384,8 @@
       "delegated": "3956627084946186989540727",
       "own": "20000000000000000000001",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.897364771151179
     },
     {
       "staker": "0x034e5b8fd71033cac6bf40478736ddac340097ab1f3002a61505fdabe342ac0f",
@@ -347,47 +393,17 @@
       "delegated": "1299629513501784321888282",
       "own": "20000000000000000000000",
       "commission": 100,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x021a5797cd9e8f74117bfa2771fb7fe0d3eff6bee06de4b52657fcd97234dad2",
       "pool": "0x06bab49f5c5f32e77c6695683b72ca7486ec331be31d573c0015c360d2971d46",
-      "delegated": "1156394320000000000000000",
+      "delegated": "1157162180000000000000000",
       "own": "30100000000000000000000",
       "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x05d0eb74795283001ae399656e00a194e6e83479ae7a537f4986ad5bc39f22bc",
-      "pool": "0x0444d15f91beed1873cd8d2db78aaaefeba1c3b2cee2d3a2e58265ced55cbf6f",
-      "delegated": "1057185815572664880007727",
-      "own": "20000000000000000000000",
-      "commission": 499,
-      "exiting": false
-    },
-    {
-      "staker": "0x067f8dc84b5b2213c4ec5a4df990f7324bf025bb819ec2e9b7592e5c82fa4bab",
-      "pool": "0x01da445316d38c562ce6a80850c094a73b82a2a6e2c2a2811300ec76634b73b0",
-      "delegated": "1043601211620298920932172",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x05c755ba1828c70314349ec4c4ddaf310e648d5773f9bb6c4eb6ce2369288569",
-      "pool": "0x072cfecedb7eb42235b3d58f88d610ac4836dac80fe6d5e025cf3ebeefab3d7a",
-      "delegated": "1040439375928660601399491",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x03baeda4f84b8a7ff49b534e51cef2d033c19baf9aac552033f25de5f74d216a",
-      "pool": "0x007d2ea1461ef8a6005aa9235bd0b953e68f6c5db72920a12c21340d7219fac9",
-      "delegated": "1035076680955232414798667",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x054fe9375a6b69d5126f54fc447a99ad55bc24b4282f6d9ade977817d780f8dc",
@@ -395,7 +411,44 @@
       "delegated": "1032277465964281629061619",
       "own": "50417000000000000000000",
       "commission": 200,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9958391123439667
+    },
+    {
+      "staker": "0x05d0eb74795283001ae399656e00a194e6e83479ae7a537f4986ad5bc39f22bc",
+      "pool": "0x0444d15f91beed1873cd8d2db78aaaefeba1c3b2cee2d3a2e58265ced55cbf6f",
+      "delegated": "1057185815572664880007727",
+      "own": "20000000000000000000000",
+      "commission": 499,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x067f8dc84b5b2213c4ec5a4df990f7324bf025bb819ec2e9b7592e5c82fa4bab",
+      "pool": "0x01da445316d38c562ce6a80850c094a73b82a2a6e2c2a2811300ec76634b73b0",
+      "delegated": "1043601211620298920932172",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x05c755ba1828c70314349ec4c4ddaf310e648d5773f9bb6c4eb6ce2369288569",
+      "pool": "0x072cfecedb7eb42235b3d58f88d610ac4836dac80fe6d5e025cf3ebeefab3d7a",
+      "delegated": "1040439375928660601399491",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x03baeda4f84b8a7ff49b534e51cef2d033c19baf9aac552033f25de5f74d216a",
+      "pool": "0x007d2ea1461ef8a6005aa9235bd0b953e68f6c5db72920a12c21340d7219fac9",
+      "delegated": "1035076680955232414798667",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x04ee3fab423424352d4fc7dd1a3bb6d26a34c26f0793e94f89d02a210d961448",
@@ -403,7 +456,8 @@
       "delegated": "1031896020000000000000000",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9916782246879334
     },
     {
       "staker": "0x07037044bca2a03ac5f317c8193f71dc49fe0aafa9acbcbb8c994d49f18e7cb3",
@@ -411,7 +465,8 @@
       "delegated": "1008503434407029811425738",
       "own": "20000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9958391123439667
     },
     {
       "staker": "0x03fd204025bf226e71a45f94564c1199b95b80a05c45db3d827e4004c6b30ece",
@@ -419,47 +474,8 @@
       "delegated": "1005975731888367093409128",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x01d83071fef0e55608b3971c80a894285cce7ae11f59d0cc2beb83c68214bb0a",
-      "pool": "0x00906b7178b63627384f352b806227c08d30f423b7f75fc680a2d589e126a81b",
-      "delegated": "1004512168454955077663977",
-      "own": "20000000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x043f05485eafa41da1cd8442069a72a6264dfced0ad1af298fd235d6df91f735",
-      "pool": "0x0009eed8cc1b0bd97e6b8311fff0cac851c02ffccdd7fb08632c5b3e9888239e",
-      "delegated": "1001120100000000000705826",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x001dbd42a6e91ceca28d1364acc31f9e73c1419b2624ce30874ade81e8324e04",
-      "pool": "0x06d36f34fcdfd50c2f81ecb7547def71168f18c674c86c661faf7325e05fc863",
-      "delegated": "1000050000000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 900,
-      "exiting": false
-    },
-    {
-      "staker": "0x03912bf7ee089d66bf3d1e25af6b7458bdb4e4a17dbad357cbcfd544830f79ea",
-      "pool": "0x01b5ba7ce836fd570e74cebfcdc09e5c4c5e3e3231bec258a21f09d2b13c28d2",
-      "delegated": "1000010101000000000000000",
-      "own": "21368000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0223d82a4ea1c98b163a4c7b9921202613f2b335292216e215a9a03d20fea2b2",
-      "pool": "0x0193537fb5929934429500491ba352d7471d3e18e06d8e0c754e99c6dd4a3383",
-      "delegated": "1000000000000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x0234cbb9f4f867f5e6b71f70d20695a9a18ad34d203d87235a6305843f8b8788",
@@ -467,7 +483,35 @@
       "delegated": "1000000000000000000000000",
       "own": "25000000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9916782246879334
+    },
+    {
+      "staker": "0x01d83071fef0e55608b3971c80a894285cce7ae11f59d0cc2beb83c68214bb0a",
+      "pool": "0x00906b7178b63627384f352b806227c08d30f423b7f75fc680a2d589e126a81b",
+      "delegated": "1004512168454955077663977",
+      "own": "20000000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x03912bf7ee089d66bf3d1e25af6b7458bdb4e4a17dbad357cbcfd544830f79ea",
+      "pool": "0x01b5ba7ce836fd570e74cebfcdc09e5c4c5e3e3231bec258a21f09d2b13c28d2",
+      "delegated": "1000010101000000000000000",
+      "own": "21368000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x043f05485eafa41da1cd8442069a72a6264dfced0ad1af298fd235d6df91f735",
+      "pool": "0x0009eed8cc1b0bd97e6b8311fff0cac851c02ffccdd7fb08632c5b3e9888239e",
+      "delegated": "1001120100000000000705826",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9791955617198336
     },
     {
       "staker": "0x03e578ec6757bd366a43c8157dab6fbf6491639173c42ae85f383a479fc90102",
@@ -475,39 +519,71 @@
       "delegated": "1000000000000000000000000",
       "own": "20900000000000000000900",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9875173370319001
+    },
+    {
+      "staker": "0x001dbd42a6e91ceca28d1364acc31f9e73c1419b2624ce30874ade81e8324e04",
+      "pool": "0x06d36f34fcdfd50c2f81ecb7547def71168f18c674c86c661faf7325e05fc863",
+      "delegated": "1000050000000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 900,
+      "exiting": false,
+      "liveness": 0.9667128987517337
+    },
+    {
+      "staker": "0x0223d82a4ea1c98b163a4c7b9921202613f2b335292216e215a9a03d20fea2b2",
+      "pool": "0x0193537fb5929934429500491ba352d7471d3e18e06d8e0c754e99c6dd4a3383",
+      "delegated": "1000000000000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x026232d459668b7183dd54e7cddccd27e168882b597743e233645cefa61eb1eb",
+      "pool": "0x06ea5688ff1395a4562238880d43500035fb55f2b80546e0e530770378cd1e2e",
+      "delegated": "148886800203577238794678",
+      "own": "750000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x02958759e22b48cfc703480c74ba9197df26190c78b83e99f25e96148b932160",
       "pool": "0x032fa556058243458fd3a06f3180b6dc4c1e965fbf9c1d3624b19d6a1b705409",
-      "delegated": "869207952001593839787811",
+      "delegated": "873412892001593839787811",
       "own": "20001000000000000000000",
       "commission": 900,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x07cd517c4373c8f6e879b24cefae63cedb3ef7e06f5fef033cde6ab734da441e",
       "pool": "0x045fed6be2ab6182b2d679c57fa4580b33031df22e357491b9aa8a3f9c444bdf",
-      "delegated": "866104190000000000000000",
+      "delegated": "869223100000000000000000",
       "own": "20005000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.7711511789181692
     },
     {
       "staker": "0x07a97a7662e7f634c8f1d136cbd1f4d46b4c9551ba5f7df0c32b3d6a07f0f1cd",
       "pool": "0x0205c83ec08f14ec12b501df25e36f69f48f5657b6d6381d77d05002cd21b6e5",
-      "delegated": "845471610000000000000000",
+      "delegated": "849609170000000000000000",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x00f7e0e1dbdea73240ab6b4470acee184990dc0ac573f5970f6dbd05ee955f02",
       "pool": "0x02745c2dc70285aa03e5476a5195cc68d4871cc84d87943210c710cbbd7e3dfe",
-      "delegated": "838821950011000000000000",
+      "delegated": "842931660011000000000000",
       "own": "22000000000000000000000",
       "commission": 990,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9958391123439667
     },
     {
       "staker": "0x063b0a2075e06b72891ba62108aff51d302e3cadd867a06fcd776e452c895da1",
@@ -515,15 +591,17 @@
       "delegated": "797989180000000000000000",
       "own": "20420690000000000000000",
       "commission": 420,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.8307905686546463
     },
     {
       "staker": "0x076ffc55e02865335b712858e26eb08557528c72c02a623c03b27f7a6a06d9fd",
       "pool": "0x0566af6ee315b5531592b8dcf260ad26ff8d365879c4eb92e6df7c2557e4485f",
-      "delegated": "591041904098448002433362",
+      "delegated": "591352194098448002433362",
       "own": "55317000000000000000000",
       "commission": 0,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
       "staker": "0x04c2b0e230aef0c703594d899c142d6aa6e1c9d43bf7032eec4d1bdb3c944aa4",
@@ -531,7 +609,8 @@
       "delegated": "462723527418824576305349",
       "own": "20000000000000000000000",
       "commission": 499,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9944521497919556
     },
     {
       "staker": "0x074f53494d13a3789e693e6cfca510d80fcc8eff6c09e6e1f406492595b518bc",
@@ -539,31 +618,8 @@
       "delegated": "427578210086593952788113",
       "own": "20000000000000000000000",
       "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x07e7e6103fa8d6365860ec14d3f14ec9cd9b55b79e5c7bf8dc13a95bf83acaa2",
-      "pool": "0x063a71daa07c2cdfe72d2fe7879b61ba65e33ebf7f65c38b2f3ffe0c1adfd9a1",
-      "delegated": "164336628954806959116888",
-      "own": "20000000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x026232d459668b7183dd54e7cddccd27e168882b597743e233645cefa61eb1eb",
-      "pool": "0x06ea5688ff1395a4562238880d43500035fb55f2b80546e0e530770378cd1e2e",
-      "delegated": "148866800203577238794678",
-      "own": "750000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x003858ccd8211c5ddb97af0ccd5cf8f00f2093d0d10d712f048d4bf8e3eee1f5",
-      "pool": "0x0109a5c98866bd08e80fe78907bac0cb17498f39af82d8f746d05c3556644e4f",
-      "delegated": "145494373723962922755188",
-      "own": "20000000000000000000000",
-      "commission": 800,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x03de178f19fba1ad51b8d2c1887127f7d964d86d3befb026438950b84886683c",
@@ -571,79 +627,26 @@
       "delegated": "118874480000000000000000",
       "own": "115318704531092044490558",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
-      "staker": "0x0744c4e52110f5c463d1997a5989a73ce97087628182a126ccaaabc65e526249",
-      "pool": "0x017a78d942fc48dc61e5be1496750b2810810183339cbd60760dba0ae5a207f7",
-      "delegated": "98275586800004467267080",
-      "own": "20001000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x05f40ebeb3a8085bcbc15fbc3aa50d9da10976121fca4e605a708ccbc4934917",
-      "pool": "0x049835dfe93f396b2016ef65d5f76ea45c904702ba4905bed5d77fabc30a6b01",
-      "delegated": "88450000000000000000000",
+      "staker": "0x07e7e6103fa8d6365860ec14d3f14ec9cd9b55b79e5c7bf8dc13a95bf83acaa2",
+      "pool": "0x063a71daa07c2cdfe72d2fe7879b61ba65e33ebf7f65c38b2f3ffe0c1adfd9a1",
+      "delegated": "164735368954806959116888",
       "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x000c7181c833be28c212d70e858037efde144235931877f5758d306f01d5edd7",
-      "pool": "0x01ec2dc9695c8935d2812ec5f80ee50b83a0afd24988fe06534134d2e07d1912",
-      "delegated": "67174139508678309235576",
-      "own": "20000000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x0452561f31ed545b7da5c172fad93ed34166d581ab15aa646adb4261a4ceb1b7",
-      "pool": "0x00a1bede72288f14c32dc253d666f47d99836fbc8bc5f3227424f5ec837ca1d2",
-      "delegated": "56840341109090005286912",
-      "own": "55040000000000000000000",
-      "commission": 99,
-      "exiting": false
-    },
-    {
-      "staker": "0x0134c52e3cdc4e581b14e79c3ef93becf778fa400309613a85e8d4c64c0265af",
-      "pool": "0x063b78f351676cf7ee6cb60eca4008bcc45ab936a228904579a9f72ebb03a822",
-      "delegated": "50114001000000000000000",
-      "own": "50000000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x02d3231a0661e52f4326e1a5d40dd6e05396bf994535662fb1e1cf746c14d082",
-      "pool": "0x0568e858f2b3dadc9cbf8fc4d974727178507d8e11b84a3ace5a1a724fa83f04",
-      "delegated": "49626580000000000000000",
-      "own": "21050000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x012ae285a6692f2ac00811aa75e8a3c8d94367cba22e22e581e2b51e3bde5103",
-      "pool": "0x060256ea04efc90fd8badeb4e4c27c420b753e802607ea47034dac8e3dc81ed0",
-      "delegated": "43218350000000000000000",
-      "own": "30300000000000000000000",
       "commission": 1500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
-      "staker": "0x07e6980efc0ed4381f23c3cb54a0cc14b030b1e38f6b01ad736f74c61f36fddd",
-      "pool": "0x006986cb69f6d8cc25e34f2376c1f72259e6f55a002ad2351346fd7278cef13c",
-      "delegated": "33541644100106804445184",
-      "own": "20020000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x00bb6c4af7ea20ce5f02cb706c7cdc897ee6a5c44c4dceb9fb87e58f0c8102cf",
-      "pool": "0x021c992875b562d226a4a254f31807c69324885c322dee29c221233281b533c7",
-      "delegated": "33199298482979807294223",
-      "own": "28500000000000000000000",
-      "commission": 1000,
-      "exiting": false
+      "staker": "0x003858ccd8211c5ddb97af0ccd5cf8f00f2093d0d10d712f048d4bf8e3eee1f5",
+      "pool": "0x0109a5c98866bd08e80fe78907bac0cb17498f39af82d8f746d05c3556644e4f",
+      "delegated": "145494373723962922755188",
+      "own": "20000000000000000000000",
+      "commission": 800,
+      "exiting": false,
+      "liveness": 0.9098474341192788
     },
     {
       "staker": "0x036fbd8152dbdafeb77163dd8f8b180473d16d66ef00f9d11799aaaa216c679e",
@@ -651,191 +654,8 @@
       "delegated": "30825822785270001303552",
       "own": "133008752149737417131188",
       "commission": 900,
-      "exiting": false
-    },
-    {
-      "staker": "0x04c2e99661a85fec90cc66fec5b1eb911a0633888f468f3eac6b9654191f7102",
-      "pool": "0x079f2d9ce1eadfc513ac8c005683c48fc0dfe3312e6e1db9c05dca881db45cd7",
-      "delegated": "29068893623969999998976",
-      "own": "20800000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x01eb3ea6a3c0ad3c2503a349cd8acca19ed34fb006045a1518eca93910bea5c2",
-      "pool": "0x00189d85f133a9544ecbfa450362b2e669f81be79bd79608ec19986cb382a820",
-      "delegated": "25963214891539999994880",
-      "own": "20100000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0522d45e8d7a57c5d7d68fbc6fab0ad86b60102041f222cefb2a7140d47e4a28",
-      "pool": "0x067b2583e86d66e0bd1132403ac20dd3ffe81c70a9dac515c556792037dba760",
-      "delegated": "22623400000000000000000",
-      "own": "30000000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x068e55c8c9b8c0d64ad20e8b08a421c1037b084c6c7339b25e602c86a09c6ce6",
-      "pool": "0x032e071d848631e0bcc3852fd7fe925a24ebb946a40176ed70455260f8ce3f2f",
-      "delegated": "21562775253100390099369",
-      "own": "20000000000000000000000",
-      "commission": 800,
-      "exiting": false
-    },
-    {
-      "staker": "0x016cacb599999b339988695c2721c65186ccc41529fb12a7b7a9251c163dc590",
-      "pool": "0x0583784e1d506f81579de66b9c48092b3f8224e8fc3f36fbc66546a07fe608c6",
-      "delegated": "21294680000000000000000",
-      "own": "20050000000000000000000",
-      "commission": 900,
-      "exiting": false
-    },
-    {
-      "staker": "0x05012a0911c6557f3f9f250b7b477681b79eb1e8af78cd02ed6d6092bb92f505",
-      "pool": "0x0276c021aef359c6b6289f3eb8cad53eb2eb555890651d6ec65dcaa1ac91390d",
-      "delegated": "20349970000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x0131383f4ad42c6ca411003c7f4113f61eba7b5848c6a1f5a7866661ed8d59c6",
-      "pool": "0x067b6a19eb4acd6935d145e1cfe90a272fdd4d3d14b4b82fcc7f0cfd57d4ba11",
-      "delegated": "19848624753578398638346",
-      "own": "20100000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x04c9bd490305796b88852d6f57862f9eda26c8af30c240cc68e9cfb785e79525",
-      "pool": "0x0127f8fbdcde14cea569f34d67f210e6016775ef26441a7ceecb52ea57833819",
-      "delegated": "19552177304578433609904",
-      "own": "20001000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x002843700bd4bc546d05baa55d055572bf2beea8ebefbdb9be763f83638fc294",
-      "pool": "0x0116de2f76b9dfdff9791d7d34570772b19968b4d927d4caa28673b71d69ea58",
-      "delegated": "16897495028500002097224",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0586a61016dfb1967e3eb227b048a1331e640851a9998b251d2da2385fbb066e",
-      "pool": "0x0520ead5d1bf9905c01ba740476ccef354d19db772823dc005991ddd1c852aa2",
-      "delegated": "13288567025338516304878",
-      "own": "20000000000000000000000",
-      "commission": 200,
-      "exiting": false
-    },
-    {
-      "staker": "0x05aac4ebc80e3ac465be66ee959523c2f904adfc817d9e4d80d7cfc327a2def7",
-      "pool": "0x017f5a218ba89acc003f1a061c3140386485a958317300d2c3204460dacd1bc8",
-      "delegated": "12156361393991179835685",
-      "own": "20001000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0684f94890702f08d6765836273bf36c2a0cb0aeb949f146803b7e42060f2192",
-      "pool": "0x014c10673124301c3c63b5ab28363f314f7ea4abc3eaa42dabd7f1b324fdbf63",
-      "delegated": "11357289859331681818639",
-      "own": "20015000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x033d152598873a307b9abdd7bd5d479cadf1814db4bf87e0f0d61a8f84d0bf63",
-      "pool": "0x07792f57b5365a0a6948211fa681b69ecfe1e98afcf0897aec15c0fefef5d8ff",
-      "delegated": "11096221147441860467967",
-      "own": "20000000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x0272399f169e862157ecb71feb1c1d1fc39b7246a7bc68b57b31ca18b6211989",
-      "pool": "0x06b98a1d1e004515e1d037163c744377ec91508baee2b860a3625d3c40a3d34d",
-      "delegated": "8486830108969688060371",
-      "own": "20500000000000000000000",
-      "commission": 100,
-      "exiting": false
-    },
-    {
-      "staker": "0x0786e60c09a183406dce74b279a3010ad2e20fb3d3b831ecd5a2d94a0f7abd0d",
-      "pool": "0x04047db6170453f3af3ab939e949980ee5861f78f992bcf55ba78bd67bc7388f",
-      "delegated": "7518000000000000000000",
-      "own": "20100000000000000000000",
-      "commission": 1500,
-      "exiting": false
-    },
-    {
-      "staker": "0x052e77b9ad9e736efa1e7444227b9a06ea0aae7fb0de5e85c63145dc3b86e081",
-      "pool": "0x03522ab4a9692a65de4eb25e65ad2d7a3fc7296f97092b2b3af2788351eacc2c",
-      "delegated": "6803161970928251335353",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x07334d1737505b1e6373929446079c46b9ca9cf1f1e5e312f9b9b242424f72bf",
-      "pool": "0x0039c258e8c57a774dcc8dac6da519ee01b16bded864d27f44fbe88bfed944e7",
-      "delegated": "6465000000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x0239361e24fc849fe2cacc0048d9863dc9031088f148f94ff4f34648a6e77197",
-      "pool": "0x02753e166619a4c1f624d35265b43d1ce4d3a1a09ebb16154f604818e2a9d985",
-      "delegated": "5120000000000000000000",
-      "own": "34900000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x011afa6f1d98aa7235cca417a409d075468c87971fe97b62a7704a4902982159",
-      "pool": "0x048991cd90a61714ff29ed8074fa086b3fcd513409e498943cbf181fd2a79379",
-      "delegated": "4079440260992906414449",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x00edd59ca1932462718c81ef4d7f463fed50e29f8a11b24d7cb5d8373923b786",
-      "pool": "0x0050c48f149c2b09cf779cbc27de0b2127f3792c17584e457f5179541141e2a8",
-      "delegated": "2932094632674010440885",
-      "own": "21700000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x06fa26c205d3dc788586652435cae77ce42e44fa01c97e24eee7617217322d25",
-      "pool": "0x0791670c0e853c7c0d05007fea72d5f5b49e13557cff5740f22067a7de799634",
-      "delegated": "2741775393088261505024",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x03d08c023aa3224427b6e91c8fd1b0695140b1dd5c4e69fd4e733dc6a98ea52c",
-      "pool": "0x00d529182da8b013bfa46d8ec65a9124fbd570f882852e5c770f2aa437ff478a",
-      "delegated": "1972409722154480312199",
-      "own": "20000000000000000000000",
-      "commission": 100,
-      "exiting": false
-    },
-    {
-      "staker": "0x02ba7cc100c1428c6dc1e59d43e184c73c8b62641ad2e7c597392dbe2dde77ac",
-      "pool": "0x06e0088984a7e7297e66c0461bb0c00dd2dddef899465097d88e3c0a90e81175",
-      "delegated": "1514000000000000000000",
-      "own": "21000000000000000000000",
-      "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x05fc466c785607651c81c416a55ff8ac196fa2673b673770134eb424e1141c7e",
@@ -843,95 +663,116 @@
       "delegated": "1295797833669087700000",
       "own": "141200000000000000000000",
       "commission": 300,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9972260748959778
     },
     {
-      "staker": "0x0224874adf1da0a04bda379862a6187e102ba4152a489199cbf6ab0a7f8259a4",
-      "pool": "0x068881c24746f3bddbcc035331fb8713c250e81ded0a2b40c428e9d3bd483de2",
-      "delegated": "1208100000000000000000",
-      "own": "20098000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x0161dbe310290d6f1bad9096b02b2eaea765b420ae9a310728837c14bcc48597",
-      "pool": "0x015984c75b8a53bac60d8b772f340850fef97b16ad50c0baf68eed99d06e4520",
-      "delegated": "294310000000000000000",
-      "own": "20300000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x0749c29eddd24613c320b57cf9299a2694934e5e3fabce987df1784231edba71",
-      "pool": "0x055c4f8f9849a021b81295b96934a94e0de3df6a2f3eb2c045f45907b0fccef9",
-      "delegated": "150100000000000000000",
-      "own": "25000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x02de02b88a30d04ac6a49f24cd6d021f8a1e39d8afabcba348795ab29e3d0d31",
-      "pool": "0x01daf484fff6717ba352d6748c4fd61b0707ec2f1484722e6ac71b1a16a2023a",
-      "delegated": "50120000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x06711b0f4b310b41585dd80422588f8582db9307685a83eefbc9d4e9b00e6516",
-      "pool": "0x022262d1883f3276490ec84f926caa2cff8f1c90d10d231037ce536a38a6b46f",
-      "delegated": "2570000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 0,
-      "exiting": false
-    },
-    {
-      "staker": "0x018231b7efb19f71c0a938ed876ed98afb864f716d52f2b9ee43719a953d3453",
-      "pool": "0x04a1b60129da72c50623e77b88621c3cc89236c07df6dc9be89cc021d85d9dd7",
-      "delegated": "1032580000003105466",
-      "own": "20300000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x02dc260794e4c2eeae87b1403a88385a72c18a5844d220b88117b2965a8cf3a5",
-      "pool": "0x0444c1179eea3e85b1ff033074ef38ddc7f0a3da4440e0f1b23031ba4a02954e",
-      "delegated": "1010000000000000000",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x0551a33db7f01ab71d8b272a33260629893b7e3d602267cd0a06b91017a1079a",
-      "pool": "0x063ca07e26de2892519af5e0df28bfef5dd6572ad7c14fbb38f65095bc916d2b",
-      "delegated": "782900443237135402",
-      "own": "40000000000000000000000",
-      "commission": 1000,
-      "exiting": false
-    },
-    {
-      "staker": "0x033ded0686310da0b30d71197e9ed357f6c341ef75ff91b22eb9659837367111",
-      "pool": "0x00b5d052a16f31b78d478817e1a5185fae56f42caef9f65305a9e5e52180654d",
-      "delegated": "639253393619649314",
-      "own": "20000000000000000000000",
-      "commission": 1000,
-      "exiting": true
-    },
-    {
-      "staker": "0x04ad2e8a7e9565321d4d9d5ceaeb1e7c5ea4c7866ef42e1f97d565fe99dea9c9",
-      "pool": "0x017fcfe37c2f023e3aace84709899287546c9c6078c130b96d3b2e0e5f8e4b56",
-      "delegated": "200000000000000000",
-      "own": "20088000000000000000000",
-      "commission": 888,
-      "exiting": true
-    },
-    {
-      "staker": "0x034641838948563bd99e84cd814314773b43f1975b4412625489b8bc368bc8fa",
-      "pool": "0x069a05dbe54622cafeb4acaa55b23b37ffbce9ead367b195eb99ba99e2225c47",
-      "delegated": "100000000000000000",
+      "staker": "0x0744c4e52110f5c463d1997a5989a73ce97087628182a126ccaaabc65e526249",
+      "pool": "0x017a78d942fc48dc61e5be1496750b2810810183339cbd60760dba0ae5a207f7",
+      "delegated": "98275586800004467267080",
       "own": "20001000000000000000000",
       "commission": 500,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x0452561f31ed545b7da5c172fad93ed34166d581ab15aa646adb4261a4ceb1b7",
+      "pool": "0x00a1bede72288f14c32dc253d666f47d99836fbc8bc5f3227424f5ec837ca1d2",
+      "delegated": "56840341109090005286912",
+      "own": "55040000000000000000000",
+      "commission": 99,
+      "exiting": false,
+      "liveness": 0.9986130374479889
+    },
+    {
+      "staker": "0x05f40ebeb3a8085bcbc15fbc3aa50d9da10976121fca4e605a708ccbc4934917",
+      "pool": "0x049835dfe93f396b2016ef65d5f76ea45c904702ba4905bed5d77fabc30a6b01",
+      "delegated": "88450000000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9972260748959778
+    },
+    {
+      "staker": "0x0134c52e3cdc4e581b14e79c3ef93becf778fa400309613a85e8d4c64c0265af",
+      "pool": "0x063b78f351676cf7ee6cb60eca4008bcc45ab936a228904579a9f72ebb03a822",
+      "delegated": "50114001000000000000000",
+      "own": "50000000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x000c7181c833be28c212d70e858037efde144235931877f5758d306f01d5edd7",
+      "pool": "0x01ec2dc9695c8935d2812ec5f80ee50b83a0afd24988fe06534134d2e07d1912",
+      "delegated": "67174139508678309235576",
+      "own": "20000000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x012ae285a6692f2ac00811aa75e8a3c8d94367cba22e22e581e2b51e3bde5103",
+      "pool": "0x060256ea04efc90fd8badeb4e4c27c420b753e802607ea47034dac8e3dc81ed0",
+      "delegated": "43377690000000000000000",
+      "own": "30300000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9944521497919556
+    },
+    {
+      "staker": "0x02d3231a0661e52f4326e1a5d40dd6e05396bf994535662fb1e1cf746c14d082",
+      "pool": "0x0568e858f2b3dadc9cbf8fc4d974727178507d8e11b84a3ace5a1a724fa83f04",
+      "delegated": "49626580000000000000000",
+      "own": "21050000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x00bb6c4af7ea20ce5f02cb706c7cdc897ee6a5c44c4dceb9fb87e58f0c8102cf",
+      "pool": "0x021c992875b562d226a4a254f31807c69324885c322dee29c221233281b533c7",
+      "delegated": "33346158482979807294223",
+      "own": "28500000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9653259361997226
+    },
+    {
+      "staker": "0x07e6980efc0ed4381f23c3cb54a0cc14b030b1e38f6b01ad736f74c61f36fddd",
+      "pool": "0x006986cb69f6d8cc25e34f2376c1f72259e6f55a002ad2351346fd7278cef13c",
+      "delegated": "33676654100106804445184",
+      "own": "20020000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9972260748959778
+    },
+    {
+      "staker": "0x0522d45e8d7a57c5d7d68fbc6fab0ad86b60102041f222cefb2a7140d47e4a28",
+      "pool": "0x067b2583e86d66e0bd1132403ac20dd3ffe81c70a9dac515c556792037dba760",
+      "delegated": "22623400000000000000000",
+      "own": "30000000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x04c2e99661a85fec90cc66fec5b1eb911a0633888f468f3eac6b9654191f7102",
+      "pool": "0x079f2d9ce1eadfc513ac8c005683c48fc0dfe3312e6e1db9c05dca881db45cd7",
+      "delegated": "29170393623969999998976",
+      "own": "20800000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9958391123439667
+    },
+    {
+      "staker": "0x01eb3ea6a3c0ad3c2503a349cd8acca19ed34fb006045a1518eca93910bea5c2",
+      "pool": "0x00189d85f133a9544ecbfa450362b2e669f81be79bd79608ec19986cb382a820",
+      "delegated": "26075494891539999994880",
+      "own": "20100000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9306518723994452
     },
     {
       "staker": "0x06ea47d7af652f74775a3bee758860a7e08aa99131ffe705cdb2f02c65d75ebe",
@@ -939,63 +780,206 @@
       "delegated": "0",
       "own": "43000000000000000000343",
       "commission": 489,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.9778085991678225
     },
     {
-      "staker": "0x06e20a6ec12b425e89fd60378a3839863a0e880f27bd0e529a92f018c36122e8",
-      "pool": "0x02694e613c25b8485fb33d1f6942bbcf7920323d840a1f88d61e7a9e863821b1",
-      "delegated": "0",
+      "staker": "0x068e55c8c9b8c0d64ad20e8b08a421c1037b084c6c7339b25e602c86a09c6ce6",
+      "pool": "0x032e071d848631e0bcc3852fd7fe925a24ebb946a40176ed70455260f8ce3f2f",
+      "delegated": "21562775253100390099369",
       "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
+      "commission": 800,
+      "exiting": false,
+      "liveness": 0.8626907073509015
     },
     {
-      "staker": "0x0475289e9b3d5c45c4906d918451e5d32331a7bca20de3ce643f50b628f67d4d",
-      "pool": "0x06442d0cc69b51543878932f9c89268d5be2282c8375865231e6d15a42afcf87",
-      "delegated": "0",
-      "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
+      "staker": "0x016cacb599999b339988695c2721c65186ccc41529fb12a7b7a9251c163dc590",
+      "pool": "0x0583784e1d506f81579de66b9c48092b3f8224e8fc3f36fbc66546a07fe608c6",
+      "delegated": "21398770000000000000000",
+      "own": "20050000000000000000000",
+      "commission": 900,
+      "exiting": false,
+      "liveness": 0.986130374479889
     },
     {
-      "staker": "0x0478080f2641099be03b42ffade49a4939e5f7d24e79ff733b0030faacead64d",
-      "pool": "0x07f1547fdae44c5637e72e3068586f70619d17ef4dc7083f772223748f7d5d33",
-      "delegated": "0",
+      "staker": "0x05012a0911c6557f3f9f250b7b477681b79eb1e8af78cd02ed6d6092bb92f505",
+      "pool": "0x0276c021aef359c6b6289f3eb8cad53eb2eb555890651d6ec65dcaa1ac91390d",
+      "delegated": "20349970000000000000000",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0
     },
     {
-      "staker": "0x03752e114c1d476771d576d7395759a8682e6a5a20fd5d7dce4987dbbc7f6d04",
-      "pool": "0x0503e1094687893ce65faf33dd5276f1aa585feccc9e884bd941dcf8da15fee6",
-      "delegated": "0",
+      "staker": "0x0239361e24fc849fe2cacc0048d9863dc9031088f148f94ff4f34648a6e77197",
+      "pool": "0x02753e166619a4c1f624d35265b43d1ce4d3a1a09ebb16154f604818e2a9d985",
+      "delegated": "5120000000000000000000",
+      "own": "34900000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9958391123439667
+    },
+    {
+      "staker": "0x0551a33db7f01ab71d8b272a33260629893b7e3d602267cd0a06b91017a1079a",
+      "pool": "0x063ca07e26de2892519af5e0df28bfef5dd6572ad7c14fbb38f65095bc916d2b",
+      "delegated": "782900443237135402",
+      "own": "40000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0131383f4ad42c6ca411003c7f4113f61eba7b5848c6a1f5a7866661ed8d59c6",
+      "pool": "0x067b6a19eb4acd6935d145e1cfe90a272fdd4d3d14b4b82fcc7f0cfd57d4ba11",
+      "delegated": "19848624753578398638346",
+      "own": "20100000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9958391123439667
+    },
+    {
+      "staker": "0x04c9bd490305796b88852d6f57862f9eda26c8af30c240cc68e9cfb785e79525",
+      "pool": "0x0127f8fbdcde14cea569f34d67f210e6016775ef26441a7ceecb52ea57833819",
+      "delegated": "19552177304578433609904",
+      "own": "20001000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x002843700bd4bc546d05baa55d055572bf2beea8ebefbdb9be763f83638fc294",
+      "pool": "0x0116de2f76b9dfdff9791d7d34570772b19968b4d927d4caa28673b71d69ea58",
+      "delegated": "16897495028500002097224",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0586a61016dfb1967e3eb227b048a1331e640851a9998b251d2da2385fbb066e",
+      "pool": "0x0520ead5d1bf9905c01ba740476ccef354d19db772823dc005991ddd1c852aa2",
+      "delegated": "13288567025338516304878",
+      "own": "20000000000000000000000",
+      "commission": 200,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x05aac4ebc80e3ac465be66ee959523c2f904adfc817d9e4d80d7cfc327a2def7",
+      "pool": "0x017f5a218ba89acc003f1a061c3140386485a958317300d2c3204460dacd1bc8",
+      "delegated": "12156361393991179835685",
+      "own": "20001000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0684f94890702f08d6765836273bf36c2a0cb0aeb949f146803b7e42060f2192",
+      "pool": "0x014c10673124301c3c63b5ab28363f314f7ea4abc3eaa42dabd7f1b324fdbf63",
+      "delegated": "11357289859331681818639",
+      "own": "20015000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x033d152598873a307b9abdd7bd5d479cadf1814db4bf87e0f0d61a8f84d0bf63",
+      "pool": "0x07792f57b5365a0a6948211fa681b69ecfe1e98afcf0897aec15c0fefef5d8ff",
+      "delegated": "11096221147441860467967",
+      "own": "20000000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0272399f169e862157ecb71feb1c1d1fc39b7246a7bc68b57b31ca18b6211989",
+      "pool": "0x06b98a1d1e004515e1d037163c744377ec91508baee2b860a3625d3c40a3d34d",
+      "delegated": "8486830108969688060371",
+      "own": "20500000000000000000000",
+      "commission": 100,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0786e60c09a183406dce74b279a3010ad2e20fb3d3b831ecd5a2d94a0f7abd0d",
+      "pool": "0x04047db6170453f3af3ab939e949980ee5861f78f992bcf55ba78bd67bc7388f",
+      "delegated": "7518000000000000000000",
+      "own": "20100000000000000000000",
+      "commission": 1500,
+      "exiting": false,
+      "liveness": 0.9958391123439667
+    },
+    {
+      "staker": "0x052e77b9ad9e736efa1e7444227b9a06ea0aae7fb0de5e85c63145dc3b86e081",
+      "pool": "0x03522ab4a9692a65de4eb25e65ad2d7a3fc7296f97092b2b3af2788351eacc2c",
+      "delegated": "6803161970928251335353",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.40499306518723993
+    },
+    {
+      "staker": "0x07334d1737505b1e6373929446079c46b9ca9cf1f1e5e312f9b9b242424f72bf",
+      "pool": "0x0039c258e8c57a774dcc8dac6da519ee01b16bded864d27f44fbe88bfed944e7",
+      "delegated": "6465000000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9805825242718447
+    },
+    {
+      "staker": "0x0749c29eddd24613c320b57cf9299a2694934e5e3fabce987df1784231edba71",
+      "pool": "0x055c4f8f9849a021b81295b96934a94e0de3df6a2f3eb2c045f45907b0fccef9",
+      "delegated": "150100000000000000000",
+      "own": "25000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.5686546463245492
+    },
+    {
+      "staker": "0x00edd59ca1932462718c81ef4d7f463fed50e29f8a11b24d7cb5d8373923b786",
+      "pool": "0x0050c48f149c2b09cf779cbc27de0b2127f3792c17584e457f5179541141e2a8",
+      "delegated": "2932094632674010440885",
+      "own": "21700000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x011afa6f1d98aa7235cca417a409d075468c87971fe97b62a7704a4902982159",
+      "pool": "0x048991cd90a61714ff29ed8074fa086b3fcd513409e498943cbf181fd2a79379",
+      "delegated": "4079440260992906414449",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0.9930651872399445
+    },
+    {
+      "staker": "0x06fa26c205d3dc788586652435cae77ce42e44fa01c97e24eee7617217322d25",
+      "pool": "0x0791670c0e853c7c0d05007fea72d5f5b49e13557cff5740f22067a7de799634",
+      "delegated": "2741775393088261505024",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9972260748959778
+    },
+    {
+      "staker": "0x02ba7cc100c1428c6dc1e59d43e184c73c8b62641ad2e7c597392dbe2dde77ac",
+      "pool": "0x06e0088984a7e7297e66c0461bb0c00dd2dddef899465097d88e3c0a90e81175",
+      "delegated": "1514000000000000000000",
       "own": "21000000000000000000000",
-      "commission": 250,
-      "exiting": true
-    },
-    {
-      "staker": "0x061089a24b3d5e29f5ed7537967df3a6dfbe321735da4a5201ef5f118b425bcc",
-      "pool": "0x01c4cac29a17903ddc5236adbe7f93f86f059c78cad100c3efdf2152c485878a",
-      "delegated": "0",
-      "own": "20736100000000000000000",
-      "commission": 500,
-      "exiting": false
-    },
-    {
-      "staker": "0x05191c87fff257be8ae03f474dbe95928d2e8e5745cd654771880c864fd91fbe",
-      "pool": "0x01c4efa7d758cd3870ac8358dc1bb03f1c049c319ca3886e4ac7f6953386d364",
-      "delegated": "0",
-      "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0.012482662968099861
     },
     {
-      "staker": "0x0569d569984026cb0b32d8db0f99c318d64bd98009b0ca3aab0bc822d3f2e72d",
-      "pool": "0x07a0c78f7b620d0998e299480b4920e3c1b58163048ebca3ccd25d7f305bab8c",
-      "delegated": "0",
+      "staker": "0x03d08c023aa3224427b6e91c8fd1b0695140b1dd5c4e69fd4e733dc6a98ea52c",
+      "pool": "0x00d529182da8b013bfa46d8ec65a9124fbd570f882852e5c770f2aa437ff478a",
+      "delegated": "1972409722154480312199",
       "own": "20000000000000000000000",
-      "commission": 500,
-      "exiting": false
+      "commission": 100,
+      "exiting": false,
+      "liveness": 0.9986130374479889
     },
     {
       "staker": "0x060b86bbcc85ea9ef0f6bb4bd7eaaf3bd4c917ee304d28470b94c8aa4d0910b1",
@@ -1003,7 +987,152 @@
       "delegated": "0",
       "own": "21630000000000000000000",
       "commission": 1000,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0224874adf1da0a04bda379862a6187e102ba4152a489199cbf6ab0a7f8259a4",
+      "pool": "0x068881c24746f3bddbcc035331fb8713c250e81ded0a2b40c428e9d3bd483de2",
+      "delegated": "1208100000000000000000",
+      "own": "20098000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x03752e114c1d476771d576d7395759a8682e6a5a20fd5d7dce4987dbbc7f6d04",
+      "pool": "0x0503e1094687893ce65faf33dd5276f1aa585feccc9e884bd941dcf8da15fee6",
+      "delegated": "0",
+      "own": "21000000000000000000000",
+      "commission": 250,
+      "exiting": true,
+      "liveness": 0
+    },
+    {
+      "staker": "0x061089a24b3d5e29f5ed7537967df3a6dfbe321735da4a5201ef5f118b425bcc",
+      "pool": "0x01c4cac29a17903ddc5236adbe7f93f86f059c78cad100c3efdf2152c485878a",
+      "delegated": "0",
+      "own": "20736100000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0161dbe310290d6f1bad9096b02b2eaea765b420ae9a310728837c14bcc48597",
+      "pool": "0x015984c75b8a53bac60d8b772f340850fef97b16ad50c0baf68eed99d06e4520",
+      "delegated": "294310000000000000000",
+      "own": "20300000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x018231b7efb19f71c0a938ed876ed98afb864f716d52f2b9ee43719a953d3453",
+      "pool": "0x04a1b60129da72c50623e77b88621c3cc89236c07df6dc9be89cc021d85d9dd7",
+      "delegated": "1032580000003105466",
+      "own": "20300000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x04ad2e8a7e9565321d4d9d5ceaeb1e7c5ea4c7866ef42e1f97d565fe99dea9c9",
+      "pool": "0x017fcfe37c2f023e3aace84709899287546c9c6078c130b96d3b2e0e5f8e4b56",
+      "delegated": "200000000000000000",
+      "own": "20088000000000000000000",
+      "commission": 888,
+      "exiting": true,
+      "liveness": 0
+    },
+    {
+      "staker": "0x02de02b88a30d04ac6a49f24cd6d021f8a1e39d8afabcba348795ab29e3d0d31",
+      "pool": "0x01daf484fff6717ba352d6748c4fd61b0707ec2f1484722e6ac71b1a16a2023a",
+      "delegated": "50120000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x06711b0f4b310b41585dd80422588f8582db9307685a83eefbc9d4e9b00e6516",
+      "pool": "0x022262d1883f3276490ec84f926caa2cff8f1c90d10d231037ce536a38a6b46f",
+      "delegated": "2570000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 0,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x034641838948563bd99e84cd814314773b43f1975b4412625489b8bc368bc8fa",
+      "pool": "0x069a05dbe54622cafeb4acaa55b23b37ffbce9ead367b195eb99ba99e2225c47",
+      "delegated": "100000000000000000",
+      "own": "20001000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x02dc260794e4c2eeae87b1403a88385a72c18a5844d220b88117b2965a8cf3a5",
+      "pool": "0x0444c1179eea3e85b1ff033074ef38ddc7f0a3da4440e0f1b23031ba4a02954e",
+      "delegated": "1010000000000000000",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x033ded0686310da0b30d71197e9ed357f6c341ef75ff91b22eb9659837367111",
+      "pool": "0x00b5d052a16f31b78d478817e1a5185fae56f42caef9f65305a9e5e52180654d",
+      "delegated": "639253393619649314",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": true,
+      "liveness": 0
+    },
+    {
+      "staker": "0x06e20a6ec12b425e89fd60378a3839863a0e880f27bd0e529a92f018c36122e8",
+      "pool": "0x02694e613c25b8485fb33d1f6942bbcf7920323d840a1f88d61e7a9e863821b1",
+      "delegated": "0",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.9972260748959778
+    },
+    {
+      "staker": "0x0475289e9b3d5c45c4906d918451e5d32331a7bca20de3ce643f50b628f67d4d",
+      "pool": "0x06442d0cc69b51543878932f9c89268d5be2282c8375865231e6d15a42afcf87",
+      "delegated": "0",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0478080f2641099be03b42ffade49a4939e5f7d24e79ff733b0030faacead64d",
+      "pool": "0x07f1547fdae44c5637e72e3068586f70619d17ef4dc7083f772223748f7d5d33",
+      "delegated": "0",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x05191c87fff257be8ae03f474dbe95928d2e8e5745cd654771880c864fd91fbe",
+      "pool": "0x01c4efa7d758cd3870ac8358dc1bb03f1c049c319ca3886e4ac7f6953386d364",
+      "delegated": "0",
+      "own": "20000000000000000000000",
+      "commission": 1000,
+      "exiting": false,
+      "liveness": 0
+    },
+    {
+      "staker": "0x0569d569984026cb0b32d8db0f99c318d64bd98009b0ca3aab0bc822d3f2e72d",
+      "pool": "0x07a0c78f7b620d0998e299480b4920e3c1b58163048ebca3ccd25d7f305bab8c",
+      "delegated": "0",
+      "own": "20000000000000000000000",
+      "commission": 500,
+      "exiting": false,
+      "liveness": 0.8280166435506241
     },
     {
       "staker": "0x063b85d9468c7cf2257da834c9bddc6394cb7808a1742f089f2412f13df36dac",
@@ -1011,7 +1140,8 @@
       "delegated": "0",
       "own": "20000000000000000000000",
       "commission": 1000,
-      "exiting": true
+      "exiting": true,
+      "liveness": 0
     },
     {
       "staker": "0x0287a1350e086748a8596ddf73366e12ebfb34aa7c369c50b984d7451a695c1c",
@@ -1019,7 +1149,8 @@
       "delegated": "0",
       "own": "20000000000000000000000",
       "commission": 10,
-      "exiting": false
+      "exiting": false,
+      "liveness": 0
     }
   ]
 }

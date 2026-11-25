@@ -5,7 +5,8 @@ import {
   isSameAddress,
   isValidStarknetAddress,
   Membership,
-  normalizeAddress
+  normalizeAddress,
+  ValidatorPool
 } from '@/helpers/stakedVoteDelegation';
 import { shortenAddress } from '@/helpers/utils';
 import IHSwitchHorizontal from '~icons/heroicons-outline/switch-horizontal';
@@ -102,6 +103,20 @@ const inputError = computed(() => {
   return '';
 });
 
+// Validators' own Snapshot profile names, so search finds e.g. "teku".
+const { request: requestProfile, getProfile } = useSnapshotProfiles();
+watch(
+  () => props.open,
+  isOpen => {
+    if (isOpen) getValidators().forEach(v => requestProfile(v.staker));
+  },
+  { immediate: true }
+);
+
+function nameOf(validator: ValidatorPool) {
+  return validator.name || getProfile(validator.staker)?.name || '';
+}
+
 const suggestions = computed(() => {
   const query = delegateeInput.value.trim().toLowerCase();
   if (isFullAddress.value) return [];
@@ -114,7 +129,7 @@ const suggestions = computed(() => {
     .filter(
       validator =>
         !query ||
-        validator.name?.toLowerCase().includes(query) ||
+        nameOf(validator).toLowerCase().includes(query) ||
         (hex && validator.staker.toLowerCase().includes(hex))
     )
     .slice(0, 4);
@@ -271,10 +286,10 @@ async function save() {
           >
             <UiStamp :id="validator.staker" type="avatar" :size="20" />
             <span class="text-skin-link truncate">
-              {{ validator.name || shortenAddress(validator.staker) }}
+              {{ nameOf(validator) || shortenAddress(validator.staker) }}
             </span>
             <span
-              v-if="validator.name"
+              v-if="nameOf(validator)"
               class="text-skin-text text-sm ml-auto shrink-0"
             >
               {{ shortenAddress(validator.staker) }}

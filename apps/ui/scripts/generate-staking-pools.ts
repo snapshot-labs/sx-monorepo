@@ -32,7 +32,12 @@ const NETWORKS: Record<NetworkId, { staking: string; fromBlock: number }> = {
   }
 };
 
-const CONCURRENCY = 4;
+/** Validators per multicall request. */
+const BATCH_SIZE = 50;
+
+/** Multicall contract (`aggregate`), same address on mainnet and Sepolia. */
+const MULTICALL =
+  '0x05754af3760f3356da99aea5c3ec39ccac7783d925a19666ebbeca58ff0087f4';
 
 /** Uptime window, as on the Voyager staking dashboard. */
 const LIVENESS_DAYS = 30;
@@ -53,21 +58,12 @@ function normalize(address: string | bigint) {
   return num.toHex64(num.toBigInt(address));
 }
 
-async function mapWithConcurrency<T, U>(
-  items: T[],
-  limit: number,
-  fn: (item: T) => Promise<U>
-): Promise<U[]> {
-  const results: U[] = new Array(items.length);
-  let cursor = 0;
-  const workers = Array.from({ length: limit }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await fn(items[index]);
-    }
-  });
-  await Promise.all(workers);
-  return results;
+function chunk<T>(items: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
+  }
+  return out;
 }
 
 /**
@@ -176,74 +172,92 @@ async function main() {
   const { abi } = await provider.getClassAt(config.staking);
   const callData = new CallData(abi);
 
-  const callView = async (entrypoint: string, stakerAddress: string) => {
+  /**
+   * Many view calls on the staking contract in one `aggregate` request (the
+   * public node drops connections under hundreds of separate calls).
+   */
+  const multicall = async (
+    entrypoint: string,
+    stakerAddresses: string[]
+  ): Promise<any[]> => {
+    const callArray: string[] = [];
+    const calldata: string[] = [];
+    for (const stakerAddress of stakerAddresses) {
+      const args = callData
+        .compile(entrypoint, { staker_address: stakerAddress })
+        .map(String);
+      callArray.push(
+        config.staking,
+        hash.getSelectorFromName(entrypoint),
+        String(calldata.length),
+        String(args.length)
+      );
+      calldata.push(...args);
+    }
     const result = await withRetry(() =>
       provider.callContract(
         {
-          contractAddress: config.staking,
-          entrypoint,
-          calldata: callData.compile(entrypoint, {
-            staker_address: stakerAddress
-          })
+          contractAddress: MULTICALL,
+          entrypoint: 'aggregate',
+          calldata: [
+            String(stakerAddresses.length),
+            ...callArray,
+            String(calldata.length),
+            ...calldata
+          ]
         },
         block
       )
     );
-    return callData.parse(entrypoint, result) as any;
+    // [block_number, retdata_len, (len, ...retdata) per call]
+    const parsed: any[] = [];
+    let i = 2;
+    for (let call = 0; call < stakerAddresses.length; call++) {
+      const len = Number(BigInt(result[i]));
+      parsed.push(callData.parse(entrypoint, result.slice(i + 1, i + 1 + len)));
+      i += 1 + len;
+    }
+    return parsed;
   };
 
-  const failures: string[] = [];
-  const rows = await mapWithConcurrency(
-    [...stakers],
-    CONCURRENCY,
-    async staker => {
-      try {
-        const [stakerInfo, poolInfo] = await Promise.all([
-          callView('get_staker_info_v1', staker),
-          callView('staker_pool_info', staker)
-        ]);
-        const info = stakerInfo?.Some ?? stakerInfo?.unwrap?.();
-        if (!info) return null;
-        const exiting = Boolean(
-          info.unstake_time?.Some ?? info.unstake_time?.unwrap?.()
-        );
-        const strkPool = (poolInfo.pools as any[]).find(
-          pool => normalize(pool.token_address) === normalize(STRK_TOKEN)
-        );
-        if (!strkPool) return null;
-        const commission =
-          poolInfo.commission?.Some ?? poolInfo.commission?.unwrap?.();
-        return {
-          staker,
-          pool: normalize(strkPool.pool_contract),
-          delegated: BigInt(strkPool.amount).toString(),
-          own: BigInt(info.amount_own).toString(),
-          commission: commission !== undefined ? Number(commission) : null,
-          exiting
-        };
-      } catch (err) {
-        const message = (err as Error).message;
-        // "Staker does not exist" (some RPCs return it hex-encoded)
-        const isExited =
-          message.includes('Staker does not exist') ||
-          message.includes('5374616b657220646f6573206e6f74206578697374');
-        if (!isExited) {
-          console.warn(`\nfailed ${staker}: ${message.split('\n')[0]}`);
-          failures.push(staker);
-        }
-        return null;
-      }
-    }
-  );
+  const unwrap = (option: any) => option?.Some ?? option?.unwrap?.();
 
-  if (failures.length) {
-    // Never write a partial list: missing validators would silently drop
-    // their delegators' pools from the page.
-    console.error(
-      `\n${failures.length} validators could not be read; not writing the file. Re-run, ideally with a less loaded RPC.`
-    );
-    process.exit(1);
+  // 1) get_staker_info_v1 returns an Option and never reverts: safe to batch.
+  const stakerList = [...stakers];
+  const infos = new Map<string, any>();
+  const infoBatches = chunk(stakerList, BATCH_SIZE);
+  for (const [n, batch] of infoBatches.entries()) {
+    const results = await multicall('get_staker_info_v1', batch);
+    batch.forEach((staker, i) => infos.set(staker, unwrap(results[i])));
+    process.stdout.write(`\rstaker info: ${n + 1}/${infoBatches.length}`);
   }
+  process.stdout.write('\n');
+
+  // 2) staker_pool_info reverts for exited stakers, so only ask existing ones.
+  const existing = stakerList.filter(staker => infos.get(staker));
+  const poolInfos = new Map<string, any>();
+  for (const batch of chunk(existing, BATCH_SIZE)) {
+    const results = await multicall('staker_pool_info', batch);
+    batch.forEach((staker, i) => poolInfos.set(staker, results[i]));
+  }
+
+  const rows = existing.map(staker => {
+    const info = infos.get(staker);
+    const poolInfo = poolInfos.get(staker);
+    const strkPool = (poolInfo.pools as any[]).find(
+      pool => normalize(pool.token_address) === normalize(STRK_TOKEN)
+    );
+    if (!strkPool) return null;
+    const commission = unwrap(poolInfo.commission);
+    return {
+      staker,
+      pool: normalize(strkPool.pool_contract),
+      delegated: BigInt(strkPool.amount).toString(),
+      own: BigInt(info.amount_own).toString(),
+      commission: commission !== undefined ? Number(commission) : null,
+      exiting: Boolean(unwrap(info.unstake_time))
+    };
+  });
 
   const liveness = await loadLiveness(provider, config.staking, block);
 

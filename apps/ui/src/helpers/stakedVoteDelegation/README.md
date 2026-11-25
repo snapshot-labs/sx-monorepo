@@ -115,6 +115,13 @@ Then open http://localhost:8080/#/delegation. Append
 `?as=<starknet address>` to view the page as that address (read-only: options
 can be explored, saving is disabled).
 
+### Test validators (local only)
+
+To test the Validator settings tab with a real wallet, list its address in
+`VITE_STAKED_DELEGATION_TEST_VALIDATORS` (comma-separated). The page treats it
+as a validator; registry calls stay real, since the contract does not check
+that the caller is a validator. Dev builds only.
+
 ### Test fixtures (local only)
 
 Add `VITE_STAKED_DELEGATION_FIXTURES=true` to the command above to load
