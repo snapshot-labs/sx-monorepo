@@ -9,6 +9,7 @@ import {
   metadataNetwork,
   offchainNetworks
 } from '@/networks';
+import { STARKNET_WALLET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -181,7 +182,7 @@ export function useActions() {
     auth: { connector: Connector; provider: Web3Provider },
     networkId: NetworkID
   ) {
-    return auth.connector.type === 'argentx' &&
+    return STARKNET_WALLET_CONNECTORS.includes(auth.connector.type) &&
       offchainNetworks.includes(networkId)
       ? await getAliasSigner(auth)
       : auth.provider;
@@ -544,8 +545,8 @@ export function useActions() {
   async function vetoProposal(proposal: Proposal) {
     if (!auth.value) return await forceLogin();
 
-    if (auth.value.connector.type === 'argentx') {
-      throw new Error('ArgentX is not supported');
+    if (STARKNET_WALLET_CONNECTORS.includes(auth.value.connector.type)) {
+      throw new Error('Starknet wallets are not supported');
     }
 
     const network = getReadWriteNetwork(proposal.network);

@@ -18,7 +18,8 @@ export const CONNECTORS: ConnectorType[] = [
   'gnosis',
   'sequence',
   'guest',
-  'argentx'
+  'argentx',
+  'bramble'
 ];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
