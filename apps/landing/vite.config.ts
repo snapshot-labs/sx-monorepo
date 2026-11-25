@@ -4,12 +4,9 @@ import { Remarkable } from 'remarkable';
 import { linkify } from 'remarkable/linkify';
 import { defineConfig, Plugin } from 'vite';
 
-// The legal pages render the app's own text, with the app's Markdown options,
-// as the module virtual:legal (see src/virtual-legal.d.ts).
-const LEGAL = {
-  terms: '../ui/src/views/Terms.vue',
-  privacy: '../ui/src/views/Policy.vue'
-};
+// The legal pages' Markdown, each file opening with its "Last updated:"
+// line, rendered at build time as the module virtual:legal (see
+// src/virtual-legal.d.ts).
 const markdown = new Remarkable({ html: false, breaks: true }).use(linkify);
 
 function legalText(): Plugin {
@@ -19,12 +16,13 @@ function legalText(): Plugin {
     resolveId: source => (source === 'virtual:legal' ? id : undefined),
     load(source) {
       if (source !== id) return;
-      const pages = Object.entries(LEGAL).map(([page, file]) => {
-        const text = readFileSync(new URL(file, import.meta.url), 'utf8');
-        const body = /const terms = `([\s\S]*?)`;/.exec(text)?.[1];
-        const updated = /Last updated: ([^<]+)</.exec(text)?.[1];
-        if (!body || !updated) throw new Error(`No legal text in ${file}`);
-        return [page, { html: markdown.render(body), updated: updated.trim() }];
+      const pages = ['terms', 'privacy'].map(page => {
+        const file = new URL(`src/legal/${page}.md`, import.meta.url);
+        const [, updated, body] =
+          /^Last updated: (.+)\n([\s\S]+)$/.exec(readFileSync(file, 'utf8')) ??
+          [];
+        if (!updated || !body) throw new Error(`No legal text in ${file}`);
+        return [page, { html: markdown.render(body), updated }];
       });
       return `export default ${JSON.stringify(Object.fromEntries(pages))};`;
     }

@@ -7,8 +7,10 @@ import {
   closingParts,
   fieldParts,
   heroParts,
+  nameOf,
   scrollProgress,
-  slideBehindLogo
+  slideBehind,
+  STEP
 } from './timeline';
 
 const BOX_FRAME_HEIGHT = 600;
@@ -24,7 +26,19 @@ const BOX_LAYERS = [
   { count: 4, class: 'invisible top-[calc(100svh-53px-760px)]' },
   { count: 6, class: 'invisible top-[320px]' }
 ];
-const LOGO_GROUNDS = ['', '#6fdcdd', '#fff'];
+// The header tabs take the color of the slide behind them.
+const TAB_GROUNDS = ['', '#6fdcdd', '#fff'];
+// The menu's, black on the last slide.
+const MENU_GROUNDS = ['', '#6fdcdd', '#000'];
+// The slides, as named in the menu and in the URL (/#/ipsum).
+const SLIDES = ['Lorem', 'Ipsum', 'Dolor'];
+// The menu items, and the menu's padding around them: smaller on narrow
+// phones so the menu fits beside the logo.
+const MENU_ITEM = 'flex items-center px-2 min-[390px]:px-3 sm:px-5';
+const MENU_PADDING = 'px-1 min-[390px]:px-3';
+const GLIDE_MS = 1200;
+// The glide's pace: fast, then slow in the middle, then fast again.
+const glideCurve = (t: number) => 0.25 * t + 0.75 * (0.5 + 4 * (t - 0.5) ** 3);
 
 // The words of a title, each behind its own mask so it can slide out of view
 // or into it by shift(i) percent of its height.
@@ -60,6 +74,69 @@ const ascii = ref<HTMLCanvasElement>();
 const heroLayer = ref<HTMLElement>();
 const scene = ref<HTMLCanvasElement>();
 const banner = ref<HTMLElement[]>([]);
+const menu = ref<HTMLElement>();
+const menuX = ref(1);
+// The slide behind the menu, 0 to 2: its item is active, and on the last
+// slide the menu turns black.
+const menuSlide = computed(() => slideBehind(progress.value, menuX.value) - 1);
+const itemBoxes = ref<{ left: number; width: number }[]>([]);
+// The menu's white block, sliding from item to item with the scroll: on an
+// item where its slide rests, and in between as the page moves.
+const marker = computed(() => {
+  const boxes = itemBoxes.value;
+  if (boxes.length < 2) return { left: 0, width: 0 };
+  const at = Math.min(progress.value / STEP, boxes.length - 1);
+  const i = Math.min(Math.floor(at), boxes.length - 2);
+  const [from, to] = [boxes[i]!, boxes[i + 1]!];
+  const t = at - i;
+  return {
+    left: from.left + (to.left - from.left) * t,
+    width: from.width + (to.width - from.width) * t
+  };
+});
+
+// Where slide i rests: the top of the stage, past the banner, then a step
+// through it.
+const slideTop = (i: number) =>
+  stage.value!.offsetTop + i * STEP * (stage.value!.offsetHeight - innerHeight);
+
+// The browser snaps scrolling to the slides (the snap points are in the
+// stage), and to the top of the page with the banner.
+const snap = (type: string) =>
+  (document.documentElement.style.scrollSnapType = type);
+
+// Glides to slide i over a fixed time (see glideCurve), without snapping so
+// the browser leaves each frame where it is. Any wheel, touch or key from the
+// reader stops the glide.
+let glide = 0;
+function stopGlide() {
+  cancelAnimationFrame(glide);
+  snap('y mandatory');
+}
+function glideTo(i: number) {
+  const top = slideTop(i);
+  stopGlide();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    scrollTo(0, top);
+    return;
+  }
+  snap('none');
+  const from = scrollY;
+  const start = performance.now();
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / GLIDE_MS);
+    scrollTo(0, from + (top - from) * glideCurve(t));
+    if (t < 1) glide = requestAnimationFrame(step);
+    else snap('y mandatory');
+  };
+  glide = requestAnimationFrame(step);
+}
+const slideOfHash = () =>
+  SLIDES.findIndex(label => label.toLowerCase() === nameOf(location.hash));
+// A click on the anchor already in the URL changes no hash, so it glides here.
+function open(i: number) {
+  if (slideOfHash() === i) glideTo(i);
+}
 
 function startAscii(canvas: HTMLCanvasElement): () => HeroFrame {
   const ctx = canvas.getContext('2d');
@@ -95,10 +172,35 @@ function startAscii(canvas: HTMLCanvasElement): () => HeroFrame {
 }
 
 onMounted(() => {
+  // A slide's anchor opens on that slide, and later ones glide to theirs.
+  if (slideOfHash() >= 0) scrollTo(0, slideTop(slideOfHash()));
+  addEventListener('hashchange', () => {
+    if (slideOfHash() >= 0) glideTo(slideOfHash());
+  });
+  snap('y mandatory');
+  for (const type of ['wheel', 'touchstart', 'keydown']) {
+    addEventListener(type, stopGlide, { passive: true });
+  }
+  const placeMenu = () => {
+    menuX.value =
+      menu.value!.getBoundingClientRect().left /
+      document.documentElement.clientWidth;
+    itemBoxes.value = Array.from(menu.value!.querySelectorAll('a'), item => ({
+      left: item.offsetLeft,
+      width: item.offsetWidth
+    }));
+  };
+  placeMenu();
+  addEventListener('resize', placeMenu);
+  document.fonts.ready.then(placeMenu);
+
   const heroFrame = startAscii(ascii.value!);
-  boxes.value = BOX_LAYERS.map(({ count }) =>
-    heroBoxes(count, ascii.value!.clientWidth, BOX_FRAME_HEIGHT, Math.random)
-  );
+  // /?rectangles=off leaves the slides without their random rectangles.
+  if (new URLSearchParams(location.search).get('rectangles') !== 'off') {
+    boxes.value = BOX_LAYERS.map(({ count }) =>
+      heroBoxes(count, ascii.value!.clientWidth, BOX_FRAME_HEIGHT, Math.random)
+    );
+  }
 
   // Repeats the banner copy until it covers the viewport, then scrolls by
   // exactly one copy so the loop is seamless. Fills with the fallback font
@@ -143,7 +245,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="group overflow-hidden bg-black text-white">
+  <div class="group snap-start overflow-hidden bg-black text-white">
     <div
       class="flex w-max animate-marquee group-hover:[animation-play-state:paused]"
       :style="{ '--copy-width': `${copyWidth}px` }"
@@ -161,8 +263,13 @@ onMounted(() => {
     </div>
   </div>
   <div ref="stage" class="relative h-[400vh]">
+    <!-- Where the slides rest: the stage's top, middle and bottom at the
+    viewport's top, middle and bottom, as in slideTop. -->
+    <div class="absolute inset-x-0 top-0 snap-start" />
+    <div class="absolute inset-x-0 top-1/2 snap-center" />
+    <div class="absolute inset-x-0 bottom-0 snap-end" />
     <div class="sticky top-0 h-[100svh] overflow-hidden">
-      <main class="relative overflow-hidden">
+      <main class="relative min-h-full overflow-hidden">
         <div aria-hidden="true" class="pointer-events-none">
           <div
             data-part="band"
@@ -171,7 +278,7 @@ onMounted(() => {
           <div ref="heroLayer">
             <canvas
               ref="ascii"
-              class="absolute left-0 top-0 h-[calc(100svh-53px)] w-full"
+              class="absolute left-0 top-0 h-[100svh] w-full"
             />
             <div
               v-for="(layer, l) in BOX_LAYERS"
@@ -193,12 +300,46 @@ onMounted(() => {
             </div>
           </div>
         </div>
-        <header class="relative z-20 flex py-6">
+        <header class="relative z-20 flex justify-between py-6">
           <Logo
             :style="{
-              backgroundColor: LOGO_GROUNDS[slideBehindLogo(progress) - 1]
+              backgroundColor: TAB_GROUNDS[slideBehind(progress, 0) - 1]
             }"
           />
+          <nav
+            ref="menu"
+            class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[390px]:text-[20px]"
+            :class="[MENU_PADDING, { 'text-white': menuSlide === 2 }]"
+            :style="{ backgroundColor: MENU_GROUNDS[menuSlide] }"
+          >
+            <a
+              v-for="(label, i) in SLIDES"
+              :key="label"
+              :href="`#/${label.toLowerCase()}`"
+              :class="MENU_ITEM"
+              :aria-current="i === menuSlide ? 'true' : undefined"
+              @click="open(i)"
+            >
+              {{ label }}
+            </a>
+            <!-- The white block, with the labels again in black so they read
+            on it wherever it is. -->
+            <div
+              aria-hidden="true"
+              class="pointer-events-none absolute inset-y-0 overflow-hidden bg-white text-black"
+              :style="{ left: `${marker.left}px`, width: `${marker.width}px` }"
+            >
+              <div
+                class="absolute inset-y-0 flex"
+                :class="MENU_PADDING"
+                :style="{ left: `${-marker.left}px` }"
+              >
+                <span v-for="label in SLIDES" :key="label" :class="MENU_ITEM">
+                  {{ label }}
+                </span>
+              </div>
+            </div>
+          </nav>
         </header>
         <div
           class="relative z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-2.5"
