@@ -12,9 +12,6 @@
   },
   "license": "MIT",
   "main": "index.js",
-  "scripts": {
-    "lint": "eslint ."
-  },
   "dependencies": {
     "@snapshot-labs/eslint-config": "^0.1.0",
     "typescript-eslint": "^8.29.1",

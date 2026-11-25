@@ -4,5 +4,4 @@ export type OpenZeppelinAuthenticator =
   | 'OpenZeppelinAuthenticatorSignatureV5';
 
 export type GovernorBravoAuthenticator =
-  | 'GovernorBravoAuthenticator'
-  | 'GovernorBravoAuthenticatorSignature';
+  'GovernorBravoAuthenticator' | 'GovernorBravoAuthenticatorSignature';

@@ -6,7 +6,7 @@ export async function getABI(
   chainId: number,
   address: string
 ): Promise<JsonFragment[]> {
-  const apiHost = `https://api.etherscan.io/v2/api`;
+  const apiHost = 'https://api.etherscan.io/v2/api';
 
   const params = new URLSearchParams({
     chainid: chainId.toString(),

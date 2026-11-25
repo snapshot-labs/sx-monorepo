@@ -59,8 +59,7 @@ export function getPlugins(
   if (!executions) return plugins;
 
   const originalSafeSnap = originalProposal?.plugins.safeSnap as
-    | { safes?: SafeSnapOriginalSafe[]; txs?: unknown }
-    | undefined;
+    { safes?: SafeSnapOriginalSafe[]; txs?: unknown } | undefined;
   const originalSafes: SafeSnapOriginalSafe[] =
     originalSafeSnap?.safes ??
     (originalSafeSnap?.txs ? [{ txs: originalSafeSnap.txs }] : []);

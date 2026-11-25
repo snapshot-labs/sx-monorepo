@@ -16,8 +16,7 @@ type SafeSnapConfig = {
 
 export function getSafeSnapConfig(space: Space): SafeSnapConfig | undefined {
   return space.additionalRawData?.plugins?.safeSnap as
-    | SafeSnapConfig
-    | undefined;
+    SafeSnapConfig | undefined;
 }
 
 // Returns null rather than falling back to the module address: presenting a

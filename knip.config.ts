@@ -9,7 +9,9 @@ const config: KnipConfig = {
   workspaces: {
     '.': {
       entry: ['scripts/*.ts', 'stage.config.js'],
-      ignore: ['docs/**']
+      ignore: ['docs/**'],
+      // `bun fmt` is a Bun command, not a package binary
+      ignoreBinaries: ['fmt']
     },
     'apps/api': {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty']
