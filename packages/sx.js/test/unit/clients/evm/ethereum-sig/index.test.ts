@@ -99,6 +99,32 @@ describe('EthereumSig', () => {
     ).toBe(0);
   });
 
+  it.each([2 ** 32, -1, 1.5])(
+    'should refuse to sign at a block that is not a uint32: %d',
+    async blockNumber => {
+      await expect(
+        ethSigClient.propose({
+          signer,
+          data: {
+            space,
+            authenticator,
+            strategies: [
+              {
+                index: 0,
+                address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202',
+                params: '0x00'
+              }
+            ],
+            executionStrategy: { addr: executor, params: '0x00' },
+            metadataUri:
+              'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
+            blockNumber
+          }
+        })
+      ).rejects.toThrow();
+    }
+  );
+
   it('should create update proposal envelope', async () => {
     const envelope = await ethSigClient.updateProposal({
       signer,
