@@ -48,12 +48,7 @@ export type NetworkID =
 export type ChainId = number | string;
 
 export type Choice =
-  | 'for'
-  | 'against'
-  | 'abstain'
-  | number
-  | number[]
-  | Record<string, number>;
+  'for' | 'against' | 'abstain' | number | number[] | Record<string, number>;
 
 export type Privacy = 'shutter' | 'inco' | 'none';
 export type SpacePrivacy = Privacy | 'any';
