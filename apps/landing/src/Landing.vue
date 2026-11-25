@@ -39,8 +39,8 @@ const BOX_LAYERS = [
 const TAB_GROUNDS = ['', '#6fdcdd', '#fff'];
 // The menu's, black on the last slide.
 const MENU_GROUNDS = ['', '#6fdcdd', '#000'];
-// The slides, as named in the menu and in the URL (/#/ipsum).
-const SLIDES = ['Lorem', 'Ipsum', 'Dolor'];
+// The slides, as named in the menu and in the URL (/#/protocol).
+const SLIDES = ['Lorem', 'Protocol', 'Dolor'];
 // /#/terms and /#/privacy open over the landing, which waits underneath where
 // it was. Their text loads the first time one opens, and if that fails, as
 // when a new release has replaced it, the page offers a reload.
@@ -60,8 +60,8 @@ const legalOfHash = () =>
   (['terms', 'privacy'] as const).find(page => page === nameOf(location.hash));
 // The menu items, and the menu's padding around them: smaller on narrow
 // phones so the menu fits beside the logo.
-const MENU_ITEM = 'flex items-center px-2 min-[390px]:px-3 sm:px-5';
-const MENU_PADDING = 'px-1 min-[390px]:px-3';
+const MENU_ITEM = 'flex items-center px-2 min-[420px]:px-3 sm:px-5';
+const MENU_PADDING = 'px-1 min-[420px]:px-3';
 const GLIDE_MS = 1200;
 // The glide's pace: fast, then slow in the middle, then fast again.
 const glideCurve = (t: number) => 0.25 * t + 0.75 * (0.5 + 4 * (t - 0.5) ** 3);
@@ -367,7 +367,7 @@ onMounted(() => {
           />
           <nav
             ref="menu"
-            class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[390px]:text-[20px]"
+            class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[420px]:text-[20px]"
             :class="[MENU_PADDING, { 'text-white': menuSlide === 2 }]"
             :style="{ backgroundColor: MENU_GROUNDS[menuSlide] }"
           >
