@@ -284,7 +284,7 @@ export function startScene(
         ];
       }
     );
-    gl.uniform4fv(uniform('uBoxes'), boxes.flat());
+    if (boxes.length) gl.uniform4fv(uniform('uBoxes'), boxes.flat());
   };
 
   // The hero's current frame as one texel per cell.

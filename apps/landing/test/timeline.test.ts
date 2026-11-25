@@ -3,8 +3,9 @@ import {
   closingParts,
   fieldParts,
   heroParts,
+  nameOf,
   scrollProgress,
-  slideBehindLogo,
+  slideBehind,
   smoothstep
 } from '../src/timeline';
 
@@ -98,9 +99,26 @@ describe('closingParts', () => {
   });
 });
 
-describe('slideBehindLogo', () => {
+describe('slideBehind', () => {
   test('follows the slides as they push in', () => {
-    expect([0, 0.4, 1].map(slideBehindLogo)).toEqual([1, 2, 3]);
+    expect([0, 0.4, 1].map(p => slideBehind(p, 0))).toEqual([1, 2, 3]);
+  });
+
+  test('changes a tab on the right first, since slides come in from the right', () => {
+    expect(slideBehind(0.152, 0.9)).toBe(2);
+    expect(slideBehind(0.152, 0)).toBe(1);
+  });
+});
+
+describe('nameOf', () => {
+  test('reads the page or slide from a hash, slashes or not', () => {
+    expect(['#/ipsum', '#ipsum', '#/ipsum/', '#/terms'].map(nameOf)).toEqual([
+      'ipsum',
+      'ipsum',
+      'ipsum',
+      'terms'
+    ]);
+    expect(['', '#', '#/'].map(nameOf)).toEqual(['', '', '']);
   });
 });
 
