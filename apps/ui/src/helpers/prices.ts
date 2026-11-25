@@ -115,8 +115,8 @@ export async function getTokenPrices(
   const coinId = (address: string) =>
     address === ETH_CONTRACT
       ? config.native
-      : COIN_ID_OVERRIDES[address.toLowerCase()] ??
-        `${config.chain}:${address}`;
+      : (COIN_ID_OVERRIDES[address.toLowerCase()] ??
+        `${config.chain}:${address}`);
   const batches = batchAddresses(contractAddresses, coinId);
 
   const results = await Promise.all(

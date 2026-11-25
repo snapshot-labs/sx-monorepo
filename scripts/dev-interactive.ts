@@ -42,7 +42,7 @@ const SERVICES: Record<ServiceType, Service> = {
   }
 };
 
-const DOCKER_CMD = `docker compose -f scripts/docker-compose.yml up -d`;
+const DOCKER_CMD = 'docker compose -f scripts/docker-compose.yml up -d';
 
 function runTurboWithFilters(serviceTypes: ServiceType[]) {
   const turboPath = path.resolve('node_modules', '.bin', 'turbo');
