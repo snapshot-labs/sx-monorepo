@@ -10,8 +10,6 @@ import { StakedDelegationNetworkId } from './config';
  */
 export type ValidatorProfile = {
   name: string;
-  /** Square image URL (https). */
-  logo?: string;
   website?: string;
   /** One or two sentences: who runs it and how it approaches governance. */
   about?: string;

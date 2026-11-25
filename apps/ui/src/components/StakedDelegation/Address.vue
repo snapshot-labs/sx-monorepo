@@ -40,11 +40,6 @@ watch(() => props.address, requestProfile, { immediate: true });
 const validatorName = computed(() => getValidator(props.address)?.name);
 const snapshotName = computed(() => getProfile(props.address)?.name);
 const profile = computed(() => getValidatorProfile(props.address));
-const hasLogoError = ref(false);
-watch(
-  () => props.address,
-  () => (hasLogoError.value = false)
-);
 
 const displayName = computed(
   () =>
@@ -62,17 +57,8 @@ const explorerLink = computed(
 
 <template>
   <div class="flex items-center gap-2.5 min-w-0">
-    <img
-      v-if="profile?.logo && !hasLogoError"
-      :src="profile.logo"
-      :alt="profile.name"
-      :width="size"
-      :height="size"
-      class="rounded-full shrink-0 object-cover bg-skin-border"
-      :style="{ width: `${size}px`, height: `${size}px` }"
-      @error="hasLogoError = true"
-    />
-    <UiStamp v-else :id="address" type="avatar" :size="size" class="shrink-0" />
+    <!-- Snapshot profile picture, else Starknet ID picture, else generated -->
+    <UiStamp :id="address" type="avatar" :size="size" class="shrink-0" />
     <div class="min-w-0 leading-[22px]">
       <div class="flex items-center gap-1.5 min-w-0">
         <AppLink

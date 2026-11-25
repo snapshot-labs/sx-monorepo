@@ -41,23 +41,30 @@ screens a Stake / Manage button opens the validator on Voyager.
 
 ## Validator profiles
 
-Names, logos, websites and a short "about" come from
-[`validatorProfiles.ts`](validatorProfiles.ts), keyed by staker address.
-Validators add themselves with a pull request:
+Validators publish their own profile as their **Snapshot profile** (name,
+picture, description, X, GitHub), signed by the staker wallet: the "Public
+profile" row in Validator settings opens Snapshot's Edit profile dialog.
+Nothing is stored by this app: Snapshot keeps the profile (pictures on IPFS).
+
+Pictures come from Snapshot's avatar service (`UiStamp`): the Snapshot
+profile picture, else the Starknet ID profile picture (an NFT the owner
+picked), else a generated pattern.
+
+Names: an SNF override in [`validatorProfiles.ts`](validatorProfiles.ts),
+else the Snapshot profile name, else the Starknet ID (`.stark`) name, else
+the shortened address.
+
+`validatorProfiles.ts` is only for what SNF vouches for, keyed by staker
+address:
 
 ```ts
 '0x0123…': {
-  name: 'Example Validator',
-  logo: 'https://example.com/logo.png',
+  name: 'Example Validator', // optional override
   website: 'https://example.com',
   about: 'Who runs it and how it approaches governance votes.',
   verified: true // only after SNF confirms the staker address
 }
 ```
-
-Without a profile, the page falls back to the validator's Starknet ID name,
-then to the shortened address. The list starts empty; Voyager's validator
-data needs a paid API key and a server-side proxy (see the project notes).
 
 ## Speed
 

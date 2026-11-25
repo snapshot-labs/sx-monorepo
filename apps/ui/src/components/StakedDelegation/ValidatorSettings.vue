@@ -196,7 +196,7 @@ const footerNote = computed(() => {
           <div>
             <h4 class="text-skin-heading">Public profile</h4>
             <p class="text-skin-text text-[15px] leading-[22px]">
-              Name, logo and description delegators see when they open your
+              Name, picture and description delegators see when they open your
               validator. Stored as your Snapshot profile and signed by this
               wallet.
             </p>
