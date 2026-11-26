@@ -64,15 +64,15 @@ export async function updateProposalValidationStrategy(
 
   const isStrategy = (address: string | null) =>
     address !== null && strategyAddress === getAddress(address);
-  // V2 appends maxBlockAge after the strategies, so it decodes like the cooldown variant
-  const hasCooldown =
-    isStrategy(
-      protocolConfig.propositionPowerWithCooldownValidationStrategyAddress
-    ) || isStrategy(protocolConfig.propositionPowerV2ValidationStrategyAddress);
+  const hasCooldown = isStrategy(
+    protocolConfig.propositionPowerWithCooldownValidationStrategyAddress
+  );
 
   if (
     hasCooldown ||
-    isStrategy(protocolConfig.propositionPowerValidationStrategyAddress)
+    isStrategy(protocolConfig.propositionPowerValidationStrategyAddress) ||
+    // V2 starts with the threshold and strategies like the plain variant, its packed limits follow
+    isStrategy(protocolConfig.propositionPowerV2ValidationStrategyAddress)
   ) {
     try {
       const [threshold, strategies] = decodeVotingPowerParams(
