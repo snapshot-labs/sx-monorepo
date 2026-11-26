@@ -5,8 +5,6 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate",
-    "lint": "eslint .",
-    "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/src/index.js",

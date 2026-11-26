@@ -4,13 +4,17 @@ const SNAPSHOT_API_URL =
 // Reorg buffer (mirrors sx-monorepo's EDITOR_SNAPSHOT_OFFSET).
 const SNAPSHOT_BLOCK_OFFSET = 4;
 
+// Without a timeout, a hub or RPC that stops answering hangs the tool call.
+const TIMEOUT_MS = 15_000;
+
 export async function getProposalSnapshotBlock(
   chainId: number
 ): Promise<number> {
   const res = await fetch(`https://rpc.brovider.xyz/${chainId}?client=mcp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber' })
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_blockNumber' }),
+    signal: AbortSignal.timeout(TIMEOUT_MS)
   });
   const { result } = (await res.json()) as { result: string };
   return Math.max(0, parseInt(result, 16) - SNAPSHOT_BLOCK_OFFSET);
@@ -28,7 +32,8 @@ export async function gql(
         'x-api-key': process.env.SNAPSHOT_API_KEY
       })
     },
-    body: JSON.stringify({ query, variables })
+    body: JSON.stringify({ query, variables }),
+    signal: AbortSignal.timeout(TIMEOUT_MS)
   });
 
   const json = (await res.json()) as {

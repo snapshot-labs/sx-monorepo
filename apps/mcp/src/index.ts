@@ -12,6 +12,7 @@ import logger from './logger.js';
 import {
   createResolveContext,
   registerFollowTool,
+  registerPrompts,
   registerProposeTool,
   registerQueryTool,
   registerSchemaTool,
@@ -53,6 +54,7 @@ function createMcpServer(mode: 'http' | 'stdio'): McpServer {
   registerVoteTool(server, resolveContext);
   registerProposeTool(server, resolveContext);
   registerFollowTool(server, resolveContext);
+  registerPrompts(server);
   return server;
 }
 
@@ -78,6 +80,12 @@ if (process.argv.includes('--stdio')) {
       ? `${pkg.version}#${commit.substring(0, 7)}`
       : pkg.version;
     res.json({ name: 'snapshot-mcp', version });
+  });
+
+  // Claude and other clients show a connector's icon from Google's favicon cache,
+  // which otherwise has nothing for this host.
+  app.get('/favicon.ico', (_req: Request, res: Response): void => {
+    res.redirect(301, 'https://snapshot.box/favicon.ico');
   });
 
   const provider = new SnapshotOAuthProvider();

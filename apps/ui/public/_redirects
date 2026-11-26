@@ -1,1 +1,3 @@
+/sitemap.xml  https://sh5.co/sitemap.xml  200
+/sitemaps/*  https://sh5.co/sitemaps/:splat  200
 /*  /#/:splat  302

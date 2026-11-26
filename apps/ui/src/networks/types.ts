@@ -30,12 +30,7 @@ import {
 
 export type PaginationOpts = { limit: number; skip?: number };
 export type ExplorerUrlType =
-  | 'transaction'
-  | 'address'
-  | 'contract'
-  | 'strategy'
-  | 'token'
-  | 'block';
+  'transaction' | 'address' | 'contract' | 'strategy' | 'token' | 'block';
 
 export type SpacesFilter = {
   controller?: string;
@@ -81,6 +76,10 @@ export type StrategyTemplate = {
    */
   deprecated?: boolean;
   about?: string;
+  /**
+   * Shown as a warning icon with this text as tooltip, e.g. for unaudited contracts.
+   */
+  warning?: string;
   author?: string;
   version?: string;
   spaceCount?: number;
@@ -516,10 +515,7 @@ export type ReadWriteNetwork = BaseNetwork & {
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
 export type ExplorePageProtocol =
-  | 'snapshot'
-  | 'snapshot-x'
-  | 'snapshot-x-inco'
-  | 'governor';
+  'snapshot' | 'snapshot-x' | 'snapshot-x-inco' | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;

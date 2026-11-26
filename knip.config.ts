@@ -9,7 +9,9 @@ const config: KnipConfig = {
   workspaces: {
     '.': {
       entry: ['scripts/*.ts', 'stage.config.js'],
-      ignore: ['docs/**']
+      ignore: ['docs/**'],
+      // `bun fmt` is a Bun command, not a package binary
+      ignoreBinaries: ['fmt']
     },
     'apps/api': {
       ignoreDependencies: ['@logtail/pino', 'pino-pretty']
@@ -44,7 +46,9 @@ const config: KnipConfig = {
         'src/**/*.vue',
         'src/**/*.ts',
         'vite.config.ts',
-        'forge.config.js'
+        'forge.config.js',
+        // loaded by Netlify by convention, not imported
+        'netlify/edge-functions/*.ts'
       ],
       vite: false,
       ignore: ['src/assets/styles/highlightjs/**'],

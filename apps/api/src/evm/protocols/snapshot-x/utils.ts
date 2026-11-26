@@ -70,7 +70,9 @@ export async function updateProposalValidationStrategy(
 
   if (
     hasCooldown ||
-    isStrategy(protocolConfig.propositionPowerValidationStrategyAddress)
+    isStrategy(protocolConfig.propositionPowerValidationStrategyAddress) ||
+    // V2 starts with the threshold and strategies like the plain variant, its packed limits follow
+    isStrategy(protocolConfig.propositionPowerV2ValidationStrategyAddress)
   ) {
     try {
       const [threshold, strategies] = decodeVotingPowerParams(

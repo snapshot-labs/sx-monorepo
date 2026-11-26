@@ -71,8 +71,8 @@ export function useCurrentSpace() {
   // Space fetched from API when not available locally
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
-      knownSpace.value ? null : spaceId.value?.networkId ?? null,
-    spaceId: () => (knownSpace.value ? null : spaceId.value?.address ?? null)
+      knownSpace.value ? null : (spaceId.value?.networkId ?? null),
+    spaceId: () => (knownSpace.value ? null : (spaceId.value?.address ?? null))
   });
 
   const space = computed<Space | null>(
