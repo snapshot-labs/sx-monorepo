@@ -9,7 +9,10 @@ import SpaceIncoAbi from './abis/Space.inco.json';
 import SpaceAbi from './abis/Space.json';
 import TimelockExecutionStrategyAbi from './abis/TimelockExecutionStrategy.json';
 import { getAuthenticator } from '../../../authenticators/evm';
-import { getStrategiesWithParams } from '../../../strategies/evm';
+import {
+  encodeUserProposalValidationParams,
+  getStrategiesWithParams
+} from '../../../strategies/evm';
 import {
   AddressConfig,
   ClientConfig,
@@ -310,13 +313,15 @@ export class EthereumTx {
       this.config
     );
 
-    const abiCoder = new AbiCoder();
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('propose', [
       proposerAddress,
       envelope.data.metadataUri,
       envelope.data.executionStrategy,
-      abiCoder.encode(['tuple(int8 index, bytes params)[]'], [userStrategies])
+      encodeUserProposalValidationParams(
+        userStrategies,
+        envelope.data.blockNumber
+      )
     ]);
 
     const selector = functionData.slice(0, 10);

@@ -86,8 +86,8 @@ export function slideBehind(progress: number, x: number): number {
   return pushed(1) < 1 - x ? 2 : 3;
 }
 
-// The page or slide a URL hash names: "#/ipsum", "#ipsum" and "#/ipsum/" all
-// name "ipsum".
+// The page or slide a URL hash names: "#/protocol", "#protocol" and
+// "#/protocol/" all name "protocol".
 export function nameOf(hash: string): string {
   return hash.replace(/^#\/?|\/$/g, '');
 }

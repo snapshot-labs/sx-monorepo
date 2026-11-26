@@ -1,3 +1,4 @@
+import { AbiCoder } from '@ethersproject/abi';
 import createApeGasStrategy from './apeGas';
 import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
@@ -79,4 +80,20 @@ export async function getStrategiesWithParams(
   );
 
   return results.filter(result => result !== null);
+}
+
+// Validations that read voting power at a recent block (VotingPowerV2) take the block before the strategies
+export function encodeUserProposalValidationParams(
+  userStrategies: IndexedConfig[],
+  blockNumber?: number
+) {
+  const abiCoder = new AbiCoder();
+  const strategiesType = 'tuple(int8 index, bytes params)[]';
+
+  return blockNumber === undefined
+    ? abiCoder.encode([strategiesType], [userStrategies])
+    : abiCoder.encode(
+        ['uint32', strategiesType],
+        [blockNumber, userStrategies]
+      );
 }
