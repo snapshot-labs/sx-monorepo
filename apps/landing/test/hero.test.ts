@@ -6,6 +6,7 @@ import {
   asciiGrid,
   asciiOrigin,
   asciiPath,
+  FIELD_REFERENCE,
   glyphRect,
   heroBoxes,
   tornadoField
@@ -60,6 +61,34 @@ describe('asciiFrame', () => {
     }
   });
 
+  test('up to the reference width, the field is the tornado as it was', () => {
+    for (const [cols, rows] of [
+      [40, 12],
+      [FIELD_REFERENCE.cols, 115]
+    ] as const) {
+      const lines = asciiFrame(cols, rows, 3).split('\n');
+      for (const [x, y] of [
+        [0, 0],
+        [cols - 1, rows - 1],
+        [Math.floor(cols / 3), Math.floor(rows / 2)]
+      ] as const) {
+        const level = tornadoField(x, y, cols, rows, 1.5);
+        const ch =
+          ASCII.chars[Math.max(0, Math.min(Math.floor((level + 1) * 2), 4))];
+        expect(lines[y]?.[x]).toBe(ch);
+      }
+    }
+  });
+
+  test('a wider screen shows the same field around the copy', () => {
+    const { cols } = FIELD_REFERENCE;
+    const reference = asciiFrame(cols, 115, 3).split('\n');
+    const wider = asciiFrame(cols + 104, 115, 3).split('\n');
+    for (let y = 0; y < 115; y += 1) {
+      expect(wider[y]?.slice(52, 52 + cols)).toBe(reference[y]);
+    }
+  });
+
   test('the eye of the storm stays blank', () => {
     const cols = 200;
     const rows = 100;
@@ -76,6 +105,14 @@ describe('asciiPath', () => {
       x: (1000 - 100 * ASCII_GLYPH.pitch) / 2,
       y: 0
     });
+  });
+
+  test('keeps a column edge in the middle of any screen', () => {
+    for (const w of [390, 1441, 2200, 3840]) {
+      const grid = asciiGrid(w, 900);
+      const origin = asciiOrigin(w, 900, grid.cols, grid.rows);
+      expect(origin.x + (grid.cols / 2) * ASCII_GLYPH.pitch).toBeCloseTo(w / 2);
+    }
   });
 
   test('draws period and dot boxes, nothing for other glyphs', () => {

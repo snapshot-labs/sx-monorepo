@@ -1,5 +1,7 @@
-// Hero backdrop maths, ported as-is from the Stage landing (bonustrack/stage,
-// apps/stage/components/landing/Landing.model.ts) so both pages look the same.
+// Hero backdrop maths, ported from the Stage landing (bonustrack/stage,
+// apps/stage/components/landing/Landing.model.ts) so both pages look the same,
+// then laid out for a reference width (FIELD_REFERENCE) so wider screens keep
+// it in place next to the copy.
 
 interface HeroBox {
   x: number;
@@ -127,12 +129,19 @@ export function asciiGrid(
   width: number,
   height: number
 ): { cols: number; rows: number } {
-  // Enough columns to cover the full width at the glyphs' own pitch.
+  // Enough columns to cover the full width at the glyphs' own pitch, an even
+  // number so the middle of the grid is a column edge on any screen.
   return {
-    cols: Math.max(1, Math.ceil(width / ASCII_GLYPH.pitch)),
+    cols: Math.max(1, 2 * Math.ceil(width / ASCII_GLYPH.pitch / 2)),
     rows: Math.ceil(height / ASCII.lineHeight) + 2
   };
 }
+
+// The width the field is laid out for. A wider screen shows more of the same
+// field around its middle, where the copy is centered, so the field stays in
+// place next to it. A narrower one shows its own. The field is never taller
+// than 900px (Landing.vue), so its rows always follow the screen.
+export const FIELD_REFERENCE = { width: 1440, cols: asciiGrid(1440, 0).cols };
 
 export function tornadoField(
   x: number,
@@ -163,11 +172,15 @@ export function tornadoField(
 
 export function asciiFrame(cols: number, rows: number, time: number): string {
   const t = time * 0.5;
+  // Past the reference width, the field keeps its width, centered.
+  const fieldCols = Math.min(cols, FIELD_REFERENCE.cols);
+  const shift = (fieldCols - cols) / 2;
   const lines: string[] = [];
   for (let y = 0; y < rows; y += 1) {
     let line = '';
     for (let x = 0; x < cols; x += 1) {
-      const i = Math.floor((tornadoField(x, y, cols, rows, t) + 1) * 2);
+      const level = tornadoField(x + shift, y, fieldCols, rows, t);
+      const i = Math.floor((level + 1) * 2);
       line += ASCII.chars[Math.max(0, Math.min(i, 4))] ?? ' ';
     }
     lines.push(line);

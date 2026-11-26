@@ -12,11 +12,14 @@ import {
 import { ASCII, asciiFrame, asciiGrid, asciiPath, heroBoxes } from './hero';
 import Logo from './Logo.vue';
 import { HeroFrame, startScene } from './scene';
+import { SOCIALS } from './socials';
 import {
   closingParts,
   fieldParts,
   heroParts,
   nameOf,
+  openingParts,
+  PUSH,
   scrollProgress,
   slideBehind,
   STEP
@@ -24,21 +27,27 @@ import {
 
 const BOX_FRAME_HEIGHT = 600;
 const MIN_BANNER_COPIES = 3;
-// Each slide's rectangles: 4 in its color low on the page, then 6 white ones
-// over the band. The scene draws them all with their slide once the page
+// Each slide's rectangles: 4 in its color low on the page, no lower than on
+// a 900px tall screen so taller ones keep them where they are, then 6 white
+// ones over the band. The scene draws them all with their slide once the page
 // scrolls, so only the hero's show before that.
 const BOX_LAYERS = [
-  { count: 4, class: 'top-[calc(100svh-53px-760px)] text-yellow' },
+  { count: 4, class: 'top-[min(87px,calc(100svh-53px-760px))] text-yellow' },
   { count: 6, class: 'top-[320px] text-white' },
-  { count: 4, class: 'invisible top-[calc(100svh-53px-760px)]' },
+  { count: 4, class: 'invisible top-[min(87px,calc(100svh-53px-760px))]' },
   { count: 6, class: 'invisible top-[320px]' },
-  { count: 4, class: 'invisible top-[calc(100svh-53px-760px)]' },
+  { count: 4, class: 'invisible top-[min(87px,calc(100svh-53px-760px))]' },
   { count: 6, class: 'invisible top-[320px]' }
 ];
-// The header tabs take the color of the slide behind them.
-const TAB_GROUNDS = ['', '#6fdcdd', '#fff'];
+// The header tabs take the color of the slide behind them (slideBehind),
+// white on the blank page as it opens.
+const TAB_GROUNDS = ['#fff', '', '#6fdcdd', '#fff'];
 // The menu's, black on the last slide.
-const MENU_GROUNDS = ['', '#6fdcdd', '#000'];
+const MENU_GROUNDS = ['#fff', '', '#6fdcdd', '#000'];
+// The opening plays the second half of the hero's push and its copy coming
+// in: from half way between the push's start and the end of the step.
+const OPENING_FROM = (PUSH.start + 1) / 2;
+const OPENING_MS = 750;
 // The slides, as named in the menu and in the URL (/#/protocol).
 const SLIDES = ['Lorem', 'Protocol', 'Dolor'];
 // /#/terms and /#/privacy open over the landing, which waits underneath where
@@ -96,7 +105,36 @@ watchSyncEffect(
 watch(legalLayer, layer => layer?.focus());
 
 const progress = ref(0);
-const hero = computed(() => heroParts(progress.value));
+// The opening, from OPENING_FROM to 1 once the scene runs: the hero pushes in
+// over a blank page, then its copy comes in, as the next slides do on scroll.
+// 0 until then, and 1 without it: when the URL opens a slide or a legal page,
+// or when motion is reduced.
+const opening = ref(
+  nameOf(location.hash) ||
+    matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? 1
+    : 0
+);
+// The progress the slides show: the opening's step before the hero (see
+// timeline.ts), until the page scrolls.
+const shown = computed(() =>
+  opening.value < 1 && progress.value === 0
+    ? -STEP * (1 - opening.value)
+    : progress.value
+);
+// How far each part of the hero is from its place (heroParts). As the page
+// opens, its copy comes in as the next slides' does, the words from below.
+const hero = computed(() => {
+  if (shown.value >= 0) return heroParts(shown.value);
+  const come = openingParts(shown.value);
+  return {
+    eyebrow: 1 - come.title,
+    title: 1 - come.title,
+    word: (i: number) => come.word(i) - 1,
+    text: 1 - come.text,
+    button: 1 - come.button
+  };
+});
 const field = computed(() => fieldParts(progress.value));
 const closing = computed(() => closingParts(progress.value));
 const boxes = ref<ReturnType<typeof heroBoxes>[]>([]);
@@ -109,9 +147,9 @@ const scene = ref<HTMLCanvasElement>();
 const banner = ref<HTMLElement[]>([]);
 const menu = ref<HTMLElement>();
 const menuX = ref(1);
-// The slide behind the menu, 0 to 2: its item is active, and on the last
-// slide the menu turns black.
-const menuSlide = computed(() => slideBehind(progress.value, menuX.value) - 1);
+// The slide behind the menu, 0 to 2, or -1 as the page opens: its item is
+// active, and on the last slide the menu turns black.
+const menuSlide = computed(() => slideBehind(shown.value, menuX.value) - 1);
 const itemBoxes = ref<{ left: number; width: number }[]>([]);
 // The menu's white block, sliding from item to item with the scroll: on an
 // item where its slide rests, and in between as the page moves.
@@ -238,8 +276,12 @@ onMounted(() => {
   const heroFrame = startAscii(ascii.value!);
   // /?rectangles=off leaves the slides without their random rectangles.
   if (new URLSearchParams(location.search).get('rectangles') !== 'off') {
+    // Spread over their layer, which is centered with the copy so a wider
+    // screen moves them with it.
+    const frameWidth =
+      document.querySelector<HTMLElement>('[data-boxes]')!.clientWidth;
     boxes.value = BOX_LAYERS.map(({ count }) =>
-      heroBoxes(count, ascii.value!.clientWidth, BOX_FRAME_HEIGHT, Math.random)
+      heroBoxes(count, frameWidth, BOX_FRAME_HEIGHT, Math.random)
     );
   }
 
@@ -290,10 +332,27 @@ onMounted(() => {
   };
   addEventListener('scroll', nameSlide, { passive: true });
 
-  // Once the page has loaded, the glyph field takes over the hero on scroll.
-  addEventListener('load', () =>
-    startScene(scene.value!, heroLayer.value!, heroFrame, () => progress.value)
-  );
+  // Once the page has loaded, the glyph field takes over the hero on scroll,
+  // and the opening plays. Without it, the hero shows as it is.
+  addEventListener('load', () => {
+    const isRunning = startScene(
+      scene.value!,
+      heroLayer.value!,
+      heroFrame,
+      () => shown.value
+    );
+    if (!isRunning || opening.value === 1) {
+      opening.value = 1;
+      return;
+    }
+    const start = performance.now();
+    const play = (now: number) => {
+      const t = Math.min(1, (now - start) / OPENING_MS);
+      opening.value = OPENING_FROM + (1 - OPENING_FROM) * t;
+      if (t < 1) requestAnimationFrame(play);
+    };
+    play(start);
+  });
 });
 </script>
 
@@ -326,21 +385,29 @@ onMounted(() => {
     <div class="absolute inset-x-0 bottom-0 snap-end" />
     <div class="sticky top-0 h-[100svh] overflow-hidden">
       <main class="relative min-h-full overflow-hidden">
-        <div aria-hidden="true" class="pointer-events-none">
+        <!-- Hidden until the opening starts, which covers them with a blank
+        page as the hero pushes in. -->
+        <div
+          aria-hidden="true"
+          class="pointer-events-none"
+          :class="{ invisible: !opening }"
+        >
           <div
             data-part="band"
             class="absolute inset-x-0 top-0 h-[540px] bg-yellow"
           />
           <div ref="heroLayer">
+            <!-- The glyph field, no taller than 900px: below, however tall the
+            screen, nothing is drawn. -->
             <canvas
               ref="ascii"
-              class="absolute left-0 top-0 h-[100svh] w-full"
+              class="absolute left-0 top-0 h-[min(100svh,900px)] w-full"
             />
             <div
               v-for="(layer, l) in BOX_LAYERS"
               :key="l"
               data-boxes
-              class="absolute inset-x-0 z-[6] h-[600px] overflow-hidden [&>div]:absolute [&>div]:bg-current"
+              class="absolute inset-x-0 z-[6] mx-auto h-[600px] max-w-[1400px] overflow-hidden [&>div]:absolute [&>div]:bg-current"
               :class="layer.class"
             >
               <div
@@ -360,14 +427,14 @@ onMounted(() => {
           <Logo
             class="bg-yellow"
             :style="{
-              backgroundColor: TAB_GROUNDS[slideBehind(progress, 0) - 1]
+              backgroundColor: TAB_GROUNDS[slideBehind(shown, 0)]
             }"
           />
           <nav
             ref="menu"
             class="relative flex h-[56px] self-center bg-yellow text-[17px] min-[420px]:text-[20px]"
             :class="[MENU_PADDING, { 'text-white': menuSlide === 2 }]"
-            :style="{ backgroundColor: MENU_GROUNDS[menuSlide] }"
+            :style="{ backgroundColor: MENU_GROUNDS[menuSlide + 1] }"
           >
             <a
               v-for="(label, i) in SLIDES"
@@ -430,6 +497,7 @@ onMounted(() => {
               </p>
               <a
                 href="https://snapshot.box"
+                target="_blank"
                 class="flex h-[53px] w-fit items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
                 :style="{ transform: `translateX(${100 * hero.button}vw)` }"
                 :inert="hero.button === 1"
@@ -440,35 +508,36 @@ onMounted(() => {
           </div>
         </div>
       </main>
+      <!-- The scene, no taller than the glyph field it draws on. -->
       <canvas
         ref="scene"
         hidden
         aria-hidden="true"
-        class="pointer-events-none absolute inset-0 z-[5] h-full w-full"
+        class="pointer-events-none absolute left-0 top-0 z-[5] h-[min(100%,900px)] w-full"
       />
       <div
         class="pointer-events-none absolute inset-0 z-10 mx-auto flex max-w-[1400px] flex-col gap-6 px-5 pb-8 pt-[215.5px]"
       >
         <h2
-          class="ml-auto w-full max-w-[760px] bg-[#6fdcdd] py-3 text-[76px] leading-[83.6px]"
+          class="pointer-events-auto ml-auto w-full max-w-[760px] bg-[#6fdcdd] py-3 text-[76px] leading-[83.6px]"
           :style="{
             transform: `translateX(${100 * (1 - field.title[0] - field.title[1])}vw)`
           }"
         >
           <Words
-            text="Duis aute irure dolor in reprehenderit est"
+            text="Coordination as code, enforced onchain"
             :shift="i => 110 * (1 - field.word(i)[0] - field.word(i)[1])"
           />
         </h2>
         <p
-          class="w-full max-w-[760px] bg-[#6fdcdd] py-3 text-[26px] leading-[31.2px]"
+          class="pointer-events-auto w-full max-w-[760px] bg-[#6fdcdd] py-3 text-[26px] leading-[31.2px]"
           :style="{
             transform: `translateX(${100 * (field.text[0] + field.text[1] - 1)}vw)`
           }"
         >
-          Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut
-          fugit, sed quia consequuntur magni dolores eos qui ratione. Neque
-          porro quisquam est, qui nemo.
+          Program who can propose, who can vote and what a passing vote does.
+          The rules hold the same way for humans and agents. A primitive for
+          anything multiplayer.
         </p>
       </div>
       <div
@@ -476,47 +545,66 @@ onMounted(() => {
         :inert="closing.button < 1"
       >
         <h2
-          class="max-w-[760px] bg-white py-3 text-[76px] leading-[83.6px]"
+          class="pointer-events-auto max-w-[760px] bg-white py-3 text-[76px] leading-[83.6px]"
           :style="{ transform: `translateX(${-100 * (1 - closing.title)}vw)` }"
         >
           <Words
-            text="Itaque earum rerum hic tenetur sapiente"
+            text="Built in the open by over 600 contributors"
             :shift="i => 110 * (1 - closing.word(i))"
           />
         </h2>
         <div class="flex justify-end">
           <div class="w-full max-w-[760px]">
             <p
-              class="bg-white py-3 text-[26px] leading-[31.2px]"
+              class="pointer-events-auto bg-white py-3 text-[26px] leading-[31.2px]"
               :style="{
                 transform: `translateX(${100 * (1 - closing.text)}vw)`
               }"
             >
-              At vero eos et accusamus et iusto odio dignissimos ducimus qui
-              blanditiis praesentium voluptatum deleniti atque corrupti quos.
-              Similique sunt in culpa officia.
+              Snapshot is fully open source under the MIT license, its contracts
+              are audited, and the app has no trackers or telemetry. Anyone can
+              read the code and help build what comes next.
             </p>
             <a
-              href="https://snapshot.box"
+              href="https://github.com/snapshot-labs/sx-monorepo"
+              target="_blank"
               class="pointer-events-auto flex h-[53px] w-fit items-center whitespace-nowrap rounded-full bg-black px-4 text-[19px] leading-[29px] text-white"
               :style="{
                 transform: `translateX(${100 * (1 - closing.button)}vw)`
               }"
             >
-              Launch app →
+              View on GitHub →
             </a>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- The legal links, over every slide, lined up with the logo. -->
+  <!-- The copyright, the legal links and Snapshot elsewhere, over every slide,
+  lined up with the logo. Phones have room for the legal links only, tablets
+  for the copyright too. -->
   <footer
-    class="fixed bottom-0 left-0 z-30 flex h-[53px] gap-5 bg-white px-5 text-[17px] [&>a]:flex [&>a]:items-center"
+    class="fixed bottom-0 left-0 z-30 flex h-[53px] gap-4 bg-white px-5 text-[17px] [&>*]:flex [&>*]:items-center [&>*]:whitespace-nowrap"
     :inert="!!legal"
   >
+    <span class="max-sm:!hidden">
+      © {{ new Date().getFullYear() }} Snapshot Labs AG
+    </span>
     <a href="#/terms">Terms of use</a>
     <a href="#/privacy">Privacy policy</a>
+    <nav aria-label="Snapshot elsewhere" class="gap-[14px] max-md:!hidden">
+      <a
+        v-for="social in SOCIALS"
+        :key="social.name"
+        :href="social.href"
+        target="_blank"
+        :aria-label="social.name"
+      >
+        <svg width="24" height="24" viewBox="0 0 1024 1024" aria-hidden="true">
+          <path :d="social.path" :transform="social.transform" />
+        </svg>
+      </a>
+    </nav>
   </footer>
   <div
     v-if="legal"

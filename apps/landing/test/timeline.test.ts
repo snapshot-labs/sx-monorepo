@@ -4,9 +4,11 @@ import {
   fieldParts,
   heroParts,
   nameOf,
+  openingParts,
   scrollProgress,
   slideBehind,
-  smoothstep
+  smoothstep,
+  STEP
 } from '../src/timeline';
 
 describe('scrollProgress', () => {
@@ -99,9 +101,39 @@ describe('closingParts', () => {
   });
 });
 
+describe('openingParts', () => {
+  test('is away on the blank page and in place once the hero rests', () => {
+    const [blank, rest] = [openingParts(-STEP), openingParts(0)];
+    expect([blank.title, blank.text, blank.button, blank.word(4)]).toEqual([
+      0, 0, 0, 0
+    ]);
+    expect([rest.title, rest.text, rest.button, rest.word(4)]).toEqual([
+      1, 1, 1, 1
+    ]);
+  });
+
+  test('brings the copy in on the schedule of the closing copy', () => {
+    for (const t of [0.5, 0.6, 0.7, 0.8]) {
+      const [opening, closing] = [
+        openingParts(-STEP + t * STEP),
+        closingParts(STEP + t * STEP)
+      ];
+      expect(opening.title).toBeCloseTo(closing.title);
+      expect(opening.word(2)).toBeCloseTo(closing.word(2));
+      expect(opening.button).toBeCloseTo(closing.button);
+    }
+  });
+});
+
 describe('slideBehind', () => {
   test('follows the slides as they push in', () => {
     expect([0, 0.4, 1].map(p => slideBehind(p, 0))).toEqual([1, 2, 3]);
+  });
+
+  test('starts on the blank page as it opens, the hero pushing in from the right', () => {
+    expect(slideBehind(-STEP, 0)).toBe(0);
+    expect(slideBehind(-STEP + 0.152, 0.9)).toBe(1);
+    expect(slideBehind(-STEP + 0.152, 0)).toBe(0);
   });
 
   test('changes a tab on the right first, since slides come in from the right', () => {
