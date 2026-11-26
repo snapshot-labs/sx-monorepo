@@ -112,12 +112,9 @@ describe('slideBehind', () => {
 
 describe('nameOf', () => {
   test('reads the page or slide from a hash, slashes or not', () => {
-    expect(['#/ipsum', '#ipsum', '#/ipsum/', '#/terms'].map(nameOf)).toEqual([
-      'ipsum',
-      'ipsum',
-      'ipsum',
-      'terms'
-    ]);
+    expect(
+      ['#/protocol', '#protocol', '#/protocol/', '#/terms'].map(nameOf)
+    ).toEqual(['protocol', 'protocol', 'protocol', 'terms']);
     expect(['', '#', '#/'].map(nameOf)).toEqual(['', '', '']);
   });
 });
