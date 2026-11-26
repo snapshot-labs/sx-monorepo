@@ -2,6 +2,7 @@ import { AbiCoder } from '@ethersproject/abi';
 import createApeGasStrategy from './apeGas';
 import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
+import createOracleStrategy from './oracle';
 import createOzVotesStrategy from './ozVotes';
 import createVanillaStrategy from './vanilla';
 import {
@@ -13,6 +14,7 @@ import {
   Vote
 } from '../../clients/evm/types';
 import { EvmNetworkConfig } from '../../types';
+import { VotingPowerDetailsError } from '../../utils/errors';
 
 export function getStrategy(
   address: string,
@@ -39,6 +41,10 @@ export function getStrategy(
 
   if (strategy.type === 'apeGas') {
     return createApeGasStrategy();
+  }
+
+  if (strategy.type === 'oracle') {
+    return createOracleStrategy();
   }
 
   return null;
@@ -73,7 +79,9 @@ export async function getStrategiesWithParams(
           index: strategyConfig.index,
           params
         };
-      } catch {
+      } catch (err) {
+        // Skip strategies the signer has no power with, but never drop power that failed to load
+        if (err instanceof VotingPowerDetailsError) throw err;
         return null;
       }
     })

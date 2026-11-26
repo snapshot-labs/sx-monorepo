@@ -1,10 +1,12 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
-import { clients, evmNetworks } from '@snapshot-labs/sx';
+import { toUtf8String } from '@ethersproject/strings';
+import { clients, encodeOracleParams, evmNetworks } from '@snapshot-labs/sx';
 import {
   APE_GAS_CONFIGS,
   DOCS_URL,
-  MAX_SYMBOL_LENGTH
+  MAX_SYMBOL_LENGTH,
+  SNAPSHOT_ORACLE
 } from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
 import { _d, getUrl, shorten, sleep } from '@/helpers/utils';
@@ -16,6 +18,7 @@ import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
@@ -124,6 +127,9 @@ export function createConstants(
     }),
     ...(config.Strategies.ApeGas && {
       [config.Strategies.ApeGas]: true
+    }),
+    ...(config.Strategies.Oracle && {
+      [config.Strategies.Oracle]: true
     })
   };
 
@@ -190,6 +196,9 @@ export function createConstants(
     }),
     ...(config.Strategies.ApeGas && {
       [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
+    }),
+    ...(config.Strategies.Oracle && {
+      [config.Strategies.Oracle]: 'Oracle'
     })
   };
 
@@ -462,9 +471,13 @@ export function createConstants(
               maxActiveProposals: 1,
               maxBlockAge: blocksIn(60 * 60)
             },
-            validate: (params: Record<string, any>) => {
-              return params?.strategies?.length > 0;
-            },
+            validate: (params: Record<string, any>) =>
+              params?.strategies?.length > 0 &&
+              (!params.strategies.some(
+                (strategy: StrategyConfig) => strategy.type === 'Oracle'
+              ) ||
+                // An oracle signs up to the safe head, up to about 15 minutes back, before the proposal lands
+                params.maxBlockAge >= blocksIn(30 * 60)),
             generateSummary: (params: Record<string, any>) =>
               params.cooldown
                 ? `(${params.threshold}, max. ${params.maxActiveProposals}, ${_d(params.cooldown)} cooldown)`
@@ -921,6 +934,61 @@ export function createConstants(
                 }
               }
             }
+          }
+        ]
+      : []),
+    ...(config.Strategies.Oracle
+      ? [
+          {
+            address: config.Strategies.Oracle,
+            // Params are a Snapshot strategy { id, network, decimals, params }, picked and edited with the
+            // offchain strategy forms, plus the oracle signing its voting power and its URL, Snapshot's by default
+            type: 'Oracle',
+            name: 'Oracle',
+            about:
+              'A strategy that uses voting power signed by an oracle. Supports any Snapshot strategy.',
+            warning: 'This contract was not audited. Use it at your own risk.',
+            icon: IHGlobeAlt,
+            generateSummary: (params: Record<string, any>) => `(${params.id})`,
+            generateParams: async (params: Record<string, any>) => [
+              encodeOracleParams(params.oracle, {
+                id: params.id,
+                network: params.network,
+                decimals: params.decimals,
+                params: params.params
+              })
+            ],
+            // The oracle signs raw values: like on any Snapshot X strategy, decimals are only for display
+            generateMetadata: async (params: Record<string, any>) => ({
+              name: params.id,
+              properties: {
+                symbol: params.params.symbol,
+                decimals: params.decimals,
+                payload: JSON.stringify({ url: params.url })
+              }
+            }),
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              const [oracle, strategy] = new AbiCoder().decode(
+                ['address', 'bytes'],
+                params
+              );
+              let url = SNAPSHOT_ORACLE.url;
+              try {
+                url = JSON.parse(metadata?.payload ?? '').url || url;
+              } catch {
+                // Not set by the editor, keep Snapshot's oracle URL
+              }
+
+              return {
+                ...JSON.parse(toUtf8String(strategy)),
+                oracle,
+                url
+              };
+            },
+            paramsDefinition: null
           }
         ]
       : [])

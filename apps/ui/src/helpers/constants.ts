@@ -90,6 +90,25 @@ export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
   }
 };
 
+// Snapshot's oracle for the Oracle voting strategy: a Safe, at the same address on every network, whose owner
+// keys score-api signs voting power with
+export const SNAPSHOT_ORACLE = {
+  address: '0x0000000000000000000000000000000000000000',
+  url: 'https://score.snapshot.org'
+};
+
+// Snapshot strategies the oracle signs exact voting power for (score-api strategies with a rawStrategy), with
+// the decimals of their values when their params don't set them
+export const ORACLE_STRATEGIES: Record<string, number> = {
+  'comp-like-votes': 18,
+  'contract-call': 18,
+  'erc1155-balance-of': 18,
+  'erc20-balance-of': 18,
+  'erc20-votes': 18,
+  erc721: 0,
+  'eth-balance': 18
+};
+
 export const MAX_SYMBOL_LENGTH = 12;
 export const MAX_FILE_SIZE_BYTES = 1024 * 1024; // 1 MB should be same as https://github.com/snapshot-labs/pineapple/blob/4023c623585e4cde2296922572d35c85d45cf940/src/upload.ts#L10
 

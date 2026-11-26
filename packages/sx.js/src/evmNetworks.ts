@@ -26,6 +26,7 @@ type Overrides = {
     OZVotes?: AddressOverride;
     Whitelist?: AddressOverride;
     ApeGas?: string;
+    Oracle?: string;
   };
   proposalValidations?: {
     Vanilla?: string;
@@ -105,7 +106,8 @@ export function createStandardConfig(
         strategies.Whitelist,
         '0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829'
       ),
-      ApeGas: strategies.ApeGas
+      ApeGas: strategies.ApeGas,
+      Oracle: strategies.Oracle
     },
     ProposalValidations: {
       Vanilla: proposalValidations.Vanilla,
@@ -154,7 +156,8 @@ export function createEvmConfig(
       [network.Strategies.Comp, { type: 'comp' }],
       [network.Strategies.OZVotes, { type: 'ozVotes' }],
       [network.Strategies.Whitelist, { type: 'whitelist' }],
-      [network.Strategies.ApeGas, { type: 'apeGas' }]
+      [network.Strategies.ApeGas, { type: 'apeGas' }],
+      [network.Strategies.Oracle, { type: 'oracle' }]
     ]),
     executionStrategiesImplementations: {
       SimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
@@ -177,6 +180,7 @@ export const evmNetworks = {
   oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
     blockTime: ethSepoliaBlockTime,
+    strategies: { Oracle: '0x59db2D5A9dC316bdc8015172Cf80891d95E2D201' },
     proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
   }),
   matic: createStandardConfig(137, { blockTime: 2 }),

@@ -4,7 +4,7 @@ import { NetworkID } from '@/types';
 
 const model = defineModel<StrategyConfig | null>({ required: true });
 
-defineProps<{
+const props = defineProps<{
   networkId: NetworkID;
   title: string;
   description: string;
@@ -15,6 +15,13 @@ defineProps<{
 }>();
 
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+// An oracle signs voting power at a past block, which only V2 lets the author choose
+const validationVotingStrategies = computed(() =>
+  props.availableVotingStrategies.filter(
+    strategy =>
+      strategy.type !== 'Oracle' || model.value?.type === 'VotingPowerV2'
+  )
+);
 const editStrategyModalOpen = ref(false);
 
 const votingStrategies = computed({
@@ -101,7 +108,7 @@ function handleStrategySave(value: Record<string, any>) {
         :network-id="networkId"
         :space-id="spaceId"
         :voting-power-symbol="votingPowerSymbol"
-        :available-strategies="availableVotingStrategies"
+        :available-strategies="validationVotingStrategies"
         :show-test-button="true"
       />
     </div>

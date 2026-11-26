@@ -47,6 +47,10 @@ export type ApeGasStrategyConfig = {
   type: 'apeGas';
 };
 
+export type OracleStrategyConfig = {
+  type: 'oracle';
+};
+
 export type Erc20VotesStrategyConfig = {
   type: 'erc20Votes';
 };
@@ -105,6 +109,7 @@ export type NetworkConfig = {
       | CompStrategyConfig
       | OzVotesStrategyConfig
       | ApeGasStrategyConfig
+      | OracleStrategyConfig
       | Erc20VotesStrategyConfig
       | WhitelistStrategyConfig
       | EvmSlotValueStrategyConfig

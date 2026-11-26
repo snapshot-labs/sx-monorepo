@@ -305,23 +305,26 @@ export class EthereumTx {
     const proposerAddress =
       envelope.signatureData?.address || (await signer.getAddress());
 
-    const userStrategies = await getStrategiesWithParams(
-      'propose',
-      envelope.data.strategies,
-      proposerAddress,
-      envelope.data,
-      this.config
-    );
+    // A relayer sends the params the author signed, so it never fetches them from a server
+    const userProposalValidationParams = envelope.signatureData
+      ? envelope.signatureData.message.userProposalValidationParams
+      : encodeUserProposalValidationParams(
+          await getStrategiesWithParams(
+            'propose',
+            envelope.data.strategies,
+            proposerAddress,
+            envelope.data,
+            this.config
+          ),
+          envelope.data.blockNumber
+        );
 
     const spaceInterface = new Interface(SpaceAbi);
     const functionData = spaceInterface.encodeFunctionData('propose', [
       proposerAddress,
       envelope.data.metadataUri,
       envelope.data.executionStrategy,
-      encodeUserProposalValidationParams(
-        userStrategies,
-        envelope.data.blockNumber
-      )
+      userProposalValidationParams
     ]);
 
     const selector = functionData.slice(0, 10);
@@ -407,13 +410,16 @@ export class EthereumTx {
     const voterAddress =
       envelope.signatureData?.address || (await signer.getAddress());
 
-    const userVotingStrategies = await getStrategiesWithParams(
-      'vote',
-      envelope.data.strategies,
-      voterAddress,
-      envelope.data,
-      this.config
-    );
+    // A relayer sends the params the voter signed, so it never fetches them from a server
+    const userVotingStrategies = envelope.signatureData
+      ? envelope.signatureData.message.userVotingStrategies
+      : await getStrategiesWithParams(
+          'vote',
+          envelope.data.strategies,
+          voterAddress,
+          envelope.data,
+          this.config
+        );
 
     const isConfidential = !!envelope.data.ciphertext;
     const spaceInterface = new Interface(

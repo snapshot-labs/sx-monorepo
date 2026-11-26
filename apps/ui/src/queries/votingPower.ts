@@ -85,7 +85,8 @@ export async function getVotingPower(
         'ozVotesStorageProof',
         'evmSlotValueV2',
         'ozVotesStorageProofV2',
-        'apeGas'
+        'apeGas',
+        'oracle'
       ].includes(err.source)
     ) {
       throw new Error('NOT_READY_YET');

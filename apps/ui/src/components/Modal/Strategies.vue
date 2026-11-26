@@ -12,6 +12,7 @@ const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
   hiddenStrategies?: string[];
+  allowedStrategies?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -27,6 +28,12 @@ const network = computed(() => getNetwork(props.networkId));
 const filteredStrategies = computed(() => {
   return strategies.value.filter(strategy => {
     if (props.hiddenStrategies?.includes(strategy.name) || strategy.disabled) {
+      return false;
+    }
+    if (
+      props.allowedStrategies &&
+      !props.allowedStrategies.includes(strategy.address)
+    ) {
       return false;
     }
 

@@ -228,6 +228,7 @@ watch(
         }"
         :error="formErrors.rawParams"
       />
+      <slot />
     </div>
     <template v-if="!isPickerShown && !isDefinitionLoading" #footer>
       <UiButton
