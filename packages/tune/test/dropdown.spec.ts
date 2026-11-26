@@ -55,3 +55,20 @@ test('dropdown items run on click and Enter, not when disabled', async ({
   await page.getByText('Archive').click({ force: true });
   await expect(page.getByText('Clicked Delete')).toBeVisible();
 });
+
+test('dropdown items work with a link component that emits click', async ({
+  page
+}) => {
+  await page.goto(
+    '/iframe.html?id=ui-dropdown--with-link-component&viewMode=story'
+  );
+  await page.waitForLoadState('networkidle');
+  const errors: string[] = [];
+  page.on('pageerror', err => errors.push(err.message));
+
+  await page.getByRole('button', { name: 'Actions' }).click();
+  await page.getByRole('menuitem', { name: 'Edit' }).click();
+  await expect(page.getByText('Clicked Edit')).toBeVisible();
+  await expect(page.getByRole('menuitem')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
