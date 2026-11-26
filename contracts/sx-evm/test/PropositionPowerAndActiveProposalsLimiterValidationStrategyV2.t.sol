@@ -319,6 +319,22 @@ contract PropositionPowerAndActiveProposalsLimiterValidationV2Test is SpaceTest 
         _createProposal(author, proposalMetadataURI, executionStrategy, abi.encode(userPropositionPowerStrategies));
     }
 
+    function testProposeMalformedUserParams() public {
+        vm.expectRevert();
+        _createProposal(author, proposalMetadataURI, executionStrategy, "");
+        vm.expectRevert();
+        _createProposal(author, proposalMetadataURI, executionStrategy, hex"deadbeef");
+    }
+
+    function testProposeStrategyWithoutCode() public {
+        // A strategy that can't be called makes the proposal fail instead of counting as no power
+        Strategy[] memory strategies = new Strategy[](1);
+        strategies[0] = Strategy(address(0xbeef), new bytes(0));
+        _setPropositionPowerStrategies(0, strategies);
+        vm.expectRevert();
+        _propose(0);
+    }
+
     function testValidateCalledDirectlyDoesNotUseAuthorQuota() public {
         cooldown = 1 days;
         _setCompStrategy();
