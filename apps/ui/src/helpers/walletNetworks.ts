@@ -80,19 +80,27 @@ export async function verifyNetwork(
 // Not implemented by Braavos and Argent Mobile
 // Signing and verifying messages on different network should work fine
 // for single signer message
+/** The Starknet wallet's active chain id, or null if it cannot tell. */
+export async function getStarknetWalletChainId(
+  web3: any
+): Promise<string | null> {
+  try {
+    const current = await web3?.provider?.request?.({
+      type: 'wallet_requestChainId'
+    });
+    return typeof current === 'string' && current ? current : null;
+  } catch {
+    return null;
+  }
+}
+
 async function isOnStarknetChain(
   web3: any,
   chainId: starknetConstants.StarknetChainId
 ): Promise<boolean> {
-  try {
-    const current = await web3.provider.request({
-      type: 'wallet_requestChainId'
-    });
-    return typeof current === 'string' && BigInt(current) === BigInt(chainId);
-  } catch {
-    // Unknown: fall back to asking the wallet to switch.
-    return false;
-  }
+  const current = await getStarknetWalletChainId(web3);
+  // Unknown: fall back to asking the wallet to switch.
+  return current !== null && BigInt(current) === BigInt(chainId);
 }
 
 export async function verifyStarknetNetwork(

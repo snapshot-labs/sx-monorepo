@@ -10,8 +10,7 @@ import { getNetworkDetails } from '@/helpers/networks';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
-  STARKNET_CONNECTORS,
-  STARKNET_WALLET_CONNECTORS
+  STARKNET_CONNECTORS
 } from '@/networks/common/constants';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet/metadata';
 import { Connector, ConnectorType } from '@/networks/types';
@@ -367,12 +366,7 @@ watch(
       type="danger"
     >
       Please connect with
-      {{
-        STARKNET_WALLET_CONNECTORS.includes(auth.connector.type)
-          ? 'an EVM'
-          : 'a Starknet'
-      }}
-      wallet.
+      {{ auth.connector.type === 'argentx' ? 'an EVM' : 'a Starknet' }} wallet.
     </UiMessage>
     <UiMessage v-else-if="!selectedDelegation" class="m-4" type="danger">
       Invalid delegation

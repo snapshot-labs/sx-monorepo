@@ -8,7 +8,6 @@ import { ETH_CONTRACT, PLUS_MIN_DEPOSIT } from '@/helpers/constants';
 import { _n, formatPlusUsage } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { STARKNET_WALLET_CONNECTORS } from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
 import { ChainId, Space } from '@/types';
 
@@ -47,8 +46,7 @@ const isModalTransactionProgressOpen = ref(false);
 // Only Ethereum wallets can send ETH
 const connectors = computed(() =>
   network.value.managerConnectors.filter(
-    connector =>
-      connector !== 'guest' && !STARKNET_WALLET_CONNECTORS.includes(connector)
+    connector => !['guest', 'argentx'].includes(connector)
   )
 );
 

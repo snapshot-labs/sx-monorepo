@@ -18,8 +18,8 @@ The page is at `/#/delegation` on the Starknet organization
   their live registry settings.
 - **Voting record**: how each validator's voting address voted on the 6 most
   recent Starknet votes (Snapshot X) and polls (`starknet.eth`), from the
-  Snapshot X API and the Snapshot hub (`votingRecord.ts`). Mainnet
-  governance data, so Sepolia validators show 0/6 unless fixtures are on.
+  Snapshot X API and the Snapshot hub (`votingRecord.ts`), for the spaces
+  listed in Starknet's organization config.
 - **When your choice counts**: open votes and polls, and a preview of who
   votes with your stake before you save.
 
@@ -82,10 +82,15 @@ regenerate `pools.<network>.json` before launch and periodically after.
 
 ## Networks
 
+The page uses the network of Starknet's Snapshot X space, as listed in
+`helpers/organizations/config.ts` (`sn`, mainnet), the same way the rest of
+the app takes a network from each space. `config.ts` holds the settings for
+each Starknet network side by side, like `networks/starknet/metadata.ts`.
+
 | Network | Registry | Notes |
 | --- | --- | --- |
-| Sepolia (`sn-sep`, default) | `0x07c1db3e8a9137063d364c84c2175d323ed75b1a7e4fd457cca81aa99ecec55f` | `staked-strk-vote-delegation@e788c48`, class `0x053c2a87…01d81c` |
-| Mainnet (`sn`) | not deployed | Set `registry` in `config.ts` once SNF publishes the address, then build with `VITE_STAKED_DELEGATION_NETWORK=sn` |
+| Mainnet (`sn`) | not deployed | Set `registry` in `config.ts` once SNF publishes the address |
+| Sepolia (`sn-sep`) | `0x07c1db3e8a9137063d364c84c2175d323ed75b1a7e4fd457cca81aa99ecec55f` | `staked-strk-vote-delegation@e788c48`, class `0x053c2a87…01d81c` |
 
 ## Validator list
 
@@ -109,11 +114,13 @@ events, and public endpoints rate-limit it.
 To find a connected wallet's pools, the page calls `get_pool_member_info_v1`
 on every listed pool (see Speed).
 
-## Run locally with the governance.starknet.io theme
+## Run locally
+
+Use the app's usual organization mapping:
 
 ```sh
 cd apps/ui
-VITE_WHITELABEL_MAPPING='localhost;;governance.starknet.io' \
+VITE_WHITELABEL_MAPPING='localhost' \
 VITE_ORGANIZATION_MAPPING='localhost;starknet' \
 bun run dev
 ```
@@ -122,25 +129,14 @@ Then open http://localhost:8080/#/delegation. Append
 `?as=<starknet address>` to view the page as that address (read-only: options
 can be explored, saving is disabled).
 
-### Test validators (local only)
+### Testing on Sepolia
 
-To test the Validator settings tab with a real wallet, list its address in
-`VITE_STAKED_DELEGATION_TEST_VALIDATORS` (comma-separated). The page treats it
-as a validator; registry calls stay real, since the contract does not check
-that the caller is a validator. Dev builds only.
+Until the mainnet registry is deployed, test against the Sepolia registry by
+changing the network of Starknet's Snapshot X space in
+`helpers/organizations/config.ts` from `sn` to `sn-sep` on your machine. Do
+not commit that change. The org's vote space and voting records then come
+from Sepolia and are empty; delegation, validator settings and look-up work
+against the Sepolia registry and staking contract.
 
-### Test fixtures (local only)
-
-Add `VITE_STAKED_DELEGATION_FIXTURES=true` to the command above to load
-`fixtures.ts`. Fixtures only fake staking state (pool membership, validator
-status); the registry is still read and written live on Sepolia. They are
-ignored in production builds.
-
-| Address | What you see |
-| --- | --- |
-| `0x03a22b…e931` | Delegator with 23,500 STRK across 4 validators, one in each "votes with" state |
-| `0x0378b9…f014` | Validator: 250k self-stake, 4.82M delegated, settings tab |
-
-Two fixture validators are Sepolia accounts with real registry entries:
-`0x032cca…cf38` declined default delegations and `0x040854…c6e6` set a vote
-receiver (`0x025f52…3a85`).
+The Validator settings tab appears for addresses that are stakers in the
+Sepolia staking contract.

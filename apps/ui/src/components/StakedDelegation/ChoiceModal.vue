@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FunctionalComponent } from 'vue';
 import {
+  getValidator,
   getValidators,
   isSameAddress,
   isValidStarknetAddress,
@@ -36,7 +37,8 @@ const OPTIONS: {
   {
     id: 'default',
     title: 'Let my validators vote',
-    description: 'Each validator votes with the stake in its pool. Default.',
+    description:
+      "Each pool's validator votes with that stake, or you keep it if the validator declined. Default.",
     icon: IHUserGroup
   },
   {
@@ -170,6 +172,24 @@ const previewDelegatee = computed<string | null | undefined>(() => {
     !inputError.value
     ? normalizeAddress(delegateeInput.value)
     : undefined;
+});
+
+/**
+ * Set when the chosen delegate is a validator's staker address. The SNIP
+ * applies an explicit delegate as given: the validator's vote receiver and
+ * decline setting are skipped, so say so.
+ */
+const delegateValidatorNote = computed(() => {
+  if (selected.value !== 'delegate' || !previewDelegatee.value) return '';
+  if (!getValidator(previewDelegatee.value)) return '';
+  const isMine = props.memberships?.some(m =>
+    isSameAddress(m.validator.staker, previewDelegatee.value)
+  );
+  const rule =
+    "Your vote goes to this staker address exactly as given: the validator's vote receiver and its decline setting don't apply.";
+  return isMine
+    ? `You already stake with this validator, and it gets your vote by default. ${rule}`
+    : `This is a validator's staker address. ${rule}`;
 });
 
 const isPreviewShown = computed(
@@ -315,6 +335,11 @@ async function save() {
             </span>
           </button>
         </div>
+        <p
+          v-if="delegateValidatorNote"
+          class="text-skin-text text-[15px] leading-[22px]"
+          v-text="delegateValidatorNote"
+        />
       </div>
 
       <div ref="previewRef">

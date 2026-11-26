@@ -261,7 +261,7 @@ async function main() {
 
   const liveness = await loadLiveness(provider, config.staking, block);
 
-  // Sorted by total stake (self-stake + delegated): what a validator votes with.
+  // Sorted by total stake (self-stake + delegated), i.e. staking power.
   const total = (row: { own: string; delegated: string }) =>
     BigInt(row.own) + BigInt(row.delegated);
   const validators = rows

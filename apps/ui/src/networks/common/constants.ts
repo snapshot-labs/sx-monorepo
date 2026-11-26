@@ -11,10 +11,5 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'sandbox'
 ];
 
-/** Connectors backed by a Starknet wallet (excludes read-only guest). */
-export const STARKNET_WALLET_CONNECTORS: ConnectorType[] = ['argentx'];
-export const STARKNET_CONNECTORS: ConnectorType[] = [
-  ...STARKNET_WALLET_CONNECTORS,
-  'guest'
-];
+export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx', 'guest'];
 export const EDITOR_APP_NAME = 'snapshot-v2';

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getFormattedVotingPower } from '@/helpers/utils';
 import { evmNetworks } from '@/networks';
-import { STARKNET_WALLET_CONNECTORS } from '@/networks/common/constants';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { NetworkID } from '@/types';
 
@@ -33,10 +32,7 @@ function handleModalOpen() {
   <slot
     v-if="
       auth &&
-      !(
-        evmNetworks.includes(networkId) &&
-        STARKNET_WALLET_CONNECTORS.includes(auth.connector.type)
-      )
+      !(evmNetworks.includes(networkId) && auth.connector.type === 'argentx')
     "
     :voting-power="votingPower"
     :formatted-voting-power="formattedVotingPower"

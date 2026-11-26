@@ -125,7 +125,8 @@ const DEFAULT_OPTIONS = [
   {
     value: true,
     title: 'Vote for my delegators',
-    description: 'Delegators who made no choice give you their vote. Default.'
+    description:
+      'Delegators who made no choice give their vote to your vote receiver. Default.'
   },
   {
     value: false,
@@ -228,8 +229,9 @@ const footerNote = computed(() => {
           <div>
             <h4 class="text-skin-heading">Vote receiver</h4>
             <p class="text-skin-text text-[15px] leading-[22px]">
-              Votes with your self-stake and your pool's default delegations.
-              Useful if your staker address is a cold wallet.
+              Votes with your self-stake and for delegators who made no choice.
+              Useful if your staker address is a cold wallet. Delegators who
+              chose your staker address directly stay with it.
             </p>
           </div>
           <StakedDelegationAddress
@@ -250,9 +252,11 @@ const footerNote = computed(() => {
             <p class="text-skin-text text-[15px] leading-[22px]">
               Delegators who made no choice
               {{
-                config.acceptsDefaultDelegations
-                  ? 'give you their vote.'
-                  : 'keep their own vote.'
+                !config.acceptsDefaultDelegations
+                  ? 'keep their own vote.'
+                  : hasCustomReceiver
+                    ? 'give their vote to your vote receiver.'
+                    : 'give you their vote.'
               }}
             </p>
           </div>
@@ -294,7 +298,9 @@ const footerNote = computed(() => {
       <div class="p-4 flex flex-col gap-3">
         <p class="text-skin-text text-[15px] leading-[22px]">
           This address votes with your self-stake and with the stake of
-          delegators who made no choice. Your stake does not move.
+          delegators who made no choice. Your stake does not move. Delegators
+          who delegated to your staker address directly keep voting through it,
+          not this address.
         </p>
         <UiInputString
           v-model="receiverInput"

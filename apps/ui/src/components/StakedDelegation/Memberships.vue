@@ -180,7 +180,10 @@ function share(amount: bigint) {
             "
           >
             <template #subtitle>
-              <StakedDelegationReasonPill :reason="membership.reason" />
+              <StakedDelegationReasonPill
+                :reason="membership.reason"
+                :is-own="isOwn"
+              />
             </template>
           </StakedDelegationAddress>
         </div>

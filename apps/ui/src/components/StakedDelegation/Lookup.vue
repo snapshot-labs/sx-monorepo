@@ -4,6 +4,7 @@ import {
   getValidatorProfile,
   isSameAddress,
   isValidStarknetAddress,
+  normalizeAddress,
   shortenVoter
 } from '@/helpers/stakedVoteDelegation';
 import {
@@ -16,19 +17,24 @@ import {
 
 const props = defineProps<{ initialAddress?: string }>();
 
+/**
+ * The looked-up address, zero-padded: the indexers and the registry store
+ * padded addresses, so a short form would match nothing.
+ */
+function toLookupAddress(value?: string) {
+  return value && isValidStarknetAddress(value) ? normalizeAddress(value) : '';
+}
+
 const input = ref(props.initialAddress ?? '');
-const address = ref(
-  props.initialAddress && isValidStarknetAddress(props.initialAddress)
-    ? props.initialAddress
-    : ''
-);
+const address = ref(toLookupAddress(props.initialAddress));
 
 watch(
   () => props.initialAddress,
   value => {
-    if (value && isValidStarknetAddress(value)) {
-      input.value = value;
-      address.value = value;
+    const next = toLookupAddress(value);
+    if (next) {
+      input.value = value ?? '';
+      address.value = next;
     }
   }
 );
@@ -84,14 +90,23 @@ const profile = computed(() =>
 
 const choice = computed(() => {
   if (delegatee.value === undefined) return '';
-  if (delegatee.value === null) return 'Default: their validators vote';
+  if (delegatee.value === null) {
+    const pools = memberships.value ?? [];
+    const declined = pools.filter(m => m.reason === 'declined').length;
+    if (pools.length && declined === pools.length) {
+      return 'Default: keeps their vote (validators declined)';
+    }
+    return declined
+      ? 'Default: their validators vote, except where they declined'
+      : 'Default: their validators vote';
+  }
   if (isSameAddress(delegatee.value, address.value)) return 'Votes themselves';
   return `Delegates to ${shortenVoter(delegatee.value)}`;
 });
 
 function handleSubmit() {
   if (!input.value || error.value) return;
-  address.value = input.value;
+  address.value = toLookupAddress(input.value);
 }
 </script>
 

@@ -63,7 +63,16 @@ const headline = computed(() => {
   if (mode.value === 'delegate') {
     return `${shortenVoter(delegatee.value!)} votes with all of your stake`;
   }
-  if (!memberships.value?.length) return 'Your validators will vote for you';
+  const pools = memberships.value?.length ?? 0;
+  if (!pools) return 'Your validators will vote for you';
+  // A validator that declined default delegations leaves you your vote.
+  const declined = memberships.value!.filter(
+    m => m.reason === 'declined'
+  ).length;
+  if (declined === pools) return 'You keep your vote';
+  if (declined) {
+    return `Your validators vote for you in ${pools - declined} of ${pools} pools`;
+  }
   return 'Your validators vote for you';
 });
 
@@ -98,8 +107,8 @@ const detail = computed(() => {
 
   <div v-else-if="!account" class="p-4">
     <UiMessage type="info">
-      Staked STRK lives on Starknet. Connect a Starknet wallet (Argent or
-      Braavos) to manage your delegation.
+      Staked STRK lives on Starknet. Connect a Starknet wallet (Ready, Braavos
+      or Bramble) to manage your delegation.
     </UiMessage>
   </div>
 

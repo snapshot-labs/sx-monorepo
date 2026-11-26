@@ -1,4 +1,5 @@
 import { constants as starknetConstants } from 'starknet';
+import { getOrganizationConfigById } from '@/helpers/organizations/config';
 import sepoliaPools from './pools.sn-sep.json';
 import mainnetPools from './pools.sn.json';
 
@@ -72,18 +73,32 @@ export const STAKED_DELEGATION_NETWORKS: Record<
   }
 };
 
-export const STAKED_DELEGATION_NETWORK: StakedDelegationNetworkId =
-  import.meta.env.VITE_STAKED_DELEGATION_NETWORK === 'sn' ? 'sn' : 'sn-sep';
+/**
+ * Starknet's governance spaces, as listed in its organization config: the
+ * Snapshot X space (votes) and the Snapshot space (polls). The SNIP changes
+ * the voting power of both.
+ */
+const starknetSpaces = getOrganizationConfigById('starknet')?.spaceIds ?? [];
+const voteSpace = starknetSpaces.find(
+  (space): space is { network: StakedDelegationNetworkId; id: string } =>
+    space.network in STAKED_DELEGATION_NETWORKS
+);
+const pollSpace = starknetSpaces.find(
+  space => space.network === 's' || space.network === 's-tn'
+);
+if (!voteSpace || !pollSpace) {
+  throw new Error('Starknet organization config is missing its spaces');
+}
 
 /** Spaces whose voting power the SNIP changes. */
 export const GOVERNANCE_SPACES = [
-  {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
-    kind: 'Vote'
-  },
-  { network: 's', id: 'starknet.eth', kind: 'Poll' }
+  { network: voteSpace.network, id: voteSpace.id, kind: 'Vote' },
+  { network: pollSpace.network, id: pollSpace.id, kind: 'Poll' }
 ] as const;
+
+/** The registry is used on the network of Starknet's Snapshot X space. */
+export const STAKED_DELEGATION_NETWORK: StakedDelegationNetworkId =
+  voteSpace.network;
 
 export const SNIP_URL =
   'https://github.com/starknet-innovation/staked-strk-vote-delegation/blob/main/snip/snip-staked-vote-delegation.md';

@@ -1,7 +1,10 @@
 import { Account, Call, CallData, hash, num } from 'starknet';
 import { getRpcUrl } from '@/helpers/provider';
 import { shortenAddress } from '@/helpers/utils';
-import { verifyStarknetNetwork } from '@/helpers/walletNetworks';
+import {
+  getStarknetWalletChainId,
+  verifyStarknetNetwork
+} from '@/helpers/walletNetworks';
 import { createProvider } from '@/networks/starknet/provider';
 import {
   getStakedDelegationConfig,
@@ -9,16 +12,9 @@ import {
   StakedDelegationNetworkId,
   ValidatorPool
 } from './config';
-import {
-  FIXTURE_PROFILES,
-  FIXTURE_VALIDATORS,
-  getFixtureMemberships,
-  isFixtureStaker
-} from './fixtures';
 import { VALIDATOR_PROFILES, ValidatorProfile } from './validatorProfiles';
 
 export * from './config';
-export { FIXTURES_ENABLED } from './fixtures';
 export type { ValidatorProfile } from './validatorProfiles';
 
 /** Why an address ends up voting with a given stake. */
@@ -131,7 +127,6 @@ export async function getIsStaker(
   address: string,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<boolean> {
-  if (isFixtureStaker(address)) return true;
   const { staking } = getStakedDelegationConfig(networkId);
   const [variant] = await getStarkProvider(networkId).callContract({
     contractAddress: staking,
@@ -360,20 +355,9 @@ export async function findMemberships(
   onProgress?: (done: number, total: number) => void,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<{ validator: ValidatorPool; amount: bigint }[]> {
-  const fixture = getFixtureMemberships(member);
-  if (fixture) {
-    onProgress?.(1, 1);
-    return fixture.flatMap(({ staker, amount }) => {
-      const validator = getValidator(staker, networkId);
-      return validator ? [{ validator, amount }] : [];
-    });
-  }
-
   // Check every listed pool, including ones that were empty when the list was
   // built: they may have received stake since.
-  const pools = getValidators(networkId).filter(
-    validator => !isFixtureStaker(validator.staker)
-  );
+  const pools = getValidators(networkId);
   const found: { validator: ValidatorPool; amount: bigint }[] = [];
   let done = 0;
   const report = (count: number) => onProgress?.((done += count), pools.length);
@@ -408,7 +392,10 @@ export async function findMemberships(
   return found.sort((a, b) => (b.amount > a.amount ? 1 : -1));
 }
 
-/** Self-stake plus delegated stake: what a validator votes with. */
+/**
+ * Self-stake plus delegated stake (staking power). Not what the validator
+ * votes with: delegators who opted out, or a decline, move part of it away.
+ */
 export function totalStake(validator: ValidatorPool): bigint {
   return BigInt(validator.own) + BigInt(validator.delegated);
 }
@@ -418,18 +405,13 @@ export function getValidators(
   networkId = STAKED_DELEGATION_NETWORK
 ): ValidatorPool[] {
   const { validators } = getStakedDelegationConfig(networkId).pools;
-  const all = FIXTURE_VALIDATORS.length
-    ? [...FIXTURE_VALIDATORS, ...validators].sort((a, b) =>
-        totalStake(b) > totalStake(a) ? 1 : -1
-      )
-    : validators;
-  return all.map(validator => {
+  return validators.map(validator => {
     const profile = getValidatorProfile(validator.staker, networkId);
     return profile ? { ...validator, name: profile.name } : validator;
   });
 }
 
-/** Profile from validatorProfiles.ts (or local fixtures), if any. */
+/** Profile from validatorProfiles.ts, if any. */
 export function getValidatorProfile(
   staker: string,
   networkId = STAKED_DELEGATION_NETWORK
@@ -440,7 +422,7 @@ export function getValidatorProfile(
   } catch {
     return null;
   }
-  return VALIDATOR_PROFILES[networkId][key] ?? FIXTURE_PROFILES[key] ?? null;
+  return VALIDATOR_PROFILES[networkId][key] ?? null;
 }
 
 /** Validator name when known, otherwise a shortened address. */
@@ -502,19 +484,56 @@ export async function sendRegistryCall(
   call: Call,
   networkId = STAKED_DELEGATION_NETWORK
 ): Promise<string> {
-  const { chainId } = getStakedDelegationConfig(networkId);
+  const { chainId, name } = getStakedDelegationConfig(networkId);
   await verifyStarknetNetwork(web3, chainId);
+  // Some wallets skip or ignore the switch request; never send the call to a
+  // registry address on the wrong network.
+  const walletChainId = await getStarknetWalletChainId(web3);
+  if (walletChainId && BigInt(walletChainId) !== BigInt(chainId)) {
+    throw new Error(`Switch your wallet to ${name} and try again.`);
+  }
   const account: Account | undefined = web3?.provider?.account;
   if (!account) throw new Error('Connect a Starknet wallet to continue.');
   const { transaction_hash } = await account.execute(call);
   return transaction_hash;
 }
 
+/** Registry revert reasons, as user-facing messages. */
+const REVERT_MESSAGES: Record<string, string> = {
+  'SVD: no delegation set':
+    'There was no choice to reset. It may have changed in another tab: reload the page to see the current state.',
+  'SVD: value unchanged':
+    'This is already your current setting. It may have changed in another tab: reload the page to see the current state.',
+  'SVD: zero delegatee': 'Enter an address to delegate to.',
+  'SVD: zero caller': 'The transaction was sent from an invalid account.'
+};
+
+/**
+ * Throws when `receipt` is for a transaction that reverted. starknet.js
+ * resolves `waitForTransaction` for reverted transactions too.
+ */
+export function assertTransactionSucceeded(receipt: {
+  execution_status?: string;
+  revert_reason?: string;
+}) {
+  if (receipt.execution_status !== 'REVERTED') return;
+
+  const reason = receipt.revert_reason ?? '';
+  const known = Object.keys(REVERT_MESSAGES).find(key => reason.includes(key));
+  throw new Error(
+    known
+      ? REVERT_MESSAGES[known]
+      : 'The transaction failed on-chain and nothing was changed.'
+  );
+}
+
 export async function waitForRegistryTransaction(
   txHash: string,
   networkId = STAKED_DELEGATION_NETWORK
 ) {
-  return getStarkProvider(networkId).waitForTransaction(txHash, {
+  const receipt = await getStarkProvider(networkId).waitForTransaction(txHash, {
     retryInterval: 3000
   });
+  if (receipt.isReverted()) assertTransactionSucceeded(receipt.value);
+  return receipt;
 }

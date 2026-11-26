@@ -103,23 +103,16 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
       primary_color: '#10abff',
       theme: 'dark'
     }
-  }
+  },
+  ...(WHITELABEL_MAPPING
+    ? (() => {
+        const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
+        if (!localSpaceId) return { [localDomain]: {} };
+        const [network, id] = localSpaceId.split(':');
+        return { [localDomain]: { network, id } };
+      })()
+    : {})
 };
-
-// Optional third segment copies the skin of a mapped domain, e.g.
-// VITE_WHITELABEL_MAPPING='localhost;;governance.starknet.io'
-if (WHITELABEL_MAPPING) {
-  const [localDomain, localSpaceId, skinDomain] = WHITELABEL_MAPPING.split(';');
-  const skinSettings = skinDomain
-    ? MAPPING[skinDomain]?.skinSettings
-    : undefined;
-  if (!localSpaceId) {
-    MAPPING[localDomain] = { skinSettings };
-  } else {
-    const [network, id] = localSpaceId.split(':');
-    MAPPING[localDomain] = { network: network as NetworkID, id, skinSettings };
-  }
-}
 
 const isWhiteLabel = ref(false);
 const isCustomDomain = ref(

@@ -1,13 +1,18 @@
-import { describe, expect, it } from 'vitest';
+import { constants } from 'starknet';
+import { describe, expect, it, vi } from 'vitest';
+import { getOrganizationConfigById } from '@/helpers/organizations';
 import {
   aggregateVoters,
-  FIXTURES_ENABLED,
+  assertTransactionSucceeded,
   getValidatorProfile,
+  GOVERNANCE_SPACES,
   isSameAddress,
   isValidStarknetAddress,
   normalizeAddress,
   registryCalls,
-  resolvePoolMember
+  resolvePoolMember,
+  sendRegistryCall,
+  STAKED_DELEGATION_NETWORK
 } from '@/helpers/stakedVoteDelegation';
 import {
   pickRecentProposals,
@@ -85,18 +90,12 @@ describe('isSameAddress', () => {
 
 describe('registryCalls', () => {
   it('encodes the boolean for set_accepts_default_delegations', () => {
-    expect(registryCalls.setAcceptsDefaultDelegations(false).calldata).toEqual([
-      '0'
-    ]);
-    expect(registryCalls.setAcceptsDefaultDelegations(true).calldata).toEqual([
-      '1'
-    ]);
-  });
-});
-
-describe('fixtures', () => {
-  it('are off unless explicitly enabled', () => {
-    expect(FIXTURES_ENABLED).toBe(false);
+    expect(
+      registryCalls.setAcceptsDefaultDelegations(false, 'sn-sep').calldata
+    ).toEqual(['0']);
+    expect(
+      registryCalls.setAcceptsDefaultDelegations(true, 'sn-sep').calldata
+    ).toEqual(['1']);
   });
 });
 
@@ -173,5 +172,86 @@ describe('getValidatorProfile', () => {
   it('returns null for unknown or invalid addresses', () => {
     expect(getValidatorProfile('0x123')).toBeNull();
     expect(getValidatorProfile('not an address')).toBeNull();
+  });
+});
+
+describe('assertTransactionSucceeded', () => {
+  it('accepts a successful transaction', () => {
+    expect(() =>
+      assertTransactionSucceeded({ execution_status: 'SUCCEEDED' })
+    ).not.toThrow();
+  });
+
+  it('turns a known registry revert into a clear message', () => {
+    expect(() =>
+      assertTransactionSucceeded({
+        execution_status: 'REVERTED',
+        revert_reason:
+          "Error in the called contract (0x07c1...):\nExecution failed. Failure reason: 0x... ('SVD: no delegation set')."
+      })
+    ).toThrow('There was no choice to reset.');
+  });
+
+  it('reports any other revert as a failure', () => {
+    expect(() =>
+      assertTransactionSucceeded({
+        execution_status: 'REVERTED',
+        revert_reason: 'Out of gas'
+      })
+    ).toThrow('The transaction failed on-chain and nothing was changed.');
+  });
+});
+
+describe('sendRegistryCall', () => {
+  const CALL = registryCalls.resetDelegation('sn-sep');
+
+  /** A wallet on `chainId` that ignores switch requests, like some do. */
+  function createWallet(chainId: string | null) {
+    const execute = vi.fn(async () => ({ transaction_hash: '0xabc' }));
+    const request = vi.fn(async ({ type }: { type: string }) => {
+      if (type === 'wallet_requestChainId') {
+        if (chainId === null) throw new Error('not implemented');
+        return chainId;
+      }
+      if (type === 'wallet_switchStarknetChain') return true;
+      throw new Error(`unexpected request ${type}`);
+    });
+    return { web3: { provider: { request, account: { execute } } }, execute };
+  }
+
+  it('sends the call when the wallet is on the registry network', async () => {
+    const { web3, execute } = createWallet(
+      constants.StarknetChainId.SN_SEPOLIA
+    );
+
+    await expect(sendRegistryCall(web3, CALL, 'sn-sep')).resolves.toBe('0xabc');
+    expect(execute).toHaveBeenCalledWith(CALL);
+  });
+
+  it('refuses to send when the wallet stays on another network', async () => {
+    const { web3, execute } = createWallet(constants.StarknetChainId.SN_MAIN);
+
+    await expect(sendRegistryCall(web3, CALL, 'sn-sep')).rejects.toThrow(
+      'Switch your wallet to Starknet Sepolia and try again.'
+    );
+    expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('sends the call when the wallet cannot report its network', async () => {
+    const { web3, execute } = createWallet(null);
+
+    await sendRegistryCall(web3, CALL, 'sn-sep');
+    expect(execute).toHaveBeenCalled();
+  });
+});
+
+describe('network', () => {
+  it("follows the Starknet organization's spaces", () => {
+    const { spaceIds } = getOrganizationConfigById('starknet')!;
+
+    expect(
+      GOVERNANCE_SPACES.map(({ network, id }) => ({ network, id }))
+    ).toEqual(spaceIds);
+    expect(STAKED_DELEGATION_NETWORK).toBe('sn');
   });
 });

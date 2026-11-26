@@ -1,18 +1,20 @@
-import { API_URL } from '@/helpers/constants';
 import { getChoiceText } from '@/helpers/utils';
-import { Choice, Proposal } from '@/types';
+import { METADATA as STARKNET_METADATA } from '@/networks/starknet/metadata';
+import { Choice, NetworkID, Proposal } from '@/types';
 import { GOVERNANCE_SPACES } from './config';
-import { getFixtureVotes } from './fixtures';
 
 /** Number of recent proposals (votes and polls) a record covers. */
 export const RECORD_SIZE = 6;
 
 /**
- * Snapshot hub for the `starknet.eth` poll space. Same URL as `HUB_URLS.s` in
+ * Snapshot hubs for the poll space. Same URLs as `HUB_URLS` in
  * `@/networks/offchain`, kept here because importing that module directly
  * creates a circular import.
  */
-const HUB_URL = 'https://hub.snapshot.org/graphql';
+const HUB_URLS: Partial<Record<NetworkID, string>> = {
+  s: 'https://hub.snapshot.org/graphql',
+  's-tn': 'https://testnet.hub.snapshot.org/graphql'
+};
 
 /** The hub rejects `voter_in` lists that are too long. */
 const HUB_BATCH_SIZE = 50;
@@ -33,6 +35,20 @@ export type VotingRecord = {
 type RawVote = { voter: string; proposal: string; choice: Choice };
 
 const [VOTE_SPACE, POLL_SPACE] = GOVERNANCE_SPACES;
+
+function requireUrl(url: string | undefined, network: NetworkID): string {
+  if (!url) throw new Error(`No governance API for network ${network}`);
+  return url;
+}
+
+const VOTE_API_URL = requireUrl(
+  STARKNET_METADATA[VOTE_SPACE.network]?.apiUrl,
+  VOTE_SPACE.network
+);
+const POLL_HUB_URL = requireUrl(
+  HUB_URLS[POLL_SPACE.network],
+  POLL_SPACE.network
+);
 
 async function graphql<T>(
   url: string,
@@ -75,7 +91,7 @@ async function loadOnchainVotes(voters: string[], proposalIds: string[]) {
   const data = await graphql<{
     votes: { voter: { id: string }; proposal: string; choice: Choice }[];
   }>(
-    `${API_URL}/graphql`,
+    `${VOTE_API_URL}/graphql`,
     `query ($space: String, $voters: [String], $proposals: [String]) {
       votes(
         indexer: "${VOTE_SPACE.network}"
@@ -103,7 +119,7 @@ async function loadOffchainVotes(voters: string[], proposalIds: string[]) {
       graphql<{
         votes: { voter: string; proposal: { id: string }; choice: Choice }[];
       }>(
-        HUB_URL,
+        POLL_HUB_URL,
         `
           query ($voters: [String], $proposals: [String]) {
             votes(
@@ -169,12 +185,11 @@ export async function loadVotingRecords(
 
   return Object.fromEntries(
     normalized.map(voter => {
-      const fixtureVotes = getFixtureVotes(voter);
-      const entries = proposals.map((proposal, index) => {
+      const entries = proposals.map(proposal => {
         const vote = byKey.get(
           keyOf(voter, proposal.network, proposalKey(proposal))
         );
-        const choice = vote?.choice ?? fixtureVotes?.[index] ?? null;
+        const choice = vote?.choice ?? null;
         return {
           proposal,
           kind:
