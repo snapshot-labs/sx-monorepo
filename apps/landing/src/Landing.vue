@@ -9,10 +9,10 @@ import {
   watch,
   watchSyncEffect
 } from 'vue';
+import Footer from './Footer.vue';
 import { ASCII, asciiFrame, asciiGrid, asciiPath, heroBoxes } from './hero';
 import Logo from './Logo.vue';
 import { HeroFrame, startScene } from './scene';
-import { SOCIALS } from './socials';
 import {
   closingParts,
   fieldParts,
@@ -580,32 +580,8 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <!-- The copyright, the legal links and Snapshot elsewhere, over every slide,
-  lined up with the logo. Phones have room for the legal links only, tablets
-  for the copyright too. -->
-  <footer
-    class="fixed bottom-0 left-0 z-30 flex h-[53px] gap-4 bg-white px-5 text-[17px] [&>*]:flex [&>*]:items-center [&>*]:whitespace-nowrap"
-    :inert="!!legal"
-  >
-    <span class="max-sm:!hidden">
-      © {{ new Date().getFullYear() }} Snapshot Labs AG
-    </span>
-    <a href="#/terms">Terms of use</a>
-    <a href="#/privacy">Privacy policy</a>
-    <nav aria-label="Snapshot elsewhere" class="gap-[14px] max-md:!hidden">
-      <a
-        v-for="social in SOCIALS"
-        :key="social.name"
-        :href="social.href"
-        target="_blank"
-        :aria-label="social.name"
-      >
-        <svg width="24" height="24" viewBox="0 0 1024 1024" aria-hidden="true">
-          <path :d="social.path" :transform="social.transform" />
-        </svg>
-      </a>
-    </nav>
-  </footer>
+  <!-- Fixed over every slide; the legal pages have it at their end. -->
+  <Footer class="fixed bottom-0 left-0 z-30" :inert="!!legal" />
   <div
     v-if="legal"
     :key="legal"
@@ -613,6 +589,21 @@ onMounted(() => {
     tabindex="-1"
     class="fixed inset-0 z-40 overflow-y-auto overscroll-contain bg-white outline-none"
   >
-    <Legal :page="legal" />
+    <Legal :page="legal">
+      <!-- The menu, here to leave for a slide: none is active. -->
+      <nav
+        class="flex h-[56px] self-center text-[17px] min-[420px]:text-[20px]"
+        :class="MENU_PADDING"
+      >
+        <a
+          v-for="label in SLIDES"
+          :key="label"
+          :href="`#/${label.toLowerCase()}`"
+          :class="MENU_ITEM"
+        >
+          {{ label }}
+        </a>
+      </nav>
+    </Legal>
   </div>
 </template>
