@@ -35,7 +35,8 @@ src
 │  ├─ ...
 ├─ proposal-validation-strategies
 │  ├─ ActiveProposalsLimiterProposalValidationStrategy.sol - "Strategy to that validates with the ActiveProposalsLimiter module"
-│  ├─ PropositionPowerAndActiveProposalsLimiterProposalValidationStrategy.sol - "Strategy that validates with the ActiveProposalsLimiter and PropositionPower modules"
+│  ├─ PropositionPowerAndActiveProposalsLimiterValidationStrategy.sol - "Strategy that validates with the ActiveProposalsLimiter and PropositionPower modules"
+│  ├─ PropositionPowerAndActiveProposalsLimiterValidationStrategyV2.sol - "Same, with proposition power at a recent block chosen by the author"
 │  └─ PropositionPowerProposalValidationStrategy.sol - "Strategy that validates with the PropositionPower module"
 ├─ utils
 │  ├─ ActiveProposalsLimiter.sol - "Module to limit the number of active proposals per author"
