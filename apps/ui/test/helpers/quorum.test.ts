@@ -47,17 +47,19 @@ describe('formatQuorum', () => {
     expect(formatQuorum(0.1234)).toBe('12.3%');
     expect(formatQuorum(0.555667)).toBe('55.5%');
     expect(formatQuorum(4.446326)).toBe('444%');
-    expect(formatQuorum(999.90111)).toBe('99.9k%');
   });
 
   it('should not round up but truncate', () => {
     expect(formatQuorum(0.9999)).toBe('99.9%');
+    expect(formatQuorum(9.9999)).toBe('999%');
   });
 
-  it('should format big numbers in compact format', () => {
-    expect(formatQuorum(1000)).toBe('100k%');
-    expect(formatQuorum(1234)).toBe('123k%');
-    expect(formatQuorum(5556)).toBe('555k%');
-    expect(formatQuorum(44444)).toBe('4.44m%');
+  it('should show >100% from 1000%', () => {
+    expect(formatQuorum(10)).toBe('>100%');
+    expect(formatQuorum(1234)).toBe('>100%');
+    // A quorum of 1 raw unit makes the ratio astronomically large
+    expect(formatQuorum(716624324)).toBe('>100%');
+    expect(formatQuorum(9.2e23)).toBe('>100%');
+    expect(formatQuorum(Infinity)).toBe('>100%');
   });
 });
