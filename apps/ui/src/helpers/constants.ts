@@ -90,8 +90,8 @@ export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
   }
 };
 
-// Snapshot's oracle for the Oracle voting strategy: a Safe, at the same address on every network, whose owner
-// keys score-api signs voting power with
+// Snapshot's oracle for the Oracle voting strategy, at the same address on every network, which score-api signs
+// voting power for
 export const SNAPSHOT_ORACLE = {
   address: '0x0000000000000000000000000000000000000000',
   url: 'https://score.snapshot.org'
