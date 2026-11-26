@@ -7,8 +7,8 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { omit } from '@/helpers/utils';
-import { DefinitionWithOptions } from '@/types';
+import { omit } from '../../helpers/utils';
+import type { DefinitionWithOptions } from '../../types';
 
 const NULL_SYMBOL = Symbol('null');
 

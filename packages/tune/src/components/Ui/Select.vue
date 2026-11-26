@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends string | number">
-import { DefinitionWithOptions } from '@/types';
+import type { DefinitionWithOptions } from '../../types';
 
 const model = defineModel<T>({ required: true });
 

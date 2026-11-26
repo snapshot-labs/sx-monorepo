@@ -166,7 +166,7 @@ watchEffect(() => setTitle('Explore'));
           placement="start"
           :items="protocols"
         />
-        <Combobox
+        <UiCombobox
           v-model="network"
           class="mb-0"
           inline

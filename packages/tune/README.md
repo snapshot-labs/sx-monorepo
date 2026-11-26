@@ -14,12 +14,14 @@ yarn add @snapshot-labs/tune
 
 ### 1. Plugin
 
-Register the Vue plugin (sets up tooltips):
+Register the Vue plugin with its options:
 
 ```ts
 import { createTune } from '@snapshot-labs/tune';
+import AppLink from './components/AppLink.vue';
 
-app.use(createTune());
+// linkComponent renders `to` links in UiButton, UiMessage and UiDropdownItem
+app.use(createTune({ linkComponent: AppLink }));
 ```
 
 ### 2. Styles
@@ -31,7 +33,10 @@ Import the styles (components + theme) in your app's global stylesheet. The impo
 @tailwind base;
 @import '@snapshot-labs/tune/style';
 @tailwind utilities;
+@import '@snapshot-labs/tune/forms';
 ```
+
+The form styles (`s-input`, `s-label`...) come after the utilities so they keep winning over them, like app styles do.
 
 ### 3. Tailwind preset (optional)
 

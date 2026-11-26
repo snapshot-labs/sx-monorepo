@@ -22,7 +22,7 @@ it('should use verified color if only verified', () => {
     global: GLOBAL
   });
 
-  expect(wrapper.element.children[0].classList.toString()).toBe(VERIFIED_CLASS);
+  expect(wrapper.find('svg').attributes('class')).toBe(VERIFIED_CLASS);
 });
 
 it('should use pro color if both verified and pro', () => {
@@ -35,7 +35,7 @@ it('should use pro color if both verified and pro', () => {
     global: GLOBAL
   });
 
-  expect(wrapper.element.children[0].classList.toString()).toBe(TURBO_CLASS);
+  expect(wrapper.find('svg').attributes('class')).toBe(TURBO_CLASS);
 });
 
 it('should use flagged color if flagged', () => {
@@ -48,5 +48,5 @@ it('should use flagged color if flagged', () => {
     global: GLOBAL
   });
 
-  expect(wrapper.element.children[0].classList.toString()).toBe(FLAGGED_CLASS);
+  expect(wrapper.find('svg').attributes('class')).toBe(FLAGGED_CLASS);
 });

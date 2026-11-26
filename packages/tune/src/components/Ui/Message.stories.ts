@@ -1,9 +1,16 @@
-import { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import Message from './Message.vue';
 
 const meta = {
   title: 'Ui/Message',
   component: Message,
+  // The text goes in the slot explicitly: Storybook only maps a `default` arg
+  // to the slot when it can read the component source
+  render: ({ default: text, ...args }) => ({
+    components: { Message },
+    setup: () => ({ args, text }),
+    template: '<Message v-bind="args">{{ text }}</Message>'
+  }),
   tags: ['autodocs'],
   args: {
     type: 'info',

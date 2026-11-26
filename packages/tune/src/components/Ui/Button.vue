@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
+import { TUNE_OPTIONS_KEY } from '../../plugin';
 
 const props = withDefaults(
   defineProps<{
@@ -22,6 +23,7 @@ const props = withDefaults(
 );
 
 const attrs = useAttrs();
+const { linkComponent = 'a' } = inject(TUNE_OPTIONS_KEY, {});
 
 const isCompact = computed(() => {
   const isFullWidth = (attrs.class as 'string')?.includes('w-full');
@@ -48,9 +50,15 @@ const buttonStyles = computed(() => {
 </script>
 
 <template>
-  <AppLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
+  <component
+    :is="linkComponent"
+    v-if="to"
+    :to="to"
+    :class="classNames"
+    :style="buttonStyles"
+  >
     <slot />
-  </AppLink>
+  </component>
   <button
     v-else
     :type="type"

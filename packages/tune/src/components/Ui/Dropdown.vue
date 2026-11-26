@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItems } from '@headlessui/vue';
-import { Float } from '@headlessui-float/vue';
+import { Menu, MenuContent, MenuTrigger } from '@ui-sdk/vue/menu';
+import SlotRoot from '../../helpers/SlotRoot';
+
+// In <body> like Headless UI's Float did, so the menu inherits the body's text
+// styles instead of whatever surrounds the trigger
+const container = document.body;
 
 withDefaults(
   defineProps<{
@@ -17,39 +21,30 @@ withDefaults(
 </script>
 
 <template>
-  <Menu as="div" class="relative">
-    <Float
-      :placement="`bottom-${placement}`"
-      :offset="Number(gap)"
-      strategy="fixed"
-      :shift="{ padding: 0 }"
-      flip
-      portal
-      z-index="60"
-    >
-      <MenuButton
-        :disabled="disabled"
-        as="template"
-        class="cursor-pointer [&_svg]:pointer-events-none"
+  <div class="relative">
+    <!-- modal=false: an outside click also reaches what it hits, like before -->
+    <Menu :modal="false" :container="container">
+      <MenuTrigger :disabled="disabled">
+        <template #render="{ props }">
+          <SlotRoot
+            v-bind="props"
+            class="cursor-pointer [&_svg]:pointer-events-none"
+          >
+            <slot name="button" />
+          </SlotRoot>
+        </template>
+      </MenuTrigger>
+      <MenuContent
+        side="bottom"
+        :align="placement"
+        :side-offset="Number(gap)"
+        :collision-padding="0"
+        class="m-0 border-0 p-0 rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden transition duration-100 ease-out data-[ending-style]:duration-75 data-[ending-style]:ease-in data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0"
       >
-        <slot name="button" />
-      </MenuButton>
-      <transition
-        enter-active-class="transition duration-100 ease-out"
-        enter-from-class="transform scale-95 opacity-0"
-        enter-to-class="transform scale-100 opacity-100"
-        leave-active-class="transition duration-75 ease-in"
-        leave-from-class="transform scale-100 opacity-100"
-        leave-to-class="transform scale-95 opacity-0"
-      >
-        <MenuItems
-          class="rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
-        >
-          <div class="max-h-[208px] overflow-y-auto py-1">
-            <slot name="items" />
-          </div>
-        </MenuItems>
-      </transition>
-    </Float>
-  </Menu>
+        <div class="max-h-[208px] overflow-y-auto py-1">
+          <slot name="items" />
+        </div>
+      </MenuContent>
+    </Menu>
+  </div>
 </template>

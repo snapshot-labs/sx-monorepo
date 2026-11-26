@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
+import { TUNE_OPTIONS_KEY } from '../../plugin';
 
 defineProps<{
   type: 'info' | 'danger';
   learnMoreLink?: string | RouteLocationRaw;
 }>();
+
+const { linkComponent = 'a' } = inject(TUNE_OPTIONS_KEY, {});
 </script>
 
 <template>
@@ -17,7 +20,9 @@ defineProps<{
     <IH-information-circle class="float-left mr-1" />
     <div class="leading-5">
       <slot />
-      <AppLink v-if="learnMoreLink" :to="learnMoreLink">Learn more</AppLink>
+      <component :is="linkComponent" v-if="learnMoreLink" :to="learnMoreLink"
+        >Learn more</component
+      >
     </div>
   </div>
 </template>

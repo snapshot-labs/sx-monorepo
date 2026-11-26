@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { ref } from 'vue';
 import Dropdown from './Dropdown.vue';
+import DropdownItem from './DropdownItem.vue';
 
 const meta = {
   title: 'Ui/Dropdown',
@@ -65,6 +67,26 @@ export const PlacementStart: Story = {
           </template>
         </Dropdown>
       </div>
+    `
+  })
+};
+
+export const WithItems: Story = {
+  render: args => ({
+    components: { Dropdown, DropdownItem },
+    setup: () => ({ args, clicked: ref('nothing') }),
+    template: `
+      <Dropdown v-bind="args">
+        <template #button>
+          <button class="px-3 py-2 border rounded">Actions</button>
+        </template>
+        <template #items>
+          <DropdownItem @click="clicked = 'Edit'">Edit</DropdownItem>
+          <DropdownItem disabled @click="clicked = 'Archive'">Archive</DropdownItem>
+          <DropdownItem danger @click="clicked = 'Delete'">Delete</DropdownItem>
+        </template>
+      </Dropdown>
+      <p class="mt-4">Clicked {{ clicked }}</p>
     `
   })
 };

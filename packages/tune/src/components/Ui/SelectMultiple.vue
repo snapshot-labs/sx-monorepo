@@ -6,7 +6,7 @@ import {
   ListboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { DefinitionWithMultipleOptions } from '@/types';
+import type { DefinitionWithMultipleOptions } from '../../types';
 
 defineOptions({ inheritAttrs: false });
 

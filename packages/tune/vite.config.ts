@@ -24,6 +24,7 @@ export default defineConfig({
     }),
     AutoImport({
       imports: ['vue', '@vueuse/core'],
+      dirs: ['./src/composables'],
       eslintrc: {
         enabled: true,
         filepath: resolve(__dirname, '.eslintrc-auto-import.json')
@@ -59,7 +60,8 @@ export default defineConfig({
         '@headlessui/vue',
         '@headlessui-float/vue',
         'dayjs',
-        'unplugin-vue-components'
+        'unplugin-vue-components',
+        /^@ui-sdk\//
       ]
     }
   }

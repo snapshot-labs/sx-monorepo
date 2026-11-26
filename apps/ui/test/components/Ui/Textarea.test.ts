@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
 import { expect, it } from 'vitest';
-import Textarea from '@/components/Ui/Textarea.vue';
+import { UiTextarea as Textarea } from '@snapshot-labs/tune';
 
 const definition = {
   type: 'string',

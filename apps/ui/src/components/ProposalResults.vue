@@ -295,11 +295,11 @@ onMounted(() => {
           width: `${width}px`
         }"
       >
-        <div
+        <UiTooltip
           v-for="(segment, i) in barSegments"
           :key="i"
-          v-tippy="{ content: segment.label }"
-          class="float-left h-full"
+          :title="segment.label"
+          class="float-left h-full !static"
           :style="{
             width: `${segment.width.toFixed(3)}%`,
             backgroundColor: segment.color

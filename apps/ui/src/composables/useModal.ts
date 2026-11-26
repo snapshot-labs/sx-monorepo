@@ -1,4 +1,7 @@
-const modalOpen = ref(false);
+import { useModalOpen } from '@snapshot-labs/tune';
+
+// Set by <UiModal> in Tune
+const modalOpen = useModalOpen();
 const modalAccountOpen = ref(false);
 const modalAccountWithoutDismissOpen = ref(false);
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getRandomHexColor } from '@/helpers/utils';
+import { getRandomHexColor } from '../../helpers/utils';
 
 defineOptions({ inheritAttrs: false });
 

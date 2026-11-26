@@ -102,7 +102,13 @@ const config: KnipConfig = {
       ignoreDependencies: ['@inco/lightning-js']
     },
     'packages/tune': {
-      entry: ['src/**/*.vue', 'src/**/*.ts', 'vite.config.ts'],
+      entry: [
+        'src/**/*.vue',
+        'src/**/*.ts',
+        'vite.config.ts',
+        // Run by playwright.config.ts as a command
+        'test/serve-storybook.ts'
+      ],
       vite: false,
       ignoreDependencies: [
         '@iconify-json/heroicons-outline',

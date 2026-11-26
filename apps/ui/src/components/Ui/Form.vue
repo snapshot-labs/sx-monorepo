@@ -1,17 +1,19 @@
 <script setup lang="ts">
+import {
+  UiInputCheckbox as InputCheckbox,
+  UiInputColor as InputColor,
+  UiInputDuration as InputDuration,
+  UiInputNumber as InputNumber,
+  UiInputString as InputString,
+  UiSelect as Select,
+  UiSelectMultiple as SelectMultiple,
+  UiTextarea as Textarea
+} from '@snapshot-labs/tune';
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
 import InputArray from './InputArray.vue';
-import InputCheckbox from './InputCheckbox.vue';
-import InputColor from './InputColor.vue';
-import InputDuration from './InputDuration.vue';
-import InputNumber from './InputNumber.vue';
 import InputStamp from './InputStamp.vue';
-import InputString from './InputString.vue';
-import Select from './Select.vue';
-import SelectMultiple from './SelectMultiple.vue';
 import SelectorNetwork from './SelectorNetwork.vue';
-import Textarea from './Textarea.vue';
 
 defineOptions({ inheritAttrs: false });
 
