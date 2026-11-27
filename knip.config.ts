@@ -71,6 +71,7 @@ const config: KnipConfig = {
       ignoreDependencies: [
         '@openzeppelin/contracts',
         '@openzeppelin/contracts-upgradeable',
+        '@safe-global/safe-contracts',
         'forge-std',
         'murky',
         'solhint-plugin-prettier'

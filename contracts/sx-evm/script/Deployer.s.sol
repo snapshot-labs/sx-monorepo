@@ -24,6 +24,7 @@ import { CompVotingStrategy } from "../src/voting-strategies/CompVotingStrategy.
 import { OZVotesVotingStrategy } from "../src/voting-strategies/OZVotesVotingStrategy.sol";
 import { WhitelistVotingStrategy } from "../src/voting-strategies/WhitelistVotingStrategy.sol";
 import { MerkleWhitelistVotingStrategy } from "../src/voting-strategies/MerkleWhitelistVotingStrategy.sol";
+import { OracleVotingStrategy } from "../src/voting-strategies/OracleVotingStrategy.sol";
 
 import { VanillaProposalValidationStrategy } from "../src/proposal-validation-strategies/VanillaProposalValidationStrategy.sol";
 import { PropositionPowerProposalValidationStrategy } from "../src/proposal-validation-strategies/PropositionPowerProposalValidationStrategy.sol";
@@ -149,6 +150,12 @@ contract Deployer is Script {
             saltNonce
         );
         deployments.serialize("MerkleWhitelistVotingStrategy", merkleWhitelistVotingStrategy);
+
+        (address oracleVotingStrategy, ) = noRedeploy(
+            abi.encodePacked(type(OracleVotingStrategy).creationCode, abi.encode(name, version)),
+            saltNonce
+        );
+        deployments.serialize("OracleVotingStrategy", oracleVotingStrategy);
 
         // ------- PROPOSAL VALIDATION STRATEGIES -------
 
