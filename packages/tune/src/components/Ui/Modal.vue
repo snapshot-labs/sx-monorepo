@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Dialog, DialogContent, DialogTitle } from '@ui-sdk/vue/dialog';
+
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
@@ -13,19 +15,21 @@ const props = withDefaults(
   }
 );
 
+// Wallet modals open over ours: these stay usable when already on the page
+// (WalletConnect, Coinbase, Starknet). Sequence opens a window instead.
+const WALLET_MODALS = [
+  'w3m-modal',
+  '.-cbwsdk-css-reset',
+  '#starknetkit-modal-container',
+  '#argent-mobile-modal-container',
+  '#argent-mobile-modal-overlay',
+  '#argent-webwallet-modal'
+];
+
 const { open } = toRefs(props);
 const modalOpen = useModalOpen();
 
-function handleKeyboardEvent(ev: KeyboardEvent) {
-  if (ev.code === 'Escape' && props.open && props.closeable) emit('close');
-}
-
-onMounted(() => {
-  document.addEventListener('keyup', handleKeyboardEvent);
-});
-
 onBeforeUnmount(() => {
-  document.removeEventListener('keyup', handleKeyboardEvent);
   modalOpen.value = false;
 });
 
@@ -35,21 +39,35 @@ watch(open, val => {
 </script>
 
 <template>
-  <transition name="fade">
-    <div
-      v-if="open"
-      class="modal mx-auto pt-electron-titlebar-height"
+  <!-- Rendered in place, under wallet modals. Only the backdrop closes it
+  on a click, so a click in a wallet modal over it doesn't. -->
+  <Dialog
+    :open="open"
+    :dismissible="closeable"
+    :close-on-outside-press="false"
+    :persistent-elements="WALLET_MODALS"
+    @update:open="emit('close')"
+  >
+    <!-- Focus goes to the modal itself, so no button shows a focus ring -->
+    <DialogContent
+      inline
+      initial-focus="content"
+      class="modal mx-auto pt-electron-titlebar-height outline-none"
       data-testid="modal"
     >
       <div class="backdrop" @click="closeable ? emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
-        <div
-          v-if="$slots.header"
-          class="border-b py-3 text-center"
-          data-testid="modal-header"
-        >
-          <slot name="header" />
-        </div>
+        <DialogTitle v-if="$slots.header">
+          <template #render="{ props: titleProps }">
+            <div
+              v-bind="titleProps"
+              class="border-b py-3 text-center"
+              data-testid="modal-header"
+            >
+              <slot name="header" />
+            </div>
+          </template>
+        </DialogTitle>
         <div class="modal-body" data-testid="modal-body">
           <slot />
         </div>
@@ -70,8 +88,8 @@ watch(open, val => {
           <IH-x />
         </button>
       </div>
-    </div>
-  </transition>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <style lang="scss">

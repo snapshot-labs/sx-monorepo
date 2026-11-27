@@ -24,3 +24,25 @@ export const NotCloseable: Story = {
   args: { open: true, closeable: false },
   render
 };
+
+export const Interactive: Story = {
+  args: { open: false },
+  render: args => ({
+    components: { Modal },
+    setup: () => ({ args, isOpen: ref(false), isNestedOpen: ref(false) }),
+    template: `
+      <div>
+        <button id="open" class="border rounded-full px-3" @click="isOpen = true">Open</button>
+        <Modal v-bind="args" :open="isOpen" @close="isOpen = false">
+          <template #header><h3>Delegate</h3></template>
+          <div class="p-4">
+            <button id="open-nested" class="border rounded-full px-3" @click="isNestedOpen = true">Open another</button>
+          </div>
+        </Modal>
+        <Modal :open="isNestedOpen" @close="isNestedOpen = false">
+          <template #header><h3>Log in</h3></template>
+          <div class="p-4">On top</div>
+        </Modal>
+      </div>`
+  })
+};
