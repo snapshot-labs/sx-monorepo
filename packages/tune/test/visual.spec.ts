@@ -38,7 +38,11 @@ const STATES: Record<string, (page: Page) => Promise<boolean>> = {
     return true;
   },
   click: async page => {
-    const target = page.locator('#storybook-root').locator(CLICKABLE).first();
+    // A disabled control can't be clicked, like Previous at a minimum month
+    const enabled = CLICKABLE.split(', ')
+      .map(selector => `${selector}:not([disabled], [aria-disabled="true"])`)
+      .join(', ');
+    const target = page.locator('#storybook-root').locator(enabled).first();
     if (!(await target.count())) return false;
     await target.click({ timeout: 2000 });
     return true;
