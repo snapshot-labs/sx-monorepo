@@ -27,7 +27,10 @@ const state = reactive({
   authLoading: false
 });
 const authInitiated = ref(false);
-const loadedProviders = ref(new Set<Connector['id']>());
+// Each attached connector's accountsChanged handler, to detach it on logout.
+const loadedProviders = ref(
+  new Map<Connector['id'], (accounts: string[]) => Promise<void>>()
+);
 const currentConnector = ref<Connector | null>(null);
 const provider = ref<Web3providerWithSafe | null>(null);
 
@@ -154,11 +157,7 @@ export function useWeb3() {
   function attachConnectorEvents(connector: Connector) {
     if (loadedProviders.value.has(connector.id)) return;
 
-    loadedProviders.value.add(connector.id);
-
-    if (!connector.provider.on) return;
-
-    connector.provider.on('accountsChanged', async (accounts: string[]) => {
+    const onAccountsChanged = async (accounts: string[]) => {
       if (!accounts?.length) {
         logout(connector);
         return;
@@ -166,7 +165,12 @@ export function useWeb3() {
 
       state.account = formatAddress(accounts[0]);
       await login(connector);
-    });
+    };
+    loadedProviders.value.set(connector.id, onAccountsChanged);
+
+    if (!connector.provider.on) return;
+
+    connector.provider.on('accountsChanged', onAccountsChanged);
 
     if (!STARKNET_CONNECTORS.includes(connector.type)) {
       connector.provider.on('chainChanged', async (chainId: string) => {
@@ -182,11 +186,15 @@ export function useWeb3() {
   }
 
   function removeConnectorEvents(connector: Connector) {
+    const onAccountsChanged = loadedProviders.value.get(connector.id);
     loadedProviders.value.delete(connector.id);
 
     try {
       connector.provider.removeAllListeners();
-    } catch {}
+    } catch {
+      // Starknet wallets have no removeAllListeners, only `off`
+      connector.provider?.off?.('accountsChanged', onAccountsChanged);
+    }
   }
 
   return {
