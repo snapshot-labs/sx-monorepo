@@ -36,12 +36,9 @@ watch(
     if (!isOpen.value) query.value = label;
   }
 );
-const icon = computed(() => {
-  const option = props.definition.options.find(
-    option => option.id === model.value
-  );
-  return option ? option.icon : null;
-});
+const icon = computed(
+  () => props.definition.options.find(option => option.id === model.value)?.icon
+);
 
 // UI SDK puts the cursor where you click: select the label instead, so
 // typing a search replaces it
