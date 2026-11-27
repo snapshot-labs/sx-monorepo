@@ -19,6 +19,7 @@ const followedSpacesStore = useFollowedSpacesStore();
       :touch-delay="100"
       :item-key="(space: Space) => `${space.network}:${space.id}`"
       animated
+      aria-label="Followed spaces"
       class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">

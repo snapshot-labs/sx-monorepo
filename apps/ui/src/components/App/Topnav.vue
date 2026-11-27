@@ -204,7 +204,16 @@ onUnmounted(() => {
         <IH-login class="sm:hidden inline-block" />
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
+      <UiButton
+        v-if="!isWhiteLabel"
+        uniform
+        :aria-label="
+          currentTheme === 'dark'
+            ? 'Switch to light mode'
+            : 'Switch to dark mode'
+        "
+        @click="toggleTheme()"
+      >
         <IH-sun v-if="currentTheme === 'dark'" />
         <IH-moon v-else />
       </UiButton>
