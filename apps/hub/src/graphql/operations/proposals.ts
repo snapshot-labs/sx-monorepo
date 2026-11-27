@@ -3,6 +3,45 @@ import log from '../../helpers/log';
 import db from '../../helpers/mysql';
 import { buildWhereQuery, checkLimits, formatProposal } from '../helpers';
 
+// MySQL's default InnoDB stopwords of 1 or 2 characters. The ngram parser
+// (pairs of characters) drops every pair that contains one, both when indexing
+// and when parsing the search string.
+const SHORT_STOPWORDS =
+  'a i an as at be by de en in is it la of on or to'.split(' ');
+
+function isIndexed(word: string): boolean {
+  const chars = [...word];
+  // The ngram index does not match characters outside the Basic Multilingual Plane
+  if (chars.some(char => char.codePointAt(0)! > 0xffff)) return false;
+  for (let i = 0; i < chars.length - 1; i++) {
+    const pair = chars[i] + chars[i + 1];
+    if (!SHORT_STOPWORDS.some(stopword => pair.includes(stopword))) return true;
+  }
+  return false;
+}
+
+// Today's title scan is the fastest when it stops early (a common word, a
+// small space). Past this, a rare word is found through the FULLTEXT index.
+const TITLE_SCAN_TIMEOUT_MS = 200;
+
+/**
+ * The MATCH search string that narrows a title_contains search through the
+ * FULLTEXT index without changing its results, or null when the index cannot
+ * find every match and only the LIKE scan may run. Every word the index can
+ * find must be present, which is always true of a title containing the term;
+ * the LIKE keeps results exact.
+ */
+export function titleMatchQuery(term: string): string | null {
+  if (!/^[\p{L}\p{N}\s]+$/u.test(term)) return null;
+  const words = term
+    .split(/\s+/)
+    .filter(isIndexed)
+    // The longest words narrow enough; more only make the FULLTEXT query heavier
+    .sort((a, b) => [...b].length - [...a].length)
+    .slice(0, 3);
+  return words.length ? words.map(word => `+"${word}"`).join(' ') : null;
+}
+
 export default async function (parent, args) {
   const { first, skip, where = {} } = args;
 
@@ -42,9 +81,12 @@ export default async function (parent, args) {
   }
 
   let searchSql = '';
+  let titleMatch: string | null = null;
   if (where.title_contains) {
+    const term = where.title_contains.toLowerCase();
     searchSql = 'AND LOWER(p.title) LIKE ?';
-    params.push(`%${where.title_contains.toLowerCase()}%`);
+    params.push(`%${term}%`);
+    titleMatch = titleMatchQuery(term);
   }
 
   if (where.strategies_contains) {
@@ -90,8 +132,8 @@ export default async function (parent, args) {
   orderDirection = orderDirection.toUpperCase();
   if (!['ASC', 'DESC'].includes(orderDirection)) orderDirection = 'DESC';
 
-  const query = `
-    SELECT
+  const query = (hint = '', matchSql = '') => `
+    SELECT ${hint}
       p.*,
       skins.*,
       p.id AS id,
@@ -105,12 +147,28 @@ export default async function (parent, args) {
     FROM proposals p
     INNER JOIN spaces ON spaces.id = p.space
     LEFT JOIN skins ON spaces.id = skins.id
-    WHERE p.space NOT IN (SELECT id FROM spaces WHERE deleted = 1) ${queryStr} ${searchSql}
+    WHERE p.space NOT IN (SELECT id FROM spaces WHERE deleted = 1) ${queryStr} ${searchSql} ${matchSql}
     ORDER BY ${orderBy} ${orderDirection}, p.id ASC LIMIT ?, ?
   `;
-  params.push(skip, first);
+  const values = [...params, skip, first];
   try {
-    const proposals = await db.queryAsync(query, params);
+    // All three queries return the same rows, whichever one answers
+    const proposals = titleMatch
+      ? await db
+          .queryAsync(
+            query(`/*+ MAX_EXECUTION_TIME(${TITLE_SCAN_TIMEOUT_MS}) */`),
+            values
+          )
+          .catch(() =>
+            db.queryAsync(
+              query('', 'AND MATCH(p.title_lower) AGAINST (? IN BOOLEAN MODE)'),
+              [...params, titleMatch, skip, first]
+            )
+          )
+          // Without the index (not deployed yet, or a query it cannot run),
+          // search as before
+          .catch(() => db.queryAsync(query(), values))
+      : await db.queryAsync(query(), values);
     return proposals.map(proposal => formatProposal(proposal));
   } catch (err: any) {
     log.error(`[graphql] proposals, ${JSON.stringify(err)}`);
