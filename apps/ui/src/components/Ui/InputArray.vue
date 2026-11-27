@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="T extends string | object">
-import Draggable from 'vuedraggable';
-
 const items = defineModel<T[]>();
 
 const props = defineProps<{
@@ -122,10 +120,11 @@ onMounted(() => {
         {{ definition.minItems > 1 ? 'are' : 'is' }} required.
       </div>
     </slot>
-    <Draggable
+    <UiReorderList
       v-if="inputValues.length"
-      v-model="items"
-      v-bind="{ animation: 200 }"
+      :model-value="currentItems"
+      @update:model-value="items = $event"
+      animated
       handle=".handle"
       class="s-array-items"
       :item-key="(_: T, index: number) => index"
@@ -143,7 +142,10 @@ onMounted(() => {
           }"
         >
           <div class="s-input-wrapper">
-            <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
+            <IC-drag
+              v-if="definition.sortable"
+              class="handle cursor-grab touch-none"
+            />
             <slot name="input-prefix" :index="index" />
             <input
               :ref="el => (itemsRef[index] = el)"
@@ -181,7 +183,10 @@ onMounted(() => {
         </div>
         <div v-else class="s-form-wrapper">
           <div class="flex items-center gap-2.5">
-            <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
+            <IC-drag
+              v-if="definition.sortable"
+              class="handle cursor-grab touch-none"
+            />
             <slot name="input-prefix" :index="index" />
             <div
               class="flex-1 text-skin-link"
@@ -210,7 +215,7 @@ onMounted(() => {
           </UiForm>
         </div>
       </template>
-    </Draggable>
+    </UiReorderList>
     <UiButton
       v-if="!definition.maxItems || currentItems.length < definition.maxItems"
       class="w-full"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import draggable from 'vuedraggable';
+import { Space } from '@/types';
 
 const followedSpacesStore = useFollowedSpacesStore();
 </script>
@@ -13,19 +13,17 @@ const followedSpacesStore = useFollowedSpacesStore();
       class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
     />
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
-    <draggable
+    <UiReorderList
       v-else
       v-model="followedSpacesStore.followedSpaces"
-      :delay="100"
-      :delay-on-touch-only="true"
-      :touch-start-threshold="35"
-      item-key="id"
-      v-bind="{ animation: 200 }"
+      :touch-delay="100"
+      :item-key="(space: Space) => `${space.network}:${space.id}`"
+      animated
       class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
     >
       <template #item="{ element }">
         <AppSidebarItem :space="element" />
       </template>
-    </draggable>
+    </UiReorderList>
   </div>
 </template>

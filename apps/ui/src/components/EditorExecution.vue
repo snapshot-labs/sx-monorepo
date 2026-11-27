@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
   parseSafeImportFile,
@@ -262,7 +261,7 @@ watch(
       <template v-if="model.length > 0 && treasury">
         <UiSectionHeader label="Transactions" class="border-t" />
         <div>
-          <Draggable
+          <UiReorderList
             v-model="model"
             handle=".handle"
             :item-key="(tx: TransactionType) => tx"
@@ -271,7 +270,7 @@ watch(
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
                 <template v-if="model.length > 1" #left>
                   <div
-                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle touch-none text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>
@@ -295,7 +294,7 @@ watch(
                 </template>
               </TransactionsListItem>
             </template>
-          </Draggable>
+          </UiReorderList>
           <div
             class="border-t px-4 py-2 space-x-2 flex items-center justify-between"
           >

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable';
 import { shorten } from '@/helpers/utils';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
@@ -79,7 +78,11 @@ function deleteTreasury(index: number) {
 
 <template>
   <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Treasuries</UiEyebrow>
-  <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
+  <UiReorderList
+    v-model="model"
+    handle=".handle"
+    :item-key="(_: unknown, index: number) => index"
+  >
     <template #item="{ element: treasury, index: i }">
       <div
         class="flex justify-between items-center first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x last-of-type:mb-3 px-4 py-3 text-skin-link"
@@ -87,7 +90,7 @@ function deleteTreasury(index: number) {
         <div class="flex items-center">
           <div
             v-if="model.length > 1"
-            class="handle mr-3 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+            class="handle touch-none mr-3 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
           >
             <IH-switch-vertical />
           </div>
@@ -129,7 +132,7 @@ function deleteTreasury(index: number) {
         </div>
       </div>
     </template>
-  </Draggable>
+  </UiReorderList>
   <UiButton
     v-if="limit ? model.length < limit : true"
     class="w-full"
@@ -150,7 +153,8 @@ function deleteTreasury(index: number) {
 </template>
 
 <style scoped lang="scss">
-.sortable-drag {
-  @apply rounded-lg border bg-skin-bg;
+// The copy that follows the pointer is a whole card, whatever row it was
+[data-drag-preview] {
+  @apply rounded-lg border bg-skin-bg #{!important};
 }
 </style>
