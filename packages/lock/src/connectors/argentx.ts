@@ -14,22 +14,29 @@ export default class Argentx extends Connector {
         return;
       }
 
-      const [starknetkit, { InjectedConnector }, { WebWalletConnector }] =
-        await Promise.all([
-          import('starknetkit'),
-          import('starknetkit/injected'),
-          import('starknetkit/webwallet')
-        ]);
+      const [
+        starknetkit,
+        { InjectedConnector },
+        { WebWalletConnector },
+        { default: BrambleConnector }
+      ] = await Promise.all([
+        import('starknetkit'),
+        import('starknetkit/injected'),
+        import('starknetkit/webwallet'),
+        import('./bramble')
+      ]);
+      const isSilent = !!localStorage.getItem('starknetLastConnectedWallet');
       const starknet = await starknetkit.connect({
         ...options,
         connectors: [
+          // First, so it is listed above the install links: starknetkit only
+          // moves the wallets it detects itself to the top.
+          new BrambleConnector({ isSilent }),
           new InjectedConnector({ options: { id: 'argentX' } }),
           new InjectedConnector({ options: { id: 'braavos' } }),
           new WebWalletConnector()
         ],
-        modalMode: localStorage.getItem('starknetLastConnectedWallet')
-          ? 'neverAsk'
-          : 'alwaysAsk',
+        modalMode: isSilent ? 'neverAsk' : 'alwaysAsk',
         modalTheme
       });
 
