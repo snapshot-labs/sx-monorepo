@@ -6,6 +6,7 @@ import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
+import IHShieldCheck from '~icons/heroicons-outline/shield-check';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
 type NavLink = { name?: string; params?: Record<string, string> };
@@ -67,6 +68,14 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           params: { space: 's:starknet.eth' }
         },
         position: 3
+      },
+      delegates: { hidden: true },
+      delegation: {
+        name: 'Delegation',
+        icon: IHShieldCheck,
+        link: { name: 'space-delegation' },
+        activeRoute: { prefix: 'space-delegation' },
+        position: 4
       },
       docs: {
         name: 'Docs',
