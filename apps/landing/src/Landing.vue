@@ -63,8 +63,6 @@ const legalOfHash = () =>
 const MENU_ITEM = 'flex items-center px-2 min-[420px]:px-3 sm:px-5';
 const MENU_PADDING = 'px-1 min-[420px]:px-3';
 const GLIDE_MS = 1200;
-// The glide's pace: fast, then slow in the middle, then fast again.
-const glideCurve = (t: number) => 0.25 * t + 0.75 * (0.5 + 4 * (t - 0.5) ** 3);
 
 // The words of a title, each behind its own mask so it can slide out of view
 // or into it by shift(i) percent of its height.
@@ -140,9 +138,9 @@ const slideTop = (i: number) =>
 const snap = (type: string) =>
   (document.documentElement.style.scrollSnapType = type);
 
-// Glides to slide i over a fixed time (see glideCurve), without snapping so
-// the browser leaves each frame where it is. Any wheel, touch or key from the
-// reader stops the glide.
+// Glides to slide i over a fixed time, slow then faster and faster, without
+// snapping so the browser leaves each frame where it is. Any wheel, touch or
+// key from the reader stops the glide.
 let glide = 0;
 function stopGlide() {
   cancelAnimationFrame(glide);
@@ -161,7 +159,7 @@ function glideTo(i: number) {
   const start = performance.now();
   const step = (now: number) => {
     const t = Math.min(1, (now - start) / GLIDE_MS);
-    scrollTo(0, from + (top - from) * glideCurve(t));
+    scrollTo(0, from + (top - from) * t ** 2);
     if (t < 1) glide = requestAnimationFrame(step);
     else stopGlide();
   };
