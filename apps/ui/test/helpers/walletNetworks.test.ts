@@ -33,6 +33,17 @@ describe('verifyStarknetNetwork', () => {
     expect(request).toHaveBeenLastCalledWith(SWITCH_TO_MAINNET);
   });
 
+  it.each(['SN_MAIN', SN_MAIN.toUpperCase(), ''])(
+    'should ask Bramble to switch when it reports its network as %j',
+    async walletChainId => {
+      const { web3, request } = createWeb3('bramble', walletChainId);
+
+      await verifyStarknetNetwork(web3, SN_MAIN);
+
+      expect(request).toHaveBeenLastCalledWith(SWITCH_TO_MAINNET);
+    }
+  );
+
   it('should fail without a switch prompt when Bramble cannot read its network', async () => {
     const request = vi.fn(async () => {
       throw new Error('chain id failed');
