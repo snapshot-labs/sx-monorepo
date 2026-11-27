@@ -76,7 +76,7 @@ export function useSnapshotProfiles() {
 
   function getProfile(address: string): SnapshotProfile | null {
     const key = keyOf(address);
-    return key ? profiles.get(key) ?? null : null;
+    return key ? (profiles.get(key) ?? null) : null;
   }
 
   /** Reloads one address, e.g. after its owner edited the profile. */
