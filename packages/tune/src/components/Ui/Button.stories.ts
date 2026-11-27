@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { ref } from 'vue';
 import Button from './Button.vue';
 
 const meta = {
@@ -46,4 +47,26 @@ export const Loading: Story = {
     default: 'Loading button',
     loading: true
   }
+};
+
+// A slow async handler, like a wallet signature, still runs on every press
+export const Interactive: Story = {
+  render: () => ({
+    components: { Button },
+    setup: () => {
+      const presses = ref(0);
+      const slow = () => {
+        presses.value++;
+        return new Promise(resolve => setTimeout(resolve, 5000));
+      };
+      return { presses, slow };
+    },
+    template: `
+      <div class="flex gap-2">
+        <Button id="slow" @click="slow">Sign</Button>
+        <Button id="off" disabled @click="presses += 100">Disabled</Button>
+        <p id="presses">Presses {{ presses }}</p>
+      </div>
+    `
+  })
 };

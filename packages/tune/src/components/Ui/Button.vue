@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { Button } from '@ui-sdk/vue/button';
 import type { RouteLocationRaw } from 'vue-router';
+import { omit } from '../../helpers/utils';
 import { TUNE_OPTIONS_KEY } from '../../plugin';
+
+defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(
   defineProps<{
@@ -24,6 +28,14 @@ const props = withDefaults(
 
 const attrs = useAttrs();
 const { linkComponent = 'a' } = inject(TUNE_OPTIONS_KEY, {});
+
+// Calls the click handlers without returning their Promise: UI SDK would
+// keep the button pending until it settles, and ignore presses meanwhile
+function click(event: MouseEvent) {
+  for (const handler of [attrs.onClick].flat()) {
+    (handler as ((event: MouseEvent) => unknown) | undefined)?.(event);
+  }
+}
 
 const isCompact = computed(() => {
   const isFullWidth = (attrs.class as 'string')?.includes('w-full');
@@ -53,22 +65,25 @@ const buttonStyles = computed(() => {
   <component
     :is="linkComponent"
     v-if="to"
+    v-bind="attrs"
     :to="to"
     :class="classNames"
     :style="buttonStyles"
   >
     <slot />
   </component>
-  <button
+  <Button
     v-else
+    v-bind="omit(attrs, ['onClick'])"
     :type="type"
     :disabled="disabled || loading"
     :class="classNames"
     :style="buttonStyles"
+    @click="click"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
-  </button>
+  </Button>
 </template>
 
 <style lang="scss" scoped>
