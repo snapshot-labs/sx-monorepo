@@ -167,16 +167,9 @@ export class ProposalPage {
   }
 
   async selectTab(tabName: 'Votes' | 'Discussion') {
-    let locator = this.tabs.getByRole('link', { name: tabName });
-
-    if (tabName === 'Discussion') {
-      // Before topic is loaded it's external link to Discourse.
-      // Once Topic is loaded it becomes an internal link to our UI.
-      // We need to wait for the link to become internal.
-      locator = locator.and(this.tabs.locator('[href^="#"]'));
-    }
-
-    await locator.click();
+    // Discussion is an external link to Discourse until its topic loads,
+    // then it becomes a tab
+    await this.tabs.getByRole('tab', { name: tabName }).click();
   }
 }
 
