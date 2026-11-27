@@ -15,17 +15,17 @@ const ADDRESS =
 
 // A Starknet wallet only has `on` and `off`, no `removeAllListeners`.
 function createStarknetConnector() {
-  const listeners = new Set<(accounts: string[]) => void>();
+  const listeners = new Set<(accounts: string[]) => Promise<void> | void>();
   const provider = {
     chainId: '0x534e5f4d41494e',
     selectedAddress: ADDRESS,
     // Answers the network lookups ethers' Web3Provider makes in the background
     request: async ({ method }: { method?: string }) =>
       method === 'eth_accounts' ? [] : '0x1',
-    on: (event: string, handler: (accounts: string[]) => void) => {
+    on: (event: string, handler: (accounts: string[]) => Promise<void>) => {
       if (event === 'accountsChanged') listeners.add(handler);
     },
-    off: (event: string, handler: (accounts: string[]) => void) => {
+    off: (event: string, handler: (accounts: string[]) => Promise<void>) => {
       if (event === 'accountsChanged') listeners.delete(handler);
     }
   };
@@ -38,12 +38,16 @@ function createStarknetConnector() {
     disconnect: vi.fn()
   };
 
-  return { connector: connector as any, listeners };
+  // The wallet announcing new accounts to whoever is still listening
+  const emit = (accounts: string[]) =>
+    Promise.all([...listeners].map(handler => handler(accounts)));
+
+  return { connector: connector as any, listeners, emit };
 }
 
 describe('useWeb3', () => {
   it('should stop following a Starknet wallet after logout', async () => {
-    const { connector, listeners } = createStarknetConnector();
+    const { connector, listeners, emit } = createStarknetConnector();
     const { login, logout, auth } = useWeb3();
 
     await login(connector);
@@ -54,7 +58,7 @@ describe('useWeb3', () => {
     expect(listeners.size).toBe(0);
 
     // A later account change in the wallet must not log the user back in
-    await Promise.all([...listeners].map(handler => handler([ADDRESS])));
+    await emit([ADDRESS]);
     expect(auth.value).toBeNull();
     expect(connector.connect).toHaveBeenCalledTimes(1);
   });
@@ -69,6 +73,39 @@ describe('useWeb3', () => {
 
     expect(listeners.size).toBe(1);
     logout();
+  });
+
+  it('should log out when the wallet locks and stay logged out after', async () => {
+    const { connector, listeners, emit } = createStarknetConnector();
+    const { login, auth } = useWeb3();
+
+    await login(connector);
+    await emit([]);
+    expect(auth.value).toBeNull();
+    expect(listeners.size).toBe(0);
+
+    await emit([ADDRESS]);
+    expect(connector.connect).toHaveBeenCalledTimes(1);
+  });
+
+  it('should log out wallets without removeAllListeners or off', async () => {
+    const { connector } = createStarknetConnector();
+    delete connector.provider.off;
+    const { login, logout, auth } = useWeb3();
+
+    await login(connector);
+    expect(() => logout()).not.toThrow();
+    expect(auth.value).toBeNull();
+  });
+
+  it('should log out when the provider is gone', async () => {
+    const { connector } = createStarknetConnector();
+    const { login, logout, auth } = useWeb3();
+
+    await login(connector);
+    connector.provider = null;
+    expect(() => logout()).not.toThrow();
+    expect(auth.value).toBeNull();
   });
 
   it('should still remove all listeners from wallets that support it', async () => {
