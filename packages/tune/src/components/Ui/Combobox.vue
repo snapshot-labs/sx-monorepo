@@ -1,16 +1,15 @@
 <script setup lang="ts" generic="T extends string | number">
 import {
   Combobox,
-  ComboboxButton,
+  ComboboxContent,
+  ComboboxEmpty,
   ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions
-} from '@headlessui/vue';
-import { Float } from '@headlessui-float/vue';
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger
+} from '@ui-sdk/vue/combobox';
 import { omit } from '../../helpers/utils';
-import type { DefinitionWithOptions } from '../../types';
-
-const NULL_SYMBOL = Symbol('null');
+import type { DefinitionWithOptions, SelectItem } from '../../types';
 
 const model = defineModel<T | null>({ required: true });
 
@@ -23,23 +22,9 @@ const props = defineProps<{
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
-const query = ref('');
-
-const filteredOptions = computed(() => {
-  return props.definition.options.filter(option =>
-    (option.name || String(option.id))
-      .toLowerCase()
-      .includes(query.value.toLowerCase())
-  );
-});
-
-const inputValue = computed({
-  get: () => model.value,
-  set: (newValue: T | null) => {
-    query.value = '';
-    model.value = newValue;
-  }
-});
+const isOpen = ref(false);
+// The input's text: the chosen option's label, or what the user types
+const query = ref(getDisplayValue(model.value));
 
 const content = computed(() => query.value || getDisplayValue(model.value));
 const icon = computed(() => {
@@ -49,21 +34,22 @@ const icon = computed(() => {
   return option ? option.icon : null;
 });
 
-function handleFocus(event: FocusEvent, open: boolean) {
-  if (!event.target || open) return;
+// UI SDK puts the cursor where you click: select the label instead, so
+// typing a search replaces it
+function selectOnFocus(event: FocusEvent) {
+  const input = event.target as HTMLInputElement;
+  requestAnimationFrame(() => input.select());
+}
 
-  query.value = '';
-
-  requestAnimationFrame(() => {
-    (event.target as HTMLInputElement).select();
-  });
+function getLabel(option: SelectItem<T | null>) {
+  return option.name || String(option.id);
 }
 
 function getDisplayValue(value: T | null) {
   if (value === null) return '';
 
   const option = props.definition.options.find(option => option.id === value);
-  return option ? option.name || String(option.id) : '';
+  return option ? getLabel(option) : '';
 }
 </script>
 
@@ -78,20 +64,21 @@ function getDisplayValue(value: T | null) {
       'mb-[14px]': !inline
     }"
   >
-    <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
-      <Float
-        :adaptive-width="inline ? false : true"
-        strategy="fixed"
-        placement="bottom-start"
-        :offset="gap && inline ? gap : 0"
+    <div>
+      <Combobox
+        v-model:value="model"
+        v-model:query="query"
+        v-model:open="isOpen"
+        filter="contains"
+        auto-highlight="always"
+        :modal="false"
       >
         <div
           :class="{
             relative: inline
           }"
         >
-          <ComboboxButton
-            as="div"
+          <div
             :aria-label="definition.title"
             :data-value="content"
             :class="{
@@ -106,23 +93,23 @@ function getDisplayValue(value: T | null) {
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
-                '!rounded-b-none': !gap && open,
+                '!rounded-b-none': !gap && isOpen,
                 'h-[42px] min-w-11': inline,
                 '!pl-[42px]': icon
               }"
-              :size="'1'"
+              :size="1"
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
-              :display-value="item => getDisplayValue(item as T)"
-              @keydown.enter="() => (query = '')"
-              @change="event => (query = event.target.value)"
-              @focus="(event: FocusEvent) => handleFocus(event, open)"
+              @focus="selectOnFocus"
             />
-          </ComboboxButton>
-          <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">
-            <IH-chevron-up v-if="open" />
+          </div>
+          <ComboboxTrigger
+            v-if="!inline"
+            class="absolute right-3 bottom-[14px]"
+          >
+            <IH-chevron-up v-if="isOpen" />
             <IH-chevron-down v-else />
-          </ComboboxButton>
+          </ComboboxTrigger>
           <div
             v-if="inline"
             class="absolute top-[-7px] bg-skin-bg px-1 left-2.5 text-sm text-skin-text leading-4"
@@ -130,52 +117,47 @@ function getDisplayValue(value: T | null) {
             {{ definition.title }}
           </div>
         </div>
-        <ComboboxOptions
-          class="w-full bg-skin-border shadow-xl overflow-hidden"
+        <ComboboxContent
+          side="bottom"
+          align="start"
+          :side-offset="gap && inline ? gap : 0"
+          class="m-0 p-0 bg-skin-border shadow-xl overflow-hidden ![position-try-fallbacks:none]"
           :class="
             inline
-              ? 'max-w-[80vw] sm:max-w-[300px] rounded-lg'
-              : 'rounded-b-lg border border-t-skin-text/10'
+              ? 'max-w-[80vw] sm:max-w-[300px] rounded-lg border-0'
+              : 'w-[var(--anchor-width)] rounded-b-lg border border-t-skin-text/10'
           "
         >
-          <div class="max-h-[208px] overflow-y-auto py-1">
-            <div
-              v-if="filteredOptions.length === 0 && query !== ''"
-              class="relative cursor-default select-none text-center py-2 px-3"
+          <ComboboxList class="max-h-[208px] overflow-y-auto py-1">
+            <ComboboxEmpty
+              class="relative cursor-default select-none text-center data-[empty]:py-2 data-[empty]:px-3"
             >
               No results for your search
-            </div>
-
-            <ComboboxOption
-              v-for="item in filteredOptions"
-              v-slot="{ selected, disabled, active }"
-              :key="item.id ?? NULL_SYMBOL"
+            </ComboboxEmpty>
+            <ComboboxItem
+              v-for="item in definition.options"
+              v-slot="{ state }"
+              :key="String(item.id)"
               :value="item.id"
-              as="template"
+              :label="getLabel(item)"
+              class="flex items-center justify-between px-3 data-[highlighted]:bg-skin-link/[.08]"
             >
-              <li
-                class="flex items-center justify-between px-3"
+              <component :is="item.icon" class="size-[20px] mr-2" />
+              <span
+                class="w-full py-1.5 leading-6 text-skin-link truncate"
                 :class="{
-                  'bg-skin-link/[.08]': active
+                  'opacity-40': state.disabled,
+                  'cursor-pointer': !state.disabled
                 }"
               >
-                <component :is="item.icon" class="size-[20px] mr-2" />
-                <span
-                  class="w-full py-1.5 leading-6 text-skin-link truncate"
-                  :class="{
-                    'opacity-40': disabled,
-                    'cursor-pointer': !disabled
-                  }"
-                >
-                  {{ item.name || item.id }}
-                </span>
-                <IH-check v-if="selected" class="text-skin-success" />
-              </li>
-            </ComboboxOption>
-          </div>
-        </ComboboxOptions>
-      </Float>
-    </Combobox>
+                {{ getLabel(item) }}
+              </span>
+              <IH-check v-if="state.selected" class="text-skin-success" />
+            </ComboboxItem>
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </div>
   </UiWrapperInput>
 </template>
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { ref } from 'vue';
+import { h, ref } from 'vue';
 import Combobox from './Combobox.vue';
 
 const meta = { title: 'Ui/Combobox' } satisfies Meta;
@@ -32,4 +32,42 @@ export const Filled: Story = { args: { definition }, render: render(8453) };
 export const WithError: Story = {
   args: { definition, error: 'Pick a network', required: true },
   render: render(null)
+};
+
+export const Interactive: Story = {
+  args: { definition },
+  render: args => ({
+    components: { Combobox },
+    setup: () => ({ args, value: ref<number | null>(8453) }),
+    template: `
+      <div>
+        <Combobox v-model="value" v-bind="args" />
+        <p id="value">Value {{ value === null ? 'null' : value }}</p>
+      </div>
+    `
+  })
+};
+
+const dot = (color: string) =>
+  h('span', {
+    class: 'inline-block rounded-full',
+    style: { background: color }
+  });
+
+const definitionWithIcons = {
+  ...definition,
+  options: definition.options.map((option, i) => ({
+    ...option,
+    icon: dot(['#627eea', '#0052ff', '#28a0f0'][i] ?? '')
+  }))
+};
+
+export const WithIcons: Story = {
+  args: { definition: definitionWithIcons },
+  render: render(8453)
+};
+
+export const Inline: Story = {
+  args: { definition: definitionWithIcons, inline: true, gap: 12 },
+  render: render(1)
 };

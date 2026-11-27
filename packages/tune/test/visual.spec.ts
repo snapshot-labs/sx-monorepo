@@ -30,6 +30,13 @@ const STATES: Record<string, (page: Page) => Promise<boolean>> = {
     await target.hover({ timeout: 2000 });
     return true;
   },
+  // Comboboxes open from their input, which the click state doesn't reach
+  input: async page => {
+    const target = page.locator('#storybook-root input[role=combobox]').first();
+    if (!(await target.count())) return false;
+    await target.click({ timeout: 2000 });
+    return true;
+  },
   click: async page => {
     const target = page.locator('#storybook-root').locator(CLICKABLE).first();
     if (!(await target.count())) return false;

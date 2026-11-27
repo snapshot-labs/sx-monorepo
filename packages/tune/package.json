@@ -30,8 +30,6 @@
     "test:visual:update": "playwright test --update-snapshots"
   },
   "peerDependencies": {
-    "@headlessui-float/vue": "^0.15.0",
-    "@headlessui/vue": "^1.7.23",
     "@vueuse/core": "^10.4.1",
     "dayjs": "^1.11.10",
     "vue": ">=3.5.0"
@@ -41,8 +39,6 @@
     "@ui-sdk/vue": "0.1.0-beta.17"
   },
   "devDependencies": {
-    "@headlessui-float/vue": "^0.15.0",
-    "@headlessui/vue": "^1.7.23",
     "@iconify-json/heroicons-outline": "^1.2.1",
     "@iconify-json/heroicons-solid": "^1.2.0",
     "@playwright/test": "^1.56.1",

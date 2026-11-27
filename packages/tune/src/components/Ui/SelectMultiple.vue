@@ -1,11 +1,10 @@
 <script setup lang="ts" generic="T extends string | number">
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions
-} from '@headlessui/vue';
-import { Float } from '@headlessui-float/vue';
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger
+} from '@ui-sdk/vue/select';
 import type { DefinitionWithMultipleOptions } from '../../types';
 
 defineOptions({ inheritAttrs: false });
@@ -21,6 +20,7 @@ const props = defineProps<{
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
+const isOpen = ref(false);
 
 const inputValue = computed({
   get: () => model.value || [],
@@ -62,12 +62,17 @@ function isItemDisabled(item: T) {
     :required="required"
     class="relative"
   >
-    <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">
-      <Float adaptive-width strategy="fixed" placement="bottom-end">
-        <ListboxButton
+    <div>
+      <Select
+        v-model:value="inputValue"
+        v-model:open="isOpen"
+        multiple
+        :modal="false"
+      >
+        <SelectTrigger
           class="s-input !flex items-start justify-between"
           :class="{
-            '!rounded-b-none': open
+            '!rounded-b-none': isOpen
           }"
         >
           <span
@@ -79,44 +84,42 @@ function isItemDisabled(item: T) {
             {{ currentValue }}
           </span>
           <div class="shrink-0 relative top-1">
-            <IH-chevron-up v-if="open" />
+            <IH-chevron-up v-if="isOpen" />
             <IH-chevron-down v-else />
           </div>
-        </ListboxButton>
-        <ListboxOptions
-          class="w-full bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden"
+        </SelectTrigger>
+        <!-- Below the trigger and as wide as it, never flipping, like before -->
+        <SelectContent
+          side="bottom"
+          align="end"
+          :side-offset="0"
+          class="m-0 p-0 w-[var(--anchor-width)] bg-skin-border rounded-b-lg border-t-skin-text/10 border shadow-xl overflow-hidden ![position-try-fallbacks:none]"
         >
           <div class="max-h-[208px] overflow-y-auto py-1">
-            <ListboxOption
+            <SelectItem
               v-for="item in definition.options"
-              v-slot="{ active, selected, disabled }"
+              v-slot="{ state }"
               :key="item.id"
               :value="item.id"
+              :label="String(item.name || item.id)"
               :disabled="isItemDisabled(item.id)"
-              as="template"
+              class="flex items-center justify-between px-3 data-[highlighted]:bg-skin-link/[.08]"
             >
-              <li
-                class="flex items-center justify-between px-3"
+              <component :is="item.icon" class="size-[20px] mr-2" />
+              <span
+                class="w-full py-1.5 leading-6 text-skin-link"
                 :class="{
-                  'bg-skin-link/[.08]': active
+                  'opacity-40': state.disabled,
+                  'cursor-pointer': !state.disabled
                 }"
               >
-                <component :is="item.icon" class="size-[20px] mr-2" />
-                <span
-                  class="w-full py-1.5 leading-6 text-skin-link"
-                  :class="{
-                    'opacity-40': disabled,
-                    'cursor-pointer': !disabled
-                  }"
-                >
-                  {{ item.name || item.id }}
-                </span>
-                <IH-check v-if="selected" class="text-skin-success" />
-              </li>
-            </ListboxOption>
+                {{ item.name || item.id }}
+              </span>
+              <IH-check v-if="state.selected" class="text-skin-success" />
+            </SelectItem>
           </div>
-        </ListboxOptions>
-      </Float>
-    </Listbox>
+        </SelectContent>
+      </Select>
+    </div>
   </UiWrapperInput>
 </template>

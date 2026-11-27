@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import {
-  Combobox,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-  Popover,
-  PopoverButton,
-  PopoverPanel
-} from '@headlessui/vue';
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@ui-sdk/vue/command';
 import { SpaceMetadataLabel } from '@/types';
 
-const props = defineProps<{
+defineProps<{
   labels: SpaceMetadataLabel[];
   buttonProps?: Record<string, any>;
   panelProps?: Record<string, any>;
@@ -24,30 +21,45 @@ const selectedLabels = defineModel<string[]>({
   required: true
 });
 
-const searchValue = ref('');
+const isOpen = ref(false);
+const buttonEl = ref<HTMLElement | null>(null);
+const panelEl = ref<HTMLElement | null>(null);
 
-const filteredLabels = computed(() =>
-  props.labels.filter(label => {
-    const search = searchValue.value.toLowerCase();
-    return (
-      label.name.toLowerCase().includes(search) ||
-      label.description.toLowerCase().includes(search)
-    );
-  })
-);
+function close() {
+  isOpen.value = false;
+}
+
+function toggleLabel(id: string) {
+  selectedLabels.value = selectedLabels.value.includes(id)
+    ? selectedLabels.value.filter(label => label !== id)
+    : [...selectedLabels.value, id];
+}
+
+onClickOutside(panelEl, close, { ignore: [buttonEl] });
+
+// The search field takes focus when the panel opens
+watch(isOpen, async value => {
+  if (!value) return;
+  await nextTick();
+  panelEl.value?.querySelector('input')?.focus();
+});
 </script>
 
 <template>
-  <Popover v-slot="{ open, close }" class="relative contents">
-    <PopoverButton
+  <div class="relative contents">
+    <button
+      ref="buttonEl"
+      type="button"
       class="w-full"
-      :class="open ? 'text-skin-link' : 'text-skin-text'"
+      :class="isOpen ? 'text-skin-link' : 'text-skin-text'"
+      :aria-expanded="isOpen"
       v-bind="buttonProps"
+      @click="isOpen = !isOpen"
     >
       <slot name="button" :close="close">
         <IH-pencil />
       </slot>
-    </PopoverButton>
+    </button>
     <transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="translate-y-1 opacity-0"
@@ -56,39 +68,39 @@ const filteredLabels = computed(() =>
       leave-from-class="translate-y-0 opacity-100"
       leave-to-class="translate-y-1 opacity-0"
     >
-      <PopoverPanel
-        focus
+      <div
+        v-if="isOpen"
+        ref="panelEl"
         class="absolute z-30 left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
       >
-        <Combobox
-          v-slot="{ activeOption }"
-          v-model="selectedLabels"
-          multiple
-          nullable
+        <Command
+          filter="contains"
+          :auto-highlight="false"
+          @action="toggleLabel"
         >
           <div class="bg-skin-bg rounded-xl overflow-hidden shadow-bottom">
             <div
               class="flex items-center px-3 py-[14px] bg-skin-border border-b border-skin-heading border-opacity-5"
             >
               <IH-search class="mr-2" />
-              <ComboboxInput
+              <!-- Escape doesn't clear the search, like before -->
+              <CommandInput
                 class="flex-auto bg-transparent text-skin-link"
-                as="input"
                 placeholder="Search"
-                :value="searchValue"
-                @change="searchValue = $event.target.value"
+                @keydown.escape.prevent
               />
             </div>
             <div class="max-h-[345px] overflow-auto no-scrollbar">
-              <ComboboxOptions static hold>
-                <ComboboxOption
-                  v-for="label in filteredLabels"
+              <CommandList>
+                <CommandItem
+                  v-for="label in labels"
                   :key="label.id"
                   :value="label.id"
-                  class="flex justify-between items-center bg-skin-border px-3 py-[11.5px] cursor-pointer w-full"
-                  :class="activeOption === label.id ? 'bg-opacity-70' : ''"
+                  :label="label.name"
+                  :keywords="[label.description]"
+                  class="flex justify-between items-center bg-skin-border px-3 py-[11.5px] cursor-pointer w-full data-[highlighted]:bg-opacity-70"
                 >
                   <div class="w-11/12">
                     <UiProposalLabel
@@ -104,14 +116,14 @@ const filteredLabels = computed(() =>
                   <div v-if="selectedLabels.includes(label.id)">
                     <IH-check class="text-skin-success" />
                   </div>
-                </ComboboxOption>
-              </ComboboxOptions>
+                </CommandItem>
+              </CommandList>
             </div>
           </div>
-        </Combobox>
-      </PopoverPanel>
+        </Command>
+      </div>
     </transition>
-  </Popover>
+  </div>
 </template>
 
 <style lang="scss" scoped>

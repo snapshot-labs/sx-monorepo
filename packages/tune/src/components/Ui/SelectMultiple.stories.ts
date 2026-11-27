@@ -38,3 +38,17 @@ export const WithError: Story = {
   args: { definition, error: 'This field is invalid', required: true },
   render: render(['eth', 'base'])
 };
+
+export const Interactive: Story = {
+  args: { definition },
+  render: args => ({
+    components: { SelectMultiple },
+    setup: () => ({ args, value: ref<string[]>(['eth']) }),
+    template: `
+      <div>
+        <SelectMultiple v-model="value" v-bind="args" />
+        <p id="value">Value {{ value.join(',') }}</p>
+      </div>
+    `
+  })
+};
