@@ -66,7 +66,12 @@ watch(
       />
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="!isValid" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="!isValid"
+        data-agent-confirm="Deletes this space for good, its id can't be used again"
+        @click="handleSubmit"
+      >
         Confirm
       </UiButton>
     </template>

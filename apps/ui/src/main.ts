@@ -4,6 +4,7 @@ import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import App from '@/App.vue';
 import AppLink from '@/components/AppLink.vue';
+import { registerAgentTools } from '@/helpers/agent';
 import { SIDEKICK_URL } from '@/helpers/constants';
 import router from '@/routes';
 import '@/style.scss';
@@ -56,5 +57,7 @@ app.use(pinia);
 app.use(VueQueryPlugin);
 
 app.mount('#app');
+
+registerAgentTools();
 
 export default app;
