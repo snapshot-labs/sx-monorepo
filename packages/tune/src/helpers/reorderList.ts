@@ -7,6 +7,8 @@ type ReorderListOptions = {
   handle?: string;
   /** How long a touch holds still before it drags, so a swipe still scrolls */
   touchDelay?: number;
+  /** Not reorderable, like a list whose handles are hidden */
+  disabled?: boolean;
   onValueChange?: (
     value: string[],
     details: ChangeDetails<ReorderReason>
@@ -23,15 +25,19 @@ export const reorderList = definePrimitive({
     value: 'list',
     handle: 'string',
     touchDelay: 'number',
+    disabled: 'boolean',
     onValueChange: 'callback'
   },
   controlled: ['value'],
   state: (options: ReorderListOptions) => ({
     value: options.value ?? [],
+    disabled: !!options.disabled,
     draft: null as ReorderDraft | null
   }),
-  sync: options =>
-    options.value === undefined ? {} : { value: options.value },
+  sync: options => ({
+    disabled: !!options.disabled,
+    ...(options.value === undefined ? {} : { value: options.value })
+  }),
   api: context => {
     const change = createChange(context);
     const reorder = createReorder(context, {
@@ -96,7 +102,8 @@ export const reorderList = definePrimitive({
       },
       // For agents, which can't drag: the bridge doesn't check the arguments
       move(key: string, index: number) {
-        const { value } = context.store.get();
+        const { value, disabled } = context.store.get();
+        if (disabled) throw new Error("This list can't be reordered.");
         if (!value.includes(key)) {
           throw new Error(`No item "${key}". Items: ${value.join(', ')}.`);
         }
@@ -127,5 +134,5 @@ export const reorderList = definePrimitive({
     })
   }),
   // No items as data: the snapshot lists the rendered ones, by their text
-  agent: { actions: ['move'], items: () => [] }
+  agent: { actions: ['move'], items: () => [], shown: state => !state.disabled }
 });

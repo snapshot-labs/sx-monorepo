@@ -611,6 +611,7 @@ watchEffect(() => {
             primary
             :loading="isSubmitButtonLoading"
             :disabled="!canSubmit"
+            :aria-label="proposal?.originalProposal ? 'Update' : 'Publish'"
             @click="handleProposeClick"
           >
             <span

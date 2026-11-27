@@ -278,7 +278,11 @@ function openDeleteModal(key: ApiKey) {
           <UiDropdown v-else>
             <template #button>
               <div class="flex items-center h-full">
-                <button type="button" class="text-skin-link">
+                <button
+                  type="button"
+                  class="text-skin-link"
+                  :aria-label="`Actions for ${key.name}`"
+                >
                   <IH-dots-horizontal />
                 </button>
               </div>

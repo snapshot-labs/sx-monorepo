@@ -237,7 +237,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
-                <button class="text-skin-link">
+                <button
+                  class="text-skin-link"
+                  :aria-label="`Actions for ${delegatee.name || shorten(delegatee.id)}`"
+                >
                   <IH-dots-horizontal />
                 </button>
               </template>
@@ -414,7 +417,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
-                  <button class="text-skin-link">
+                  <button
+                    class="text-skin-link"
+                    :aria-label="`Actions for ${delegate.name || shorten(delegate.user)}`"
+                  >
                     <IH-dots-horizontal />
                   </button>
                 </template>

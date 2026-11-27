@@ -60,3 +60,28 @@ it('lets an agent move an item by its text', async () => {
 
   wrapper.unmount();
 });
+
+it('keeps a list that people cannot reorder out of reach', async () => {
+  const wrapper = mount(ReorderList<string>, {
+    attachTo: document.body,
+    attrs: { 'aria-label': 'Fixed choices' },
+    props: {
+      modelValue: ['For', 'Against'],
+      itemKey: (choice: string) => choice,
+      disabled: true
+    },
+    slots: { item: ({ element }: { element: string }) => h('div', element) }
+  });
+  await nextTick();
+
+  expect(
+    agent.snapshot().filter(entry => entry.label === 'Fixed choices')
+  ).toEqual([]);
+  const result = await agent.act({
+    steps: [{ ref: 'Fixed choices', action: 'move', args: ['Against', 0] }]
+  });
+  expect(result.ok).toBe(false);
+  expect(wrapper.props('modelValue')).toEqual(['For', 'Against']);
+
+  wrapper.unmount();
+});

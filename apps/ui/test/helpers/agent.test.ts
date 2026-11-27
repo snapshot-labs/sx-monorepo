@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick } from 'vue';
 import { UiButton } from '@snapshot-labs/tune';
 import { registerAgentTools } from '@/helpers/agent';
@@ -18,6 +18,10 @@ vi.mock('@ui-sdk/vue/agent', async importOriginal => {
 });
 
 describe('registerAgentTools', () => {
+  afterEach(() => {
+    Reflect.deleteProperty(document, 'modelContext');
+  });
+
   it('does nothing in a browser without WebMCP', () => {
     registerAgentTools();
 

@@ -124,6 +124,7 @@ onMounted(() => {
       v-if="inputValues.length"
       :model-value="currentItems"
       :aria-label="definition.title || `${itemName}s`"
+      :disabled="!definition.sortable"
       animated
       handle=".handle"
       class="s-array-items"

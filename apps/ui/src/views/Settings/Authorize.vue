@@ -145,6 +145,7 @@ watch(isJustAuthorized, val => {
           v-if="isAlreadyAuthorized"
           class="w-full hover:border-skin-danger"
           :loading="isRevoking"
+          data-agent-confirm="Revokes this alias, so its app can no longer act for you"
           @click="revoke()"
         >
           <span class="text-skin-danger">Revoke alias</span>
@@ -157,6 +158,7 @@ watch(isJustAuthorized, val => {
             primary
             class="w-full"
             :loading="isAuthorizing"
+            :data-agent-confirm="`Lets ${checksumAddress} act for you on Snapshot`"
             @click="authorize()"
           >
             Authorize

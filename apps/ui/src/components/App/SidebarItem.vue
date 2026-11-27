@@ -11,6 +11,8 @@ const item = computed(() => resolveSpaceItem(props.space));
 
 <template>
   <AppLink :to="item.link" class="block">
+    <!-- The tooltip's text renders in <body>, so this names the link -->
+    <span class="sr-only" v-text="item.title" />
     <UiTooltip :title="item.title" placement="right">
       <SpaceAvatar
         show-active-proposals

@@ -308,7 +308,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="flex items-center ml-auto"
           >
             <template #button>
-              <button>
+              <button aria-label="Token options">
                 <IH-dots-horizontal class="size-[22px]" />
               </button>
             </template>

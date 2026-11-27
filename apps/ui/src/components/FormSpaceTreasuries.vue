@@ -122,7 +122,7 @@ function deleteTreasury(index: number) {
         <div class="flex gap-2">
           <UiTooltip title="Edit treasury">
             <UiButton
-              aria-label="Edit treasury"
+              :aria-label="`Edit ${treasury.name || shorten(treasury.address)}`"
               uniform
               @click="editTreasury(i)"
             >
@@ -131,7 +131,7 @@ function deleteTreasury(index: number) {
           </UiTooltip>
           <UiTooltip title="Delete treasury">
             <UiButton
-              aria-label="Delete treasury"
+              :aria-label="`Delete ${treasury.name || shorten(treasury.address)}`"
               uniform
               @click="deleteTreasury(i)"
             >

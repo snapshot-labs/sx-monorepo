@@ -16,6 +16,8 @@ const props = defineProps<{
   touchDelay?: number;
   /** Slide the other items aside while one moves, not when it lands */
   animated?: boolean;
+  /** Not reorderable, like a list whose handles are hidden */
+  disabled?: boolean;
 }>();
 
 defineSlots<{
@@ -49,6 +51,7 @@ function reorder(order: string[]) {
     :value="keys"
     :handle="handle"
     :touch-delay="touchDelay"
+    :disabled="disabled"
     @value-change="reorder"
   >
     <TransitionGroup

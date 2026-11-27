@@ -60,10 +60,18 @@ test('every component an agent sees has a name', async ({
   await expect(spacePage.spaceName).toBeVisible();
   await expect(spacePage.summaryProposalsList).toBeVisible();
 
-  const components: { ref: string; component: string; label?: string }[] =
-    await callTool(page, 'snapshot', {});
+  const components: {
+    ref: string;
+    component: string;
+    label?: string;
+    offPage?: boolean;
+  }[] = await callTool(page, 'snapshot', {});
   expect(components.length).toBeGreaterThan(5);
-  for (const { ref, component, label } of components) {
+  // Past 100 entries the last one is "more", which has no label
+  const shown = components.filter(
+    entry => !entry.offPage && entry.component !== 'more'
+  );
+  for (const { ref, component, label } of shown) {
     expect(label, `${component} ${ref} has no name`).toBeTruthy();
   }
 });
