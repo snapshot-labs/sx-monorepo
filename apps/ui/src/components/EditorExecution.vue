@@ -283,18 +283,23 @@ watch(
                 <template #right>
                   <div class="flex gap-3">
                     <UiTooltip :title="getEditDisabledReason(tx)">
-                      <button
-                        type="button"
+                      <UiButton
+                        aria-label="Edit transaction"
+                        plain
                         :disabled="!!getEditDisabledReason(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >
                         <IH-pencil />
-                      </button>
+                      </UiButton>
                     </UiTooltip>
-                    <button type="button" @click.stop="removeTx(i)">
+                    <UiButton
+                      aria-label="Remove transaction"
+                      plain
+                      @click.stop="removeTx(i)"
+                    >
                       <IH-trash />
-                    </button>
+                    </UiButton>
                   </div>
                 </template>
               </TransactionsListItem>
@@ -323,9 +328,9 @@ watch(
               v-else-if="simulationState === null"
               title="Simulate execution"
             >
-              <button type="button" class="flex" @click="handleSimulateClick">
+              <UiButton plain class="flex" @click="handleSimulateClick">
                 <IH-shield-check class="text-skin-link" />
-              </button>
+              </UiButton>
             </UiTooltip>
             <UiLoading v-else-if="simulationState === 'SIMULATING'" />
             <UiTooltip

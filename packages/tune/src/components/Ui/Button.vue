@@ -15,6 +15,8 @@ const props = withDefaults(
     uniform?: boolean;
     size?: number;
     to?: RouteLocationRaw;
+    /** No styles of its own, for a button the caller styles */
+    plain?: boolean;
   }>(),
   {
     type: 'button',
@@ -22,7 +24,8 @@ const props = withDefaults(
     loading: false,
     disabled: false,
     uniform: false,
-    size: 46
+    size: 46,
+    plain: false
   }
 );
 
@@ -44,6 +47,8 @@ const isCompact = computed(() => {
 });
 
 const classNames = computed(() => {
+  if (props.plain) return {};
+
   return {
     button: true,
     primary: props.primary,
@@ -53,6 +58,8 @@ const classNames = computed(() => {
 });
 
 const buttonStyles = computed(() => {
+  if (props.plain) return {};
+
   return {
     height: `${props.size}px`,
     minWidth: `${props.size}px`,

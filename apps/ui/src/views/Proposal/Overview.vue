@@ -601,12 +601,12 @@ onBeforeUnmount(() => destroyAudio());
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
         </AppLink>
         ·
-        <button
-          type="button"
+        <UiButton
+          plain
           class="text-skin-text"
           @click="modalOpenTimeline = true"
-          v-text="votingTime"
-        />
+          >{{ votingTime }}</UiButton
+        >
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
     </ContentFlagable>

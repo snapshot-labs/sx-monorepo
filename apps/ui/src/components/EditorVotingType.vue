@@ -45,8 +45,8 @@ watch(
 <template>
   <div class="s-base">
     <UiEyebrow class="mb-2.5">Voting system</UiEyebrow>
-    <button
-      type="button"
+    <UiButton
+      plain
       class="border rounded-xl py-2.5 px-3 flex text-left relative border-skin-content w-full"
       :class="{
         '!border-skin-border cursor-not-allowed': !hasMultipleVotingType
@@ -68,7 +68,7 @@ watch(
       >
         <IH-chevron-down />
       </div>
-    </button>
+    </UiButton>
   </div>
   <teleport to="#modal">
     <ModalSelectVotingType

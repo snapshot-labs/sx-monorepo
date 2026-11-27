@@ -10,6 +10,7 @@ export type * from './types';
 
 // Composables (auto-generated, do not edit manually)
 export * from './composables/useDirty';
+export * from './composables/useFieldText';
 export * from './composables/useModalOpen';
 export * from './composables/useTheme';
 
@@ -44,6 +45,7 @@ export { default as UiModal } from './components/Ui/Modal.vue';
 export { default as UiModalSearchInput } from './components/Ui/ModalSearchInput.vue';
 export { default as UiPill } from './components/Ui/Pill.vue';
 export { default as UiRawInputAmount } from './components/Ui/RawInputAmount.vue';
+export { default as UiRawInputString } from './components/Ui/RawInputString.vue';
 export { default as UiReorderList } from './components/Ui/ReorderList.vue';
 export { default as UiScrollerHorizontal } from './components/Ui/ScrollerHorizontal.vue';
 export { default as UiSectionHeader } from './components/Ui/SectionHeader.vue';

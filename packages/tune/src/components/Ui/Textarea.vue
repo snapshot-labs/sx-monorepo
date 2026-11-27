@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Textarea } from '@ui-sdk/vue/textarea';
+
 defineOptions({ inheritAttrs: false });
 
 const model = defineModel<string>();
@@ -11,53 +13,40 @@ const props = defineProps<{
 
 const { isDirty } = useDirty(model, props.definition);
 
-// Large values (e.g. 61k-line whitelist) cause browser layout thrashing when
-// Vue re-sets the textarea DOM value on every reactive update. For these cases
-// we debounce model sync so typing stays responsive while validation still
-// fires after 500ms.
+// Large values (e.g. 61k-line whitelist) make every model update costly, so
+// the model syncs 500ms after typing stops while the field keeps up
 const LARGE_VALUE_THRESHOLD = 100_000;
-const textareaRef = ref<HTMLTextAreaElement>();
 
-function setTextarea(el: unknown) {
-  textareaRef.value = (el ?? undefined) as HTMLTextAreaElement | undefined;
-}
+const text = useFieldText(model, value => value);
 
-const updateModelDebounced = useDebounceFn((el: HTMLTextAreaElement) => {
-  model.value = el.value;
+const updateModelDebounced = useDebounceFn(() => {
+  model.value = text.value;
 }, 500);
 
-function onInput(event: Event) {
-  const el = event.target as HTMLTextAreaElement;
-
-  if (el.value.length > LARGE_VALUE_THRESHOLD) {
-    updateModelDebounced(el);
+function update(value: string) {
+  text.value = value;
+  if (value.length > LARGE_VALUE_THRESHOLD) {
+    updateModelDebounced();
   } else {
-    model.value = el.value;
+    model.value = value;
   }
 }
-
-watch([textareaRef, model], ([el, val]) => {
-  if (el && el.value !== (val ?? '')) {
-    el.value = val ?? '';
-  }
-});
 </script>
 
 <template>
   <UiWrapperInput
-    v-slot="{ control }"
     :definition="definition"
     :error="error"
     :dirty="isDirty"
     :required="required"
     :input-value-length="model?.length"
-    :control-ref="setTextarea"
   >
-    <textarea
+    <Textarea
+      :value="text"
       class="s-input"
-      v-bind="{ ...control, ...$attrs }"
+      v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
-      @input="onInput"
+      @value-change="update"
     />
   </UiWrapperInput>
 </template>

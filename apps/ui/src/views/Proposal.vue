@@ -304,8 +304,8 @@ watchEffect(() => {
                   </div>
                   <div v-else class="flex gap-1.5 items-center">
                     <span class="shrink-0">Voting power:</span>
-                    <button
-                      type="button"
+                    <UiButton
+                      plain
                       class="truncate"
                       :disabled="isVotingPowerPending"
                       :class="{
@@ -323,7 +323,7 @@ watchEffect(() => {
                         class="text-skin-link"
                         v-text="getFormattedVotingPower(votingPower)"
                       />
-                    </button>
+                    </UiButton>
                     <AppLink
                       v-if="
                         votingPower?.votingPowers?.every(v => v.value === 0n)

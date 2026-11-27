@@ -877,14 +877,16 @@ watchEffect(() => {
                 v-if="proposal.type === 'basic'"
                 #input-suffix="{ index, deleteItem }"
               >
-                <button
+                <UiButton
                   v-if="index > 1 && isOffchainSpace"
+                  plain
                   class="text-skin-text"
                   title="Delete choice"
+                  :aria-label="`Delete choice ${index + 1}`"
                   @click="deleteItem(index)"
                 >
                   <IH-trash />
-                </button>
+                </UiButton>
                 <div v-else />
               </template>
               <template

@@ -149,15 +149,20 @@ onMounted(() => {
               class="handle cursor-grab touch-none"
             />
             <slot name="input-prefix" :index="index" />
-            <input
-              :ref="el => (itemsRef[index] = el)"
-              v-model.trim="inputValues[index].value"
-              type="text"
-              :readonly="readonly"
+            <UiRawInputString
+              :ref="
+                el => (itemsRef[index] = (el as { $el?: HTMLElement })?.$el)
+              "
+              :model-value="inputValues[index].value as string"
+              :aria-label="`${itemName} ${index + 1}`"
+              :read-only="readonly"
               :placeholder="
                 definition.items?.examples?.[index] ||
                 definition.items?.examples?.[0] ||
                 ''
+              "
+              @update:model-value="
+                value => (inputValues[index].value = value as T)
               "
               @keydown.enter="handlePressEnter(index)"
               @keydown.delete="handlePressDelete(index)"
@@ -168,13 +173,15 @@ onMounted(() => {
               :item-name="definition.items.title"
               :delete-item="deleteItem"
             >
-              <button
+              <UiButton
+                plain
                 class="text-skin-text"
                 :title="`Delete ${itemName.toLowerCase()}`"
+                :aria-label="`Delete ${itemName.toLowerCase()} ${index + 1}`"
                 @click="deleteItem(index)"
               >
                 <IH-trash />
-              </button>
+              </UiButton>
             </slot>
           </div>
           <div
@@ -200,13 +207,15 @@ onMounted(() => {
               :item-name="definition.items.title"
               :delete-item="deleteItem"
             >
-              <button
+              <UiButton
+                plain
                 class="shrink-0 text-skin-text"
                 :title="`Delete ${itemName.toLowerCase()}`"
+                :aria-label="`Delete ${itemName.toLowerCase()} ${index + 1}`"
                 @click="deleteItem(index)"
               >
                 <IH-trash />
-              </button>
+              </UiButton>
             </slot>
           </div>
           <UiForm

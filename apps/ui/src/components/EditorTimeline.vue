@@ -103,12 +103,14 @@ function formatVotingDuration(
         >
           <IH-exclamation-circle />
         </UiTooltip>
-        <button
+        <UiButton
           v-else-if="isOffchainSpace"
+          plain
           class="text-skin-link"
+          aria-label="Edit start"
           @click="handleEditClick('start')"
-          v-text="'Edit'"
-        />
+          >Edit</UiButton
+        >
       </template>
       <template v-if="editable" #end-date-suffix>
         <UiTooltip
@@ -117,12 +119,14 @@ function formatVotingDuration(
         >
           <IH-exclamation-circle />
         </UiTooltip>
-        <button
+        <UiButton
           v-else-if="isOffchainSpace"
+          plain
           class="text-skin-link"
+          aria-label="Edit end"
           @click="handleEditClick('min_end')"
-          v-text="'Edit'"
-        />
+          >Edit</UiButton
+        >
       </template>
       <template v-if="editable && space.min_voting_period" #min_end-date-suffix>
         <UiTooltip

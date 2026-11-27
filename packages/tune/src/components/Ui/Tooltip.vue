@@ -5,7 +5,10 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@ui-sdk/vue/tooltip';
-import { mergeProps } from 'vue';
+import { Comment, mergeProps } from 'vue';
+import type { VNode } from 'vue';
+import SlotRoot from '../../helpers/SlotRoot';
+import Button from './Button.vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -25,7 +28,14 @@ const container = document.body;
 const el = shallowRef<HTMLElement | null>(null);
 defineExpose({ el });
 
-// The trigger is a <div>: no button `type` (Tailwind's base styles give
+// On a single button, the button itself triggers it: agents then see one
+// control, and a screen reader hears the title as the icon button's name
+function isSoleButton(nodes: VNode[] = []) {
+  const [node, ...others] = nodes.filter(node => node.type !== Comment);
+  return !others.length && (node?.type === Button || node?.type === 'button');
+}
+
+// Else the trigger is a <div>: no button `type` (Tailwind's base styles give
 // [type='button'] a native appearance), and a ref that also records the element
 function triggerOverrides(partRef: unknown) {
   return {
@@ -43,6 +53,14 @@ function triggerOverrides(partRef: unknown) {
     <TooltipTrigger>
       <template #render="{ props }">
         <div
+          v-if="isSoleButton($slots.default?.())"
+          v-bind="$attrs"
+          class="inline-block relative"
+        >
+          <SlotRoot v-bind="props"><slot /></SlotRoot>
+        </div>
+        <div
+          v-else
           v-bind="mergeProps($attrs, props, triggerOverrides(props.ref))"
           :aria-label="title || undefined"
           class="inline-block relative"

@@ -52,6 +52,29 @@ test('a browser agent reads and uses the page', async ({
   await expect(page).toHaveURL(/n=8453/);
 });
 
+test('a browser agent fills a proposal draft', async ({ page }) => {
+  await page.goto(
+    '/#/s:arbitrumfoundation.eth/create?as=0x000000000000000000000000000000000000dEaD'
+  );
+  const title = page.getByRole('textbox', { name: 'Title' });
+  await expect(title).toBeVisible();
+
+  await expect
+    .poll(() =>
+      callTool(page, 'act', {
+        steps: [
+          { ref: 'Title', action: 'setValue', args: ['Fund the docs'] },
+          { ref: 'Body', action: 'setValue', args: ['Two months of work.'] }
+        ]
+      })
+    )
+    .toMatchObject({ ok: true });
+  await expect(title).toHaveValue('Fund the docs');
+  await expect(page.getByRole('textbox', { name: 'Body' })).toHaveValue(
+    'Two months of work.'
+  );
+});
+
 test('every component an agent sees has a name', async ({
   page,
   spacePage

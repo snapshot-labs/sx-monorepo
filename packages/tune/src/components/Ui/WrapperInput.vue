@@ -16,8 +16,6 @@ const props = withDefaults(
     error?: string;
     dirty?: boolean;
     required?: boolean;
-    /** A ref of the control's own, kept next to the field's */
-    controlRef?: (el: unknown) => void;
   }>(),
   { inputValueLength: 0 }
 );
@@ -29,7 +27,7 @@ const FieldControlProps = defineComponent((_, { slots }) => {
   const field = useFieldControl();
   return () =>
     slots.default?.({
-      control: field?.props({ ref: props.controlRef }) ?? {}
+      control: field?.props({}) ?? {}
     });
 });
 </script>

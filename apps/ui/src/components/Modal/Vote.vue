@@ -234,15 +234,15 @@ watchEffect(async () => {
 <template>
   <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
-      <button
+      <UiButton
         v-if="pickedChoice"
-        type="button"
+        plain
         aria-label="Back"
         class="absolute left-0 -top-1 p-4"
         @click="pickedChoice = null"
       >
         <IH-arrow-narrow-left class="mr-2" />
-      </button>
+      </UiButton>
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
@@ -312,8 +312,8 @@ watchEffect(async () => {
           />
         </div>
         <div v-if="canVoteViaTx">
-          <button
-            type="button"
+          <UiButton
+            plain
             class="flex items-center gap-1 text-skin-text text-sm"
             @click="isAdvancedOpen = !isAdvancedOpen"
           >
@@ -322,7 +322,7 @@ watchEffect(async () => {
               class="w-[14px] h-[14px] transition-transform"
               :class="{ 'rotate-180': isAdvancedOpen }"
             />
-          </button>
+          </UiButton>
           <div
             class="grid transition-all duration-200"
             :class="isAdvancedOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"

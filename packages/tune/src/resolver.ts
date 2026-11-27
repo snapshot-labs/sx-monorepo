@@ -31,6 +31,7 @@ const components = [
   'ModalSearchInput',
   'Pill',
   'RawInputAmount',
+  'RawInputString',
   'ReorderList',
   'ScrollerHorizontal',
   'SectionHeader',

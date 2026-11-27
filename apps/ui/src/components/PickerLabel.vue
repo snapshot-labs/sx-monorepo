@@ -23,6 +23,8 @@ const selectedLabels = defineModel<string[]>({
 
 const isOpen = ref(false);
 const buttonEl = ref<HTMLElement | null>(null);
+const setButton = (button: unknown) =>
+  (buttonEl.value = (button as { $el?: HTMLElement })?.$el ?? null);
 const panelEl = ref<HTMLElement | null>(null);
 
 function close() {
@@ -66,9 +68,9 @@ watch(isOpen, async value => {
 
 <template>
   <div class="relative contents">
-    <button
-      ref="buttonEl"
-      type="button"
+    <UiButton
+      :ref="setButton"
+      plain
       class="w-full"
       :class="isOpen ? 'text-skin-link' : 'text-skin-text'"
       :aria-expanded="isOpen"
@@ -79,7 +81,7 @@ watch(isOpen, async value => {
       <slot name="button" :close="close">
         <IH-pencil />
       </slot>
-    </button>
+    </UiButton>
     <transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="translate-y-1 opacity-0"
