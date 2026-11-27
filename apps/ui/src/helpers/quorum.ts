@@ -48,6 +48,9 @@ export function quorumLabel(quorumType: Proposal['quorum_type']): string {
 }
 
 export function formatQuorum(value: number) {
+  // Tiny quorums make the percentage absurd (e.g. 71.6b%)
+  if (value >= 10) return '>100%';
+
   const formatter = new Intl.NumberFormat('en', {
     notation: 'compact',
     maximumSignificantDigits: 3,
