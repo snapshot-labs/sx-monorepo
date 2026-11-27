@@ -123,7 +123,6 @@ onMounted(() => {
     <UiReorderList
       v-if="inputValues.length"
       :model-value="currentItems"
-      @update:model-value="items = $event"
       animated
       handle=".handle"
       class="s-array-items"
@@ -132,6 +131,7 @@ onMounted(() => {
         'space-y-2': itemType === 'string',
         'space-y-2.5': itemType === 'object'
       }"
+      @update:model-value="items = $event"
     >
       <template #item="{ index }">
         <div
