@@ -1,4 +1,4 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
+import { defaultAbiCoder, Interface } from '@ethersproject/abi';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { toUtf8String } from '@ethersproject/strings';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -20,9 +20,22 @@ const params = encodeOracleParams(ORACLE, {
 });
 const [, oracleParams] = defaultAbiCoder.decode(['address', 'bytes'], params);
 const SAFE_HEAD = 12_000_050;
+const strategyInterface = new Interface([
+  'function getVotingPower(uint32 blockNumber, address voter, bytes params, bytes userParams) view returns (uint256)'
+]);
+// The strategy contract: counts the signed voting power it is given
 const provider = {
+  _isProvider: true,
   getNetwork: async () => ({ chainId: 11155111 }),
-  getBlock: vi.fn(async () => ({ number: SAFE_HEAD }))
+  getBlock: vi.fn(async () => ({ number: SAFE_HEAD })),
+  call: vi.fn(async ({ data }: { data: string }) => {
+    const [, , , userParams] = strategyInterface.decodeFunctionData(
+      'getVotingPower',
+      data
+    );
+    const [vp] = defaultAbiCoder.decode(['uint256', 'bytes'], userParams);
+    return strategyInterface.encodeFunctionResult('getVotingPower', [vp]);
+  })
 } as any;
 const clientConfig = {
   networkConfig: { eip712ChainId: 11155111 } as any,
@@ -55,6 +68,7 @@ describe('oracle', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     provider.getBlock.mockClear();
+    provider.call.mockClear();
   });
 
   it('should return type', () => {
@@ -355,6 +369,40 @@ describe('oracle', () => {
       strategy: STRATEGY
     });
     expect(provider.getBlock).not.toHaveBeenCalled();
+    // Counted by the strategy, with the oracle signature
+    const [{ to, data }] = provider.call.mock.calls[0];
+    expect(to).toBe(STRATEGY);
+    expect(
+      strategyInterface.decodeFunctionData('getVotingPower', data).map(String)
+    ).toEqual([
+      '12000000',
+      VOTER,
+      params,
+      defaultAbiCoder.encode(
+        ['uint256', 'bytes'],
+        ['1514415861332052753', '0x1234']
+      )
+    ]);
+  });
+
+  it('should not show voting power the strategy refuses to count', async () => {
+    mockOracle({ result: { vp: '1', signature: '0x1234' } });
+    provider.call.mockRejectedValueOnce(
+      Object.assign(new Error('call revert exception'), {
+        code: 'CALL_EXCEPTION'
+      })
+    );
+
+    await expect(
+      oracleStrategy.getVotingPower(
+        STRATEGY,
+        VOTER,
+        null,
+        12_000_000,
+        params,
+        provider
+      )
+    ).rejects.toThrow('call revert exception');
   });
 
   it('should read the current voting power at the safe head', async () => {

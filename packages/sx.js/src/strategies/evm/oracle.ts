@@ -18,6 +18,9 @@ export const DEFAULT_ORACLE_URL = 'https://score.snapshot.org';
 
 const NOT_FINAL_ERROR = 'voting power is not final yet';
 const ORACLE_TIMEOUT = 30_000;
+const ORACLE_STRATEGY_ABI = [
+  'function getVotingPower(uint32 blockNumber, address voter, bytes params, bytes userParams) view returns (uint256)'
+];
 
 export type OracleStrategy = {
   id: string;
@@ -183,8 +186,9 @@ export default function createOracleStrategy(): Strategy {
         );
       }
     },
-    // The same signed value the vote would carry, so shown and counted voting power are equal. Without a
-    // block, the latest one the oracle signs: the safe head
+    // The signed value the vote would carry, as the strategy counts it, so shown and counted voting power are
+    // equal, and an oracle whose signatures the strategy refuses shows an error. Without a block, the latest
+    // one the oracle signs: the safe head
     async getVotingPower(
       strategyAddress: string,
       voterAddress: string,
@@ -197,7 +201,7 @@ export default function createOracleStrategy(): Strategy {
         provider.getNetwork(),
         block ?? provider.getBlock('safe').then(({ number }) => number)
       ]);
-      const { vp } = await getSignedVotingPower(metadata, {
+      const { vp, signature } = await getSignedVotingPower(metadata, {
         address: voterAddress,
         network: String(chainId),
         snapshot,
@@ -205,7 +209,18 @@ export default function createOracleStrategy(): Strategy {
         strategy: strategyAddress
       });
 
-      return BigInt(vp);
+      const votingPower = await new Contract(
+        strategyAddress,
+        ORACLE_STRATEGY_ABI,
+        provider
+      ).getVotingPower(
+        snapshot,
+        voterAddress,
+        params,
+        defaultAbiCoder.encode(['uint256', 'bytes'], [vp, signature])
+      );
+
+      return BigInt(votingPower.toString());
     }
   };
 }
