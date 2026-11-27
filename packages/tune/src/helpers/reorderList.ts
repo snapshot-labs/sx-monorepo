@@ -97,8 +97,11 @@ export const reorderList = definePrimitive({
     };
   },
   slots: slot => ({
-    root: slot<object, { order: string[] }>({
-      state: (state, { api }) => ({ order: api.reorder.order(state) })
+    root: slot<object, { order: string[]; moving: boolean }>({
+      state: (state, { api }) => ({
+        order: api.reorder.order(state),
+        moving: !!state.draft
+      })
     }),
     item: slot<{ value: string }>({
       props: { value: 'string' },

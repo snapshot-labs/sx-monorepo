@@ -14,7 +14,7 @@ const props = defineProps<{
   handle?: string;
   /** How long a touch holds still before it drags, so a swipe still scrolls */
   touchDelay?: number;
-  /** Slide the other items aside while one moves */
+  /** Slide the other items aside while one moves, not when it lands */
   animated?: boolean;
 }>();
 
@@ -52,7 +52,9 @@ function reorder(order: string[]) {
     @value-change="reorder"
   >
     <TransitionGroup
-      :move-class="animated ? 'transition-transform duration-200' : ''"
+      :move-class="
+        animated && state.moving ? 'transition-transform duration-200' : ''
+      "
     >
       <!-- Each item is the slot's own root, with no wrapper -->
       <Item v-for="key in state.order" :key="key" :value="key">

@@ -8,13 +8,14 @@ const meta = { title: 'Ui/ReorderList' } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 
+// Keyed by index, like the inputs of a form
 export const Default: Story = {
   render: () => ({
     components: { ReorderList: ReorderList as Component },
     setup: () => ({ items: ref(['Ethereum', 'Base', 'Arbitrum']) }),
     template: `
       <div class="max-w-[300px]">
-        <ReorderList v-model="items" :item-key="item => item" handle=".handle" animated class="space-y-2">
+        <ReorderList v-model="items" :item-key="(_, index) => index" handle=".handle" animated class="space-y-2">
           <template #item="{ element, index }">
             <div class="flex items-center gap-2 border rounded-lg px-3 py-2">
               <button type="button" class="handle cursor-grab touch-none" :aria-label="'Move ' + element">⋮⋮</button>

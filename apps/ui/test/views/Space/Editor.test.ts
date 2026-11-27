@@ -125,8 +125,7 @@ async function mountEditor(network = 'eth') {
     props: { space: { ...space, network } as Space },
     global: {
       renderStubDefaultSlot: true,
-      stubs: { EditorExecution: false, teleport: true },
-      directives: { tippy: () => {} }
+      stubs: { EditorExecution: false, teleport: true }
     }
   });
   wrappers.push(wrapper);

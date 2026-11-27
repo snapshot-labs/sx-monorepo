@@ -70,3 +70,21 @@ test('items keyed by objects move too', async ({ page }) => {
   await page.keyboard.press('Space');
   await expect(page.locator('#value')).toHaveText('Value Carol,Alice,Bob');
 });
+
+const transforms = (page: Page) =>
+  page
+    .locator('[data-slot=reorder-list-item]')
+    .evaluateAll(items => items.map(item => getComputedStyle(item).transform));
+
+test('items slide while one moves, not once it lands', async ({ page }) => {
+  await page.locator('[aria-label="Move Ethereum"]').focus();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('ArrowDown');
+  expect((await transforms(page)).some(t => t !== 'none')).toBe(true);
+  await page.waitForTimeout(300);
+  await page.keyboard.press('Space');
+  await expect(page.locator('#value')).toHaveText(
+    'Value Base,Ethereum,Arbitrum'
+  );
+  expect(await transforms(page)).toEqual(['none', 'none', 'none']);
+});
