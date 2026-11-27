@@ -48,9 +48,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       authInitiated.value && !isWhiteLabel.value && !!web3.value.account
   });
 
-  const { data: followedSpacesData } = useFollowedSpacesQuery({
-    followedSpacesIds
-  });
+  const { data: followedSpacesData, isPlaceholderData } =
+    useFollowedSpacesQuery({
+      followedSpacesIds
+    });
 
   const maxFollowLimit = computed(() => {
     return limits.value['user.default.follow_limit'];
@@ -154,14 +155,18 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     }
   );
 
-  watch(followedSpacesData, data => {
-    if (data) hasSpaceDataLoaded.value = true;
-  });
-
+  // The spaces of an account can be the same cached data as the previous
+  // account's (e.g. both follow none), so check the state, not data changes.
   watch(
-    () => web3.value.account,
-    () => {
-      hasSpaceDataLoaded.value = false;
+    [
+      () => web3.value.account,
+      followedSpacesIds,
+      followedSpacesData,
+      isPlaceholderData
+    ],
+    ([account, ids, data, isPlaceholder], [previousAccount]) => {
+      if (account !== previousAccount) hasSpaceDataLoaded.value = false;
+      if (ids && data && !isPlaceholder) hasSpaceDataLoaded.value = true;
     }
   );
 
