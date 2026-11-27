@@ -29,13 +29,32 @@ function close() {
   isOpen.value = false;
 }
 
+function toggle() {
+  isOpen.value = !isOpen.value;
+  buttonEl.value?.focus();
+}
+
+// Focus leaving the panel closes it, like before
+function closeOnFocusOut(event: FocusEvent) {
+  const target = event.relatedTarget as Node | null;
+  if (target && !panelEl.value?.contains(target)) close();
+}
+
 function toggleLabel(id: string) {
   selectedLabels.value = selectedLabels.value.includes(id)
     ? selectedLabels.value.filter(label => label !== id)
     : [...selectedLabels.value, id];
 }
 
-onClickOutside(panelEl, close, { ignore: [buttonEl] });
+// A click on nothing focusable gives focus back to the button, like before
+onClickOutside(
+  panelEl,
+  () => {
+    close();
+    if (document.activeElement === document.body) buttonEl.value?.focus();
+  },
+  { ignore: [buttonEl] }
+);
 
 // The search field takes focus when the panel opens
 watch(isOpen, async value => {
@@ -54,7 +73,8 @@ watch(isOpen, async value => {
       :class="isOpen ? 'text-skin-link' : 'text-skin-text'"
       :aria-expanded="isOpen"
       v-bind="buttonProps"
-      @click="isOpen = !isOpen"
+      @mousedown.prevent
+      @click="toggle"
     >
       <slot name="button" :close="close">
         <IH-pencil />
@@ -74,6 +94,7 @@ watch(isOpen, async value => {
         class="absolute z-30 left-0 -mt-2 mx-4 pb-3"
         style="width: calc(100% - 48px)"
         v-bind="panelProps"
+        @focusout="closeOnFocusOut"
       >
         <Command
           filter="contains"
