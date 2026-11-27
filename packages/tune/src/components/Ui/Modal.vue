@@ -5,7 +5,7 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     open: boolean;
     closeable?: boolean;
@@ -25,17 +25,6 @@ const WALLET_MODALS = [
   '#argent-mobile-modal-overlay',
   '#argent-webwallet-modal'
 ];
-
-const { open } = toRefs(props);
-const modalOpen = useModalOpen();
-
-onBeforeUnmount(() => {
-  modalOpen.value = false;
-});
-
-watch(open, val => {
-  modalOpen.value = val;
-});
 </script>
 
 <template>

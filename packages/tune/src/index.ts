@@ -10,7 +10,6 @@ export type * from './types';
 
 // Composables (auto-generated, do not edit manually)
 export * from './composables/useDirty';
-export * from './composables/useModalOpen';
 export * from './composables/useTheme';
 
 // Components (auto-generated, do not edit manually)

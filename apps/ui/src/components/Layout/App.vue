@@ -17,12 +17,8 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useAppRouter();
 const uiStore = useUiStore();
-const {
-  modalOpen,
-  modalAccountOpen,
-  modalAccountWithoutDismissOpen,
-  resetAccountModal
-} = useModal();
+const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
+  useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
@@ -56,7 +52,8 @@ const {
 
 provide('web3', web3);
 
-const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
+// Modals lock scrolling themselves (UI SDK Dialog)
+const scrollDisabled = computed(() => uiStore.sideMenuOpen);
 
 const { hasAppNav } = useNav();
 
@@ -138,8 +135,7 @@ watch(isSwiping, () => {
     window.innerWidth > LG_WIDTH ||
     !hasSwipeableContent.value ||
     !sidebarSwipeEnabled.value ||
-    !isSwiping.value ||
-    modalOpen.value
+    !isSwiping.value
   ) {
     return;
   }
