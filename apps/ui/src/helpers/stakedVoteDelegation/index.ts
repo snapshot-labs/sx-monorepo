@@ -1,10 +1,7 @@
 import { Account, Call, CallData, hash, num } from 'starknet';
 import { getRpcUrl } from '@/helpers/provider';
 import { shortenAddress } from '@/helpers/utils';
-import {
-  getStarknetWalletChainId,
-  verifyStarknetNetwork
-} from '@/helpers/walletNetworks';
+import { verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import { createProvider } from '@/networks/starknet/provider';
 import {
   getStakedDelegationConfig,
@@ -19,11 +16,7 @@ export type { ValidatorProfile } from './validatorProfiles';
 
 /** Why an address ends up voting with a given stake. */
 export type ResolutionReason =
-  | 'explicit'
-  | 'validator'
-  | 'vote-receiver'
-  | 'declined'
-  | 'self-stake';
+  'explicit' | 'validator' | 'vote-receiver' | 'declined' | 'self-stake';
 
 export type ValidatorConfig = {
   voteReceiver: string;
@@ -474,6 +467,18 @@ export const registryCalls = {
       networkId
     )
 };
+
+/** The Starknet wallet's active chain id, or null if it cannot tell. */
+async function getStarknetWalletChainId(web3: any): Promise<string | null> {
+  try {
+    const current = await web3?.provider?.request?.({
+      type: 'wallet_requestChainId'
+    });
+    return typeof current === 'string' && current ? current : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Sends `call` from the connected Starknet wallet. `web3` is the provider

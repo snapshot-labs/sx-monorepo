@@ -1,7 +1,5 @@
 import { ConnectorDetail, useLock } from '@snapshot-labs/lock/vue';
-import { constants } from 'starknet';
 import { APP_NAME } from '@/helpers/constants';
-import { getRpcUrl } from '@/helpers/provider';
 import { getAddresses } from '@/helpers/stamp';
 import { ConnectorType } from '@/networks/types';
 import IHUser from '~icons/heroicons-outline/user';
@@ -47,12 +45,7 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     },
     options: {
       dappName: APP_NAME,
-      getTheme: () => useTheme().currentTheme.value,
-      // Used by Bramble, which needs an RPC for its starknet.js account.
-      getRpcUrl: (chainId: string) =>
-        getRpcUrl(
-          chainId === constants.StarknetChainId.SN_MAIN ? 'sn' : 'sn-sep'
-        )
+      getTheme: () => useTheme().currentTheme.value
     }
   },
   sequence: {

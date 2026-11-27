@@ -1,14 +1,9 @@
-import { createBrambleConnector } from './bramble';
 import Connector from './connector';
 
 export default class Argentx extends Connector {
   async connect() {
-    const { getTheme, getRpcUrl, ...options } = this.options;
+    const { getTheme, ...options } = this.options;
     const modalTheme = getTheme?.() ?? 'light';
-
-    const isSilentReconnect = !!localStorage.getItem(
-      'starknetLastConnectedWallet'
-    );
 
     try {
       const injected = (window as any).starknet_argentX;
@@ -23,25 +18,25 @@ export default class Argentx extends Connector {
         starknetkit,
         { InjectedConnector },
         { WebWalletConnector },
-        bramble
+        { default: BrambleConnector }
       ] = await Promise.all([
         import('starknetkit'),
         import('starknetkit/injected'),
         import('starknetkit/webwallet'),
-        createBrambleConnector({
-          getRpcUrl,
-          canOpenInstallPage: !isSilentReconnect
-        })
+        import('./bramble')
       ]);
+      const isSilent = !!localStorage.getItem('starknetLastConnectedWallet');
       const starknet = await starknetkit.connect({
         ...options,
         connectors: [
+          // First, so it is listed above the install links: starknetkit only
+          // moves the wallets it detects itself to the top.
+          new BrambleConnector({ isSilent }),
           new InjectedConnector({ options: { id: 'argentX' } }),
           new InjectedConnector({ options: { id: 'braavos' } }),
-          bramble,
           new WebWalletConnector()
         ],
-        modalMode: isSilentReconnect ? 'neverAsk' : 'alwaysAsk',
+        modalMode: isSilent ? 'neverAsk' : 'alwaysAsk',
         modalTheme
       });
 

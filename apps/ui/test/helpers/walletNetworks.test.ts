@@ -3,58 +3,63 @@ import { describe, expect, it, vi } from 'vitest';
 import { verifyStarknetNetwork } from '@/helpers/walletNetworks';
 
 const { SN_MAIN, SN_SEPOLIA } = constants.StarknetChainId;
+const SWITCH_TO_MAINNET = {
+  type: 'wallet_switchStarknetChain',
+  params: { chainId: SN_MAIN }
+};
 
-function createWallet(currentChainId: string | Error) {
-  const request = vi.fn(async ({ type }: { type: string }) => {
-    if (type === 'wallet_requestChainId') {
-      if (currentChainId instanceof Error) throw currentChainId;
-      return currentChainId;
-    }
-    if (type === 'wallet_switchStarknetChain') return true;
-    throw new Error(`unexpected request ${type}`);
-  });
-  return { web3: { provider: { request } }, request };
-}
+function createWeb3(id: string, walletChainId: string) {
+  const request = vi.fn(async ({ type }: { type: string }) =>
+    type === 'wallet_requestChainId' ? walletChainId : true
+  );
 
-function requestedTypes(request: ReturnType<typeof vi.fn>) {
-  return request.mock.calls.map(([args]) => args.type);
+  return { web3: { provider: { id, request } }, request };
 }
 
 describe('verifyStarknetNetwork', () => {
-  it('does not ask to switch when the wallet is already on the network', async () => {
-    const { web3, request } = createWallet(SN_SEPOLIA);
+  it('should not ask Bramble to switch to the network it is on', async () => {
+    const { web3, request } = createWeb3('bramble', SN_MAIN);
 
-    await verifyStarknetNetwork(web3, SN_SEPOLIA);
+    await verifyStarknetNetwork(web3, SN_MAIN);
 
-    expect(requestedTypes(request)).toEqual(['wallet_requestChainId']);
+    expect(request.mock.calls).toEqual([[{ type: 'wallet_requestChainId' }]]);
   });
 
-  it('matches chain ids regardless of hex formatting', async () => {
-    const { web3, request } = createWallet(
-      SN_SEPOLIA.toUpperCase().replace('0X', '0x')
-    );
+  it('should ask Bramble to switch from another network', async () => {
+    const { web3, request } = createWeb3('bramble', SN_SEPOLIA);
 
-    await verifyStarknetNetwork(web3, SN_SEPOLIA);
+    await verifyStarknetNetwork(web3, SN_MAIN);
 
-    expect(requestedTypes(request)).not.toContain('wallet_switchStarknetChain');
+    expect(request).toHaveBeenLastCalledWith(SWITCH_TO_MAINNET);
   });
 
-  it('asks to switch when the wallet is on another network', async () => {
-    const { web3, request } = createWallet(SN_MAIN);
+  it.each(['SN_MAIN', SN_MAIN.toUpperCase(), ''])(
+    'should ask Bramble to switch when it reports its network as %j',
+    async walletChainId => {
+      const { web3, request } = createWeb3('bramble', walletChainId);
 
-    await verifyStarknetNetwork(web3, SN_SEPOLIA);
+      await verifyStarknetNetwork(web3, SN_MAIN);
 
-    expect(request).toHaveBeenLastCalledWith({
-      type: 'wallet_switchStarknetChain',
-      params: { chainId: SN_SEPOLIA }
+      expect(request).toHaveBeenLastCalledWith(SWITCH_TO_MAINNET);
+    }
+  );
+
+  it('should fail without a switch prompt when Bramble cannot read its network', async () => {
+    const request = vi.fn(async () => {
+      throw new Error('chain id failed');
     });
+
+    await expect(
+      verifyStarknetNetwork({ provider: { id: 'bramble', request } }, SN_MAIN)
+    ).rejects.toThrow('chain id failed');
+    expect(request).toHaveBeenCalledTimes(1);
   });
 
-  it('asks to switch when the wallet cannot report its network', async () => {
-    const { web3, request } = createWallet(new Error('not implemented'));
+  it('should ask other wallets to switch without reading their network', async () => {
+    const { web3, request } = createWeb3('argentX', SN_MAIN);
 
-    await verifyStarknetNetwork(web3, SN_SEPOLIA);
+    await verifyStarknetNetwork(web3, SN_MAIN);
 
-    expect(requestedTypes(request)).toContain('wallet_switchStarknetChain');
+    expect(request.mock.calls).toEqual([[SWITCH_TO_MAINNET]]);
   });
 });

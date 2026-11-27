@@ -80,29 +80,6 @@ export async function verifyNetwork(
 // Not implemented by Braavos and Argent Mobile
 // Signing and verifying messages on different network should work fine
 // for single signer message
-/** The Starknet wallet's active chain id, or null if it cannot tell. */
-export async function getStarknetWalletChainId(
-  web3: any
-): Promise<string | null> {
-  try {
-    const current = await web3?.provider?.request?.({
-      type: 'wallet_requestChainId'
-    });
-    return typeof current === 'string' && current ? current : null;
-  } catch {
-    return null;
-  }
-}
-
-async function isOnStarknetChain(
-  web3: any,
-  chainId: starknetConstants.StarknetChainId
-): Promise<boolean> {
-  const current = await getStarknetWalletChainId(web3);
-  // Unknown: fall back to asking the wallet to switch.
-  return current !== null && BigInt(current) === BigInt(chainId);
-}
-
 export async function verifyStarknetNetwork(
   web3: any,
   chainId: starknetConstants.StarknetChainId
@@ -113,9 +90,13 @@ export async function verifyStarknetNetwork(
   // returns "Unknown request" inside the in-app browser.
   if (web3.provider.name === 'Argent Mobile') return;
   if (web3.provider.isInAppBrowser) return;
-  // Some wallets (e.g. Bramble) ask the user to approve every switch request,
-  // even to the network they are already on, so skip it when it matches.
-  if (await isOnStarknetChain(web3, chainId)) return;
+  // Bramble asks to approve every switch, even to the network it is on.
+  if (
+    web3.provider.id === 'bramble' &&
+    (await web3.provider.request({ type: 'wallet_requestChainId' })) === chainId
+  ) {
+    return;
+  }
   try {
     await web3.provider.request({
       type: 'wallet_switchStarknetChain',
