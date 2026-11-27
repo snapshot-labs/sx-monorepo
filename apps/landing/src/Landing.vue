@@ -245,14 +245,22 @@ function startAscii(canvas: HTMLCanvasElement): () => HeroFrame {
 
 onMounted(() => {
   // A slide's anchor opens on that slide, and later ones glide to theirs. An
-  // empty one, from a legal page's logo, goes back to the top.
+  // empty one, from a legal page's logo, goes back to the top. Leaving a
+  // legal page shows the slide, or the top, at once rather than gliding from
+  // where the landing waited.
   if (slideOfHash() >= 0) scrollTo(0, slideTop(slideOfHash()));
+  const jumpTo = (top: number) => {
+    scrollTo(0, top);
+    progress.value = target();
+  };
   addEventListener('hashchange', () => {
+    const wasLegal = !!legal.value;
     legal.value = legalOfHash();
     if (slideOfHash() >= 0) {
-      glideTo(slideOfHash());
+      if (wasLegal) jumpTo(slideTop(slideOfHash()));
+      else glideTo(slideOfHash());
     } else if (!nameOf(location.hash)) {
-      scrollTo(0, 0);
+      jumpTo(0);
       history.replaceState(null, '', location.pathname + location.search);
     }
   });
