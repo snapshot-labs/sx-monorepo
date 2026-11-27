@@ -250,6 +250,7 @@ onMounted(() => {
   // where the landing waited.
   if (slideOfHash() >= 0) scrollTo(0, slideTop(slideOfHash()));
   const jumpTo = (top: number) => {
+    stopGlide();
     scrollTo(0, top);
     progress.value = target();
   };
