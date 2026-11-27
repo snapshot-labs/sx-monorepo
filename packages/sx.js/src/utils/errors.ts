@@ -1,4 +1,4 @@
-export type VotingPowerDetailsErrorDetails = 'NOT_READY_YET';
+export type VotingPowerDetailsErrorDetails = 'NOT_READY_YET' | 'UNAVAILABLE';
 
 export class VotingPowerDetailsError extends Error {
   source: string;

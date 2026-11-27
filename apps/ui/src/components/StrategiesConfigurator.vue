@@ -1,6 +1,28 @@
 <script setup lang="ts">
+import { ORACLE_STRATEGIES, SNAPSHOT_ORACLE } from '@/helpers/constants';
+import { validateForm } from '@/helpers/validation';
+import { getNetwork, metadataNetwork } from '@/networks';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { NetworkID } from '@/types';
+
+const ORACLE_DEFINITION = {
+  type: 'object',
+  additionalProperties: false,
+  required: ['address', 'url'],
+  properties: {
+    address: {
+      type: 'string',
+      format: 'ethAddress',
+      title: 'Oracle'
+    },
+    url: {
+      type: 'string',
+      format: 'uri',
+      title: 'Oracle URL',
+      examples: [SNAPSHOT_ORACLE.url]
+    }
+  }
+};
 
 const model = defineModel<StrategyConfig[]>({ required: true });
 
@@ -26,14 +48,71 @@ const editedStrategy: Ref<StrategyConfig | null> = ref(null);
 const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 const editStrategyModalOpen = ref(false);
 const isTestStrategiesModalOpen = ref(false);
+const oracleTemplate: Ref<StrategyTemplate | null> = ref(null);
+const isSnapshotStrategiesModalOpen = ref(false);
+const oracleForm = ref({ ...SNAPSHOT_ORACLE });
+const isOracleEditing = ref(false);
 
 const limitReached = computed(() => model.value.length >= props.limit);
 const activeStrategiesMap = computed(() =>
   Object.fromEntries(model.value.map(strategy => [strategy.name, strategy]))
 );
 
+// Oracle strategy params are a Snapshot strategy, picked and edited like offchain strategies
+const isOracle = (strategy: StrategyTemplate) => strategy.type === 'Oracle';
+
+const oracleErrors = computed(() =>
+  validateForm(ORACLE_DEFINITION, oracleForm.value)
+);
+
+const editModalProps = computed(() => {
+  const strategy = editedStrategy.value;
+  if (!strategy) return null;
+
+  if (isOracle(strategy)) {
+    return {
+      networkId: metadataNetwork,
+      strategyAddress: strategy.params.id,
+      initialState: strategy.params.params,
+      customErrorValidation: () =>
+        Object.keys(oracleErrors.value).length
+          ? 'Invalid oracle settings.'
+          : undefined
+    };
+  }
+
+  return {
+    networkId: props.networkId,
+    strategyAddress: strategy.address,
+    definition: strategy.paramsDefinition,
+    initialState: strategy.params
+  };
+});
+
+function addSnapshotStrategy(snapshotStrategy: StrategyTemplate) {
+  if (!oracleTemplate.value) return;
+
+  editStrategy({
+    id: crypto.randomUUID(),
+    ...oracleTemplate.value,
+    params: {
+      id: snapshotStrategy.address,
+      network: String(getNetwork(props.networkId).chainId),
+      params: snapshotStrategy.defaultParams || {},
+      oracle: SNAPSHOT_ORACLE.address,
+      url: SNAPSHOT_ORACLE.url
+    }
+  });
+}
+
 function addStrategy(strategy: StrategyTemplate) {
   if (limitReached.value) return;
+
+  if (isOracle(strategy)) {
+    oracleTemplate.value = strategy;
+    isSnapshotStrategiesModalOpen.value = true;
+    return;
+  }
 
   const strategyConfig = {
     id: crypto.randomUUID(),
@@ -51,6 +130,14 @@ function addStrategy(strategy: StrategyTemplate) {
 }
 
 function editStrategy(strategy: StrategyConfig) {
+  if (isOracle(strategy)) {
+    oracleForm.value = {
+      address: strategy.params.oracle,
+      url: strategy.params.url
+    };
+    isOracleEditing.value = false;
+  }
+
   editedStrategy.value = strategy;
   editStrategyModalOpen.value = true;
 }
@@ -62,20 +149,32 @@ function removeStrategy(strategy: StrategyConfig) {
 function handleStrategySave(value: Record<string, any>) {
   editStrategyModalOpen.value = false;
 
+  const edited = editedStrategy.value;
+  if (!edited) return;
+
+  const params = isOracle(edited)
+    ? {
+        // The id and network stay: the oracle only signs for the space network
+        ...edited.params,
+        // The scale of the raw values: the strategy params' decimals, or the strategy's own
+        decimals: Number(value.decimals ?? ORACLE_STRATEGIES[edited.params.id]),
+        params: value,
+        oracle: oracleForm.value.address,
+        url: oracleForm.value.url
+      }
+    : value;
+
   let allStrategies = [...model.value];
-  if (
-    editedStrategy.value &&
-    !allStrategies.find(s => s.id === editedStrategy.value?.id)
-  ) {
-    allStrategies.push(editedStrategy.value);
+  if (!allStrategies.find(s => s.id === edited.id)) {
+    allStrategies.push(edited);
   }
 
   model.value = allStrategies.map(strategy => {
-    if (strategy.id !== editedStrategy.value?.id) return strategy;
+    if (strategy.id !== edited.id) return strategy;
 
     return {
       ...strategy,
-      params: value
+      params
     };
   });
 }
@@ -135,16 +234,50 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
         :strategies="testedStrategies"
         @close="isTestStrategiesModalOpen = false"
       />
+      <ModalStrategies
+        :open="isSnapshotStrategiesModalOpen"
+        :network-id="metadataNetwork"
+        :allowed-strategies="Object.keys(ORACLE_STRATEGIES)"
+        @add-strategy="addSnapshotStrategy"
+        @close="isSnapshotStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
-        v-if="editedStrategy"
+        v-if="editModalProps"
+        v-bind="editModalProps"
         :open="editStrategyModalOpen"
-        :network-id="networkId"
-        :strategy-address="editedStrategy.address"
-        :definition="editedStrategy.paramsDefinition"
-        :initial-state="editedStrategy.params"
         @close="editStrategyModalOpen = false"
         @save="handleStrategySave"
-      />
+      >
+        <div v-if="editedStrategy && isOracle(editedStrategy)" class="mt-4">
+          <UiEyebrow class="mb-2 font-medium">Oracle</UiEyebrow>
+          <UiForm
+            v-if="isOracleEditing"
+            v-model="oracleForm"
+            :error="oracleErrors"
+            :definition="ORACLE_DEFINITION"
+          />
+          <div
+            v-else
+            class="flex items-center gap-3 rounded-lg border px-4 py-3"
+          >
+            <UiStamp
+              :id="oracleForm.address"
+              type="avatar"
+              :size="32"
+              class="!rounded-md"
+            />
+            <div class="flex-1 min-w-0 leading-[22px]">
+              <UiAddress :address="oracleForm.address" class="text-skin-link" />
+              <div class="truncate">{{ oracleForm.url }}</div>
+            </div>
+            <UiTooltip title="Edit oracle">
+              <UiButton uniform @click="isOracleEditing = true">
+                <IH-pencil />
+              </UiButton>
+            </UiTooltip>
+          </div>
+        </div>
+      </ModalEditStrategy>
     </teleport>
   </div>
 </template>

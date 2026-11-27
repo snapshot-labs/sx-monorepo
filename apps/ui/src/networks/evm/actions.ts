@@ -75,6 +75,8 @@ export function createActions(
   const votingPowerV2 =
     evmNetworks[networkId as keyof typeof evmNetworks].ProposalValidations
       .VotingPowerV2;
+  const oracleStrategy =
+    evmNetworks[networkId as keyof typeof evmNetworks].Strategies.Oracle;
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
     helpers
@@ -451,11 +453,17 @@ export function createActions(
         strategies: strategiesWithMetadata,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`,
-        // V2 takes a block to read voting power at, 0 for the block the proposal lands in.
-        // The strategies offered here are all onchain, so they use the current block.
+        // V2 takes a block to read voting power at, 0 for the block the proposal lands in
         ...(votingPowerV2 &&
           compareAddresses(space.validation_strategy, votingPowerV2) && {
-            blockNumber: 0
+            blockNumber:
+              oracleStrategy &&
+              strategiesWithMetadata.some(s =>
+                compareAddresses(s.address, oracleStrategy)
+              )
+                ? // The latest block the oracle signs, as for the proposition power shown before
+                  (await provider.getBlock('safe')).number
+                : 0
           })
       };
 

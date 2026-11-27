@@ -15,6 +15,7 @@ type Strategy = Pick<
   | 'generateSummary'
   | 'paramsDefinition'
   | 'warning'
+  | 'type'
 >;
 
 const props = defineProps<{
@@ -61,7 +62,11 @@ const isOffchainNetwork = computed(() => {
       </div>
       <div v-if="!readOnly" class="flex gap-3">
         <button
-          v-if="strategy.paramsDefinition || isOffchainNetwork"
+          v-if="
+            strategy.paramsDefinition ||
+            strategy.type === 'Oracle' ||
+            isOffchainNetwork
+          "
           type="button"
           @click="$emit('editStrategy', strategy)"
         >
