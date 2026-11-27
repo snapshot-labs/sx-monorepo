@@ -116,13 +116,19 @@ function handleSelect(value: string) {
           v-if="(isLoading && !isRefreshing) || !names"
           class="block"
         />
-        <div v-else-if="Object.keys(names).length" class="space-y-2">
+        <UiSelectorGroup
+          v-else-if="Object.keys(names).length"
+          :model-value="spaceId"
+          aria-label="ENS names"
+          class="space-y-2"
+          @select="handleSelect"
+        >
           <UiSelector
             v-for="name in validNames"
             :key="name.name"
+            :value="name.name"
             :is-active="spaceId === name.name"
             class="w-full"
-            @click="() => handleSelect(name.name)"
           >
             <div class="flex gap-2 items-center text-skin-link">
               <IH-Globe-alt class="shrink-0" />
@@ -132,6 +138,7 @@ function handleSelect(value: string) {
           <UiSelector
             v-for="name in invalidNames"
             :key="name.name"
+            :value="name.name"
             :disabled="true"
             class="w-full"
           >
@@ -163,7 +170,7 @@ function handleSelect(value: string) {
           >
             No more domain names available for space creation found.
           </UiMessage>
-        </div>
+        </UiSelectorGroup>
         <UiMessage v-else type="danger">
           No domain names found for the current wallet.
         </UiMessage>

@@ -52,6 +52,7 @@ export { default as UiSelectDropdown } from './components/Ui/SelectDropdown.vue'
 export { default as UiSelectMultiple } from './components/Ui/SelectMultiple.vue';
 export { default as UiSelector } from './components/Ui/Selector.vue';
 export { default as UiSelectorCard } from './components/Ui/SelectorCard.vue';
+export { default as UiSelectorGroup } from './components/Ui/SelectorGroup.vue';
 export { default as UiStateWarning } from './components/Ui/StateWarning.vue';
 export { default as UiStepper } from './components/Ui/Stepper.vue';
 export { default as UiSwitch } from './components/Ui/Switch.vue';

@@ -39,6 +39,7 @@ const components = [
   'SelectMultiple',
   'Selector',
   'SelectorCard',
+  'SelectorGroup',
   'StateWarning',
   'Stepper',
   'Switch',

@@ -351,28 +351,37 @@ watch(
           </UiStrategiesConfiguratorOffchain>
         </template>
       </div>
-      <UiSelector
-        v-for="validation in filteredValidations"
+      <UiSelectorGroup
         v-else
-        :key="validation.key"
-        :is-active="current?.name === validation.key"
-        @click="handleSelect(validation)"
+        :model-value="current?.name"
+        aria-label="Validation"
+        class="flex flex-col gap-2.5"
+        @select="
+          key => handleSelect(filteredValidations.find(v => v.key === key)!)
+        "
       >
-        <div class="w-full">
-          <div class="flex items-center gap-2 overflow-hidden">
-            <h4
-              class="text-skin-link truncate"
-              v-text="getValidationInfo(validation.key).label"
-            />
-            <UiPill
-              v-if="validation.key === 'passport-gated'"
-              variant="secondary"
-              label="Beta"
-            />
+        <UiSelector
+          v-for="validation in filteredValidations"
+          :key="validation.key"
+          :value="validation.key"
+          :is-active="current?.name === validation.key"
+        >
+          <div class="w-full">
+            <div class="flex items-center gap-2 overflow-hidden">
+              <h4
+                class="text-skin-link truncate"
+                v-text="getValidationInfo(validation.key).label"
+              />
+              <UiPill
+                v-if="validation.key === 'passport-gated'"
+                variant="secondary"
+                label="Beta"
+              />
+            </div>
+            <div v-text="getValidationInfo(validation.key).description" />
           </div>
-          <div v-text="getValidationInfo(validation.key).description" />
-        </div>
-      </UiSelector>
+        </UiSelector>
+      </UiSelectorGroup>
     </div>
     <template v-if="selectedValidation" #footer>
       <UiButton
