@@ -31,6 +31,7 @@ type Overrides = {
     Vanilla?: string;
     VotingPower?: AddressOverride;
     VotingPowerWithCooldown?: AddressOverride;
+    VotingPowerV2?: string;
   };
   executionStrategies?: {
     IncoSimpleQuorumVanilla?: string;
@@ -115,7 +116,8 @@ export function createStandardConfig(
       VotingPowerWithCooldown: resolveAddress(
         proposalValidations.VotingPowerWithCooldown,
         '0x358e4Ba219CC1e1c7084A14c3a504772acfc40b1'
-      )
+      ),
+      VotingPowerV2: proposalValidations.VotingPowerV2
     },
     ExecutionStrategies: {
       IncoSimpleQuorumVanilla: executionStrategies.IncoSimpleQuorumVanilla,
@@ -164,18 +166,28 @@ export function createEvmConfig(
 const ethMainnetBlockTime = 12;
 const ethSepoliaBlockTime = 12;
 
+// Deployed on these networks only, at the same address
+const VOTING_POWER_V2 = '0x62E8967f705B3588F07b2Dbd685276B8799Ea7aa';
+
 export const evmNetworks = {
-  eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
+  eth: createStandardConfig(1, {
+    blockTime: ethMainnetBlockTime,
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
+  }),
   oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
-    blockTime: ethSepoliaBlockTime
+    blockTime: ethSepoliaBlockTime,
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
   }),
   matic: createStandardConfig(137, { blockTime: 2 }),
   arb1: createStandardConfig(42161, {
     blockTime: ethMainnetBlockTime,
     hasNonNativeBlockNumbers: true
   }),
-  base: createStandardConfig(8453, { blockTime: 2 }),
+  base: createStandardConfig(8453, {
+    blockTime: 2,
+    proposalValidations: { VotingPowerV2: VOTING_POWER_V2 }
+  }),
   bnb: createStandardConfig(56, {
     blockTime: 0.45
   }),

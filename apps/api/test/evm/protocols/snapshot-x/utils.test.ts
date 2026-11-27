@@ -9,7 +9,7 @@ vi.mock('../../../../src/common/ipfs', () => ({
   handleVotingPowerValidationMetadata: vi.fn()
 }));
 
-const { protocolConfig } = createConfig('eth');
+const { protocolConfig } = createConfig('sep');
 const strategies = [
   ['0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe', '0x1234'],
   ['0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829', '0xabcd']
@@ -32,9 +32,18 @@ describe('updateProposalValidationStrategy', () => {
         parseAbiParameters('uint256, uint256, uint256, (address,bytes)[]'),
         [604800n, 5n, 100n, strategies]
       )
+    ],
+    [
+      'voting power v2',
+      protocolConfig.propositionPowerV2ValidationStrategyAddress,
+      // Packed limits: 1 max. active proposal, no cooldown, 256 blocks max. age
+      encodeAbiParameters(
+        parseAbiParameters('uint256, (address,bytes)[], uint96'),
+        [100n, strategies, (1n << 64n) | 256n]
+      )
     ]
   ])('should index %s threshold and strategies', async (_, address, params) => {
-    const space = new Space('0x123', 'eth');
+    const space = new Space('0x123', 'sep');
 
     await updateProposalValidationStrategy(
       space,
@@ -52,5 +61,22 @@ describe('updateProposalValidationStrategy', () => {
     expect(space.voting_power_validation_strategy_strategies_params).toEqual(
       strategies.map(([, strategyParams]) => strategyParams)
     );
+  });
+
+  it('should index no threshold or strategies when params are malformed', async () => {
+    const space = new Space('0x123', 'sep');
+
+    await updateProposalValidationStrategy(
+      space,
+      protocolConfig.propositionPowerV2ValidationStrategyAddress!,
+      '0x1234',
+      'ipfs://metadata',
+      {} as EVMConfig,
+      protocolConfig
+    );
+
+    expect(space.validation_strategy_params).toBe('0x1234');
+    expect(space.proposal_threshold).toBe('0');
+    expect(space.voting_power_validation_strategy_strategies).toEqual([]);
   });
 });

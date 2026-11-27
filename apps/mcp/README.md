@@ -192,5 +192,4 @@ Each user gets their own CDP alias, so one user cannot sign votes on behalf of a
 bun dev      # watch mode
 bun test     # run security tests
 bun lint     # ESLint
-bun format   # Prettier
 ```

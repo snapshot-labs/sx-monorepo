@@ -222,6 +222,8 @@ export function createConfig(networkId: NetworkID): Config {
         network.ProposalValidations.VotingPower ?? null,
       propositionPowerWithCooldownValidationStrategyAddress:
         network.ProposalValidations.VotingPowerWithCooldown ?? null,
+      propositionPowerV2ValidationStrategyAddress:
+        network.ProposalValidations.VotingPowerV2 ?? null,
       apeGasStrategy: network.Strategies.ApeGas ?? null,
       apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     }

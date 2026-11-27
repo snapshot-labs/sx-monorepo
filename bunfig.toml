@@ -1,0 +1,24 @@
+[fmt]
+singleQuote = true
+trailingComma = "none"
+arrowParens = "avoid"
+# Formats the code oxlint checks: JS, TS and Vue files.
+ignorePatterns = [
+  "*.css",
+  "*.gql",
+  "*.html",
+  "*.json",
+  "*.md",
+  "*.mdx",
+  "*.scss",
+  "*.sol",
+  "*.toml",
+  "*.yaml",
+  "*.yml",
+  "apps/mcp",
+  "apps/sequencer/*.*",
+  "apps/sequencer/scripts",
+  "contracts/sx-evm",
+  "docs",
+  "tests"
+]

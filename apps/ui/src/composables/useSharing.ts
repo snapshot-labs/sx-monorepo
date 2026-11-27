@@ -89,7 +89,7 @@ export function useSharing() {
     const votedText =
       isSingleChoice && !hasPrivacy
         ? `I just voted "${choiceText}"`
-        : `I just voted`;
+        : 'I just voted';
 
     return `${votedText} on "${proposal.title}" ${getProposalUrl(proposal)}`;
   }

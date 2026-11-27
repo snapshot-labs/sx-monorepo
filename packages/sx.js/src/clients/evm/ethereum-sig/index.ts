@@ -1,4 +1,3 @@
-import { AbiCoder } from '@ethersproject/abi';
 import {
   Signer,
   TypedDataField,
@@ -12,7 +11,10 @@ import {
   voteTypes,
   voteTypesInco
 } from './types';
-import { getStrategiesWithParams } from '../../../strategies/evm';
+import {
+  encodeUserProposalValidationParams,
+  getStrategiesWithParams
+} from '../../../strategies/evm';
 import { bytesToHex } from '../../../utils/bytes';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import {
@@ -41,9 +43,7 @@ export class EthereumSig {
 
   public async sign<
     T extends
-      | EIP712ProposeMessage
-      | EIP712UpdateProposalMessage
-      | EIP712VoteMessage
+      EIP712ProposeMessage | EIP712UpdateProposalMessage | EIP712VoteMessage
   >(
     signer: Signer & TypedDataSigner,
     verifyingContract: string,
@@ -110,15 +110,14 @@ export class EthereumSig {
       this.config
     );
 
-    const abiCoder = new AbiCoder();
     const message: EIP712ProposeMessage = {
       space: data.space,
       author,
       metadataURI: data.metadataUri,
       executionStrategy: data.executionStrategy,
-      userProposalValidationParams: abiCoder.encode(
-        ['tuple(int8 index, bytes params)[]'],
-        [userStrategies]
+      userProposalValidationParams: encodeUserProposalValidationParams(
+        userStrategies,
+        data.blockNumber
       ),
       salt: this.generateSalt()
     };
