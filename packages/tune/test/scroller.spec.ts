@@ -27,3 +27,16 @@ test('arrows show by the scroll edges and scroll the list', async ({
     )
     .toBeGreaterThan(0);
 });
+
+test('a sticky class from the caller keeps the bar sticky', async ({
+  page
+}) => {
+  await page.goto(
+    '/iframe.html?id=ui-scrollerhorizontal--sticky&viewMode=story'
+  );
+  await page.waitForLoadState('networkidle');
+  // UI SDK sets its own root's position: ours must keep the caller's
+  const bar = page.locator('#sticky');
+  await expect(bar).toHaveCSS('position', 'sticky');
+  await expect(bar).toHaveCSS('top', '20px');
+});

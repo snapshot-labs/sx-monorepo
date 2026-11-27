@@ -48,3 +48,20 @@ export const WithButtons: Story = {
     </ScrollerHorizontal>`
   })
 };
+
+// Sticky like the proposal tabs: the caller's classes stay on the root
+export const Sticky: Story = {
+  render: () => ({
+    components: { ScrollerHorizontal },
+    template: `
+      <div class="h-[300px] overflow-auto">
+        <ScrollerHorizontal id="sticky" class="sticky" style="top: 20px" with-buttons gradient="xxl">
+          <div class="flex space-x-3 min-w-max px-4 border-b">
+            <span v-for="i in 20" :key="i" class="py-2">Tab {{ i }}</span>
+          </div>
+        </ScrollerHorizontal>
+        <div class="h-[600px]" />
+      </div>
+    `
+  })
+};
