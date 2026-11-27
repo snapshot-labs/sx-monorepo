@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import {
+  ScrollArea,
+  ScrollAreaContent,
+  ScrollAreaViewport
+} from '@ui-sdk/vue/scroll-area';
+
 const emit = defineEmits<{
   (e: 'scroll', target: HTMLElement): void;
 }>();
@@ -11,43 +17,21 @@ withDefaults(
   { withButtons: false, gradient: false }
 );
 
-const containerRef = ref<HTMLElement | null>(null);
-const canScrollTabs = ref({ canScrollLeft: false, canScrollRight: false });
-
-function handleScroll(target: HTMLElement) {
-  canScrollTabs.value = {
-    canScrollLeft: target.scrollLeft > 0,
-    canScrollRight:
-      Math.ceil(target.scrollLeft) < target.scrollWidth - target.clientWidth
-  };
-  emit('scroll', target);
-}
+const viewport = ref<{ $el: HTMLElement } | null>(null);
 
 function scroll(direction: 'left' | 'right') {
-  if (!containerRef.value) return;
-
-  containerRef.value.scrollBy({
+  viewport.value?.$el.scrollBy({
     left: direction === 'right' ? 200 : -200,
     behavior: 'smooth'
   });
 }
-
-onMounted(() => {
-  if (!containerRef.value) return;
-
-  handleScroll(containerRef.value);
-
-  new ResizeObserver(() => {
-    if (!containerRef.value) return;
-    handleScroll(containerRef.value);
-  }).observe(containerRef.value);
-});
 </script>
 
 <template>
-  <div class="relative">
+  <!-- UI SDK tracks the edges; the gradients and buttons show by them -->
+  <ScrollArea v-slot="{ state }" class="relative">
     <button
-      v-if="gradient && (!withButtons || canScrollTabs.canScrollLeft)"
+      v-if="gradient && (!withButtons || (state.overflowX && !state.atStart))"
       type="button"
       tabindex="-1"
       :disabled="!withButtons"
@@ -63,17 +47,17 @@ onMounted(() => {
     >
       <IH-chevron-left v-if="withButtons" />
     </button>
-    <div
-      ref="containerRef"
+    <ScrollAreaViewport
+      ref="viewport"
       class="overflow-x-auto no-scrollbar"
-      @scroll="e => e.target && handleScroll(e.target as HTMLElement)"
+      @scroll="(e: Event) => emit('scroll', e.target as HTMLElement)"
     >
-      <div data-no-sidebar-swipe>
+      <ScrollAreaContent data-no-sidebar-swipe>
         <slot />
-      </div>
-    </div>
+      </ScrollAreaContent>
+    </ScrollAreaViewport>
     <button
-      v-if="gradient && (!withButtons || canScrollTabs.canScrollRight)"
+      v-if="gradient && (!withButtons || (state.overflowX && !state.atEnd))"
       type="button"
       tabindex="-1"
       :disabled="!withButtons"
@@ -89,5 +73,5 @@ onMounted(() => {
     >
       <IH-chevron-right v-if="withButtons" />
     </button>
-  </div>
+  </ScrollArea>
 </template>
