@@ -112,6 +112,22 @@ describe('useFollowedSpacesStore', () => {
     await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
   });
 
+  it('should not show the previous account spaces when follows fail to load', async () => {
+    followsByAccount['0xa'] = ['ens.eth'];
+    const store = setupStore();
+
+    await switchTo('0xa');
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+
+    loadFollows.mockRejectedValueOnce(new Error('hub down'));
+    await switchTo('0xb');
+    await vi.waitFor(() => expect(loadFollows).toHaveBeenCalledWith('0xb'));
+    await new Promise(resolve => setTimeout(resolve, 50));
+
+    expect(store.followedSpacesLoaded).toBe(false);
+    expect(store.followedSpacesIds).toEqual([]);
+  });
+
   it('should keep showing loaded data while the same account refetches', async () => {
     followsByAccount['0xa'] = ['ens.eth'];
     const store = setupStore();
