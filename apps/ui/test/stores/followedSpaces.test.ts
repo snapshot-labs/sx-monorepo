@@ -5,15 +5,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { computed, createApp, nextTick, reactive, ref, watch } from 'vue';
 import { useFollowedSpacesStore } from '@/stores/followedSpaces';
 
+// Requests (by account or space id) that wait until the test releases them
+const gates = new Map<string, Promise<void>>();
+function hold(key: string) {
+  let release!: () => void;
+  gates.set(key, new Promise<void>(resolve => (release = resolve)));
+  return release;
+}
+
 const followsByAccount: Record<string, string[]> = {};
-const loadFollows = vi.fn(async (account: string) =>
-  (followsByAccount[account] ?? []).map(id => ({
+const loadFollows = vi.fn(async (account: string) => {
+  await gates.get(account);
+  return (followsByAccount[account] ?? []).map(id => ({
     space: { id, network: 's' }
-  }))
-);
-const loadSpaces = vi.fn(async (_: unknown, filter: { id_in?: string[] }) =>
-  (filter.id_in ?? []).map(id => ({ id, network: 's' }))
-);
+  }));
+});
+const loadSpaces = vi.fn(async (_: unknown, filter: { id_in?: string[] }) => {
+  const ids = filter.id_in ?? [];
+  await Promise.all(ids.map(id => gates.get(id)));
+  return ids.map(id => ({ id, network: 's' }));
+});
 
 vi.mock('@/networks', () => ({
   enabledNetworks: ['s'],
@@ -68,8 +79,12 @@ async function switchTo(account: string) {
 
 beforeEach(() => {
   queryClient.clear();
+  localStorage.clear();
   state.account = '';
   for (const key of Object.keys(followsByAccount)) delete followsByAccount[key];
+  gates.clear();
+  loadFollows.mockClear();
+  loadSpaces.mockClear();
 });
 
 afterEach(() => {
@@ -85,6 +100,7 @@ describe('useFollowedSpacesStore', () => {
     async (_, spaces) => {
       followsByAccount['0xa'] = spaces;
       followsByAccount['0xb'] = spaces;
+      const release = hold('0xb');
       const store = setupStore();
 
       await switchTo('0xa');
@@ -92,23 +108,89 @@ describe('useFollowedSpacesStore', () => {
 
       await switchTo('0xb');
       await vi.waitFor(() => expect(loadFollows).toHaveBeenCalledWith('0xb'));
+      expect(store.followedSpacesLoaded).toBe(false);
+
+      release();
       await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+      expect(store.followedSpacesIds).toEqual(spaces.map(id => `s:${id}`));
     }
   );
 
-  it('should show loading until the new account spaces are loaded', async () => {
+  it('should keep loading while the new account spaces are in flight', async () => {
     followsByAccount['0xa'] = ['ens.eth'];
     followsByAccount['0xb'] = ['aave.eth'];
+    const release = hold('aave.eth');
     const store = setupStore();
 
     await switchTo('0xa');
     await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
 
     await switchTo('0xb');
-    expect(store.followedSpacesLoaded).toBe(false);
     await vi.waitFor(() =>
       expect(store.followedSpacesIds).toEqual(['s:aave.eth'])
     );
+    expect(store.followedSpacesLoaded).toBe(false);
+
+    release();
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+  });
+
+  it('should keep loading when coming back to an account whose spaces are in flight', async () => {
+    followsByAccount['0xa'] = ['ens.eth'];
+    followsByAccount['0xb'] = ['aave.eth'];
+    const release = hold('aave.eth');
+    const store = setupStore();
+
+    await switchTo('0xa');
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+    await switchTo('0xb');
+    await vi.waitFor(() =>
+      expect(store.followedSpacesIds).toEqual(['s:aave.eth'])
+    );
+    await switchTo('0xa');
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+
+    await switchTo('0xb');
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(store.followedSpacesLoaded).toBe(false);
+
+    release();
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+  });
+
+  it('should keep loading when the account changes in the same tick as a data update', async () => {
+    followsByAccount['0xa'] = ['ens.eth'];
+    followsByAccount['0xb'] = ['aave.eth'];
+    const release = hold('0xb');
+    const store = setupStore();
+
+    await switchTo('0xa');
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+
+    // A refetch of 0xa's spaces lands, then the account changes before Vue flushes
+    queryClient.setQueryData(
+      ['spaces', 'followedSpaces', ['s:ens.eth']],
+      [{ id: 'ens.eth', network: 's', name: 'ENS' }]
+    );
+    await switchTo('0xb');
+    await new Promise(resolve => setTimeout(resolve, 20));
+    expect(store.followedSpacesLoaded).toBe(false);
+
+    release();
+    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+  });
+
+  it('should be loaded when created with the account spaces already cached', async () => {
+    followsByAccount['0xa'] = ['ens.eth'];
+    queryClient.setQueryData(['followedSpaces', '0xa'], ['s:ens.eth']);
+    queryClient.setQueryData(
+      ['spaces', 'followedSpaces', ['s:ens.eth']],
+      [{ id: 'ens.eth', network: 's' }]
+    );
+    state.account = '0xa';
+
+    const store = setupStore();
+
     await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
   });
 
@@ -128,27 +210,41 @@ describe('useFollowedSpacesStore', () => {
     expect(store.followedSpacesIds).toEqual([]);
   });
 
-  it('should keep showing loaded data while the same account refetches', async () => {
+  it('should keep showing loaded spaces while the same account follows another', async () => {
     followsByAccount['0xa'] = ['ens.eth'];
+    const release = hold('aave.eth');
     const store = setupStore();
 
     await switchTo('0xa');
     await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
 
     const seen: boolean[] = [];
-    watch(
+    const stop = watch(
       () => store.followedSpacesLoaded,
       value => seen.push(value),
       { flush: 'sync' }
     );
-    queryClient.setQueryData(['followedSpaces', '0xa'], ['s:aave.eth']);
+    // What toggleSpaceFollow does after a follow
+    queryClient.setQueryData<string[]>(['followedSpaces', '0xa'], old => [
+      's:aave.eth',
+      ...(old ?? [])
+    ]);
     await vi.waitFor(() =>
+      // ens.eth is already cached, so only the new space is fetched
       expect(loadSpaces).toHaveBeenLastCalledWith(expect.anything(), {
         id_in: ['aave.eth']
       })
     );
-    await nextTick();
+    expect(store.followedSpaces.map(space => space.id)).toEqual(['ens.eth']);
 
+    release();
+    await vi.waitFor(() =>
+      expect(store.followedSpaces.map(space => space.id).sort()).toEqual([
+        'aave.eth',
+        'ens.eth'
+      ])
+    );
+    stop();
     expect(seen).not.toContain(false);
     expect(store.followedSpacesLoaded).toBe(true);
   });
