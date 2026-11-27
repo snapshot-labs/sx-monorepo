@@ -155,7 +155,11 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-if="compareAddresses(web3.account, user.id)"
           title="Edit profile"
         >
-          <UiButton uniform @click="modalOpenEditUser = true">
+          <UiButton
+            aria-label="Edit profile"
+            uniform
+            @click="modalOpenEditUser = true"
+          >
             <IH-cog />
           </UiButton>
         </UiTooltip>

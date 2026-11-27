@@ -42,7 +42,15 @@ const { toggleTheme, currentTheme } = useTheme();
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
-      <UiButton uniform @click="toggleTheme">
+      <UiButton
+        :aria-label="
+          currentTheme === 'dark'
+            ? 'Switch to light mode'
+            : 'Switch to dark mode'
+        "
+        uniform
+        @click="toggleTheme"
+      >
         <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>

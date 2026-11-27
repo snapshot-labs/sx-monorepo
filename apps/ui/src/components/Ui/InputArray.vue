@@ -123,6 +123,7 @@ onMounted(() => {
     <UiReorderList
       v-if="inputValues.length"
       :model-value="currentItems"
+      :aria-label="definition.title || `${itemName}s`"
       animated
       handle=".handle"
       class="s-array-items"

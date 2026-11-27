@@ -18,6 +18,7 @@ const emit = defineEmits<{
   <div class="flex space-x-2">
     <UiTooltip :title="choices[0]">
       <UiButton
+        :aria-label="choices[0]"
         class="!text-skin-success !border-skin-success"
         uniform
         :size="size"
@@ -28,6 +29,7 @@ const emit = defineEmits<{
     </UiTooltip>
     <UiTooltip :title="choices[1]">
       <UiButton
+        :aria-label="choices[1]"
         class="!text-skin-danger !border-skin-danger"
         uniform
         :size="size"
@@ -38,6 +40,7 @@ const emit = defineEmits<{
     </UiTooltip>
     <UiTooltip v-if="choices.length === 3" :title="choices[2]">
       <UiButton
+        :aria-label="choices[2]"
         class="!text-gray-500 !border-gray-500"
         uniform
         :size="size"

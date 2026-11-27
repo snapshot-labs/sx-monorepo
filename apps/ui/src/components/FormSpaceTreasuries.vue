@@ -80,8 +80,9 @@ function deleteTreasury(index: number) {
   <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Treasuries</UiEyebrow>
   <UiReorderList
     v-model="model"
+    aria-label="Treasuries"
     handle=".handle"
-    :item-key="(_: unknown, index: number) => index"
+    :item-key="(treasury: object) => treasury"
   >
     <template #item="{ element: treasury, index: i }">
       <div
@@ -120,12 +121,20 @@ function deleteTreasury(index: number) {
         </div>
         <div class="flex gap-2">
           <UiTooltip title="Edit treasury">
-            <UiButton uniform @click="editTreasury(i)">
+            <UiButton
+              aria-label="Edit treasury"
+              uniform
+              @click="editTreasury(i)"
+            >
               <IH-pencil />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Delete treasury">
-            <UiButton uniform @click="deleteTreasury(i)">
+            <UiButton
+              aria-label="Delete treasury"
+              uniform
+              @click="deleteTreasury(i)"
+            >
               <IH-trash />
             </UiButton>
           </UiTooltip>

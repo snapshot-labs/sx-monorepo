@@ -26,6 +26,7 @@ const selectedChoices = ref<RankedChoice>(
   <div class="flex flex-col gap-3">
     <UiReorderList
       v-model="selectedChoices"
+      aria-label="Ranked choices"
       animated
       handle=".handle"
       class="flex flex-col gap-2"

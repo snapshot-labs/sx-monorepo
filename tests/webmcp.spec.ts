@@ -51,3 +51,19 @@ test('a browser agent reads and uses the page', async ({
     .toMatchObject({ ok: true });
   await expect(page).toHaveURL(/n=8453/);
 });
+
+test('every component an agent sees has a name', async ({
+  page,
+  spacePage
+}) => {
+  await spacePage.goto('s:arbitrumfoundation.eth');
+  await expect(spacePage.spaceName).toBeVisible();
+  await expect(spacePage.summaryProposalsList).toBeVisible();
+
+  const components: { ref: string; component: string; label?: string }[] =
+    await callTool(page, 'snapshot', {});
+  expect(components.length).toBeGreaterThan(5);
+  for (const { ref, component, label } of components) {
+    expect(label, `${component} ${ref} has no name`).toBeTruthy();
+  }
+});

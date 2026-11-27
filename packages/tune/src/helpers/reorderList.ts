@@ -93,6 +93,19 @@ export const reorderList = definePrimitive({
       // Without a handle, keys stay the item's own, like Enter on a link
       keydown(event: KeyboardEvent, key: string) {
         if (inHandle(event)) reorder.keydown(event, key);
+      },
+      // For agents, which can't drag: the bridge doesn't check the arguments
+      move(key: string, index: number) {
+        const { value } = context.store.get();
+        if (!value.includes(key)) {
+          throw new Error(`No item "${key}". Items: ${value.join(', ')}.`);
+        }
+        if (!Number.isInteger(index) || index < 0 || index >= value.length) {
+          throw new Error(
+            `No position ${index}, use 0 to ${value.length - 1}.`
+          );
+        }
+        return reorder.move(key, index);
       }
     };
   },
@@ -112,5 +125,7 @@ export const reorderList = definePrimitive({
       },
       bind: (el, part) => part.api.reorder.bind(el, part)
     })
-  })
+  }),
+  // No items as data: the snapshot lists the rendered ones, by their text
+  agent: { actions: ['move'], items: () => [] }
 });

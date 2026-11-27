@@ -217,6 +217,7 @@ watch(
         <div class="flex gap-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
+              aria-label="Send token"
               :disabled="!treasury || disabled || !treasury.supportsTokens"
               uniform
               @click="openModal('sendToken')"
@@ -226,6 +227,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
+              aria-label="Send NFT"
               :disabled="!treasury || disabled || !treasury.supportsNfts"
               uniform
               @click="openModal('sendNft')"
@@ -235,6 +237,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Contract call">
             <UiButton
+              aria-label="Contract call"
               :disabled="!treasury || disabled"
               uniform
               @click="openModal('contractCall')"
@@ -244,6 +247,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Import Safe file">
             <UiButton
+              aria-label="Import Safe file"
               :disabled="
                 !treasury ||
                 disabled ||
@@ -263,6 +267,7 @@ watch(
         <div>
           <UiReorderList
             v-model="model"
+            :aria-label="`Transactions from ${treasury.name || shorten(treasury.wallet)}`"
             handle=".handle"
             :item-key="(tx: TransactionType) => tx"
           >

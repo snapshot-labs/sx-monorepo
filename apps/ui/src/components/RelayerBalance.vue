@@ -59,7 +59,11 @@ const {
           </div>
         </AppLink>
         <UiTooltip title="Deposit" class="shrink-0">
-          <UiButton uniform @click="isAddressModalOpen = true">
+          <UiButton
+            aria-label="Deposit"
+            uniform
+            @click="isAddressModalOpen = true"
+          >
             <IH-qrcode />
           </UiButton>
         </UiTooltip>

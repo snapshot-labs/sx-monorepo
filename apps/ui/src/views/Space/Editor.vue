@@ -584,6 +584,7 @@ watchEffect(() => {
     >
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
+          aria-label="Back"
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
           class="ml-4 shrink-0"
           uniform
@@ -600,7 +601,7 @@ watchEffect(() => {
       <div class="flex gap-2 items-center">
         <IndicatorPendingTransactions />
         <UiTooltip title="Drafts">
-          <UiButton uniform @click="modalOpen = true">
+          <UiButton uniform aria-label="Drafts" @click="modalOpen = true">
             <IH-collection />
           </UiButton>
         </UiTooltip>

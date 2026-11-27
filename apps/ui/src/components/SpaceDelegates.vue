@@ -178,6 +178,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
       >
         <UiButton
+          :aria-label="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
           uniform
           @click="
             isUpdatableDelegation

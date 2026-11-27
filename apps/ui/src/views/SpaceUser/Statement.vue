@@ -96,7 +96,7 @@ watchEffect(() =>
             title="Edit"
             class="!absolute right-0"
           >
-            <UiButton uniform @click="isEditMode = true">
+            <UiButton aria-label="Edit" uniform @click="isEditMode = true">
               <IH-pencil />
             </UiButton>
           </UiTooltip>

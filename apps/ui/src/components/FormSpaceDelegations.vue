@@ -54,8 +54,9 @@ function deleteDelegation(index: number) {
   <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Delegations</UiEyebrow>
   <UiReorderList
     v-model="model"
+    aria-label="Delegations"
     handle=".handle"
-    :item-key="(_: unknown, index: number) => index"
+    :item-key="(delegation: object) => delegation"
   >
     <template #item="{ element: delegation, index: i }">
       <div

@@ -223,6 +223,7 @@ watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
         />
         <UiTooltip title="New proposal">
           <UiButton
+            aria-label="New proposal"
             :to="{
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }

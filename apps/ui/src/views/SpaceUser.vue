@@ -203,7 +203,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
-          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
+          <UiButton
+            aria-label="View profile"
+            :to="{ name: 'user', params: { user: user.id } }"
+            uniform
+          >
             <IH-user-circle />
           </UiButton>
         </UiTooltip>

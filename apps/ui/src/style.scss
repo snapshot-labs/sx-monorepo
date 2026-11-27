@@ -1,5 +1,7 @@
 @use 'sass:meta';
 
+@layer ui-sdk;
+
 @tailwind base;
 @import '@snapshot-labs/tune/style';
 @tailwind utilities;

@@ -60,6 +60,7 @@ watch(
       </div>
       <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
+          aria-label="Create new space"
           :to="{
             name: `create-space-${protocol}`
           }"
