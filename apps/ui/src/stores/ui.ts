@@ -1,3 +1,4 @@
+import { toast } from '@ui-sdk/vue/toast';
 import { defineStore } from 'pinia';
 import { waitForTransaction } from '@/helpers/generic';
 import { lsGet, lsSet } from '@/helpers/utils';
@@ -7,12 +8,6 @@ type SafeModal = {
   id: string;
   type: 'vote' | 'propose' | 'transaction';
   showVerifierLink: boolean;
-};
-
-type Notification = {
-  id: string;
-  type: NotificationType;
-  message: string;
 };
 
 type PendingTransaction = {
@@ -32,7 +27,6 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     sideMenuOpen: false,
     safeModal: null as SafeModal | null,
-    notifications: [] as Notification[],
     pendingTransactions: [] as PendingTransaction[]
   }),
   actions: {
@@ -43,20 +37,7 @@ export const useUiStore = defineStore('ui', {
       this.safeModal = { id: crypto.randomUUID(), ...data };
     },
     addNotification(type: NotificationType, message: string, timeout = 5000) {
-      const id = crypto.randomUUID();
-
-      this.notifications.push({
-        id,
-        type,
-        message
-      });
-
-      setTimeout(() => this.dismissNotification(id), timeout);
-    },
-    dismissNotification(id: string) {
-      this.notifications = this.notifications.filter(
-        notification => notification.id !== id
-      );
+      toast[type](message, { duration: timeout });
     },
     async addPendingTransaction(txId: string, chainId: ChainId) {
       this.pendingTransactions.push({

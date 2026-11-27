@@ -30,10 +30,13 @@ const emit = defineEmits<{
       />
       <slot />
     </div>
+    <!-- A click doesn't take focus: closing a toast leaves focus where it
+    was, so the other toasts' timers keep running -->
     <button
       v-if="dismissible"
       type="button"
       class="text-skin-link opacity-50 hover:opacity-100"
+      @mousedown.prevent
       @click="emit('close')"
     >
       <IH-x />

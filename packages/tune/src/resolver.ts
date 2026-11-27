@@ -42,6 +42,7 @@ const components = [
   'Stepper',
   'Switch',
   'Textarea',
+  'Toaster',
   'ToolbarBottom',
   'Tooltip',
   'TooltipOnTruncate',
