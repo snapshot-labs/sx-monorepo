@@ -57,9 +57,9 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } }
 });
 let testApp: ReturnType<typeof createApp>;
+let store: ReturnType<typeof useFollowedSpacesStore> | undefined;
 
 function setupStore() {
-  let store!: ReturnType<typeof useFollowedSpacesStore>;
   testApp = createApp({
     setup() {
       store = useFollowedSpacesStore();
@@ -69,7 +69,7 @@ function setupStore() {
   testApp.use(createPinia());
   testApp.provide(VUE_QUERY_CLIENT, queryClient);
   testApp.mount(document.createElement('div'));
-  return store;
+  return store!;
 }
 
 async function switchTo(account: string) {
@@ -88,6 +88,9 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  // Unmounting the app leaves Pinia's store scope (and its queries) running
+  store?.$dispose();
+  store = undefined;
   testApp?.unmount();
 });
 
@@ -158,27 +161,37 @@ describe('useFollowedSpacesStore', () => {
     await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
   });
 
-  it('should keep loading when the account changes in the same tick as a data update', async () => {
-    followsByAccount['0xa'] = ['ens.eth'];
-    followsByAccount['0xb'] = ['aave.eth'];
-    const release = hold('0xb');
-    const store = setupStore();
+  it.each([
+    ['before', true],
+    ['after', false]
+  ])(
+    'should keep loading when a data update lands in the same tick, %s the account change',
+    async (_, isUpdateFirst) => {
+      followsByAccount['0xa'] = ['ens.eth'];
+      followsByAccount['0xb'] = ['aave.eth'];
+      const release = hold('0xb');
+      const store = setupStore();
 
-    await switchTo('0xa');
-    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+      await switchTo('0xa');
+      await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
 
-    // A refetch of 0xa's spaces lands, then the account changes before Vue flushes
-    queryClient.setQueryData(
-      ['spaces', 'followedSpaces', ['s:ens.eth']],
-      [{ id: 'ens.eth', network: 's', name: 'ENS' }]
-    );
-    await switchTo('0xb');
-    await new Promise(resolve => setTimeout(resolve, 20));
-    expect(store.followedSpacesLoaded).toBe(false);
+      // A refetch of 0xa's spaces lands in the same tick as the account change
+      const update = () =>
+        queryClient.setQueryData(
+          ['spaces', 'followedSpaces', ['s:ens.eth']],
+          [{ id: 'ens.eth', network: 's', name: 'ENS' }]
+        );
+      if (isUpdateFirst) update();
+      state.account = '0xb';
+      if (!isUpdateFirst) update();
+      await nextTick();
+      await new Promise(resolve => setTimeout(resolve, 20));
+      expect(store.followedSpacesLoaded).toBe(false);
 
-    release();
-    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
-  });
+      release();
+      await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+    }
+  );
 
   it('should be loaded when created with the account spaces already cached', async () => {
     followsByAccount['0xa'] = ['ens.eth'];
@@ -191,7 +204,7 @@ describe('useFollowedSpacesStore', () => {
 
     const store = setupStore();
 
-    await vi.waitFor(() => expect(store.followedSpacesLoaded).toBe(true));
+    expect(store.followedSpacesLoaded).toBe(true);
   });
 
   it('should not show the previous account spaces when follows fail to load', async () => {
