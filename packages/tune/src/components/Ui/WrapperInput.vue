@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  useFieldControl
+} from '@ui-sdk/vue/field';
 import { _n } from '../../helpers/number';
 
 const props = withDefaults(
@@ -9,29 +16,42 @@ const props = withDefaults(
     error?: string;
     dirty?: boolean;
     required?: boolean;
+    /** A ref of the control's own, kept next to the field's */
+    controlRef?: (el: unknown) => void;
   }>(),
   { inputValueLength: 0 }
 );
 
-const id = computed(() => crypto.randomUUID());
+const showError = computed(() => !!props.error && props.dirty);
 
-const showError = computed(() => props.error && props.dirty);
+// Hands the field's props (id, aria-describedby...) to the control in the slot
+const FieldControlProps = defineComponent((_, { slots }) => {
+  const field = useFieldControl();
+  return () =>
+    slots.default?.({
+      control: field?.props({ ref: props.controlRef }) ?? {}
+    });
+});
 </script>
 
 <template>
-  <div class="s-base" :class="showError ? 's-error' : ''">
+  <!-- Our own rule decides when it's invalid, never the browser's -->
+  <Field
+    class="s-base"
+    :class="showError ? 's-error' : ''"
+    :invalid="showError"
+  >
     <div class="relative">
       <div class="!flex justify-between s-label w-full gap-1">
-        <label
+        <FieldLabel
           v-if="definition.title"
-          :for="id"
           class="truncate flex items-center gap-1"
         >
           {{ definition.title }}{{ required ? ' *' : '' }}
           <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
             <IH-question-mark-circle class="shrink-0" />
           </UiTooltip>
-        </label>
+        </FieldLabel>
         <UiLoading v-if="loading" :size="16" />
         <div
           v-else-if="inputValueLength >= 0 && definition.maxLength"
@@ -40,9 +60,21 @@ const showError = computed(() => props.error && props.dirty);
           {{ _n(inputValueLength) }} / {{ _n(definition.maxLength) }}
         </div>
       </div>
-      <slot :id="id" />
+      <FieldControlProps v-slot="{ control }">
+        <slot :control="control" />
+      </FieldControlProps>
     </div>
-    <span v-if="showError" class="s-input-error-message">{{ error }}</span>
-    <legend v-if="definition.description" v-text="definition.description" />
-  </div>
+    <FieldError v-if="showError" :match="true">
+      <template #render="{ props: errorProps }">
+        <span v-bind="errorProps" class="s-input-error-message">{{
+          error
+        }}</span>
+      </template>
+    </FieldError>
+    <FieldDescription v-if="definition.description">
+      <template #render="{ props: descriptionProps }">
+        <legend v-bind="descriptionProps" v-text="definition.description" />
+      </template>
+    </FieldDescription>
+  </Field>
 </template>

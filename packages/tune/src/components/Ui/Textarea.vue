@@ -18,6 +18,10 @@ const { isDirty } = useDirty(model, props.definition);
 const LARGE_VALUE_THRESHOLD = 100_000;
 const textareaRef = ref<HTMLTextAreaElement>();
 
+function setTextarea(el: unknown) {
+  textareaRef.value = (el ?? undefined) as HTMLTextAreaElement | undefined;
+}
+
 const updateModelDebounced = useDebounceFn((el: HTMLTextAreaElement) => {
   model.value = el.value;
 }, 500);
@@ -41,18 +45,17 @@ watch([textareaRef, model], ([el, val]) => {
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
+    v-slot="{ control }"
     :definition="definition"
     :error="error"
     :dirty="isDirty"
     :required="required"
     :input-value-length="model?.length"
+    :control-ref="setTextarea"
   >
     <textarea
-      :id="id"
-      ref="textareaRef"
       class="s-input"
-      v-bind="$attrs"
+      v-bind="{ ...control, ...$attrs }"
       :placeholder="definition.examples && definition.examples[0]"
       @input="onInput"
     />

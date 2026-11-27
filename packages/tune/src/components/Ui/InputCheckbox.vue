@@ -18,11 +18,11 @@ const { isDirty } = useDirty(model, props.definition);
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
+    v-slot="{ control }"
     :definition="definition"
     :error="error"
     :dirty="isDirty"
   >
-    <input :id="id" v-model="model" type="checkbox" class="mt-[7px]" />
+    <input v-bind="control" v-model="model" type="checkbox" class="mt-[7px]" />
   </UiWrapperInput>
 </template>

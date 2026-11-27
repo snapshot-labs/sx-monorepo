@@ -34,7 +34,7 @@ const inputLength = computed(() => {
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
+    v-slot="{ control }"
     :definition="definition"
     :loading="loading"
     :error="error"
@@ -43,11 +43,10 @@ const inputLength = computed(() => {
     :input-value-length="inputLength"
   >
     <input
-      :id="id"
       v-model.trim="model"
       type="text"
       class="s-input"
-      v-bind="$attrs"
+      v-bind="{ ...control, ...$attrs }"
       :placeholder="definition.examples && definition.examples[0]"
     />
   </UiWrapperInput>

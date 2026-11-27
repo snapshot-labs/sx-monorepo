@@ -47,13 +47,13 @@ watch(
     </div>
     <div class="flex !mb-0" :class="{ 's-error': error && isDirty }">
       <UiWrapperInput
-        v-slot="{ id }"
+        v-slot="{ control }"
         :definition="{ title: 'Days' }"
         class="flex-1"
         :dirty="isDirty"
       >
         <input
-          :id="id"
+          v-bind="control"
           v-model="days"
           class="s-input !rounded-r-none"
           type="number"
@@ -61,13 +61,13 @@ watch(
         />
       </UiWrapperInput>
       <UiWrapperInput
-        v-slot="{ id }"
+        v-slot="{ control }"
         :definition="{ title: 'Hours' }"
         class="flex-1"
         :dirty="isDirty"
       >
         <input
-          :id="id"
+          v-bind="control"
           v-model="hours"
           class="s-input !rounded-none !border-l-0"
           type="number"
@@ -75,13 +75,13 @@ watch(
         />
       </UiWrapperInput>
       <UiWrapperInput
-        v-slot="{ id }"
+        v-slot="{ control }"
         :definition="{ title: 'Minutes' }"
         class="flex-1"
         :dirty="isDirty"
       >
         <input
-          :id="id"
+          v-bind="control"
           v-model="minutes"
           class="s-input !rounded-l-none !border-l-0"
           type="number"

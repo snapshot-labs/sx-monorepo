@@ -77,7 +77,7 @@ function validateAndConvertColor(color: string): string {
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
+    v-slot="{ control }"
     :definition="definition"
     :loading="loading"
     :error="error"
@@ -92,11 +92,10 @@ function validateAndConvertColor(color: string): string {
         class="absolute appearance-none cursor-pointer size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20 padding-0 margin-0"
       />
       <input
-        :id="id"
         v-model.trim="inputValue"
         type="text"
         class="s-input !pl-6"
-        v-bind="$attrs"
+        v-bind="{ ...control, ...$attrs }"
         :placeholder="definition.examples && definition.examples[0]"
       />
       <button

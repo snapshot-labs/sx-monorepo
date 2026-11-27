@@ -15,12 +15,18 @@ const { isDirty } = useDirty(model, props.definition);
 
 <template>
   <UiWrapperInput
+    v-slot="{ control }"
     :definition="definition"
     :error="error"
     :dirty="isDirty"
     :required="required"
   >
-    <select v-model="model" class="s-input" :disabled="disabled">
+    <select
+      v-bind="control"
+      v-model="model"
+      class="s-input"
+      :disabled="disabled"
+    >
       <option disabled value="">Please select one</option>
       <option
         v-for="option in definition.options"

@@ -17,7 +17,7 @@ const { isDirty } = useDirty(model, props.definition);
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
+    v-slot="{ control }"
     :definition="definition"
     :error="error"
     :dirty="isDirty"
@@ -25,13 +25,12 @@ const { isDirty } = useDirty(model, props.definition);
     :loading="loading"
   >
     <input
-      :id="id"
       v-model="model"
       type="number"
       class="s-input"
       :disabled="disabled"
       :class="{ '!text-skin-text': disabled }"
-      v-bind="$attrs"
+      v-bind="{ ...control, ...$attrs }"
       :placeholder="definition.examples && definition.examples[0]"
       :min="definition.minimum"
       :max="definition.maximum"
