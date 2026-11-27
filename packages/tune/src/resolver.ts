@@ -42,6 +42,8 @@ const components = [
   'StateWarning',
   'Stepper',
   'Switch',
+  'Tab',
+  'Tabs',
   'Textarea',
   'Toaster',
   'ToolbarBottom',

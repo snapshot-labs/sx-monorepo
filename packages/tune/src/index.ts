@@ -55,6 +55,8 @@ export { default as UiSelectorCard } from './components/Ui/SelectorCard.vue';
 export { default as UiStateWarning } from './components/Ui/StateWarning.vue';
 export { default as UiStepper } from './components/Ui/Stepper.vue';
 export { default as UiSwitch } from './components/Ui/Switch.vue';
+export { default as UiTab } from './components/Ui/Tab.vue';
+export { default as UiTabs } from './components/Ui/Tabs.vue';
 export { default as UiTextarea } from './components/Ui/Textarea.vue';
 export { default as UiToaster } from './components/Ui/Toaster.vue';
 export { default as UiToolbarBottom } from './components/Ui/ToolbarBottom.vue';

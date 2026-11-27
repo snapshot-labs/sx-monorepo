@@ -156,9 +156,14 @@ watchEffect(() => {
           gradient="xxl"
           data-testid="proposal-tabs"
         >
-          <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
-            <AppLink
-              v-slot="{ isExactActive }"
+          <UiTabs
+            :model-value="String(route.name)"
+            aria-label="Proposal"
+            class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max"
+          >
+            <UiTab
+              v-slot="{ selected }"
+              value="space-proposal-overview"
               :to="{
                 name: 'space-proposal-overview',
                 params: {
@@ -167,11 +172,12 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLabel :is-active="isExactActive" text="Overview" />
-            </AppLink>
-            <AppLink
+              <UiLabel :is-active="selected" text="Overview" />
+            </UiTab>
+            <UiTab
               v-if="proposal.vote_count"
-              v-slot="{ isExactActive }"
+              v-slot="{ selected }"
+              value="space-proposal-votes"
               :to="{
                 name: 'space-proposal-votes',
                 params: {
@@ -182,15 +188,16 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="isExactActive"
+                :is-active="selected"
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
               />
-            </AppLink>
-            <AppLink
+            </UiTab>
+            <UiTab
               v-if="proposal.executions?.length"
-              v-slot="{ isExactActive }"
+              v-slot="{ selected }"
+              value="space-proposal-execution"
               :to="{
                 name: 'space-proposal-execution',
                 params: {
@@ -201,7 +208,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="isExactActive"
+                :is-active="selected"
                 :count="
                   proposal.executions
                     .map(execution => execution.transactions.length)
@@ -210,11 +217,12 @@ watchEffect(() => {
                 text="Execution"
                 class="inline-block"
               />
-            </AppLink>
+            </UiTab>
             <template v-if="discussion">
-              <AppLink
+              <UiTab
                 v-if="discourseTopic?.posts_count"
-                v-slot="{ isExactActive }"
+                v-slot="{ selected }"
+                value="space-proposal-discussion"
                 :to="{
                   name: 'space-proposal-discussion',
                   params: {
@@ -225,18 +233,18 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLabel
-                  :is-active="isExactActive"
+                  :is-active="selected"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
                 />
-              </AppLink>
+              </UiTab>
               <AppLink v-else :to="discussion" class="flex items-center">
                 <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
               </AppLink>
             </template>
-          </div>
+          </UiTabs>
         </UiScrollerHorizontal>
         <router-view :proposal="proposal" />
       </div>

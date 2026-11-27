@@ -263,26 +263,34 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex items-center px-4 border-b">
-          <div class="flex space-x-3">
-            <AppLink
+          <UiTabs
+            :model-value="page"
+            aria-label="Assets"
+            class="flex space-x-3"
+          >
+            <UiTab
+              v-slot="{ selected }"
+              value="tokens"
               :to="{
                 params: {
                   tab: 'tokens'
                 }
               }"
             >
-              <UiLabel :is-active="page === 'tokens'" text="Tokens" />
-            </AppLink>
-            <AppLink
+              <UiLabel :is-active="selected" text="Tokens" />
+            </UiTab>
+            <UiTab
+              v-slot="{ selected }"
+              value="nfts"
               :to="{
                 params: {
                   tab: 'nfts'
                 }
               }"
             >
-              <UiLabel :is-active="page === 'nfts'" text="NFTs" />
-            </AppLink>
-          </div>
+              <UiLabel :is-active="selected" text="NFTs" />
+            </UiTab>
+          </UiTabs>
           <UiDropdown
             v-if="page === 'tokens'"
             class="flex items-center ml-auto"
