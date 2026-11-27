@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import { h, ref } from 'vue';
+import { h, onMounted, ref } from 'vue';
 import Combobox from './Combobox.vue';
 
 const meta = { title: 'Ui/Combobox' } satisfies Meta;
@@ -70,4 +70,36 @@ export const WithIcons: Story = {
 export const Inline: Story = {
   args: { definition: definitionWithIcons, inline: true, gap: 12 },
   render: render(1)
+};
+
+// A value set from outside and options that load after the value both show
+// the right label
+export const ExternalChanges: Story = {
+  render: () => ({
+    components: { Combobox },
+    setup: () => {
+      const value = ref<number | null>(8453);
+      const late = ref<number | null>(42161);
+      const lateDefinition = ref({
+        ...definition,
+        title: 'Late',
+        options: [] as typeof definition.options
+      });
+      onMounted(() =>
+        setTimeout(
+          () => (lateDefinition.value = { ...definition, title: 'Late' }),
+          300
+        )
+      );
+      return { value, late, lateDefinition, definition };
+    },
+    template: `
+      <div>
+        <Combobox v-model="value" :definition="definition" />
+        <button id="set-ethereum" @click="value = 1">Set Ethereum</button>
+        <button id="set-null" @click="value = null">Set null</button>
+        <Combobox v-model="late" :definition="lateDefinition" />
+      </div>
+    `
+  })
 };

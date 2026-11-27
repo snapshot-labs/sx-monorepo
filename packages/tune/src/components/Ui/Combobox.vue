@@ -27,6 +27,15 @@ const isOpen = ref(false);
 const query = ref(getDisplayValue(model.value));
 
 const content = computed(() => query.value || getDisplayValue(model.value));
+
+// Follow the value and options while closed: a value set from outside, or
+// options that load after the value, show their label
+watch(
+  () => getDisplayValue(model.value),
+  label => {
+    if (!isOpen.value) query.value = label;
+  }
+);
 const icon = computed(() => {
   const option = props.definition.options.find(
     option => option.id === model.value
@@ -71,6 +80,7 @@ function getDisplayValue(value: T | null) {
         v-model:open="isOpen"
         filter="contains"
         auto-highlight="always"
+        :item-to-label="value => getDisplayValue(value as T | null)"
         :modal="false"
       >
         <div
@@ -79,7 +89,6 @@ function getDisplayValue(value: T | null) {
           }"
         >
           <div
-            :aria-label="definition.title"
             :data-value="content"
             :class="{
               sizer: inline,
@@ -100,6 +109,7 @@ function getDisplayValue(value: T | null) {
               :size="1"
               autocomplete="off"
               :placeholder="definition.examples?.[0]"
+              :aria-label="definition.title"
               @focus="selectOnFocus"
             />
           </div>

@@ -51,6 +51,23 @@ test.describe('combobox', () => {
   });
 });
 
+test('combobox follows a value set from outside and late options', async ({
+  page
+}) => {
+  await openStory(page, 'ui-combobox--external-changes');
+  const [input, late] = [
+    page.getByRole('combobox', { name: 'Network' }),
+    page.getByRole('combobox', { name: 'Late' })
+  ];
+  await expect(input).toHaveValue('Base');
+  await expect(late).toHaveValue('Arbitrum');
+
+  await page.locator('#set-ethereum').click();
+  await expect(input).toHaveValue('Ethereum');
+  await page.locator('#set-null').click();
+  await expect(input).toHaveValue('');
+});
+
 test.describe('select multiple', () => {
   test.beforeEach(({ page }) =>
     openStory(page, 'ui-selectmultiple--interactive')
@@ -59,7 +76,7 @@ test.describe('select multiple', () => {
   test('toggles options and disables the rest at the limit', async ({
     page
   }) => {
-    await page.locator('#storybook-root button').first().click();
+    await page.getByRole('combobox', { name: 'Networks' }).click();
     await page.getByRole('option', { name: 'Base' }).click();
     await expect(page.getByText('Value eth,base')).toBeVisible();
     await expect(
@@ -74,8 +91,9 @@ test.describe('select multiple', () => {
   });
 
   test('works with the keyboard', async ({ page }) => {
-    await page.locator('#storybook-root button').first().focus();
+    await page.getByRole('combobox', { name: 'Networks' }).focus();
     await page.keyboard.press('Enter');
+    await expect(page.getByRole('listbox', { name: 'Networks' })).toBeVisible();
     await expect(options(page)).toHaveCount(3);
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press(' ');

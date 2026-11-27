@@ -74,6 +74,7 @@ function isItemDisabled(item: T) {
           :class="{
             '!rounded-b-none': isOpen
           }"
+          :aria-label="definition.title"
         >
           <span
             class="text-left"
