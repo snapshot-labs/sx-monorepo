@@ -22,12 +22,16 @@ const isSiteRoute = computed(() => {
         v-if="resolved && !isWhiteLabel && !isSiteRoute"
         title="About Snapshot"
       >
-        <UiButton :to="{ name: 'site-landing' }" uniform>
+        <UiButton
+          aria-label="About Snapshot"
+          :to="{ name: 'site-landing' }"
+          uniform
+        >
           <IH-question-mark-circle class="size-[24px]" />
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <UiButton :to="`${DOCS_URL}/contact-us`" uniform>
+        <UiButton aria-label="Get help" :to="`${DOCS_URL}/contact-us`" uniform>
           <IH-chat />
         </UiButton>
       </UiTooltip>

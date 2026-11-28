@@ -16,7 +16,9 @@ const displayValue = computed(() => {
 </script>
 
 <template>
+  <!-- A key is a secret: browser agents don't see it or copy it -->
   <div
+    data-agent-hidden
     class="flex items-center gap-2"
     :class="
       inline

@@ -1,0 +1,28 @@
+<script setup lang="ts">
+import type { RouteLocationRaw } from 'vue-router';
+import { TUNE_OPTIONS_KEY } from '../../plugin';
+
+defineProps<{
+  type: 'info' | 'danger';
+  learnMoreLink?: string | RouteLocationRaw;
+}>();
+
+const { linkComponent = 'a' } = inject(TUNE_OPTIONS_KEY, {});
+</script>
+
+<template>
+  <div
+    class="border rounded-md p-[20px]"
+    :class="{
+      'text-skin-danger border-skin-danger': type === 'danger'
+    }"
+  >
+    <IH-information-circle class="float-left mr-1" />
+    <div class="leading-5">
+      <slot />
+      <component :is="linkComponent" v-if="learnMoreLink" :to="learnMoreLink"
+        >Learn more</component
+      >
+    </div>
+  </div>
+</template>

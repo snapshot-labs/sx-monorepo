@@ -203,7 +203,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
-          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
+          <UiButton
+            aria-label="View profile"
+            :to="{ name: 'user', params: { user: user.id } }"
+            uniform
+          >
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
@@ -265,20 +269,25 @@ watch(
       with-buttons
       gradient="xxl"
     >
-      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <AppLink
+      <UiTabs
+        :model-value="String(route.name)"
+        aria-label="Profile"
+        class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max"
+      >
+        <UiTab
           v-for="(item, i) in navigation"
           :key="i"
-          v-slot="{ isExactActive }"
+          v-slot="{ selected }"
+          :value="item.route"
           :to="{ name: item.route, params: { user: rawUserId } }"
         >
           <UiLabel
-            :is-active="isExactActive"
+            :is-active="selected"
             :text="item.label"
             :count="item.count"
           />
-        </AppLink>
-      </div>
+        </UiTab>
+      </UiTabs>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
     <teleport to="#modal">

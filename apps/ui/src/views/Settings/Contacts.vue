@@ -26,7 +26,11 @@ function handleContactEdit(contact: Contact) {
 <template>
   <div>
     <div class="flex justify-end p-4">
-      <UiButton uniform @click="openModal('editContact')">
+      <UiButton
+        aria-label="Add contact"
+        uniform
+        @click="openModal('editContact')"
+      >
         <IH-plus-sm />
       </UiButton>
     </div>

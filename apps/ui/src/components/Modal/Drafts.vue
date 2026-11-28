@@ -57,9 +57,14 @@ function handleRemoveDraft(id: string) {
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </AppLink>
-          <button type="button" @click="handleRemoveDraft(proposal.id)">
+          <UiButton
+            :aria-label="`Delete ${proposal.title || 'Untitled'} #${proposal.key}`"
+            plain
+            data-agent-confirm="Deletes this draft for good"
+            @click="handleRemoveDraft(proposal.id)"
+          >
             <IH-trash />
-          </button>
+          </UiButton>
         </div>
       </div>
       <div v-else class="p-4 text-center">There isn't any drafts yet!</div>

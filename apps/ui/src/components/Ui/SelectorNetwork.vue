@@ -70,7 +70,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <Combobox
+  <UiCombobox
     v-model="network"
     :definition="{
       ...definition,

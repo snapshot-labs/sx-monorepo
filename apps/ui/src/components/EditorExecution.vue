@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
   parseSafeImportFile,
@@ -218,6 +217,7 @@ watch(
         <div class="flex gap-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
+              aria-label="Send token"
               :disabled="!treasury || disabled || !treasury.supportsTokens"
               uniform
               @click="openModal('sendToken')"
@@ -227,6 +227,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
+              aria-label="Send NFT"
               :disabled="!treasury || disabled || !treasury.supportsNfts"
               uniform
               @click="openModal('sendNft')"
@@ -236,6 +237,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Contract call">
             <UiButton
+              aria-label="Contract call"
               :disabled="!treasury || disabled"
               uniform
               @click="openModal('contractCall')"
@@ -245,6 +247,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Import Safe file">
             <UiButton
+              aria-label="Import Safe file"
               :disabled="
                 !treasury ||
                 disabled ||
@@ -262,8 +265,9 @@ watch(
       <template v-if="model.length > 0 && treasury">
         <UiSectionHeader label="Transactions" class="border-t" />
         <div>
-          <Draggable
+          <UiReorderList
             v-model="model"
+            :aria-label="`Transactions from ${treasury.name || shorten(treasury.wallet)}`"
             handle=".handle"
             :item-key="(tx: TransactionType) => tx"
           >
@@ -271,7 +275,7 @@ watch(
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
                 <template v-if="model.length > 1" #left>
                   <div
-                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle touch-none text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>
@@ -279,23 +283,28 @@ watch(
                 <template #right>
                   <div class="flex gap-3">
                     <UiTooltip :title="getEditDisabledReason(tx)">
-                      <button
-                        type="button"
+                      <UiButton
+                        aria-label="Edit transaction"
+                        plain
                         :disabled="!!getEditDisabledReason(tx)"
                         class="flex disabled:cursor-not-allowed disabled:opacity-40"
                         @click.stop="editTx(i)"
                       >
                         <IH-pencil />
-                      </button>
+                      </UiButton>
                     </UiTooltip>
-                    <button type="button" @click.stop="removeTx(i)">
+                    <UiButton
+                      aria-label="Remove transaction"
+                      plain
+                      @click.stop="removeTx(i)"
+                    >
                       <IH-trash />
-                    </button>
+                    </UiButton>
                   </div>
                 </template>
               </TransactionsListItem>
             </template>
-          </Draggable>
+          </UiReorderList>
           <div
             class="border-t px-4 py-2 space-x-2 flex items-center justify-between"
           >
@@ -319,9 +328,14 @@ watch(
               v-else-if="simulationState === null"
               title="Simulate execution"
             >
-              <button type="button" class="flex" @click="handleSimulateClick">
+              <UiButton
+                plain
+                aria-label="Simulate execution"
+                class="flex"
+                @click="handleSimulateClick"
+              >
                 <IH-shield-check class="text-skin-link" />
-              </button>
+              </UiButton>
             </UiTooltip>
             <UiLoading v-else-if="simulationState === 'SIMULATING'" />
             <UiTooltip

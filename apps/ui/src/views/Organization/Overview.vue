@@ -113,7 +113,7 @@ function getSpaceLabel(s: Space) {
         <UiTooltip title="New proposal">
           <UiDropdown>
             <template #button>
-              <UiButton uniform>
+              <UiButton aria-label="New proposal" uniform>
                 <IH-pencil-alt />
               </UiButton>
             </template>

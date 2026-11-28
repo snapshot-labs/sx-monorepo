@@ -132,6 +132,7 @@ const aliasItems = computed(() => {
         <UiButton
           class="!px-3 hover:border-skin-danger"
           :loading="isRevoking && revokingAlias === alias.alias"
+          data-agent-confirm="Revokes this alias, so its app can no longer act for you"
           @click="revoke(alias.alias)"
         >
           <span class="text-skin-danger">Revoke</span>

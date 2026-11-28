@@ -77,17 +77,22 @@ function handleClick(validationId: string) {
 
 <template>
   <div>
-    <div class="space-y-3">
+    <UiSelectorGroup
+      :model-value="validation?.name"
+      aria-label="Proposal validation"
+      class="space-y-3"
+      @select="handleClick"
+    >
       <UiSelectorCard
         :is="UiSelector"
         v-for="(type, id) in availableValidations"
         :key="id"
         :item="{ ...type, key: id }"
+        :value="id"
         :selected="validation?.name === id"
         :is-active="validation?.name === id"
-        @click="handleClick"
       />
-    </div>
+    </UiSelectorGroup>
     <teleport to="#modal">
       <ModalSelectValidation
         type="proposal"

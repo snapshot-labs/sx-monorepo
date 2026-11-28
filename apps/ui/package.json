@@ -39,8 +39,6 @@
     "@ethersproject/strings": "^5.8.0",
     "@ethersproject/units": "^5.8.0",
     "@ethersproject/wallet": "^5.8.0",
-    "@headlessui-float/vue": "^0.15.0",
-    "@headlessui/vue": "^1.7.23",
     "@inco/lightning-js": "^1.0.0",
     "@reown/walletkit": "^1.2.11",
     "@snapshot-labs/lock": "0.3.2",
@@ -48,6 +46,8 @@
     "@snapshot-labs/sx": "^0.1.11",
     "@snapshot-labs/tune": "0.1.0",
     "@tanstack/vue-query": "^5.64.2",
+    "@ui-sdk/core": "0.1.0-beta.17",
+    "@ui-sdk/vue": "0.1.0-beta.17",
     "@tiptap/core": "^3.4.1",
     "@tiptap/extension-code-block-lowlight": "^3.4.2",
     "@tiptap/extension-file-handler": "^3.4.2",
@@ -87,7 +87,6 @@
     "viem": "^2.21.0",
     "vue": "^3.5.30",
     "vue-router": "^4.2.5",
-    "vuedraggable": "^4.1.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

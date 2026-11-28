@@ -17,7 +17,7 @@ function handleCopyLinkClick() {
   <UiDropdown>
     <template #button>
       <slot name="button">
-        <UiButton v-bind="$attrs">
+        <UiButton aria-label="Share" v-bind="$attrs">
           <IH-share />
         </UiButton>
       </slot>

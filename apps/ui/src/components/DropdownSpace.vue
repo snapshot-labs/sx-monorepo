@@ -28,6 +28,7 @@ function handleCopyLinkClick() {
       <UiButton
         ref="buttonRef"
         title="More"
+        aria-label="More"
         uniform
         @click="isCalendarLevel = false"
       >

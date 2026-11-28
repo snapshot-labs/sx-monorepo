@@ -263,7 +263,7 @@ router.afterEach(() => {
         />
       </main>
     </div>
-    <AppNotifications />
+    <UiToaster />
     <ModalConfirmSafe
       v-if="uiStore.safeModal !== null"
       :open="uiStore.safeModal !== null"

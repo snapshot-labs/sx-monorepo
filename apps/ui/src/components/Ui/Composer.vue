@@ -31,30 +31,41 @@ const AsyncVisualEditor = defineAsyncComponent({
 <template>
   <div>
     <div class="h-[40px] flex space-x-3">
-      <template v-if="editorType === 'markdown'">
-        <button type="button" @click="previewEnabled = false">
+      <UiTabs
+        v-if="editorType === 'markdown'"
+        :model-value="previewEnabled ? 'preview' : 'write'"
+        aria-label="Editor"
+        class="flex space-x-3"
+        @update:model-value="value => (previewEnabled = value === 'preview')"
+      >
+        <UiTab v-slot="{ selected }" value="write">
           <UiLabel
-            :is-active="!previewEnabled"
+            :is-active="selected"
             text="Write"
             class="border-transparent"
           />
-        </button>
-        <button type="button" @click="previewEnabled = true">
+        </UiTab>
+        <UiTab v-slot="{ selected }" value="preview">
           <UiLabel
-            :is-active="previewEnabled"
+            :is-active="selected"
             text="Preview"
             class="border-transparent"
           />
-        </button>
-      </template>
+        </UiTab>
+      </UiTabs>
       <div class="grow" />
-      <button class="flex items-center space-x-1.5" @click="toggleEditor">
+      <UiButton
+        plain
+        :aria-label="`Switch to ${editorType === 'visual' ? 'Markdown' : 'visual'} editor`"
+        class="flex items-center space-x-1.5"
+        @click="toggleEditor"
+      >
         <IH-eye v-if="editorType === 'markdown'" />
         <IC-markdown v-else class="size-[28px]" />
         <span class="hidden sm:inline-block">
           Switch to {{ editorType === 'visual' ? 'Markdown' : 'visual' }} editor
         </span>
-      </button>
+      </UiButton>
     </div>
     <div class="min-h-[260px] mb-3">
       <AsyncVisualEditor

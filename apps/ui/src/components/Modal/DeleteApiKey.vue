@@ -31,7 +31,12 @@ function handleSubmit() {
       </UiMessage>
     </div>
     <template #footer>
-      <UiButton class="w-full" :loading="isDeleting" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :loading="isDeleting"
+        data-agent-confirm="Deletes this API key for good"
+        @click="handleSubmit"
+      >
         Delete key
       </UiButton>
     </template>

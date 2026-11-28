@@ -11,6 +11,12 @@ const indexExports = names
   )
   .join('\n');
 
+const composableExports = globSync('src/composables/*.ts')
+  .map(f => basename(f, '.ts'))
+  .sort()
+  .map(name => `export * from './composables/${name}';`)
+  .join('\n');
+
 const index = `// Styles
 import './styles/index.scss';
 
@@ -20,6 +26,9 @@ export type { TuneOptions } from './plugin';
 
 // Types
 export type * from './types';
+
+// Composables (auto-generated, do not edit manually)
+${composableExports}
 
 // Components (auto-generated, do not edit manually)
 ${indexExports}

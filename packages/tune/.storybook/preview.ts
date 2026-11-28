@@ -6,6 +6,8 @@ import type { Decorator, Preview } from '@storybook/vue3-vite';
 import { createTune } from '../src/plugin';
 import '../src/styles/index.scss';
 import './style.css';
+// After the utilities in style.css, like in the app
+import '../src/styles/forms.scss';
 
 setup(app => {
   app.use(

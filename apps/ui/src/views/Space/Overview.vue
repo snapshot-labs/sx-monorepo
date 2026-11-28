@@ -50,6 +50,7 @@ watchEffect(() => setTitle(props.space.name));
         <DropdownSpace :space="space" />
         <UiTooltip title="New proposal">
           <UiButton
+            aria-label="New proposal"
             :to="{
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }

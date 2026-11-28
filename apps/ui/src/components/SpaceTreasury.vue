@@ -175,7 +175,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="!isReadOnly && EVM_CHAIN_IDS.includes(treasury.network)"
         title="Connect to apps"
       >
-        <UiButton uniform @click="modalOpen.walletConnectLink = true">
+        <UiButton
+          aria-label="Connect to apps"
+          uniform
+          @click="modalOpen.walletConnectLink = true"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
@@ -191,7 +195,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Deposit">
-        <UiButton uniform @click="isAddressModalOpen = true">
+        <UiButton
+          aria-label="Deposit"
+          uniform
+          @click="isAddressModalOpen = true"
+        >
           <IH-qrcode />
         </UiButton>
       </UiTooltip>
@@ -199,7 +207,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="!isReadOnly"
         :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
       >
-        <UiButton uniform @click="openModal(page)">
+        <UiButton
+          :aria-label="page === 'tokens' ? 'Send token' : 'Send NFT'"
+          uniform
+          @click="openModal(page)"
+        >
           <IH-arrow-sm-right class="-rotate-45" />
         </UiButton>
       </UiTooltip>
@@ -263,32 +275,40 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </div>
       <div>
         <div class="flex items-center px-4 border-b">
-          <div class="flex space-x-3">
-            <AppLink
+          <UiTabs
+            :model-value="page"
+            aria-label="Assets"
+            class="flex space-x-3"
+          >
+            <UiTab
+              v-slot="{ selected }"
+              value="tokens"
               :to="{
                 params: {
                   tab: 'tokens'
                 }
               }"
             >
-              <UiLabel :is-active="page === 'tokens'" text="Tokens" />
-            </AppLink>
-            <AppLink
+              <UiLabel :is-active="selected" text="Tokens" />
+            </UiTab>
+            <UiTab
+              v-slot="{ selected }"
+              value="nfts"
               :to="{
                 params: {
                   tab: 'nfts'
                 }
               }"
             >
-              <UiLabel :is-active="page === 'nfts'" text="NFTs" />
-            </AppLink>
-          </div>
+              <UiLabel :is-active="selected" text="NFTs" />
+            </UiTab>
+          </UiTabs>
           <UiDropdown
             v-if="page === 'tokens'"
             class="flex items-center ml-auto"
           >
             <template #button>
-              <button>
+              <button aria-label="Token options">
                 <IH-dots-horizontal class="size-[22px]" />
               </button>
             </template>
@@ -357,7 +377,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 "
                 title="Stake with Lido"
               >
-                <UiButton uniform @click.prevent="openModal('stake')">
+                <UiButton
+                  aria-label="Stake with Lido"
+                  uniform
+                  @click.prevent="openModal('stake')"
+                >
                   <IC-stake />
                 </UiButton>
               </UiTooltip>

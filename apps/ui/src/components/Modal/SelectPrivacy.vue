@@ -25,12 +25,17 @@ function handleSelect(type: SpacePrivacy) {
     <template #header>
       <h3>Select privacy</h3>
     </template>
-    <div class="p-4 flex flex-col gap-2.5">
+    <UiSelectorGroup
+      :model-value="initialState"
+      aria-label="Privacy"
+      class="p-4 flex flex-col gap-2.5"
+      @select="handleSelect($event as SpacePrivacy)"
+    >
       <UiSelector
         v-for="type in votingTypes"
         :key="type"
+        :value="type"
         :is-active="initialState === type"
-        @click="handleSelect(type)"
       >
         <div>
           <h4 class="text-skin-link" v-text="PRIVACY_TYPES_INFO[type].label" />
@@ -40,6 +45,6 @@ function handleSelect(type: SpacePrivacy) {
           />
         </div>
       </UiSelector>
-    </div>
+    </UiSelectorGroup>
   </UiModal>
 </template>

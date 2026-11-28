@@ -101,6 +101,11 @@ watch(
         class="w-full"
         :loading="isCreating || isRenaming"
         :disabled="isProfileRequired || Object.keys(formErrors).length > 0"
+        :data-agent-confirm="
+          apiKey
+            ? 'Renames this API key'
+            : 'Creates an API key for your account'
+        "
         @click="handleSubmit"
       >
         {{ apiKey ? 'Save' : 'Create' }}

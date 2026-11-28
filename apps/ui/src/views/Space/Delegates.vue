@@ -25,19 +25,23 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         with-buttons
         gradient="xxl"
       >
-        <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-          <button
+        <UiTabs
+          v-model="activeDelegationId"
+          aria-label="Delegations"
+          class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max"
+        >
+          <UiTab
             v-for="(delegation, i) in space.delegations"
             :key="i"
-            type="button"
-            @click="activeDelegationId = i"
+            v-slot="{ selected }"
+            :value="i"
           >
             <UiLabel
-              :is-active="activeDelegationId === i"
+              :is-active="selected"
               :text="delegation.name || `Delegates ${i + 1}`"
             />
-          </button>
-        </div>
+          </UiTab>
+        </UiTabs>
       </UiScrollerHorizontal>
       <SpaceDelegates
         v-if="delegateData"

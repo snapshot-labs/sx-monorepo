@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable';
 import { Choice, Proposal } from '@/types';
 
 type RankedChoice = number[];
@@ -25,15 +24,16 @@ const selectedChoices = ref<RankedChoice>(
 
 <template>
   <div class="flex flex-col gap-3">
-    <Draggable
+    <UiReorderList
       v-model="selectedChoices"
-      v-bind="{ animation: 200 }"
+      aria-label="Ranked choices"
+      animated
       handle=".handle"
       class="flex flex-col gap-2"
-      item-key="id"
+      :item-key="(choice: number) => choice"
     >
       <template #item="{ element, index }">
-        <UiButton :size="48" class="text-left handle cursor-grab">
+        <UiButton :size="48" class="text-left handle cursor-grab touch-none">
           <IC-drag class="text-skin-text" />
           <UiTooltipOnTruncate
             :content="proposal.choices[element - 1]"
@@ -46,7 +46,7 @@ const selectedChoices = ref<RankedChoice>(
           </div>
         </UiButton>
       </template>
-    </Draggable>
+    </UiReorderList>
     <teleport defer :to="submitTo" :disabled="!submitTo">
       <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
         Vote

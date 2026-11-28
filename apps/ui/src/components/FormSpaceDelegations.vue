@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Draggable from 'vuedraggable';
 import { NetworkID, SpaceMetadataDelegation } from '@/types';
 
 const model = defineModel<SpaceMetadataDelegation[]>({
@@ -53,7 +52,12 @@ function deleteDelegation(index: number) {
 
 <template>
   <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Delegations</UiEyebrow>
-  <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
+  <UiReorderList
+    v-model="model"
+    aria-label="Delegations"
+    handle=".handle"
+    :item-key="(delegation: object) => delegation"
+  >
     <template #item="{ element: delegation, index: i }">
       <div
         class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
@@ -61,7 +65,7 @@ function deleteDelegation(index: number) {
         <div class="flex items-center">
           <div
             v-if="model.length > 1"
-            class="handle mr-4 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+            class="handle touch-none mr-4 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
           >
             <IH-switch-vertical />
           </div>
@@ -79,7 +83,7 @@ function deleteDelegation(index: number) {
         </div>
       </div>
     </template>
-  </Draggable>
+  </UiReorderList>
   <UiButton
     v-if="limit ? model.length < limit : true"
     class="w-full"

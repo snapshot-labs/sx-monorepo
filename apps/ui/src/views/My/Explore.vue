@@ -166,7 +166,7 @@ watchEffect(() => setTitle('Explore'));
           placement="start"
           :items="protocols"
         />
-        <Combobox
+        <UiCombobox
           v-model="network"
           class="mb-0"
           inline
@@ -190,6 +190,7 @@ watchEffect(() => setTitle('Explore'));
       </div>
       <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
+          aria-label="Create new space"
           :to="{
             name: `create-space-${protocol}`
           }"

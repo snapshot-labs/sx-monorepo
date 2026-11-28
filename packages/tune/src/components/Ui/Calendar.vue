@@ -1,4 +1,15 @@
 <script setup lang="ts">
+import {
+  Calendar,
+  CalendarDay,
+  CalendarGrid,
+  CalendarHeading,
+  CalendarNext,
+  CalendarPrevious,
+  CalendarWeekday,
+  CalendarWeekdays,
+  CalendarWeeks
+} from '@ui-sdk/vue/calendar';
 import dayjs from 'dayjs';
 
 const props = defineProps<{
@@ -10,92 +21,72 @@ const emit = defineEmits<{
   (e: 'pick', timestamp: number): void;
 }>();
 
-const timestamp = useTimestamp({ interval: 1000 });
+// UI SDK works with ISO dates, the app with timestamps
+const toISODate = (timestamp?: number) =>
+  timestamp ? dayjs.unix(timestamp).format('YYYY-MM-DD') : undefined;
 
-const selectedDate = props.selected
-  ? dayjs.unix(props.selected).startOf('day')
-  : null;
-const minimumDate = props.min ? dayjs.unix(props.min).startOf('day') : null;
-
-const currentView = ref<dayjs.Dayjs>(
-  dayjs
-    .unix(props.selected || Math.floor(timestamp.value / 1000))
-    .startOf('month')
-);
-
-const today = computed(() => dayjs(timestamp.value).startOf('day'));
-
-const contents = computed(() => {
-  const start = currentView.value.startOf('week');
-  const end = currentView.value.endOf('month').endOf('week');
-  const days: dayjs.Dayjs[] = [];
-  let pivot = start;
-
-  do {
-    days.push(pivot);
-    pivot = pivot.add(1, 'day');
-  } while (pivot.isBefore(end));
-
-  return days;
-});
-
-function handleDateClick(date: dayjs.Dayjs) {
-  if (!isSelectable(date)) return;
-
-  emit('pick', date.unix());
-}
-
-function isSelectable(date: dayjs.Dayjs) {
-  if (!date.isSame(currentView.value, 'month')) return false;
-  if (!minimumDate) return true;
-
-  return !date.isBefore(minimumDate);
+function pick(value: unknown) {
+  if (typeof value === 'string') emit('pick', dayjs(value).unix());
 }
 </script>
 
 <template>
-  <div class="calendar space-y-2 mx-auto">
+  <!-- Weeks start on Sunday and days of other months stay blank, like before -->
+  <Calendar
+    :value="toISODate(props.selected) ?? null"
+    :min="toISODate(props.min)"
+    :week-starts-on="0"
+    weekday-format="short"
+    :show-outside-days="false"
+    class="calendar space-y-2 mx-auto"
+    @value-change="pick"
+  >
     <div class="flex items-center">
       <div class="w-1/4 flex items-center justify-start">
-        <button @click="currentView = currentView.subtract(1, 'month')">
+        <CalendarPrevious>
           <IH-chevron-left />
-        </button>
+        </CalendarPrevious>
       </div>
-      <h4
-        class="h-full w-full text-center"
-        v-text="dayjs(currentView).format('MMMM YYYY')"
-      />
+      <CalendarHeading>
+        <template #render="{ props: headingProps, children }">
+          <h4 v-bind="headingProps" class="h-full w-full text-center">
+            <component :is="children" />
+          </h4>
+        </template>
+      </CalendarHeading>
       <div class="w-1/4 flex items-center justify-end">
-        <button @click="currentView = currentView.add(1, 'month')">
+        <CalendarNext>
           <IH-chevron-right />
-        </button>
+        </CalendarNext>
       </div>
     </div>
-    <div class="grid-cols-7">
-      <div
-        v-for="(header, i) in contents.slice(0, 7)"
-        :key="i"
-        class="cell text-skin-link"
-        v-text="header.format('ddd')"
-      />
-      <button
-        v-for="(date, i) in contents"
-        :key="i"
-        :disabled="!isSelectable(date)"
-        class="cell day unselectable"
-        :class="{
-          '!cursor-default': !date.isSame(currentView, 'month'),
-          today: date.isSame(today) && date.isSame(currentView, 'month'),
-          selected: selectedDate && selectedDate.isSame(date),
-          selectable: isSelectable(date)
-        }"
-        @click="handleDateClick(date)"
-        v-text="
-          date.isSame(currentView, 'month') ? date.format('DD') : '&nbsp;'
-        "
-      />
-    </div>
-  </div>
+    <CalendarGrid class="border-separate border-spacing-0">
+      <CalendarWeekdays v-slot="{ index }">
+        <CalendarWeekday
+          :index="index"
+          class="weekday font-normal text-skin-link"
+        />
+      </CalendarWeekdays>
+      <CalendarWeeks v-slot="{ cell }">
+        <CalendarDay :value="cell.date" class="p-0">
+          <template #render="{ props: dayProps, state }">
+            <td v-bind="dayProps" class="p-0 align-baseline outline-none">
+              <span
+                class="cell day"
+                :class="{
+                  today: state.today,
+                  selected: state.selected,
+                  selectable: !state.disabled,
+                  unselectable: state.disabled
+                }"
+                v-text="dayjs(state.date).format('DD')"
+              />
+            </td>
+          </template>
+        </CalendarDay>
+      </CalendarWeeks>
+    </CalendarGrid>
+  </Calendar>
 </template>
 
 <style scoped lang="scss">
@@ -103,8 +94,12 @@ function isSelectable(date: dayjs.Dayjs) {
   $size: 44px;
   width: $size * 7;
 
+  .weekday {
+    @apply p-0 text-center size-[#{$size}] leading-[#{$size}];
+  }
+
   .cell {
-    @apply inline-block text-center size-[#{$size}] leading-[#{$size}];
+    @apply inline-block p-0 text-center size-[#{$size}] leading-[#{$size}];
 
     &.day {
       @apply text-skin-border rounded-full cursor-default;

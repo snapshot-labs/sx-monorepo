@@ -431,6 +431,7 @@ onBeforeUnmount(() => destroyAudio());
               :size="22"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
+              aria-label="AI summary"
               @click="handleAiSummaryClick"
             >
               <IH-sparkles
@@ -455,6 +456,7 @@ onBeforeUnmount(() => destroyAudio());
               :size="22"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
+              :aria-label="audioState === 'playing' ? 'Pause' : 'Listen'"
               @click="handleAiSpeechClick"
             >
               <IH-pause
@@ -470,14 +472,14 @@ onBeforeUnmount(() => destroyAudio());
             class="flex items-center"
           >
             <template #button>
-              <button>
+              <button aria-label="Share">
                 <IH-share class="size-[22px]" />
               </button>
             </template>
           </DropdownShare>
           <UiDropdown class="flex items-center">
             <template #button>
-              <button>
+              <button aria-label="More">
                 <IH-dots-vertical class="size-[22px]" />
               </button>
             </template>
@@ -599,12 +601,12 @@ onBeforeUnmount(() => destroyAudio());
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
         </AppLink>
         ·
-        <button
-          type="button"
+        <UiButton
+          plain
           class="text-skin-text"
           @click="modalOpenTimeline = true"
-          v-text="votingTime"
-        />
+          >{{ votingTime }}</UiButton
+        >
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
     </ContentFlagable>

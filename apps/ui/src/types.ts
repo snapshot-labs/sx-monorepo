@@ -1,6 +1,5 @@
 import { Transaction as _Transaction } from '@snapshot-labs/sx';
-import { NotificationType } from '@snapshot-labs/tune';
-import { VNode } from 'vue';
+import { NotificationType, Theme } from '@snapshot-labs/tune';
 import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
@@ -14,8 +13,6 @@ export type Task = {
   totalSteps?: number;
   type?: NotificationType | 'info';
 };
-
-export type Theme = 'light' | 'dark';
 
 export type ProposalState =
   | 'pending'
@@ -485,31 +482,13 @@ export type RequiredProperty<T> = {
 };
 
 // UI
-export type BaseDefinition<T> = {
-  type: string | string[];
-  format?: string;
-  title: string;
-  description?: string;
-  default?: T;
-  examples?: string[];
-  tooltip?: string;
-};
-
-export type DefinitionWithOptions<T> = BaseDefinition<T> & {
-  enum: T[];
-  options: SelectItem<T>[];
-};
-
-export type DefinitionWithMultipleOptions<T> = BaseDefinition<T[]> & {
-  enum: T[];
-  options: SelectItem<T>[];
-};
-
-export type SelectItem<T> = {
-  id: T;
-  name?: string;
-  icon?: VNode;
-};
+export type {
+  BaseDefinition,
+  DefinitionWithMultipleOptions,
+  DefinitionWithOptions,
+  SelectItem,
+  Theme
+} from '@snapshot-labs/tune';
 
 export type Setting = {
   name: string;

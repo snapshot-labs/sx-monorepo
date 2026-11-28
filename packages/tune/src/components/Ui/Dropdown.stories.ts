@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { defineComponent, provide, ref } from 'vue';
+import { TUNE_OPTIONS_KEY } from '../../plugin';
 import Dropdown from './Dropdown.vue';
+import DropdownItem from './DropdownItem.vue';
 
 const meta = {
   title: 'Ui/Dropdown',
@@ -65,6 +68,53 @@ export const PlacementStart: Story = {
           </template>
         </Dropdown>
       </div>
+    `
+  })
+};
+
+export const WithItems: Story = {
+  render: args => ({
+    components: { Dropdown, DropdownItem },
+    setup: () => ({ args, clicked: ref('nothing') }),
+    template: `
+      <Dropdown v-bind="args">
+        <template #button>
+          <button class="px-3 py-2 border rounded">Actions</button>
+        </template>
+        <template #items>
+          <DropdownItem @click="clicked = 'Edit'">Edit</DropdownItem>
+          <DropdownItem disabled @click="clicked = 'Archive'">Archive</DropdownItem>
+          <DropdownItem danger @click="clicked = 'Delete'">Delete</DropdownItem>
+        </template>
+      </Dropdown>
+      <p class="mt-4">Clicked {{ clicked }}</p>
+    `
+  })
+};
+
+// A link component that declares its own `click` emit, like the app's AppLink
+const EmitsClickLink = defineComponent({
+  emits: ['click'],
+  template: '<button type="button" @click="$emit(\'click\')"><slot /></button>'
+});
+
+export const WithLinkComponent: Story = {
+  render: args => ({
+    components: { Dropdown, DropdownItem },
+    setup: () => {
+      provide(TUNE_OPTIONS_KEY, { linkComponent: EmitsClickLink });
+      return { args, clicked: ref('nothing') };
+    },
+    template: `
+      <Dropdown v-bind="args">
+        <template #button>
+          <button class="px-3 py-2 border rounded">Actions</button>
+        </template>
+        <template #items>
+          <DropdownItem @click="clicked = 'Edit'">Edit</DropdownItem>
+        </template>
+      </Dropdown>
+      <p class="mt-4">Clicked {{ clicked }}</p>
     `
   })
 };

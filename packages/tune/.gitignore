@@ -3,3 +3,6 @@ storybook-static
 .eslintrc-auto-import.json
 auto-imports.d.ts
 components.d.ts
+test-results
+test/*-snapshots
+test/snapshots-*

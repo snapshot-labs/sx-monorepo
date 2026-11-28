@@ -3,6 +3,8 @@ import { createTune } from '@snapshot-labs/tune';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import App from '@/App.vue';
+import AppLink from '@/components/AppLink.vue';
+import { registerAgentTools } from '@/helpers/agent';
 import { SIDEKICK_URL } from '@/helpers/constants';
 import router from '@/routes';
 import '@/style.scss';
@@ -43,7 +45,10 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 }
 
 const pinia = createPinia();
-const tune = createTune({ linkPreviewUrl: `${SIDEKICK_URL}/api/og` });
+const tune = createTune({
+  linkPreviewUrl: `${SIDEKICK_URL}/api/og`,
+  linkComponent: AppLink
+});
 const app = createApp({ render: () => h(App) })
   .use(router)
   .use(tune);
@@ -52,5 +57,7 @@ app.use(pinia);
 app.use(VueQueryPlugin);
 
 app.mount('#app');
+
+registerAgentTools();
 
 export default app;

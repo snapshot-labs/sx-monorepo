@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ProtocolID } from '@snapshot-labs/sx';
-import { StepRecords } from '@/components/Ui/Stepper.vue';
+import { StepRecords } from '@snapshot-labs/tune';
 import { clone, getSalt } from '@/helpers/utils';
 import {
   spaceCreationNetworks as defaultSpaceCreationNetworks,

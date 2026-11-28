@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
 import { expect, it } from 'vitest';
-import InputString from '@/components/Ui/InputString.vue';
+import { UiInputString as InputString } from '@snapshot-labs/tune';
 
 const definition = {
   type: 'string',

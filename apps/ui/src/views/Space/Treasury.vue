@@ -60,10 +60,16 @@ watchEffect(() => {
       with-buttons
       gradient="xxl"
     >
-      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <AppLink
+      <UiTabs
+        :model-value="activeTreasuryId"
+        aria-label="Treasuries"
+        class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max"
+      >
+        <UiTab
           v-for="(treasury, i) in treasuries"
           :key="i"
+          v-slot="{ selected }"
+          :value="i"
           :to="{
             name: route.name as string,
             params: {
@@ -74,11 +80,11 @@ watchEffect(() => {
           :aria-active="activeTreasuryId === i"
         >
           <UiLabel
-            :is-active="activeTreasuryId === i"
+            :is-active="selected"
             :text="treasury.name || shorten(treasury.address)"
           />
-        </AppLink>
-      </div>
+        </UiTab>
+      </UiTabs>
     </UiScrollerHorizontal>
     <SpaceTreasury
       v-if="treasuryData"

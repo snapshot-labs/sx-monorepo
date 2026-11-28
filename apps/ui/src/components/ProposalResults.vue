@@ -249,9 +249,9 @@ onMounted(() => {
           <div v-text="_p(result.progress / 100)" />
         </template>
       </div>
-      <button
+      <UiButton
         v-if="!displayAllChoices && otherResultsSummary.count > 0"
-        type="button"
+        plain
         class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center text-left group"
         @click="displayAllChoices = true"
       >
@@ -272,7 +272,7 @@ onMounted(() => {
         <div class="hidden group-hover:flex items-center gap-1">
           See all <IH-arrow-down class="size-[16px]" />
         </div>
-      </button>
+      </UiButton>
       <div v-if="proposal.quorum" class="flex items-center justify-between">
         <span class="text-skin-link">
           {{ quorumLabel(proposal.quorum_type) }}
@@ -295,11 +295,11 @@ onMounted(() => {
           width: `${width}px`
         }"
       >
-        <div
+        <UiTooltip
           v-for="(segment, i) in barSegments"
           :key="i"
-          v-tippy="{ content: segment.label }"
-          class="float-left h-full"
+          :title="segment.label"
+          class="float-left h-full !static"
           :style="{
             width: `${segment.width.toFixed(3)}%`,
             backgroundColor: segment.color

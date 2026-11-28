@@ -40,12 +40,17 @@ function handleSelect(type: AvailableVotingTypes) {
     <template #header>
       <h3>Select voting system</h3>
     </template>
-    <div class="p-4 flex flex-col gap-2.5">
+    <UiSelectorGroup
+      :model-value="initialState"
+      aria-label="Voting system"
+      class="p-4 flex flex-col gap-2.5"
+      @select="handleSelect($event as AvailableVotingTypes)"
+    >
       <UiSelector
         v-for="(type, index) in availableVotingTypes"
         :key="index"
+        :value="type"
         :is-active="initialState === type"
-        @click="handleSelect(type)"
       >
         <div>
           <div class="flex items-center gap-2">
@@ -62,6 +67,6 @@ function handleSelect(type: AvailableVotingTypes) {
           <div v-text="getVotingTypeInfo(type).description" />
         </div>
       </UiSelector>
-    </div>
+    </UiSelectorGroup>
   </UiModal>
 </template>

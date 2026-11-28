@@ -157,10 +157,13 @@ onUnmounted(() => {
     </form>
 
     <div class="flex space-x-2 shrink-0">
-      <UiButton v-if="web3.authLoading" loading />
+      <UiButton v-if="web3.authLoading" loading aria-label="Loading account" />
       <UiDropdown v-else-if="web3.account" :key="route.fullPath">
         <template #button>
-          <UiButton class="sm:w-auto !px-0 sm:!px-3">
+          <UiButton
+            class="sm:w-auto !px-0 sm:!px-3"
+            :aria-label="user.name || shorten(user.id)"
+          >
             <span
               class="sm:flex items-center space-x-2"
               data-testid="profile-button"
@@ -198,13 +201,23 @@ onUnmounted(() => {
       <UiButton
         v-else
         class="sm:w-auto !px-0 sm:!px-3"
+        aria-label="Log in"
         @click="modalAccountOpen = true"
       >
         <span class="hidden sm:block" v-text="'Log in'" />
         <IH-login class="sm:hidden inline-block" />
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
+      <UiButton
+        v-if="!isWhiteLabel"
+        uniform
+        :aria-label="
+          currentTheme === 'dark'
+            ? 'Switch to light mode'
+            : 'Switch to dark mode'
+        "
+        @click="toggleTheme()"
+      >
         <IH-sun v-if="currentTheme === 'dark'" />
         <IH-moon v-else />
       </UiButton>

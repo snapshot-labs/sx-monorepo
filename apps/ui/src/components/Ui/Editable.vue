@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import InputDuration from '@/components/Ui/InputDuration.vue';
-import InputNumber from '@/components/Ui/InputNumber.vue';
-import InputString from '@/components/Ui/InputString.vue';
+import {
+  UiInputDuration as InputDuration,
+  UiInputNumber as InputNumber,
+  UiInputString as InputString
+} from '@snapshot-labs/tune';
 import { validateForm } from '@/helpers/validation';
 
 type Definition = {
