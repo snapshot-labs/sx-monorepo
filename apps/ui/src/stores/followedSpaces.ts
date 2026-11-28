@@ -154,15 +154,19 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     }
   );
 
-  watch(followedSpacesData, data => {
-    if (data) hasSpaceDataLoaded.value = true;
-  });
-
+  // Read the current account's ids and spaces from the cache: the queries can
+  // update after this watcher, and the spaces can be the previous account's
+  // same cached array (e.g. both follow none).
   watch(
-    () => web3.value.account,
-    () => {
-      hasSpaceDataLoaded.value = false;
-    }
+    [() => web3.value.account, followedSpacesIds, followedSpacesData],
+    ([account], [previousAccount]) => {
+      if (account !== previousAccount) hasSpaceDataLoaded.value = false;
+      const ids = queryClient.getQueryData(['followedSpaces', account]);
+      if (ids && queryClient.getQueryData(['spaces', 'followedSpaces', ids])) {
+        hasSpaceDataLoaded.value = true;
+      }
+    },
+    { immediate: true }
   );
 
   return {
