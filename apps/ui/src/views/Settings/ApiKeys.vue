@@ -41,12 +41,6 @@ const sortBy = ref<`${SortType}-${'asc' | 'desc'}`>('requests-desc');
 const isStarknetAccount = computed(
   () => !!web3Account.value && web3Account.value.length !== 42
 );
-const usageKeyItems = computed(() => [
-  { key: 'all', label: 'All keys' },
-  ...keys.value
-    .map(key => ({ key: key.key, label: key.name }))
-    .sort((a, b) => a.label.localeCompare(b.label))
-]);
 const usageSeries = computed(() => {
   const isDaily = usagePeriod.value === 'day';
   const rows = (isDaily ? dailyUsage.value : monthlyUsage.value).filter(
@@ -154,7 +148,7 @@ function openDeleteModal(key: ApiKey) {
       <div v-if="!isError" class="mt-4">
         <div class="flex items-center justify-between gap-2 mb-3 px-4">
           <UiEyebrow class="font-medium">Usage</UiEyebrow>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0">
             <div
               class="relative top-1 flex items-center rounded-full border p-1"
             >
@@ -185,12 +179,10 @@ function openDeleteModal(key: ApiKey) {
                 <IH-table class="size-[18px]" />
               </button>
             </div>
-            <UiSelectDropdown
+            <DropdownApiKey
               v-if="keys.length > 1"
               v-model="usageKey"
-              title="API key"
-              placement="end"
-              :items="usageKeyItems"
+              :keys="keys"
             />
             <UiSelectDropdown
               v-model="usagePeriod"
