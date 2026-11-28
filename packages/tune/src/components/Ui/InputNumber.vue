@@ -22,11 +22,12 @@ function toNumber(value: string) {
   return isNaN(number) ? value : number;
 }
 
-const text = useFieldText(model, toNumber);
+const { text, update } = useFieldText(model, toNumber);
 
-function update(value: string) {
-  text.value = value;
-  model.value = toNumber(value);
+// Typing gives a number or nothing: refuse other text an agent sets, like 1,000
+function change(value: string, details: { cancel: () => void }) {
+  if (value && isNaN(Number(value))) return details.cancel();
+  update(value);
 }
 </script>
 
@@ -48,7 +49,7 @@ function update(value: string) {
       :placeholder="definition.examples && definition.examples[0]"
       :min="definition.minimum"
       :max="definition.maximum"
-      @value-change="update"
+      @value-change="change"
     />
   </UiWrapperInput>
 </template>

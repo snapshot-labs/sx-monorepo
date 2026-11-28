@@ -137,6 +137,10 @@ watchEffect(() => {
       `Proposal #${proposal.value.proposal_id}`
   );
 });
+
+// Named by its label and its value, like "Voting power: 1.2K ARB"
+const votingPowerLabelId = useId();
+const votingPowerButtonId = useId();
 </script>
 
 <template>
@@ -303,9 +307,13 @@ watchEffect(() => {
                     computed.
                   </div>
                   <div v-else class="flex gap-1.5 items-center">
-                    <span class="shrink-0">Voting power:</span>
+                    <span :id="votingPowerLabelId" class="shrink-0">
+                      Voting power:
+                    </span>
                     <UiButton
+                      :id="votingPowerButtonId"
                       plain
+                      :aria-labelledby="`${votingPowerLabelId} ${votingPowerButtonId}`"
                       class="truncate"
                       :disabled="isVotingPowerPending"
                       :class="{

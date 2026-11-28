@@ -10,6 +10,7 @@ import {
 } from '@snapshot-labs/tune';
 
 const agent = createAgent();
+const mounted: { unmount: () => void }[] = [];
 
 function field(
   component: typeof InputString | typeof Textarea | typeof InputNumber,
@@ -25,6 +26,7 @@ function field(
         wrapper.setProps({ modelValue: value })
     }
   });
+  mounted.push(wrapper);
   const el = wrapper.find('input, textarea');
   return {
     wrapper,
@@ -50,7 +52,7 @@ function field(
 }
 
 afterEach(() => {
-  document.body.innerHTML = '';
+  mounted.splice(0).forEach(wrapper => wrapper.unmount());
   vi.useRealTimers();
 });
 
@@ -147,5 +149,25 @@ describe('Textarea', () => {
     });
     expect(result.ok, result.error?.message).toBe(true);
     expect(input.model()).toBe('Hello');
+  });
+});
+
+describe('agent values', () => {
+  it('refuses text that is not a number', async () => {
+    const input = field(InputNumber, 'Quorum', 5);
+    await agent.act({
+      steps: [{ ref: 'Quorum', action: 'setValue', args: ['1,000'] }]
+    });
+    expect(input.model()).toBe(5);
+  });
+
+  it('puts a large value in the model before the next step', async () => {
+    const input = field(Textarea, 'Whitelist');
+    const large = 'a'.repeat(100_001);
+    const result = await agent.act({
+      steps: [{ ref: 'Whitelist', action: 'setValue', args: [large] }]
+    });
+    expect(result.ok, result.error?.message).toBe(true);
+    expect(input.model()).toBe(large);
   });
 });

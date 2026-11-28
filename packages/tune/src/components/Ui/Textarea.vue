@@ -17,15 +17,19 @@ const { isDirty } = useDirty(model, props.definition);
 // the model syncs 500ms after typing stops while the field keeps up
 const LARGE_VALUE_THRESHOLD = 100_000;
 
-const text = useFieldText(model, value => value);
+const { text } = useFieldText(model, value => value);
 
 const updateModelDebounced = useDebounceFn(() => {
   model.value = text.value;
 }, 500);
 
-function update(value: string) {
+// Only typing waits: an agent's value is in the model before its next step
+function update(value: string, details: { reason: string }) {
   text.value = value;
-  if (value.length > LARGE_VALUE_THRESHOLD) {
+  if (
+    details.reason === 'input-change' &&
+    value.length > LARGE_VALUE_THRESHOLD
+  ) {
     updateModelDebounced();
   } else {
     model.value = value;

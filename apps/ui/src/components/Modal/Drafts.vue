@@ -58,8 +58,9 @@ function handleRemoveDraft(id: string) {
             <span class="text-skin-text">#{{ proposal.key }}</span>
           </AppLink>
           <UiButton
-            aria-label="Delete draft"
+            :aria-label="`Delete ${proposal.title || 'Untitled'} #${proposal.key}`"
             plain
+            data-agent-confirm="Deletes this draft for good"
             @click="handleRemoveDraft(proposal.id)"
           >
             <IH-trash />

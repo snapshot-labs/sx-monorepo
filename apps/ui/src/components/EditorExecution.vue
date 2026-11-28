@@ -328,7 +328,12 @@ watch(
               v-else-if="simulationState === null"
               title="Simulate execution"
             >
-              <UiButton plain class="flex" @click="handleSimulateClick">
+              <UiButton
+                plain
+                aria-label="Simulate execution"
+                class="flex"
+                @click="handleSimulateClick"
+              >
                 <IH-shield-check class="text-skin-link" />
               </UiButton>
             </UiTooltip>

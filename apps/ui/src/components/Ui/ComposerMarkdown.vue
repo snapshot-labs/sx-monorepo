@@ -24,12 +24,7 @@ const editor = useMarkdownEditor(
 const { isDirty } = useDirty(model, props.definition);
 
 // Like v-model.trim: the model is trimmed as you type, the field on blur
-const text = useFieldText(model, value => value.trim());
-
-function update(value: string) {
-  text.value = value;
-  model.value = value.trim();
-}
+const { text, update } = useFieldText(model, value => value.trim());
 
 const inputValueLength = computed(() => model.value.length);
 

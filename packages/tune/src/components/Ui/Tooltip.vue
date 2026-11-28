@@ -8,11 +8,12 @@ import {
 import { Comment, mergeProps } from 'vue';
 import type { VNode } from 'vue';
 import SlotRoot from '../../helpers/SlotRoot';
+import { omit } from '../../helpers/utils';
 import Button from './Button.vue';
 
 defineOptions({ inheritAttrs: false });
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     title: string;
     placement?: 'top' | 'right' | 'bottom' | 'left';
@@ -29,11 +30,22 @@ const el = shallowRef<HTMLElement | null>(null);
 defineExpose({ el });
 
 // On a single button, the button itself triggers it: agents then see one
-// control, and a screen reader hears the title as the icon button's name
-function isSoleButton(nodes: VNode[] = []) {
+// control, and a screen reader hears the title as the icon button's name.
+// Not on a link (`to`), or a disabled button, which some browsers don't hover
+function soleButton(nodes: VNode[] = []) {
   const [node, ...others] = nodes.filter(node => node.type !== Comment);
-  return !others.length && (node?.type === Button || node?.type === 'button');
+  if (others.length || (node?.type !== Button && node?.type !== 'button')) {
+    return;
+  }
+  const { to, disabled, loading } = node.props ?? {};
+  const isSet = (value: unknown) => value != null && value !== false;
+  if (to || isSet(disabled) || isSet(loading)) return;
+  return node;
 }
+
+// A title that repeats the button's name labels it, so it isn't heard twice
+const typeFor = (button?: VNode) =>
+  button?.props?.['aria-label'] === props.title ? 'label' : undefined;
 
 // Else the trigger is a <div>: no button `type` (Tailwind's base styles give
 // [type='button'] a native appearance), and a ref that also records the element
@@ -49,19 +61,27 @@ function triggerOverrides(partRef: unknown) {
 </script>
 
 <template>
-  <Tooltip :delay="0" :disabled="!title" :container="container">
+  <Tooltip
+    :delay="0"
+    :disabled="!title"
+    :container="container"
+    :type="typeFor(soleButton($slots.default?.()))"
+  >
     <TooltipTrigger>
-      <template #render="{ props }">
+      <template #render="{ props: triggerProps }">
         <div
-          v-if="isSoleButton($slots.default?.())"
+          v-if="soleButton($slots.default?.())"
           v-bind="$attrs"
           class="inline-block relative"
         >
-          <SlotRoot v-bind="props"><slot /></SlotRoot>
+          <!-- The button keeps its own type -->
+          <SlotRoot v-bind="omit(triggerProps, ['type'])"><slot /></SlotRoot>
         </div>
         <div
           v-else
-          v-bind="mergeProps($attrs, props, triggerOverrides(props.ref))"
+          v-bind="
+            mergeProps($attrs, triggerProps, triggerOverrides(triggerProps.ref))
+          "
           :aria-label="title || undefined"
           class="inline-block relative"
         >

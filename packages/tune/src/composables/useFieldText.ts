@@ -14,5 +14,10 @@ export function useFieldText<T>(
     if (value !== parse(text.value)) text.value = toText(value);
   });
 
-  return text;
+  function update(value: string) {
+    text.value = value;
+    model.value = parse(value);
+  }
+
+  return { text, update };
 }

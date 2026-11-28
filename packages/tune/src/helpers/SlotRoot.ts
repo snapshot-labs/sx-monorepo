@@ -17,7 +17,8 @@ function firstElement(nodes: VNode[]): VNode | undefined {
  */
 const SlotRoot: FunctionalComponent = (_, { slots, attrs }) => {
   const root = firstElement(slots.default?.() ?? []);
-  return root ? cloneVNode(root, attrs) : null;
+  // Keeps a ref the consumer set on the root next to ours
+  return root ? cloneVNode(root, attrs, true) : null;
 };
 SlotRoot.inheritAttrs = false;
 
