@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
-import { formatAddress } from '@/helpers/utils';
+import { formatAddress, getDelegationReadChainId } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -13,6 +13,7 @@ type Delegatee = {
   delegatedVotePercentage: number;
   share: number;
   name?: string;
+  chainId?: string;
 };
 
 const PERCENT_DIVISOR = 10000;
@@ -88,12 +89,15 @@ async function fetchApeChainDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
-  const { getDelegates, getDelegation } = useDelegates(
+  const { getDelegates, getAccountDelegations } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
     space
   );
 
-  const accountDelegation = await getDelegation(account.toLowerCase());
+  // A delegation portal is bound to a single network, so there is at most one.
+  const [accountDelegation] = await getAccountDelegations(
+    account.toLowerCase()
+  );
   if (!accountDelegation) return [];
 
   const provider = getProvider(Number(delegation.chainId));
@@ -132,17 +136,21 @@ async function fetchDelegateRegistryDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
-  const { getDelegates, getDelegation } = useDelegates(
+  const { getDelegates, getAccountDelegations } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
     space
   );
 
-  const accountDelegation = await getDelegation(account);
+  const accountDelegations = await getAccountDelegations(account);
 
-  if (!accountDelegation) return [];
+  if (!accountDelegations.length) return [];
 
-  const [names, votingPowers, [apiDelegate]] = await Promise.all([
-    getNames([accountDelegation.delegate]),
+  const delegateAddresses = [
+    ...new Set(accountDelegations.map(d => d.delegate))
+  ];
+
+  const [names, votingPowers, apiDelegates] = await Promise.all([
+    getNames(delegateAddresses),
     getNetwork(space.network).actions.getVotingPower(
       space.id,
       space.strategies,
@@ -154,34 +162,57 @@ async function fetchDelegateRegistryDelegatees(
         chainId: space.snapshot_chain_id
       }
     ),
-    getDelegates({
-      first: 1,
-      skip: 0,
-      orderBy: 'delegatedVotes',
-      orderDirection: 'desc',
-      where: {
-        // NOTE: this is delegate registry, needs to be checksummed
-        user: getAddress(accountDelegation.delegate)
-      }
-    })
+    Promise.all(
+      delegateAddresses.map(address =>
+        getDelegates({
+          first: 1,
+          skip: 0,
+          orderBy: 'delegatedVotes',
+          orderDirection: 'desc',
+          where: {
+            // NOTE: this is delegate registry, needs to be checksummed
+            user: getAddress(address)
+          }
+        }).then(([delegate]) => delegate)
+      )
+    )
   ]);
 
-  const balance = votingPowers.reduce(
-    (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
-    0
+  // For remote-vp strategies the entries map 1:1 to strategies_params, whose
+  // params decide which chain's registry a strategy reads.
+  const readChainIds = votingPowers.map((vp, i) =>
+    votingPowers.length === space.strategies_params.length
+      ? getDelegationReadChainId(
+          space.strategies_params[i],
+          space.snapshot_chain_id
+        )
+      : String(vp.chainId ?? space.snapshot_chain_id)
   );
 
-  return [
-    {
-      id: formatAddress(accountDelegation.delegate),
+  return accountDelegations.map(({ delegate, chainId }) => {
+    const apiDelegate = apiDelegates[delegateAddresses.indexOf(delegate)];
+    // A delegation only carries the power of the strategies reading its chain.
+    const balance = votingPowers.reduce(
+      (acc, vp, i) =>
+        readChainIds[i] === chainId
+          ? acc + Number(vp.value) / 10 ** vp.cumulativeDecimals
+          : acc,
+      0
+    );
+
+    // A delegate missing from the API falls back to this delegation as their
+    // whole total, which reads as the account being their only delegator.
+    const delegatedVotes = Number(apiDelegate?.delegatedVotes ?? balance);
+
+    return {
+      id: formatAddress(delegate),
       balance,
-      delegatedVotePercentage: apiDelegate
-        ? balance / Number(apiDelegate.delegatedVotes)
-        : 1,
-      name: names[accountDelegation.delegate],
-      share: 100
-    }
-  ];
+      delegatedVotePercentage: delegatedVotes ? balance / delegatedVotes : 0,
+      name: names[delegate],
+      share: 100,
+      chainId
+    };
+  });
 }
 
 function getSplitDelegationStrategy(space: Space) {
