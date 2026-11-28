@@ -21,7 +21,8 @@ export function scrollProgress(
 // The page scrolls through two steps of the same length, the hero to the
 // field and the field to the rings. Both run the same schedule in their own
 // time, from 0 to 1: the copy leaves, the next slide pushes in, then its copy
-// comes in.
+// comes in. As the page opens, the hero comes in the same way, over a step
+// before them: progress from -STEP to 0.
 export const STEP = 0.5;
 // The part of a step the next slide pushes in over (see scene.ts).
 export const PUSH = { start: 0.16, length: 0.48 };
@@ -75,13 +76,20 @@ export function closingParts(progress: number) {
   return copyIn(stepTime(progress, 1));
 }
 
-// Which slide's color a header tab takes, 1 to 3, when its left edge is at
-// fraction x of the width. The header's strips lead the push and each next
-// slide comes in from the right, so a tab changes once the push covers it
-// (see scene.ts): the menu on the right before the logo on the left.
+// How far each part of the hero's copy has come in as the page opens.
+export function openingParts(progress: number) {
+  return copyIn(stepTime(progress, -1));
+}
+
+// Which slide's color a header tab takes, 1 to 3, or 0 for the blank page
+// before the hero comes in, when its left edge is at fraction x of the width.
+// The header's strips lead the push and each next slide comes in from the
+// right, so a tab changes once the push covers it (see scene.ts): the menu on
+// the right before the logo on the left.
 export function slideBehind(progress: number, x: number): number {
   const pushed = (step: number) =>
     smoothstep(0, 0.6, (stepTime(progress, step) - PUSH.start) / PUSH.length);
+  if (pushed(-1) < 1 - x) return 0;
   if (pushed(0) < 1 - x) return 1;
   return pushed(1) < 1 - x ? 2 : 3;
 }

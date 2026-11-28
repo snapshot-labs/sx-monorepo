@@ -1,4 +1,4 @@
-import { ASCII, ASCII_GLYPH, asciiOrigin } from './hero';
+import { ASCII, ASCII_GLYPH, asciiOrigin, FIELD_REFERENCE } from './hero';
 import { PUSH, STEP } from './timeline';
 
 // The hero's ASCII field as drawn now: the frame, its size and its clock.
@@ -10,6 +10,9 @@ export interface HeroFrame {
 }
 
 const KIND: Record<string, number> = { '⋅': 1, '.': 2, '^': 3 };
+// How long a click's ripple lasts, in seconds, and how many run at once.
+const RIPPLE_S = 2.4;
+const RIPPLES = 8;
 
 // One triangle that covers the whole canvas.
 const vertexShader = /* glsl */ `
@@ -34,13 +37,21 @@ const fragmentShader = /* glsl */ `
   uniform float uProgress;
   uniform float uTime;
   uniform vec4 uBoxes[30];
+  uniform float uNow;
+  uniform vec3 uRipples[${RIPPLES}];
 
   const vec2 CELL = vec2(${ASCII_GLYPH.pitch}, ${ASCII.lineHeight.toFixed(1)});
   const float BASELINE = ${ASCII_GLYPH.baseline};
   const float STEP = ${STEP.toFixed(3)};
+  // The reference screen's width and half its columns (FIELD_REFERENCE): past
+  // it, the field and the rings stay in place next to the centered copy.
+  const float REF_WIDTH = ${FIELD_REFERENCE.width.toFixed(1)};
+  const float REF_HALF_COLS = ${(FIELD_REFERENCE.cols / 2).toFixed(1)};
   const float PUSH_START = ${PUSH.start.toFixed(3)};
   const float PUSH_LENGTH = ${PUSH.length.toFixed(3)};
   const vec4 BLACK = vec4(0.0, 0.0, 0.0, 1.0);
+  // #252525, the rings' rectangles.
+  const vec4 GRAY = vec4(0.145, 0.145, 0.145, 1.0);
   const vec4 WHITE = vec4(1.0);
   const vec4 CYAN = vec4(0.435, 0.863, 0.867, 1.0);
   const vec4 YELLOW = vec4(0.98, 0.996, 0.412, 1.0);
@@ -50,27 +61,37 @@ const fragmentShader = /* glsl */ `
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
   }
 
+  // Cell as counted on the reference screen: past it, columns count from
+  // where its first one is, centered like the copy.
+  vec2 fieldCell(vec2 cell) {
+    return cell - vec2(max(0.0, floor(uGrid.x / 2.0) - REF_HALF_COLS), 0.0);
+  }
+
   // Pixel blocks and binary digits streaming sideways at point at: dense on
   // the left, sparse on the right where the title sits, and scarce on the
-  // white below uBand.
+  // white below uBand. Past the reference screen, the density spreads over
+  // its width, centered like the copy.
   float field(vec2 cell, vec2 at) {
-    vec2 shifted = vec2(cell.x + floor(uProgress * 60.0), cell.y);
+    vec2 c = fieldCell(cell);
+    vec2 shifted = vec2(c.x + floor(uProgress * 60.0), c.y);
     vec2 region = floor(shifted / vec2(10.0, 6.0));
     vec2 tile = floor(shifted / vec2(3.0, 2.0));
     float kind = hash(region + floor(uTime * 0.6) * 0.07);
-    float density = 1.0 - smoothstep(0.25, 0.7, at.x / uSize.x);
+    float x = (at.x - uSize.x / 2.0) / min(uSize.x, REF_WIDTH) + 0.5;
+    float density = 1.0 - smoothstep(0.25, 0.7, x);
     float amount = at.y < uBand ? 1.0 : 0.3;
     float blocks = mix(0.06, 0.5, density) * amount;
     if (kind < blocks) return hash(tile + floor(uTime * 2.5)) < 0.85 ? 6.0 : 0.0;
     if (kind < blocks + mix(0.06, 0.3, density) * amount) {
       if (hash(tile * 1.3) < 0.12) return 6.0;
-      return hash(cell + floor(uTime * 2.5)) < 0.5 ? 4.0 : 5.0;
+      return hash(c + floor(uTime * 2.5)) < 0.5 ? 4.0 : 5.0;
     }
     return 0.0;
   }
 
-  // How far the push into the next slide has come in step (0 the hero to the
-  // field, 1 the field to the rings), from 0 to 1 (see PUSH in timeline.ts).
+  // How far the push into the next slide has come in step (-1 the blank page
+  // to the hero as the page opens, 0 the hero to the field, 1 the field to
+  // the rings), from 0 to 1 (see PUSH in timeline.ts).
   float pushTime(float step) {
     return (uProgress / STEP - step - PUSH_START) / PUSH_LENGTH;
   }
@@ -78,7 +99,9 @@ const fragmentShader = /* glsl */ `
   // Rings in the hero's glyphs at point at, spreading out from their center
   // as they push in, until they fill the band: consensus.
   float rings(vec2 at, float jitter) {
-    float d = distance(at, vec2(uSize.x * 0.74, uBand * 0.42));
+    // Right of the middle, by a part of the reference screen past it.
+    vec2 center = vec2(uSize.x / 2.0 + 0.24 * min(uSize.x, REF_WIDTH), uBand * 0.42);
+    float d = distance(at, center);
     float reach = smoothstep(0.0, 1.0, pushTime(1.0)) * length(uSize) * 1.1;
     if (d > reach + jitter * 24.0) return 0.0;
     float level = cos(d * 0.065 - uTime * 5.0) * exp(-d / 460.0) * 1.5;
@@ -86,34 +109,36 @@ const fragmentShader = /* glsl */ `
     return level > 0.45 ? 3.0 : level > 0.25 ? 2.0 : level > 0.1 ? 1.0 : 0.0;
   }
 
-  // What slide which (0 the hero, 1 the field, 2 the rings) shows at cell:
-  // x its glyph (0 empty, 1 ⋅, 2 ., 3 ^, 4 zero, 5 one, 6 block) and y its
-  // palette: 0 the hero's, 1 cyan and 2 white for the field, 3 black and 4
-  // white for the rings (inked white and black). Like the hero's yellow band,
-  // the field and the rings get their color above uBand and white below.
+  // What slide which (-1 the blank page, 0 the hero, 1 the field, 2 the
+  // rings) shows at cell: x its glyph (0 empty, 1 ⋅, 2 ., 3 ^, 4 zero, 5 one,
+  // 6 block) and y its palette: 0 the hero's, 1 cyan and 2 white for the
+  // field, 3 black and 4 white for the rings (inked white and black), 5 the
+  // blank page's white. Like the hero's yellow band, the field and the rings
+  // get their color above uBand and white below.
   vec2 slideAt(float which, vec2 cell) {
+    if (which < 0.0) return vec2(0.0, 5.0);
     vec2 center = uOrigin + (cell + 0.5) * CELL;
     bool isBand = center.y < uBand;
-    if (which == 2.0) return vec2(rings(center, hash(cell)), isBand ? 3.0 : 4.0);
+    if (which == 2.0) return vec2(rings(center, hash(fieldCell(cell))), isBand ? 3.0 : 4.0);
     if (which == 1.0) return vec2(field(cell, center), isBand ? 1.0 : 2.0);
     bool isHero = center.y < uClip && all(greaterThanEqual(cell, vec2(0.0))) && all(lessThan(cell, uGrid));
     return vec2(isHero ? floor(texture2D(uKinds, (cell + 0.5) / uGrid).r * 255.0 + 0.5) : 0.0, 0.0);
   }
 
-  // Which slide cell shows (x) and from which of its cells (yz): the hero,
-  // then the field, then the rings. Each next slide comes in from the right in
-  // strips of three rows, each on its own timing, pushing the last one out to
-  // the left. The strips behind the logo lead, so its tab can change color
-  // with them (slideBehindLogo).
+  // Which slide cell shows (x) and from which of its cells (yz): the blank
+  // page as it opens, then the hero, the field and the rings. Each next slide
+  // comes in from the right in strips of three rows, each on its own timing,
+  // pushing the last one out to the left. The strips behind the logo lead, so
+  // its tab can change color with them (slideBehind in timeline.ts).
   vec3 sourceOf(vec2 cell) {
     float toField = pushTime(0.0);
     float toRings = pushTime(1.0);
-    if (toField <= 0.0) return vec3(0.0, cell);
-    float next = toRings > 0.0 ? 2.0 : 1.0;
+    if (uProgress >= 0.0 && toField <= 0.0) return vec3(0.0, cell);
+    float next = toRings > 0.0 ? 2.0 : uProgress < 0.0 ? 0.0 : 1.0;
     float strip = floor(cell.y / 3.0);
     bool isHeader = uOrigin.y + strip * 3.0 * CELL.y < 112.0;
     float delay = isHeader ? 0.0 : hash(vec2(strip, 9.0)) * 0.4;
-    float t = next == 2.0 ? toRings : toField;
+    float t = next == 2.0 ? toRings : next == 1.0 ? toField : pushTime(-1.0);
     float pushed = smoothstep(0.0, 1.0, clamp((t - delay) / 0.6, 0.0, 1.0));
     float width = floor(uSize.x / CELL.x);
     float edge = floor((1.0 - pushed) * width);
@@ -122,7 +147,8 @@ const fragmentShader = /* glsl */ `
   }
 
   // The color of the rectangle of slide which at point at, if any. Each slide
-  // has 10 in uBoxes: 4 in its color, then 6 white ones painted over them.
+  // has 10 in uBoxes: 4 in its color (gray for the rings), then 6 white
+  // ones painted over them.
   vec4 boxAt(float which, vec2 at) {
     vec4 color = vec4(0.0);
     for (int i = 0; i < 30; i++) {
@@ -130,7 +156,7 @@ const fragmentShader = /* glsl */ `
       vec4 box = uBoxes[i];
       if (slide != which || any(lessThan(at, box.xy)) || any(greaterThanEqual(at, box.zw))) continue;
       if (float(i) - slide * 10.0 >= 4.0) color = WHITE;
-      else color = slide == 0.0 ? YELLOW : slide == 1.0 ? CYAN : BLACK;
+      else color = slide == 0.0 ? YELLOW : slide == 1.0 ? CYAN : GRAY;
     }
     return color;
   }
@@ -175,12 +201,42 @@ const fragmentShader = /* glsl */ `
     return g == 6.0;
   }
 
+  // Whether a click's ripple (x, y, start in seconds) inks pixel px of cell:
+  // a ring of carets spreading from where the click landed, thinning out.
+  // Carets reach into the row above, as in main.
+  bool isRipple(vec2 px, vec2 cell) {
+    for (int row = -1; row <= 1; row++) {
+      vec2 c = cell + vec2(0.0, float(row));
+      if (!isInk(3.0, px - uOrigin - c * CELL)) continue;
+      vec2 at = uOrigin + (c + 0.5) * CELL;
+      for (int i = 0; i < ${RIPPLES}; i++) {
+        vec3 ripple = uRipples[i];
+        float age = uNow - ripple.z;
+        if (age < 0.0 || age > ${RIPPLE_S.toFixed(1)}) continue;
+        float fade = age / ${RIPPLE_S.toFixed(1)};
+        // Narrower than its radius, so the ring is hollow from the start.
+        float width = min(28.0, age * 180.0) * (1.0 - fade);
+        bool isFront = abs(distance(at, ripple.xy) - age * 300.0) < width;
+        if (isFront && hash(floor(at / 7.0) + ripple.z) > fade) return true;
+      }
+    }
+    return false;
+  }
+
   void main() {
     vec2 px = vec2(gl_FragCoord.x, uSize.y * uRatio - gl_FragCoord.y) / uRatio;
     vec2 cell = floor((px - uOrigin) / CELL);
     // A slide's rectangles move with it, over its glyphs.
     vec3 here = sourceOf(cell);
     vec4 box = boxAt(here.x, px + (here.yz - cell) * CELL);
+    // A ripple shows over everything, rectangles included: white on black or
+    // gray, black on anything else.
+    if (isRipple(px, cell)) {
+      vec2 g = slideAt(here.x, here.yz);
+      vec4 under = box.a > 0.0 ? box : groundOf(g.y, g.x == 4.0 || g.x == 5.0);
+      gl_FragColor = under == BLACK || under == GRAY ? WHITE : BLACK;
+      return;
+    }
     if (box.a > 0.0) {
       gl_FragColor = box;
       return;
@@ -202,18 +258,19 @@ const fragmentShader = /* glsl */ `
   }
 `;
 
-// Draws the scene on canvas with plain WebGL once the page scrolls, in place
-// of the hero's 2D canvas and rectangles (hero), which it also draws: the
-// rectangles of every slide, read from the page. Without WebGL, the hero stays
+// Draws the scene on canvas with plain WebGL while the page opens, once it
+// scrolls, or when a click sets off a ripple, in place of the hero's 2D canvas
+// and rectangles (hero), which it also draws: the rectangles of every slide,
+// read from the page. Returns whether it runs: without WebGL, the hero stays
 // as it is.
 export function startScene(
   canvas: HTMLCanvasElement,
   hero: HTMLElement,
   heroFrame: () => HeroFrame,
   scrollProgress: () => number
-): void {
+): boolean {
   const gl = canvas.getContext('webgl');
-  if (!gl) return;
+  if (!gl) return false;
   const program = gl.createProgram()!;
   for (const [type, source] of [
     [gl.VERTEX_SHADER, vertexShader],
@@ -225,7 +282,7 @@ export function startScene(
     gl.attachShader(program, shader);
   }
   gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
   gl.useProgram(program);
 
   const position = gl.getAttribLocation(program, 'position');
@@ -271,11 +328,16 @@ export function startScene(
     const boxes = Array.from(
       hero.querySelectorAll<HTMLElement>('[data-boxes] > div'),
       box => {
-        const { offsetTop: top, offsetHeight: height } = box.parentElement!;
+        const layer = box.parentElement!;
+        const {
+          offsetLeft: left,
+          offsetTop: top,
+          offsetHeight: height
+        } = layer;
         return [
-          Math.max(0, box.offsetLeft),
+          left + Math.max(0, box.offsetLeft),
           top + Math.max(0, box.offsetTop),
-          Math.min(width, box.offsetLeft + box.offsetWidth),
+          left + Math.min(layer.offsetWidth, box.offsetLeft + box.offsetWidth),
           Math.min(
             top + height,
             top + box.offsetTop + box.offsetHeight,
@@ -317,6 +379,28 @@ export function startScene(
     gl.uniform2f(uniform('uOrigin'), origin.x, origin.y);
   };
 
+  // Each ripple as x, y and its start in seconds, the oldest replaced first.
+  const ripples = new Float32Array(RIPPLES * 3).fill(-100);
+  let nextRipple = 0;
+  window.addEventListener('click', event => {
+    // Only on the page itself: not on a link or a button, nor from a key
+    // pressing one or a drag selecting text, and not when motion is reduced.
+    if (
+      !event.detail ||
+      (event.target as Element).closest('a, button') ||
+      !getSelection()?.isCollapsed ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+    // The canvas's own box is empty while it's hidden.
+    const { left, top } = canvas.parentElement!.getBoundingClientRect();
+    ripples.set(
+      [event.clientX - left, event.clientY - top, performance.now() / 1000],
+      (nextRipple++ % RIPPLES) * 3
+    );
+  });
+
   let isActive = false;
   const setActive = (active: boolean) => {
     isActive = active;
@@ -325,23 +409,30 @@ export function startScene(
     if (active) layout();
   };
 
-  // Draws only when the scroll, the hero's clock or the size has changed.
+  // Draws only when the scroll, the hero's clock or the size has changed, or
+  // on every frame while a ripple runs.
   let frame = 0;
   const render = () => {
     frame = requestAnimationFrame(render);
     const progress = scrollProgress();
-    if (progress <= 0.002) {
+    const now = performance.now() / 1000;
+    const isRippling = ripples.some(
+      (start, i) => i % 3 === 2 && now - start < RIPPLE_S
+    );
+    if (Math.abs(progress) <= 0.002 && !isRippling) {
       if (isActive) setActive(false);
       return;
     }
     if (!isActive) setActive(true);
     const hero = heroFrame();
-    const state = `${progress} ${hero.time} ${canvas.width}x${canvas.height}`;
+    const state = `${progress} ${hero.time} ${canvas.width}x${canvas.height} ${isRippling ? now : ''}`;
     if (state === drawn) return;
     drawn = state;
     upload(hero);
     gl.uniform1f(uniform('uProgress'), progress);
     gl.uniform1f(uniform('uTime'), hero.time);
+    gl.uniform1f(uniform('uNow'), now);
+    gl.uniform3fv(uniform('uRipples'), ripples);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
@@ -355,4 +446,5 @@ export function startScene(
     hero.style.visibility = '';
   });
   frame = requestAnimationFrame(render);
+  return true;
 }

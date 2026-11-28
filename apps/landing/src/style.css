@@ -7,3 +7,15 @@
     format('woff2');
   font-weight: 500;
 }
+
+/* Selected text, in the landing's black and white. */
+::selection {
+  background-color: #000;
+  color: #fff;
+}
+
+/* The page ends on its last slide: no elastic scroll past its ends, which
+would pull up a blank band under the slide. */
+html {
+  overscroll-behavior-y: none;
+}
