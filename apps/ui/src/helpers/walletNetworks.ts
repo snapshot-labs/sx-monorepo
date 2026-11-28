@@ -90,6 +90,13 @@ export async function verifyStarknetNetwork(
   // returns "Unknown request" inside the in-app browser.
   if (web3.provider.name === 'Argent Mobile') return;
   if (web3.provider.isInAppBrowser) return;
+  // Bramble asks to approve every switch, even to the network it is on.
+  if (
+    web3.provider.id === 'bramble' &&
+    (await web3.provider.request({ type: 'wallet_requestChainId' })) === chainId
+  ) {
+    return;
+  }
   try {
     await web3.provider.request({
       type: 'wallet_switchStarknetChain',
